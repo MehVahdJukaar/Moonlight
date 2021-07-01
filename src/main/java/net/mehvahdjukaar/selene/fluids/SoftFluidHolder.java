@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import net.mehvahdjukaar.supplementaries.client.renderers.FluidParticleColors;
-import net.mehvahdjukaar.supplementaries.common.CommonUtil;
+import net.mehvahdjukaar.selene.client.FluidParticleColors;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
@@ -53,7 +53,7 @@ public class SoftFluidHolder {
         ItemStack returnStack = this.interactWithItem(handStack, world, pos);
         //for items that have no bottle
         if(returnStack!=null){
-            CommonUtil.swapItem(player, hand, returnStack);
+            Utils.swapItem(player, hand, returnStack);
 
             if(!handStack.isEmpty()) player.awardStat(Stats.ITEM_USED.get(handStack.getItem()));
             return true;
@@ -69,18 +69,11 @@ public class SoftFluidHolder {
      */
     @Nullable
     public ItemStack interactWithItem(ItemStack stack, @Nullable World world, @Nullable BlockPos pos) {
-        //special nbt items like potions and stews
-        ItemStack specialCase = this.handleStewsAndPotions(stack);
-        if (specialCase != null) {
-            if (world != null && !world.isClientSide && pos != null && !specialCase.isEmpty())
-                world.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundCategory.BLOCKS, 1, 1);
-            return specialCase;
-        }
 
         ItemStack returnStack;
         //try filling
         returnStack = this.tryFillingItem(stack.getItem(), world, pos);
-        if(stack!=null)return returnStack;
+        if(returnStack!=null)return returnStack;
         //try emptying
         returnStack = this.tryDrainItem(stack, world, pos);
 
@@ -102,7 +95,7 @@ public class SoftFluidHolder {
             if (item instanceof PotionItem) {
                 Potion potion = PotionUtils.getPotion(stack);
                 if(potion == Potions.WATER){
-                    if (tryAddingFluid(SoftFluidRegistry.WATER, BOTTLE_COUNT, new CompoundNBT())) {
+                    if (tryAddingFluid(SoftFluidRegistry.WATER, BOTTLE_COUNT)) {
                         return getEmptyBottle();
                     }
                 }
@@ -137,6 +130,13 @@ public class SoftFluidHolder {
      */
     @Nullable
     public ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable World world, @Nullable BlockPos pos) {
+        //special case to empty nbt items like potions and stews
+        ItemStack specialCase = this.handleStewsAndPotions(filledContainerStack);
+        if (specialCase != null) {
+            if (world != null && !world.isClientSide && pos != null && !specialCase.isEmpty())
+                world.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundCategory.BLOCKS, 1, 1);
+            return specialCase;
+        }
         Item filledContainer = filledContainerStack.getItem();
         //set new fluid if empty
         if (this.isEmpty()) {
@@ -270,7 +270,7 @@ public class SoftFluidHolder {
     public boolean tryAddingFluid(SoftFluid s, int count, CompoundNBT com) {
         if (this.canAdd(count)) {
             if (this.isEmpty()) {
-                this.setFluid(s);
+                this.setFluid(s, com);
                 this.setCount(count);
                 return true;
             } else if (this.isSameFluidAs(s,com)) {
@@ -577,6 +577,7 @@ public class SoftFluidHolder {
         return this.fluid.getTintColor();
     }
 
+    //TODO: rethink this
     //only client
     public int getParticleColor() {
         if (this.isEmpty()) return -1;
@@ -608,7 +609,17 @@ public class SoftFluidHolder {
             CompoundNBT cmp = compound.getCompound("FluidHolder");
             this.count = cmp.getInt("Count");
             this.nbt = cmp.getCompound("NBT");
-            this.setFluid(SoftFluidRegistry.get(cmp.getString("Fluid")), this.nbt);
+            String id = cmp.getString("Fluid");
+            SoftFluid sf = SoftFluidRegistry.get(id);
+            //supplementaries backwards compat
+            if(sf.isEmpty()){
+                sf = SoftFluidRegistry.get(id.replace("supplementaries","minecraft"));
+                if(sf.isEmpty()){
+                    sf = SoftFluidRegistry.get(id.replace("minecraft","supplementaries"));
+                }
+            }
+
+            this.setFluid(sf, this.nbt);
         }
     }
     /**
@@ -641,7 +652,7 @@ public class SoftFluidHolder {
 
         //case for xp
         if(this.fluid == SoftFluidRegistry.XP){
-            player.giveExperiencePoints(CommonUtil.bottleToXP(1,world.random));
+            player.giveExperiencePoints(Utils.bottleToXP(1,world.random));
             if (world.isClientSide) return true;
             this.shrink(1);
 

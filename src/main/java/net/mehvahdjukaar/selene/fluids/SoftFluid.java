@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.selene.fluids;
 
+import net.mehvahdjukaar.selene.client.FluidParticleColors;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
@@ -267,6 +268,7 @@ public class SoftFluid {
         return this.tintColor != -1;
     }
 
+    //TODO: rethink this
     //only client
     public int getParticleColor() {
         if (!this.isColored()) return FluidParticleColors.get(this.getID());

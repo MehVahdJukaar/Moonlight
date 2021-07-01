@@ -67,10 +67,8 @@ public class SoftFluidRegistry {
     public static final SoftFluid DRAGON_BREATH;
     public static final SoftFluid XP;
     public static final SoftFluid SLIME;
-    public static final SoftFluid DIRT;
     public static final SoftFluid GHAST_TEAR;
     public static final SoftFluid MAGMA_CREAM;
-    public static final SoftFluid SAP;
 
     //first of all creates all soft fluids for vanilla items without registering them
     static{
@@ -141,10 +139,6 @@ public class SoftFluidRegistry {
                 .setSoundsForCategory(SoundEvents.SLIME_BLOCK_PLACE,SoundEvents.SLIME_BLOCK_BREAK,Items.AIR)
                 .addEqFluid("cyclic:slime")
                 .translationKey("fluid.supplementaries.slime"));
-        DIRT = makeSF(new SoftFluid.Builder(FluidTextures.DIRT_TEXTURE, FluidTextures.DIRT_TEXTURE,"dirt")
-                .emptyHandContainerItem(Items.DIRT,4)
-                .setSoundsForCategory(SoundEvents.GRAVEL_PLACE,SoundEvents.GRAVEL_BREAK,Items.AIR)
-                .translationKey("block.minecraft.dirt"));
         GHAST_TEAR = makeSF(new SoftFluid.Builder(FluidTextures.MILK_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"ghast_tear")
                 .color(0xbff0f0)
                 .emptyHandContainerItem(Items.GHAST_TEAR,1)
@@ -152,12 +146,6 @@ public class SoftFluidRegistry {
         MAGMA_CREAM = makeSF(new SoftFluid.Builder(FluidTextures.MAGMA_TEXTURE, FluidTextures.MAGMA_TEXTURE_FLOW,"magma_cream")
                 .emptyHandContainerItem(Items.MAGMA_CREAM,1)
                 .translationKey("item.minecraft.magma_cream"));
-        SAP = makeSF(new SoftFluid.Builder(FluidTextures.HONEY_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"sap")
-                .textureOverride("thermal:sap")
-                .color(0xbd6e2a)
-                .drink("autumnity:sap_bottle")
-                .bucket("thermal:sap_bucket")
-                .translationKey("fluid.supplementaries.sap"));
     }
 
 
@@ -216,256 +204,12 @@ public class SoftFluidRegistry {
     }
 
     public static void init() {
-
+        //registers all forge fluids
         convertAndRegisterAllForgeFluids();
 
+        //registers vanilla fluids
         registerUnchecked(WATER,LAVA,HONEY,MILK,MUSHROOM_STEW,
-                SUS_STEW,BEETROOT_SOUP,RABBIT_STEW,POTION,DRAGON_BREATH,XP,SLIME,DIRT,GHAST_TEAR,SAP);
-
-        List<SoftFluid> custom = new ArrayList<>(Collections.emptyList());
-
-
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"komodo_spit")
-                .fromMod("alexsmobs")
-                .color(0xa8b966)
-                .translationKey("item.alexmobs.komodo_spit")
-                .bottle("alexsmobs:komodo_spit_bottle")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"squash_soup")
-                .fromMod("simplefarming")
-                .color(0xe6930a)
-                .stew("simplefarming:squash_soup")));
-        addOpt(custom,makeSF(new SoftFluid.Builder("inspirations:potato_soup")
-                .textures(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW)
-                .fromMod("inspirations")
-                .stew("inspirations:potato_soup")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"fish_oil")
-                .fromMod("alexsmobs")
-                .color(0xFFE89C)
-                .translationKey("item.alexsmobs.fish_oil")
-                .food("alexsmobs:fish_oil")
-                .bottle("alexsmobs:fish_oil")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"poison")
-                .fromMod("alexsmobs")
-                .color(0x8AEB67)
-                .translationKey("item.alexsmobs:poison")
-                .bottle("alexsmobs:poison_bottle")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"sopa_de_macaco")
-                .fromMod("alexsmobs")
-                .color(0xB6C184)
-                .food("alexsmobs:sopa_de_macaco")
-                .bowl("alexsmobs:sopa_de_macaco")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"baked_cod_stew")
-                .fromMod("farmersdelight")
-                .color(0xECCD96)
-                .stew("farmersdelight:baked_cod_stew")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"beef_stew")
-                .fromMod("farmersdelight")
-                .color(0x713F2D)
-                .food("farmersdelight:beef_stew")
-                .stew("farmersdelight:beef_stew")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"chicken_soup")
-                .fromMod("farmersdelight")
-                .color(0xDEA766)
-                .food("farmersdelight:chicken_soup")
-                .bowl("farmersdelight:chicken_soup")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"fish_stew")
-                .fromMod("farmersdelight")
-                .color(0xB34420)
-                .food("farmersdelight:fish_stew")
-                .bowl("farmersdelight:fish_stew")));
-        //TODO: add honey and milk flowing textures
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.MILK_TEXTURE, FluidTextures.MILK_TEXTURE,"hot_cocoa")
-                .fromMod("farmersdelight")
-                //.textureOverride("create:chocolate",0xe98352)
-                .color(0x8F563B)
-                .food("farmersdelight:hot_cocoa")
-                .translationKey("item.farmersdelight.hot_cocoa")
-                .bottle("farmersdelight:hot_cocoa")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"pumpkin_soup")
-                .fromMod("farmersdelight")
-                .color(0xE38A1D)
-                .food("farmersdelight:pumpkin_soup")
-                .bowl("farmersdelight:pumpkin_soup")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"tomato_sauce")
-                .fromMod("farmersdelight")
-                .color(0xC0341F)
-                .food("farmersdelight:tomato_sauce")
-                .bowl("farmersdelight:tomato_sauce")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.HONEY_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"syrup")
-                .fromMod("autumnity")
-                .textureOverride("create:honey")
-                .color(0x8e3f26)
-                .addEqFluid("thermal:syrup")
-                .food("autumnity:syrup_bottle")
-                .translationKey("item.autumnity.syrup")
-                .bottle("autumnity:syrup_bottle")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"fire_stew")
-                .fromMod("iceandfire")
-                .color(0xEB5D10)
-                .food("iceandfire:fire_stew")
-                .bowl("iceandfire:fire_stew")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"frost_stew")
-                .fromMod("iceandfire")
-                .color(0x81F2F9)
-                .food("iceandfire:frost_stew")
-                .bowl("iceandfire:frost_stew")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"lightning_stew")
-                .fromMod("iceandfire")
-                .color(0x7552C2)
-                .food("iceandfire:lightning_stew")
-                .bowl("iceandfire:lightning_stew")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"fire_dragon_blood")
-                .fromMod("iceandfire")
-                .color(0xEB5D10)
-                .food("iceandfire:fire_dragon_blood")
-                .translationKey("item.iceandfire.fire_dragon_blood")
-                .bottle("iceandfire:fire_dragon_blood")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"lightning_dragon_blood")
-                .fromMod("iceandfire")
-                .color(0xA700FC)
-                .food("iceandfire:lightning_dragon_blood")
-                .translationKey("item.iceandfire.lightning_dragon_blood")
-                .bottle("iceandfire:lightning_dragon_blood")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"ice_dragon_blood")
-                .fromMod("iceandfire")
-                .color(0x1BCFFC)
-                .food("iceandfire:ice_dragon_blood")
-                .translationKey("item.iceandfire.ice_dragon_blood")
-                .bottle("iceandfire:ice_dragon_blood")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"vegetable_soup")
-                .fromMod("farmersdelight")
-                .color(0x8A7825)
-                .food("farmersdelight:vegetable_soup")
-                .bowl("farmersdelight:vegetable_soup")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.MILK_TEXTURE, FluidTextures.MILK_TEXTURE,"goat_milk")
-                .fromMod("betteranimalsplus")
-                .translationKey("item.betteranimalsplus.goatmilk")
-                .bucket("betteranimalsplus:goatmilk")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"whiskey")
-                .fromMod("simplefarming")
-                .color(0xd29062)
-                .translationKey("item.simplefarming.whiskey")
-                .food("simplefarming:whiskey")
-                .bottle("simplefarming:whiskey")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"olive_oil")
-                .fromMod("simplefarming")
-                .color(0x969F1C)
-                .translationKey("item.simplefarming.olive_oil")
-                .food("simplefarming:olive_oil")
-                .bottle("simplefarming:olive_oil")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"vinegar")
-                .fromMod("simplefarming")
-                .color(0xD4D2C4)
-                .translationKey("item.simplefarming.vinegar")
-                .food("simplefarming:vinegar")
-                .bottle("simplefarming:vinegar")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"mead")
-                .fromMod("simplefarming")
-                .color(0xC39710)
-                .translationKey("item.simplefarming.mead")
-                .food("simplefarming:mead")
-                .bottle("simplefarming:mead")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"beer")
-                .fromMod("simplefarming")
-                .color(0xCB9847)
-                .translationKey("item.simplefarming.beer")
-                .food("simplefarming:beer")
-                .bottle("simplefarming:beer")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"cauim")
-                .fromMod("simplefarming")
-                .color(0xCFC273)
-                .translationKey("item.simplefarming.cauim")
-                .food("simplefarming:cauim")
-                .bottle("simplefarming:cauim")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"cider")
-                .fromMod("simplefarming")
-                .color(0xDC921E)
-                .translationKey("item.simplefarming.cider")
-                .food("simplefarming:cider")
-                .bottle("simplefarming:cider")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"sake")
-                .fromMod("simplefarming")
-                .color(0xE3D56C)
-                .translationKey("item.simplefarming.sake")
-                .drink("simplefarming:sake")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"tiswin")
-                .fromMod("simplefarming")
-                .color(0xDC5826)
-                .translationKey("item.simplefarming.tiswin")
-                .drink("simplefarming:tiswin")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"vodka")
-                .fromMod("simplefarming")
-                .color(0xCFDFEB)
-                .translationKey("item.simplefarming.vodka")
-                .drink("simplefarming:vodka")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,"wine")
-                .fromMod("simplefarming")
-                .color(0x961D49)
-                .translationKey("item.simplefarming.wine")
-                .drink("simplefarming:wine")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.HONEY_TEXTURE, FluidTextures.HONEY_TEXTURE,"jam")
-                .fromMod("simplefarming")
-                .color(0x970C1F)
-                .translationKey("item.simplefarming.jam")
-                .food("simplefarming:jam")
-                .bottle("simplefarming:jam")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"umbrella_cluster_juice")
-                .fromMod("betterendforge")
-                .color(0xBE53F6)
-                .translationKey("item.betterendforge.umbrella_cluster_juice")
-                .drink("betterendforge:umbrella_cluster_juice")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"soap")
-                .fromMod("fluffy_farmer")
-                .color(0xdb9eff)
-                .translationKey("item.fluffy_farmer.soap")
-                .bottle("fluffy_farmer:bottle_with_soap_bubbles")));
-        addOpt(custom,makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"soap")
-                .fromMod("betteranimalsplus")
-                .color(0x60A8E0)
-                .translationKey("item.betteranimalsplus.horseshoe_crab_blood")
-                .drink("betteranimalsplus:horseshoe_crab_blood")));
-        addOpt(custom,makeSF(new SoftFluid.Builder("tconstruct:sky_congealed_slime",
-                "tconstruct:sky_congealed_slime","sky_slime")
-                .fromMod("tconstruct")
-                .emptyHandContainerItem("tconstruct:sky_slime_ball",1)
-                .food("tconstruct:sky_slime_ball")));
-        addOpt(custom,makeSF(new SoftFluid.Builder("tconstruct:ichor_congealed_slime",
-                "tconstruct:ichor_congealed_slime","ichor_slime")
-                .fromMod("tconstruct")
-                .emptyHandContainerItem("tconstruct:ichor_slime_ball",1)
-                .food("tconstruct:ichor_slime_ball")));
-        addOpt(custom,makeSF(new SoftFluid.Builder("tconstruct:blood_congealed_slime",
-                "tconstruct:blood_congealed_slime","blood_slime")
-                .fromMod("tconstruct")
-                .emptyHandContainerItem("tconstruct:blood_slime_ball",1)
-                .food("tconstruct:blood_slime_ball")));
-        addOpt(custom,makeSF(new SoftFluid.Builder("tconstruct:ender_congealed_slime",
-                "tconstruct:ender_congealed_slime","ender_slime")
-                .fromMod("tconstruct")
-                .emptyHandContainerItem("tconstruct:ender_slime_ball",1)
-                .food("tconstruct:ender_slime_ball")));
-
-        //"upgrade_aquatic:mulberry_jar_bottle" d3385d
-        //"atmospehric:aloe_vera_bottle" 66dc46
-
-        //inspirations dye bottles. not adding nbt mixed ones
-
-
-        for (DyeColor c: DyeColor.values()){
-            Item dye = ForgeRegistries.ITEMS.getValue(new ResourceLocation("minecraft:"+c.getName()+"_dye"));
-            String name = "inspirations:"+c.getSerializedName()+"_dyed_bottle";
-            SoftFluid s = makeSF(new SoftFluid.Builder(FluidTextures.WATER_TEXTURE, FluidTextures.FLOWING_WATER_TEXTURE,name)
-                    .bottle(name)
-                    .translationKey(dye.getDescriptionId())
-                    .color(c.getColorValue())
-                    .fromMod("inspirations")
-                    .textureOverride("inspirations:potato_soup")
-            );
-            if(s==null)continue;
-            custom.add(s);
-        }
-
-        registerUnchecked(custom.toArray(new SoftFluid[0]));
+                SUS_STEW,BEETROOT_SOUP,RABBIT_STEW,POTION,DRAGON_BREATH,XP,SLIME,GHAST_TEAR);
     }
 
 }

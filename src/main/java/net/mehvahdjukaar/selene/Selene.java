@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene;
 
-import net.mehvahdjukaar.selene.init.ClientSetup;
-import net.mehvahdjukaar.selene.init.ModSetup;
+import net.mehvahdjukaar.selene.setup.ClientSetup;
+import net.mehvahdjukaar.selene.setup.ModSetup;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;

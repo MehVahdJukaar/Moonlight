@@ -2,7 +2,6 @@ buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        maven { url = 'https://files.minecraftforge.net/maven' }
         mavenCentral()
     }
     dependencies {
@@ -200,5 +199,12 @@ publishing {
         maven {
             url "file:///${project.projectDir}/mcmodsrepo"
         }
+    }
+}
+
+repositories {
+    maven {
+        name 'Cursemaven'
+        url 'https://www.cursemaven.com'
     }
 }
