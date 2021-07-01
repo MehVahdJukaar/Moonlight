@@ -1,0 +1,24 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:saplings",
+    "#minecraft:small_flowers",
+    "#minecraft:tall_flowers",
+    "#minecraft:beehives",
+    "#minecraft:bee_growables",
+    "#minecraft:corals",
+    "minecraft:brown_mushroom",
+    "minecraft:sugar_cane",
+    "minecraft:cactus",
+    "minecraft:dead_bush",
+    "minecraft:warped_fungus",
+    "minecraft:crimson_fungus",
+    "minecraft:lily_pad",
+    "minecraft:kelp",
+    "minecraft:chorus_plant",
+    "minecraft:chorus_flower",
+    "minecraft:red_mushroom"
+  ],
+  "optional": [
+  ]
+}
