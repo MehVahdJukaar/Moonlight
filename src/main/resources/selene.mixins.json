@@ -6,8 +6,8 @@
   "refmap": "selene.refmap.json",
   "package": "net.mehvahdjukaar.selene.mixins",
   "mixins": [
+    "GrindstoneTestSlotMixin",
     "MapDataMixin",
-    ,
     "MapExtendingRecipeMixin"
   ],
   "client": [

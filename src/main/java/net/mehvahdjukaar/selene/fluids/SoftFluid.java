@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import net.mehvahdjukaar.selene.client.FluidParticleColors;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;

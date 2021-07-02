@@ -1,10 +1,8 @@
 package net.mehvahdjukaar.selene.setup;
 
-import net.mehvahdjukaar.selene.client.FluidParticleColors;
+import net.mehvahdjukaar.selene.fluids.client.FluidParticleColors;
 import net.mehvahdjukaar.selene.fluids.FluidTextures;
-import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

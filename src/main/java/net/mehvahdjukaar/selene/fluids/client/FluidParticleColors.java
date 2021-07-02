@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.client;
+package net.mehvahdjukaar.selene.fluids.client;
 
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;

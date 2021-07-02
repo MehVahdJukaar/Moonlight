@@ -6,7 +6,7 @@ import net.minecraft.util.text.ITextComponent;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-//default base simple decoration
+//default base simple decoration. this will be instanced in a map. equivalent of a tile entity
 public class CustomDecoration {
     private final CustomDecorationType<?,?> type;
     private ITextComponent displayName;

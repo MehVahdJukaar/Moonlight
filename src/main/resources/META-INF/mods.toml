@@ -29,13 +29,13 @@ displayName="Selene" #mandatory
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="icon.png" #optional
 # A text field displayed in the mod UI
+itemIcon="minecraft:end_stone" #catalogue icon
 credits="" #optional
 # A text field displayed in the mod UI
 authors="MehVahdJukaar" #optional
 # The description text for the mod (multi line!) (#mandatory)
-itemIcon="minecraft:stick" #catalogue icon
 description='''
-Praise the moon!
+A small library that allows to make custom map markers and contains the soft fluid system as well as other utilities
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.selene]] #optional
