@@ -102,21 +102,25 @@ public class SoftFluidRegistry {
         MUSHROOM_STEW = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"mushroom_stew")
                 .color(0xffad89)
                 .stew(Items.MUSHROOM_STEW)
+                .translationKey(Items.MUSHROOM_STEW.getDescriptionId())
                 .addEqFluid("inspirations:mushroom_stew")
                 .textureOverrideF("inspirations:mushroom_stew"));
         BEETROOT_SOUP = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"beetroot_soup")
                 .color(0xC93434)
                 .stew(Items.BEETROOT_SOUP)
+                .translationKey(Items.BEETROOT_SOUP.getDescriptionId())
                 .addEqFluid("inspirations:beetroot_soup")
                 .textureOverrideF("inspirations:beetroot_soup"));
         RABBIT_STEW = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"rabbit_stew")
                 .color(0xFF904F)
                 .stew(Items.RABBIT_STEW)
+                .translationKey(Items.RABBIT_STEW.getDescriptionId())
                 .addEqFluid("inspirations:rabbit_stew")
                 .textureOverrideF("inspirations:rabbit_stew"));
         SUS_STEW = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"suspicious_stew")
                 .color(0xBAE85F)
                 .stew(Items.SUSPICIOUS_STEW)
+                .translationKey(Items.SUSPICIOUS_STEW.getDescriptionId())
                 .textureOverrideF("inspirations:mushroom_stew"));
         //TODO: automate translation key thing
         POTION = makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"potion")
@@ -161,6 +165,7 @@ public class SoftFluidRegistry {
     /**
      * registers provided soft fluid. Automatically replaces any equivalent forge fluid associated with this fluid if already registered
      * does not register fluids marked as disabled (if dependencies are not met)
+     * Use your own namespace as id to make them always register
      * @param s soft fluid to register
      * @return same provided soft fluid
      */

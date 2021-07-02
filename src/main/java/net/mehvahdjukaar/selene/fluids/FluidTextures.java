@@ -10,7 +10,6 @@ public class FluidTextures {
     private static final String MOD_ID = Selene.MOD_ID;
 
     //minecraft
-    public static final ResourceLocation DIRT_TEXTURE = new ResourceLocation("minecraft:block/dirt");
     public static final ResourceLocation WATER_TEXTURE = new ResourceLocation("minecraft:block/water_still");
     public static final ResourceLocation FLOWING_WATER_TEXTURE = new ResourceLocation("minecraft:block/water_flow");
     public static final ResourceLocation LAVA_TEXTURE = new ResourceLocation("minecraft:block/lava_still");

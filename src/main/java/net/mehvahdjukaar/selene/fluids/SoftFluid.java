@@ -89,7 +89,7 @@ public class SoftFluid {
      *
      * @return forge fluid
      */
-    public Fluid getFluid() {
+    public Fluid getForgeFluid() {
         for (Fluid fluid : this.equivalentFluids) {
             return fluid;
         }
@@ -260,19 +260,15 @@ public class SoftFluid {
         return luminosity;
     }
 
+    /**
+     * @return tint color. default is -1 (white) so effectively no tint
+     */
     public int getTintColor() {
         return tintColor;
     }
 
     public boolean isColored() {
         return this.tintColor != -1;
-    }
-
-    //TODO: rethink this
-    //only client
-    public int getParticleColor() {
-        if (!this.isColored()) return FluidParticleColors.get(this.getID());
-        return this.tintColor;
     }
 
     public ResourceLocation getFlowingTexture() {
@@ -601,8 +597,7 @@ public class SoftFluid {
          * @return builder
          */
         public final Builder drink(Item item) {
-            this.foodDivider = BOTTLE_COUNT;
-            return this.bottle(item).food(item);
+            return this.bottle(item).food(item,BOTTLE_COUNT);
         }
 
         /**
@@ -612,8 +607,7 @@ public class SoftFluid {
          * @return builder
          */
         public final Builder drink(String res) {
-            this.foodDivider = BOTTLE_COUNT;
-            return this.bottle(res).food(res);
+            return this.bottle(res).food(res,BOTTLE_COUNT);
         }
 
         /**
@@ -698,8 +692,7 @@ public class SoftFluid {
          * @return builder
          */
         public final Builder stew(Item item) {
-            this.foodDivider = BOWL_COUNT;
-            return this.bowl(item).food(item);
+            return this.bowl(item).food(item,BOWL_COUNT);
         }
 
         /**
@@ -709,8 +702,7 @@ public class SoftFluid {
          * @return builder
          */
         public final Builder stew(String res) {
-            this.foodDivider = BOWL_COUNT;
-            return this.bowl(res).food(res);
+            return this.bowl(res).food(res,BOWL_COUNT);
         }
 
         /**

@@ -3,6 +3,8 @@ package net.mehvahdjukaar.selene.fluids;
 import net.mehvahdjukaar.selene.client.FluidParticleColors;
 import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -14,7 +16,12 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeColors;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
@@ -35,7 +42,9 @@ public class SoftFluidHolder {
     private final int capacity;
     private CompoundNBT nbt = new CompoundNBT();
     private SoftFluid fluid = SoftFluidRegistry.EMPTY;
+    //special tint color. Used for dynamic tint fluids like water and potions
     private int specialColor = 0;
+    private boolean needColorRefresh = true;
 
     public SoftFluidHolder(int capacity) {
         this.capacity = capacity;
@@ -257,7 +266,7 @@ public class SoftFluidHolder {
      */
     public boolean tryAddingFluid(FluidStack fluidStack) {
         int count = fluidStack.getAmount();
-        SoftFluid s = SoftFluidRegistry.fromForgeFluid(fluid.getFluid());
+        SoftFluid s = SoftFluidRegistry.fromForgeFluid(fluid.getForgeFluid());
         return tryAddingFluid(s,count,fluidStack.getTag());
     }
     /**
@@ -377,13 +386,13 @@ public class SoftFluidHolder {
      * @return forge fluid stacks
      */
     public FluidStack toEquivalentForgeFluid(int mb) {
-        FluidStack stack = new FluidStack(this.fluid.getFluid(), mb);
+        FluidStack stack = new FluidStack(this.fluid.getForgeFluid(), mb);
         this.applyNBTtoFluidStack(stack);
         return stack;
     }
 
     private void applyNBTtoFluidStack(FluidStack fluidStack) {
-        if (this.nbt != null && !this.nbt.isEmpty())
+        if (this.nbt != null && !this.nbt.isEmpty() && !fluidStack.isEmpty())
             fluidStack.setTag(this.nbt.copy());
     }
     /**
@@ -562,28 +571,50 @@ public class SoftFluidHolder {
         this.nbt = nbt;
         this.specialColor = 0;
         if(this.fluid.isEmpty())this.setCount(0);
-        //only possible and needed client side
-        if (fluid == SoftFluidRegistry.WATER) {
-            //if (this.world != null && this.world.isClientSide && this.pos != null) {
-                //this.specialColor = BiomeColors.getAverageWaterColor(this.world, this.pos); }
-        } else if (fluid == SoftFluidRegistry.POTION) {
-            Potion potion = PotionUtils.getPotion(this.nbt);
-            this.specialColor = PotionUtils.getColor(potion);
-        }
+        this.needColorRefresh = true;
     }
 
-    public int getTintColor() {
+    /**
+     * @return tint color to be applied on the fuid texture
+     */
+    public int getTintColor(@Nullable IWorldReader world, @Nullable BlockPos pos) {
+        if(this.needColorRefresh){
+            this.refreshSpecialColor(world,pos);
+            this.needColorRefresh = false;
+        }
         if (this.specialColor != 0) return this.specialColor;
         return this.fluid.getTintColor();
     }
 
-    //TODO: rethink this
-    //only client
-    public int getParticleColor() {
+    /**
+     * @return tint color to be used on particle. Differs from getTintColor since it returns an average color extrapolated from their fluid textures
+     */
+    public int getParticleColor(@Nullable IWorldReader world, @Nullable BlockPos pos) {
         if (this.isEmpty()) return -1;
-        int tintColor = this.getTintColor();
+        int tintColor = this.getTintColor(world, pos);
+        //only gets color from texture for colored textures fluids(ones that don't have tint). Might remove if
         if (tintColor == -1) return FluidParticleColors.get(this.fluid.getID());
         return tintColor;
+    }
+
+    private void refreshSpecialColor(@Nullable IWorldReader world, @Nullable BlockPos pos){
+
+        if (fluid == SoftFluidRegistry.POTION) {
+            this.specialColor = PotionUtils.getColor(PotionUtils.getPotion(this.nbt));
+        }
+        else{
+            Fluid f = this.getFluid().getForgeFluid();
+            if(f != Fluids.EMPTY){
+                FluidAttributes att = f.getAttributes();
+                //world accessor
+                int w = -1;
+                if(world != null && pos != null) w = att.getColor(world,pos);
+                //stack accessor
+                if(w==-1) w = att.getColor(this.toEquivalentForgeFluid(1));
+                if(w!=-1) this.specialColor = w;
+            }
+        }
+
     }
     /**
      * @return true if contained fluid has associated food
@@ -632,7 +663,7 @@ public class SoftFluidHolder {
         cmp.putInt("Count", this.count);
         cmp.putString("Fluid", this.fluid.getID());
         //for item render. needed for potion colors
-        cmp.putInt("CachedColor", this.getTintColor());
+        cmp.putInt("CachedColor", this.getTintColor(null, null));
         if (!this.nbt.isEmpty()) cmp.put("NBT", this.nbt);
         compound.put("FluidHolder", cmp);
 
@@ -652,7 +683,7 @@ public class SoftFluidHolder {
 
         //case for xp
         if(this.fluid == SoftFluidRegistry.XP){
-            player.giveExperiencePoints(Utils.bottleToXP(1,world.random));
+            player.giveExperiencePoints(Utils.getXPinaBottle(1,world.random));
             if (world.isClientSide) return true;
             this.shrink(1);
 
@@ -704,7 +735,7 @@ public class SoftFluidHolder {
     //vanilla fluids special behaviors
 
     //stew code
-    public static void susStewBehavior(PlayerEntity player, ItemStack stack, int div) {
+    private static void susStewBehavior(PlayerEntity player, ItemStack stack, int div) {
         CompoundNBT compoundnbt = stack.getTag();
         if (compoundnbt != null && compoundnbt.contains("Effects", 9)) {
             ListNBT listnbt = compoundnbt.getList("Effects", 10);
@@ -722,7 +753,7 @@ public class SoftFluidHolder {
     }
 
     //removes just 1 effect
-    public static boolean milkBottleBehavior(PlayerEntity player, ItemStack stack) {
+    private static boolean milkBottleBehavior(PlayerEntity player, ItemStack stack) {
         for (EffectInstance effect : player.getActiveEffectsMap().values()) {
             if (effect.isCurativeItem(stack)) {
                 player.removeEffect(effect.getEffect());
@@ -733,7 +764,6 @@ public class SoftFluidHolder {
     }
 
     //util functions
-
     public static int getLiquidCountFromItem(Item i) {
         if (i == Items.GLASS_BOTTLE) {
             return BOTTLE_COUNT;
