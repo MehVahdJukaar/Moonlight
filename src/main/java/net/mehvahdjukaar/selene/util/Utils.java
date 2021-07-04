@@ -1,9 +1,10 @@
 package net.mehvahdjukaar.selene.util;
 
-import net.minecraft.client.renderer.entity.IronGolemRenderer;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.util.*;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.DrinkHelper;
+import net.minecraft.util.Hand;
+
 import java.util.Random;
 
 

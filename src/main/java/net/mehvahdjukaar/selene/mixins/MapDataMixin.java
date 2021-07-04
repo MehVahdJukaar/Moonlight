@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.selene.mixins;
 
 import com.google.common.collect.Maps;
+import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.map.CustomDecoration;
 import net.mehvahdjukaar.selene.map.CustomDecorationHolder;
 import net.mehvahdjukaar.selene.map.CustomDecorationType;
@@ -40,7 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@Mixin(MapData.class)
+
+@Mixin(targets = {"net.minecraft.world.storage.MapData"})
 public abstract class MapDataMixin extends WorldSavedData implements CustomDecorationHolder {
     public MapDataMixin(String name) {
         super(name);
@@ -107,10 +109,16 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
             for(int j = 0; j < listnbt.size(); ++j) {
                 CompoundNBT com = listnbt.getCompound(j);
                 if (!this.decorations.containsKey(com.getString("id"))) {
-                    CustomDecorationType<CustomDecoration, ?> type = (CustomDecorationType<CustomDecoration, ?>) MapDecorationHandler.get(com.getString("type"));
+                    String name = com.getString("type");
+                    //TODO: add more checks
+                    CustomDecorationType<CustomDecoration, ?> type = (CustomDecorationType<CustomDecoration, ?>) MapDecorationHandler.get(name);
                     if(type!=null) {
                         MapWorldMarker<CustomDecoration> dummy = new DummyMapWorldMarker(type, com.getInt("x"), com.getInt("z"));
                         this.addCustomDecoration(dummy);
+                    }
+                    else{
+                        Selene.LOGGER.warn("Failed to load map decoration "+name+". Skipping it");
+
                     }
                 }
             }

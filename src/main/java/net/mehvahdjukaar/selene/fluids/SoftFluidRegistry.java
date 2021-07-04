@@ -3,18 +3,18 @@ package net.mehvahdjukaar.selene.fluids;
 import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.item.DyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 public class SoftFluidRegistry {
     // id -> SoftFluid
@@ -119,15 +119,18 @@ public class SoftFluidRegistry {
                 .textureOverrideF("inspirations:rabbit_stew"));
         SUS_STEW = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"suspicious_stew")
                 .color(0xBAE85F)
+                .keepNBTFromItem("Effects")
                 .stew(Items.SUSPICIOUS_STEW)
                 .translationKey(Items.SUSPICIOUS_STEW.getDescriptionId())
                 .textureOverrideF("inspirations:mushroom_stew"));
         //TODO: automate translation key thing
         POTION = makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"potion")
                 .color(PotionUtils.getColor(Potions.EMPTY))
+                .keepNBTFromItem("Potion")
                 .translationKey(Items.POTION.getDescriptionId())
                 .drink(Items.POTION)
-                .addEqFluid("create:potion"));
+                .addEqFluid("create:potion")
+                .addEqFluid("immersiveengineering:potion"));
         DRAGON_BREATH = makeSF(new SoftFluid.Builder(FluidTextures.DRAGON_BREATH_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"dragon_breath")
                 .color(0xFF33FF)
                 .luminosity(3)
@@ -149,9 +152,12 @@ public class SoftFluidRegistry {
                 .translationKey("item.minecraft.ghast_tear"));
         MAGMA_CREAM = makeSF(new SoftFluid.Builder(FluidTextures.MAGMA_TEXTURE, FluidTextures.MAGMA_TEXTURE_FLOW,"magma_cream")
                 .emptyHandContainerItem(Items.MAGMA_CREAM,1)
+                .color(0xfabd30)
+                .setSoundsForCategory(SoundEvents.SLIME_BLOCK_PLACE,SoundEvents.SLIME_BLOCK_BREAK,Items.AIR)
                 .translationKey("item.minecraft.magma_cream"));
     }
 
+    //TODO: allow user to modify already registered fluids
 
     public static SoftFluid makeSF(SoftFluid.Builder builder){
         if(builder.isDisabled)return null;
@@ -209,12 +215,12 @@ public class SoftFluidRegistry {
     }
 
     public static void init() {
+        //registers vanilla fluids
+        registerUnchecked(WATER,LAVA,HONEY,MILK,MUSHROOM_STEW,MAGMA_CREAM,
+                SUS_STEW,BEETROOT_SOUP,RABBIT_STEW,POTION,DRAGON_BREATH,XP,SLIME,GHAST_TEAR);
+
         //registers all forge fluids
         convertAndRegisterAllForgeFluids();
-
-        //registers vanilla fluids
-        registerUnchecked(WATER,LAVA,HONEY,MILK,MUSHROOM_STEW,
-                SUS_STEW,BEETROOT_SOUP,RABBIT_STEW,POTION,DRAGON_BREATH,XP,SLIME,GHAST_TEAR);
     }
 
 }

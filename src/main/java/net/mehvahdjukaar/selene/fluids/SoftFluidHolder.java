@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.selene.fluids;
 
+import net.mehvahdjukaar.selene.api.ISoftFluidContainerItem;
 import net.mehvahdjukaar.selene.fluids.client.FluidParticleColors;
 import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.entity.player.PlayerEntity;
@@ -10,10 +11,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.potion.*;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IWorldReader;
@@ -92,43 +90,6 @@ public class SoftFluidHolder {
             stack.setTag(this.nbt.copy());
     }
 
-    //returns null to handle the item with previous behavior (water bottles)
-    @Nullable
-    private ItemStack handleStewsAndPotions(ItemStack stack) {
-        Item item = stack.getItem();
-        CompoundNBT com = stack.getTag();
-        if (com != null) {
-            if (item instanceof PotionItem) {
-                Potion potion = PotionUtils.getPotion(stack);
-                if(potion == Potions.WATER){
-                    if (tryAddingFluid(SoftFluidRegistry.WATER, BOTTLE_COUNT)) {
-                        return getEmptyBottle();
-                    }
-                }
-                else if (potion != Potions.EMPTY && com.contains("Potion")) {
-                    CompoundNBT newCom = new CompoundNBT();
-                    newCom.putString("Potion", com.getString("Potion"));
-                    if (tryAddingFluid(SoftFluidRegistry.POTION, BOTTLE_COUNT, newCom)) {
-                        return getEmptyBottle();
-                    }
-                }
-                //every other potion is water bottle. handles by normal code
-                return null;
-            }
-            else if (item instanceof SuspiciousStewItem) {
-                if (com.contains("Effects", 9)) {
-                    ListNBT listnbt = com.getList("Effects", 10);
-                    CompoundNBT newCom = new CompoundNBT();
-                    newCom.put("Effects", listnbt);
-                    if (tryAddingFluid(SoftFluidRegistry.SUS_STEW, BOWL_COUNT, newCom)) {
-                        return getEmptyBowl();
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     /**
      * tries pouring the content of provided item in the tank
      * also plays sound
@@ -136,28 +97,61 @@ public class SoftFluidHolder {
      */
     @Nullable
     public ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable World world, @Nullable BlockPos pos) {
-        //special case to empty nbt items like potions and stews
-        ItemStack specialCase = this.handleStewsAndPotions(filledContainerStack);
-        if (specialCase != null) {
-            if (world != null && !world.isClientSide && pos != null && !specialCase.isEmpty())
-                world.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundCategory.BLOCKS, 1, 1);
-            return specialCase;
-        }
+
+
+        //TODO: generalize this adding a function list that converts items in compounts and fluid pair or a compund whitelist
+
+        //TODO: all of this  is horrible
+
         Item filledContainer = filledContainerStack.getItem();
+
+        if(filledContainer instanceof ISoftFluidContainerItem){
+            ISoftFluidContainerItem p = ((ISoftFluidContainerItem) filledContainer);
+            ResourceLocation r = p.getSoftFluid();
+            SoftFluid s = SoftFluidRegistry.get(r.toString());
+            if(!s.isEmpty()) {
+                CompoundNBT nbt = p.getFluidNBT();
+                int am = p.getAmount();
+                if (this.isEmpty()) {
+                    this.setFluid(s, nbt);
+                }
+                if (this.canAddSoftFluid(s, am, nbt)) {
+                    this.grow(am);
+                    SoundEvent sound = p.getEmptySound();
+                    if (sound != null && world != null && pos != null)
+                        world.playSound(null, pos, sound, SoundCategory.BLOCKS, 1, 1);
+                    return p.getEmptyContainer();
+                }
+            }
+        }
+
+        SoftFluid s = SoftFluidRegistry.fromItem(filledContainer);
+        if (s.isEmpty()) return null;
+        //convert potions to water bottles
+        if (PotionUtils.getPotion(filledContainerStack) == Potions.WATER) s = SoftFluidRegistry.WATER;
+
+        //copy nbt from item
+        CompoundNBT com = filledContainerStack.getTag();
+        CompoundNBT newCom = new CompoundNBT();
+        String nbtKey = s.getNbtKeyFromItem();
+        if(com!=null && nbtKey!=null) {
+            if (com.contains(nbtKey)){
+                newCom.put(nbtKey,com.get(nbtKey));
+            }
+        }
+
         //set new fluid if empty
         if (this.isEmpty()) {
-            SoftFluid s = SoftFluidRegistry.fromItem(filledContainer);
-            //case to convert water
-            if (PotionUtils.getPotion(filledContainerStack) == Potions.WATER) s = SoftFluidRegistry.WATER;
-
-            if (s.isEmpty()) return null;
-            this.setFluid(s);
+            this.setFluid(s, newCom);
         }
+
+        //todo: this is horrible
         Item empty = fluid.tryGettingEmptyItem(filledContainer);
         SoftFluid.FilledContainerCategory category = fluid.tryGettingFilledItems(empty);
         if(category != null && empty != null) {
+
             int amount = category.getAmount();
-            if (this.canAdd(amount)) {
+            if (this.canAddSoftFluid(this.fluid,amount,newCom)) {
 
                 this.grow(amount);
 
@@ -584,16 +578,26 @@ public class SoftFluidHolder {
     }
 
     /**
+     * @return tint color to be applied on the fluid texture
+     */
+    public int getFlowingTint(@Nullable IWorldReader world, @Nullable BlockPos pos) {
+        if(this.fluid.useParticleColorForFlowingTexture())return this.getParticleColor(world,pos);
+        else return this.getTintColor(world,pos);
+    }
+
+    /**
      * @return tint color to be used on particle. Differs from getTintColor since it returns an average color extrapolated from their fluid textures
      */
     public int getParticleColor(@Nullable IWorldReader world, @Nullable BlockPos pos) {
         if (this.isEmpty()) return -1;
         int tintColor = this.getTintColor(world, pos);
-        //only gets color from texture for colored textures fluids(ones that don't have tint). Might remove if
-        if (tintColor == -1) return FluidParticleColors.get(this.fluid.getID());
+        //if tint color is white gets averaged color
+        if (tintColor == -1)
+            return FluidParticleColors.get(this.fluid.getID());
         return tintColor;
     }
 
+    //grabs world/ fluidstack dependednt tint color if fluid has associated forge fluid. overrides normal tint color
     private void refreshSpecialColor(@Nullable IWorldReader world, @Nullable BlockPos pos){
 
         if (fluid == SoftFluidRegistry.POTION) {
@@ -639,6 +643,7 @@ public class SoftFluidHolder {
             this.nbt = cmp.getCompound("NBT");
             String id = cmp.getString("Fluid");
             SoftFluid sf = SoftFluidRegistry.get(id);
+            //TODO: remove
             //supplementaries backwards compat
             if(sf.isEmpty()){
                 sf = SoftFluidRegistry.get(id.replace("supplementaries","minecraft"));

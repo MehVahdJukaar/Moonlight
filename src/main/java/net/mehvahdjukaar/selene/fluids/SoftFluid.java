@@ -23,21 +23,25 @@ public class SoftFluid {
     private final ResourceLocation stillTexture;
     private final ResourceLocation flowingTexture;
     private final int tintColor;
+    private final boolean useParticleColorForFlowingTexture;
     private final List<Fluid> equivalentFluids;
     private final int luminosity;
     private final Map<Item, FilledContainerCategory> filledContainersMap;
     private final Item foodItem;
     private final int foodDivider;
     private final ResourceLocation id;
+    private final String NBTFromItem;
     private final String translationKey;
     //used to indicate if it has been directly converted from a forge fluid
     public final boolean isCustom;
+    //flag will be raised when required dependencies are not met. will not be registered
     private final boolean disabled;
 
     public SoftFluid(Builder builder) {
         this.stillTexture = builder.stillTexture;
         this.flowingTexture = builder.flowingTexture;
         this.tintColor = builder.tintColor;
+        this.useParticleColorForFlowingTexture = builder.useParticleColorForFlowingTexture;
         this.equivalentFluids = builder.equivalentFluids;
         this.luminosity = builder.luminosity;
         this.filledContainersMap = builder.filledContainers;
@@ -45,6 +49,7 @@ public class SoftFluid {
         this.foodDivider = Math.max(1, builder.foodDivider);
         this.id = builder.id;
         this.translationKey = builder.translationKey;
+        this.NBTFromItem = builder.NBTFromItem;
         this.isCustom = builder.custom;
         this.disabled = builder.isDisabled;
     }
@@ -93,6 +98,13 @@ public class SoftFluid {
             return fluid;
         }
         return Fluids.EMPTY;
+    }
+
+    /**
+     * @return name of nbt tag that will be transferred from container item to fluid
+     */
+    public String getNbtKeyFromItem() {
+        return NBTFromItem;
     }
 
     /**
@@ -241,6 +253,10 @@ public class SoftFluid {
         return list;
     }
 
+    /**
+     * use this to access containers and possibly add new container items
+     * @return container map
+     */
     public Map<Item, FilledContainerCategory> getFilledContainersMap() {
         return filledContainersMap;
     }
@@ -266,6 +282,18 @@ public class SoftFluid {
         return tintColor;
     }
 
+    /**
+     * @return used for fluids that only have a colored still texture and a grayscaled flowing one
+     */
+    public boolean useParticleColorForFlowingTexture() {
+        return useParticleColorForFlowingTexture;
+    }
+
+    /**
+     * @return tint color to be used on flowing fluid texture. -1 for no tint
+     */
+
+
     public boolean isColored() {
         return this.tintColor != -1;
     }
@@ -286,7 +314,9 @@ public class SoftFluid {
         private ResourceLocation stillTexture;
         private ResourceLocation flowingTexture;
         private String translationKey = "fluid.selene.generic_fluid";
+        private String NBTFromItem = null;
         private int tintColor = -1;
+        private boolean useParticleColorForFlowingTexture = false;
         private int luminosity = 0;
         private Item foodItem = Items.AIR;
         private int foodDivider = 1;
@@ -379,8 +409,30 @@ public class SoftFluid {
             return this;
         }
 
+        /**
+         * @param NBTkey name of the nbt tag that, if present in a container item, will get assigned to the fluid. i.e. "Potion" for potions
+         * @return builder
+         */
+        public final Builder keepNBTFromItem(String NBTkey) {
+            this.NBTFromItem = NBTkey;
+            return this;
+        }
+
+        /**
+         * @param tintColor fluid tint color.
+         * @return builder
+         */
         public final Builder color(int tintColor) {
             this.tintColor = tintColor;
+            return this;
+        }
+
+        /**
+         * used for fluids that only have a colored still texture and a grayscaled flowing one
+         * @return builder
+         */
+        public final Builder useParticleColorForFlowingTexture() {
+            this.useParticleColorForFlowingTexture = true;
             return this;
         }
 
@@ -706,11 +758,13 @@ public class SoftFluid {
 
         /**
          * sets fill & empty sounds associated to a certain empty container (i.e:empty bucket)
+         * Always call after adding empty containers
          *
          * @param fill  fill sound event
          * @param empty empty sound event
          * @return builder
          */
+        //TODO: make so it creates category if it doesn't exist
         public final Builder setSoundsForCategory(SoundEvent fill, SoundEvent empty, Item emptyContainer) {
             FilledContainerCategory c = this.filledContainers.get(emptyContainer);
             if (c != null) c.setSounds(fill, empty);

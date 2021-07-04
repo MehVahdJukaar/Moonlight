@@ -130,7 +130,7 @@ public abstract class MapWorldMarker<D extends CustomDecoration>  {
         byte mapX = (byte)((int)((double)(f * 2.0F) + 0.5D));
         byte mapY = (byte)((int)((double)(f1 * 2.0F) + 0.5D));
         byte rot;
-        if (f >= -63.0F && f1 >= -63.0F && f <= 63.0F && f1 <= 63.0F) {
+        if (f >= -64.0F && f1 >= -64.0F && f <= 64.0F && f1 <= 64.0F) {
             rotation = rotation + (rotation < 0.0D ? -8.0D : 8.0D);
             rot = (byte)((int)(rotation * 16.0D / 360.0D));
             return doCreateDecoration(mapX, mapY, rot);
