@@ -23,7 +23,7 @@ public class SoftFluid {
     private final ResourceLocation stillTexture;
     private final ResourceLocation flowingTexture;
     private final int tintColor;
-    private final boolean useParticleColorForFlowingTexture;
+    private final TintMethod tintMethod;
     private final List<Fluid> equivalentFluids;
     private final int luminosity;
     private final Map<Item, FilledContainerCategory> filledContainersMap;
@@ -41,7 +41,7 @@ public class SoftFluid {
         this.stillTexture = builder.stillTexture;
         this.flowingTexture = builder.flowingTexture;
         this.tintColor = builder.tintColor;
-        this.useParticleColorForFlowingTexture = builder.useParticleColorForFlowingTexture;
+        this.tintMethod = builder.tintMethod;
         this.equivalentFluids = builder.equivalentFluids;
         this.luminosity = builder.luminosity;
         this.filledContainersMap = builder.filledContainers;
@@ -79,6 +79,10 @@ public class SoftFluid {
 
     public TranslationTextComponent getTranslatedName() {
         return new TranslationTextComponent(this.translationKey);
+    }
+
+    public String getTranslationKey() {
+        return translationKey;
     }
 
     public String getID() {
@@ -285,8 +289,8 @@ public class SoftFluid {
     /**
      * @return used for fluids that only have a colored still texture and a grayscaled flowing one
      */
-    public boolean useParticleColorForFlowingTexture() {
-        return useParticleColorForFlowingTexture;
+    public TintMethod getTintMethod() {
+        return tintMethod;
     }
 
     /**
@@ -316,7 +320,7 @@ public class SoftFluid {
         private String translationKey = "fluid.selene.generic_fluid";
         private String NBTFromItem = null;
         private int tintColor = -1;
-        private boolean useParticleColorForFlowingTexture = false;
+        private TintMethod tintMethod = TintMethod.STILL_AND_FLOWING;
         private int luminosity = 0;
         private Item foodItem = Items.AIR;
         private int foodDivider = 1;
@@ -431,8 +435,22 @@ public class SoftFluid {
          * used for fluids that only have a colored still texture and a grayscaled flowing one
          * @return builder
          */
-        public final Builder useParticleColorForFlowingTexture() {
-            this.useParticleColorForFlowingTexture = true;
+        public final Builder noTint() {
+            this.tintMethod = TintMethod.NO_TINT;
+            return this;
+        }
+
+        public final Builder tinted() {
+            this.tintMethod = TintMethod.STILL_AND_FLOWING;
+            return this;
+        }
+
+        /**
+         * only tint flowing texture. No need to give tint color since it will use particle color
+         * @return
+         */
+        public final Builder onlyFlowingTinted() {
+            this.tintMethod = TintMethod.FLOWING;
             return this;
         }
 
@@ -453,7 +471,7 @@ public class SoftFluid {
                 if (f != null && f != Fluids.EMPTY) {
                     this.equivalentFluids.add(f);
                     Item i = f.getBucket();
-                    if (i != null && i != Items.AIR) this.bucket(i);
+                    if (i != Items.AIR && i != Items.BUCKET) this.bucket(i);
                 }
             }
             return this;
@@ -902,4 +920,15 @@ public class SoftFluid {
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
     public static final int BUCKET_COUNT = 4;
+
+    /**
+     * NO_TINT for both colored textures
+     * FLOWING for when only flowing texture is grayscaled
+     * STILL_AND_FLOWING for when both are grayscaled
+     */
+    public enum TintMethod{
+        NO_TINT, //allows special color
+        FLOWING, //use particle for flowing
+        STILL_AND_FLOWING //both grayscaled
+    }
 }

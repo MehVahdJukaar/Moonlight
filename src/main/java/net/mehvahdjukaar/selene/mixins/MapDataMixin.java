@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.Objects;
 
 
-@Mixin(targets = {"net.minecraft.world.storage.MapData"})
+@Mixin(MapData.class)
 public abstract class MapDataMixin extends WorldSavedData implements CustomDecorationHolder {
     public MapDataMixin(String name) {
         super(name);

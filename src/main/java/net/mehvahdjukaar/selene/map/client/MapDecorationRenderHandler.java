@@ -17,8 +17,7 @@ public class MapDecorationRenderHandler {
     static {
         bindSimpleRenderer(MapDecorationHandler.GENERIC_STRUCTURE_TYPE);
     }
-
-    //TODO: stitch all textures on an atlas for simple renderers
+    //TODO: create atlas for markers for all textures on an atlas for simple renderers
 
     public static <T extends CustomDecoration> void bindDecorationRenderer(CustomDecorationType<T,?> type, DecorationRenderer<T> renderer){
         if(RENDERERS.containsKey(type)){

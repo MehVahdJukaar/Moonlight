@@ -12,5 +12,6 @@ public class ModSetup {
             NetworkHandler.registerMessages();
             SoftFluidRegistry.init();
         });
+
     }
 }
