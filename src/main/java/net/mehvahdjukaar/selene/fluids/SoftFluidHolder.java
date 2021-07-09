@@ -164,8 +164,9 @@ public class SoftFluidHolder {
         }
 
         //todo: this is horrible
-        Item empty = fluid.tryGettingEmptyItem(filledContainer);
-        SoftFluid.FilledContainerCategory category = fluid.tryGettingFilledItems(empty);
+        if (potion == Potions.WATER) s = SoftFluidRegistry.POTION;
+        Item empty = s.tryGettingEmptyItem(filledContainer);
+        SoftFluid.FilledContainerCategory category = s.tryGettingFilledItems(empty);
         if(category != null && empty != null) {
 
             int amount = category.getAmount();

@@ -65,12 +65,16 @@ public class DispenserHelper {
             //this.setSuccessful(false);
             try{
                 ActionResult<ItemStack> result = this.customBehavior(source,stack);
-                if (result.getResult().consumesAction()){
-                    this.playSound(source);
+                ActionResultType type = result.getResult();
+                if (type!=ActionResultType.PASS){
+                    boolean success = type.consumesAction();
+                    this.playSound(source,success);
                     this.playAnimation(source, source.getBlockState().getValue(DispenserBlock.FACING));
-                    ItemStack resultStack = result.getObject();
-                    if(resultStack.getItem()==stack.getItem())return resultStack;
-                    return fillItemInDispenser(source,stack,result.getObject());
+                    if(success) {
+                        ItemStack resultStack = result.getObject();
+                        if (resultStack.getItem() == stack.getItem()) return resultStack;
+                        return fillItemInDispenser(source, stack, result.getObject());
+                    }
                 }
             }
             catch (Exception ignored) {}
@@ -81,13 +85,13 @@ public class DispenserHelper {
          * custom dispenser behavior that you want to implement
          * @param source dispenser block
          * @param stack stack to dispense
-         * @return return ActionResult.SUCCESS / CONSUME for success, FAIL or PASS and vanilla/previously registered behavior will be used. <br>
+         * @return return ActionResult.SUCCESS / CONSUME for success, FAIL to do nothing and PASS to fallback to vanilla/previously registered behavior will be used. <br>
          * Type parameter is return item stack. If item in itemstack is different than initially provided, such itemstack will be added to dispenser, otherwise will replace existing itemstack
          */
         protected abstract ActionResult<ItemStack> customBehavior(IBlockSource source, ItemStack stack);
 
-        protected void playSound(IBlockSource source) {
-            source.getLevel().levelEvent(1000, source.getPos(), 0);
+        protected void playSound(IBlockSource source, boolean success) {
+            source.getLevel().levelEvent(success ? 1000 : 1001, source.getPos(), 0);
         }
 
         protected void playAnimation(IBlockSource source, Direction direction) {
@@ -119,7 +123,7 @@ public class DispenserHelper {
                     }
                     return ActionResult.success(stack);
                 }
-                return ActionResult.success(stack);
+                return ActionResult.fail(stack);
             }
             return ActionResult.pass(stack);
         }
@@ -150,11 +154,11 @@ public class DispenserHelper {
                         returnStack = tank.interactWithItem(stack, world, blockpos, false);
                         if(returnStack != null) {
                             te.setChanged();
-                            return ActionResult.success(fillItemInDispenser(source, stack, returnStack));
+                            return ActionResult.success(returnStack);
                         }
                     }
                 }
-                return ActionResult.success(stack);
+                return ActionResult.fail(stack);
             }
             return ActionResult.pass(stack);
         }
