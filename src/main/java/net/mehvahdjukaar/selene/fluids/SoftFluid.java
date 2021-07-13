@@ -161,26 +161,7 @@ public class SoftFluid {
         return null;
     }
 
-//    /**
-//     * does provided bucket contains this fluid
-//     *
-//     * @param item bucket
-//     * @return is same fluid
-//     */
-//    public boolean isContainedInBucket(Item item) {
-//        return this.filledBuckets.contains(item);
-//    }
-//
-//    /**
-//     * does provided bowl contains this fluid
-//     *
-//     * @param item bowl
-//     * @return is same fluid
-//     */
-//    public boolean isContainedInBowl(Item item) {
-//        return this.filledBowls.contains(item);
-//    }
-//
+
 //    /**
 //     * does provided bucket contains this fluid
 //     *
@@ -194,29 +175,13 @@ public class SoftFluid {
 //    public boolean hasBucket() {
 //        return !this.filledBuckets.isEmpty();
 //    }
-//
-//    public boolean hasBowl() {
-//        return !this.filledBowls.isEmpty();
-//    }
-//
-//    public boolean hasBottle() {
-//        return !this.filledBottles.isEmpty();
-//    }
+
 //
 //    public Collection<Item> getBowls() {
 //        return this.filledBowls;
 //    }
 //
-//    public Collection<Item> getBuckets() {
-//        return this.filledBuckets;
-//    }
-//
-//    public Collection<Item> getBottles() {
-//        return this.filledBottles;
-//    }
-//
-//
-//
+
 //    /**
 //     * @return filled bottle, null if not present
 //     */
@@ -228,28 +193,7 @@ public class SoftFluid {
 //        return null;
 //    }
 //
-//    /**
-//     * @return filled bowl, null if not present
-//     */
-//    @Nullable
-//    public Item getBowl() {
-//        for (Item item : this.filledBowls) {
-//            return item;
-//        }
-//        return null;
-//    }
-//
-//    /**
-//     * @return first filled bucket, null if not present
-//     */
-//    @Nullable
-//    public Item getBucket() {
-//        this.filledContainers.get(Items.BUCKET)
-//        for (Item item : this.filledBuckets) {
-//            return item;
-//        }
-//        return null;
-//    }
+
 
     public List<Item> getAllFilledContainers() {
         List<Item> list = new ArrayList<>();

@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 
 /**
- * implement in a block that can consume a soft fluid
+ * implement in a block that can consume a soft fluid (not a tank)
  * prevents any other further interaction it this block has a fluid tank
  */
 public interface ISoftFluidConsumer {

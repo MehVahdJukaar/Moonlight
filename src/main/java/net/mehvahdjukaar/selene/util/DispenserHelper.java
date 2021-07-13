@@ -1,9 +1,12 @@
 package net.mehvahdjukaar.selene.util;
 
 
+import net.mehvahdjukaar.selene.fluids.ISoftFluidConsumer;
 import net.mehvahdjukaar.selene.fluids.ISoftFluidHolder;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidHolder;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.dispenser.IBlockSource;
@@ -163,7 +166,6 @@ public class DispenserHelper {
             return ActionResult.pass(stack);
         }
     }
-
 
     public static class PlaceBlockDispenseBehavior extends OptionalDispenseBehavior {
 

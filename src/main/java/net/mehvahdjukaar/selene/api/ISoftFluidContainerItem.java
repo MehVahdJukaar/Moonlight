@@ -8,6 +8,7 @@ import net.minecraft.util.SoundEvent;
 import javax.annotation.Nullable;
 
 /**
+ * NYI
  * implement this in your item to provide a soft fluid without needing to register its containers to the fluid itself
  */
 //TODO: this is useless since this way it won't be able to be taken out.. maybe add other interface for empty container

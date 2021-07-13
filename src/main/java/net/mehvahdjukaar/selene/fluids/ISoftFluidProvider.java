@@ -7,7 +7,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * implement in a simple block that can provide a soft fluid
+ * implement in a simple block that can provide a soft fluid (not a tank)
  * prevents any other further interaction it this block has a fluid tank
  */
 public interface ISoftFluidProvider {
