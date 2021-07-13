@@ -8,10 +8,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,11 +49,11 @@ public class SoftFluidRegistry {
     }
     /**
      * gets a soft fluid provided a bottle like item
-     * @param container fluid container item
+     * @param filledContainerItem item containing provided fluid
      * @return soft fluid. empty fluid if not found
      */
-    public static SoftFluid fromItem(Item container){
-        return ITEM_MAP.getOrDefault(container, EMPTY);
+    public static SoftFluid fromItem(Item filledContainerItem){
+        return ITEM_MAP.getOrDefault(filledContainerItem, EMPTY);
     }
 
 
@@ -75,8 +77,8 @@ public class SoftFluidRegistry {
     static{
         WATER = makeSF(new SoftFluid.Builder(Fluids.WATER)
                 //don't put bottles here
-                .containerItem("tea_kettle:empty_kettle","tea_kettle:water_kettle",1)
-                .food(Items.POTION)); //handled via special case in liquid holder along other nbt stff
+                .containerItem("tea_kettle:water_kettle","tea_kettle:empty_kettle",1)
+                .food(Items.POTION)); //handled via special case in liquid holder along other nbt stuff
         LAVA = makeSF(new SoftFluid.Builder(Fluids.LAVA)
                 .noTint()
                 .bottle("alexsmobs:lava_bottle")
@@ -172,13 +174,34 @@ public class SoftFluidRegistry {
 
     //TODO: allow user to modify already registered fluids
 
+    /**
+     * Adds a fluid containing item to an already registered fluid (I.E. water canteens for water fluid)
+     * @param softFluidID id of the SoftFluid that is contained in the item
+     * @param emptyContainer empty container item that can be filled with fluid
+     * @param filledContainer filled container item that contains provided fluid
+     * @param itemCapacity amount in minecraft bottles of fluid contained in this item
+     * @param fillSound optional fill sound
+     * @param emptySound optional empty sound
+     * @return true if operation was successful
+     */
+    public static boolean addContainerToSoftFluid(String softFluidID, Item emptyContainer, Item filledContainer,
+                                                  int itemCapacity, @Nullable SoundEvent fillSound, @Nullable SoundEvent emptySound){
+        SoftFluid s = get(softFluidID);
+        if(!s.isEmpty()){
+            if (filledContainer != Items.AIR) {
+                SoftFluid.FilledContainerCategory c = s.getFilledContainersMap().computeIfAbsent(emptyContainer, a ->
+                        new SoftFluid.FilledContainerCategory(itemCapacity));
+                c.addItem(filledContainer);
+                if(fillSound!=null && emptySound!=null)c.setSounds(fillSound,emptySound);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static SoftFluid makeSF(SoftFluid.Builder builder){
         if(builder.isDisabled)return null;
         return new SoftFluid(builder);
-    }
-
-    public static void addOpt(List<SoftFluid> l, SoftFluid s){
-        if(s!=null)l.add(s);
     }
 
     /**
