@@ -17,7 +17,6 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 public class SoftFluidRegistry {
     // id -> SoftFluid
@@ -92,7 +91,7 @@ public class SoftFluidRegistry {
                 .setSoundsForCategory(SoundEvents.HONEY_BLOCK_PLACE,SoundEvents.HONEY_BLOCK_BREAK,Items.GLASS_BOTTLE)
                 .emptyHandContainerItem(Items.HONEY_BLOCK,4)
                 .setSoundsForCategory(SoundEvents.HONEY_BLOCK_PLACE,SoundEvents.HONEY_BLOCK_BREAK,Items.AIR)
-                .textureOverrideF("create:honey")
+                .copyFlowingTextureFrom("create:honey")
                 .addEqFluid("create:honey")
                 .addEqFluid("cyclic:honey")
                 .addEqFluid("inspirations:honey"));
@@ -101,7 +100,7 @@ public class SoftFluidRegistry {
                 .noTint()
                 .food(Items.MILK_BUCKET)
                 .translationKey("fluid.supplementaries.milk")
-                .textureOverrideF("create:milk")
+                .copyFlowingTextureFrom("create:milk")
                 .addEqFluid("create:milk")
                 .addEqFluid("inspirations:milk")
                 .bottle("farmersdelight:milk_bottle")
@@ -115,32 +114,33 @@ public class SoftFluidRegistry {
                 .stew(Items.MUSHROOM_STEW)
                 .translationKey(Items.MUSHROOM_STEW.getDescriptionId())
                 .addEqFluid("inspirations:mushroom_stew")
-                .textureOverrideF("inspirations:mushroom_stew"));
+                .copyFlowingTextureFrom("inspirations:mushroom_stew"));
         BEETROOT_SOUP = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"beetroot_soup")
                 .color(0xC93434)
                 .stew(Items.BEETROOT_SOUP)
                 .translationKey(Items.BEETROOT_SOUP.getDescriptionId())
                 .addEqFluid("inspirations:beetroot_soup")
-                .textureOverrideF("inspirations:beetroot_soup"));
+                .copyFlowingTextureFrom("inspirations:beetroot_soup"));
         RABBIT_STEW = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"rabbit_stew")
                 .color(0xFF904F)
                 .stew(Items.RABBIT_STEW)
                 .translationKey(Items.RABBIT_STEW.getDescriptionId())
                 .addEqFluid("inspirations:rabbit_stew")
-                .textureOverrideF("inspirations:rabbit_stew"));
+                .copyFlowingTextureFrom("inspirations:rabbit_stew"));
         SUS_STEW = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"suspicious_stew")
                 .color(0xBAE85F)
                 .keepNBTFromItem("Effects")
                 .stew(Items.SUSPICIOUS_STEW)
                 .translationKey(Items.SUSPICIOUS_STEW.getDescriptionId())
-                .textureOverrideF("inspirations:mushroom_stew"));
+                .copyFlowingTextureFrom("inspirations:mushroom_stew"));
         POTION = makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"potion")
                 .color(PotionUtils.getColor(Potions.EMPTY))
-                .keepNBTFromItem("Potion")
+                .keepNBTFromItem("Potion","Bottle")
                 .translationKey(Items.POTION.getDescriptionId())
                 .drink(Items.POTION)
                 .bottle(Items.SPLASH_POTION)
                 .bottle(Items.LINGERING_POTION)
+                .copyFlowingTextureFrom("create:potion")
                 .addEqFluid("create:potion")
                 .addEqFluid("cofh_core:potion")
                 .addEqFluid("immersiveengineering:potion"));
@@ -152,7 +152,7 @@ public class SoftFluidRegistry {
         XP = makeSF(new SoftFluid.Builder(FluidTextures.XP_TEXTURE, FluidTextures.XP_TEXTURE_FLOW,"experience")
                 .translationKey("fluid.supplementaries.experience")
                 .noTint()
-                .textureOverride("cyclic:xpjuice")
+                .copyTexturesFrom("cyclic:xpjuice")
                 .addEqFluid("cyclic:xpjuice")
                 .bottle(Items.EXPERIENCE_BOTTLE));
         SLIME = makeSF(new SoftFluid.Builder(FluidTextures.SLIME_TEXTURE, FluidTextures.SLIME_TEXTURE,"slime")

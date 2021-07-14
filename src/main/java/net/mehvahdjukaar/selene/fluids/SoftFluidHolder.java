@@ -88,14 +88,23 @@ public class SoftFluidHolder {
 
     //handles special nbt items such as potions or soups
     private void applyNBTtoItemStack(ItemStack stack) {
-        String nbtKey = this.fluid.getNbtKeyFromItem();
+        String[] nbtKey = this.fluid.getNbtKeyFromItem();
         if (this.nbt != null && !this.nbt.isEmpty() && nbtKey != null) {
             CompoundNBT newCom = new CompoundNBT();
-            if (this.nbt.contains(nbtKey)) {
-                newCom.put(nbtKey, this.nbt.get(nbtKey));
-                stack.setTag(newCom);
+            for(String s : nbtKey) {
+                if (this.nbt.contains(s)) {
+                    newCom.put(s, this.nbt.get(s));
+                }
             }
+            stack.setTag(newCom);
         }
+    }
+
+    private void addPotionTag(Item i, CompoundNBT com){
+        String type = "BOTTLE";
+        if (i instanceof SplashPotionItem) type = "SPLASH";
+        else if (i instanceof LingeringPotionItem) type = "LINGERING";
+        com.putString("Bottle", type);
     }
 
     /**
@@ -146,15 +155,16 @@ public class SoftFluidHolder {
         if (potion == Potions.WATER) s = SoftFluidRegistry.WATER;
         //add tags to splash and lingering potions
         else if(potion != Potions.EMPTY) {
-            if (filledContainer instanceof SplashPotionItem) newCom.putString("PotionType", "Splash");
-            else if (filledContainer instanceof LingeringPotionItem) newCom.putString("PotionType", "Lingering");
+            addPotionTag(filledContainer,newCom);
         }
 
         //copy nbt from item
-        String nbtKey = s.getNbtKeyFromItem();
+        String[] nbtKey = s.getNbtKeyFromItem();
         if(com!=null && nbtKey!=null) {
-            if (com.contains(nbtKey)){
-                newCom.put(nbtKey,com.get(nbtKey));
+            for(String k : nbtKey) {
+                if (com.contains(k)) {
+                    newCom.put(k, com.get(k));
+                }
             }
         }
 
@@ -411,13 +421,15 @@ public class SoftFluidHolder {
     }
 
     private void applyNBTtoFluidStack(FluidStack fluidStack) {
-        String nbtKey = this.fluid.getNbtKeyFromItem();
+        String[] nbtKey = this.fluid.getNbtKeyFromItem();
         if (this.nbt != null && !this.nbt.isEmpty() && !fluidStack.isEmpty() && nbtKey != null){
             CompoundNBT newCom = new CompoundNBT();
-            if (this.nbt.contains(nbtKey)) {
-                newCom.put(nbtKey, this.nbt.get(nbtKey));
-                fluidStack.setTag(newCom);
+            for(String k : nbtKey) {
+                if (this.nbt.contains(k)) {
+                    newCom.put(k, this.nbt.get(k));
+                }
             }
+            fluidStack.setTag(newCom);
         }
     }
     /**

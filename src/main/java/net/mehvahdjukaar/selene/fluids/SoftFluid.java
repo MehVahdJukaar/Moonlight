@@ -30,7 +30,7 @@ public class SoftFluid {
     private final Item foodItem;
     private final int foodDivider;
     private final ResourceLocation id;
-    private final String NBTFromItem;
+    private final String[] NBTFromItem;
     private final String translationKey;
     //used to indicate if it has been directly converted from a forge fluid
     public final boolean isCustom;
@@ -107,7 +107,7 @@ public class SoftFluid {
     /**
      * @return name of nbt tag that will be transferred from container item to fluid
      */
-    public String getNbtKeyFromItem() {
+    public String[] getNbtKeyFromItem() {
         return NBTFromItem;
     }
 
@@ -262,7 +262,7 @@ public class SoftFluid {
         private ResourceLocation stillTexture;
         private ResourceLocation flowingTexture;
         private String translationKey = "fluid.selene.generic_fluid";
-        private String NBTFromItem = null;
+        private String[] NBTFromItem = null;
         private int tintColor = -1;
         private TintMethod tintMethod = TintMethod.STILL_AND_FLOWING;
         private int luminosity = 0;
@@ -361,7 +361,7 @@ public class SoftFluid {
          * @param NBTkey name of the nbt tag that, if present in a container item, will get assigned to the fluid. i.e. "Potion" for potions
          * @return builder
          */
-        public final Builder keepNBTFromItem(String NBTkey) {
+        public final Builder keepNBTFromItem(String ...NBTkey) {
             this.NBTFromItem = NBTkey;
             return this;
         }
@@ -447,7 +447,7 @@ public class SoftFluid {
          * @param fluidRes modded optional forge fluid from which the texture will be taken
          * @return builder
          */
-        public final Builder textureOverrideF(String fluidRes) {
+        public final Builder copyFlowingTextureFrom(String fluidRes) {
             if (ForgeRegistries.FLUIDS.containsKey(new ResourceLocation(fluidRes))) {
                 Fluid f = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidRes));
                 if (f != null && f != Fluids.EMPTY) {
@@ -464,7 +464,7 @@ public class SoftFluid {
          * @param fluidRes modded optional forge fluid from which the texture will be taken
          * @return builder
          */
-        public final Builder textureOverride(String fluidRes) {
+        public final Builder copyTexturesFrom(String fluidRes) {
             if (ForgeRegistries.FLUIDS.containsKey(new ResourceLocation(fluidRes))) {
                 Fluid f = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidRes));
                 if (f != null && f != Fluids.EMPTY) {
