@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 /**
  * instance this fluid tank in your tile entity
  */
+@SuppressWarnings("unused")
 public class SoftFluidHolder {
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
@@ -37,7 +38,8 @@ public class SoftFluidHolder {
     //count in bottles
     private int count = 0;
     private final int capacity;
-    private CompoundNBT nbt = new CompoundNBT();
+    @Nullable
+    private CompoundNBT nbt = null;
     private SoftFluid fluid = SoftFluidRegistry.EMPTY;
     //special tint color. Used for dynamic tint fluids like water and potions
     private int specialColor = 0;
@@ -49,8 +51,9 @@ public class SoftFluidHolder {
 
     /**
      * call this method from your block when player interacts. tries to fill or empty current held item in tank
+     *
      * @param player player
-     * @param hand hand
+     * @param hand   hand
      * @return interaction successful
      */
     public boolean interactWithPlayer(PlayerEntity player, Hand hand, @Nullable World world, @Nullable BlockPos pos) {
@@ -58,19 +61,21 @@ public class SoftFluidHolder {
 
         ItemStack returnStack = this.interactWithItem(handStack, world, pos, false);
         //for items that have no bottle
-        if(returnStack!=null){
+        if (returnStack != null) {
             Utils.swapItem(player, hand, returnStack);
 
-            if(!handStack.isEmpty()) player.awardStat(Stats.ITEM_USED.get(handStack.getItem()));
+            if (!handStack.isEmpty()) player.awardStat(Stats.ITEM_USED.get(handStack.getItem()));
             return true;
         }
         return false;
     }
+
     /**
      * makes current item interact with fluid tank. returns empty stack if
+     *
      * @param stack ItemStack to be interacted with
      * @param world world. null if no sound is to be played
-     * @param pos position. null if no sound is to be played
+     * @param pos   position. null if no sound is to be played
      * @return resulting ItemStack: empty for empty hand return, null if it failed
      */
     @Nullable
@@ -79,7 +84,7 @@ public class SoftFluidHolder {
         ItemStack returnStack;
         //try filling
         returnStack = this.tryFillingItem(stack.getItem(), world, pos, simulate);
-        if(returnStack!=null)return returnStack;
+        if (returnStack != null) return returnStack;
         //try emptying
         returnStack = this.tryDrainItem(stack, world, pos, simulate);
 
@@ -91,16 +96,16 @@ public class SoftFluidHolder {
         String[] nbtKey = this.fluid.getNbtKeyFromItem();
         if (this.nbt != null && !this.nbt.isEmpty() && nbtKey != null) {
             CompoundNBT newCom = new CompoundNBT();
-            for(String s : nbtKey) {
+            for (String s : nbtKey) {
                 if (this.nbt.contains(s)) {
                     newCom.put(s, this.nbt.get(s));
                 }
             }
-            stack.setTag(newCom);
+            if(!newCom.isEmpty())stack.setTag(newCom);
         }
     }
 
-    private void addPotionTag(Item i, CompoundNBT com){
+    private void addPotionTag(Item i, CompoundNBT com) {
         String type = "BOTTLE";
         if (i instanceof SplashPotionItem) type = "SPLASH";
         else if (i instanceof LingeringPotionItem) type = "LINGERING";
@@ -110,12 +115,13 @@ public class SoftFluidHolder {
     /**
      * tries pouring the content of provided item in the tank
      * also plays sound
+     *
      * @return empty container item, null if it failed
      */
     @Nullable
     public ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable World world, @Nullable BlockPos pos, boolean simulate) {
 
-        //TODO: generalize this adding a function list that converts items in compounts and fluid pair or a compund whitelist
+        //TODO: generalize this adding a function list that converts items in compounts and fluid pair or a compound whitelist
         //TODO: all of this  is horrible
 
         Item filledContainer = filledContainerStack.getItem();
@@ -153,15 +159,15 @@ public class SoftFluidHolder {
         //convert potions to water bottles
         Potion potion = PotionUtils.getPotion(filledContainerStack);
         if (potion == Potions.WATER) s = SoftFluidRegistry.WATER;
-        //add tags to splash and lingering potions
-        else if(potion != Potions.EMPTY) {
-            addPotionTag(filledContainer,newCom);
+            //add tags to splash and lingering potions
+        else if (potion != Potions.EMPTY) {
+            addPotionTag(filledContainer, newCom);
         }
 
         //copy nbt from item
         String[] nbtKey = s.getNbtKeyFromItem();
-        if(com!=null && nbtKey!=null) {
-            for(String k : nbtKey) {
+        if (com != null && nbtKey != null) {
+            for (String k : nbtKey) {
                 if (com.contains(k)) {
                     newCom.put(k, com.get(k));
                 }
@@ -170,22 +176,23 @@ public class SoftFluidHolder {
 
         //set new fluid if empty
         if (this.isEmpty()) {
-            this.setFluid(s, newCom);
+            this.setFluid(s, newCom.isEmpty() ? null : newCom);
         }
 
         //todo: this is horrible
         if (potion == Potions.WATER) s = SoftFluidRegistry.POTION;
         Item empty = s.tryGettingEmptyItem(filledContainer);
         SoftFluid.FilledContainerCategory category = s.tryGettingFilledItems(empty);
-        if(category != null && empty != null) {
+        if (category != null && empty != null) {
 
             int amount = category.getAmount();
-            if (this.canAddSoftFluid(this.fluid,amount,newCom)) {
-                if(simulate) return ItemStack.EMPTY;
+            if (this.canAddSoftFluid(this.fluid, amount, newCom)) {
+                if (simulate) return ItemStack.EMPTY;
                 this.grow(amount);
 
                 SoundEvent sound = category.getEmptySound();
-                if(sound!=null && world!=null && pos != null) world.playSound(null, pos, sound, SoundCategory.BLOCKS, 1, 1);
+                if (sound != null && world != null && pos != null)
+                    world.playSound(null, pos, sound, SoundCategory.BLOCKS, 1, 1);
 
                 return new ItemStack(empty);
             }
@@ -196,21 +203,23 @@ public class SoftFluidHolder {
     /**
      * tries removing said amount of fluid and returns filled item
      * also plays sound
+     *
      * @return filled bottle item. null if it failed or if simulated is true and failed
      */
     @Nullable
-    public ItemStack tryFillingItem(Item emptyContainer, @Nullable World world, @Nullable  BlockPos pos, boolean simulate) {
+    public ItemStack tryFillingItem(Item emptyContainer, @Nullable World world, @Nullable BlockPos pos, boolean simulate) {
         SoftFluid.FilledContainerCategory category = fluid.tryGettingFilledItems(emptyContainer);
-        if(category != null) {
+        if (category != null) {
             int amount = category.getAmount();
             if (this.canRemove(amount)) {
-                if(simulate) return ItemStack.EMPTY;
+                if (simulate) return ItemStack.EMPTY;
                 ItemStack stack = new ItemStack(category.getFirstFilled());
                 //case for lingering potions
-                if(this.fluid == SoftFluidRegistry.POTION){
-                    if(this.nbt.contains("PotionType")){
-                        stack = new ItemStack(this.nbt.getString("PotionType").equals("Splash")?
-                                Items.SPLASH_POTION : Items.LINGERING_POTION);
+                if (this.fluid == SoftFluidRegistry.POTION) {
+                    if (this.nbt != null && this.nbt.contains("Bottle")) {
+                        String bottle = this.nbt.getString("Bottle");
+                        if (bottle.equals("SPLASH")) stack = new ItemStack(Items.SPLASH_POTION);
+                        else if (bottle.equals("LINGERING")) stack = new ItemStack(Items.LINGERING_POTION);
                     }
                 }
 
@@ -222,31 +231,38 @@ public class SoftFluidHolder {
                 this.shrink(amount);
 
                 SoundEvent sound = category.getEmptySound();
-                if(sound!=null && world!=null && pos != null) world.playSound(null, pos, sound, SoundCategory.BLOCKS, 1, 1);
+                if (sound != null && world != null && pos != null)
+                    world.playSound(null, pos, sound, SoundCategory.BLOCKS, 1, 1);
 
                 return stack;
             }
         }
         return null;
     }
+
     /**
      * tries removing bottle amount and returns filled bottle
+     *
      * @return filled bottle item. null if it failed
      */
     @Nullable
     public ItemStack tryFillingBottle(World world, BlockPos pos) {
         return tryFillingItem(Items.GLASS_BOTTLE, world, pos, false);
     }
+
     /**
      * tries removing bucket amount and returns filled bucket
+     *
      * @return filled bucket item. null if it failed
      */
     @Nullable
     public ItemStack tryFillingBucket(World world, BlockPos pos) {
         return tryFillingItem(Items.BUCKET, world, pos, false);
     }
+
     /**
      * tries removing bowl amount and returns filled bowl
+     *
      * @return filled bowl item. null if it failed
      */
     @Nullable
@@ -256,84 +272,104 @@ public class SoftFluidHolder {
 
     /**
      * checks if current tank holds equivalent fluid as provided forge fluids stack & nbt
+     *
      * @param fluidStack forge fluid stack
-     * @param com fluid nbt
+     * @param com        fluid nbt
      * @return is same
      */
     public boolean isSameFluidAs(FluidStack fluidStack, CompoundNBT com) {
         return this.fluid.isEquivalent(fluidStack.getFluid()) && com.equals(this.nbt);
     }
+
     /**
      * checks if current tank holds equivalent fluid as provided forge fluids stack
+     *
      * @param fluidStack forge fluid stack
      * @return is same
      */
+    //might be wrong
     public boolean isSameFluidAs(FluidStack fluidStack) {
-        return this.fluid.isEquivalent(fluidStack.getFluid()) && fluidStack.getOrCreateTag().equals(this.nbt);
+        return this.fluid.isEquivalent(fluidStack.getFluid()) && areNbtEquals(this.nbt, fluidStack.getTag());
     }
+
+    private boolean areNbtEquals(CompoundNBT nbt, CompoundNBT nbt1) {
+        return (((nbt == null || nbt.isEmpty()) && (nbt1 == null || nbt1.isEmpty())) || nbt1.equals(nbt));
+    }
+
     /**
      * checks if current tank holds equivalent fluid as provided soft fluid
+     *
      * @param other soft fluid
      * @return is same
      */
     public boolean isSameFluidAs(SoftFluid other) {
-        return isSameFluidAs(other, new CompoundNBT());
+        return isSameFluidAs(other, null);
     }
+
     /**
      * checks if current tank holds equivalent fluid as provided soft fluid
+     *
      * @param other soft fluid
-     * @param com fluid nbt
+     * @param com   fluid nbt
      * @return is same
      */
-    public boolean isSameFluidAs(SoftFluid other, CompoundNBT com) {
-        return this.fluid.equals(other) && this.nbt.equals(com);
+    public boolean isSameFluidAs(SoftFluid other, @Nullable CompoundNBT com) {
+        return this.fluid.equals(other) && areNbtEquals(this.nbt, com);
     }
+
     /**
      * try adding provided forge fluid to the tank
+     *
      * @param fluidStack forge fluid stack
      * @return success
      */
     public boolean tryAddingFluid(FluidStack fluidStack) {
         int count = fluidStack.getAmount();
         SoftFluid s = SoftFluidRegistry.fromForgeFluid(fluid.getForgeFluid());
-        return tryAddingFluid(s,count,fluidStack.getTag());
+        return tryAddingFluid(s, count, fluidStack.getTag());
     }
+
     /**
      * try adding provided soft fluid to the tank
-     * @param s soft fluid to add
+     *
+     * @param s     soft fluid to add
      * @param count count to add
-     * @param com fluid nbt
+     * @param com   fluid nbt
      * @return success
      */
-    public boolean tryAddingFluid(SoftFluid s, int count, CompoundNBT com) {
+    public boolean tryAddingFluid(SoftFluid s, int count, @Nullable CompoundNBT com) {
         if (this.canAdd(count)) {
             if (this.isEmpty()) {
                 this.setFluid(s, com);
                 this.setCount(count);
                 return true;
-            } else if (this.isSameFluidAs(s,com)) {
+            } else if (this.isSameFluidAs(s, com)) {
                 this.grow(count);
                 return true;
             }
         }
         return false;
     }
+
     /**
      * try adding provided soft fluid to the tank
-     * @param s soft fluid to add
+     *
+     * @param s     soft fluid to add
      * @param count count to add
      * @return success
      */
     public boolean tryAddingFluid(SoftFluid s, int count) {
-        return tryAddingFluid(s,count,new CompoundNBT());
+        return tryAddingFluid(s, count, null);
     }
+
     /**
      * try adding 1 bottle of provided soft fluid to the tank
+     *
      * @param s soft fluid to add
      * @return success
      */
     public boolean tryAddingFluid(SoftFluid s) {
-        return this.tryAddingFluid(s,1);
+        return this.tryAddingFluid(s, 1);
     }
 
     public boolean tryTransferFluid(SoftFluidHolder destination) {
@@ -359,8 +395,9 @@ public class SoftFluidHolder {
 
     /**
      * empties n bottle of content into said forge fluid tank
+     *
      * @param fluidDestination forge fluid tank handler
-     * @param bottles number of bottles to empty (1blt = 250mb)
+     * @param bottles          number of bottles to empty (1blt = 250mb)
      * @return success
      */
     public boolean tryTransferToFluidTank(IFluidHandler fluidDestination, int bottles) {
@@ -389,9 +426,9 @@ public class SoftFluidHolder {
         FluidStack drainable = fluidSource.drain(milliBuckets, IFluidHandler.FluidAction.SIMULATE);
         if (!drainable.isEmpty() && drainable.getAmount() == milliBuckets) {
             boolean transfer = false;
-            CompoundNBT fsTag = drainable.getOrCreateTag();
+            CompoundNBT fsTag = drainable.getTag();
             if (this.fluid.isEmpty()) {
-                this.setFluid(SoftFluidRegistry.fromForgeFluid(drainable.getFluid()), drainable.getOrCreateTag());
+                this.setFluid(SoftFluidRegistry.fromForgeFluid(drainable.getFluid()), fsTag);
                 transfer = true;
             } else if (this.isSameFluidAs(drainable, fsTag)) {
                 transfer = true;
@@ -411,6 +448,7 @@ public class SoftFluidHolder {
 
     /**
      * gets the equivalent forge fluid without draining the tank. returned stack might be empty
+     *
      * @param mb forge minecraft buckets
      * @return forge fluid stacks
      */
@@ -422,50 +460,58 @@ public class SoftFluidHolder {
 
     private void applyNBTtoFluidStack(FluidStack fluidStack) {
         String[] nbtKey = this.fluid.getNbtKeyFromItem();
-        if (this.nbt != null && !this.nbt.isEmpty() && !fluidStack.isEmpty() && nbtKey != null){
+        if (this.nbt != null && !this.nbt.isEmpty() && !fluidStack.isEmpty() && nbtKey != null) {
             CompoundNBT newCom = new CompoundNBT();
-            for(String k : nbtKey) {
+            for (String k : nbtKey) {
                 if (this.nbt.contains(k)) {
                     newCom.put(k, this.nbt.get(k));
                 }
             }
-            fluidStack.setTag(newCom);
+            if(!newCom.isEmpty()) fluidStack.setTag(newCom);
         }
     }
+
     /**
      * can I remove n bottles of fluid
+     *
      * @param n bottles amount
      * @return can remove
      */
     public boolean canRemove(int n) {
         return this.count >= n && !this.isEmpty();
     }
+
     /**
      * can I add n bottles of fluid
+     *
      * @param n bottles amount
      * @return can add
      */
     public boolean canAdd(int n) {
         return this.count + n <= this.capacity;
     }
+
     /**
      * can provided soft fluid be added to tank
-     * @param s soft fluid to add
+     *
+     * @param s     soft fluid to add
      * @param count bottles amount
      * @return can add
      */
-    public boolean canAddSoftFluid(SoftFluid s, int count){
-        return canAddSoftFluid(s,count,new CompoundNBT());
+    public boolean canAddSoftFluid(SoftFluid s, int count) {
+        return canAddSoftFluid(s, count, null);
     }
+
     /**
      * can provided soft fluid be added to tank
-     * @param s soft fluid to add
+     *
+     * @param s     soft fluid to add
      * @param count bottles amount
-     * @param nbt soft fluid nbt
+     * @param nbt   soft fluid nbt
      * @return can add
      */
-    public boolean canAddSoftFluid(SoftFluid s, int count, CompoundNBT nbt){
-        return this.canAdd(count) && this.isSameFluidAs(s,nbt);
+    public boolean canAddSoftFluid(SoftFluid s, int count, @Nullable CompoundNBT nbt) {
+        return this.canAdd(count) && this.isSameFluidAs(s, nbt);
     }
 
     public boolean isFull() {
@@ -474,10 +520,12 @@ public class SoftFluidHolder {
 
     public boolean isEmpty() {
         //count 0 should always = to fluid.empty
-        return this.fluid.isEmpty()||this.count<=0;
+        return this.fluid.isEmpty() || this.count <= 0;
     }
+
     /**
      * grows contained fluid by at most inc bottles. doesn't need checking
+     *
      * @param inc maximum increment
      */
     public void lossyAdd(int inc) {
@@ -486,40 +534,49 @@ public class SoftFluidHolder {
 
     /**
      * unchecked sets the tank fluid count
+     *
      * @param count bottles count
      */
     public void setCount(int count) {
         this.count = count;
     }
+
     /**
      * fills out tank to the maximum capacity
      */
     public void fillCount() {
         this.setCount(capacity);
     }
+
     /**
      * unchecked grows the tank by inc bottles. Check with canAdd()
+     *
      * @param inc bottles increment
      */
     public void grow(int inc) {
         this.setCount(this.count + inc);
     }
+
     /**
      * unchecked shrinks the tank by inc bottles
+     *
      * @param inc bottles increment
      */
     public void shrink(int inc) {
         this.grow(-inc);
-        if(this.count==0)this.fluid = SoftFluidRegistry.EMPTY;
+        if (this.count == 0) this.fluid = SoftFluidRegistry.EMPTY;
     }
+
     /**
      * gets liquid height for renderer
+     *
      * @param maxHeight maximum height in blocks
      * @return fluid height
      */
     public float getHeight(float maxHeight) {
         return maxHeight * (float) this.count / (float) this.capacity;
     }
+
     /**
      * @return comparator block redstone power
      */
@@ -537,87 +594,102 @@ public class SoftFluidHolder {
         return fluid;
     }
 
+    @Nullable
     public CompoundNBT getNbt() {
         return nbt;
     }
 
-    public void setNbt(CompoundNBT nbt) {
+    public void setNbt(@Nullable CompoundNBT nbt) {
         this.nbt = nbt;
     }
+
     /**
      * resets & clears the tank
      */
     public void clear() {
         this.fluid = SoftFluidRegistry.EMPTY;
         this.setCount(0);
-        this.nbt = new CompoundNBT();
+        this.nbt = null;
         this.specialColor = 0;
     }
 
     /**
      * copies the content of a fluid tank into this
-     * @param other
+     *
+     * @param other other tank
      */
     public void copy(SoftFluidHolder other) {
         this.setFluid(other.getFluid(), other.getNbt());
         this.setCount(Math.min(this.capacity, other.getCount()));
     }
+
     /**
      * copies the content of a fluid tank into this
-     * @param other
+     *
+     * @param other forge fluid tank
      */
     public void copy(IFluidHandler other) {
         FluidStack drainable = other.drain(250, IFluidHandler.FluidAction.SIMULATE);
-        CompoundNBT nbt = drainable.isEmpty() ? new CompoundNBT() : drainable.getOrCreateTag();
+        CompoundNBT nbt = drainable.isEmpty() ? null : drainable.getTag();
         this.setFluid(SoftFluidRegistry.fromForgeFluid(drainable.getFluid()), nbt);
         this.setCount(Math.min(this.capacity, other.getTankCapacity(0)));
     }
+
     /**
      * fills to max capacity with provided forge fluid
+     *
      * @param fluidStack forge fluid
      */
     public void fill(FluidStack fluidStack) {
         this.setFluid(fluidStack);
         this.fillCount();
     }
+
     /**
      * fills to max capacity with provided soft fluid
+     *
      * @param fluid forge fluid
      */
     public void fill(SoftFluid fluid) {
-        this.fill(fluid, new CompoundNBT());
+        this.fill(fluid, null);
     }
+
     /**
      * fills to max capacity with provided soft fluid
+     *
      * @param fluid soft fluid
-     * @param nbt soft fluid nbt
+     * @param nbt   soft fluid nbt
      */
-    public void fill(SoftFluid fluid, CompoundNBT nbt) {
+    public void fill(SoftFluid fluid, @Nullable CompoundNBT nbt) {
         this.setFluid(fluid, nbt);
         this.fillCount();
     }
+
     /**
      * sets current fluid to provided forge fluid equivalent
+     *
      * @param fluidStack forge fluid
      */
     public void setFluid(FluidStack fluidStack) {
         SoftFluid s = SoftFluidRegistry.fromForgeFluid(fluidStack.getFluid());
-        this.setFluid(s, fluidStack.getOrCreateTag());
+        this.setFluid(s, fluidStack.getTag());
     }
+
     /**
      * sets current fluid to provided soft fluid equivalent
+     *
      * @param fluid soft fluid
      */
     public void setFluid(SoftFluid fluid) {
-        this.setFluid(fluid, new CompoundNBT());
+        this.setFluid(fluid, null);
     }
 
     //called when it goes from empty to full
-    public void setFluid(SoftFluid fluid, CompoundNBT nbt) {
+    public void setFluid(SoftFluid fluid, @Nullable CompoundNBT nbt) {
         this.fluid = fluid;
         this.nbt = nbt;
         this.specialColor = 0;
-        if(this.fluid.isEmpty())this.setCount(0);
+        if (this.fluid.isEmpty()) this.setCount(0);
         this.needColorRefresh = true;
     }
 
@@ -626,9 +698,9 @@ public class SoftFluidHolder {
      */
     public int getTintColor(@Nullable IWorldReader world, @Nullable BlockPos pos) {
         SoftFluid.TintMethod method = this.fluid.getTintMethod();
-        if(method == SoftFluid.TintMethod.NO_TINT)return -1;
-        if(this.needColorRefresh){
-            this.refreshSpecialColor(world,pos);
+        if (method == SoftFluid.TintMethod.NO_TINT) return -1;
+        if (this.needColorRefresh) {
+            this.refreshSpecialColor(world, pos);
             this.needColorRefresh = false;
         }
         if (this.specialColor != 0) return this.specialColor;
@@ -640,8 +712,8 @@ public class SoftFluidHolder {
      */
     public int getFlowingTint(@Nullable IWorldReader world, @Nullable BlockPos pos) {
         SoftFluid.TintMethod method = this.fluid.getTintMethod();
-        if(method == SoftFluid.TintMethod.FLOWING) return this.getParticleColor(world,pos);
-        else return this.getTintColor(world,pos);
+        if (method == SoftFluid.TintMethod.FLOWING) return this.getParticleColor(world, pos);
+        else return this.getTintColor(world, pos);
     }
 
     /**
@@ -657,33 +729,35 @@ public class SoftFluidHolder {
     }
 
     //grabs world/ fluidstack dependednt tint color if fluid has associated forge fluid. overrides normal tint color
-    private void refreshSpecialColor(@Nullable IWorldReader world, @Nullable BlockPos pos){
+    private void refreshSpecialColor(@Nullable IWorldReader world, @Nullable BlockPos pos) {
 
         if (fluid == SoftFluidRegistry.POTION) {
             this.specialColor = PotionUtils.getColor(PotionUtils.getPotion(this.nbt));
-        }
-        else{
+        } else {
             Fluid f = this.getFluid().getForgeFluid();
-            if(f != Fluids.EMPTY){
+            if (f != Fluids.EMPTY) {
                 FluidAttributes att = f.getAttributes();
                 //world accessor
                 int w = -1;
-                if(world != null && pos != null) w = att.getColor(world,pos);
+                if (world != null && pos != null) w = att.getColor(world, pos);
                 //stack accessor
-                if(w==-1) w = att.getColor(this.toEquivalentForgeFluid(1));
-                if(w!=-1) this.specialColor = w;
+                if (w == -1) w = att.getColor(this.toEquivalentForgeFluid(1));
+                if (w != -1) this.specialColor = w;
             }
         }
 
     }
+
     /**
      * @return true if contained fluid has associated food
      */
     public boolean isFood() {
         return this.fluid.isFood();
     }
+
     /**
      * returns associated food items
+     *
      * @return food
      */
     public ItemStack getFood() {
@@ -691,8 +765,10 @@ public class SoftFluidHolder {
         this.applyNBTtoItemStack(stack);
         return stack;
     }
+
     /**
      * call from tile entity. loads tank from nbt
+     *
      * @param compound nbt
      */
     public void load(CompoundNBT compound) {
@@ -704,18 +780,20 @@ public class SoftFluidHolder {
             SoftFluid sf = SoftFluidRegistry.get(id);
             //TODO: remove
             //supplementaries backwards compat
-            if(sf.isEmpty()){
-                sf = SoftFluidRegistry.get(id.replace("supplementaries","minecraft"));
-                if(sf.isEmpty()){
-                    sf = SoftFluidRegistry.get(id.replace("minecraft","supplementaries"));
+            if (sf.isEmpty()) {
+                sf = SoftFluidRegistry.get(id.replace("supplementaries", "minecraft"));
+                if (sf.isEmpty()) {
+                    sf = SoftFluidRegistry.get(id.replace("minecraft", "supplementaries"));
                 }
             }
 
             this.setFluid(sf, this.nbt);
         }
     }
+
     /**
      * call from tile entity. saves to nbt
+     *
      * @param compound nbt
      * @return nbt
      */
@@ -725,16 +803,18 @@ public class SoftFluidHolder {
         cmp.putString("Fluid", this.fluid.getID());
         //for item render. needed for potion colors
         cmp.putInt("CachedColor", this.getTintColor(null, null));
-        if (!this.nbt.isEmpty()) cmp.put("NBT", this.nbt);
+        if (this.nbt != null && !this.nbt.isEmpty()) cmp.put("NBT", this.nbt);
         compound.put("FluidHolder", cmp);
 
         return compound;
     }
+
     /**
      * makes player drink 1 bottle and removes it from the tank
+     *
      * @param player player
-     * @param world world
-     * @param hand hand
+     * @param world  world
+     * @param hand   hand
      * @return success
      */
     public boolean tryDrinkUpFluid(PlayerEntity player, World world, Hand hand) {
@@ -743,8 +823,8 @@ public class SoftFluidHolder {
         Item item = stack.getItem();
 
         //case for xp
-        if(this.fluid == SoftFluidRegistry.XP){
-            player.giveExperiencePoints(Utils.getXPinaBottle(1,world.random));
+        if (this.fluid == SoftFluidRegistry.XP) {
+            player.giveExperiencePoints(Utils.getXPinaBottle(1, world.random));
             if (world.isClientSide) return true;
             this.shrink(1);
 
@@ -752,7 +832,7 @@ public class SoftFluidHolder {
             return true;
         }
         //food
-        else if(this.isFood()) {
+        else if (this.isFood()) {
 
             Food food = item.getFoodProperties();
             int div = this.fluid.getFoodDivider();
@@ -778,8 +858,7 @@ public class SoftFluidHolder {
                 player.getFoodData().eat(food.getNutrition() / div, food.getSaturationModifier() / (float) div);
 
                 success = true;
-            }
-            else if (item instanceof MilkBucketItem) {
+            } else if (item instanceof MilkBucketItem) {
                 if (world.isClientSide) return true;
                 milkBottleBehavior(player, stack);
                 success = true;
@@ -835,13 +914,16 @@ public class SoftFluidHolder {
         }
         return 0;
     }
-    public static ItemStack getEmptyBottle(){
+
+    public static ItemStack getEmptyBottle() {
         return new ItemStack(Items.GLASS_BOTTLE);
     }
-    public static ItemStack getEmptyBucket(){
+
+    public static ItemStack getEmptyBucket() {
         return new ItemStack(Items.BUCKET);
     }
-    public static ItemStack getEmptyBowl(){
+
+    public static ItemStack getEmptyBowl() {
         return new ItemStack(Items.BOWL);
     }
 
