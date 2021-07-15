@@ -327,7 +327,9 @@ public class SoftFluid {
                     FluidAttributes att = fluid.getAttributes();
                     this.stillTexture = att.getStillTexture();
                     this.flowingTexture = att.getFlowingTexture();
-                    this.color(att.getColor());
+                    int color = att.getColor();
+                    if(color==-1)this.tintMethod = TintMethod.NO_TINT;
+                    this.color(color);
                     this.bucket(fluid.getBucket());
                     this.luminosity = att.getLuminosity();
                     this.translationKey = att.getTranslationKey();
@@ -376,7 +378,7 @@ public class SoftFluid {
         }
 
         /**
-         * used for fluids that only have a colored still texture and a grayscaled flowing one
+         * used for fluids that only have a colored still and flowing texture and do not need tint (except for particles)
          * @return builder
          */
         public final Builder noTint() {

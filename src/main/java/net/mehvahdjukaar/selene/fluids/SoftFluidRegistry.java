@@ -135,7 +135,7 @@ public class SoftFluidRegistry {
                 .copyFlowingTextureFrom("inspirations:mushroom_stew"));
         POTION = makeSF(new SoftFluid.Builder(FluidTextures.POTION_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"potion")
                 .color(PotionUtils.getColor(Potions.EMPTY))
-                .keepNBTFromItem("Potion","Bottle")
+                .keepNBTFromItem("Potion","Bottle","CustomPotionEffects")
                 .translationKey(Items.POTION.getDescriptionId())
                 .drink(Items.POTION)
                 .bottle(Items.SPLASH_POTION)

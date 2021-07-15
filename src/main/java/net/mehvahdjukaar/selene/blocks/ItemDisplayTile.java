@@ -40,7 +40,7 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
         super.setChanged();
     }
 
-    //TODO: this is shit. do it better
+    //TODO: improve this
     public void updateOnChangedBeforePacket(){
         this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
     }
@@ -186,7 +186,6 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
     }
 
 
-    //TODO: figure out what this handlers and Isided inventory do
     private final LazyOptional<? extends IItemHandler>[] handlers = SidedInvWrapper.create(this, Direction.values());
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {

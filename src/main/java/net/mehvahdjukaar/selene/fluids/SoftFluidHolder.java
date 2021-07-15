@@ -160,7 +160,7 @@ public class SoftFluidHolder {
         Potion potion = PotionUtils.getPotion(filledContainerStack);
         if (potion == Potions.WATER) s = SoftFluidRegistry.WATER;
             //add tags to splash and lingering potions
-        else if (potion != Potions.EMPTY) {
+        else if (potion != Potions.EMPTY || (filledContainerStack.hasTag() && filledContainerStack.getTag().contains("CustomPotionEffects"))) {
             addPotionTag(filledContainer, newCom);
         }
 

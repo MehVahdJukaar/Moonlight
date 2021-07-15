@@ -58,7 +58,7 @@ public class FluidParticleColors {
     }
 
 
-    //credits to Random on forge discord
+    //credits to Random832
     private static int getColorFrom(TextureAtlasSprite sprite, int tint) {
         if (sprite == null || sprite.getFrameCount() == 0) return -1;
         int tintR = tint >> 16 & 255;
