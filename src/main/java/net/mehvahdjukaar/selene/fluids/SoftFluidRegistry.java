@@ -91,7 +91,7 @@ public class SoftFluidRegistry {
                 .setSoundsForCategory(SoundEvents.HONEY_BLOCK_PLACE,SoundEvents.HONEY_BLOCK_BREAK,Items.GLASS_BOTTLE)
                 .emptyHandContainerItem(Items.HONEY_BLOCK,4)
                 .setSoundsForCategory(SoundEvents.HONEY_BLOCK_PLACE,SoundEvents.HONEY_BLOCK_BREAK,Items.AIR)
-                .copyFlowingTextureFrom("create:honey")
+                .copyTexturesFrom("create:honey")
                 .addEqFluid("create:honey")
                 .addEqFluid("cyclic:honey")
                 .addEqFluid("inspirations:honey"));
@@ -140,7 +140,7 @@ public class SoftFluidRegistry {
                 .drink(Items.POTION)
                 .bottle(Items.SPLASH_POTION)
                 .bottle(Items.LINGERING_POTION)
-                .copyFlowingTextureFrom("create:potion")
+                .copyTexturesFrom("create:potion")
                 .addEqFluid("create:potion")
                 .addEqFluid("cofh_core:potion")
                 .addEqFluid("immersiveengineering:potion"));

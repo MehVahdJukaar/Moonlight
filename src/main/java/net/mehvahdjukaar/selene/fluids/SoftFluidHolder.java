@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.selene.fluids;
 
+import net.mehvahdjukaar.selene.util.PotionNBTHelper;
 import net.mehvahdjukaar.selene.fluids.client.FluidParticleColors;
 import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.entity.player.PlayerEntity;
@@ -158,9 +159,12 @@ public class SoftFluidHolder {
 
         //convert potions to water bottles
         Potion potion = PotionUtils.getPotion(filledContainerStack);
-        if (potion == Potions.WATER) s = SoftFluidRegistry.WATER;
-            //add tags to splash and lingering potions
-        else if (potion != Potions.EMPTY || (filledContainerStack.hasTag() && filledContainerStack.getTag().contains("CustomPotionEffects"))) {
+        boolean hasCustomPot = (filledContainerStack.hasTag() && filledContainerStack.getTag().contains("CustomPotionEffects"));
+        if (potion == Potions.WATER && !hasCustomPot){
+            s = SoftFluidRegistry.WATER;
+        }
+        //add tags to splash and lingering potions
+        else if (potion != Potions.EMPTY || hasCustomPot) {
             addPotionTag(filledContainer, newCom);
         }
 
@@ -278,7 +282,7 @@ public class SoftFluidHolder {
      * @return is same
      */
     public boolean isSameFluidAs(FluidStack fluidStack, CompoundNBT com) {
-        return this.fluid.isEquivalent(fluidStack.getFluid()) && com.equals(this.nbt);
+        return this.fluid.isEquivalent(fluidStack.getFluid()) && areNbtEquals(com,this.nbt);
     }
 
     /**
@@ -289,7 +293,7 @@ public class SoftFluidHolder {
      */
     //might be wrong
     public boolean isSameFluidAs(FluidStack fluidStack) {
-        return this.fluid.isEquivalent(fluidStack.getFluid()) && areNbtEquals(this.nbt, fluidStack.getTag());
+        return isSameFluidAs(fluidStack,fluidStack.getTag());
     }
 
     private boolean areNbtEquals(CompoundNBT nbt, CompoundNBT nbt1) {
@@ -732,7 +736,7 @@ public class SoftFluidHolder {
     private void refreshSpecialColor(@Nullable IWorldReader world, @Nullable BlockPos pos) {
 
         if (fluid == SoftFluidRegistry.POTION) {
-            this.specialColor = PotionUtils.getColor(PotionUtils.getPotion(this.nbt));
+            this.specialColor = PotionNBTHelper.getColorFromNBT(this.nbt);
         } else {
             Fluid f = this.getFluid().getForgeFluid();
             if (f != Fluids.EMPTY) {
