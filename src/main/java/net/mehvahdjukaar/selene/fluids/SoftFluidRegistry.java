@@ -108,7 +108,8 @@ public class SoftFluidRegistry {
                 .bottle("fluffy_farmer:bottle_of_milk")
                 .bottle("vanillacookbook:milk_bottle")
                 .bottle("simplefarming:milk_bottle")
-                .bottle("farmersdelight:milk_bottle"));
+                .bottle("farmersdelight:milk_bottle")
+                .containerItem("frozenup:mug_of_milk","frozenup:empty_mug",4));
         MUSHROOM_STEW = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"mushroom_stew")
                 .color(0xffad89)
                 .stew(Items.MUSHROOM_STEW)
@@ -140,6 +141,8 @@ public class SoftFluidRegistry {
                 .drink(Items.POTION)
                 .bottle(Items.SPLASH_POTION)
                 .bottle(Items.LINGERING_POTION)
+                .containerItem("minecraft:splash_potion","inspirations:splash_bottle",1)
+                .containerItem("minecraft:lingering_potion","inspirations:lingering_bottle",1)
                 .copyTexturesFrom("create:potion")
                 .addEqFluid("create:potion")
                 .addEqFluid("cofh_core:potion")
@@ -151,6 +154,7 @@ public class SoftFluidRegistry {
                 .bottle(Items.DRAGON_BREATH));
         XP = makeSF(new SoftFluid.Builder(FluidTextures.XP_TEXTURE, FluidTextures.XP_TEXTURE_FLOW,"experience")
                 .translationKey("fluid.supplementaries.experience")
+                .luminosity(5)
                 .noTint()
                 .copyTexturesFrom("cyclic:xpjuice")
                 .addEqFluid("cyclic:xpjuice")

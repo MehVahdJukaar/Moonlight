@@ -9,12 +9,13 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -275,7 +276,7 @@ public class SoftFluid {
 
         private final List<Fluid> equivalentFluids = new ArrayList<>();
 
-        private final Map<Item, FilledContainerCategory> filledContainers = new HashMap<>();
+        private final Map<Item, FilledContainerCategory> filledContainers = new LinkedHashMap<>();
 
         /**
          * default builder. If provided id namespace mod is not loaded it will not be registered
@@ -325,8 +326,8 @@ public class SoftFluid {
                 Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidRes));
                 if (fluid != null && fluid != Fluids.EMPTY) {
                     FluidAttributes att = fluid.getAttributes();
-                    this.stillTexture = att.getStillTexture();
-                    this.flowingTexture = att.getFlowingTexture();
+                    this.stillTexture = att.getStillTexture(new FluidStack(fluid,1));
+                    this.flowingTexture = att.getFlowingTexture(new FluidStack(fluid,1));
                     int color = att.getColor();
                     if(color==-1)this.tintMethod = TintMethod.NO_TINT;
                     this.color(color);

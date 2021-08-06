@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import net.mehvahdjukaar.selene.util.PotionNBTHelper;
 import net.mehvahdjukaar.selene.fluids.client.FluidParticleColors;
+import net.mehvahdjukaar.selene.util.PotionNBTHelper;
 import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -98,7 +98,8 @@ public class SoftFluidHolder {
         if (this.nbt != null && !this.nbt.isEmpty() && nbtKey != null) {
             CompoundNBT newCom = new CompoundNBT();
             for (String s : nbtKey) {
-                if (this.nbt.contains(s)) {
+                //ignores bottle tag, handled separately since it's a diff item
+                if (this.nbt.contains(s) && s!="Bottle") {
                     newCom.put(s, this.nbt.get(s));
                 }
             }
@@ -106,8 +107,9 @@ public class SoftFluidHolder {
         }
     }
 
+    //same syntax as create
     private void addPotionTag(Item i, CompoundNBT com) {
-        String type = "BOTTLE";
+        String type = "REGULAR";
         if (i instanceof SplashPotionItem) type = "SPLASH";
         else if (i instanceof LingeringPotionItem) type = "LINGERING";
         com.putString("Bottle", type);
@@ -220,7 +222,7 @@ public class SoftFluidHolder {
                 ItemStack stack = new ItemStack(category.getFirstFilled());
                 //case for lingering potions
                 if (this.fluid == SoftFluidRegistry.POTION) {
-                    if (this.nbt != null && this.nbt.contains("Bottle")) {
+                    if (this.nbt != null && this.nbt.contains("Bottle") && !emptyContainer.getRegistryName().getNamespace().equals("inspirations")) {
                         String bottle = this.nbt.getString("Bottle");
                         if (bottle.equals("SPLASH")) stack = new ItemStack(Items.SPLASH_POTION);
                         else if (bottle.equals("LINGERING")) stack = new ItemStack(Items.LINGERING_POTION);

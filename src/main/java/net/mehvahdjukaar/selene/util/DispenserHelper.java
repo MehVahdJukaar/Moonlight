@@ -28,10 +28,12 @@ public class DispenserHelper {
         DispenserBlock.registerBehavior(behavior.item, behavior);
     }
 
+    //default spawn egg behavior
     public static void registerSpawnEggBehavior(IItemProvider egg){
         DispenserBlock.registerBehavior(egg, SPAWN_EGG_BEHAVIOR);
     }
 
+    //block placement behavior
     public static void registerPlaceBlockBehavior(IItemProvider block){
         DispenserBlock.registerBehavior(block, PLACE_BLOCK_BEHAVIOR);
     }
