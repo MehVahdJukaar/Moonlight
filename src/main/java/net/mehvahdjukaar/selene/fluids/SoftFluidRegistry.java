@@ -75,6 +75,7 @@ public class SoftFluidRegistry {
     //first of all creates all soft fluids for vanilla items without registering them
     static{
         WATER = makeSF(new SoftFluid.Builder(Fluids.WATER)
+                .containerItem("xcercamod:item_glass_of_water","xcercamod:item_glass",4)
                 .containerItem("tea_kettle:water_kettle","tea_kettle:empty_kettle",4)
                 .food(Items.POTION)); //handled via special case in liquid holder along other nbt stuff
         LAVA = makeSF(new SoftFluid.Builder(Fluids.LAVA)
@@ -108,6 +109,7 @@ public class SoftFluidRegistry {
                 .bottle("vanillacookbook:milk_bottle")
                 .bottle("simplefarming:milk_bottle")
                 .bottle("farmersdelight:milk_bottle")
+                .containerItem("xcercamod:item_glass_of_milk","xcercamod:item_glass",4)
                 .containerItem("frozenup:mug_of_milk","frozenup:empty_mug",4));
         MUSHROOM_STEW = makeSF(new SoftFluid.Builder(FluidTextures.SOUP_TEXTURE, FluidTextures.POTION_TEXTURE_FLOW,"mushroom_stew")
                 .color(0xffad89)
