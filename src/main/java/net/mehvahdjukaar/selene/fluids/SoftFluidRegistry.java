@@ -76,7 +76,7 @@ public class SoftFluidRegistry {
     static{
         WATER = makeSF(new SoftFluid.Builder(Fluids.WATER)
                 //don't put bottles here
-                .containerItem("tea_kettle:water_kettle","tea_kettle:empty_kettle",1)
+                .containerItem("tea_kettle:water_kettle","tea_kettle:empty_kettle",4)
                 .food(Items.POTION)); //handled via special case in liquid holder along other nbt stuff
         LAVA = makeSF(new SoftFluid.Builder(Fluids.LAVA)
                 .noTint()
