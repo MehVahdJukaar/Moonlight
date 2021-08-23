@@ -518,10 +518,13 @@ public class SoftFluid {
          * @return builder
          */
         public final Builder containerItem(ResourceLocation filledItemRes, ResourceLocation emptyItemRes, int itemCapacity) {
-            Item filled = ForgeRegistries.ITEMS.getValue(filledItemRes);
-            Item empty = ForgeRegistries.ITEMS.getValue(emptyItemRes);
 
-            if (filled != null && empty != null) this.containerItem(filled, empty, itemCapacity);
+            if(ForgeRegistries.ITEMS.containsKey(filledItemRes) && ForgeRegistries.ITEMS.containsKey(emptyItemRes)) {
+                Item filled = ForgeRegistries.ITEMS.getValue(filledItemRes);
+                Item empty = ForgeRegistries.ITEMS.getValue(emptyItemRes);
+
+                if (filled != null && empty != null) this.containerItem(filled, empty, itemCapacity);
+            }
 
             return this;
         }
@@ -808,7 +811,7 @@ public class SoftFluid {
     }
 
     public static class FilledContainerCategory {
-        private final int containerCapacity;
+        private int containerCapacity;
         private SoundEvent fillSound;
         private SoundEvent emptySound;
         private final List<Item> filled = new ArrayList<>();
@@ -822,6 +825,14 @@ public class SoftFluid {
 
         public FilledContainerCategory(int containerCapacity) {
             this(containerCapacity, SoundEvents.BOTTLE_FILL, SoundEvents.BOTTLE_EMPTY);
+        }
+
+        public void setCapacity(int containerCapacity) {
+            this.containerCapacity = containerCapacity;
+        }
+
+        public int getCapacity() {
+            return containerCapacity;
         }
 
         public void addItem(Item i) {

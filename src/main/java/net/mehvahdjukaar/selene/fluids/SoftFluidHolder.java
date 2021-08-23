@@ -99,7 +99,7 @@ public class SoftFluidHolder {
             CompoundNBT newCom = new CompoundNBT();
             for (String s : nbtKey) {
                 //ignores bottle tag, handled separately since it's a diff item
-                if (this.nbt.contains(s) && s!="Bottle") {
+                if (this.nbt.contains(s) && !s.equals("Bottle")) {
                     newCom.put(s, this.nbt.get(s));
                 }
             }
@@ -161,7 +161,7 @@ public class SoftFluidHolder {
 
         //convert potions to water bottles
         Potion potion = PotionUtils.getPotion(filledContainerStack);
-        boolean hasCustomPot = (filledContainerStack.hasTag() && filledContainerStack.getTag().contains("CustomPotionEffects"));
+        boolean hasCustomPot = (com != null && com.contains("CustomPotionEffects"));
         if (potion == Potions.WATER && !hasCustomPot){
             s = SoftFluidRegistry.WATER;
         }

@@ -75,8 +75,7 @@ public class SoftFluidRegistry {
     //first of all creates all soft fluids for vanilla items without registering them
     static{
         WATER = makeSF(new SoftFluid.Builder(Fluids.WATER)
-                //don't put bottles here
-                .containerItem("tea_kettle:water_kettle","tea_kettle:empty_kettle",1)
+                .containerItem("tea_kettle:water_kettle","tea_kettle:empty_kettle",4)
                 .food(Items.POTION)); //handled via special case in liquid holder along other nbt stuff
         LAVA = makeSF(new SoftFluid.Builder(Fluids.LAVA)
                 .noTint()
@@ -183,7 +182,7 @@ public class SoftFluidRegistry {
      * @param softFluidID id of the SoftFluid that is contained in the item
      * @param emptyContainer empty container item that can be filled with fluid
      * @param filledContainer filled container item that contains provided fluid
-     * @param itemCapacity amount in minecraft bottles of fluid contained in this item
+     * @param itemCapacity amount in minecraft bottles of fluid contained in this item. Only one can exist per empty container. Will replace already existing one
      * @param fillSound optional fill sound
      * @param emptySound optional empty sound
      * @return true if operation was successful
@@ -195,6 +194,7 @@ public class SoftFluidRegistry {
             if (filledContainer != Items.AIR) {
                 SoftFluid.FilledContainerCategory c = s.getFilledContainersMap().computeIfAbsent(emptyContainer, a ->
                         new SoftFluid.FilledContainerCategory(itemCapacity));
+                c.setCapacity(itemCapacity);
                 c.addItem(filledContainer);
                 if(fillSound!=null && emptySound!=null)c.setSounds(fillSound,emptySound);
                 return true;
