@@ -11,7 +11,9 @@
     "MapExtendingRecipeMixin"
   ],
   "client": [
-    "MapItemRendererMixin"
+    "FirstPersonRendererMixin",
+    "MapItemRendererMixin",
+    "ThirdPersonRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
