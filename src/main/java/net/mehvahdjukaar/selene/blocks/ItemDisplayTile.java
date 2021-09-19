@@ -26,41 +26,47 @@ import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 
 public abstract class ItemDisplayTile extends LockableLootTileEntity implements ISidedInventory {
-    protected NonNullList<ItemStack> stacks = NonNullList.withSize(1, ItemStack.EMPTY);
+    protected NonNullList<ItemStack> stacks;
 
     public ItemDisplayTile(TileEntityType type) {
+        this(type, 1);
+    }
+
+    public ItemDisplayTile(TileEntityType type, int slots) {
         super(type);
+        this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
     }
 
     //for server
     @Override
     public void setChanged() {
-        if(this.level==null)return;
+        if (this.level == null) return;
         this.updateOnChangedBeforePacket();
         super.setChanged();
     }
 
     //TODO: improve this
-    public void updateOnChangedBeforePacket(){
+    public void updateOnChangedBeforePacket() {
         this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
     }
 
-    public void updateClientVisualsOnLoad(){}
+    public void updateClientVisualsOnLoad() {
+    }
 
-    public ItemStack getDisplayedItem(){
+    public ItemStack getDisplayedItem() {
         return this.getItem(0);
     }
 
-    public void setDisplayedItem(ItemStack stack){
-        this.setItem(0,stack);
+    public void setDisplayedItem(ItemStack stack) {
+        this.setItem(0, stack);
     }
 
-    public ActionResultType interact(PlayerEntity player, Hand handIn){
-        return this.interact(player,handIn,0);
+    public ActionResultType interact(PlayerEntity player, Hand handIn) {
+        return this.interact(player, handIn, 0);
     }
 
-    public ActionResultType interact(PlayerEntity player, Hand handIn, int slot){
-        if(handIn==Hand.MAIN_HAND) {
+    public ActionResultType interact(PlayerEntity player, Hand handIn, int slot) {
+        if (handIn == Hand.MAIN_HAND) {
             ItemStack handItem = player.getItemInHand(handIn);
             //remove
             if (!this.isEmpty() && handItem.isEmpty()) {
@@ -68,8 +74,7 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
                 if (!this.level.isClientSide()) {
                     player.setItemInHand(handIn, it);
                     this.setChanged();
-                }
-                else{
+                } else {
                     //also update visuals on client. will get overwritten by packet tho
                     this.updateClientVisualsOnLoad();
                 }
@@ -79,16 +84,15 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
             else if (!handItem.isEmpty() && this.canPlaceItem(slot, handItem)) {
                 ItemStack it = handItem.copy();
                 it.setCount(1);
-                this.setItem(slot,it);
+                this.setItem(slot, it);
 
                 if (!player.isCreative()) {
                     handItem.shrink(1);
                 }
                 if (!this.level.isClientSide()) {
-                    this.level.playSound(null, this.worldPosition, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundCategory.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.10F + 0.95F);
+                    this.level.playSound(null, this.worldPosition, this.getAddItemSound(), SoundCategory.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.10F + 0.95F);
                     //this.setChanged();
-                }
-                else{
+                } else {
                     //also update visuals on client. will get overwritten by packet tho
                     this.updateClientVisualsOnLoad();
                 }
@@ -98,6 +102,10 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
         return ActionResultType.PASS;
     }
 
+    public SoundEvent getAddItemSound(){
+        return SoundEvents.ITEM_FRAME_ADD_ITEM;
+    }
+
     @Override
     public void load(BlockState state, CompoundNBT compound) {
         super.load(state, compound);
@@ -105,7 +113,7 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
             this.stacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         }
         ItemStackHelper.loadAllItems(compound, this.stacks);
-        if(this.level !=null && this.level.isClientSide) this.updateClientVisualsOnLoad();
+        if (this.level != null && this.level.isClientSide) this.updateClientVisualsOnLoad();
     }
 
     @Override
@@ -129,7 +137,7 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        this.load(this.getBlockState(),pkt.getTag());
+        this.load(this.getBlockState(), pkt.getTag());
     }
 
     @Override
@@ -187,6 +195,7 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
 
 
     private final LazyOptional<? extends IItemHandler>[] handlers = SidedInvWrapper.create(this, Direction.values());
+
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
         if (!this.remove && facing != null && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)

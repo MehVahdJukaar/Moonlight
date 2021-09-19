@@ -64,9 +64,13 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     @Shadow
     public RegistryKey<World> dimension;
 
-    @Shadow public byte[] colors;
-    @Shadow public boolean locked;
-    @Shadow @Final private Map<String, MapBanner> bannerMarkers;
+    @Shadow
+    public byte[] colors;
+    @Shadow
+    public boolean locked;
+    @Shadow
+    @Final
+    private Map<String, MapBanner> bannerMarkers;
     //new decorations (stuff that gets rendered)
     @Final
     public Map<String, CustomDecoration> customDecorations = Maps.newLinkedHashMap();
@@ -85,39 +89,38 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
         return customMapMarkers;
     }
 
-    private <D extends CustomDecoration> void addCustomDecoration(MapWorldMarker<D> marker){
-        D decoration = marker.createDecorationFromMarker(scale,x,z,dimension,locked);
-        if(decoration!=null) {
+    private <D extends CustomDecoration> void addCustomDecoration(MapWorldMarker<D> marker) {
+        D decoration = marker.createDecorationFromMarker(scale, x, z, dimension, locked);
+        if (decoration != null) {
             this.customDecorations.put(marker.getMarkerId(), decoration);
         }
     }
 
     @Inject(method = "lockData", at = @At("HEAD"), cancellable = true)
-    public void lockData(MapData data, CallbackInfo ci){
-        if(data instanceof CustomDecorationHolder){
+    public void lockData(MapData data, CallbackInfo ci) {
+        if (data instanceof CustomDecorationHolder) {
             this.customMapMarkers.putAll(((CustomDecorationHolder) data).getCustomMarkers());
             this.customDecorations.putAll(((CustomDecorationHolder) data).getCustomDecorations());
         }
     }
 
     @Inject(method = "tickCarriedBy", at = @At("TAIL"), cancellable = true)
-    public void tickCarriedBy(PlayerEntity player, ItemStack stack, CallbackInfo ci){
+    public void tickCarriedBy(PlayerEntity player, ItemStack stack, CallbackInfo ci) {
         CompoundNBT compoundnbt = stack.getTag();
         if (compoundnbt != null && compoundnbt.contains("CustomDecorations", 9)) {
             ListNBT listnbt = compoundnbt.getList("CustomDecorations", 10);
             //for exploration maps
-            for(int j = 0; j < listnbt.size(); ++j) {
+            for (int j = 0; j < listnbt.size(); ++j) {
                 CompoundNBT com = listnbt.getCompound(j);
                 if (!this.decorations.containsKey(com.getString("id"))) {
                     String name = com.getString("type");
                     //TODO: add more checks
                     CustomDecorationType<CustomDecoration, ?> type = (CustomDecorationType<CustomDecoration, ?>) MapDecorationHandler.get(name);
-                    if(type!=null) {
+                    if (type != null) {
                         MapWorldMarker<CustomDecoration> dummy = new DummyMapWorldMarker(type, com.getInt("x"), com.getInt("z"));
                         this.addCustomDecoration(dummy);
-                    }
-                    else{
-                        Selene.LOGGER.warn("Failed to load map decoration "+name+". Skipping it");
+                    } else {
+                        Selene.LOGGER.warn("Failed to load map decoration " + name + ". Skipping it");
 
                     }
                 }
@@ -127,12 +130,12 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
 
     @Inject(method = "load", at = @At("TAIL"), cancellable = true)
     public void load(CompoundNBT compound, CallbackInfo ci) {
-        if(compound.contains("customMarkers")) {
+        if (compound.contains("customMarkers")) {
             ListNBT listNBT = compound.getList("customMarkers", 10);
 
             for (int j = 0; j < listNBT.size(); ++j) {
                 MapWorldMarker<?> marker = MapDecorationHandler.readWorldMarker(listNBT.getCompound(j));
-                if(marker!=null) {
+                if (marker != null) {
                     this.customMapMarkers.put(marker.getMarkerId(), marker);
                     this.addCustomDecoration(marker);
                 }
@@ -146,9 +149,9 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
 
         ListNBT listNBT = new ListNBT();
 
-        for(MapWorldMarker<?> marker : this.customMapMarkers.values()) {
+        for (MapWorldMarker<?> marker : this.customMapMarkers.values()) {
             CompoundNBT com2 = new CompoundNBT();
-            com2.put(marker.getTypeId(),marker.saveToNBT(new CompoundNBT()));
+            com2.put(marker.getTypeId(), marker.saveToNBT(new CompoundNBT()));
             listNBT.add(com2);
         }
         com.put("customMarkers", listNBT);
@@ -156,11 +159,11 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
 
     @Override
     public void resetCustomDecoration() {
-        for(String key : this.customMapMarkers.keySet()) {
+        for (String key : this.customMapMarkers.keySet()) {
             this.customDecorations.remove(key);
             this.customMapMarkers.remove(key);
         }
-        for(String key : this.bannerMarkers.keySet()) {
+        for (String key : this.bannerMarkers.keySet()) {
             this.bannerMarkers.remove(key);
             this.decorations.remove(key);
         }
@@ -168,15 +171,15 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
 
     @Override
     public void toggleCustomDecoration(IWorld world, BlockPos pos) {
-        double d0 = (double)pos.getX() + 0.5D;
-        double d1 = (double)pos.getZ() + 0.5D;
+        double d0 = (double) pos.getX() + 0.5D;
+        double d1 = (double) pos.getZ() + 0.5D;
         int i = 1 << this.scale;
-        double d2 = (d0 - (double)this.x) / (double)i;
-        double d3 = (d1 - (double)this.z) / (double)i;
+        double d2 = (d0 - (double) this.x) / (double) i;
+        double d3 = (d1 - (double) this.z) / (double) i;
         if (d2 >= -63.0D && d3 >= -63.0D && d2 <= 63.0D && d3 <= 63.0D) {
-            List<MapWorldMarker<?>> markers = MapDecorationHandler.getMarkersFromWorld(world,pos);
+            List<MapWorldMarker<?>> markers = MapDecorationHandler.getMarkersFromWorld(world, pos);
             boolean changed = false;
-            for(MapWorldMarker<?> marker : markers) {
+            for (MapWorldMarker<?> marker : markers) {
                 if (marker != null) {
                     //toggle
                     String id = marker.getMarkerId();
@@ -190,7 +193,7 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
                     changed = true;
                 }
             }
-            if(changed) this.setDirty();
+            if (changed) this.setDirty();
         }
     }
 
@@ -198,16 +201,15 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     public void checkBanners(IBlockReader world, int x, int z, CallbackInfo ci) {
         Iterator<MapWorldMarker<?>> iterator = this.customMapMarkers.values().iterator();
 
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             MapWorldMarker<?> marker = iterator.next();
             if (marker.getPos().getX() == x && marker.getPos().getZ() == z) {
-                MapWorldMarker<?> newMarker = marker.getType().getWorldMarkerFromWorld(world,marker.getPos());
+                MapWorldMarker<?> newMarker = marker.getType().getWorldMarkerFromWorld(world, marker.getPos());
                 String id = marker.getMarkerId();
-                if (newMarker==null) {
+                if (newMarker == null) {
                     iterator.remove();
                     this.customDecorations.remove(id);
-                }
-                else if(Objects.equals(id,newMarker.getMarkerId())&&marker.shouldUpdate(newMarker)){
+                } else if (Objects.equals(id, newMarker.getMarkerId()) && marker.shouldUpdate(newMarker)) {
                     newMarker.updateDecoration(this.customDecorations.get(id));
                 }
             }
@@ -219,7 +221,7 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     @Inject(method = "getUpdatePacket", at = @At("RETURN"), cancellable = true)
     public void getUpdatePacket(ItemStack stack, IBlockReader reader, PlayerEntity playerEntity, CallbackInfoReturnable<IPacket<?>> cir) {
         IPacket<?> packet = cir.getReturnValue();
-        if(playerEntity instanceof ServerPlayerEntity && packet instanceof SMapDataPacket) {
+        if (playerEntity instanceof ServerPlayerEntity && packet instanceof SMapDataPacket) {
             NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) playerEntity),
                     new SyncCustomMapDecorationPacket(FilledMapItem.getMapId(stack), this.customDecorations.values().toArray(new CustomDecoration[0])));
         }

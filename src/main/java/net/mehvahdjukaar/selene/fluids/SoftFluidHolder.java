@@ -635,7 +635,7 @@ public class SoftFluidHolder {
      * @param other forge fluid tank
      */
     public void copy(IFluidHandler other) {
-        FluidStack drainable = other.drain(250, IFluidHandler.FluidAction.SIMULATE);
+        FluidStack drainable = other.getFluidInTank(0).copy();// 250, IFluidHandler.FluidAction.SIMULATE);
         CompoundNBT nbt = drainable.isEmpty() ? null : drainable.getTag();
         this.setFluid(SoftFluidRegistry.fromForgeFluid(drainable.getFluid()), nbt);
         this.setCount(Math.min(this.capacity, other.getTankCapacity(0)));
@@ -757,7 +757,7 @@ public class SoftFluidHolder {
     /**
      * @return true if contained fluid has associated food
      */
-    public boolean isFood() {
+    public boolean containsFood() {
         return this.fluid.isFood();
     }
 
@@ -820,10 +820,9 @@ public class SoftFluidHolder {
      *
      * @param player player
      * @param world  world
-     * @param hand   hand
      * @return success
      */
-    public boolean tryDrinkUpFluid(PlayerEntity player, World world, Hand hand) {
+    public boolean tryDrinkUpFluid(PlayerEntity player, World world) {
         if (this.isEmpty()) return false;
         ItemStack stack = this.getFood();
         Item item = stack.getItem();
@@ -838,7 +837,7 @@ public class SoftFluidHolder {
             return true;
         }
         //food
-        else if (this.isFood()) {
+        else if (this.containsFood()) {
 
             Food food = item.getFoodProperties();
             int div = this.fluid.getFoodDivider();
