@@ -13,6 +13,7 @@ import net.minecraft.util.SoundEvents;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,6 +52,7 @@ public class SoftFluidRegistry {
      * @param filledContainerItem item containing provided fluid
      * @return soft fluid. empty fluid if not found
      */
+    @Nonnull
     public static SoftFluid fromItem(Item filledContainerItem){
         return ITEM_MAP.getOrDefault(filledContainerItem, EMPTY);
     }
@@ -77,7 +79,7 @@ public class SoftFluidRegistry {
         WATER = makeSF(new SoftFluid.Builder(Fluids.WATER)
                 .containerItem("xercamod:item_glass_of_water","xercamod:item_glass",4)
                 .containerItem("tea_kettle:water_kettle","tea_kettle:empty_kettle",4)
-                .food(Items.POTION)); //handled via special case in liquid holder along other nbt stuff
+                .drink(Items.POTION)); //handled via special case in liquid holder along other nbt stuff
         LAVA = makeSF(new SoftFluid.Builder(Fluids.LAVA)
                 .noTint()
                 .bottle("alexsmobs:lava_bottle")

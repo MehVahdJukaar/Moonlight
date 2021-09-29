@@ -37,19 +37,46 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
         this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
     }
 
-    //for server
+    //should only be server side. called when inventory has changed
     @Override
     public void setChanged() {
         if (this.level == null) return;
-        this.updateOnChangedBeforePacket();
+        this.updateTileOnInventoryChanged();
+        if (this.needsToUpdateClientWhenChanged()) {
+            //this saves and sends a packet to update the client tile
+            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
+        }
         super.setChanged();
     }
 
-    //TODO: improve this
-    public void updateOnChangedBeforePacket() {
-        this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
+     //todo: legacy, remove
+     @Deprecated
+     public void updateOnChangedBeforePacket(){
+
+     }
+
+    /**
+     * called every time the tile is marked dirty or loaded. Server side method.
+     * Put here common logic for things that needs to react to inventory changes like updating blockState or logic
+     */
+    public void updateTileOnInventoryChanged() {
+        //TODO: remove
+        this.updateOnChangedBeforePacket();
     }
 
+    /**
+     * @return true if the tile needs to react one inventory changes on client.
+     * Set to true if you are using updateClientVisualsOnLoad()
+     * usually not needed for tiles that do not visually display their content
+     */
+    public boolean needsToUpdateClientWhenChanged() {
+        return true;
+    }
+
+    /**
+     * Called after the tile is loaded from packet. Client side.
+     * Put here client only visual logic that needs to react to inventory changes
+     */
     public void updateClientVisualsOnLoad() {
     }
 
@@ -102,7 +129,7 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
         return ActionResultType.PASS;
     }
 
-    public SoundEvent getAddItemSound(){
+    public SoundEvent getAddItemSound() {
         return SoundEvents.ITEM_FRAME_ADD_ITEM;
     }
 
@@ -113,7 +140,10 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
             this.stacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         }
         ItemStackHelper.loadAllItems(compound, this.stacks);
-        if (this.level != null && this.level.isClientSide) this.updateClientVisualsOnLoad();
+        if (this.level != null){
+            if(this.level.isClientSide) this.updateClientVisualsOnLoad();
+            else this.updateTileOnInventoryChanged();
+        }
     }
 
     @Override

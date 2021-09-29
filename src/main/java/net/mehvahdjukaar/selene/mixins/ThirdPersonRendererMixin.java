@@ -27,7 +27,7 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
 
     @Inject(method = "poseRightArm", at = @At(value = "HEAD"), cancellable = true)
     public void poseRightArm(T entity, CallbackInfo ci) {
-        //cancel off hand animation if two handed
+        //cancel off hand animation if two handed so two handed animation always happens last
         if (this.animationType.isTwoHanded()) ci.cancel();
         HandSide handSide = entity.getMainArm();
         ItemStack stack = entity.getItemInHand(handSide == HandSide.RIGHT ? Hand.MAIN_HAND : Hand.OFF_HAND);
@@ -41,7 +41,7 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
 
     @Inject(method = "poseLeftArm", at = @At(value = "HEAD"), cancellable = true)
     public void poseLeftArm(T entity, CallbackInfo ci) {
-        //cancel off hand animation if two handed
+        //cancel off hand animation if two handed so two handed animation always happens last
         if (this.animationType.isTwoHanded()) ci.cancel();
         HandSide handSide = entity.getMainArm();
         ItemStack stack = entity.getItemInHand(handSide == HandSide.RIGHT ? Hand.OFF_HAND : Hand.MAIN_HAND);

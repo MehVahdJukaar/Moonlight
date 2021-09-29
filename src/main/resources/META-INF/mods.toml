@@ -35,7 +35,7 @@ credits="" #optional
 authors="MehVahdJukaar" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-A small library that allows to make custom map markers and contains the soft fluid system as well as other utilities
+A small library that allows to make custom map markers, first and third person animations and contains the soft fluid system as well as other utilities
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.selene]] #optional

@@ -185,14 +185,13 @@ public class SoftFluidHolder {
             this.setFluid(s, newCom.isEmpty() ? null : newCom);
         }
 
-        //todo: this is horrible
-        if (potion == Potions.WATER) s = SoftFluidRegistry.POTION;
         Item empty = s.tryGettingEmptyItem(filledContainer);
         SoftFluid.FilledContainerCategory category = s.tryGettingFilledItems(empty);
+
         if (category != null && empty != null) {
 
             int amount = category.getAmount();
-            if (this.canAddSoftFluid(this.fluid, amount, newCom)) {
+            if (this.canAddSoftFluid(s, amount, newCom)) {
                 if (simulate) return ItemStack.EMPTY;
                 this.grow(amount);
 
