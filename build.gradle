@@ -1,131 +1,121 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        maven { url = 'https://repo.spongepowered.org/maven' }
+        jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
-        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
-
-
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
-
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
+
+apply plugin: 'org.spongepowered.mixin'
 
 mixin {
     add sourceSets.main, "selene.refmap.json"
 }
 
-version = '1.16.5-1.0'
-group = 'net.mehvahdjukaar.selene'  // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+version = '1.17.1-1.1'
+group = 'net.mehvahdjukaar.selene' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'selene'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     // The mappings can be changed at any time, and must be in the following format.
-    // Channel:   Version:
-    // snapshot   YYYYMMDD   Snapshot are built nightly.
-    // stable     #          Stables are built at the discretion of the MCP team.
-    // official   MCVersion  Official field/method names from Mojang mapping files
-    //
-    // You must be aware of the Mojang license when using the 'official' mappings.
-    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
-    //
+    // snapshot_YYYYMMDD   Snapshot are built nightly.
+    // stable_#            Stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'official', version: '1.16.5'
+    //mappings channel: 'snapshot', version: '20200916-1.16.2'
+    mappings channel: 'official', version: '1.17.1'
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-    
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
     runs {
-
-
         client {
 
-            property 'mixin.env.disableRefMap', 'true'
-            arg "-mixin.config=selene.mixins.json"
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+
+
+            property 'mixin.env.remapRefMap', 'true'
+            //property 'mixin.env.disableRefMap', 'true'
+            arg "-mixin.config=selene.mixins.json".toString()
+            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             workingDirectory project.file('run')
 
-
-
-            // Recommended logging data for a userdev environment
-            // The markers can be changed as needed. 
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
+            // Recommendedo logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
             // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                examplemod {
+                selene {
                     source sourceSets.main
                 }
             }
         }
 
         server {
+
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+
+
+            property 'mixin.env.remapRefMap', 'true'
+            //property 'mixin.env.disableRefMap', 'true'
+            arg "-mixin.config=selene.mixins.json".toString()
+            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             workingDirectory project.file('run')
 
             // Recommended logging data for a userdev environment
-            // The markers can be changed as needed. 
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
             // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                examplemod {
+                selene {
                     source sourceSets.main
                 }
             }
         }
 
         data {
+
+            //run data mixins?
+            property 'mixin.env.remapRefMap', 'true'
+
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             workingDirectory project.file('run')
 
             // Recommended logging data for a userdev environment
-            // The markers can be changed as needed. 
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
             // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            //args "--mod", "selene", "--all", "--output", "\"" + file("src/generated/resources").toString() + "\"", "--validate", "--existing", "\"" + sourceSets.main.resources.srcDirs[0] + "\""
+            args '--mod', 'selene', '--all', '--output', file('src/generated/resources/'), '--existing', sourceSets.main.resources.srcDirs[0]   //args "--mod", "usefulbackpacks", "--all", "--output", "\"" + file("src/generated/resources").toString() + "\"", "--validate", "--existing", "\"" + sourceSets.main.resources.srcDirs[0] + "\""
 
             mods {
-                examplemod {
+                selene {
                     source sourceSets.main
                 }
             }
@@ -138,30 +128,20 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
 
+
+
+    minecraft 'net.minecraftforge:forge:1.17.1-37.0.65'
+    annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
+
+    implementation fg.deobf("curse.maven:create-328085:3419412")
+    //implementation fg.deobf("curse.maven:flywheel-486392:3419392")
+    implementation fg.deobf("com.jozufozu.flywheel:Flywheel:1.16-0.2.3.49")
+    //implementation fg.deobf("vazkii.quark:Quark:r2.4-305.1724")
+    implementation fg.deobf("curse.maven:quark-243121:3326040")
+    //implementation fg.deobf("curse.maven:quarkoddities-301051:3088871")
+
     //mixin stuff fore gradle 5+
     annotationProcessor 'org.spongepowered:mixin:0.8:processor'
-    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
-
-    // You may put jars on which you depend on in ./libs or you may define them like so..
-    // compile "some.group:artifact:version:classifier"
-    // compile "some.group:artifact:version"
-
-    // Real examples
-    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // These dependencies get remapped to your current MCP mappings
-    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
 }
 
@@ -169,23 +149,21 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "examplemod",
-            "Specification-Vendor": "examplemodsareus",
-            "Specification-Version": "1", // We are version 1 of ourselves
-            "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"examplemodsareus",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-
-            "MixinConfigs": "selene.mixins.json"
+                "Specification-Title": "selene",
+                "Specification-Vendor": "examplemodsareus",
+                "Specification-Version": "1", // We are version 1 of ourselves
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"examplemodsareus",
+                //"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs": "selene.mixins.json"
         ])
     }
 }
 
-
 // Example configuration to allow publishing using the maven-publish task
 // This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar') 
+jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
 
@@ -198,13 +176,135 @@ publishing {
     repositories {
         maven {
             url "file:///${project.projectDir}/mcmodsrepo"
+            allowInsecureProtocol = true
         }
     }
 }
 
+
+
 repositories {
     maven {
-        name 'Cursemaven'
-        url 'https://www.cursemaven.com'
+        url "https://www.cursemaven.com"
+        allowInsecureProtocol = true
     }
+    maven {
+        // location of the maven that hosts JEI files (And TiC)
+        name "Progwml6 maven"
+        url "https://dvs1.progwml6.com/files/maven/"
+        allowInsecureProtocol = true
+    }
+    maven {
+        //location of the maven for mixed mappings and registrate
+        name = "tterrag maven"
+        url = "https://maven.tterrag.com/"
+        allowInsecureProtocol = true
+    }
+    maven {
+        // location of the maven that hosts JEI files (And TiC)
+        name "Progwml6 maven"
+        url "https://dvs1.progwml6.com/files/maven/"
+        allowInsecureProtocol = true
+    }
+    maven {
+        //location of the maven for vazkii's mods
+        name "blamejared"
+        url "http://maven.blamejared.com/"
+        allowInsecureProtocol = true
+    }
+}
+
+repositories{
+    maven {
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+        allowInsecureProtocol = true
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.k-4u.nl"
+        allowInsecureProtocol = true
+    }
+    jcenter()
+    mavenCentral()
+}
+
+repositories {
+    maven { // JEI
+        url "https://dvs1.progwml6.com/files/maven"
+        allowInsecureProtocol = true
+    }
+    maven { // TOP
+        name 'tterrag maven'
+        url "http://maven.tterrag.com/"
+        allowInsecureProtocol = true
+    }
+}
+
+
+
+// Loads files in the format {modid}-{version}.jar, MC version optional but picky about hyphens.
+// See the regex pattern.
+def getModVersion(filename) {
+    // println(filename);
+    def pattern = /^(?<modid>[^-]+)(?:-(?<mcversion>[0-9.]+))?(?:-(?<modver>[0-9.\-]+))\.jar$/;
+
+    def matcher = filename =~ pattern
+
+    def found = matcher.find()
+
+    if(found) {
+        def mod = matcher.group("modid");
+
+        // Extract MC version or default
+        def mcVersion = matcher.group("mcversion");
+
+        // Extract mod version
+        def version = matcher.group("modver");
+
+        // println("> mod: ${mod}; mc: ${mcVersion}; version: ${version}");
+
+        if(mcVersion == null)
+            return "${mod}:${mod}:${version}";
+        else
+            return "${mod}:${mod}-${mcVersion}:${version}";
+
+    } else {
+        println(" > not a mod filenamea ")
+        return filename;
+    }
+}
+
+def dev_mods_dir = "mods"
+
+repositories {
+    // Built mods
+    flatDir {
+        dirs dev_mods_dir
+    }
+
+    // Other repositories (standard build gradle)
+}
+
+def dev_mods = fileTree(dev_mods_dir).filter { it -> it.isFile() }.files.name.collect( { getModVersion(it) } )
+
+dependencies {
+    implementation 'org.jetbrains:annotations:19.0.0'
+
+    //mixin stuff fore gradle 5+
+    annotationProcessor 'org.spongepowered:mixin:0.8:processor'
+
+
+    // Snip: Minecraft dependencies, Forge
+
+    // Deobfuscate each dev mod for runtime
+    dev_mods.each {
+        compileOnly fg.deobf(it)
+        runtimeOnly fg.deobf(it)
+    }
+
+    // Other standard gradle dependencies
+
 }
