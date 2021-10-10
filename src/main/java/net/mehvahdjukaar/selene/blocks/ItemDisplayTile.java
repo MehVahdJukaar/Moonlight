@@ -1,38 +1,44 @@
 package net.mehvahdjukaar.selene.blocks;
 
-
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.inventory.container.ChestContainer;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.LockableLootTileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.*;
+import com.mojang.math.Constants;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 
 import javax.annotation.Nullable;
+import java.util.AbstractList;
 import java.util.stream.IntStream;
 
-public abstract class ItemDisplayTile extends LockableLootTileEntity implements ISidedInventory {
-    protected NonNullList<ItemStack> stacks;
+public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity implements WorldlyContainer {
 
-    public ItemDisplayTile(TileEntityType type) {
+    private final AbstractList<ItemStack> stacks;
+
+    public ItemDisplayTile( BlockEntityType type) {
         this(type, 1);
     }
 
-    public ItemDisplayTile(TileEntityType type, int slots) {
+    public ItemDisplayTile(BlockEntityType type, int slots) {
         super(type);
         this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
     }
@@ -44,16 +50,16 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
         this.updateTileOnInventoryChanged();
         if (this.needsToUpdateClientWhenChanged()) {
             //this saves and sends a packet to update the client tile
-            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
+            this.level.sendBlockUpdated(this.level, this.getBlockEntity(), this.getBlockEntity(), Constants.BlockFlags.BLOCK_UPDATE);
         }
         super.setChanged();
     }
 
-     //todo: legacy, remove
-     @Deprecated
-     public void updateOnChangedBeforePacket(){
+    //todo: legacy, remove
+    @Deprecated
+    public void updateOnChangedBeforePacket(){
 
-     }
+    }
 
     /**
      * called every time the tile is marked dirty or loaded. Server side method.
@@ -88,12 +94,12 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
         this.setItem(0, stack);
     }
 
-    public ActionResultType interact(PlayerEntity player, Hand handIn) {
+    public InteractionResult interact(Player player, InteractionHand handIn) {
         return this.interact(player, handIn, 0);
     }
 
-    public ActionResultType interact(PlayerEntity player, Hand handIn, int slot) {
-        if (handIn == Hand.MAIN_HAND) {
+    public InteractionResult interact(Player player, InteractionHand handIn, int slot) {
+        if (handIn == InteractionHand.MAIN_HAND) {
             ItemStack handItem = player.getItemInHand(handIn);
             //remove
             if (!this.isEmpty() && handItem.isEmpty()) {
@@ -105,7 +111,7 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
                     //also update visuals on client. will get overwritten by packet tho
                     this.updateClientVisualsOnLoad();
                 }
-                return ActionResultType.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
             //place
             else if (!handItem.isEmpty() && this.canPlaceItem(slot, handItem)) {
@@ -123,10 +129,10 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
                     //also update visuals on client. will get overwritten by packet tho
                     this.updateClientVisualsOnLoad();
                 }
-                return ActionResultType.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     public SoundEvent getAddItemSound() {
@@ -134,12 +140,12 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundTag compound) {
         super.load(state, compound);
         if (!this.tryLoadLootTable(compound)) {
             this.stacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         }
-        ItemStackHelper.loadAllItems(compound, this.stacks);
+        ContainerHelper.loadAllItems(compound, this.stacks);
         if (this.level != null){
             if(this.level.isClientSide) this.updateClientVisualsOnLoad();
             else this.updateTileOnInventoryChanged();
@@ -147,26 +153,26 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundTag save(CompoundTag compound) {
         super.save(compound);
         if (!this.trySaveLootTable(compound)) {
-            ItemStackHelper.saveAllItems(compound, this.stacks);
+            ContainerHelper.saveAllItems(compound, this.stacks);
         }
         return compound;
     }
 
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(this.worldPosition, 0, this.getUpdateTag());
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return new ClientboundBlockEntityDataPacket(this.worldPosition, 0, this.getUpdateTag());
     }
 
     @Override
-    public CompoundNBT getUpdateTag() {
-        return this.save(new CompoundNBT());
+    public CompoundTag getUpdateTag() {
+        return this.save(new CompoundTag());
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+    public void onDataPacket( Connection net, ClientboundBlockEntityDataPacket pkt) {
         this.load(this.getBlockState(), pkt.getTag());
     }
 
@@ -189,8 +195,8 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
     }
 
     @Override
-    public Container createMenu(int id, PlayerInventory player) {
-        return ChestContainer.threeRows(id, player, this);
+    public AbstractContainerMenu createMenu( int id, Inventory player) {
+        return ChestMenu.threeRows(id, player, this);
     }
 
     @Override
@@ -241,4 +247,3 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
     }
 
 }
-
