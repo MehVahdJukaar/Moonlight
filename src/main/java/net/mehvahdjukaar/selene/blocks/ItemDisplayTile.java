@@ -15,6 +15,7 @@ import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.*;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
@@ -23,9 +24,12 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
-public abstract class ItemDisplayTile extends LockableLootTileEntity implements ISidedInventory {
+public abstract class ItemDisplayTile extends LockableLootTileEntity implements ISidedInventory, IOwnerProtected {
+    @Nullable
+    private UUID owner = null;
     protected NonNullList<ItemStack> stacks;
 
     public ItemDisplayTile(TileEntityType type) {
@@ -35,6 +39,17 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
     public ItemDisplayTile(TileEntityType type, int slots) {
         super(type);
         this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
+    }
+
+    @Override
+    public void setOwner(@Nullable UUID owner) {
+        this.owner = owner;
+    }
+
+    @Override
+    @Nullable
+    public UUID getOwner() {
+        return owner;
     }
 
     //should only be server side. called when inventory has changed
@@ -49,11 +64,11 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
         super.setChanged();
     }
 
-     //todo: legacy, remove
-     @Deprecated
-     public void updateOnChangedBeforePacket(){
+    //todo: legacy, remove
+    @Deprecated
+    public void updateOnChangedBeforePacket() {
 
-     }
+    }
 
     /**
      * called every time the tile is marked dirty or loaded. Server side method.
@@ -93,7 +108,10 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
     }
 
     public ActionResultType interact(PlayerEntity player, Hand handIn, int slot) {
-        if (handIn == Hand.MAIN_HAND) {
+        if(!this.isAccessibleBy(player)){
+            player.displayClientMessage(new TranslationTextComponent("container.isLocked",""), true);
+        }
+        else if (handIn == Hand.MAIN_HAND) {
             ItemStack handItem = player.getItemInHand(handIn);
             //remove
             if (!this.isEmpty() && handItem.isEmpty()) {
@@ -140,10 +158,11 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
             this.stacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         }
         ItemStackHelper.loadAllItems(compound, this.stacks);
-        if (this.level != null){
-            if(this.level.isClientSide) this.updateClientVisualsOnLoad();
+        if (this.level != null) {
+            if (this.level.isClientSide) this.updateClientVisualsOnLoad();
             else this.updateTileOnInventoryChanged();
         }
+        this.loadOwner(compound);
     }
 
     @Override
@@ -152,6 +171,7 @@ public abstract class ItemDisplayTile extends LockableLootTileEntity implements 
         if (!this.trySaveLootTable(compound)) {
             ItemStackHelper.saveAllItems(compound, this.stacks);
         }
+        this.saveOwner(compound);
         return compound;
     }
 
