@@ -33,7 +33,7 @@ import java.util.stream.IntStream;
 
 public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity implements WorldlyContainer {
 
-    private final AbstractList<ItemStack> stacks;
+    private NonNullList<ItemStack> stacks;
 
     public ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state) {
         this(type, pos, state, 1);
@@ -116,6 +116,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                     handItem.shrink(1);
                 }
                 if (!this.level.isClientSide()) {
+                    //aaaa skulk I hate you. They changed the whole sound system thingie
                     this.level.playSound(null, this.worldPosition, this.getAddItemSound(), SoundCategory.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.10F + 0.95F);
                     //this.setChanged();
                 } else {

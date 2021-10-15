@@ -99,8 +99,9 @@ public abstract class MapDataMixin extends SavedData implements CustomDecoration
         }
     }
 
-    @Inject(method = "lockData", at = @At("HEAD"), cancellable = true)
-    public void lockData(MapItemSavedData data, CallbackInfo ci) {
+    @Inject(method = "locked", at = @At("RETURN"), cancellable = true)
+    public void locked(CallbackInfoReturnable<MapItemSavedData> cir) {
+        MapItemSavedData data = cir.getReturnValue();
         if (data instanceof CustomDecorationHolder) {
             this.customMapMarkers.putAll(((CustomDecorationHolder) data).getCustomMarkers());
             this.customDecorations.putAll(((CustomDecorationHolder) data).getCustomDecorations());
@@ -222,11 +223,11 @@ public abstract class MapDataMixin extends SavedData implements CustomDecoration
     }
 
     @Inject(method = "getUpdatePacket", at = @At("RETURN"), cancellable = true)
-    public void getUpdatePacket(ItemStack stack, BlockGetter reader, Player playerEntity, CallbackInfoReturnable<Packet<?>> cir) {
+    public void getUpdatePacket(int pMapId, Player pPlayer, CallbackInfoReturnable<Packet<?>> cir) {
         Packet<?> packet = cir.getReturnValue();
-        if (playerEntity instanceof ServerPlayer && packet instanceof ClientboundMapItemDataPacket) {
-            NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) playerEntity),
-                    new SyncCustomMapDecorationPacket(MapItem.getMapId(stack), this.customDecorations.values().toArray(new CustomDecoration[0])));
+        if (pPlayer instanceof ServerPlayer serverPlayer && packet instanceof ClientboundMapItemDataPacket) {
+            NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
+                    new SyncCustomMapDecorationPacket(pMapId, this.customDecorations.values().toArray(new CustomDecoration[0])));
         }
     }
 

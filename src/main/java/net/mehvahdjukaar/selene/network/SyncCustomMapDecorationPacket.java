@@ -7,6 +7,8 @@ import net.mehvahdjukaar.selene.map.CustomDecorationType;
 import net.mehvahdjukaar.selene.map.MapDecorationHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.MapRenderer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -15,6 +17,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fmllegacy.network.NetworkDirection;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -51,7 +54,6 @@ public class SyncCustomMapDecorationPacket {
         }
     }
 
-
     public static void handler(SyncCustomMapDecorationPacket message, Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
@@ -59,8 +61,11 @@ public class SyncCustomMapDecorationPacket {
 
                 Minecraft mc = Minecraft.getInstance();
                 MapRenderer mapitemrenderer = mc.gameRenderer.getMapRenderer();
-                String s = MapItem.makeKey(message.getMapId());
-                MapItemSavedData mapdata = mc.level.getMapData(s);
+
+
+                Integer integer = message.getMapId();
+                MapItemSavedData mapdata = mc.level == null ? null : MapItem.getSavedData(integer, mc.level);
+                
                 if (mapdata == null) {
                     mapdata = new MapItemSavedData(s);
                     if (mapitemrenderer.getMapInstanceIfExists(s) != null) {
