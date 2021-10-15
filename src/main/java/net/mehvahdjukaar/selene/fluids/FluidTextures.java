@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.fluids;
 
 import net.mehvahdjukaar.selene.Selene;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;

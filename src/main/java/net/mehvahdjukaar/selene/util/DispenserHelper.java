@@ -4,23 +4,33 @@ package net.mehvahdjukaar.selene.util;
 import net.mehvahdjukaar.selene.fluids.ISoftFluidHolder;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidHolder;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.dispenser.DefaultDispenseItemBehavior;
-import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.dispenser.IDispenseItemBehavior;
-import net.minecraft.dispenser.OptionalDispenseBehavior;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.item.*;
-import net.minecraft.tileentity.DispenserTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.BlockSource;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.Map;
 
+
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.context.DirectionalPlaceContext;
+import net.minecraft.world.level.ItemLike;
 
 public class DispenserHelper {
 
@@ -29,12 +39,12 @@ public class DispenserHelper {
     }
 
     //default spawn egg behavior
-    public static void registerSpawnEggBehavior(IItemProvider egg){
+    public static void registerSpawnEggBehavior(ItemLike egg){
         DispenserBlock.registerBehavior(egg, SPAWN_EGG_BEHAVIOR);
     }
 
     //block placement behavior
-    public static void registerPlaceBlockBehavior(IItemProvider block){
+    public static void registerPlaceBlockBehavior(ItemLike block){
         DispenserBlock.registerBehavior(block, PLACE_BLOCK_BEHAVIOR);
     }
 
@@ -51,9 +61,9 @@ public class DispenserHelper {
     /**
      * implement this to add your own custom behaviors
      */
-    public abstract static class AdditionalDispenserBehavior implements IDispenseItemBehavior {
+    public abstract static class AdditionalDispenserBehavior implements DispenseItemBehavior {
 
-        private final IDispenseItemBehavior fallback;
+        private final DispenseItemBehavior fallback;
 
         private final Item item;
 
@@ -63,12 +73,12 @@ public class DispenserHelper {
         }
 
         @Override
-        public final ItemStack dispense(IBlockSource source, ItemStack stack) {
+        public final ItemStack dispense(BlockSource source, ItemStack stack) {
             //this.setSuccessful(false);
             try{
-                ActionResult<ItemStack> result = this.customBehavior(source,stack);
-                ActionResultType type = result.getResult();
-                if (type!=ActionResultType.PASS){
+                InteractionResultHolder<ItemStack> result = this.customBehavior(source,stack);
+                InteractionResult type = result.getResult();
+                if (type!=InteractionResult.PASS){
                     boolean success = type.consumesAction();
                     this.playSound(source,success);
                     this.playAnimation(source, source.getBlockState().getValue(DispenserBlock.FACING));
@@ -90,13 +100,13 @@ public class DispenserHelper {
          * @return return ActionResult.SUCCESS / CONSUME for success, FAIL to do nothing and PASS to fallback to vanilla/previously registered behavior will be used. <br>
          * Type parameter is return item stack. If item in itemstack is different than initially provided, such itemstack will be added to dispenser, otherwise will replace existing itemstack
          */
-        protected abstract ActionResult<ItemStack> customBehavior(IBlockSource source, ItemStack stack);
+        protected abstract InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack);
 
-        protected void playSound(IBlockSource source, boolean success) {
+        protected void playSound(BlockSource source, boolean success) {
             source.getLevel().levelEvent(success ? 1000 : 1001, source.getPos(), 0);
         }
 
-        protected void playAnimation(IBlockSource source, Direction direction) {
+        protected void playAnimation(BlockSource source, Direction direction) {
             source.getLevel().levelEvent(2000, source.getPos(), direction.get3DDataValue());
         }
     }
@@ -108,13 +118,13 @@ public class DispenserHelper {
         }
 
         @Override
-        protected ActionResult<ItemStack> customBehavior(IBlockSource source, ItemStack stack) {
+        protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
             //this.setSuccessful(false);
-            ServerWorld world = source.getLevel();
+            ServerLevel world = source.getLevel();
             BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
-            TileEntity te = world.getBlockEntity(blockpos);
-            if(te instanceof ISidedInventory){
-                ISidedInventory tile = ((ISidedInventory)te);
+            BlockEntity te = world.getBlockEntity(blockpos);
+            if(te instanceof WorldlyContainer){
+                WorldlyContainer tile = ((WorldlyContainer)te);
                 if(tile.canPlaceItem(0,stack)){
                     if(tile.isEmpty()){
                         tile.setItem(0, stack.split(1));
@@ -123,11 +133,11 @@ public class DispenserHelper {
                         tile.getItem(0).grow(1);
                         stack.shrink(1);
                     }
-                    return ActionResult.success(stack);
+                    return InteractionResultHolder.success(stack);
                 }
-                return ActionResult.fail(stack);
+                return InteractionResultHolder.fail(stack);
             }
-            return ActionResult.pass(stack);
+            return InteractionResultHolder.pass(stack);
         }
     }
 
@@ -139,11 +149,11 @@ public class DispenserHelper {
         }
 
         @Override
-        protected ActionResult<ItemStack> customBehavior(IBlockSource source, ItemStack stack) {
+        protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
             //this.setSuccessful(false);
-            ServerWorld world = source.getLevel();
+            ServerLevel world = source.getLevel();
             BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
-            TileEntity te = world.getBlockEntity(blockpos);
+            BlockEntity te = world.getBlockEntity(blockpos);
             if(te instanceof ISoftFluidHolder){
                 ISoftFluidHolder tile = ((ISoftFluidHolder)te);
 
@@ -156,27 +166,27 @@ public class DispenserHelper {
                         returnStack = tank.interactWithItem(stack, world, blockpos, false);
                         if(returnStack != null) {
                             te.setChanged();
-                            return ActionResult.success(returnStack);
+                            return InteractionResultHolder.success(returnStack);
                         }
                     }
                 }
-                return ActionResult.fail(stack);
+                return InteractionResultHolder.fail(stack);
             }
-            return ActionResult.pass(stack);
+            return InteractionResultHolder.pass(stack);
         }
     }
 
-    public static class PlaceBlockDispenseBehavior extends OptionalDispenseBehavior {
+    public static class PlaceBlockDispenseBehavior extends OptionalDispenseItemBehavior {
 
         @Override
-        public ItemStack execute(IBlockSource source, ItemStack stack) {
+        public ItemStack execute(BlockSource source, ItemStack stack) {
             this.setSuccess(false);
             Item item = stack.getItem();
             if (item instanceof BlockItem) {
                 Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
                 BlockPos blockpos = source.getPos().relative(direction);
                 Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
-                ActionResultType result = ((BlockItem)item).place(new DirectionalPlaceContext(source.getLevel(), blockpos, direction, stack, direction1));
+                InteractionResult result = ((BlockItem)item).place(new DirectionalPlaceContext(source.getLevel(), blockpos, direction, stack, direction1));
                 this.setSuccess(result.consumesAction());
             }
             return stack;
@@ -184,7 +194,7 @@ public class DispenserHelper {
     }
 
     //returns full bottle to dispenser. same function that's in IDispenserItemBehavior
-    private static ItemStack fillItemInDispenser(IBlockSource source, ItemStack empty, ItemStack filled) {
+    private static ItemStack fillItemInDispenser(BlockSource source, ItemStack empty, ItemStack filled) {
         empty.shrink(1);
         if (empty.isEmpty()) {
             return filled.copy();
@@ -197,7 +207,7 @@ public class DispenserHelper {
     }
 
     //add item to dispenser and merges it if there's one already
-    private static boolean MergeDispenserItem(DispenserTileEntity te, ItemStack filled) {
+    private static boolean MergeDispenserItem(DispenserBlockEntity te, ItemStack filled) {
         NonNullList<ItemStack> stacks = te.items;
         for (int i = 0; i < te.getContainerSize(); ++i) {
             ItemStack s = stacks.get(i);
@@ -214,10 +224,10 @@ public class DispenserHelper {
     private static final DefaultDispenseItemBehavior SHOOT_BEHAVIOR = new DefaultDispenseItemBehavior();
     public static final DefaultDispenseItemBehavior SPAWN_EGG_BEHAVIOR = new DefaultDispenseItemBehavior() {
         @Override
-        public ItemStack execute(IBlockSource source, ItemStack stack) {
+        public ItemStack execute(BlockSource source, ItemStack stack) {
             Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
             EntityType<?> type = ((SpawnEggItem)stack.getItem()).getType(stack.getTag());
-            type.spawn(source.getLevel(), stack, null, source.getPos().relative(direction), SpawnReason.DISPENSER, direction != Direction.UP, false);
+            type.spawn(source.getLevel(), stack, null, source.getPos().relative(direction), MobSpawnType.DISPENSER, direction != Direction.UP, false);
             stack.shrink(1);
             return stack;
         }

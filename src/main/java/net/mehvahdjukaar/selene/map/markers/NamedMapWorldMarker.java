@@ -2,8 +2,8 @@ package net.mehvahdjukaar.selene.map.markers;
 
 import net.mehvahdjukaar.selene.map.CustomDecoration;
 import net.mehvahdjukaar.selene.map.CustomDecorationType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -13,25 +13,25 @@ public abstract class NamedMapWorldMarker<D extends CustomDecoration> extends Ma
 
     //additional data to be stored
     @Nullable
-    public ITextComponent name;
+    public Component name;
 
     public NamedMapWorldMarker(CustomDecorationType<D, ?> type) {
         super(type);
     }
 
     @Override
-    public CompoundNBT saveToNBT(CompoundNBT compound) {
+    public CompoundTag saveToNBT(CompoundTag compound) {
         super.saveToNBT(compound);
         if (this.name != null) {
-            compound.putString("Name", ITextComponent.Serializer.toJson(this.name));
+            compound.putString("Name", Component.Serializer.toJson(this.name));
         }
         return compound;
     }
 
     @Override
-    public void loadFromNBT(CompoundNBT compound){
+    public void loadFromNBT(CompoundTag compound){
         super.loadFromNBT(compound);
-        this.name = compound.contains("Name") ? ITextComponent.Serializer.fromJson(compound.getString("Name")) : null;
+        this.name = compound.contains("Name") ? Component.Serializer.fromJson(compound.getString("Name")) : null;
     }
 
     @Override

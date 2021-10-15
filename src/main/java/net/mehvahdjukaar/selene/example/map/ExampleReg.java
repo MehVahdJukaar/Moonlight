@@ -3,7 +3,7 @@ package net.mehvahdjukaar.selene.example.map;
 import net.mehvahdjukaar.selene.map.CustomDecoration;
 import net.mehvahdjukaar.selene.map.CustomDecorationType;
 import net.mehvahdjukaar.selene.map.MapDecorationHandler;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 public class ExampleReg {

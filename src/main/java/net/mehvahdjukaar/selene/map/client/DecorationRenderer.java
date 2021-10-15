@@ -1,19 +1,19 @@
 package net.mehvahdjukaar.selene.map.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.mehvahdjukaar.selene.map.CustomDecoration;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.storage.MapData;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class DecorationRenderer<T extends CustomDecoration> {
     private final RenderType RENDER_TYPE;
@@ -41,7 +41,7 @@ public class DecorationRenderer<T extends CustomDecoration> {
         return RENDER_TYPE;
     }
 
-    public boolean render(T decoration, MatrixStack matrixStack, IRenderTypeBuffer buffer, MapData mapData, boolean isOnFrame, int light, int index) {
+    public boolean render(T decoration, PoseStack matrixStack, MultiBufferSource buffer, MapItemSavedData mapData, boolean isOnFrame, int light, int index) {
         if (!isOnFrame || renderOnFrame) {
 
             matrixStack.pushPose();
@@ -52,7 +52,7 @@ public class DecorationRenderer<T extends CustomDecoration> {
 
             Matrix4f matrix4f1 = matrixStack.last().pose();
 
-            IVertexBuilder vertexBuilder = buffer.getBuffer(this.getRenderType(decoration));
+            VertexConsumer vertexBuilder = buffer.getBuffer(this.getRenderType(decoration));
 
             int color = this.getMapColor(decoration);
 
@@ -66,10 +66,10 @@ public class DecorationRenderer<T extends CustomDecoration> {
             vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, (float) index * -0.001F).color(r, g, b, 255).uv(0, 0).uv2(light).endVertex();
             matrixStack.popPose();
             if (decoration.getDisplayName() != null) {
-                FontRenderer fontrenderer = Minecraft.getInstance().font;
-                ITextComponent itextcomponent = decoration.getDisplayName();
+                Font fontrenderer = Minecraft.getInstance().font;
+                Component itextcomponent = decoration.getDisplayName();
                 float f6 = (float) fontrenderer.width(itextcomponent);
-                float f7 = MathHelper.clamp(25.0F / f6, 0.0F, 6.0F / 9.0F);
+                float f7 = Mth.clamp(25.0F / f6, 0.0F, 6.0F / 9.0F);
                 matrixStack.pushPose();
                 matrixStack.translate((double) (0.0F + (float) decoration.getX() / 2.0F + 64.0F - f6 * f7 / 2.0F), (double) (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
                 matrixStack.scale(f7, f7, 1.0F);

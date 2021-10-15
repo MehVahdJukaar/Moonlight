@@ -2,7 +2,7 @@ package net.mehvahdjukaar.selene.map.markers;
 
 import net.mehvahdjukaar.selene.map.CustomDecoration;
 import net.mehvahdjukaar.selene.map.CustomDecorationType;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 /**
  * utility class do not instance

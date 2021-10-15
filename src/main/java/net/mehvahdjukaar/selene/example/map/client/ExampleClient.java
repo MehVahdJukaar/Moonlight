@@ -3,7 +3,7 @@ package net.mehvahdjukaar.selene.example.map.client;
 import net.mehvahdjukaar.selene.example.map.ExampleReg;
 import net.mehvahdjukaar.selene.map.client.DecorationRenderer;
 import net.mehvahdjukaar.selene.map.client.MapDecorationRenderHandler;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 public class ExampleClient {

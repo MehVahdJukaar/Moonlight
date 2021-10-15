@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -12,8 +12,8 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public interface ISoftFluidProvider {
 
-    Pair<SoftFluid, CompoundNBT> getProvidedFluid(World world, BlockState state, BlockPos pos);
+    Pair<SoftFluid, CompoundTag> getProvidedFluid(Level world, BlockState state, BlockPos pos);
 
-    void consumeProvidedFluid(World world, BlockState state, BlockPos pos, SoftFluid f, CompoundNBT nbt, int amount);
+    void consumeProvidedFluid(Level world, BlockState state, BlockPos pos, SoftFluid f, CompoundTag nbt, int amount);
 
 }

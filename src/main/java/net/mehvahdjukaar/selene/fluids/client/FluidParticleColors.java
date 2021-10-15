@@ -4,11 +4,11 @@ import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.util.ColorHelper;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.util.FastColor;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
@@ -23,9 +23,8 @@ public class FluidParticleColors {
             if(!particleColor.containsKey(key)){
                 ResourceLocation location = f.getAttributes().getStillTexture();
                 if(location==null)continue;
-                AtlasTexture textureMap = Minecraft.getInstance().getModelManager().getAtlas(AtlasTexture.LOCATION_BLOCKS);
+                TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
                 TextureAtlasSprite sprite = textureMap.getSprite(location);
-                if(sprite==null)continue;
                 int fluidTint = f.getAttributes().getColor();
 
                 int averageColor = getColorFrom(sprite,fluidTint);
@@ -36,9 +35,8 @@ public class FluidParticleColors {
             if(!particleColor.containsKey(s.getID()) && !s.isColored()){
                 ResourceLocation location = s.getStillTexture();
                 if(location==null)continue;
-                AtlasTexture textureMap = Minecraft.getInstance().getModelManager().getAtlas(AtlasTexture.LOCATION_BLOCKS);
+                TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
                 TextureAtlasSprite sprite = textureMap.getSprite(location);
-                if(sprite==null)continue;
                 int averageColor = -1;
                 try {
                     averageColor = getColorFrom(sprite, s.getTintColor());
@@ -82,7 +80,7 @@ public class FluidParticleColors {
             }
         }
         if (total <= 0) return -1;
-        return ColorHelper.PackedColor.color(255,
+        return FastColor.ARGB32.color(255,
                 totalR / total * tintR / 255,
                 totalG / total * tintG / 255,
                 totalB / total * tintB / 255);

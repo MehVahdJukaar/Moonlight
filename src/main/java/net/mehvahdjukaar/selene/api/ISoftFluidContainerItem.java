@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.selene.api;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 
 import javax.annotation.Nullable;
 
@@ -16,8 +16,8 @@ public interface ISoftFluidContainerItem {
 
     ResourceLocation getSoftFluid();
 
-    default CompoundNBT getFluidNBT(){
-        return new CompoundNBT();
+    default CompoundTag getFluidNBT(){
+        return new CompoundTag();
     }
 
     /**

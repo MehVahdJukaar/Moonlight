@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.map;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -9,12 +9,12 @@ import java.util.Objects;
 //default base simple decoration. this will be instanced in a map. equivalent of a tile entity
 public class CustomDecoration {
     private final CustomDecorationType<?,?> type;
-    private ITextComponent displayName;
+    private Component displayName;
     private byte x;
     private byte y;
     private byte rot;
 
-    public CustomDecoration(CustomDecorationType<?,?> type, byte x, byte y, byte rot, @Nullable ITextComponent displayName) {
+    public CustomDecoration(CustomDecorationType<?,?> type, byte x, byte y, byte rot, @Nullable Component displayName) {
         this.type = type;
         this.x = x;
         this.y = y;
@@ -42,7 +42,7 @@ public class CustomDecoration {
         return this.rot;
     }
 
-    public void setDisplayName(ITextComponent displayName) {
+    public void setDisplayName(Component displayName) {
         this.displayName = displayName;
     }
 
@@ -59,7 +59,7 @@ public class CustomDecoration {
     }
 
     @Nullable
-    public ITextComponent getDisplayName() {
+    public Component getDisplayName() {
         return this.displayName;
     }
 
@@ -99,7 +99,7 @@ public class CustomDecoration {
      * implement this if you are adding new data to this base decoration class
      * @param buffer packed buffer
      */
-    public void saveToBuffer(PacketBuffer buffer){
+    public void saveToBuffer(FriendlyByteBuf buffer){
         buffer.writeByte(this.getX());
         buffer.writeByte(this.getY());
         buffer.writeByte(this.getRot() & 15);
@@ -116,7 +116,7 @@ public class CustomDecoration {
      * implement this if you are adding new data to this base decoration class
      * @param buffer packed buffer
      */
-    public CustomDecoration(CustomDecorationType<?,?> type, PacketBuffer buffer){
+    public CustomDecoration(CustomDecorationType<?,?> type, FriendlyByteBuf buffer){
         this(type, buffer.readByte(), buffer.readByte(), (byte)(buffer.readByte() & 15), buffer.readBoolean() ? buffer.readComponent() : null);
     }
 

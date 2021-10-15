@@ -1,13 +1,13 @@
 package net.mehvahdjukaar.selene.map.client;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.selene.map.CustomDecoration;
 import net.mehvahdjukaar.selene.map.CustomDecorationType;
 import net.mehvahdjukaar.selene.map.MapDecorationHandler;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.storage.MapData;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 import java.util.Map;
 
@@ -45,7 +45,7 @@ public class MapDecorationRenderHandler {
         return (DecorationRenderer<E>)RENDERERS.get(decoration.getType());
     }
 
-    public static <T extends CustomDecoration> boolean render(T decoration, MatrixStack matrixStack, IRenderTypeBuffer buffer, MapData mapData, boolean isOnFrame, int light, int index){
+    public static <T extends CustomDecoration> boolean render(T decoration, PoseStack matrixStack, MultiBufferSource buffer, MapItemSavedData mapData, boolean isOnFrame, int light, int index){
         DecorationRenderer<T> renderer = getRenderer(decoration);
         if(renderer!=null) {
             return renderer.render(decoration, matrixStack, buffer, mapData, isOnFrame, light, index);

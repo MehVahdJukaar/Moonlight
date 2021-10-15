@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.selene.blocks;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.Connection;
@@ -20,14 +21,14 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 
 
-public abstract class MimicBlockTile extends BlockEntity {
+public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder{
 
     public BlockState mimic = Blocks.AIR.defaultBlockState();
     public static final ModelProperty<BlockState> MIMIC = new ModelProperty<>();
 
 
-    public MimicBlockTile(BlockEntityType<?> type) {
-        super(type);
+    public MimicBlockTile(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 
     @Override
@@ -51,13 +52,13 @@ public abstract class MimicBlockTile extends BlockEntity {
 
 
     @Override
-    public void load(BlockState state, CompoundTag compound) {
-        super.load(state, CompoundTag compound);
+    public void load(CompoundTag compound) {
+        super.load(compound);
         this.mimic = NbtUtils.readBlockState(compound.getCompound("Mimic"));
     }
 
 
-    public CompoundContainer save(CompoundContainer compound) {
+    public CompoundTag save(CompoundTag compound) {
         super.save(compound);
         compound.put("Mimic", NbtUtils.writeBlockState(mimic));
 
@@ -68,7 +69,7 @@ public abstract class MimicBlockTile extends BlockEntity {
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
         BlockState oldMimic = this.mimic;
         CompoundTag tag = pkt.getTag();
-        handleUpdateTag(this.getBlockState(), tag);
+        handleUpdateTag(tag);
         if (!Objects.equals(oldMimic, this.mimic)) {
             ModelDataManager.requestModelDataRefresh(this);
             this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), Constants.BlockFlags.BLOCK_UPDATE + Constants.BlockFlags.NOTIFY_NEIGHBORS);

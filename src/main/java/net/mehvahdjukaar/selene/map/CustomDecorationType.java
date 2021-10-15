@@ -2,11 +2,11 @@ package net.mehvahdjukaar.selene.map;
 
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
 import javax.annotation.Nullable;
 import java.util.function.BiFunction;
@@ -16,8 +16,8 @@ import java.util.function.Supplier;
 public class CustomDecorationType<D extends CustomDecoration, M extends MapWorldMarker<D>> {
     private final ResourceLocation id;
     private final Supplier<M> markerFactory;
-    private final BiFunction<IBlockReader,BlockPos,M> markerFromWorldFactory;
-    private final BiFunction<CustomDecorationType<?,?>,PacketBuffer,D> decorationFactory;
+    private final BiFunction<BlockGetter,BlockPos,M> markerFromWorldFactory;
+    private final BiFunction<CustomDecorationType<?,?>,FriendlyByteBuf,D> decorationFactory;
     private final boolean hasMarker;
 
     /**
@@ -27,15 +27,15 @@ public class CustomDecorationType<D extends CustomDecoration, M extends MapWorld
      * @param markerFromWorldFactory function that retrieves an optional world marker from the world at a certain pos
      * @param decorationFactory read decoration data from buffer
      */
-    public CustomDecorationType(ResourceLocation id, Supplier<M> markerFactory, BiFunction<IBlockReader,BlockPos,M>markerFromWorldFactory,
-                                BiFunction<CustomDecorationType<?,?>,PacketBuffer,D> decorationFactory){
+    public CustomDecorationType(ResourceLocation id, Supplier<M> markerFactory, BiFunction<BlockGetter,BlockPos,M>markerFromWorldFactory,
+                                BiFunction<CustomDecorationType<?,?>,FriendlyByteBuf,D> decorationFactory){
         this.id = id;
         this.markerFactory = markerFactory;
         this.markerFromWorldFactory = markerFromWorldFactory;
         this.decorationFactory = decorationFactory;
         this.hasMarker = true;
     }
-    public CustomDecorationType(ResourceLocation id,BiFunction<CustomDecorationType<?,?>,PacketBuffer,D> decoFromBuffer){
+    public CustomDecorationType(ResourceLocation id,BiFunction<CustomDecorationType<?,?>,FriendlyByteBuf,D> decoFromBuffer){
         this.id = id;
         this.markerFactory = ()->null;
         this.markerFromWorldFactory = (s, d)->null;
@@ -57,7 +57,7 @@ public class CustomDecorationType<D extends CustomDecoration, M extends MapWorld
     }
 
     @Nullable
-    public D loadDecorationFromBuffer(PacketBuffer buffer){
+    public D loadDecorationFromBuffer(FriendlyByteBuf buffer){
         try {
             return decorationFactory.apply(this, buffer);
         }catch (Exception e){
@@ -67,7 +67,7 @@ public class CustomDecorationType<D extends CustomDecoration, M extends MapWorld
     }
 
     @Nullable
-    public M loadMarkerFromNBT(CompoundNBT compound){
+    public M loadMarkerFromNBT(CompoundTag compound){
         if(hasMarker){
             M marker = markerFactory.get();
             try {
@@ -81,7 +81,7 @@ public class CustomDecorationType<D extends CustomDecoration, M extends MapWorld
     }
 
     @Nullable
-    public M getWorldMarkerFromWorld(IBlockReader reader, BlockPos pos){
+    public M getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos){
         return hasMarker ? markerFromWorldFactory.apply(reader,pos) : null;
     }
 

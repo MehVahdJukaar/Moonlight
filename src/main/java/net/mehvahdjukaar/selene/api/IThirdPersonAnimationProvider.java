@@ -1,13 +1,11 @@
 package net.mehvahdjukaar.selene.api;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.mehvahdjukaar.selene.util.TwoHandedAnimation;
-import net.minecraft.client.renderer.entity.model.AgeableModel;
-import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
+import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.HumanoidArm;
 
 /**
  * Implement in an item to allow it to be displayed with a custom animation using provided method callback
@@ -24,10 +22,10 @@ public interface IThirdPersonAnimationProvider {
      * @param twoHanded set to true to skip off hand animation
      * @return True if default animation should be skipped
      */
-     <T extends LivingEntity> boolean poseRightArm(ItemStack stack, BipedModel<T> model, T entity, HandSide mainHand, TwoHandedAnimation twoHanded);
+     <T extends LivingEntity> boolean poseRightArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand, TwoHandedAnimation twoHanded);
 
-    default <T extends LivingEntity> boolean poseRightArmGeneric(ItemStack stack, AgeableModel<T> model, T entity, HandSide mainHand, TwoHandedAnimation twoHanded){
-        return poseRightArm(stack, (BipedModel)model, entity, mainHand, twoHanded);
+    default <T extends LivingEntity> boolean poseRightArmGeneric(ItemStack stack, AgeableListModel<T> model, T entity, HumanoidArm mainHand, TwoHandedAnimation twoHanded){
+        return poseRightArm(stack, (HumanoidModel)model, entity, mainHand, twoHanded);
     }
 
     /**
@@ -38,10 +36,10 @@ public interface IThirdPersonAnimationProvider {
      * @param mainHand hand side
      * @return True if default animation should be skipped
      */
-    <T extends LivingEntity> boolean poseLeftArm(ItemStack stack, BipedModel<T> model, T entity, HandSide mainHand,TwoHandedAnimation twoHanded);
+    <T extends LivingEntity> boolean poseLeftArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand,TwoHandedAnimation twoHanded);
 
-    default <T extends LivingEntity> boolean poseLeftArmGeneric(ItemStack stack, AgeableModel<T> model, T entity, HandSide mainHand, TwoHandedAnimation twoHanded){
-        return poseLeftArm(stack, (BipedModel)model, entity, mainHand, twoHanded);
+    default <T extends LivingEntity> boolean poseLeftArmGeneric(ItemStack stack, AgeableListModel<T> model, T entity, HumanoidArm mainHand, TwoHandedAnimation twoHanded){
+        return poseLeftArm(stack, (HumanoidModel)model, entity, mainHand, twoHanded);
     }
 
     default boolean isTwoHanded(){

@@ -2,11 +2,11 @@ package net.mehvahdjukaar.selene.map.markers;
 
 import net.mehvahdjukaar.selene.map.CustomDecoration;
 import net.mehvahdjukaar.selene.map.CustomDecorationType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -24,8 +24,8 @@ public abstract class MapWorldMarker<D extends CustomDecoration>  {
      * load a world marker to nbt. must match saveToNBT
      * implement if you are adding extra data
      */
-    public void loadFromNBT(CompoundNBT compound){
-        this.pos = NBTUtil.readBlockPos(compound.getCompound("Pos"));
+    public void loadFromNBT(CompoundTag compound){
+        this.pos = NbtUtils.readBlockPos(compound.getCompound("Pos"));
     }
 
     /**
@@ -33,8 +33,8 @@ public abstract class MapWorldMarker<D extends CustomDecoration>  {
      * implement if you are adding extra data
      * @return nbt
      */
-    public CompoundNBT saveToNBT(CompoundNBT compound){
-        compound.put("Pos", NBTUtil.writeBlockPos(this.getPos()));
+    public CompoundTag saveToNBT(CompoundTag compound){
+        compound.put("Pos", NbtUtils.writeBlockPos(this.getPos()));
         return compound;
     }
 
@@ -119,7 +119,7 @@ public abstract class MapWorldMarker<D extends CustomDecoration>  {
      * @return new decoration instance
      */
     @Nullable
-    public D createDecorationFromMarker(byte scale, int x, int z, RegistryKey<World> dimension, boolean locked){
+    public D createDecorationFromMarker(byte scale, int x, int z, ResourceKey<Level> dimension, boolean locked){
         double worldX = this.getPos().getX();
         double worldZ = this.getPos().getZ();
         double rotation = this.getRotation();
@@ -153,6 +153,6 @@ public abstract class MapWorldMarker<D extends CustomDecoration>  {
     /**
      * updates my map decoration after should update returns true
      */
-    public void updateDecoration(CustomDecoration old){};
+    public void updateDecoration(CustomDecoration old){}
 
 }

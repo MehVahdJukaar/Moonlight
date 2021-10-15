@@ -6,6 +6,7 @@ import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 public class ModSetup {
+
     public static void init(final FMLCommonSetupEvent event) {
         event.enqueueWork(()->{
             ModCriteriaTriggers.init();

@@ -10,24 +10,24 @@ import net.mehvahdjukaar.selene.map.markers.DummyMapWorldMarker;
 import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
 import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.mehvahdjukaar.selene.network.SyncCustomMapDecorationPacket;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.server.SMapDataPacket;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.storage.MapBanner;
-import net.minecraft.world.storage.MapData;
-import net.minecraft.world.storage.MapDecoration;
-import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapBanner;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,42 +42,45 @@ import java.util.Map;
 import java.util.Objects;
 
 
-@Mixin(MapData.class)
-public abstract class MapDataMixin extends WorldSavedData implements CustomDecorationHolder {
-    public MapDataMixin(String name) {
-        super(name);
-    }
+@Mixin(MapItemSavedData.class)
+public abstract class MapDataMixin extends SavedData implements CustomDecorationHolder {
 
+
+    @Final
     @Shadow
     public int x;
 
+    @Final
     @Shadow
     public int z;
 
+    @Final
     @Shadow
     public byte scale;
 
     @Final
     @Shadow
-    public Map<String, MapDecoration> decorations;
+    Map<String, MapDecoration> decorations;
 
+    @Final
     @Shadow
-    public RegistryKey<World> dimension;
+    public ResourceKey<Level> dimension;
 
     @Shadow
     public byte[] colors;
+    @Final
     @Shadow
     public boolean locked;
     @Shadow
     @Final
     private Map<String, MapBanner> bannerMarkers;
     //new decorations (stuff that gets rendered)
-    @Final
+
     public Map<String, CustomDecoration> customDecorations = Maps.newLinkedHashMap();
 
     //world markers
-    @Final
-    private Map<String, MapWorldMarker<?>> customMapMarkers = Maps.newHashMap();
+
+    private final Map<String, MapWorldMarker<?>> customMapMarkers = Maps.newHashMap();
 
     @Override
     public Map<String, CustomDecoration> getCustomDecorations() {
@@ -97,7 +100,7 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     }
 
     @Inject(method = "lockData", at = @At("HEAD"), cancellable = true)
-    public void lockData(MapData data, CallbackInfo ci) {
+    public void lockData(MapItemSavedData data, CallbackInfo ci) {
         if (data instanceof CustomDecorationHolder) {
             this.customMapMarkers.putAll(((CustomDecorationHolder) data).getCustomMarkers());
             this.customDecorations.putAll(((CustomDecorationHolder) data).getCustomDecorations());
@@ -105,13 +108,13 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     }
 
     @Inject(method = "tickCarriedBy", at = @At("TAIL"), cancellable = true)
-    public void tickCarriedBy(PlayerEntity player, ItemStack stack, CallbackInfo ci) {
-        CompoundNBT compoundnbt = stack.getTag();
+    public void tickCarriedBy(Player player, ItemStack stack, CallbackInfo ci) {
+        CompoundTag compoundnbt = stack.getTag();
         if (compoundnbt != null && compoundnbt.contains("CustomDecorations", 9)) {
-            ListNBT listnbt = compoundnbt.getList("CustomDecorations", 10);
+            ListTag listnbt = compoundnbt.getList("CustomDecorations", 10);
             //for exploration maps
             for (int j = 0; j < listnbt.size(); ++j) {
-                CompoundNBT com = listnbt.getCompound(j);
+                CompoundTag com = listnbt.getCompound(j);
                 if (!this.decorations.containsKey(com.getString("id"))) {
                     String name = com.getString("type");
                     //TODO: add more checks
@@ -129,9 +132,9 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     }
 
     @Inject(method = "load", at = @At("TAIL"), cancellable = true)
-    public void load(CompoundNBT compound, CallbackInfo ci) {
+    public void load(CompoundTag compound, CallbackInfo ci) {
         if (compound.contains("customMarkers")) {
-            ListNBT listNBT = compound.getList("customMarkers", 10);
+            ListTag listNBT = compound.getList("customMarkers", 10);
 
             for (int j = 0; j < listNBT.size(); ++j) {
                 MapWorldMarker<?> marker = MapDecorationHandler.readWorldMarker(listNBT.getCompound(j));
@@ -144,14 +147,14 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     }
 
     @Inject(method = "save", at = @At("RETURN"), cancellable = true)
-    public void save(CompoundNBT p_189551_1_, CallbackInfoReturnable<CompoundNBT> cir) {
-        CompoundNBT com = cir.getReturnValue();
+    public void save(CompoundTag p_189551_1_, CallbackInfoReturnable<CompoundTag> cir) {
+        CompoundTag com = cir.getReturnValue();
 
-        ListNBT listNBT = new ListNBT();
+        ListTag listNBT = new ListTag();
 
         for (MapWorldMarker<?> marker : this.customMapMarkers.values()) {
-            CompoundNBT com2 = new CompoundNBT();
-            com2.put(marker.getTypeId(), marker.saveToNBT(new CompoundNBT()));
+            CompoundTag com2 = new CompoundTag();
+            com2.put(marker.getTypeId(), marker.saveToNBT(new CompoundTag()));
             listNBT.add(com2);
         }
         com.put("customMarkers", listNBT);
@@ -170,7 +173,7 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     }
 
     @Override
-    public void toggleCustomDecoration(IWorld world, BlockPos pos) {
+    public void toggleCustomDecoration(LevelAccessor world, BlockPos pos) {
         double d0 = (double) pos.getX() + 0.5D;
         double d1 = (double) pos.getZ() + 0.5D;
         int i = 1 << this.scale;
@@ -198,7 +201,7 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     }
 
     @Inject(method = "checkBanners", at = @At("TAIL"), cancellable = true)
-    public void checkBanners(IBlockReader world, int x, int z, CallbackInfo ci) {
+    public void checkBanners(BlockGetter world, int x, int z, CallbackInfo ci) {
         Iterator<MapWorldMarker<?>> iterator = this.customMapMarkers.values().iterator();
 
         while (iterator.hasNext()) {
@@ -219,11 +222,11 @@ public abstract class MapDataMixin extends WorldSavedData implements CustomDecor
     }
 
     @Inject(method = "getUpdatePacket", at = @At("RETURN"), cancellable = true)
-    public void getUpdatePacket(ItemStack stack, IBlockReader reader, PlayerEntity playerEntity, CallbackInfoReturnable<IPacket<?>> cir) {
-        IPacket<?> packet = cir.getReturnValue();
-        if (playerEntity instanceof ServerPlayerEntity && packet instanceof SMapDataPacket) {
-            NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) playerEntity),
-                    new SyncCustomMapDecorationPacket(FilledMapItem.getMapId(stack), this.customDecorations.values().toArray(new CustomDecoration[0])));
+    public void getUpdatePacket(ItemStack stack, BlockGetter reader, Player playerEntity, CallbackInfoReturnable<Packet<?>> cir) {
+        Packet<?> packet = cir.getReturnValue();
+        if (playerEntity instanceof ServerPlayer && packet instanceof ClientboundMapItemDataPacket) {
+            NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) playerEntity),
+                    new SyncCustomMapDecorationPacket(MapItem.getMapId(stack), this.customDecorations.values().toArray(new CustomDecoration[0])));
         }
     }
 

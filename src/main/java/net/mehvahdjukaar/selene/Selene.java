@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene;
 
 import net.mehvahdjukaar.selene.setup.ClientSetup;
 import net.mehvahdjukaar.selene.setup.ModSetup;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -12,6 +13,8 @@ import org.apache.logging.log4j.Logger;
 
 @Mod(Selene.MOD_ID)
 public class Selene {
+
+
     public static final String MOD_ID = "selene";
 
     public static final Logger LOGGER = LogManager.getLogger();

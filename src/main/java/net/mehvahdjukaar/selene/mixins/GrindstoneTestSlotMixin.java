@@ -2,21 +2,21 @@ package net.mehvahdjukaar.selene.mixins;
 
 
 import net.mehvahdjukaar.selene.common.ModCriteriaTriggers;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(targets = {"net.minecraft.inventory.container.GrindstoneContainer$4"})
+@Mixin(targets = {"net.minecraft.world.inventory.GrindstoneMenu$4"})
 public abstract class GrindstoneTestSlotMixin {
 
-    @Inject(method = "onTake(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;", at = @At("RETURN"), cancellable = true)
-    private void onTake(PlayerEntity player, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
-        if(player instanceof ServerPlayerEntity)
-            ModCriteriaTriggers.GRIND.trigger((ServerPlayerEntity)player, stack.copy());
+    @Inject(method = "onTake(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)V", at = @At("RETURN"), cancellable = true)
+    private void onTake(Player player, ItemStack stack, CallbackInfo ci) {
+        if(player instanceof ServerPlayer)
+            ModCriteriaTriggers.GRIND.trigger((ServerPlayer)player, stack.copy());
     }
 
 }

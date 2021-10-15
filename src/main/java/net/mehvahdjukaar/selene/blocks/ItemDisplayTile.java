@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.blocks;
 
-import com.mojang.math.Constants;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -34,12 +35,12 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
 
     private final AbstractList<ItemStack> stacks;
 
-    public ItemDisplayTile( BlockEntityType type) {
-        this(type, 1);
+    public ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state) {
+        this(type, pos, state, 1);
     }
 
-    public ItemDisplayTile(BlockEntityType type, int slots) {
-        super(type);
+    public ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state, int slots) {
+        super(type, pos, state);
         this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
     }
 
@@ -50,15 +51,9 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         this.updateTileOnInventoryChanged();
         if (this.needsToUpdateClientWhenChanged()) {
             //this saves and sends a packet to update the client tile
-            this.level.sendBlockUpdated(this.level, this.getBlockEntity(), this.getBlockEntity(), Constants.BlockFlags.BLOCK_UPDATE);
+            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
         }
         super.setChanged();
-    }
-
-    //todo: legacy, remove
-    @Deprecated
-    public void updateOnChangedBeforePacket(){
-
     }
 
     /**
@@ -66,8 +61,6 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
      * Put here common logic for things that needs to react to inventory changes like updating blockState or logic
      */
     public void updateTileOnInventoryChanged() {
-        //TODO: remove
-        this.updateOnChangedBeforePacket();
     }
 
     /**
@@ -140,8 +133,8 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     @Override
-    public void load(BlockState state, CompoundTag compound) {
-        super.load(state, compound);
+    public void load(CompoundTag compound) {
+        super.load(compound);
         if (!this.tryLoadLootTable(compound)) {
             this.stacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         }
@@ -173,7 +166,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
 
     @Override
     public void onDataPacket( Connection net, ClientboundBlockEntityDataPacket pkt) {
-        this.load(this.getBlockState(), pkt.getTag());
+        this.load(pkt.getTag());
     }
 
     @Override

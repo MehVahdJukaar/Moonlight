@@ -1,30 +1,30 @@
 package net.mehvahdjukaar.selene.util;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DrinkHelper;
-import net.minecraft.util.Hand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.InteractionHand;
 
 import java.util.Random;
 
 
 public class Utils {
 
-    public static void swapItem(PlayerEntity player, Hand hand, ItemStack oldItem, ItemStack newItem, boolean bothsides){
+    public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem, boolean bothsides){
         if(!player.level.isClientSide || bothsides)
-            player.setItemInHand(hand, DrinkHelper.createFilledResult(oldItem.copy(), player, newItem, player.isCreative()));
+            player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem, player.isCreative()));
     }
-    public static void swapItem(PlayerEntity player, Hand hand, ItemStack oldItem, ItemStack newItem){
+    public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem){
         if(!player.level.isClientSide)
-        player.setItemInHand(hand, DrinkHelper.createFilledResult(oldItem.copy(), player, newItem, player.isCreative()));
+        player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem, player.isCreative()));
     }
-    public static void swapItemNBT(PlayerEntity player, Hand hand, ItemStack oldItem, ItemStack newItem){
+    public static void swapItemNBT(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem){
         if(!player.level.isClientSide)
-            player.setItemInHand(hand, DrinkHelper.createFilledResult(oldItem.copy(), player, newItem,false));
+            player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem,false));
     }
-    public static void swapItem(PlayerEntity player, Hand hand, ItemStack newItem){
+    public static void swapItem(Player player, InteractionHand hand, ItemStack newItem){
         if(!player.level.isClientSide)
-        player.setItemInHand(hand, DrinkHelper.createFilledResult(player.getItemInHand(hand).copy(), player, newItem, player.isCreative()));
+        player.setItemInHand(hand, ItemUtils.createFilledResult(player.getItemInHand(hand).copy(), player, newItem, player.isCreative()));
     }
     //xp bottle logic
     public static int getXPinaBottle(int bottleCount, Random rand){

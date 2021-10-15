@@ -6,14 +6,14 @@ import net.mehvahdjukaar.selene.map.CustomDecorationHolder;
 import net.mehvahdjukaar.selene.map.CustomDecorationType;
 import net.mehvahdjukaar.selene.map.MapDecorationHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.MapItemRenderer;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.storage.MapData;
+import net.minecraft.client.gui.MapRenderer;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -29,7 +29,7 @@ public class SyncCustomMapDecorationPacket {
         this.customDecoration = customDecoration;
     }
 
-    public SyncCustomMapDecorationPacket(PacketBuffer buffer) {
+    public SyncCustomMapDecorationPacket(FriendlyByteBuf buffer) {
         this.mapId = buffer.readVarInt();
         this.customDecoration = new CustomDecoration[buffer.readVarInt()];
 
@@ -41,7 +41,7 @@ public class SyncCustomMapDecorationPacket {
         }
     }
 
-    public static void buffer(SyncCustomMapDecorationPacket message, PacketBuffer buffer) {
+    public static void buffer(SyncCustomMapDecorationPacket message, FriendlyByteBuf buffer) {
         buffer.writeVarInt(message.mapId);
         buffer.writeVarInt(message.customDecoration.length);
 
@@ -58,13 +58,13 @@ public class SyncCustomMapDecorationPacket {
             if (context.getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
 
                 Minecraft mc = Minecraft.getInstance();
-                MapItemRenderer mapitemrenderer = mc.gameRenderer.getMapRenderer();
-                String s = FilledMapItem.makeKey(message.getMapId());
-                MapData mapdata = mc.level.getMapData(s);
+                MapRenderer mapitemrenderer = mc.gameRenderer.getMapRenderer();
+                String s = MapItem.makeKey(message.getMapId());
+                MapItemSavedData mapdata = mc.level.getMapData(s);
                 if (mapdata == null) {
-                    mapdata = new MapData(s);
+                    mapdata = new MapItemSavedData(s);
                     if (mapitemrenderer.getMapInstanceIfExists(s) != null) {
-                        MapData mapdata1 = mapitemrenderer.getData(mapitemrenderer.getMapInstanceIfExists(s));
+                        MapItemSavedData mapdata1 = mapitemrenderer.getData(mapitemrenderer.getMapInstanceIfExists(s));
                         if (mapdata1 != null) {
                             mapdata = mapdata1;
                         }
@@ -87,7 +87,7 @@ public class SyncCustomMapDecorationPacket {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void applyToMap(MapData data) {
+    public void applyToMap(MapItemSavedData data) {
         if(data instanceof CustomDecorationHolder){
             Map<String, CustomDecoration> decorations = ((CustomDecorationHolder) data).getCustomDecorations();
             decorations.clear();

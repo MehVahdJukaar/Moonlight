@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
@@ -13,6 +13,6 @@ import javax.annotation.Nullable;
  */
 public interface ISoftFluidConsumer {
 
-    boolean tryAcceptingFluid(World world, BlockState state, BlockPos pos, SoftFluid f, @Nullable CompoundNBT nbt, int amount);
+    boolean tryAcceptingFluid(Level world, BlockState state, BlockPos pos, SoftFluid f, @Nullable CompoundTag nbt, int amount);
 
 }

@@ -1,13 +1,13 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.ModList;
@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class SoftFluid {
 
     private final ResourceLocation stillTexture;
@@ -56,7 +57,7 @@ public class SoftFluid {
     }
 
     /**
-     * @return true if dependsncy mods are not present and fluid should not be registered
+     * @return true if dependency mods are not present and fluid should not be registered
      */
     public boolean isDisabled(){
         return this.disabled;
@@ -78,8 +79,8 @@ public class SoftFluid {
         return foodItem;
     }
 
-    public TranslationTextComponent getTranslatedName() {
-        return new TranslationTextComponent(this.translationKey);
+    public TranslatableComponent getTranslatedName() {
+        return new TranslatableComponent(this.translationKey);
     }
 
     public String getTranslationKey() {
@@ -161,40 +162,6 @@ public class SoftFluid {
         }
         return null;
     }
-
-
-//    /**
-//     * does provided bucket contains this fluid
-//     *
-//     * @param item bucket
-//     * @return is same fluid
-//     */
-//    public boolean isContainedInBottle(Item item) {
-//        return this.filledBottles.contains(item);
-//    }
-//
-//    public boolean hasBucket() {
-//        return !this.filledBuckets.isEmpty();
-//    }
-
-//
-//    public Collection<Item> getBowls() {
-//        return this.filledBowls;
-//    }
-//
-
-//    /**
-//     * @return filled bottle, null if not present
-//     */
-//    @Nullable
-//    public Item getBottle() {
-//        for (Item item : this.filledBottles) {
-//            return item;
-//        }
-//        return null;
-//    }
-//
-
 
     public List<Item> getAllFilledContainers() {
         List<Item> list = new ArrayList<>();
@@ -394,7 +361,6 @@ public class SoftFluid {
 
         /**
          * only tint flowing texture. No need to give tint color since it will use particle color
-         * @return
          */
         public final Builder onlyFlowingTinted() {
             this.tintMethod = TintMethod.FLOWING;

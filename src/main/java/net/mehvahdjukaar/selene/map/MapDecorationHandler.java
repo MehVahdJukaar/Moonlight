@@ -2,12 +2,12 @@ package net.mehvahdjukaar.selene.map;
 
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class MapDecorationHandler {
     }
 
     @Nullable
-    public static MapWorldMarker<?> readWorldMarker(CompoundNBT compound){
+    public static MapWorldMarker<?> readWorldMarker(CompoundTag compound){
         for(String s : DECORATION_TYPES.keySet()){
             if(compound.contains(s)){
                 return DECORATION_TYPES.get(s).loadMarkerFromNBT(compound.getCompound(s));
@@ -80,7 +80,7 @@ public class MapDecorationHandler {
      * @param pos world position
      * @return markers found, null if none found
      */
-    public static List<MapWorldMarker<?>> getMarkersFromWorld(IBlockReader reader, BlockPos pos){
+    public static List<MapWorldMarker<?>> getMarkersFromWorld(BlockGetter reader, BlockPos pos){
         List<MapWorldMarker<?>> list = new ArrayList<>();
         for(CustomDecorationType<?,?> type : DECORATION_TYPES.values()){
             MapWorldMarker<?> c = type.getWorldMarkerFromWorld(reader,pos);
@@ -99,20 +99,20 @@ public class MapDecorationHandler {
      */
     public static void addTargetDecoration(ItemStack stack, BlockPos pos, CustomDecorationType<?,?> type, int mapColor) {
 
-        ListNBT listnbt;
+        ListTag listnbt;
         if (stack.hasTag() && stack.getTag().contains("CustomDecorations", 9)) {
             listnbt = stack.getTag().getList("CustomDecorations", 10);
         } else {
-            listnbt = new ListNBT();
+            listnbt = new ListTag();
             stack.addTagElement("CustomDecorations", listnbt);
         }
-        CompoundNBT compoundnbt = new CompoundNBT();
+        CompoundTag compoundnbt = new CompoundTag();
         compoundnbt.putString("type", type.getRegistryId());
         compoundnbt.putInt("x", pos.getX());
         compoundnbt.putInt("z", pos.getZ());
         listnbt.add(compoundnbt);
         if (mapColor!=0) {
-            CompoundNBT com = stack.getOrCreateTagElement("display");
+            CompoundTag com = stack.getOrCreateTagElement("display");
             com.putInt("MapColor", mapColor);
         }
 

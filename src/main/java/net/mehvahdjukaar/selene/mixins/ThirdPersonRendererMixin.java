@@ -1,27 +1,21 @@
 package net.mehvahdjukaar.selene.mixins;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.mehvahdjukaar.selene.api.IThirdPersonAnimationProvider;
 import net.mehvahdjukaar.selene.util.TwoHandedAnimation;
-import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
-import net.minecraft.client.renderer.FirstPersonRenderer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.PlayerRenderer;
-import net.minecraft.client.renderer.entity.model.AgeableModel;
-import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
+import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(BipedModel.class)
-public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends AgeableModel<T> {
+@Mixin(HumanoidModel.class)
+public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends AgeableListModel<T> {
 
     public TwoHandedAnimation animationType = new TwoHandedAnimation();
 
@@ -29,8 +23,8 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
     public void poseRightArm(T entity, CallbackInfo ci) {
         //cancel off hand animation if two handed so two handed animation always happens last
         if (this.animationType.isTwoHanded()) ci.cancel();
-        HandSide handSide = entity.getMainArm();
-        ItemStack stack = entity.getItemInHand(handSide == HandSide.RIGHT ? Hand.MAIN_HAND : Hand.OFF_HAND);
+        HumanoidArm handSide = entity.getMainArm();
+        ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
         Item item = stack.getItem();
         if (item instanceof IThirdPersonAnimationProvider) {
             if (((IThirdPersonAnimationProvider) item).poseRightArmGeneric(stack, this, entity, handSide, this.animationType)) {
@@ -43,8 +37,8 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
     public void poseLeftArm(T entity, CallbackInfo ci) {
         //cancel off hand animation if two handed so two handed animation always happens last
         if (this.animationType.isTwoHanded()) ci.cancel();
-        HandSide handSide = entity.getMainArm();
-        ItemStack stack = entity.getItemInHand(handSide == HandSide.RIGHT ? Hand.OFF_HAND : Hand.MAIN_HAND);
+        HumanoidArm handSide = entity.getMainArm();
+        ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         Item item = stack.getItem();
         if (item instanceof IThirdPersonAnimationProvider) {
             if (((IThirdPersonAnimationProvider) item).poseLeftArmGeneric(stack, this, entity, handSide, this.animationType)) {

@@ -2,12 +2,12 @@ package net.mehvahdjukaar.selene.example.map;
 
 import net.mehvahdjukaar.selene.map.CustomDecoration;
 import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.SignTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.BlockGetter;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -15,40 +15,40 @@ import java.util.Objects;
 public class ExampleMarker extends MapWorldMarker<CustomDecoration> {
     //additional data to be stored
     @Nullable
-    private ITextComponent name;
+    private Component name;
 
     public ExampleMarker() {
         super(ExampleReg.EXAMPLE_DECORATION_TYPE);
     }
 
-    public ExampleMarker(BlockPos pos, ITextComponent name) {
+    public ExampleMarker(BlockPos pos, Component name) {
         this();
         this.setPos(pos);
         this.name = name;
     }
 
     @Override
-    public CompoundNBT saveToNBT(CompoundNBT compound) {
+    public CompoundTag saveToNBT(CompoundTag compound) {
         super.saveToNBT(compound);
         if (this.name != null) {
-            compound.putString("Name", ITextComponent.Serializer.toJson(this.name));
+            compound.putString("Name", Component.Serializer.toJson(this.name));
         }
         return compound;
     }
 
     //get a marker from nbt
-    public void loadFromNBT(CompoundNBT compound){
+    public void loadFromNBT(CompoundTag compound){
         super.loadFromNBT(compound);
-        this.name = compound.contains("Name") ? ITextComponent.Serializer.fromJson(compound.getString("Name")) : null;
+        this.name = compound.contains("Name") ? Component.Serializer.fromJson(compound.getString("Name")) : null;
     }
 
     //get a marker from world
     @Nullable
-    public static ExampleMarker getFromWorld(IBlockReader world, BlockPos pos){
-        TileEntity tileentity = world.getBlockEntity(pos);
-        if (tileentity instanceof SignTileEntity) {
-            SignTileEntity sign = ((SignTileEntity) tileentity);
-            ITextComponent name = sign.getMessage(0);
+    public static ExampleMarker getFromWorld(BlockGetter world, BlockPos pos){
+        BlockEntity tileentity = world.getBlockEntity(pos);
+        if (tileentity instanceof SignBlockEntity) {
+            SignBlockEntity sign = ((SignBlockEntity) tileentity);
+            Component name = sign.getMessage(0);
             return new ExampleMarker(pos,name);
         } else {
             return null;

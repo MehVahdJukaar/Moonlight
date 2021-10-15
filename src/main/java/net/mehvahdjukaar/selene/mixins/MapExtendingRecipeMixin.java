@@ -1,10 +1,10 @@
 package net.mehvahdjukaar.selene.mixins;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.MapExtendingRecipe;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.World;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.MapExtendingRecipe;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -13,12 +13,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class MapExtendingRecipeMixin {
 
 
-    @Redirect(method ="matches",
+    @Redirect(method = "matches*",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/item/ItemStack;isEmpty()Z",
+                    target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
                     ordinal = 1))
-    private boolean matches(ItemStack original, CraftingInventory inventory, World world) {
-        CompoundNBT compoundnbt = original.getTag();
+    private boolean matches(ItemStack original, CraftingContainer inventory, Level world) {
+        CompoundTag compoundnbt = original.getTag();
         if (compoundnbt != null && compoundnbt.contains("CustomDecorations", 9)) {
             return true;
         }
