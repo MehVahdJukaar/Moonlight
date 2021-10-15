@@ -46,9 +46,8 @@ public class ExampleMarker extends MapWorldMarker<CustomDecoration> {
     @Nullable
     public static ExampleMarker getFromWorld(BlockGetter world, BlockPos pos){
         BlockEntity tileentity = world.getBlockEntity(pos);
-        if (tileentity instanceof SignBlockEntity) {
-            SignBlockEntity sign = ((SignBlockEntity) tileentity);
-            Component name = sign.getMessage(0);
+        if (tileentity instanceof SignBlockEntity sign) {
+            Component name = sign.getMessage(0, false);
             return new ExampleMarker(pos,name);
         } else {
             return null;

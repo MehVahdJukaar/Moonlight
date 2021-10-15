@@ -7,11 +7,15 @@ import net.minecraft.world.level.LevelAccessor;
 
 import java.util.Map;
 
-public interface CustomDecorationHolder {
+public interface ExpandedMapData {
     Map<String, CustomDecoration> getCustomDecorations();
     Map<String, MapWorldMarker<?>> getCustomMarkers();
 
     void toggleCustomDecoration(LevelAccessor world, BlockPos pos);
 
     void resetCustomDecoration();
+
+    int getVanillaDecorationSize();
+
+    <D extends CustomDecoration> void addCustomDecoration(MapWorldMarker<D> marker);
 }

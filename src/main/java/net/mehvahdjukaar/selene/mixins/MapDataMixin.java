@@ -3,7 +3,7 @@ package net.mehvahdjukaar.selene.mixins;
 import com.google.common.collect.Maps;
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.map.CustomDecoration;
-import net.mehvahdjukaar.selene.map.CustomDecorationHolder;
+import net.mehvahdjukaar.selene.map.ExpandedMapData;
 import net.mehvahdjukaar.selene.map.CustomDecorationType;
 import net.mehvahdjukaar.selene.map.MapDecorationHandler;
 import net.mehvahdjukaar.selene.map.markers.DummyMapWorldMarker;
@@ -12,7 +12,6 @@ import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.mehvahdjukaar.selene.network.SyncCustomMapDecorationPacket;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -43,7 +42,7 @@ import java.util.Objects;
 
 
 @Mixin(MapItemSavedData.class)
-public abstract class MapDataMixin extends SavedData implements CustomDecorationHolder {
+public abstract class MapDataMixin extends SavedData implements ExpandedMapData {
 
 
     @Final
@@ -92,7 +91,7 @@ public abstract class MapDataMixin extends SavedData implements CustomDecoration
         return customMapMarkers;
     }
 
-    private <D extends CustomDecoration> void addCustomDecoration(MapWorldMarker<D> marker) {
+    public <D extends CustomDecoration> void addCustomDecoration(MapWorldMarker<D> marker) {
         D decoration = marker.createDecorationFromMarker(scale, x, z, dimension, locked);
         if (decoration != null) {
             this.customDecorations.put(marker.getMarkerId(), decoration);
@@ -102,9 +101,9 @@ public abstract class MapDataMixin extends SavedData implements CustomDecoration
     @Inject(method = "locked", at = @At("RETURN"), cancellable = true)
     public void locked(CallbackInfoReturnable<MapItemSavedData> cir) {
         MapItemSavedData data = cir.getReturnValue();
-        if (data instanceof CustomDecorationHolder) {
-            this.customMapMarkers.putAll(((CustomDecorationHolder) data).getCustomMarkers());
-            this.customDecorations.putAll(((CustomDecorationHolder) data).getCustomDecorations());
+        if (data instanceof ExpandedMapData) {
+            this.customMapMarkers.putAll(((ExpandedMapData) data).getCustomMarkers());
+            this.customDecorations.putAll(((ExpandedMapData) data).getCustomDecorations());
         }
     }
 
@@ -132,16 +131,17 @@ public abstract class MapDataMixin extends SavedData implements CustomDecoration
         }
     }
 
-    @Inject(method = "load", at = @At("TAIL"), cancellable = true)
-    public void load(CompoundTag compound, CallbackInfo ci) {
-        if (compound.contains("customMarkers")) {
+    @Inject(method = "load", at = @At("RETURN"), cancellable = true)
+    private static void load(CompoundTag compound, CallbackInfoReturnable<MapItemSavedData> cir) {
+        MapItemSavedData data = cir.getReturnValue();
+        if (compound.contains("customMarkers") && data instanceof ExpandedMapData mapData) {
             ListTag listNBT = compound.getList("customMarkers", 10);
 
             for (int j = 0; j < listNBT.size(); ++j) {
                 MapWorldMarker<?> marker = MapDecorationHandler.readWorldMarker(listNBT.getCompound(j));
                 if (marker != null) {
-                    this.customMapMarkers.put(marker.getMarkerId(), marker);
-                    this.addCustomDecoration(marker);
+                    mapData.getCustomMarkers().put(marker.getMarkerId(), marker);
+                    mapData.addCustomDecoration(marker);
                 }
             }
         }
@@ -227,8 +227,12 @@ public abstract class MapDataMixin extends SavedData implements CustomDecoration
         Packet<?> packet = cir.getReturnValue();
         if (pPlayer instanceof ServerPlayer serverPlayer && packet instanceof ClientboundMapItemDataPacket) {
             NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
-                    new SyncCustomMapDecorationPacket(pMapId, this.customDecorations.values().toArray(new CustomDecoration[0])));
+                    new SyncCustomMapDecorationPacket(pMapId, this.scale, this.locked, null, this.customDecorations.values().toArray(new CustomDecoration[0])));
         }
+    }
+
+    public int getVanillaDecorationSize(){
+        return this.decorations.size();
     }
 
 }

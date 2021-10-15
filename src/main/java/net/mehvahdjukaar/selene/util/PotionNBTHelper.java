@@ -10,7 +10,6 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.util.text.*;
 
 import javax.annotation.Nullable;
 import java.util.List;

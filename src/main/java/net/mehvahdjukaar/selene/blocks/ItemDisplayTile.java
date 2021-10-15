@@ -5,9 +5,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -29,10 +31,12 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 
 import javax.annotation.Nullable;
 import java.util.AbstractList;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
-public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity implements WorldlyContainer {
-
+public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity implements WorldlyContainer, IOwnerProtected {
+    @Nullable
+    private UUID owner = null;
     private NonNullList<ItemStack> stacks;
 
     public ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state) {
@@ -42,6 +46,17 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     public ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state, int slots) {
         super(type, pos, state);
         this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
+    }
+
+    @Override
+    public void setOwner(@Nullable UUID owner) {
+        this.owner = owner;
+    }
+
+    @Override
+    @Nullable
+    public UUID getOwner() {
+        return owner;
     }
 
     //should only be server side. called when inventory has changed
@@ -92,7 +107,9 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     public InteractionResult interact(Player player, InteractionHand handIn, int slot) {
-        if (handIn == InteractionHand.MAIN_HAND) {
+        if (!this.isAccessibleBy(player)) {
+            player.displayClientMessage(new TranslatableComponent("container.isLocked", ""), true);
+        } else if (handIn == InteractionHand.MAIN_HAND) {
             ItemStack handItem = player.getItemInHand(handIn);
             //remove
             if (!this.isEmpty() && handItem.isEmpty()) {
@@ -116,8 +133,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                     handItem.shrink(1);
                 }
                 if (!this.level.isClientSide()) {
-                    //aaaa skulk I hate you. They changed the whole sound system thingie
-                    this.level.playSound(null, this.worldPosition, this.getAddItemSound(), SoundCategory.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.10F + 0.95F);
+                    this.level.playSound(null, this.worldPosition, this.getAddItemSound(), SoundSource.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.10F + 0.95F);
                     //this.setChanged();
                 } else {
                     //also update visuals on client. will get overwritten by packet tho
@@ -140,10 +156,11 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
             this.stacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         }
         ContainerHelper.loadAllItems(compound, this.stacks);
-        if (this.level != null){
-            if(this.level.isClientSide) this.updateClientVisualsOnLoad();
+        if (this.level != null) {
+            if (this.level.isClientSide) this.updateClientVisualsOnLoad();
             else this.updateTileOnInventoryChanged();
         }
+        this.loadOwner(compound);
     }
 
     @Override
@@ -152,6 +169,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         if (!this.trySaveLootTable(compound)) {
             ContainerHelper.saveAllItems(compound, this.stacks);
         }
+        this.saveOwner(compound);
         return compound;
     }
 
@@ -166,7 +184,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     @Override
-    public void onDataPacket( Connection net, ClientboundBlockEntityDataPacket pkt) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
         this.load(pkt.getTag());
     }
 
@@ -189,7 +207,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     @Override
-    public AbstractContainerMenu createMenu( int id, Inventory player) {
+    public AbstractContainerMenu createMenu(int id, Inventory player) {
         return ChestMenu.threeRows(id, player, this);
     }
 

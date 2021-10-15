@@ -2,7 +2,7 @@ package net.mehvahdjukaar.selene.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.selene.map.CustomDecoration;
-import net.mehvahdjukaar.selene.map.CustomDecorationHolder;
+import net.mehvahdjukaar.selene.map.ExpandedMapData;
 import net.mehvahdjukaar.selene.map.client.MapDecorationRenderHandler;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,12 +17,13 @@ public abstract class MapItemRendererMixin {
 
 
     @Inject(method = "render", at = @At("RETURN"), cancellable = true)
-    private void render(PoseStack poseStack, MultiBufferSource buffer, int mapId, MapItemSavedData mapData , boolean isOnFrame, int light, CallbackInfo ci) {
-        if (mapData instanceof CustomDecorationHolder) {
-            int index = mapData.decorations.size();
-            for (CustomDecoration decoration : ((CustomDecorationHolder) mapData).getCustomDecorations().values()){
+    private void render(PoseStack poseStack, MultiBufferSource buffer, int mapId, MapItemSavedData mapData, boolean isOnFrame, int light, CallbackInfo ci) {
+        if (mapData instanceof ExpandedMapData data) {
+            int index = data.getVanillaDecorationSize();
+            for (CustomDecoration decoration :data.getCustomDecorations().values()) {
 
-                if(MapDecorationRenderHandler.render(decoration,matrixStack,buffer,mapData,isOnFrame,light,index)) index++;
+                if (MapDecorationRenderHandler.render(decoration, poseStack, buffer, mapData, isOnFrame, light, index))
+                    index++;
             }
         }
     }
