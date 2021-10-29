@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 
-public class SyncCustomMapDecorationPacket {
+public class ClientBoundSyncCustomMapDecorationPacket {
     private final int mapId;
     private final byte scale;
     private final boolean locked;
@@ -30,7 +30,7 @@ public class SyncCustomMapDecorationPacket {
 
     private final CustomDecoration[] customDecoration;
 
-    public SyncCustomMapDecorationPacket(int mapId, byte pScale, boolean pLocked, @Nullable MapItemSavedData.MapPatch pColorPatch, CustomDecoration[] customDecoration) {
+    public ClientBoundSyncCustomMapDecorationPacket(int mapId, byte pScale, boolean pLocked, @Nullable MapItemSavedData.MapPatch pColorPatch, CustomDecoration[] customDecoration) {
         this.mapId = mapId;
         this.scale = pScale;
         this.locked = pLocked;
@@ -39,7 +39,7 @@ public class SyncCustomMapDecorationPacket {
         this.customDecoration = customDecoration;
     }
 
-    public SyncCustomMapDecorationPacket(FriendlyByteBuf pBuffer) {
+    public ClientBoundSyncCustomMapDecorationPacket(FriendlyByteBuf pBuffer) {
         this.mapId = pBuffer.readVarInt();
         this.scale = pBuffer.readByte();
         this.locked = pBuffer.readBoolean();
@@ -66,7 +66,7 @@ public class SyncCustomMapDecorationPacket {
     }
 
 
-    public static void buffer(SyncCustomMapDecorationPacket message, FriendlyByteBuf buffer) {
+    public static void buffer(ClientBoundSyncCustomMapDecorationPacket message, FriendlyByteBuf buffer) {
         buffer.writeVarInt(message.mapId);
         buffer.writeByte(message.scale);
         buffer.writeBoolean(message.locked);
@@ -89,14 +89,13 @@ public class SyncCustomMapDecorationPacket {
         }
     }
 
-    public static void handler(SyncCustomMapDecorationPacket message, Supplier<NetworkEvent.Context> contextSupplier) {
+    public static void handler(ClientBoundSyncCustomMapDecorationPacket message, Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             if (context.getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
 
-                Minecraft mc = Minecraft.getInstance();
-                MapRenderer mapRenderer = mc.gameRenderer.getMapRenderer();
-                Level world = mc.level;
+                MapRenderer mapRenderer = Minecraft.getInstance().gameRenderer.getMapRenderer();
+                Level world = Minecraft.getInstance().level;
 
                 int i = message.getMapId();
                 String s = MapItem.makeKey(i);

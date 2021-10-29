@@ -9,7 +9,7 @@ import net.mehvahdjukaar.selene.map.MapDecorationHandler;
 import net.mehvahdjukaar.selene.map.markers.DummyMapWorldMarker;
 import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
 import net.mehvahdjukaar.selene.network.NetworkHandler;
-import net.mehvahdjukaar.selene.network.SyncCustomMapDecorationPacket;
+import net.mehvahdjukaar.selene.network.ClientBoundSyncCustomMapDecorationPacket;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -227,7 +227,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         Packet<?> packet = cir.getReturnValue();
         if (pPlayer instanceof ServerPlayer serverPlayer && packet instanceof ClientboundMapItemDataPacket) {
             NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
-                    new SyncCustomMapDecorationPacket(pMapId, this.scale, this.locked, null, this.customDecorations.values().toArray(new CustomDecoration[0])));
+                    new ClientBoundSyncCustomMapDecorationPacket(pMapId, this.scale, this.locked, null, this.customDecorations.values().toArray(new CustomDecoration[0])));
         }
     }
 

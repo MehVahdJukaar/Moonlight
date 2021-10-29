@@ -11,9 +11,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(targets = {"net.minecraft.world.inventory.GrindstoneMenu$4"})
-public abstract class GrindstoneTestSlotMixin {
+public abstract class GrindstoneMenuSlotMixin {
 
-    @Inject(method = "onTake(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)V", at = @At("RETURN"), cancellable = true)
+
+    @Inject(method = {"onTake", "m_142406_"
+    }, at = @At("RETURN"))
     private void onTake(Player player, ItemStack stack, CallbackInfo ci) {
         if(player instanceof ServerPlayer)
             ModCriteriaTriggers.GRIND.trigger((ServerPlayer)player, stack.copy());

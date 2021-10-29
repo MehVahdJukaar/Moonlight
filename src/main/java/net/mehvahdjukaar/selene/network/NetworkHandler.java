@@ -16,7 +16,7 @@ public class NetworkHandler {
         INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation(Selene.MOD_ID, "network"), () -> PROTOCOL_VERSION,
                 PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
-        INSTANCE.registerMessage(nextID(), SyncCustomMapDecorationPacket.class,SyncCustomMapDecorationPacket::buffer,
-                SyncCustomMapDecorationPacket::new, SyncCustomMapDecorationPacket::handler);
+        INSTANCE.registerMessage(nextID(), ClientBoundSyncCustomMapDecorationPacket.class, ClientBoundSyncCustomMapDecorationPacket::buffer,
+                ClientBoundSyncCustomMapDecorationPacket::new, ClientBoundSyncCustomMapDecorationPacket::handler);
     }
 }
