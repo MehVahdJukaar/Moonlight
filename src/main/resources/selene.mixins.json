@@ -13,6 +13,7 @@
   "client": [
     "FirstPersonRendererMixin",
     "MapItemRendererMixin",
+    "PlayerItemInHandLayerMixin",
     "ThirdPersonRendererMixin"
   ],
   "injectors": {

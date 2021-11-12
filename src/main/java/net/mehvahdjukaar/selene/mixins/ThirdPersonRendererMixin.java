@@ -47,7 +47,7 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
         }
     }
 
-    @Inject(method = "setupAnim", at = @At(value = "RETURN"), cancellable = true)
+    @Inject(method = "setupAnim*", at = @At(value = "RETURN"))
     public void setupAnim(T p_225597_1_, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_, CallbackInfo ci) {
         this.animationType.setTwoHanded(false);
     }

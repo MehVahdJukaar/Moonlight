@@ -8,12 +8,12 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.levelgen.feature.OceanMonumentFeature;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MapDecorationHandler {
     private static final Map<String, CustomDecorationType<?,?>> DECORATION_TYPES = new HashMap<>();
@@ -94,7 +94,7 @@ public class MapDecorationHandler {
      * Such decoration will not have any world marker associated and wont be toggleable
      * @param stack map item stack
      * @param pos decoration world pos
-     * @param type decorationType
+     * @param type custom decorationType
      * @param mapColor map item tint color
      */
     public static void addTargetDecoration(ItemStack stack, BlockPos pos, CustomDecorationType<?,?> type, int mapColor) {
@@ -119,14 +119,34 @@ public class MapDecorationHandler {
     }
 
     /**
+     * adds a vanilla decoration
+     * @param stack map item stack
+     * @param pos decoration world pos
+     * @param type vanilla decorationType
+     * @param mapColor map item tint color
+     */
+    public static void addVanillaTargetDecorations(ItemStack stack, BlockPos pos, MapDecoration.Type type, int mapColor){
+        MapItemSavedData.addTargetDecoration(stack, pos, "+", type);
+        if (mapColor!=0) {
+            CompoundTag com = stack.getOrCreateTagElement("display");
+            com.putInt("MapColor", mapColor);
+        }
+    }
+
+    /**
      * see addTargetDecoration
      * @param id decoration type id. if invalid will default to generic structure decoration
      */
     public static void addTargetDecoration(ItemStack stack, BlockPos pos, ResourceLocation id, int mapColor) {
+        if(id.getNamespace().equals("minecraft")){
+            Optional<MapDecoration.Type> opt = Arrays.stream(MapDecoration.Type.values()).filter(t->t.toString().toLowerCase().equals(id.getPath())).findFirst();
+            if(opt.isPresent()){
+                addVanillaTargetDecorations(stack, pos, opt.get(), mapColor);
+                return;
+            }
+        }
         CustomDecorationType<?,?> type = DECORATION_TYPES.getOrDefault(id.toString(),GENERIC_STRUCTURE_TYPE);
         addTargetDecoration(stack,pos,type,mapColor);
     }
-
-
 
 }

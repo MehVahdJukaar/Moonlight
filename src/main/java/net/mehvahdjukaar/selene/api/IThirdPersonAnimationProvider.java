@@ -10,6 +10,8 @@ import net.minecraft.world.entity.HumanoidArm;
 /**
  * Implement in an item to allow it to be displayed with a custom animation using provided method callback
  * Will be called before the item actually gets rendered
+ * It is suggested to return ArmPose.SPYGLASS in your item getUseAnimation if you do not want to have the arm bob animation play
+ * Alternatively you can simply call AnimationUtils.bobModelPart(model.leftArm, entity.tickCount, -1.0F); to "unbob" your arms, this is required for 2 handed animations
  */
 public interface IThirdPersonAnimationProvider {
 

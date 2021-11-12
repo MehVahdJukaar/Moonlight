@@ -25,9 +25,12 @@ public class FluidParticleColors {
                 if(location==null)continue;
                 TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
                 TextureAtlasSprite sprite = textureMap.getSprite(location);
-                int fluidTint = f.getAttributes().getColor();
-
-                int averageColor = getColorFrom(sprite,fluidTint);
+                int averageColor = -1;
+                try {
+                    averageColor = getColorFrom(sprite, f.getAttributes().getColor());
+                }catch (Exception e){
+                    Selene.LOGGER.warn("failed to load particle color for "+sprite.toString()+" using current resource pack. might be a broken png.mcmeta");
+                }
                 particleColor.put(key, averageColor);
             }
         }
@@ -59,24 +62,35 @@ public class FluidParticleColors {
     //credits to Random832
     private static int getColorFrom(TextureAtlasSprite sprite, int tint) {
         if (sprite == null || sprite.getFrameCount() == 0) return -1;
+        
         int tintR = tint >> 16 & 255;
         int tintG = tint >> 8 & 255;
         int tintB = tint & 255;
         int total = 0, totalR = 0, totalB = 0, totalG = 0;
-        for (int x = 0; x < sprite.getWidth(); x++) {
-            for (int y = 0; y < sprite.getHeight(); y++) {
-                int pixel = 0;
 
-                pixel = sprite.getPixelRGBA(0, x, y);
+        for(int tryFrame = 0; tryFrame < sprite.getFrameCount(); tryFrame++) {
+            try {
+                for (int x = 0; x < sprite.getWidth(); x++) {
+                    for (int y = 0; y < sprite.getHeight(); y++) {
 
-                // this is in 0xAABBGGRR format, not the usual 0xAARRGGBB.
-                int pixelB = pixel >> 16 & 255;
-                int pixelG = pixel >> 8 & 255;
-                int pixelR = pixel & 255;
-                ++total;
-                totalR += pixelR;
-                totalG += pixelG;
-                totalB += pixelB;
+                        int pixel = sprite.getPixelRGBA(tryFrame, x, y);
+
+                        // this is in 0xAABBGGRR format, not the usual 0xAARRGGBB.
+                        int pixelB = pixel >> 16 & 255;
+                        int pixelG = pixel >> 8 & 255;
+                        int pixelR = pixel & 255;
+                        ++total;
+                        totalR += pixelR;
+                        totalG += pixelG;
+                        totalB += pixelB;
+                    }
+                }
+                break;
+            } catch (Exception e) {
+                total = 0;
+                totalR = 0;
+                totalB = 0;
+                totalG = 0;
             }
         }
         if (total <= 0) return -1;
