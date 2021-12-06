@@ -12,7 +12,7 @@ license="All rights reserved"
 # The modid of the mod
 modId="selene" #mandatory
 
-version="${file.jarVersion}" #mandatory
+version="1.17.1-1.11.0" #mandatory
  # A display name for the mod
 displayName="Selene" #mandatory
 

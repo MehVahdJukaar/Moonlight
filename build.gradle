@@ -27,7 +27,7 @@ mixin {
     add sourceSets.main, "selene.refmap.json"
 }
 
-version = '1.17.1-1.1'
+version = '1.17.1-1.11'
 group = 'net.mehvahdjukaar.selene' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'selene'
 

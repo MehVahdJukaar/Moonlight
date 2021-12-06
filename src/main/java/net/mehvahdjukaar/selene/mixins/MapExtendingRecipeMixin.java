@@ -18,8 +18,8 @@ public abstract class MapExtendingRecipeMixin {
                     target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
                     ordinal = 1))
     private boolean matches(ItemStack original, CraftingContainer inventory, Level world) {
-        CompoundTag compoundnbt = original.getTag();
-        if (compoundnbt != null && compoundnbt.contains("CustomDecorations", 9)) {
+        CompoundTag tag = original.getTag();
+        if (tag != null && tag.contains("CustomDecorations", 9)) {
             return true;
         }
         return original.isEmpty();

@@ -8,14 +8,14 @@ import net.minecraft.core.BlockPos;
  * utility class do not instance
  * used to create decorations for decoration types that don't have a marker
  */
-public class DummyMapWorldMarker extends MapWorldMarker<CustomDecoration> {
+public class DummyMapWorldMarker<T extends CustomDecoration> extends MapWorldMarker<T> {
 
-    public DummyMapWorldMarker(CustomDecorationType<CustomDecoration,?> type, int x, int z) {
+    public DummyMapWorldMarker(CustomDecorationType<T,?> type, int x, int z) {
         super(type);
         setPos(new BlockPos(x,64,z));
     }
     @Override
-    protected CustomDecoration doCreateDecoration(byte mapX, byte mapY, byte rot) {
-        return new CustomDecoration(this.getType(),mapX,mapY,rot,null);
+    protected T doCreateDecoration(byte mapX, byte mapY, byte rot) {
+        return (T) new CustomDecoration(this.getType(),mapX,mapY,rot,null);
     }
 }
