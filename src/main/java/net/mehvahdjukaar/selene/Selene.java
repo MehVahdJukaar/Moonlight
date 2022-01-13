@@ -7,6 +7,7 @@ import com.mojang.math.Vector3f;
 import net.mehvahdjukaar.selene.setup.ClientSetup;
 import net.mehvahdjukaar.selene.setup.ModSetup;
 import net.mehvahdjukaar.selene.util.TwoHandedAnimation;
+import net.mehvahdjukaar.selene.villager_ai.VillagerAIManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.*;
 import net.minecraft.client.model.geom.ModelPart;
@@ -42,7 +43,7 @@ public class Selene {
     public Selene() {
 
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-
+        VillagerAIManager.SCHEDULES.register(bus);
         bus.addListener(ModSetup::init);
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> bus.addListener(ClientSetup::init));
     }
