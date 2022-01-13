@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.setup;
 
-import net.mehvahdjukaar.selene.common.ModCriteriaTriggers;
+import net.mehvahdjukaar.selene.data.ModCriteriaTriggers;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;

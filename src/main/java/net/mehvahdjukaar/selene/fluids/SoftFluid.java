@@ -132,8 +132,6 @@ public class SoftFluid {
         return this.equivalentFluids.contains(fluid);
     }
 
-
-
     public boolean isEmpty() {
         return this == SoftFluidRegistry.EMPTY;
     }

@@ -12,7 +12,7 @@ license="All rights reserved"
 # The modid of the mod
 modId="selene" #mandatory
 
-version="${file.jarVersion}" #mandatory
+version="1.18-1.11.0" #mandatory
  # A display name for the mod
 displayName="Selene" #mandatory
 
@@ -43,6 +43,6 @@ A small library that allows to make custom map markers, first and third person a
     modId="minecraft"
     mandatory=true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-    versionRange="[1.17.1,1.18)"
+    versionRange="[1.18,1.19)"
     ordering="NONE"
     side="BOTH"

@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.mixins;
 
 
-import net.mehvahdjukaar.selene.common.ModCriteriaTriggers;
+import net.mehvahdjukaar.selene.data.ModCriteriaTriggers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -14,8 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class GrindstoneMenuSlotMixin {
 
 
-    @Inject(method = {"onTake", "m_142406_"
-    }, at = @At("RETURN"))
+    @Inject(method = {"onTake"}, at = @At("RETURN"))
     private void onTake(Player player, ItemStack stack, CallbackInfo ci) {
         if(player instanceof ServerPlayer)
             ModCriteriaTriggers.GRIND.trigger((ServerPlayer)player, stack.copy());

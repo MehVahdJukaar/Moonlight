@@ -2,48 +2,48 @@ package net.mehvahdjukaar.selene.mixins;
 
 import com.google.common.collect.Maps;
 import net.mehvahdjukaar.selene.Selene;
-import net.mehvahdjukaar.selene.map.CustomDecoration;
-import net.mehvahdjukaar.selene.map.ExpandedMapData;
-import net.mehvahdjukaar.selene.map.CustomDecorationType;
-import net.mehvahdjukaar.selene.map.MapDecorationHandler;
+import net.mehvahdjukaar.selene.map.*;
 import net.mehvahdjukaar.selene.map.markers.DummyMapWorldMarker;
 import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
-import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.mehvahdjukaar.selene.network.ClientBoundSyncCustomMapDecorationPacket;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
+import net.mehvahdjukaar.selene.network.NetworkHandler;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.maps.MapBanner;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraft.world.level.saveddata.maps.MapBanner;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraftforge.network.PacketDistributor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 
 @Mixin(MapItemSavedData.class)
 public abstract class MapDataMixin extends SavedData implements ExpandedMapData {
 
+
+    @Invoker("<init>")
+    private static MapItemSavedData newMap(int pX, int pZ, byte pScale, boolean pTrackingPosition, boolean pUnlimitedTracking, boolean pLocked, ResourceKey<Level> pDimension) {
+        throw new AssertionError();
+    }
 
     @Final
     @Shadow
@@ -65,21 +65,37 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Shadow
     public ResourceKey<Level> dimension;
 
-    @Shadow
-    public byte[] colors;
     @Final
     @Shadow
     public boolean locked;
+
     @Shadow
     @Final
     private Map<String, MapBanner> bannerMarkers;
-    //new decorations (stuff that gets rendered)
 
+    @Shadow
+    @Final
+    private boolean trackingPosition;
+    @Shadow
+    @Final
+    private boolean unlimitedTracking;
+
+    @Shadow
+    public abstract MapItemSavedData locked();
+
+    //new decorations (stuff that gets rendered)
     public Map<String, CustomDecoration> customDecorations = Maps.newLinkedHashMap();
 
     //world markers
-
     private final Map<String, MapWorldMarker<?>> customMapMarkers = Maps.newHashMap();
+
+    //custom data that can be stored in maps
+    public final Map<String, CustomDataHolder.Instance<?>> customData = new HashMap<>();
+
+    @Override
+    public Map<String, CustomDataHolder.Instance<?>> getCustomData() {
+        return customData;
+    }
 
     @Override
     public Map<String, CustomDecoration> getCustomDecorations() {
@@ -101,24 +117,46 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Inject(method = "locked", at = @At("RETURN"), cancellable = true)
     public void locked(CallbackInfoReturnable<MapItemSavedData> cir) {
         MapItemSavedData data = cir.getReturnValue();
-        if (data instanceof ExpandedMapData) {
-            this.customMapMarkers.putAll(((ExpandedMapData) data).getCustomMarkers());
-            this.customDecorations.putAll(((ExpandedMapData) data).getCustomDecorations());
+        if (data instanceof ExpandedMapData expandedMapData) {
+            expandedMapData.getCustomMarkers().putAll(this.getCustomMarkers());
+            expandedMapData.getCustomDecorations().putAll(this.getCustomDecorations());
         }
     }
 
-    @Inject(method = "tickCarriedBy", at = @At("TAIL"), cancellable = true)
+    @Inject(method = "scaled", at = @At("RETURN"), cancellable = true)
+    public void scaled(CallbackInfoReturnable<MapItemSavedData> cir) {
+        MapItemSavedData data = cir.getReturnValue();
+        if (data instanceof ExpandedMapData expandedMapData) {
+            expandedMapData.getCustomData().putAll(this.customData);
+        }
+    }
+
+    public Map<String, MapBanner> getBannerMarkersMap() {
+        return bannerMarkers;
+    }
+
+    public Map<String, MapDecoration> getDecorationsMap() {
+        return decorations;
+    }
+
+    public MapItemSavedData copy() {
+        MapItemSavedData newData = MapItemSavedData.load(this.save(new CompoundTag()));
+        newData.setDirty();
+        return newData;
+    }
+
+    @Inject(method = "tickCarriedBy", at = @At("TAIL"))
     public void tickCarriedBy(Player player, ItemStack stack, CallbackInfo ci) {
-        CompoundTag compoundnbt = stack.getTag();
-        if (compoundnbt != null && compoundnbt.contains("CustomDecorations", 9)) {
-            ListTag listnbt = compoundnbt.getList("CustomDecorations", 10);
+        CompoundTag tag = stack.getTag();
+        if (tag != null && tag.contains("CustomDecorations", 9)) {
+            ListTag listTag = tag.getList("CustomDecorations", 10);
             //for exploration maps
-            for (int j = 0; j < listnbt.size(); ++j) {
-                CompoundTag com = listnbt.getCompound(j);
+            for (int j = 0; j < listTag.size(); ++j) {
+                CompoundTag com = listTag.getCompound(j);
                 if (!this.decorations.containsKey(com.getString("id"))) {
                     String name = com.getString("type");
-                    //TODO: add more checks
-                    CustomDecorationType<CustomDecoration, ?> type = (CustomDecorationType<CustomDecoration, ?>) MapDecorationHandler.get(name);
+
+                    CustomDecorationType<? extends CustomDecoration, ?> type = MapDecorationHandler.get(name);
                     if (type != null) {
                         MapWorldMarker<CustomDecoration> dummy = new DummyMapWorldMarker(type, com.getInt("x"), com.getInt("z"));
                         this.addCustomDecoration(dummy);
@@ -144,11 +182,20 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     mapData.addCustomDecoration(marker);
                 }
             }
+
+            var customData = mapData.getCustomData();
+            customData.clear();
+            MapDecorationHandler.CUSTOM_MAP_DATA_TYPES.forEach((s, o) -> {
+                CustomDataHolder.Instance<?> i = o.create(compound);
+                if (i != null) customData.put(s, i);
+            });
         }
+
+
     }
 
     @Inject(method = "save", at = @At("RETURN"), cancellable = true)
-    public void save(CompoundTag p_189551_1_, CallbackInfoReturnable<CompoundTag> cir) {
+    public void save(CompoundTag tag, CallbackInfoReturnable<CompoundTag> cir) {
         CompoundTag com = cir.getReturnValue();
 
         ListTag listNBT = new ListTag();
@@ -159,10 +206,14 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             listNBT.add(com2);
         }
         com.put("customMarkers", listNBT);
+
+        this.customData.forEach((s, o) -> o.save(tag));
+
     }
 
     @Override
     public void resetCustomDecoration() {
+
         for (String key : this.customMapMarkers.keySet()) {
             this.customDecorations.remove(key);
             this.customMapMarkers.remove(key);
@@ -201,7 +252,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         }
     }
 
-    @Inject(method = "checkBanners", at = @At("TAIL"), cancellable = true)
+    @Inject(method = "checkBanners", at = @At("TAIL"))
     public void checkBanners(BlockGetter world, int x, int z, CallbackInfo ci) {
         Iterator<MapWorldMarker<?>> iterator = this.customMapMarkers.values().iterator();
 
@@ -217,8 +268,6 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     newMarker.updateDecoration(this.customDecorations.get(id));
                 }
             }
-
-
         }
     }
 
@@ -227,11 +276,13 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         Packet<?> packet = cir.getReturnValue();
         if (pPlayer instanceof ServerPlayer serverPlayer && packet instanceof ClientboundMapItemDataPacket) {
             NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
-                    new ClientBoundSyncCustomMapDecorationPacket(pMapId, this.scale, this.locked, null, this.customDecorations.values().toArray(new CustomDecoration[0])));
+                    new ClientBoundSyncCustomMapDecorationPacket(pMapId, this.scale, this.locked, null,
+                            this.customDecorations.values().toArray(new CustomDecoration[0]),
+                            this.customData.values().toArray(new CustomDataHolder.Instance[0])));
         }
     }
 
-    public int getVanillaDecorationSize(){
+    public int getVanillaDecorationSize() {
         return this.decorations.size();
     }
 

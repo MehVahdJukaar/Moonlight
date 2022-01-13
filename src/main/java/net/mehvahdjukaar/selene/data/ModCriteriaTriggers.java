@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.common;
+package net.mehvahdjukaar.selene.data;
 
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.CriteriaTriggers;

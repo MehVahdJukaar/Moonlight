@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MapItemRendererMixin {
 
 
-    @Inject(method = "render", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "render", at = @At("RETURN"))
     private void render(PoseStack poseStack, MultiBufferSource buffer, int mapId, MapItemSavedData mapData, boolean isOnFrame, int light, CallbackInfo ci) {
         if (mapData instanceof ExpandedMapData data) {
             int index = data.getVanillaDecorationSize();

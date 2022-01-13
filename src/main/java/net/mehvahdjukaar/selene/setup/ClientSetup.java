@@ -26,7 +26,7 @@ public class ClientSetup {
     //textures
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
-        if (event.getMap().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
+        if (event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
             FluidTextures.getTexturesToStitch().forEach(event::addSprite);
         }
     }
