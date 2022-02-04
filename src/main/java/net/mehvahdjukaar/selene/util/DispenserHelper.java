@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.selene.util;
 
 
+import com.google.common.collect.ImmutableSet;
 import net.mehvahdjukaar.selene.fluids.ISoftFluidHolder;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidHolder;
@@ -53,20 +54,22 @@ public class DispenserHelper {
     private static Set<Item> REGISTERED_FLUID_ITEMS = new HashSet<>();
 
     public static void registerFluidBehavior(SoftFluid f) {
+        Set<Item> registeredFluidItems = new HashSet<>();
         Map<Item, SoftFluid.FilledContainerCategory> map = f.getFilledContainersMap();
         for (Item empty : map.keySet()) {
             //prevents registering stuff twice
-            if (empty != Items.AIR && !REGISTERED_FLUID_ITEMS.contains(empty)){
+            if (empty != Items.AIR && !registeredFluidItems.contains(empty)){
                 registerCustomBehavior(new FillFluidHolderBehavior(empty));
-                REGISTERED_FLUID_ITEMS.add(empty);
+                registeredFluidItems.add(empty);
             }
             for (Item full : map.get(empty).getItems()) {
-                if (full != Items.AIR && !REGISTERED_FLUID_ITEMS.contains(full)){
+                if (full != Items.AIR && !registeredFluidItems.contains(full)){
                     registerCustomBehavior(new FillFluidHolderBehavior(full));
-                    REGISTERED_FLUID_ITEMS.add(full);
+                    registeredFluidItems.add(full);
                 }
             }
         }
+        REGISTERED_FLUID_ITEMS = ImmutableSet.copyOf(registeredFluidItems);
     }
 
     /**

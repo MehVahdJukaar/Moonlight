@@ -54,15 +54,15 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
         this.mimic = NbtUtils.readBlockState(compound.getCompound("Mimic"));
     }
 
-
-    public CompoundTag save(CompoundTag compound) {
-        super.save(compound);
-        compound.put("Mimic", NbtUtils.writeBlockState(mimic));
-
-        return compound;
+    @Override
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
+        compoundTag.put("Mimic", NbtUtils.writeBlockState(mimic));
     }
 
+
     //client
+    @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
         BlockState oldMimic = this.mimic;
         CompoundTag tag = pkt.getTag();

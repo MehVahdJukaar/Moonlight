@@ -157,6 +157,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         ContainerHelper.loadAllItems(compound, this.stacks);
         if (this.level != null) {
             if (this.level.isClientSide) this.updateClientVisualsOnLoad();
+            //this doesnt work on first load cause world is null on server. You need to save stuff on nbt
             else this.updateTileOnInventoryChanged();
         }
         this.loadOwner(compound);

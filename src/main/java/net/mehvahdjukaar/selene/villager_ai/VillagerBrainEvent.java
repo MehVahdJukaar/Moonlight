@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.selene.villager_ai;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.selene.Selene;
 import net.minecraft.world.entity.ai.Brain;
@@ -10,6 +12,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.entity.schedule.ScheduleBuilder;
@@ -17,22 +20,20 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 
-public class VillagerBrainEvent<T extends AbstractVillager> extends Event {
+public class VillagerBrainEvent extends Event {
 
     private TreeMap<Integer, Activity> scheduleBuilder = null;
 
-    private final Brain<T> brain;
-    private final T villager;
+    private final Brain<Villager> brain;
+    private final Villager villager;
 
     /**
      * used to add activities, memories, sensor types and modify schedules in a compatible way
      * Main feature is easily adding scheduled activities without overriding the whole schedule and adding sensor types
      */
-    public VillagerBrainEvent(Brain<T> brain, T villager) {
+    public VillagerBrainEvent(Brain<Villager> brain, Villager villager) {
         this.brain = brain;
         this.villager = villager;
     }
@@ -43,12 +44,13 @@ public class VillagerBrainEvent<T extends AbstractVillager> extends Event {
      *
      * @return villager entity
      */
-    public T getVillager() {
+    public Villager getVillager() {
         return villager;
     }
 
     /**
      * access the brain memories to add new ones or remove existing ones
+     * Important: to register new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
      *
      * @return brain memories
      */
@@ -57,14 +59,17 @@ public class VillagerBrainEvent<T extends AbstractVillager> extends Event {
     }
 
     /**
-     * add a new activity to the brain. You will need to give the villager a new schedule task to be able to use it
+     * add an activity to the brain.
+     * However this isn't recommended since it doesn't completely clear its previous requirements from the requirements map. This might not be an issue tho
+     * Try to use addTaskToActivity instead if you just want to add a task to an existing activity without completely overriding it
      *
      * @param activity        the identifier of the activity
      * @param activityPackage the play package itself that will be executed
      */
-    public void addActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends Behavior<T>>> activityPackage) {
+    public void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends Behavior<? super Villager>>> activityPackage) {
         this.brain.addActivity(activity, activityPackage);
     }
+
 
     /**
      * Adds an activity to the schedule. will override any activity that is in that specified time window
@@ -117,12 +122,12 @@ public class VillagerBrainEvent<T extends AbstractVillager> extends Event {
      *
      * @param newSensor sensor to be added
      */
-    public void addSensor(SensorType<? extends Sensor<T>> newSensor) {
+    public void addSensor(SensorType<? extends Sensor<Villager>> newSensor) {
         if (SENSORS == null) SENSORS = ObfuscationReflectionHelper.findField(Brain.class, "f_21844_");
 
         SENSORS.setAccessible(true);
         try {
-            var sensors = (Map<SensorType<? extends Sensor<T>>, Sensor<T>>) SENSORS.get(brain);
+            var sensors = (Map<SensorType<? extends Sensor<Villager>>, Sensor<Villager>>) SENSORS.get(brain);
 
             var sensorInstance = newSensor.create();
             sensors.put(newSensor, sensorInstance);
@@ -138,8 +143,40 @@ public class VillagerBrainEvent<T extends AbstractVillager> extends Event {
     }
 
     private static Field SENSORS = null;
+    private static Field ACTIVITY_MAP = null;
 
-    private TreeMap<Integer, Activity> makeDefaultSchedule(T villager) {
+
+    /**
+     * Used to add a single task to an existing activity. Useful so you can add to existing activities without overriding or having to override the entire activity.
+     * Alternatively you can define your own activity and add it to the villager schedule using scheduleActivity
+     * @param activity activity you want to add a task to
+     * @param task task to add with its priority
+     * @return if successfull
+     */
+    public <P extends Pair<Integer, ? extends Behavior<Villager>>> boolean addTaskToActivity(Activity activity, P task) {
+        if (ACTIVITY_MAP == null) ACTIVITY_MAP = ObfuscationReflectionHelper.findField(Brain.class, "f_21845_");
+
+        ACTIVITY_MAP.setAccessible(true);
+        try {
+            Map<Integer, Map<Activity, Set<Behavior<Villager>>>> map =
+                    (Map<Integer, Map<Activity, Set<Behavior<Villager>>>>) ACTIVITY_MAP.get(this.brain);
+
+            var tasksWithSamePriority = map.computeIfAbsent(task.getFirst(), (m) -> Maps.newHashMap());
+
+            var activityTaskSet = tasksWithSamePriority.computeIfAbsent(activity, (a) -> Sets.newLinkedHashSet());
+
+            activityTaskSet.add(task.getSecond());
+
+            return true;
+
+        } catch (Exception e) {
+            Selene.LOGGER.warn("failed to add task for activity {} for villagers: {}", activity, e);
+        }
+        return false;
+    }
+
+
+    private TreeMap<Integer, Activity> makeDefaultSchedule(Villager villager) {
         TreeMap<Integer, Activity> map = new TreeMap<>();
         //mimics vanilla behavior until I figure out how to decode a compiled schedule
         if (villager.isBaby()) {

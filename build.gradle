@@ -27,7 +27,7 @@ mixin {
     add sourceSets.main, "selene.refmap.json"
 }
 
-version = '1.18-1.11'
+version = '1.18-1.13.0'
 group = 'net.mehvahdjukaar.selene' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'selene'
 
@@ -134,8 +134,9 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
 
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.14'
 
-    minecraft 'net.minecraftforge:forge:1.18-38.0.14'
+    implementation fg.deobf("curse.maven:farmersdelight-398521:3575116")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
@@ -302,5 +303,6 @@ dependencies {
     }
 
     // Other standard gradle dependencies
+
 
 }
