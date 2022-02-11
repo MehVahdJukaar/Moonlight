@@ -134,7 +134,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
 
-    minecraft 'net.minecraftforge:forge:1.18.1-39.0.14'
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.62'
 
     implementation fg.deobf("curse.maven:farmersdelight-398521:3575116")
 

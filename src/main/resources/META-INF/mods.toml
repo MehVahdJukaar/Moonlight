@@ -48,6 +48,13 @@ license="All rights reserved"
     ordering="AFTER"
     side="BOTH"
 
+[[dependencies.selene]]
+    modId = "architectury"
+    mandatory = false
+    versionRange = "[3.4.9,)"
+    ordering = "AFTER"
+    side = "BOTH"
+
 [[dependencies.selene]] #optional
     # the modid of the dependency
     modId="forge" #mandatory

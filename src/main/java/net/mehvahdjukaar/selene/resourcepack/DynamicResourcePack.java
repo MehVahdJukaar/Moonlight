@@ -2,6 +2,8 @@ package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.NativeImage;
+import net.mehvahdjukaar.selene.util.BlockSetHandler;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -14,14 +16,20 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.regex.qual.Regex;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -116,7 +124,7 @@ public abstract class DynamicResourcePack implements PackResources {
     @Override
     public InputStream getResource(PackType type, ResourceLocation id) throws IOException {
         if (type != this.packType) {
-            throw new IOException(String.format("tried to access wrong type of resource on %s.", this.resourcePackName));
+            throw new IOException(String.format("Tried to access wrong type of resource on %s.", this.resourcePackName));
         }
         if (this.resources.containsKey(id)) {
             try {
@@ -136,8 +144,9 @@ public abstract class DynamicResourcePack implements PackResources {
     @Override
     public void close() {
         if (this.packType == PackType.CLIENT_RESOURCES) {
-            this.resources.clear();
-            this.namespaces.clear();
+            // do not clear after reloading texture packs. should always be on
+            // this.resources.clear();
+            // this.namespaces.clear();
         }
     }
 
@@ -179,12 +188,62 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
-    public void addJson(ResourceLocation location, JsonElement json, RPUtils.ResType resType){
+    public void addJson(ResourceLocation location, JsonElement json, RPUtils.ResType resType) {
         this.addJson(RPUtils.resPath(location, resType), json);
     }
 
-    public void addBytes(ResourceLocation location, byte[] bytes, RPUtils.ResType resType){
+    public void addBytes(ResourceLocation location, byte[] bytes, RPUtils.ResType resType) {
         this.addBytes(RPUtils.resPath(location, resType), bytes);
+    }
+
+    /**
+     * This is a handy method for dynamic resource pack since it allows to specify the name of an existing resource
+     * that will then be copied and modified replacing a certain keyword in it with another.
+     * This is useful when adding new woodtypes as one can simply manually add a default wood json and provide the method with the
+     * default woodtype name and the target name
+     * The target location will the one of this pack while its path will be the original one modified following the same principle as the json itself
+     *
+     * @param resource    target resource that will be copied, modified and saved back
+     * @param keyword     keyword to replace
+     * @param replaceWith word to replace the keyword with
+     */
+    public void addSimilarJsonResource(RPUtils.StaticResource resource, String keyword, String replaceWith) {
+        ResourceLocation fullPath = resource.location;
+
+        try {
+            String string = new String(resource.data, StandardCharsets.UTF_8);
+
+            if (!string.contains(keyword)) {
+                LOGGER.error("Resource {} did not contain keyword {}. ", fullPath, keyword);
+                return;
+            }
+
+            string = string.replace(keyword, replaceWith);
+            //calculates new path
+            StringBuilder builder = new StringBuilder();
+            String[] partial = fullPath.getPath().split("/");
+            for (int i = 0; i < partial.length; i++) {
+                if (i != 0) builder.append("/");
+                if (i == partial.length - 1) {
+                    builder.append(partial[i].replace(keyword, replaceWith));
+                } else builder.append(partial[i]);
+            }
+            //adds modified under my namespace
+            ResourceLocation newRes = new ResourceLocation(resourcePackName.getNamespace(), builder.toString());
+            this.addBytes(newRes, string.getBytes());
+        } catch (Exception e) {
+            LOGGER.error("Failed to read resource {}", fullPath, e);
+        }
+
+    }
+
+    @FunctionalInterface
+    public interface TextTransform {
+        String accept(String input);
+       
+        static TextTransform replace(String from, String to){
+            return s -> s.replace(from,to);
+        }
     }
 
 

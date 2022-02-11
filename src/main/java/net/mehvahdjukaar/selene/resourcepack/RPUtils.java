@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -18,30 +19,52 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 public class RPUtils {
 
-    public enum ResType {
-        TAGS("tags/{}.json"),
-        LOOT_TABLES("loot_tables/{}.json"),
-        RECIPES("recipes/{}.json"),
-        ADVANCEMENTS("advancements/{}.json"),
+    /**
+     * Represents a generic resource that can be read multiple times. Consumes the original resource
+     */
+    public static class StaticResource{
+        public final byte[] data;
+        public final ResourceLocation location;
+        public final String sourceName;
 
-        LANG("lang/{}.json"),
-        TEXTURES("textures/{}.png"),
-        BLOCK_TEXTURES("textures/block/{}.png"),
-        ITEM_TEXTURES("textures/item/{}.png"),
-        BLOCK_MCMETA("textures/block/{}.png.mcmeta"),
-        ITEM_MCMETA("textures/item/{}.mcmeta"),
-        MODELS("models/{}.json"),
-        BLOCK_MODELS("models/block/{}.json"),
-        ITEM_MODELS("models/item/{}.json"),
-        BLOCKSTATES("blockstates/{}.json");
+        public StaticResource(Resource original) {
+            byte[] data1;
+            try {
+                data1 = original.getInputStream().readAllBytes();
+            } catch (IOException e) {
+                data1 = new byte[]{};
+            }
+
+            this.data = data1;
+            this.location = original.getLocation();
+            this.sourceName = original.getSourceName();
+        }
+    }
+
+    public enum ResType {
+        GENERIC("%s"),
+        TAGS("tags/%s.json"),
+        LOOT_TABLES("loot_tables/%s.json"),
+        RECIPES("recipes/%s.json"),
+        ADVANCEMENTS("advancements/%s.json"),
+
+        LANG("lang/%s.json"),
+        TEXTURES("textures/%s.png"),
+        BLOCK_TEXTURES("textures/block/%s.png"),
+        ITEM_TEXTURES("textures/item/%s.png"),
+        ENTITY_TEXTURES("textures/entity/%s.png"),
+        MCMETA("textures/%s.png.mcmeta"),
+        BLOCK_MCMETA("textures/block/%s.png.mcmeta"),
+        ITEM_MCMETA("textures/item/%s.png.mcmeta"),
+        MODELS("models/%s.json"),
+        BLOCK_MODELS("models/block/%s.json"),
+        ITEM_MODELS("models/item/%s.json"),
+        BLOCKSTATES("blockstates/%s.json");
 
         public final String loc;
 
@@ -52,6 +75,10 @@ public class RPUtils {
 
     public static ResourceLocation resPath(ResourceLocation relativeLocation, ResType type) {
         return new ResourceLocation(relativeLocation.getNamespace(), String.format(type.loc, relativeLocation.getPath()));
+    }
+
+    public static ResourceLocation resPath(String relativeLocation, ResType type) {
+        return resPath(new ResourceLocation(relativeLocation), type);
     }
 
 
@@ -77,7 +104,7 @@ public class RPUtils {
 
 
     public static class LangBuilder {
-        private final Map<String, String> entries = new HashMap<>();
+        private final Map<String, String> entries = new LinkedHashMap<>();
 
         public void addGenericEntry(String key, String translation) {
             entries.put(key, translation);

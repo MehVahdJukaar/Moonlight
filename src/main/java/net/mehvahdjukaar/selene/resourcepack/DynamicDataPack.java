@@ -36,7 +36,7 @@ public class DynamicDataPack extends DynamicResourcePack {
         try {
             server.reloadResources(packs.getSelectedIds()).get();
         } catch (Exception e) {
-            LOGGER.error("Failed to reload test resource packs.", e);
+            LOGGER.error("Failed to reload dynamic resource pack {}.",this.getName(), e);
         }
     }
 

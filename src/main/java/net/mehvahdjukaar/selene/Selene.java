@@ -21,6 +21,12 @@ import net.minecraftforge.registries.GameData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.function.Consumer;
+
 @Mod(Selene.MOD_ID)
 public class Selene {
 
@@ -28,16 +34,35 @@ public class Selene {
 
     public static final Logger LOGGER = LogManager.getLogger();
 
+    //mod specific bus. important because it will have lowest priority thanks to wood loader dummy mod
+    public static IEventBus MOD_BUS = null;
+    
     public Selene() {
 
         MOD_BUS = FMLJavaModLoadingContext.get().getModEventBus();
         VillagerAIManager.SCHEDULES.register(MOD_BUS);
         MOD_BUS.addListener(ModSetup::init);
+        MOD_BUS.addListener(BlockSetHandler::detectWoodTypes);
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> MOD_BUS.addListener(ClientSetup::init));
 
+        BUS_WORK_QUEUE.forEach(w->w.accept(MOD_BUS));
     }
 
-    public static IEventBus MOD_BUS;
+    private static final Queue<Consumer<IEventBus>> BUS_WORK_QUEUE = new PriorityQueue<>();
+
+    //tries to run some code on the mod bus as late as possible
+    public static void enqueueLateBusWork(Consumer<IEventBus> work){
+        if(MOD_BUS == null){
+            BUS_WORK_QUEUE.add(work);
+        }
+        else{
+            //if bus is not null means this current mod is running AFTER this so we can register on ITS bus
+            work.accept(FMLJavaModLoadingContext.get().getModEventBus());
+            //work.accept(MOD_BUS);
+
+        }
+    }
+
 
 
 

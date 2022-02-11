@@ -12,15 +12,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryObject;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -49,50 +49,59 @@ public class BlockSetHandler {
         return WOOD_TYPES.getOrDefault(new ResourceLocation(name), OAK_WOOD_TYPE);
     }
 
-    private static final Map<Class<? extends IForgeRegistryEntry<?>>, List<WoodRegistryCallback<?>>>
-            CALLBACKS = new HashMap<>();
-
-    public static void init() {
-        CALLBACKS.clear();
+    public static void onModSetup() {
+        if (ForgeRegistries.BLOCKS.getValues().size() > totalBlockRegistered) {
+            Selene.LOGGER.error("Conditional registration didn't run last. This might have cause it to miss some wood types.");
+        }
     }
+
+
 
     @FunctionalInterface
     public interface WoodRegistryCallback<T extends IForgeRegistryEntry<T>> {
         void accept(RegistryEvent.Register<T> reg, Collection<WoodSetType> wood);
     }
 
+    private static int totalBlockRegistered = 0;
+
+    //Fires after the block registration one. We use it to first gather all wood types, then register out blocks here
+    //hopefully it should not cause problems
+    public static void detectWoodTypes(RegistryEvent.Register<Item> event) {
+
+    }
+
+    private static final List<WoodRegistryCallback<Block>> LATE_BLOCK_REGISTRATIONS = new ArrayList<>();
 
     /**
      * Add a registry function meant to register a set of blocks that use a specific wood type
      * Other entries like items can access WOOD_TYPES directly since it will be filled
+     * Will be called (hopefully) after all other block registrations have been fired so the wood set type is complete
+     * IMPORTANT: your mod needs to be set to run AFTER this mod. You can sed it in your mods.toml dependency
+     * If you dont this will still work but registration will throw some warnings
      *
      * @param registrationFunction registry function
      */
     public static <T extends IForgeRegistryEntry<T>> void addWoodRegistrationCallback(WoodRegistryCallback<T> registrationFunction, Class<T> regType) {
 
-        if (!CALLBACKS.containsKey(regType)) {
-            CALLBACKS.put(regType, new ArrayList<>());
 
-            //if new registry type is added also register its event, so it gets called
+        //event consumer
+        Consumer<RegistryEvent.Register<T>> consumer = e -> {
+            if (!hasFilledWoodTypes) {
+                findAllAvailableWoodTypes();
+                hasFilledWoodTypes = true;
+            }
+            registrationFunction.accept(e, WOOD_TYPES.values());
+            //sanity check to verity that this indeed run last
+            if (regType == Block.class) {
+                totalBlockRegistered = ForgeRegistries.BLOCKS.getValues().size();
+            }
+        };
 
-            //Ugliest shit ever lol
-            Consumer<RegistryEvent.Register<T>> consumer = e -> {
-                if (!hasFilledWoodTypes) {
-                    findAllAvailableWoodTypes();
-                    hasFilledWoodTypes = true;
-                }
-                var ls = CALLBACKS.get(regType);
-                for (var c : ls) {
-                    ((WoodRegistryCallback<T>) c).accept(e, WOOD_TYPES.values());
-                }
-            };
+        //so I'm sure it gets added to this mod bus
+        //bus consumer
 
-            //so I'm sure it gets added to this mod bus
-            Selene.MOD_BUS.addGenericListener(regType, EventPriority.LOWEST, consumer);
-        }
-        var list = CALLBACKS.get(regType);
+        Selene.enqueueLateBusWork(b -> b.addGenericListener(regType, EventPriority.LOWEST, consumer));
 
-        list.add(registrationFunction);
     }
 
 
@@ -121,7 +130,7 @@ public class BlockSetHandler {
         if (name != null) {
             BlockState state = baseBlock.defaultBlockState();
             //needs to use wood sound type
-            if (state.getSoundType() == SoundType.WOOD) {
+            if (state.getSoundType() == SoundType.WOOD || baseRes.equals("tconstruct")) { //wood from tcon has diff sounds
                 Material mat = state.getMaterial();
                 //and have correct material
                 if (mat == Material.WOOD || mat == Material.NETHER_WOOD) {
@@ -138,16 +147,34 @@ public class BlockSetHandler {
         public final Material material;
         public final Block baseBlock;
         //if true then this woodtype probably shouldn't have other blocks assigned to it
-        public final boolean hasFence;
         public final String shortenedNamespace;
+        @Nullable
+        public final Block logBlock;
 
         protected WoodSetType(ResourceLocation id, Block baseBlock) {
             this.id = id;
             this.baseBlock = baseBlock;
             this.material = baseBlock.defaultBlockState().getMaterial();
-            String[] test = {id.toString() + "_fence", id.toString() + "_planks_fence", id.toString() + "_plank_fence"};
-            this.hasFence = Arrays.stream(test).anyMatch(s -> ForgeRegistries.BLOCKS.containsKey(new ResourceLocation(s)));
-            this.shortenedNamespace = id.getNamespace().equals("minecraft") ? "" : "_" + getAbbreviation(id.getNamespace());
+            this.shortenedNamespace = id.getNamespace().equals("minecraft") ? "" : "_" + abbreviateString(id.getNamespace());
+            //check if it has its log
+            ResourceLocation[] test = {
+                    new ResourceLocation(id.getNamespace(), id.getPath() + "_log"),
+                    new ResourceLocation(id.getNamespace(), "log_" + id.getPath()),
+                    new ResourceLocation(id.getPath() + "_log"),
+                    new ResourceLocation("log_" + id.getPath()),
+                    new ResourceLocation(id.getNamespace(), id.getPath() + "_stem"),
+                    new ResourceLocation(id.getNamespace(), "stem_" + id.getPath()),
+                    new ResourceLocation(id.getPath() + "_stem"),
+                    new ResourceLocation("stem_" + id.getPath())
+            };
+            Block temp = null;
+            for (var r : test) {
+                if (ForgeRegistries.BLOCKS.containsKey(r)) {
+                    temp = ForgeRegistries.BLOCKS.getValue(r);
+                    break;
+                }
+            }
+            this.logBlock = temp;
         }
 
         @Override
@@ -172,12 +199,41 @@ public class BlockSetHandler {
         /**
          * @return relatively short id used to append to blocks registryNames
          */
+        @Deprecated
         public String getAppendableId() {
             return this.getWoodName() + this.shortenedNamespace;
         }
 
+        /**
+         * Use this to get the new id of a block variant
+         *
+         * @param baseName base variant name
+         * @return something like mod_id/[baseName]_oak. ignores minecraft namespace
+         */
+        public String getVariantId(String baseName) {
+            String namespace = this.getNamespace();
+            if (namespace.equals("minecraft")) return baseName + "_" + this.getWoodName();
+            return this.getNamespace() + "/" + baseName + "_" + this.getWoodName();
+        }
+
+        /**
+         * Use this to get the texture path of a wood type
+         *
+         * @param baseName base variant name
+         * @return something like minecraft/oak
+         */
+        public String getTexturePath() {
+            String namespace = this.getNamespace();
+            if (namespace.equals("minecraft")) return this.getWoodName();
+            return this.getNamespace() + "/" + this.getWoodName();
+        }
+
+        /**
+         * @return True if this wood type should probably have wood items registered to
+         * Simply checks if a log type with the same name exists. Should cover most cases
+         */
         public boolean shouldHaveBlockSet() {
-            return this.hasFence;
+            return this.logBlock != null;
         }
 
         public boolean canBurn() {
@@ -194,7 +250,7 @@ public class BlockSetHandler {
 
     }
 
-    private static String getAbbreviation(String string) {
+    private static String abbreviateString(String string) {
         if (string.length() <= 5) return string;
         String[] a = string.split("_");
         if (a.length > 2) {

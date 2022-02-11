@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Mixin(MapItem.class)
 public class MapItemMixin {
 
+    //since I'm here might aswell mixin instead of event
     @Inject(method = "appendHoverText", at = @At("HEAD"))
     private void appendHoverText(ItemStack stack, Level level, List<Component> tooltips, TooltipFlag tooltipFlag, CallbackInfo ci) {
         Integer integer = MapItem.getMapId(stack);

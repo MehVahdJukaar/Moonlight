@@ -18,7 +18,7 @@ public class ModSetup {
             NetworkHandler.registerMessages();
             SoftFluidRegistry.init();
             VillagerAIManager.init();
-            BlockSetHandler.init();
+            BlockSetHandler.onModSetup();
         });
 
     }
