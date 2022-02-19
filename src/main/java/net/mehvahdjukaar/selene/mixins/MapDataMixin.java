@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -72,16 +73,6 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Shadow
     @Final
     private Map<String, MapBanner> bannerMarkers;
-
-    @Shadow
-    @Final
-    private boolean trackingPosition;
-    @Shadow
-    @Final
-    private boolean unlimitedTracking;
-
-    @Shadow
-    public abstract MapItemSavedData locked();
 
     //new decorations (stuff that gets rendered)
     public Map<String, CustomDecoration> customDecorations = Maps.newLinkedHashMap();
@@ -145,26 +136,37 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         return newData;
     }
 
+    //TODO: find a goow way to have update packet (current one isnt fully working)
     @Inject(method = "tickCarriedBy", at = @At("TAIL"))
     public void tickCarriedBy(Player player, ItemStack stack, CallbackInfo ci) {
         CompoundTag tag = stack.getTag();
-        if (tag != null && tag.contains("CustomDecorations", 9)) {
-            ListTag listTag = tag.getList("CustomDecorations", 10);
-            //for exploration maps
-            for (int j = 0; j < listTag.size(); ++j) {
-                CompoundTag com = listTag.getCompound(j);
-                if (!this.decorations.containsKey(com.getString("id"))) {
-                    String name = com.getString("type");
+        if (tag != null) {
+            if (tag.contains("CustomDecorations", 9)) {
+                ListTag listTag = tag.getList("CustomDecorations", 10);
+                //for exploration maps
+                for (int j = 0; j < listTag.size(); ++j) {
+                    CompoundTag com = listTag.getCompound(j);
+                    if (!this.decorations.containsKey(com.getString("id"))) {
+                        String name = com.getString("type");
 
-                    CustomDecorationType<? extends CustomDecoration, ?> type = MapDecorationHandler.get(name);
-                    if (type != null) {
-                        MapWorldMarker<CustomDecoration> dummy = new DummyMapWorldMarker(type, com.getInt("x"), com.getInt("z"));
-                        this.addCustomDecoration(dummy);
-                    } else {
-                        Selene.LOGGER.warn("Failed to load map decoration " + name + ". Skipping it");
-
+                        CustomDecorationType<? extends CustomDecoration, ?> type = MapDecorationHandler.get(name);
+                        if (type != null) {
+                            MapWorldMarker<CustomDecoration> dummy = new DummyMapWorldMarker(type, com.getInt("x"), com.getInt("z"));
+                            this.addCustomDecoration(dummy);
+                        } else {
+                            Selene.LOGGER.warn("Failed to load map decoration " + name + ". Skipping it");
+                        }
                     }
                 }
+            }
+            //sends update packet
+            Integer mapId = MapItem.getMapId(stack);
+            if (player instanceof ServerPlayer serverPlayer && mapId != null) {
+
+                NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
+                        new ClientBoundSyncCustomMapDecorationPacket(mapId, this.scale, this.locked, null,
+                                this.customDecorations.values().toArray(new CustomDecoration[0]),
+                                this.customData.values().toArray(new CustomDataHolder.Instance[0])));
             }
         }
     }
@@ -268,17 +270,6 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     newMarker.updateDecoration(this.customDecorations.get(id));
                 }
             }
-        }
-    }
-
-    @Inject(method = "getUpdatePacket", at = @At("RETURN"), cancellable = true)
-    public void getUpdatePacket(int pMapId, Player pPlayer, CallbackInfoReturnable<Packet<?>> cir) {
-        Packet<?> packet = cir.getReturnValue();
-        if (pPlayer instanceof ServerPlayer serverPlayer && packet instanceof ClientboundMapItemDataPacket) {
-            NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
-                    new ClientBoundSyncCustomMapDecorationPacket(pMapId, this.scale, this.locked, null,
-                            this.customDecorations.values().toArray(new CustomDecoration[0]),
-                            this.customData.values().toArray(new CustomDataHolder.Instance[0])));
         }
     }
 

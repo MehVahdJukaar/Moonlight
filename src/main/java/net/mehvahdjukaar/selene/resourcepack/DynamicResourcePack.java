@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.selene.util.BlockSetHandler;
 import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
@@ -31,9 +32,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -42,20 +45,37 @@ public abstract class DynamicResourcePack implements PackResources {
 
     public static final List<ResourceLocation> NO_RESOURCES = Collections.emptyList();
 
+    protected final boolean hidden;
+    protected final boolean fixed;
+    protected final Pack.Position position;
     protected final PackType packType;
     protected final PackMetadataSection packInfo;
-    protected final TranslatableComponent title;
+    protected final Component title;
     protected final ResourceLocation resourcePackName;
     private final Set<String> namespaces = new HashSet<>();
     private final Map<ResourceLocation, byte[]> resources = new HashMap<>();
 
+    //for debug or to generate assets
+    public boolean generateDebugResources = false;
+
     public DynamicResourcePack(ResourceLocation name, PackType type) {
+        this(name , type, Pack.Position.TOP, false, false);
+    }
+
+    public DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
         this.packType = type;
-        this.packInfo = new PackMetadataSection(
-                new TranslatableComponent("%s.%s_description", name.getNamespace(), name.getPath()), 6);
+        //TODO: fix translation not working
+        var component = new TextComponent(AssetGenerators.LangBuilder.getReadableName(name.getNamespace()+"_dynamic_resources"));
+        //new TranslatableComponent("%s.%s.description", name.getNamespace(), name.getPath());
+        this.packInfo = new PackMetadataSection(component, 6);
         this.resourcePackName = name;
         this.namespaces.add(name.getNamespace());
-        this.title = new TranslatableComponent("%s.%s_title", name.getNamespace(), name.getPath());
+        this.title = new TextComponent(AssetGenerators.LangBuilder.getReadableName(name.toString()));
+        ;//new TranslatableComponent("%s.%s.title", name.getNamespace(), name.getPath());
+
+        this.position = position;
+        this.fixed = fixed;
+        this.hidden = hidden;
     }
 
     /**
@@ -84,10 +104,11 @@ public abstract class DynamicResourcePack implements PackResources {
                         this.packInfo.getDescription(), // description
                         PackCompatibility.COMPATIBLE,
                         Pack.Position.TOP,
-                        false, // fixed position? no
+                        this.fixed, // fixed position? no
                         PackSource.DEFAULT,
-                        false // hidden? no
+                        this.hidden // hidden? no
                 )));
+        //TODO: find a way not to reload everything here
         packRepository.reload();
     }
 
@@ -159,20 +180,17 @@ public abstract class DynamicResourcePack implements PackResources {
         this.resources.put(path, bytes);
 
         //debug
-        if (true) {
+        if (generateDebugResources) {
             try {
-                var p = Paths.get("debug", "generated_pack").resolve(path.getNamespace() + "/" + path.getPath());
+                Path p = Paths.get("debug", "generated_resource_pack").resolve(path.getNamespace() + "/" + path.getPath());
                 Files.createDirectories(p.getParent());
-                Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-                        StandardOpenOption.TRUNCATE_EXISTING);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+            } catch (IOException ignored) {}
         }
     }
 
     protected void addImage(ResourceLocation path, NativeImage image, RPUtils.ResType resType) {
-        try {
+        try (image) {
             this.addBytes(path, image.asByteArray(), resType);
         } catch (Exception e) {
             LOGGER.warn("Failed to add image {} to resource pack {}.", path, this.resourcePackName, e);
@@ -207,34 +225,28 @@ public abstract class DynamicResourcePack implements PackResources {
      * @param keyword     keyword to replace
      * @param replaceWith word to replace the keyword with
      */
-    public void addSimilarJsonResource(RPUtils.StaticResource resource, String keyword, String replaceWith) {
+    public void addSimilarJsonResource(RPUtils.StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException{
         ResourceLocation fullPath = resource.location;
 
-        try {
-            String string = new String(resource.data, StandardCharsets.UTF_8);
+        String string = new String(resource.data, StandardCharsets.UTF_8);
 
-            if (!string.contains(keyword)) {
-                LOGGER.error("Resource {} did not contain keyword {}. ", fullPath, keyword);
-                return;
-            }
-
-            string = string.replace(keyword, replaceWith);
-            //calculates new path
-            StringBuilder builder = new StringBuilder();
-            String[] partial = fullPath.getPath().split("/");
-            for (int i = 0; i < partial.length; i++) {
-                if (i != 0) builder.append("/");
-                if (i == partial.length - 1) {
-                    builder.append(partial[i].replace(keyword, replaceWith));
-                } else builder.append(partial[i]);
-            }
-            //adds modified under my namespace
-            ResourceLocation newRes = new ResourceLocation(resourcePackName.getNamespace(), builder.toString());
-            this.addBytes(newRes, string.getBytes());
-        } catch (Exception e) {
-            LOGGER.error("Failed to read resource {}", fullPath, e);
+        if (!string.contains(keyword)) {
+            throw new NoSuchElementException(String.format("Resource %s did not contain keyword %s. ",fullPath, keyword));
         }
 
+        string = string.replace(keyword, replaceWith);
+        //calculates new path
+        StringBuilder builder = new StringBuilder();
+        String[] partial = fullPath.getPath().split("/");
+        for (int i = 0; i < partial.length; i++) {
+            if (i != 0) builder.append("/");
+            if (i == partial.length - 1) {
+                builder.append(partial[i].replace(keyword, replaceWith));
+            } else builder.append(partial[i]);
+        }
+        //adds modified under my namespace
+        ResourceLocation newRes = new ResourceLocation(resourcePackName.getNamespace(), builder.toString());
+        this.addBytes(newRes, string.getBytes());
     }
 
     @FunctionalInterface

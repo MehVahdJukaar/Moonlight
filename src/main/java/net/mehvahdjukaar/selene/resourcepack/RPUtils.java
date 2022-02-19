@@ -1,26 +1,20 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
-import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
+import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.client.model.generators.VariantBlockStateBuilder;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class RPUtils {
 
@@ -71,6 +65,7 @@ public class RPUtils {
         ResType(String loc){
             this.loc = loc;
         }
+
     }
 
     public static ResourceLocation resPath(ResourceLocation relativeLocation, ResType type) {
@@ -80,8 +75,6 @@ public class RPUtils {
     public static ResourceLocation resPath(String relativeLocation, ResType type) {
         return resPath(new ResourceLocation(relativeLocation), type);
     }
-
-
 
     public static String serializeJson(JsonElement json) throws IOException {
         StringWriter stringWriter = new StringWriter();
@@ -94,7 +87,7 @@ public class RPUtils {
         return stringWriter.toString();
     }
 
-    public static JsonObject deserializeJson(InputStream stream) throws Exception{
+    public static JsonObject deserializeJson(InputStream stream) {
         JsonElement element = new JsonParser().parse(
                 new InputStreamReader(stream)
         );
@@ -102,143 +95,86 @@ public class RPUtils {
     }
 
 
-
-    public static class LangBuilder {
-        private final Map<String, String> entries = new LinkedHashMap<>();
-
-        public void addGenericEntry(String key, String translation) {
-            entries.put(key, translation);
-        }
-
-        public void addEntry(Block block, String translation) {
-            entries.put(block.getDescriptionId(), translation);
-        }
-
-        public void addEntry(Item item, String translation) {
-            entries.put(item.getDescriptionId(), translation);
-        }
-
-        public void addEntry(EntityType<?> entityType, String translation) {
-            entries.put(entityType.getDescriptionId(), translation);
-        }
-
-        public JsonElement build() {
-            JsonObject json = new JsonObject();
-            for (var e : entries.entrySet()) {
-                json.addProperty(e.getKey(), e.getValue());
-            }
-            return json;
-        }
-
-    }
-
-    public static class SimpleModelBuilder {
-        private final ResourceLocation parent;
-        private final Map<String, ResourceLocation> textures = new HashMap<>();
-
-        public SimpleModelBuilder(ResourceLocation parent) {
-            this.parent = parent;
-        }
-
-        public SimpleModelBuilder texture(String name, ResourceLocation texture) {
-            this.textures.put(name, texture);
-            return this;
-        }
-
-        public JsonElement build() {
-            JsonObject json = new JsonObject();
-            json.addProperty("parent", this.parent.toString());
-            JsonObject text = new JsonObject();
-
-            textures.forEach((key, value) -> text.addProperty(key, value.toString()));
-            json.add("textures", text);
-
-            return json;
+    public static NativeImage findFirstBlockTexture(ResourceManager manager, Block block) throws FileNotFoundException {
+        String loc = findFirstBlockTextureLocation(manager, block, s -> true);
+        try {
+            return NativeImage.read(manager.getResource(RPUtils.resPath(loc, ResType.TEXTURES)).getInputStream());
+        } catch (IOException e) {
+            throw new FileNotFoundException("Could not resolve texture "+loc);
         }
     }
 
-    public static class ModelConfiguration {
-        public final ResourceLocation modelLocation;
-        public int xRot = 0;
-        public int yRot = 0;
-        public boolean uvLock = false;
-
-        public ModelConfiguration(ResourceLocation modelLocation) {
-            this.modelLocation = modelLocation;
-        }
-
-        public JsonObject toJson() {
-            JsonObject model = new JsonObject();
-            model.addProperty("model", this.modelLocation.toString());
-            if (this.xRot != 0) {
-                model.addProperty("x", this.xRot);
-            }
-            if (this.yRot != 0) {
-                model.addProperty("y", this.xRot);
-            }
-            if (this.uvLock) {
-                model.addProperty("uvlock", true);
-            }
-            return model;
+    public static NativeImage findFirstItemTexture(ResourceManager manager, Item item) throws FileNotFoundException{
+        String loc = findFirstItemTextureLocation(manager, item, s -> true);
+        try {
+            return NativeImage.read(manager.getResource(RPUtils.resPath(loc, ResType.TEXTURES)).getInputStream());
+        } catch (IOException e) {
+            throw new FileNotFoundException("Could not resolve texture "+loc);
         }
     }
 
-    public static class BlockstateBuilder {
-        private final Block block;
-        private final Map<Map<Property<?>, Comparable<?>>, ModelConfiguration> blockModelMappings = new HashMap<>();
+    /**
+     * Grabs the first texture from a given block
+     * @param manager resource manager
+     * @param block target block
+     * @param texturePredicate predicate that will be applied to the texture name
+     * @return found texture location
+     */
+    public static String findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
+        try {
+            ResourceLocation res = block.getRegistryName();
+            Resource blockState = manager.getResource(RPUtils.resPath(res, ResType.BLOCKSTATES));
 
-        public BlockstateBuilder(Block block) {
-            this.block = block;
+            JsonElement bsElement = RPUtils.deserializeJson(blockState.getInputStream());
+
+            String modelPath = findFirstResourceInJsonRecursive(bsElement.getAsJsonObject().get("variants"));
+            Resource model = manager.getResource(RPUtils.resPath(modelPath, ResType.MODELS));
+            JsonElement modelElement = RPUtils.deserializeJson(model.getInputStream());
+
+            return findAllResourcesInJsonRecursive(modelElement.getAsJsonObject().getAsJsonObject("textures"))
+                    .stream().filter(texturePredicate).findAny().get();
+        } catch (Exception e) {
+            throw new FileNotFoundException("Could not find any texture associated to the given block "+block.getRegistryName());
         }
-
-        public static BlockstateBuilder forAllStatesExcept(
-                Block block,
-                Function<BlockState, ModelConfiguration> modelLocationProvider,
-                Property<?>... ignored) {
-            var builder = new BlockstateBuilder(block);
-            //forge code
-            BlockState defaultState = block.defaultBlockState();
-            Set<VariantBlockStateBuilder.PartialBlockstate> seen = new HashSet<>();
-            loop:
-            for (BlockState fullState : block.getStateDefinition().getPossibleStates()) {
-                Map<Property<?>, Comparable<?>> propertyValues = Maps.newLinkedHashMap(fullState.getValues());
-                //only allows default values for ignored ones so they are essentially removed
-                for (Property<?> p : ignored) {
-                    if (propertyValues.get(p) != defaultState.getValue(p)) continue loop;
-                    propertyValues.remove(p);
-                }
-
-
-                builder.setModel(propertyValues, modelLocationProvider.apply(fullState));
-
-            }
-            return builder;
-        }
-
-        public BlockstateBuilder setModel(Map<Property<?>, Comparable<?>> properties, ModelConfiguration modelLocation) {
-            this.blockModelMappings.put(properties, modelLocation);
-            return this;
-        }
-
-        public JsonObject build() {
-            JsonObject main = new JsonObject();
-
-            JsonObject variants = new JsonObject();
-
-            for (var entry : blockModelMappings.entrySet()) {
-                StringBuilder builder = new StringBuilder();
-
-                for (var v : entry.getKey().entrySet()) {
-                    builder.append(v.getKey().getName()).append("=").append(v.getValue());
-                }
-
-                variants.add(builder.toString(), entry.getValue().toJson());
-            }
-
-            main.add("variants", variants);
-
-            return main;
-        }
-
     }
+
+    /**
+     * Grabs the first texture from a given item
+     * @param manager resource manager
+     * @param item target item
+     * @param texturePredicate predicate that will be applied to the texture name
+     * @return found texture location
+     */
+    public static String findFirstItemTextureLocation(ResourceManager manager, Item item, Predicate<String> texturePredicate) throws FileNotFoundException {
+        try {
+            ResourceLocation res = item.getRegistryName();
+            Resource itemModel = manager.getResource(RPUtils.resPath(res, ResType.ITEM_MODELS));
+
+            JsonElement bsElement = RPUtils.deserializeJson(itemModel.getInputStream());
+
+            return findAllResourcesInJsonRecursive(bsElement.getAsJsonObject().getAsJsonObject("textures"))
+                    .stream().filter(texturePredicate).findAny().get();
+        } catch (Exception e) {
+            throw new FileNotFoundException("Could not find any texture associated to the given item "+item.getRegistryName());
+        }
+    }
+
+    public static String findFirstResourceInJsonRecursive(JsonElement element) throws NoSuchElementException {
+        if (element instanceof JsonObject) {
+            var entries = element.getAsJsonObject().entrySet();
+            JsonElement child = entries.stream().findAny().get().getValue();
+            return findFirstResourceInJsonRecursive(child);
+        } else return element.getAsString();
+    }
+
+    public static List<String> findAllResourcesInJsonRecursive(JsonElement element) {
+        if (element instanceof JsonObject) {
+            var entries = element.getAsJsonObject().entrySet();
+            var children = entries.stream().map(Map.Entry::getValue);
+            List<String> list = new ArrayList<>();
+            children.map(RPUtils::findAllResourcesInJsonRecursive).forEach(list::addAll);
+            return list;
+        } else return List.of(element.getAsString());
+    }
+
 }

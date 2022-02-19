@@ -9,16 +9,22 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 
 import java.util.Collection;
 import java.util.Locale;
 
 public class DynamicDataPack extends DynamicResourcePack {
+
+    public DynamicDataPack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
+        super(name, PackType.SERVER_DATA, position, fixed, hidden);
+    }
 
     public DynamicDataPack(ResourceLocation name) {
         super(name, PackType.SERVER_DATA);
@@ -29,7 +35,7 @@ public class DynamicDataPack extends DynamicResourcePack {
      *
      * @param event ServerStartedEvent event
      */
-    public void register(ServerStartedEvent event) {
+    public void register(ServerAboutToStartEvent event) {
         MinecraftServer server = event.getServer();
         PackRepository packs = server.getPackRepository();
         this.addPackToRepository(packs);

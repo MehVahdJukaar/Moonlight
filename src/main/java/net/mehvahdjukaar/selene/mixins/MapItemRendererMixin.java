@@ -20,7 +20,7 @@ public abstract class MapItemRendererMixin {
     private void render(PoseStack poseStack, MultiBufferSource buffer, int mapId, MapItemSavedData mapData, boolean isOnFrame, int light, CallbackInfo ci) {
         if (mapData instanceof ExpandedMapData data) {
             int index = data.getVanillaDecorationSize();
-            for (CustomDecoration decoration :data.getCustomDecorations().values()) {
+            for (CustomDecoration decoration : data.getCustomDecorations().values()) {
 
                 if (MapDecorationRenderHandler.render(decoration, poseStack, buffer, mapData, isOnFrame, light, index))
                     index++;

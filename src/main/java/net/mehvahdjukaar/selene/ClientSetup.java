@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.setup;
+package net.mehvahdjukaar.selene;
 
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.fluids.FluidTextures;
