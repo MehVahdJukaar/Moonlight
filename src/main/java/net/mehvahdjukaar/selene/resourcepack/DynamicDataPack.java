@@ -30,22 +30,6 @@ public class DynamicDataPack extends DynamicResourcePack {
         super(name, PackType.SERVER_DATA);
     }
 
-    /**
-     * Needs to be called to register the pack. Call from forge event
-     *
-     * @param event ServerStartedEvent event
-     */
-    public void register(ServerAboutToStartEvent event) {
-        MinecraftServer server = event.getServer();
-        PackRepository packs = server.getPackRepository();
-        this.addPackToRepository(packs);
-        try {
-            server.reloadResources(packs.getSelectedIds()).get();
-        } catch (Exception e) {
-            LOGGER.error("Failed to reload dynamic resource pack {}.",this.getName(), e);
-        }
-    }
-
     public enum TagType {
         BLOCKS, ITEMS, ENTITY_TYPES
     }

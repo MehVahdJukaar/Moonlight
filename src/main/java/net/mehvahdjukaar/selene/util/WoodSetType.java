@@ -5,57 +5,43 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
+import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class WoodSetType {
 
-    public static WoodSetType OAK_WOOD_TYPE = new WoodSetType(new ResourceLocation("oak"), Blocks.OAK_PLANKS);
+    public static WoodSetType OAK_WOOD_TYPE = new WoodSetType(new ResourceLocation("oak"), Blocks.OAK_PLANKS,Blocks.OAK_LOG);
 
     public final ResourceLocation id;
     public final Material material;
     public final Block plankBlock;
-    //if true then this woodtype probably shouldn't have other blocks assigned to it
     public final String shortenedNamespace;
-
 
     @Nullable
     public final Block logBlock; //used for log texture
+    //lazy cause wood types are loaded before items so we can only access blocks
     @Nullable
-    public final Item signItem; //used for item textures
+    public final Lazy<Item> signItem; //used for item textures
 
-    protected WoodSetType(ResourceLocation id, Block baseBlock) {
+    protected WoodSetType(ResourceLocation id, Block baseBlock,Block logBlock) {
         this.id = id;
         this.plankBlock = baseBlock;
+        this.logBlock = logBlock;
         this.material = baseBlock.defaultBlockState().getMaterial();
         this.shortenedNamespace = id.getNamespace().equals("minecraft") ? "" : "_" + abbreviateString(id.getNamespace());
-        //check if it has its log
-        ResourceLocation[] test = {
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_log"),
-                new ResourceLocation(id.getNamespace(), "log_" + id.getPath()),
-                new ResourceLocation(id.getPath() + "_log"),
-                new ResourceLocation("log_" + id.getPath()),
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_stem"),
-                new ResourceLocation(id.getNamespace(), "stem_" + id.getPath()),
-                new ResourceLocation(id.getPath() + "_stem"),
-                new ResourceLocation("stem_" + id.getPath())
-        };
-        Block temp = null;
-        for (var r : test) {
-            if (ForgeRegistries.BLOCKS.containsKey(r)) {
-                temp = ForgeRegistries.BLOCKS.getValue(r);
-                break;
-            }
-        }
-        this.logBlock = temp;
 
         //checks if it has a sign
+        this.signItem = Lazy.of(this::findSign);
+    }
+
+    @Nullable
+    private Item findSign() {
         ResourceLocation[] test2 = {
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_sign"),
                 new ResourceLocation(id.getNamespace(), "sign_" + id.getPath())
@@ -67,9 +53,8 @@ public class WoodSetType {
                 break;
             }
         }
-        this.signItem = temp2;
+        return temp2;
     }
-
 
     @Override
     public String toString() {
@@ -120,14 +105,6 @@ public class WoodSetType {
         return this.getNamespace() + "/" + this.getWoodName();
     }
 
-    /**
-     * @return True if this wood type should probably have wood items registered to
-     * Simply checks if a log type with the same name exists. Should cover most cases
-     */
-    public boolean shouldHaveBlockSet() {
-        return this.logBlock != null;
-    }
-
     public boolean canBurn() {
         return this.material.isFlammable();
     }
@@ -149,5 +126,60 @@ public class WoodSetType {
         } else if (a.length > 1) {
             return "" + a[0].substring(0, Math.min(2, a[0].length())) + a[1].substring(0, Math.min(2, a[0].length()));
         } else return string.substring(0, 4);
+    }
+
+    @Nullable
+    private static Block findLog(ResourceLocation id) {
+        ResourceLocation[] test = {
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_log"),
+                new ResourceLocation(id.getNamespace(), "log_" + id.getPath()),
+                new ResourceLocation(id.getPath() + "_log"),
+                new ResourceLocation("log_" + id.getPath()),
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_stem"),
+                new ResourceLocation(id.getNamespace(), "stem_" + id.getPath()),
+                new ResourceLocation(id.getPath() + "_stem"),
+                new ResourceLocation("stem_" + id.getPath())
+        };
+        Block temp = null;
+        for (var r : test) {
+            if (ForgeRegistries.BLOCKS.containsKey(r)) {
+                temp = ForgeRegistries.BLOCKS.getValue(r);
+                break;
+            }
+        }
+        return temp;
+    }
+
+    //returns if this block is the base plank block
+    public static Optional<WoodSetType> getWoodTypeFromBlock(Block baseBlock) {
+        ResourceLocation baseRes = baseBlock.getRegistryName();
+        String name = null;
+        String path = baseRes.getPath();
+        //needs to contain planks in its name
+        if (path.endsWith("_planks")) {
+            name = path.substring(0, path.length() - "_planks".length());
+        } else if (path.startsWith("planks_")) {
+            name = path.substring("planks_".length());
+        } else if (path.endsWith("_plank")) {
+            name = path.substring(0, path.length() - "_plank".length());
+        } else if (path.startsWith("plank_")) {
+            name = path.substring("plank_".length());
+        }
+        if (name != null) {
+            BlockState state = baseBlock.defaultBlockState();
+            //needs to use wood sound type
+            //if (state.getSoundType() == SoundType.WOOD) { //wood from tcon has diff sounds
+            Material mat = state.getMaterial();
+            //and have correct material
+            if (mat == Material.WOOD || mat == Material.NETHER_WOOD) {
+                ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
+                Block logBlock = findLog(id);
+                if(logBlock!=null) {
+                    return Optional.of(new WoodSetType(id, baseBlock, logBlock));
+                }
+            }
+            //}
+        }
+        return Optional.empty();
     }
 }

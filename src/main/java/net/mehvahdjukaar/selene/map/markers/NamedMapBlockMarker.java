@@ -2,21 +2,26 @@ package net.mehvahdjukaar.selene.map.markers;
 
 import net.mehvahdjukaar.selene.map.CustomDecoration;
 import net.mehvahdjukaar.selene.map.CustomDecorationType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-//see mapWorldMarker for javadocs
-public abstract class NamedMapWorldMarker<D extends CustomDecoration> extends MapWorldMarker<D> {
+//see mapWorldMarker for more
+public abstract class NamedMapBlockMarker<D extends CustomDecoration> extends MapBlockMarker<D> {
 
     //additional data to be stored
     @Nullable
     public Component name;
 
-    public NamedMapWorldMarker(CustomDecorationType<D, ?> type) {
+    public NamedMapBlockMarker(CustomDecorationType<D, ?> type) {
         super(type);
+    }
+
+    public NamedMapBlockMarker(CustomDecorationType<D, ?> type, BlockPos pos) {
+        super(type, pos);
     }
 
     @Override
@@ -39,7 +44,7 @@ public abstract class NamedMapWorldMarker<D extends CustomDecoration> extends Ma
         if (this == other) {
             return true;
         } else if (other != null && this.getClass() == other.getClass()) {
-            NamedMapWorldMarker<?> marker = (NamedMapWorldMarker<?>)other;
+            NamedMapBlockMarker<?> marker = (NamedMapBlockMarker<?>)other;
             return Objects.equals(this.getPos(), marker.getPos())&& Objects.equals(this.name, marker.name);
         } else {
             return false;
@@ -51,9 +56,9 @@ public abstract class NamedMapWorldMarker<D extends CustomDecoration> extends Ma
     }
 
     @Override
-    public boolean shouldUpdate(MapWorldMarker<?> other) {
-        if(other instanceof NamedMapWorldMarker){
-            return !Objects.equals(this.name,((NamedMapWorldMarker<?>) other).name);
+    public boolean shouldUpdate(MapBlockMarker<?> other) {
+        if(other instanceof NamedMapBlockMarker){
+            return !Objects.equals(this.name,((NamedMapBlockMarker<?>) other).name);
         }
         return false;
     }

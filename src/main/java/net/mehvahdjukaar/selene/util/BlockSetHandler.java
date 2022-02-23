@@ -6,10 +6,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -61,7 +63,7 @@ public class BlockSetHandler {
     }
 
     //shitties code ever lol
-    protected static void registerModLateBlockAndItems(RegistryEvent.Register<Item> event) {
+    protected static void registerLateBlockAndItems(RegistryEvent.Register<Item> event) {
         //when the first registration function is called we find all wood types
         if (!hasFilledWoodTypes) {
             findAllAvailableWoodTypes();
@@ -115,7 +117,7 @@ public class BlockSetHandler {
             var registrationQueues =
                     LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {
                         //if absent we register its registration callback
-                        bus.addGenericListener(Item.class, EventPriority.HIGHEST, BlockSetHandler::registerModLateBlockAndItems);
+                        bus.addGenericListener(Item.class, EventPriority.HIGHEST, BlockSetHandler::registerLateBlockAndItems);
                         return Pair.of(new ArrayList<>(), new ArrayList<>());
                     });
 
@@ -161,41 +163,13 @@ public class BlockSetHandler {
         //base oak is always there
         map.put(WoodSetType.OAK_WOOD_TYPE.id, WoodSetType.OAK_WOOD_TYPE);
         for (var b : ForgeRegistries.BLOCKS) {
-            getWoodSetType(b).ifPresent(t -> {
+            WoodSetType.getWoodTypeFromBlock(b).ifPresent(t -> {
                 if (!map.containsKey(t.id)) map.put(t.id, t);
             });
         }
         WOOD_TYPES = map;
     }
 
-    private static Optional<WoodSetType> getWoodSetType(Block baseBlock) {
-        ResourceLocation baseRes = baseBlock.getRegistryName();
-        String name = null;
-        String path = baseRes.getPath();
-        //needs to contain planks in its name
-        if (path.endsWith("_planks")) {
-            name = path.substring(0, path.length() - "_planks".length());
-        } else if (path.startsWith("planks_")) {
-            name = path.substring("planks_".length());
-        } else if (path.endsWith("_plank")) {
-            name = path.substring(0, path.length() - "_plank".length());
-        } else if (path.startsWith("plank_")) {
-            name = path.substring("plank_".length());
-        }
-        if (name != null) {
-            BlockState state = baseBlock.defaultBlockState();
-            //needs to use wood sound type
-            //if (state.getSoundType() == SoundType.WOOD) { //wood from tcon has diff sounds
-            Material mat = state.getMaterial();
-            //and have correct material
-            if (mat == Material.WOOD || mat == Material.NETHER_WOOD) {
-                ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
-                return Optional.of(new WoodSetType(id, baseBlock));
-            }
-            //}
-        }
-        return Optional.empty();
-    }
 
     public enum VariantType {
         BLOCK(Block::new),

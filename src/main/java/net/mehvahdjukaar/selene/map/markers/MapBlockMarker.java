@@ -11,13 +11,22 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public abstract class MapWorldMarker<D extends CustomDecoration>  {
+/**
+ * represents a block tracker instance which keeps track of a placed block and creates its associated map decoration
+ * @param <D> decoration
+ */
+public abstract class MapBlockMarker<D extends CustomDecoration>  {
     private final CustomDecorationType<D,?> type;
     public BlockPos pos;
     //private final int rotation;
 
-    public MapWorldMarker(CustomDecorationType<D,?> type) {
+    public MapBlockMarker(CustomDecorationType<D,?> type) {
         this.type = type;
+    }
+
+    public MapBlockMarker(CustomDecorationType<D,?> type, BlockPos pos) {
+        this(type);
+        this.pos = pos;
     }
 
     /**
@@ -49,7 +58,7 @@ public abstract class MapWorldMarker<D extends CustomDecoration>  {
         if (this == other) {
             return true;
         } else if (other != null && this.getClass() == other.getClass()) {
-            MapWorldMarker<?> marker = (MapWorldMarker<?>)other;
+            MapBlockMarker<?> marker = (MapBlockMarker<?>)other;
             return Objects.equals(this.getPos(), marker.getPos());
         } else {
             return false;
@@ -146,7 +155,7 @@ public abstract class MapWorldMarker<D extends CustomDecoration>  {
      * @param other marker that needs to be compared wit this
      * @return true if corresponding decoration has to be updated
      */
-    public boolean shouldUpdate(MapWorldMarker<?> other){
+    public boolean shouldUpdate(MapBlockMarker<?> other){
         return false;
     }
 

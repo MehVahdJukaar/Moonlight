@@ -12,7 +12,7 @@ license="All rights reserved"
     # The modid of the mod
     modId="selene" #mandatory
 
-    version="1.18-1.13.1" #mandatory
+    version="1.18-1.13.2" #mandatory
      # A display name for the mod
     displayName="Selene" #mandatory
 

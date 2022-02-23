@@ -3,20 +3,17 @@ package net.mehvahdjukaar.selene.mixins;
 import com.google.common.collect.Maps;
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.map.*;
-import net.mehvahdjukaar.selene.map.markers.DummyMapWorldMarker;
-import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
+import net.mehvahdjukaar.selene.map.markers.DummyMapBlockMarker;
+import net.mehvahdjukaar.selene.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.selene.network.ClientBoundSyncCustomMapDecorationPacket;
 import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -78,7 +75,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     public Map<String, CustomDecoration> customDecorations = Maps.newLinkedHashMap();
 
     //world markers
-    private final Map<String, MapWorldMarker<?>> customMapMarkers = Maps.newHashMap();
+    private final Map<String, MapBlockMarker<?>> customMapMarkers = Maps.newHashMap();
 
     //custom data that can be stored in maps
     public final Map<String, CustomDataHolder.Instance<?>> customData = new HashMap<>();
@@ -94,11 +91,11 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Override
-    public Map<String, MapWorldMarker<?>> getCustomMarkers() {
+    public Map<String, MapBlockMarker<?>> getCustomMarkers() {
         return customMapMarkers;
     }
 
-    public <D extends CustomDecoration> void addCustomDecoration(MapWorldMarker<D> marker) {
+    public <D extends CustomDecoration> void addCustomDecoration(MapBlockMarker<D> marker) {
         D decoration = marker.createDecorationFromMarker(scale, x, z, dimension, locked);
         if (decoration != null) {
             this.customDecorations.put(marker.getMarkerId(), decoration);
@@ -151,7 +148,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
                         CustomDecorationType<? extends CustomDecoration, ?> type = MapDecorationHandler.get(name);
                         if (type != null) {
-                            MapWorldMarker<CustomDecoration> dummy = new DummyMapWorldMarker(type, com.getInt("x"), com.getInt("z"));
+                            MapBlockMarker<CustomDecoration> dummy = new DummyMapBlockMarker(type, com.getInt("x"), com.getInt("z"));
                             this.addCustomDecoration(dummy);
                         } else {
                             Selene.LOGGER.warn("Failed to load map decoration " + name + ". Skipping it");
@@ -160,7 +157,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                 }
             }
             //sends update packet
-            Integer mapId = MapItem.getMapId(stack);
+            Integer mapId = MapHelper.getMapId(stack, player, this);
             if (player instanceof ServerPlayer serverPlayer && mapId != null) {
 
                 NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
@@ -178,7 +175,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             ListTag listNBT = compound.getList("customMarkers", 10);
 
             for (int j = 0; j < listNBT.size(); ++j) {
-                MapWorldMarker<?> marker = MapDecorationHandler.readWorldMarker(listNBT.getCompound(j));
+                MapBlockMarker<?> marker = MapDecorationHandler.readWorldMarker(listNBT.getCompound(j));
                 if (marker != null) {
                     mapData.getCustomMarkers().put(marker.getMarkerId(), marker);
                     mapData.addCustomDecoration(marker);
@@ -202,7 +199,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
         ListTag listNBT = new ListTag();
 
-        for (MapWorldMarker<?> marker : this.customMapMarkers.values()) {
+        for (MapBlockMarker<?> marker : this.customMapMarkers.values()) {
             CompoundTag com2 = new CompoundTag();
             com2.put(marker.getTypeId(), marker.saveToNBT(new CompoundTag()));
             listNBT.add(com2);
@@ -234,9 +231,9 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         double d2 = (d0 - (double) this.x) / (double) i;
         double d3 = (d1 - (double) this.z) / (double) i;
         if (d2 >= -63.0D && d3 >= -63.0D && d2 <= 63.0D && d3 <= 63.0D) {
-            List<MapWorldMarker<?>> markers = MapDecorationHandler.getMarkersFromWorld(world, pos);
+            List<MapBlockMarker<?>> markers = MapDecorationHandler.getMarkersFromWorld(world, pos);
             boolean changed = false;
-            for (MapWorldMarker<?> marker : markers) {
+            for (MapBlockMarker<?> marker : markers) {
                 if (marker != null) {
                     //toggle
                     String id = marker.getMarkerId();
@@ -256,12 +253,12 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Inject(method = "checkBanners", at = @At("TAIL"))
     public void checkBanners(BlockGetter world, int x, int z, CallbackInfo ci) {
-        Iterator<MapWorldMarker<?>> iterator = this.customMapMarkers.values().iterator();
+        Iterator<MapBlockMarker<?>> iterator = this.customMapMarkers.values().iterator();
 
         while (iterator.hasNext()) {
-            MapWorldMarker<?> marker = iterator.next();
+            MapBlockMarker<?> marker = iterator.next();
             if (marker.getPos().getX() == x && marker.getPos().getZ() == z) {
-                MapWorldMarker<?> newMarker = marker.getType().getWorldMarkerFromWorld(world, marker.getPos());
+                MapBlockMarker<?> newMarker = marker.getType().getWorldMarkerFromWorld(world, marker.getPos());
                 String id = marker.getMarkerId();
                 if (newMarker == null) {
                     iterator.remove();

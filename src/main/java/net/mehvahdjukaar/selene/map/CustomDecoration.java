@@ -2,11 +2,15 @@ package net.mehvahdjukaar.selene.map;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-//default base simple decoration. this will be instanced in a map. equivalent of a tile entity
+/**
+ * Represents the actual map marker displayed on a map
+ * default base simple decoration. this will be instanced in a map. equivalent of a tile entity or decorations for maps themselves
+ */
 public class CustomDecoration {
     private final CustomDecorationType<?,?> type;
     private Component displayName;

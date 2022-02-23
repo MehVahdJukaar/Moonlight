@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.example.map;
 
 import net.mehvahdjukaar.selene.map.CustomDecoration;
-import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
+import net.mehvahdjukaar.selene.map.markers.MapBlockMarker;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -12,7 +12,7 @@ import net.minecraft.world.level.BlockGetter;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public class ExampleMarker extends MapWorldMarker<CustomDecoration> {
+public class ExampleMarker extends MapBlockMarker<CustomDecoration> {
     //additional data to be stored
     @Nullable
     private Component name;
@@ -22,8 +22,7 @@ public class ExampleMarker extends MapWorldMarker<CustomDecoration> {
     }
 
     public ExampleMarker(BlockPos pos, Component name) {
-        this();
-        this.setPos(pos);
+        super(ExampleReg.EXAMPLE_DECORATION_TYPE,pos);
         this.name = name;
     }
 
@@ -77,7 +76,7 @@ public class ExampleMarker extends MapWorldMarker<CustomDecoration> {
     }
 
     @Override
-    public boolean shouldUpdate(MapWorldMarker<?> other) {
+    public boolean shouldUpdate(MapBlockMarker<?> other) {
         if(other instanceof ExampleMarker){
             return !Objects.equals(this.name,((ExampleMarker) other).name);
         }

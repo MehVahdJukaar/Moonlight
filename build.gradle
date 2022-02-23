@@ -5,7 +5,6 @@ buildscript {
         maven { url = 'https://files.minecraftforge.net/maven' }
         maven { url = 'https://repo.spongepowered.org/maven' }
         maven { url = 'https://maven.parchmentmc.org' }
-        jcenter()
         mavenCentral()
     }
     dependencies {
@@ -27,7 +26,7 @@ mixin {
     add sourceSets.main, "selene.refmap.json"
 }
 
-version = '1.18-1.13.1'
+version = '1.18-1.13.2'
 group = 'net.mehvahdjukaar.selene' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'selene'
 
@@ -137,6 +136,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.18.1-39.0.62'
 
     implementation fg.deobf("curse.maven:farmersdelight-398521:3575116")
+    implementation fg.deobf("curse.maven:map-atlases-forge-519759:3641038")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 

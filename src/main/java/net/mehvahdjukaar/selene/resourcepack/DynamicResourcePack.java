@@ -19,7 +19,12 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.EventBus;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.event.IModBusEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -94,22 +99,35 @@ public abstract class DynamicResourcePack implements PackResources {
         return title.getString();
     }
 
-    public void addPackToRepository(PackRepository packRepository) {
-        packRepository.addPackFinder((infoConsumer, packFactory) ->
-                infoConsumer.accept(new Pack(
-                        this.getName(),    // id
-                        true,    // required -- this MAY need to be true for the pack to be enabled by default
-                        () -> this, // pack supplier
-                        this.getTitle(), // title
-                        this.packInfo.getDescription(), // description
-                        PackCompatibility.COMPATIBLE,
-                        Pack.Position.TOP,
-                        this.fixed, // fixed position? no
-                        PackSource.DEFAULT,
-                        this.hidden // hidden? no
-                )));
-        //TODO: find a way not to reload everything here
-        packRepository.reload();
+
+    /**
+     * registers this pack. Intern calls AddPackFinderEvent
+     * @param bus MOD event bus
+     */
+    public void registerPack(IEventBus bus){
+        bus.addListener(this::register);
+    }
+
+    /**
+     * same as register pack but takes the actual event. Use just one
+     * @param event AddPackFindersEvent
+     */
+    public void register(AddPackFindersEvent event) {
+        if(event.getPackType() == this.packType) {
+            event.addRepositorySource((infoConsumer, packFactory) ->
+                    infoConsumer.accept(new Pack(
+                            this.getName(),    // id
+                            true,    // required -- this MAY need to be true for the pack to be enabled by default
+                            () -> this, // pack supplier
+                            this.getTitle(), // title
+                            this.packInfo.getDescription(), // description
+                            PackCompatibility.COMPATIBLE,
+                            Pack.Position.TOP,
+                            this.fixed, // fixed position? no
+                            PackSource.DEFAULT,
+                            this.hidden // hidden? no
+                    )));
+        }
     }
 
     @Override

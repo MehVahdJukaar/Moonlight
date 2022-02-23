@@ -22,16 +22,6 @@ public class DynamicTexturePack extends DynamicResourcePack {
     }
 
     /**
-     * Needs to be called to register the pack. Call from forge event
-     *
-     * @param clientConstructEvent FMLConstructModEvent event
-     */
-    public void register(FMLConstructModEvent clientConstructEvent) {
-        PackRepository packs = Minecraft.getInstance().getResourcePackRepository();
-        this.addPackToRepository(packs);
-    }
-
-    /**
      * Adds a new textures and closes the passed native image
      */
     public void addTexture(ResourceLocation textureLocation, NativeImage image) {

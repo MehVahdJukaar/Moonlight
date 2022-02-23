@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.map;
 
 import net.mehvahdjukaar.selene.Selene;
-import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
+import net.mehvahdjukaar.selene.map.markers.MapBlockMarker;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -10,10 +10,11 @@ import net.minecraft.world.level.BlockGetter;
 
 import javax.annotation.Nullable;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-//equivalent of TileEntityType
-public class CustomDecorationType<D extends CustomDecoration, M extends MapWorldMarker<D>> {
+//equivalent of TileEntityType. Singleton which will be in charge of creating CustomDecoration and MapBlockMarker instances
+public class CustomDecorationType<D extends CustomDecoration, M extends MapBlockMarker<D>> {
     private final ResourceLocation id;
     private final Supplier<M> markerFactory;
     private final BiFunction<BlockGetter,BlockPos,M> markerFromWorldFactory;

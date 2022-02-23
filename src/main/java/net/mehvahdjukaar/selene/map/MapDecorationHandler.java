@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.map;
 
 import net.mehvahdjukaar.selene.Selene;
-import net.mehvahdjukaar.selene.map.markers.MapWorldMarker;
+import net.mehvahdjukaar.selene.map.markers.MapBlockMarker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +26,7 @@ public class MapDecorationHandler {
     private static final Map<String, CustomDecorationType<? extends CustomDecoration, ?>> DECORATION_TYPES = new HashMap<>();
 
     public static final CustomDecorationType<CustomDecoration, ?> GENERIC_STRUCTURE_TYPE = makeSimpleType(Selene.MOD_ID, "generic_structure");
-
+    
     /**
      * registers a decoration type. use register simple for decoration that doesn't need a world marker
      *
@@ -74,7 +74,7 @@ public class MapDecorationHandler {
     }
 
     @Nullable
-    public static MapWorldMarker<?> readWorldMarker(CompoundTag compound) {
+    public static MapBlockMarker<?> readWorldMarker(CompoundTag compound) {
         for (String s : DECORATION_TYPES.keySet()) {
             if (compound.contains(s)) {
                 return DECORATION_TYPES.get(s).loadMarkerFromNBT(compound.getCompound(s));
@@ -90,10 +90,10 @@ public class MapDecorationHandler {
      * @param pos    world position
      * @return markers found, null if none found
      */
-    public static List<MapWorldMarker<?>> getMarkersFromWorld(BlockGetter reader, BlockPos pos) {
-        List<MapWorldMarker<?>> list = new ArrayList<>();
+    public static List<MapBlockMarker<?>> getMarkersFromWorld(BlockGetter reader, BlockPos pos) {
+        List<MapBlockMarker<?>> list = new ArrayList<>();
         for (CustomDecorationType<?, ?> type : DECORATION_TYPES.values()) {
-            MapWorldMarker<?> c = type.getWorldMarkerFromWorld(reader, pos);
+            MapBlockMarker<?> c = type.getWorldMarkerFromWorld(reader, pos);
             if (c != null) list.add(c);
         }
         return list;
