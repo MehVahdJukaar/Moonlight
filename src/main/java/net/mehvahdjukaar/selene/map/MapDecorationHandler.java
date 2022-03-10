@@ -26,7 +26,7 @@ public class MapDecorationHandler {
     private static final Map<String, CustomDecorationType<? extends CustomDecoration, ?>> DECORATION_TYPES = new HashMap<>();
 
     public static final CustomDecorationType<CustomDecoration, ?> GENERIC_STRUCTURE_TYPE = makeSimpleType(Selene.MOD_ID, "generic_structure");
-    
+
     /**
      * registers a decoration type. use register simple for decoration that doesn't need a world marker
      *

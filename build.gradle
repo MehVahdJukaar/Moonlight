@@ -8,9 +8,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-        classpath 'org.parchmentmc:librarian:1.+'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: "${project.forgegradle_version}", changing: true
+        classpath "org.spongepowered:mixingradle:${project.mixingradle_version}"
+        classpath "org.parchmentmc:librarian:${project.librarian_version}"
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -23,41 +23,33 @@ apply plugin: 'org.spongepowered.mixin'
 apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
 
 mixin {
-    add sourceSets.main, "selene.refmap.json"
+    add sourceSets.main, "${project.mod_id}+.refmap.json"
 }
 
-version = '1.18-1.13.2'
-group = 'net.mehvahdjukaar.selene' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'selene'
+
+archivesBaseName = project.mod_id
+version = "${project.mc_update_version}-${project.mod_version}".toString()
+group = project.maven_group+"."+archivesBaseName
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    // The mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   Snapshot are built nightly.
-    // stable_#            Stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
-    //mappings channel: 'snapshot', version: '20200916-1.16.2'
-    //mappings channel: 'official', version: '1.17.1'
-    mappings channel: 'official', version: '1.18'
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+
+    if(project.parchment_enabled == "true"){
+        mappings channel: 'parchment', version: "${project.parchment_version}-${project.minecraft_version}"
+    }else{
+        mappings channel: 'official', version: "${project.minecraft_version}"
+    }
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
     runs {
         client {
 
             property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-
-
             property 'mixin.env.remapRefMap', 'true'
-            //property 'mixin.env.disableRefMap', 'true'
-            arg "-mixin.config=selene.mixins.json".toString()
-            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            arg "-mixin.config=${project.mod_id}.mixins.json".toString()
 
             workingDirectory project.file('run')
 
@@ -67,24 +59,14 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
-            mods {
-                selene {
-                    source sourceSets.main
-                }
-            }
         }
 
         server {
 
             property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
 
-
             property 'mixin.env.remapRefMap', 'true'
-            //property 'mixin.env.disableRefMap', 'true'
-            arg "-mixin.config=selene.mixins.json".toString()
-            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            arg "-mixin.config=${project.mod_id}.mixins.json".toString()
 
             workingDirectory project.file('run')
 
@@ -94,18 +76,12 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
-            mods {
-                selene {
-                    source sourceSets.main
-                }
-            }
         }
 
         data {
 
             //run data mixins?
             property 'mixin.env.remapRefMap', 'true'
-
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             workingDirectory project.file('run')
@@ -116,14 +92,8 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
-            //args "--mod", "selene", "--all", "--output", "\"" + file("src/generated/resources").toString() + "\"", "--validate", "--existing", "\"" + sourceSets.main.resources.srcDirs[0] + "\""
-            args '--mod', 'selene', '--all', '--output', file('src/generated/resources/'), '--existing', sourceSets.main.resources.srcDirs[0]   //args "--mod", "usefulbackpacks", "--all", "--output", "\"" + file("src/generated/resources").toString() + "\"", "--validate", "--existing", "\"" + sourceSets.main.resources.srcDirs[0] + "\""
+            args '--mod', "${project.mod_id}", '--all', '--output', file('src/generated/resources/'), '--existing', sourceSets.main.resources.srcDirs[0]   //args "--mod", "usefulbackpacks", "--all", "--output", "\"" + file("src/generated/resources").toString() + "\"", "--validate", "--existing", "\"" + sourceSets.main.resources.srcDirs[0] + "\""
 
-            mods {
-                selene {
-                    source sourceSets.main
-                }
-            }
         }
     }
 }
@@ -133,12 +103,11 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
 
-    minecraft 'net.minecraftforge:forge:1.18.1-39.0.62'
+    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
 
     implementation fg.deobf("curse.maven:farmersdelight-398521:3575116")
     implementation fg.deobf("curse.maven:map-atlases-forge-519759:3641038")
 
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 }
 
@@ -146,23 +115,17 @@ dependencies {
 jar {
     manifest {
         attributes([
-                "Specification-Title": "selene",
-                "Specification-Vendor": "examplemodsareus",
+                "Specification-Title": "${projectDir}",
                 "Specification-Version": "1", // We are version 1 of ourselves
                 "Implementation-Title": project.name,
                 "Implementation-Version": "${version}",
-                "Implementation-Vendor" :"examplemodsareus",
-                //"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConfigs": "selene.mixins.json"
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs": "${projectDir}.mixins.json"
         ])
     }
 }
 
-// Example configuration to allow publishing using the maven-publish task
-// This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('reobfJar')
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-//publish.dependsOn('reobfJar')
 
 publishing {
     publications {
@@ -185,61 +148,7 @@ repositories {
         url "https://www.cursemaven.com"
         allowInsecureProtocol = true
     }
-    maven {
-        // location of the maven that hosts JEI files (And TiC)
-        name "Progwml6 maven"
-        url "https://dvs1.progwml6.com/files/maven/"
-        allowInsecureProtocol = true
-    }
-    maven {
-        //location of the maven for mixed mappings and registrate
-        name = "tterrag maven"
-        url = "https://maven.tterrag.com/"
-        allowInsecureProtocol = true
-    }
-    maven {
-        // location of the maven that hosts JEI files (And TiC)
-        name "Progwml6 maven"
-        url "https://dvs1.progwml6.com/files/maven/"
-        allowInsecureProtocol = true
-    }
-    maven {
-        //location of the maven for vazkii's mods
-        name "blamejared"
-        url "http://maven.blamejared.com/"
-        allowInsecureProtocol = true
-    }
 }
-
-repositories{
-    maven {
-        // location of the maven that hosts JEI files
-        name = "Progwml6 maven"
-        url = "https://dvs1.progwml6.com/files/maven/"
-        allowInsecureProtocol = true
-    }
-    maven {
-        // location of a maven mirror for JEI files, as a fallback
-        name = "ModMaven"
-        url = "https://modmaven.k-4u.nl"
-        allowInsecureProtocol = true
-    }
-    jcenter()
-    mavenCentral()
-}
-
-repositories {
-    maven { // JEI
-        url "https://dvs1.progwml6.com/files/maven"
-        allowInsecureProtocol = true
-    }
-    maven { // TOP
-        name 'tterrag maven'
-        url "http://maven.tterrag.com/"
-        allowInsecureProtocol = true
-    }
-}
-
 
 
 // Loads files in the format {modid}-{version}.jar, MC version optional but picky about hyphens.
@@ -291,8 +200,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:19.0.0'
 
     //mixin stuff fore gradle 5+
-    annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
-
+    annotationProcessor "org.spongepowered:mixin:${project.mixin_version}:processor"
 
     // Snip: Minecraft dependencies, Forge
 
@@ -303,6 +211,5 @@ dependencies {
     }
 
     // Other standard gradle dependencies
-
 
 }

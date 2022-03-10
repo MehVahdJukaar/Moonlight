@@ -1,49 +1,55 @@
 
 modLoader="javafml" #mandatory
-# A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[37,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
-# The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
-# Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
+
+loaderVersion="[38,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+
 license="All rights reserved"
-# A URL to refer people to when problems occur with this mod
-#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
-# A list of mods - how many allowed here is determined by the individual mod loader
+
+issueTrackerURL="https://www.curseforge.com/minecraft/mc-mods/selene/issues" #optional
+
 [[mods]] #mandatory
-    # The modid of the mod
+
     modId="selene" #mandatory
 
-    version="1.18-1.13.2" #mandatory
-     # A display name for the mod
+    version="${file.jarVersion}" #mandatory
+
     displayName="Selene" #mandatory
 
+    displayURL="https://www.curseforge.com/minecraft/mc-mods/selene" #optional
+
     logoFile="icon.png" #optional
-    # A text field displayed in the mod UI
+
     itemIcon="minecraft:end_stone" #catalogue icon
+
     credits="" #optional
-    # A text field displayed in the mod UI
+
     authors="MehVahdJukaar" #optional
-    # The description text for the mod (multi line!) (#mandatory)
+
     description='''
     A small library that allows to make custom map markers, first and third person animations and contains the soft fluid system as well as other utilities
     '''
-    # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+
 
 [[dependencies.selene]] #optional
-    # the modid of the dependency
+
     modId="forge" #mandatory
-    # Does this dependency have to exist - if not, ordering below must be specified
+
     mandatory=true #mandatory
-    # The version range of the dependency
-    versionRange="[37,)" #mandatory
-    # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
+
+    versionRange="[38,)" #mandatory
+
     ordering="NONE"
-    # Side this dependency is applied on - BOTH, CLIENT or SERVER
+
     side="BOTH"
-# Here's another dependency
+
 [[dependencies.selene]]
+
     modId="minecraft"
+
     mandatory=true
-# This version range declares a minimum of the current minecraft version up to but not including the next major version
+
     versionRange="[1.18,1.19)"
+
     ordering="NONE"
+
     side="BOTH"
