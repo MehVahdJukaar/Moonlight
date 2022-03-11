@@ -1,0 +1,185 @@
+package net.mehvahdjukaar.selene.block_set;
+
+import com.mojang.datafixers.util.Pair;
+import net.mehvahdjukaar.selene.block_set.wood.WoodType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
+
+import java.util.*;
+import java.util.function.Consumer;
+
+public class BlockSetManager {
+
+    private static final Map<Class<? extends IBlockType>, IBlockSetContainer<?>> BLOCK_SET_CONTAINERS = new HashMap<>();
+    private static final Set<Runnable> FINDER_ADDER = new HashSet<>();
+
+    private static boolean hasFilledBlockSets = false;
+
+    /**
+     * Registers a block set definition (like wood type, leaf type etc...)
+     * Can be called only during mod startup (not during mod setup as it needs to run before registry events
+     * @param type class of the target block set
+     * @param detContainer block set container class instance. This contains all the logic that determines how a blockset
+     *                     gets formed
+     * @param <T> IBlockType
+     */
+    public static <T extends IBlockType> void registerBlockSetDefinition(Class<T> type,IBlockSetContainer<T> detContainer){
+        if (hasFilledBlockSets) {
+            throw new UnsupportedOperationException(
+                    String.format("Tried to register block set definition %s for block type %s after registry events",detContainer, type ));
+        }
+        BLOCK_SET_CONTAINERS.put(type,detContainer);
+    }
+
+    /**
+     * Use this function to register a (modded) block type finder manually.
+     * This is handy for bloc types that are unique and which can't be detected by the detection system defined in their BlockSetContainer class
+     * Call during mod startup (not mod setup as it will be too late for this to affect block registration)
+     *
+     * @param woodFinder Finder object that will provide the modded block type when the time is right
+     */
+    public static <T extends IBlockType> void addBlockTypeFinder(Class<T> type, IBlockType.SetFinder<T> woodFinder) {
+        if (hasFilledBlockSets) {
+            throw new UnsupportedOperationException(
+                    String.format("Tried to register block %s finder %s after registry events", type, woodFinder));
+        }
+        FINDER_ADDER.add(()->{
+            IBlockSetContainer<T> container = getBlockSet(type);
+            container.addFinder(woodFinder);
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends IBlockType> IBlockSetContainer<T> getBlockSet(Class<T> type) {
+        return (IBlockSetContainer<T>) BLOCK_SET_CONTAINERS.get(type);
+    }
+
+    @FunctionalInterface
+    public interface BlockSetRegistryCallback<T extends IBlockType, R extends IForgeRegistryEntry<R>> {
+        void accept(RegistryEvent.Register<R> reg, Collection<T> wood);
+    }
+
+    //shittiest code ever lol
+    protected static void registerLateBlockAndItems(RegistryEvent.Register<Item> event) {
+        //when the first registration function is called we find all wood types
+        if (!hasFilledBlockSets) {
+            initializeBlockSets();
+            hasFilledBlockSets = true;
+        }
+        //get the queue corresponding to this certain mod
+        String modId = ModLoadingContext.get().getActiveContainer().getModId();
+        var registrationQueues =
+                LATE_REGISTRATION_QUEUE.get(modId);
+        if (registrationQueues != null) {
+            //register blocks
+            var blockQueue = registrationQueues.getFirst();
+            blockQueue.forEach(Runnable::run);
+            //registers items
+            var itemQueue = registrationQueues.getSecond();
+            itemQueue.forEach(q -> q.accept(event));
+        }
+        //clears stuff that's been execured. not really needed but just to be safe its here
+        LATE_REGISTRATION_QUEUE.remove(modId);
+    }
+
+    //maps containing mod ids and block and items runnables. Block one is ready to run, items needs the bus supplied to it
+    //they will be run each mod at a time block first then items
+    private static final Map<String, Pair<
+            List<Runnable>, //block registration function
+            List<Consumer<RegistryEvent.Register<Item>>> //item registration function
+            >>
+            LATE_REGISTRATION_QUEUE = new HashMap<>();
+
+    @Deprecated
+    void addWoodRegistrationCallback(){};
+    public static <R extends IForgeRegistryEntry<R>> void addWoodRegistrationCallback(
+            BlockSetRegistryCallback<WoodType,R> registrationFunction, Class<R> regType) {
+        addBlockSetRegistrationCallback(registrationFunction,regType, WoodType.class);
+    }
+
+    /**
+     * Add a registry function meant to register a set of blocks that use a specific wood type
+     * Other entries like items can access WOOD_TYPES directly since it will be filled
+     * Will be called (hopefully) after all other block registrations have been fired so the wood set type is complete
+     * IMPORTANT: your mod needs to be set to run AFTER this mod. You can sed it in your mods.toml dependency
+     * If you dont this will still work but registration will throw some warnings
+     *
+     * @param registrationFunction registry function
+     */
+    public static <T extends IBlockType, R extends IForgeRegistryEntry<R>> void addBlockSetRegistrationCallback(
+            BlockSetRegistryCallback<T,R> registrationFunction, Class<R> regType, Class<T> blockType) {
+        //this is horrible. worst shit ever
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        Consumer<RegistryEvent.Register<R>> eventConsumer;
+
+        if (regType == Block.class || regType == Item.class) {
+
+            //get the queue corresponding to this certain mod
+            String modId = ModLoadingContext.get().getActiveContainer().getModId();
+
+            var registrationQueues =
+                    LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {
+                        //if absent we register its registration callback
+                        bus.addGenericListener(Item.class, EventPriority.HIGHEST, BlockSetManager::registerLateBlockAndItems);
+                        return Pair.of(new ArrayList<>(), new ArrayList<>());
+                    });
+
+
+            if (regType == Block.class) {
+                //if block makes a function that just adds the bus and runnable to the queue whenever reg block is fired
+                eventConsumer = e -> {
+                    //actual runnable which will registers the blocks
+                    Runnable lateRegistration = () -> {
+
+                        IForgeRegistry<?> registry = e.getRegistry();
+                        if (registry instanceof ForgeRegistry fr) {
+                            boolean frozen = fr.isLocked();
+                            fr.unfreeze();
+                            registrationFunction.accept(e, getBlockSet(blockType).getTypes().values());
+                            if (frozen) fr.freeze();
+                        }
+                    };
+                    //when this reg block event fires we only add a runnable to the queue
+                    registrationQueues.getFirst().add(lateRegistration);
+                };
+                //registering block event to the bus
+
+                bus.addGenericListener(regType, EventPriority.HIGHEST, eventConsumer);
+            } else {
+                //items just get added to the queue. they will already be called with the correct event
+
+                Consumer<RegistryEvent.Register<Item>> itemEvent = e ->
+                        registrationFunction.accept((RegistryEvent.Register<R>) e, getBlockSet(blockType).getTypes().values());
+                registrationQueues.getSecond().add(itemEvent);
+            }
+        } else {
+            //non block /item event. just wraps it by giving it the wood types
+
+            eventConsumer = e -> registrationFunction.accept(e, getBlockSet(blockType).getTypes().values());
+            bus.addGenericListener(regType, eventConsumer);
+        }
+    }
+
+    private static <T extends IBlockType> void addFinderToSet(Pair<Class<T>,IBlockType.SetFinder<T>> pair){
+
+    }
+
+    private static void initializeBlockSets() {
+        FINDER_ADDER.forEach(Runnable::run);
+        FINDER_ADDER.clear();
+
+        for(var c : BLOCK_SET_CONTAINERS.values()){
+            c.buildAll();
+        }
+    }
+
+
+}

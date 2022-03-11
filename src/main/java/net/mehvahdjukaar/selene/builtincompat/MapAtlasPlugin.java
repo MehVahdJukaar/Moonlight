@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.map.mapatlas;
+package net.mehvahdjukaar.selene.builtincompat;
 
 import lilypuree.mapatlases.item.MapAtlasItem;
 import lilypuree.mapatlases.util.MapAtlasesAccessUtils;

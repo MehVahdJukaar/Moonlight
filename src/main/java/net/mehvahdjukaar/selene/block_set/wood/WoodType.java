@@ -1,5 +1,7 @@
-package net.mehvahdjukaar.selene.util;
+package net.mehvahdjukaar.selene.block_set.wood;
 
+import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.block_set.IBlockType;
 import net.mehvahdjukaar.selene.resourcepack.AssetGenerators;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -9,14 +11,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.common.util.Lazy;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
-public class WoodSetType {
+public class WoodType implements IBlockType {
 
-    public static WoodSetType OAK_WOOD_TYPE = new WoodSetType(new ResourceLocation("oak"), Blocks.OAK_PLANKS,Blocks.OAK_LOG);
+    public static WoodType OAK_WOOD_TYPE = new WoodType(new ResourceLocation("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
 
     public final ResourceLocation id;
     public final Material material;
@@ -25,11 +29,11 @@ public class WoodSetType {
 
     @Nullable
     public final Block logBlock; //used for log texture
-    //lazy cause wood types are loaded before items so we can only access blocks
+    //lazy cause wood types are loaded before items, so we can only access blocks
     @Nullable
     public final Lazy<Item> signItem; //used for item textures
 
-    protected WoodSetType(ResourceLocation id, Block baseBlock,Block logBlock) {
+    protected WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
         this.id = id;
         this.plankBlock = baseBlock;
         this.logBlock = logBlock;
@@ -128,58 +132,37 @@ public class WoodSetType {
         } else return string.substring(0, 4);
     }
 
-    @Nullable
-    private static Block findLog(ResourceLocation id) {
-        ResourceLocation[] test = {
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_log"),
-                new ResourceLocation(id.getNamespace(), "log_" + id.getPath()),
-                new ResourceLocation(id.getPath() + "_log"),
-                new ResourceLocation("log_" + id.getPath()),
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_stem"),
-                new ResourceLocation(id.getNamespace(), "stem_" + id.getPath()),
-                new ResourceLocation(id.getPath() + "_stem"),
-                new ResourceLocation("stem_" + id.getPath())
-        };
-        Block temp = null;
-        for (var r : test) {
-            if (ForgeRegistries.BLOCKS.containsKey(r)) {
-                temp = ForgeRegistries.BLOCKS.getValue(r);
-                break;
-            }
-        }
-        return temp;
-    }
 
-    //returns if this block is the base plank block
-    public static Optional<WoodSetType> getWoodTypeFromBlock(Block baseBlock) {
-        ResourceLocation baseRes = baseBlock.getRegistryName();
-        String name = null;
-        String path = baseRes.getPath();
-        //needs to contain planks in its name
-        if (path.endsWith("_planks")) {
-            name = path.substring(0, path.length() - "_planks".length());
-        } else if (path.startsWith("planks_")) {
-            name = path.substring("planks_".length());
-        } else if (path.endsWith("_plank")) {
-            name = path.substring(0, path.length() - "_plank".length());
-        } else if (path.startsWith("plank_")) {
-            name = path.substring("plank_".length());
+    public static class Finder extends SetFinder<WoodType>{
+
+        private final Supplier<Block> planksFinder;
+        private final Supplier<Block> logFinder;
+        private final ResourceLocation id;
+
+        public Finder(ResourceLocation id, Supplier<Block> planks, Supplier<Block> log){
+            this.id = id;
+            this.planksFinder = planks;
+            this.logFinder = log;
         }
-        if (name != null) {
-            BlockState state = baseBlock.defaultBlockState();
-            //needs to use wood sound type
-            //if (state.getSoundType() == SoundType.WOOD) { //wood from tcon has diff sounds
-            Material mat = state.getMaterial();
-            //and have correct material
-            if (mat == Material.WOOD || mat == Material.NETHER_WOOD) {
-                ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
-                Block logBlock = findLog(id);
-                if(logBlock!=null) {
-                    return Optional.of(new WoodSetType(id, baseBlock, logBlock));
+
+        public static Finder simple(String modId, String woodTypeName, String planksName, String logName){
+            return new Finder(new ResourceLocation(modId, woodTypeName),
+                    ()-> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(modId, planksName)),
+                    ()-> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(modId, logName)));
+        }
+
+        public Optional<WoodType> get(){
+            if(ModList.get().isLoaded(id.getNamespace())) {
+                try {
+                    Block plank = planksFinder.get();
+                    Block log = logFinder.get();
+                    return Optional.of(new WoodType(id, plank, log));
+                } catch (Exception e) {
+                    Selene.LOGGER.warn("Failed to find custom wood type {}", id);
                 }
             }
-            //}
+            return Optional.empty();
         }
-        return Optional.empty();
+
     }
 }

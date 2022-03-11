@@ -21,10 +21,12 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class VillagerAIManager {
+
     public static final DeferredRegister<Schedule> SCHEDULES = DeferredRegister.create(ForgeRegistries.SCHEDULES, Selene.MOD_ID);
 
+    //schedule to which all the tasks are registered to
     protected static final RegistryObject<Schedule> CUSTOM_VILLAGER_SCHEDULE =
-            SCHEDULES.register("villager_baby_halloween", Schedule::new);
+            SCHEDULES.register("custom_villager_schedule", Schedule::new);
 
     //dont even have priority lol
     private static final List<Consumer<VillagerBrainEvent>> LISTENERS = new ArrayList<>();
@@ -68,12 +70,7 @@ public class VillagerAIManager {
      */
     public static void registerMemory(MemoryModuleType<?> memoryModuleType) {
 
-        //if (MEMORIES == null) MEMORIES = ObfuscationReflectionHelper.findField(Villager.class, "f_35367_");
-
-
         try {
-            //MEMORIES.setAccessible(true);
-            //ImmutableList<MemoryModuleType<?>> oldValue = (ImmutableList<MemoryModuleType<?>>) MEMORIES.get(null);
             var oldValue = Villager.MEMORY_TYPES ;
 
             ImmutableList.Builder<MemoryModuleType<?>> builder = ImmutableList.builder();
@@ -85,6 +82,5 @@ public class VillagerAIManager {
             Selene.LOGGER.warn("failed to register pumpkin sensor type for villagers: " + e);
         }
     }
-    private static Field MEMORIES = null;
 
 }

@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.map;
 
-import net.mehvahdjukaar.selene.map.mapatlas.MapAtlasPlugin;
+import net.mehvahdjukaar.selene.builtincompat.MapAtlasPlugin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
