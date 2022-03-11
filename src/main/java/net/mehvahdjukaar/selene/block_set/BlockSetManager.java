@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 
 public class BlockSetManager {
 
-    private static final Map<Class<? extends IBlockType>, IBlockSetContainer<?>> BLOCK_SET_CONTAINERS = new HashMap<>();
+    private static final Map<Class<? extends IBlockType>, IBlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new HashMap<>();
     private static final Set<Runnable> FINDER_ADDER = new HashSet<>();
 
     private static boolean hasFilledBlockSets = false;
@@ -27,16 +27,16 @@ public class BlockSetManager {
      * Registers a block set definition (like wood type, leaf type etc...)
      * Can be called only during mod startup (not during mod setup as it needs to run before registry events
      * @param type class of the target block set
-     * @param detContainer block set container class instance. This contains all the logic that determines how a blockset
+     * @param typeRegistry block set registry class instance. This contains all the logic that determines how a blockset
      *                     gets formed
      * @param <T> IBlockType
      */
-    public static <T extends IBlockType> void registerBlockSetDefinition(Class<T> type,IBlockSetContainer<T> detContainer){
+    public static <T extends IBlockType> void registerBlockSetDefinition(Class<T> type, IBlockTypeRegistry<T> typeRegistry){
         if (hasFilledBlockSets) {
             throw new UnsupportedOperationException(
-                    String.format("Tried to register block set definition %s for block type %s after registry events",detContainer, type ));
+                    String.format("Tried to register block set definition %s for block type %s after registry events",typeRegistry, type ));
         }
-        BLOCK_SET_CONTAINERS.put(type,detContainer);
+        BLOCK_SET_CONTAINERS.put(type,typeRegistry);
     }
 
     /**
@@ -52,14 +52,14 @@ public class BlockSetManager {
                     String.format("Tried to register block %s finder %s after registry events", type, woodFinder));
         }
         FINDER_ADDER.add(()->{
-            IBlockSetContainer<T> container = getBlockSet(type);
+            IBlockTypeRegistry<T> container = getBlockSet(type);
             container.addFinder(woodFinder);
         });
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends IBlockType> IBlockSetContainer<T> getBlockSet(Class<T> type) {
-        return (IBlockSetContainer<T>) BLOCK_SET_CONTAINERS.get(type);
+    public static <T extends IBlockType> IBlockTypeRegistry<T> getBlockSet(Class<T> type) {
+        return (IBlockTypeRegistry<T>) BLOCK_SET_CONTAINERS.get(type);
     }
 
     @FunctionalInterface
@@ -67,30 +67,7 @@ public class BlockSetManager {
         void accept(RegistryEvent.Register<R> reg, Collection<T> wood);
     }
 
-    //shittiest code ever lol
-    protected static void registerLateBlockAndItems(RegistryEvent.Register<Item> event) {
-        //when the first registration function is called we find all wood types
-        if (!hasFilledBlockSets) {
-            initializeBlockSets();
-            hasFilledBlockSets = true;
-        }
-        //get the queue corresponding to this certain mod
-        String modId = ModLoadingContext.get().getActiveContainer().getModId();
-        var registrationQueues =
-                LATE_REGISTRATION_QUEUE.get(modId);
-        if (registrationQueues != null) {
-            //register blocks
-            var blockQueue = registrationQueues.getFirst();
-            blockQueue.forEach(Runnable::run);
-            //registers items
-            var itemQueue = registrationQueues.getSecond();
-            itemQueue.forEach(q -> q.accept(event));
-        }
-        //clears stuff that's been execured. not really needed but just to be safe its here
-        LATE_REGISTRATION_QUEUE.remove(modId);
-    }
-
-    //maps containing mod ids and block and items runnables. Block one is ready to run, items needs the bus supplied to it
+    //maps containing mod ids and block and items runnable. Block one is ready to run, items needs the bus supplied to it
     //they will be run each mod at a time block first then items
     private static final Map<String, Pair<
             List<Runnable>, //block registration function
@@ -107,10 +84,9 @@ public class BlockSetManager {
 
     /**
      * Add a registry function meant to register a set of blocks that use a specific wood type
-     * Other entries like items can access WOOD_TYPES directly since it will be filled
-     * Will be called (hopefully) after all other block registrations have been fired so the wood set type is complete
-     * IMPORTANT: your mod needs to be set to run AFTER this mod. You can sed it in your mods.toml dependency
-     * If you dont this will still work but registration will throw some warnings
+     * Other entries like items can access the block types directly since it will be filled
+     * Will be called (hopefully) after all other block registrations have been fired so the block set type is complete
+     * Note that whatever gets registered here should in no way influence the block sets themselves (you shouldn't add new wood types here for example)
      *
      * @param registrationFunction registry function
      */
@@ -168,9 +144,31 @@ public class BlockSetManager {
         }
     }
 
-    private static <T extends IBlockType> void addFinderToSet(Pair<Class<T>,IBlockType.SetFinder<T>> pair){
 
+    //shittiest code ever lol
+    protected static void registerLateBlockAndItems(RegistryEvent.Register<Item> event) {
+        //when the first registration function is called we find all wood types
+        if (!hasFilledBlockSets) {
+            initializeBlockSets();
+            hasFilledBlockSets = true;
+        }
+        //get the queue corresponding to this certain mod
+        String modId = ModLoadingContext.get().getActiveContainer().getModId();
+        var registrationQueues =
+                LATE_REGISTRATION_QUEUE.get(modId);
+        if (registrationQueues != null) {
+            //register blocks
+            var blockQueue = registrationQueues.getFirst();
+            blockQueue.forEach(Runnable::run);
+            //registers items
+            var itemQueue = registrationQueues.getSecond();
+            itemQueue.forEach(q -> q.accept(event));
+        }
+        //clears stuff that's been execured. not really needed but just to be safe its here
+        LATE_REGISTRATION_QUEUE.remove(modId);
     }
+
+
 
     private static void initializeBlockSets() {
         FINDER_ADDER.forEach(Runnable::run);

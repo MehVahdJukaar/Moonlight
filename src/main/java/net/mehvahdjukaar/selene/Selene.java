@@ -1,10 +1,14 @@
 package net.mehvahdjukaar.selene;
 
+import net.mehvahdjukaar.selene.block_set.BlockSetManager;
+import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
+import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.builtincompat.mapatlas.CompatWoodTypes;
 import net.mehvahdjukaar.selene.data.ModCriteriaTriggers;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.mehvahdjukaar.selene.villager_ai.VillagerAIManager;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -23,7 +27,8 @@ public class Selene {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         VillagerAIManager.SCHEDULES.register(bus);
         bus.addListener(Selene::init);
-
+        BlockSetManager.registerBlockSetDefinition(WoodType.class, new WoodTypeRegistry());
+        BlockSetManager.addBlockSetRegistrationCallback((a,b)->{}, Block.class, WoodType.class);
         CompatWoodTypes.init();
     }
 

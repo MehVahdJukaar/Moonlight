@@ -1,9 +1,8 @@
 package net.mehvahdjukaar.selene.block_set.wood;
 
 import com.google.common.collect.ImmutableMap;
-import net.mehvahdjukaar.selene.Selene;
-import net.mehvahdjukaar.selene.block_set.IBlockSetContainer;
 import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.selene.block_set.IBlockTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,7 +12,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class WoodSetContainer implements IBlockSetContainer<WoodType> {
+public class WoodTypeRegistry implements IBlockTypeRegistry<WoodType> {
+
+    public static WoodTypeRegistry INSTANCE;
+
+    public WoodTypeRegistry() {
+        INSTANCE = this;
+    }
 
     /**
      * Do not access these to register your blocks since they are empty right before the last registration phase.
@@ -24,7 +29,7 @@ public class WoodSetContainer implements IBlockSetContainer<WoodType> {
 
     private boolean frozen = false;
     private final List<IBlockType.SetFinder<WoodType>> WOOD_FINDERS = new ArrayList<>();
-    private final Set<WoodType> builder = new HashSet<>();
+    private final List<WoodType> builder = new ArrayList<>();
 
     /**
      * Gets corresponding wood type or oak if the provided one is not installed or missing
@@ -32,8 +37,12 @@ public class WoodSetContainer implements IBlockSetContainer<WoodType> {
      * @param name string resource location name of the type
      * @return wood type
      */
-    public WoodType fromNBT(String name) {
-        return WOOD_TYPES.getOrDefault(new ResourceLocation(name), this.getDefaultType());
+    public WoodType getFromNBT(String name) {
+        return this.getTypes().getOrDefault(new ResourceLocation(name), this.getDefaultType());
+    }
+
+    public static WoodType fromNBT(String name) {
+        return WOOD_TYPES.getOrDefault(new ResourceLocation(name), WoodType.OAK_WOOD_TYPE);
     }
 
     @Override
@@ -42,7 +51,7 @@ public class WoodSetContainer implements IBlockSetContainer<WoodType> {
     }
 
     @Override
-    public Map<ResourceLocation,WoodType> getTypes() {
+    public Map<ResourceLocation, WoodType> getTypes() {
         if (!frozen) {
             throw new UnsupportedOperationException("Tried to access wood types too early");
         }
@@ -63,11 +72,11 @@ public class WoodSetContainer implements IBlockSetContainer<WoodType> {
             throw new UnsupportedOperationException("Wood types are already finalized");
         }
         LinkedHashMap<ResourceLocation, WoodType> linkedHashMap = new LinkedHashMap<>();
-        builder.forEach(e->{
-            if(linkedHashMap.containsKey(e.id)){
-                Selene.LOGGER.warn("Found wood type with duplicate id ({}), overriding",e.id);
+        builder.forEach(e -> {
+            if (!linkedHashMap.containsKey(e.id)) {
+                linkedHashMap.put(e.id, e);
+                //Selene.LOGGER.warn("Found wood type with duplicate id ({}), skipping",e.id);
             }
-            linkedHashMap.put(e.id,e);
         });
         WOOD_TYPES = ImmutableMap.copyOf(linkedHashMap);
         builder.clear();

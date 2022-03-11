@@ -8,9 +8,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-public interface IBlockSetContainer<T extends IBlockType> {
+public interface IBlockTypeRegistry<T extends IBlockType> {
 
-    T fromNBT(String string);
+    T getFromNBT(String string);
 
     T getDefaultType();
 
