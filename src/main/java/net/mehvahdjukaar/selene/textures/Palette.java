@@ -67,7 +67,7 @@ public class Palette {
             for (int y = 0; y < image.getHeight(); y++) {
                 if (mask == null || NativeImage.getA(mask.getPixelRGBA(x, y)) == 0) {
                     int color = image.getPixelRGBA(x, y);
-                    if(NativeImage.getA(color)!=0) {
+                    if (NativeImage.getA(color) != 0) {
                         int finalX = x;
                         int finalY = y;
                         var paletteColor = map.computeIfAbsent(color,
@@ -77,10 +77,14 @@ public class Palette {
                 }
             }
         }
+        if (map.size() == 0) throw new UnsupportedOperationException("Palette mask must not cover the whole image");
         return new Palette(map.values());
     }
 
     public void matchSize(int targetSize) {
+        if (this.size() <= 0 || targetSize <= 0) {
+            throw new UnsupportedOperationException("Palette size can't be 0");
+        }
         this.maybeReducePalette(targetSize);
         this.maybeIncreasePalette(targetSize);
     }

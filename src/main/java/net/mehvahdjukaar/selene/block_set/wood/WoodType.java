@@ -7,7 +7,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.common.util.Lazy;
@@ -25,13 +24,15 @@ public class WoodType implements IBlockType {
     public final ResourceLocation id;
     public final Material material;
     public final Block plankBlock;
-    public final String shortenedNamespace;
-
-    @Nullable
-    public final Block logBlock; //used for log texture
+    public final Block logBlock;
     //lazy cause wood types are loaded before items, so we can only access blocks
     @Nullable
     public final Lazy<Item> signItem; //used for item textures
+    @Nullable
+    public final Lazy<Item> boatItem;
+
+    //remove
+    public final String shortenedNamespace;
 
     protected WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
         this.id = id;
@@ -41,23 +42,24 @@ public class WoodType implements IBlockType {
         this.shortenedNamespace = id.getNamespace().equals("minecraft") ? "" : "_" + abbreviateString(id.getNamespace());
 
         //checks if it has a sign
-        this.signItem = Lazy.of(this::findSign);
+        this.signItem = Lazy.of(()->this.findRelatedItem("sign"));
+        this.boatItem = Lazy.of(()->this.findRelatedItem("boat"));
     }
 
     @Nullable
-    private Item findSign() {
-        ResourceLocation[] test2 = {
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_sign"),
-                new ResourceLocation(id.getNamespace(), "sign_" + id.getPath())
+    private Item findRelatedItem(String appendedName) {
+        ResourceLocation[] targets = {
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + appendedName),
+                new ResourceLocation(id.getNamespace(), appendedName + "_" + id.getPath())
         };
-        Item temp2 = null;
-        for (var r : test2) {
+        Item found = null;
+        for (var r : targets) {
             if (ForgeRegistries.ITEMS.containsKey(r)) {
-                temp2 = ForgeRegistries.ITEMS.getValue(r);
+                found = ForgeRegistries.ITEMS.getValue(r);
                 break;
             }
         }
-        return temp2;
+        return found;
     }
 
     @Override
@@ -133,26 +135,26 @@ public class WoodType implements IBlockType {
     }
 
 
-    public static class Finder extends SetFinder<WoodType>{
+    public static class Finder extends SetFinder<WoodType> {
 
         private final Supplier<Block> planksFinder;
         private final Supplier<Block> logFinder;
         private final ResourceLocation id;
 
-        public Finder(ResourceLocation id, Supplier<Block> planks, Supplier<Block> log){
+        public Finder(ResourceLocation id, Supplier<Block> planks, Supplier<Block> log) {
             this.id = id;
             this.planksFinder = planks;
             this.logFinder = log;
         }
 
-        public static Finder simple(String modId, String woodTypeName, String planksName, String logName){
+        public static Finder simple(String modId, String woodTypeName, String planksName, String logName) {
             return new Finder(new ResourceLocation(modId, woodTypeName),
-                    ()-> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(modId, planksName)),
-                    ()-> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(modId, logName)));
+                    () -> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(modId, planksName)),
+                    () -> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(modId, logName)));
         }
 
-        public Optional<WoodType> get(){
-            if(ModList.get().isLoaded(id.getNamespace())) {
+        public Optional<WoodType> get() {
+            if (ModList.get().isLoaded(id.getNamespace())) {
                 try {
                     Block plank = planksFinder.get();
                     Block log = logFinder.get();

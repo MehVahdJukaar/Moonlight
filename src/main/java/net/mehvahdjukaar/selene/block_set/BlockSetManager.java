@@ -14,14 +14,25 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
 public class BlockSetManager {
 
-    private static final Map<Class<? extends IBlockType>, IBlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new HashMap<>();
-    private static final Set<Runnable> FINDER_ADDER = new HashSet<>();
-
     private static boolean hasFilledBlockSets = false;
+
+    //Frick mod loading is multi-threaded, so we need to beware of concurrent access
+    private static final Map<Class<? extends IBlockType>, IBlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new ConcurrentHashMap<>();
+    private static final ConcurrentLinkedDeque<Runnable> FINDER_ADDER = new ConcurrentLinkedDeque<>();
+
+    //maps containing mod ids and block and items runnable. Block one is ready to run, items needs the bus supplied to it
+    //they will be run each mod at a time block first then items
+    private static final Map<String, Pair<
+            List<Runnable>, //block registration function
+            List<Consumer<RegistryEvent.Register<Item>>> //item registration function
+            >>
+            LATE_REGISTRATION_QUEUE = new ConcurrentHashMap<>();
 
     /**
      * Registers a block set definition (like wood type, leaf type etc...)
@@ -67,13 +78,9 @@ public class BlockSetManager {
         void accept(RegistryEvent.Register<R> reg, Collection<T> wood);
     }
 
-    //maps containing mod ids and block and items runnable. Block one is ready to run, items needs the bus supplied to it
-    //they will be run each mod at a time block first then items
-    private static final Map<String, Pair<
-            List<Runnable>, //block registration function
-            List<Consumer<RegistryEvent.Register<Item>>> //item registration function
-            >>
-            LATE_REGISTRATION_QUEUE = new HashMap<>();
+
+
+
 
     @Deprecated
     void addWoodRegistrationCallback(){};
