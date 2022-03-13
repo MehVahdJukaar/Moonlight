@@ -69,7 +69,6 @@ public class Respriter {
         }
         //now they should be same size
         return zipToMap(this.originalPalette.getValues(), toPalette.getValues());
-        //}
     }
 
     private Map<Integer, Integer> zipToMap(List<PaletteColor> keys, List<PaletteColor> values) {

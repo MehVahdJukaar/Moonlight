@@ -5,6 +5,7 @@ import net.mehvahdjukaar.selene.block_set.IBlockType;
 import net.mehvahdjukaar.selene.block_set.IBlockTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -113,15 +114,18 @@ public class WoodTypeRegistry implements IBlockTypeRegistry<WoodType> {
         }
         if (name != null) {
             BlockState state = baseBlock.defaultBlockState();
-            //needs to use wood sound type
-            //if (state.getSoundType() == SoundType.WOOD) { //wood from tcon has diff sounds
-            Material mat = state.getMaterial();
-            //and have correct material
-            if (mat == Material.WOOD || mat == Material.NETHER_WOOD) {
-                ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
-                Block logBlock = findLog(id);
-                if (logBlock != null) {
-                    return Optional.of(new WoodType(id, baseBlock, logBlock));
+            //cant check if the block is a full one so I do this. Adding some checks here
+            if (state.getProperties().size() <= 2 && !(baseBlock instanceof SlabBlock)) {
+                //needs to use wood sound type
+                //if (state.getSoundType() == SoundType.WOOD) { //wood from tcon has diff sounds
+                Material mat = state.getMaterial();
+                //and have correct material
+                if (mat == Material.WOOD || mat == Material.NETHER_WOOD) {
+                    ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
+                    Block logBlock = findLog(id);
+                    if (logBlock != null) {
+                        return Optional.of(new WoodType(id, baseBlock, logBlock));
+                    }
                 }
             }
             //}

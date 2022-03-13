@@ -3,21 +3,29 @@ package net.mehvahdjukaar.selene.resourcepack;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.data.BlockLootTableAccessor;
 import net.mehvahdjukaar.selene.resourcepack.RPUtils.ResType;
+import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 public class DynamicDataPack extends DynamicResourcePack {
@@ -30,26 +38,32 @@ public class DynamicDataPack extends DynamicResourcePack {
         super(name, PackType.SERVER_DATA);
     }
 
+    @Deprecated
     public enum TagType {
         BLOCKS, ITEMS, ENTITY_TYPES
     }
 
+    @Deprecated
     public void addTag(ResourceLocation tagLocation, Collection<ResourceLocation> values, TagType... types) {
+        for(var v : types){
+            switch (v){
+                case BLOCKS -> addTag(tagLocation, values, Registry.BLOCK_REGISTRY);
+                case ITEMS -> addTag(tagLocation, values, Registry.ITEM_REGISTRY);
+                case ENTITY_TYPES -> addTag(tagLocation, values, Registry.ENTITY_TYPE_REGISTRY);
+            };
+        }
+    }
+
+    public <T> void addTag(ResourceLocation tagLocation, Collection<ResourceLocation> values, ResourceKey<Registry<T>> type) {
         JsonObject json = new JsonObject();
         json.addProperty("replace", false);
         JsonArray array = new JsonArray();
 
         values.forEach(v -> array.add(v.toString()));
         json.add("values", array);
+        this.addJson(new ResourceLocation(tagLocation.getNamespace(),
+                type.location().getPath() +"/"+ tagLocation.getPath()), json, ResType.TAGS);
 
-        for (TagType type : types) {
-            this.addJson(new ResourceLocation(tagLocation.getNamespace(),
-                    type.name().toLowerCase(Locale.ROOT) +"/"+ tagLocation.getPath()), json, ResType.TAGS);
-        }
-    }
-
-    public void addLootTable(ResourceLocation lootTableLocation, JsonElement lootTable) {
-        this.addJson(lootTableLocation, lootTable, ResType.LOOT_TABLES);
     }
 
     /**
