@@ -1,6 +1,9 @@
 package net.mehvahdjukaar.selene.fluids;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.selene.util.Utils;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -11,15 +14,16 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Function;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 public class SoftFluid {
+
+    public static final SoftFluid EMPTY = new SoftFluid(new SoftFluid.Builder(Fluids.EMPTY));
 
     private final ResourceLocation id;
     private final ResourceLocation stillTexture;
@@ -40,7 +44,7 @@ public class SoftFluid {
     //used to indicate if it has been directly converted from a forge fluid
     public final boolean isGenerated;
 
-    public SoftFluid(Builder builder) {
+    private SoftFluid(Builder builder) {
         this.stillTexture = builder.stillTexture;
         this.flowingTexture = builder.flowingTexture;
         this.tintColor = builder.tintColor;
@@ -78,17 +82,13 @@ public class SoftFluid {
         return translationKey;
     }
 
-    public String getID() {
-        return id.toString();
-    }
-
     public ResourceLocation getRegistryName() {
         return id;
     }
 
     @Override
     public String toString() {
-        return this.getID();
+        return this.getRegistryName().toString();
     }
 
     /**
@@ -199,8 +199,11 @@ public class SoftFluid {
         return !this.food.isEmpty();
     }
 
+
+    //TODO: builder isn't needed anymore. maybe remove
+    @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
-        private ResourceLocation id;
+        private final ResourceLocation id;
         private ResourceLocation stillTexture;
         private ResourceLocation flowingTexture;
 
@@ -216,8 +219,6 @@ public class SoftFluid {
         private final List<String> NBTFromItem = new ArrayList<>();
         private final List<Fluid> equivalentFluids = new ArrayList<>();
 
-        //TODO: remove
-        public boolean isDisabled = false;
         //used to indicate automatically generated fluids
         public boolean custom = true;
         private ResourceLocation useTexturesFrom;
@@ -233,7 +234,6 @@ public class SoftFluid {
             this.stillTexture = stillTexture;
             this.flowingTexture = flowingTexture;
             this.id = id;
-            this.isDisabled = !ModList.get().isLoaded(id.getNamespace());
         }
 
         public Builder(String stillTexture, String flowingTexture, String id) {
@@ -259,31 +259,6 @@ public class SoftFluid {
             this.translationKey = att.getTranslationKey();
             this.addEqFluid(fluid);
             this.id = fluid.getRegistryName();
-            this.isDisabled = false;
-        }
-
-        /**
-         * builder for modded forge fluid accessed with registry id
-         *
-         * @param fluidRes equivalent fluid id
-         */
-        public Builder(String fluidRes) {
-            if (ForgeRegistries.FLUIDS.containsKey(new ResourceLocation(fluidRes))) {
-                Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidRes));
-                if (fluid != null && fluid != Fluids.EMPTY) {
-                    FluidAttributes att = fluid.getAttributes();
-                    this.stillTexture = att.getStillTexture(new FluidStack(fluid, 1));
-                    this.flowingTexture = att.getFlowingTexture(new FluidStack(fluid, 1));
-                    int color = att.getColor();
-                    if (color == -1) this.tintMethod = TintMethod.NO_TINT;
-                    this.color(color);
-                    this.bucket(fluid.getBucket());
-                    this.luminosity = att.getLuminosity();
-                    this.translationKey = att.getTranslationKey();
-                    this.addEqFluid(fluid);
-                    this.id = fluid.getRegistryName();
-                } else this.isDisabled = true;
-            } else this.isDisabled = true;
         }
 
         /**
@@ -395,20 +370,6 @@ public class SoftFluid {
         }
 
         /**
-         * you can call this when creating soft fluids for other mods. They will be disabled if said mod is not installed
-         * also sets fluid id namespace to provided mod namespace.
-         * Note that by default a fluid will be disabled automatically if its id namespace mod is not loaded
-         *
-         * @param modId mod id of target mod
-         * @return builder
-         */
-        public final Builder fromMod(String modId) {
-            this.isDisabled = !ModList.get().isLoaded(modId);
-            if (id != null && !id.getNamespace().equals(modId)) id = new ResourceLocation(modId, id.getPath());
-            return this;
-        }
-
-        /**
          * adds an item containing this fluid
          *
          * @param filledItem   filled item
@@ -423,40 +384,14 @@ public class SoftFluid {
             return this;
         }
 
-        /**
-         * adds an item containing this fluid
-         *
-         * @param filledItemRes filled item id
-         * @param emptyItemRes  empty item id
-         * @param itemCapacity  bottle equivalent of fluid contained in this filled item
-         * @return builder
-         */
-        public final Builder containerItem(ResourceLocation filledItemRes, ResourceLocation emptyItemRes, int itemCapacity) {
-            this.containerList.add(emptyItemRes, filledItemRes, itemCapacity);
-            if (ForgeRegistries.ITEMS.containsKey(filledItemRes) && ForgeRegistries.ITEMS.containsKey(emptyItemRes)) {
-                Item filled = ForgeRegistries.ITEMS.getValue(filledItemRes);
-                Item empty = ForgeRegistries.ITEMS.getValue(emptyItemRes);
-
-               // if (filled != null && empty != null) this.containerItem(filled, empty, itemCapacity);
+        public final Builder containerItem(Item filledItem, Item emptyItem, int itemCapacity, SoundEvent fillSound, SoundEvent emptySound) {
+            if (filledItem != Items.AIR) {
+                this.containerList.add(emptyItem, filledItem, itemCapacity, fillSound, emptySound);
             }
-
             return this;
         }
 
-        /**
-         * adds an item containing this fluid
-         *
-         * @param filledItemRes filled item id
-         * @param emptyItemRes  empty item id
-         * @param itemCapacity  bottle equivalent of fluid contained in this filled item
-         * @return builder
-         */
-        public final Builder containerItem(String filledItemRes, String emptyItemRes, int itemCapacity) {
-            return this.containerItem(new ResourceLocation(filledItemRes), new ResourceLocation(emptyItemRes), itemCapacity);
-        }
-
-
-        public  final Builder containers(FluidContainerList containerList) {
+        public final Builder containers(FluidContainerList containerList) {
             this.containerList = containerList;
             return this;
         }
@@ -476,28 +411,6 @@ public class SoftFluid {
         }
 
         /**
-         * adds an item containing this fluid that does not have an empty container. Returns empty hand when placed in the tank
-         *
-         * @param filledItemRes filled item id
-         * @param itemCapacity  bottle equivalent of fluid contained in this filled item
-         * @return builder
-         */
-        public final Builder emptyHandContainerItem(ResourceLocation filledItemRes, int itemCapacity) {
-            return this.containerItem(filledItemRes, new ResourceLocation("minecraft:air"), itemCapacity);
-        }
-
-        /**
-         * adds an item containing this fluid that does not have an empty container. Returns empty hand when placed in the tank
-         *
-         * @param filledItemRes filled item id
-         * @param itemCapacity  bottle equivalent of fluid contained in this filled item
-         * @return builder
-         */
-        public final Builder emptyHandContainerItem(String filledItemRes, int itemCapacity) {
-            return this.containerItem(filledItemRes, "minecraft:air", itemCapacity);
-        }
-
-        /**
          * adds a bottle containing this fluid
          *
          * @param item filled bottle
@@ -506,31 +419,6 @@ public class SoftFluid {
         public final Builder bottle(Item item) {
             this.containerItem(item, Items.GLASS_BOTTLE, BOTTLE_COUNT);
             return this;
-        }
-
-        /**
-         * adds a bottle containing this fluid
-         *
-         * @param itemRes filled bottle id
-         * @return builder
-         */
-        public final Builder bottle(ResourceLocation itemRes) {
-            this.containerItem(itemRes, Items.GLASS_BOTTLE.getRegistryName(), BOTTLE_COUNT);
-            if (ForgeRegistries.ITEMS.containsKey(itemRes)) {
-              //  Item i = ForgeRegistries.ITEMS.getValue(itemRes);
-               // if (i != null) this.bottle(i);
-            }
-            return this;
-        }
-
-        /**
-         * adds a bottle containing this fluid
-         *
-         * @param res filled bottle id
-         * @return builder
-         */
-        public final Builder bottle(String res) {
-            return this.bottle(new ResourceLocation(res));
         }
 
         /**
@@ -544,52 +432,14 @@ public class SoftFluid {
         }
 
         /**
-         * adds a bottle containing this fluid & sets it as food
-         *
-         * @param res filled bottle
-         * @return builder
-         */
-        public final Builder drink(String res) {
-            return this.bottle(res).food(res, BOTTLE_COUNT);
-        }
-
-        /**
          * adds a bucket containing this fluid
          *
          * @param item filled bucket
          * @return builder
          */
         public final Builder bucket(Item item) {
-            if (item != Items.AIR) {
-                this.containerList.add(Items.BUCKET.getRegistryName(), item.getRegistryName(),
-                        BUCKET_COUNT, SoundEvents.BUCKET_FILL, SoundEvents.BUCKET_EMPTY);
-            }
+            this.containerItem(item, Items.BUCKET, BUCKET_COUNT, SoundEvents.BUCKET_FILL, SoundEvents.BUCKET_EMPTY);
             return this;
-        }
-
-        /**
-         * adds a bucket containing this fluid
-         *
-         * @param itemRes filled bucket id
-         * @return builder
-         */
-        public final Builder bucket(ResourceLocation itemRes) {
-            this.containerItem(itemRes, Items.BUCKET.getRegistryName(), BUCKET_COUNT);
-            if (ForgeRegistries.ITEMS.containsKey(itemRes)) {
-                Item i = ForgeRegistries.ITEMS.getValue(itemRes);
-                if (i != null) this.bucket(i);
-            }
-            return this;
-        }
-
-        /**
-         * adds a bucket containing this fluid
-         *
-         * @param res filled bucket id
-         * @return builder
-         */
-        public final Builder bucket(String res) {
-            return this.bucket(new ResourceLocation(res));
         }
 
         /**
@@ -604,31 +454,6 @@ public class SoftFluid {
         }
 
         /**
-         * adds a bowl containing this fluid
-         *
-         * @param itemRes filled bowl id
-         * @return builder
-         */
-        public final Builder bowl(ResourceLocation itemRes) {
-            this.containerItem(itemRes, Items.BOWL.getRegistryName(), BOWL_COUNT);
-            if (ForgeRegistries.ITEMS.containsKey(itemRes)) {
-                Item i = ForgeRegistries.ITEMS.getValue(itemRes);
-                if (i != null) this.bowl(i);
-            }
-            return this;
-        }
-
-        /**
-         * adds a bowl containing this fluid
-         *
-         * @param res filled bowl id
-         * @return builder
-         */
-        public final Builder bowl(String res) {
-            return this.bowl(new ResourceLocation(res));
-        }
-
-        /**
          * adds a bowl containing this fluid & sets it as food
          *
          * @param item filled bowl
@@ -636,42 +461,6 @@ public class SoftFluid {
          */
         public final Builder stew(Item item) {
             return this.bowl(item).food(item, BOWL_COUNT);
-        }
-
-        /**
-         * adds a bowl containing this fluid & sets it as food
-         *
-         * @param res filled bowl
-         * @return builder
-         */
-        public final Builder stew(String res) {
-            return this.bowl(res).food(res, BOWL_COUNT);
-        }
-
-        /**
-         * sets fill & empty sounds associated to a certain empty container (i.e:empty bucket)
-         * Always call after adding empty containers
-         *
-         * @param fill  fill sound event
-         * @param empty empty sound event
-         * @return builder
-         */
-        //TODO: make so it creates category if it doesn't exist
-        public final Builder setSoundsForCategory(SoundEvent fill, SoundEvent empty, Item emptyContainer) {
-            var c = this.containerList.getCategoryFromEmpty(emptyContainer);
-            if (c.isPresent()) c.get().setSounds(fill, empty);
-            return this;
-        }
-
-        /**
-         * sets fill & empty sounds associated to a buckets
-         *
-         * @param fill  fill sound event
-         * @param empty empty sound event
-         * @return builder
-         */
-        public final Builder setBucketSounds(SoundEvent fill, SoundEvent empty) {
-            return this.setSoundsForCategory(fill, empty, Items.BUCKET);
         }
 
         /**
@@ -687,32 +476,12 @@ public class SoftFluid {
         /**
          * adds associated food
          *
-         * @param itemRes food item id
-         * @return builder
-         */
-        public final Builder food(ResourceLocation itemRes) {
-            return this.food(itemRes, 1);
-        }
-
-        /**
-         * adds associated food
-         *
-         * @param res food item id
-         * @return builder
-         */
-        public final Builder food(String res) {
-            return this.food(res, 1);
-        }
-
-        /**
-         * adds associated food
-         *
          * @param item        food item
          * @param foodDivider divider for the food effects. i.e: 2 for bowls. Same as bottles of fluid contained in item
          * @return builder
          */
         public final Builder food(Item item, int foodDivider) {
-            if (item != null) this.food(FoodProvider.create(item.getRegistryName(), foodDivider));
+            if (item != null) this.food(FoodProvider.create(item, foodDivider));
             return this;
         }
 
@@ -720,33 +489,10 @@ public class SoftFluid {
             this.food = foodProvider;
             return this;
         }
-        /**
-         * adds associated food
-         *
-         * @param res         food item id
-         * @param foodDivider divider for the food effects. i.e: 2 for bowls. Same as bottles of fluid contained in item
-         * @return builder
-         */
-        public final Builder food(ResourceLocation res, int foodDivider) {
-            this.food(FoodProvider.create(res, foodDivider));
-            if (ForgeRegistries.ITEMS.containsKey(res)) {
-                Item i = ForgeRegistries.ITEMS.getValue(res);
-                if (i != null) this.food(i, foodDivider);
-            }
-            return this;
-        }
 
-        /**
-         * adds associated food
-         *
-         * @param res         food item id
-         * @param foodDivider divider for the food effects. i.e: 2 for bowls. Same as bottles of fluid contained in item
-         * @return builder
-         */
-        public final Builder food(String res, int foodDivider) {
-            return this.food(new ResourceLocation(res), foodDivider);
+        public SoftFluid build() {
+            return new SoftFluid(this);
         }
-
     }
 
 
@@ -774,5 +520,70 @@ public class SoftFluid {
         public static TintMethod byName(String name) {
             return TintMethod.valueOf(name.toUpperCase(Locale.ROOT));
         }
+    }
+
+
+    public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+            ResourceLocation.CODEC.fieldOf("id").forGetter(SoftFluid::getRegistryName),
+            ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
+            ResourceLocation.CODEC.fieldOf("flowing_texture").forGetter(SoftFluid::getFlowingTexture),
+            Codec.STRING.optionalFieldOf("translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
+            Codec.INT.optionalFieldOf("luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
+            Utils.HEX_CODEC.optionalFieldOf("color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
+            SoftFluid.TintMethod.CODEC.optionalFieldOf("tint_method").forGetter(getHackyOptional(SoftFluid::getTintMethod)),
+            FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
+            Codec.STRING.listOf().optionalFieldOf("preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
+            FluidContainerList.Category.CODEC.listOf().optionalFieldOf("containers").forGetter(f -> f.getContainerList().encodeList()),
+            Registry.FLUID.byNameCodec().listOf().optionalFieldOf("equivalent_fluids")
+                    .forGetter(getHackyOptional(s -> s.getEquivalentFluids().stream().toList())),
+            ResourceLocation.CODEC.optionalFieldOf("use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
+    ).apply(instance, SoftFluid::create));
+
+
+    protected static SoftFluid create(ResourceLocation id, ResourceLocation still, ResourceLocation flowing,
+                                    Optional<String> translation, Optional<Integer> luminosity, Optional<Integer> color,
+                                    Optional<SoftFluid.TintMethod> tint, Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
+                                    Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,
+                                    Optional<ResourceLocation> textureFrom) {
+        SoftFluid.Builder builder = new SoftFluid.Builder(still, flowing, id);
+        translation.ifPresent(builder::translationKey);
+        luminosity.ifPresent(builder::luminosity);
+        color.ifPresent(builder::color);
+        tint.ifPresent(builder::tintMethod);
+        food.ifPresent(builder::food);
+        nbtKeys.ifPresent(k -> k.forEach(builder::keepNBTFromItem));
+        containers.ifPresent(b -> builder.containers(new FluidContainerList(b)));
+        equivalent.ifPresent(e -> e.forEach(builder::addEqFluid));
+        textureFrom.ifPresent(builder::copyTexturesFrom);
+        return builder.build();
+    }
+
+    protected static SoftFluid create(SoftFluid originalFluid, SoftFluid newFluid) {
+        var builder = new SoftFluid.Builder(newFluid.stillTexture, newFluid.flowingTexture, originalFluid.id);
+        builder.translationKey(newFluid.getTranslationKey());
+        builder.luminosity(newFluid.getLuminosity());
+        builder.color(newFluid.getTintColor());
+        builder.tintMethod(newFluid.getTintMethod());
+        newFluid.getNbtKeyFromItem().forEach(builder::keepNBTFromItem);
+        originalFluid.getNbtKeyFromItem().forEach(builder::keepNBTFromItem);
+        FluidContainerList containerList = newFluid.getContainerList();
+        containerList.merge(originalFluid.getContainerList());
+        builder.containers(containerList);
+        newFluid.getEquivalentFluids().forEach(builder::addEqFluid);
+        originalFluid.getEquivalentFluids().forEach(builder::addEqFluid);
+        if (originalFluid.useTexturesFrom != null) builder.copyTexturesFrom(originalFluid.useTexturesFrom);
+        if (newFluid.useTexturesFrom != null) builder.copyTexturesFrom(newFluid.useTexturesFrom);
+        return builder.build();
+    }
+
+    private static final SoftFluid DEFAULT_DUMMY = new SoftFluid(new SoftFluid.Builder(new ResourceLocation(""), new ResourceLocation(""), new ResourceLocation("")));
+
+    //hacky. gets an optional if the fluid value is its default one
+    private static <T> Function<SoftFluid, Optional<T>> getHackyOptional(final Function<SoftFluid, T> getter) {
+        return f -> {
+            var value = getter.apply(f);
+            var def = getter.apply(DEFAULT_DUMMY);
+            return value == null || value.equals(def) ? Optional.empty() : Optional.of(value);
+        };
     }
 }

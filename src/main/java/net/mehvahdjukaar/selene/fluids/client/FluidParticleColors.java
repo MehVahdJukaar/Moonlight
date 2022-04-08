@@ -14,14 +14,14 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.HashMap;
 
 public class FluidParticleColors {
-    public static HashMap<String, Integer> particleColor = new HashMap<>();
+    private static final HashMap<ResourceLocation, Integer> PARTICLE_COLORS = new HashMap<>();
 
     //TODO: possibly do it for ALL fluids, not only non grayscale ones
     public static void refresh() {
-        particleColor = new HashMap<>();
+        PARTICLE_COLORS.clear();
         for (Fluid f : ForgeRegistries.FLUIDS) {
-            String key = f.getRegistryName().toString();
-            if (!particleColor.containsKey(key)) {
+            ResourceLocation key = f.getRegistryName();
+            if (!PARTICLE_COLORS.containsKey(key)) {
                 ResourceLocation location = f.getAttributes().getStillTexture();
                 if (location == null) continue;
                 TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
@@ -32,11 +32,12 @@ public class FluidParticleColors {
                 } catch (Exception e) {
                     Selene.LOGGER.warn("Failed to load particle color for " + sprite.toString() + " using current resource pack. might be a broken png.mcmeta");
                 }
-                particleColor.put(key, averageColor);
+                PARTICLE_COLORS.put(key, averageColor);
             }
         }
-        for (SoftFluid s : SoftFluidRegistry.getFluids()) {
-            if (!particleColor.containsKey(s.getID()) && !s.isColored()) {
+        for (SoftFluid s : SoftFluidRegistry.getRegisteredFluids()) {
+            ResourceLocation key = s.getRegistryName();
+            if (!PARTICLE_COLORS.containsKey(key) && !s.isColored()) {
                 ResourceLocation location = s.getStillTexture();
                 if (location == null) continue;
                 TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
@@ -47,17 +48,17 @@ public class FluidParticleColors {
                 } catch (Exception e) {
                     Selene.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
                 }
-                particleColor.put(s.getID(), averageColor);
+                PARTICLE_COLORS.put(key, averageColor);
             }
         }
     }
 
     public static int get(Fluid f) {
-        return particleColor.getOrDefault(f.getRegistryName().toString(), -1);
+        return PARTICLE_COLORS.getOrDefault(f.getRegistryName(), -1);
     }
 
-    public static int get(String s) {
-        return particleColor.getOrDefault(s, -1);
+    public static int get(SoftFluid s) {
+        return PARTICLE_COLORS.getOrDefault(s.getRegistryName(), -1);
     }
 
 

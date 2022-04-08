@@ -78,6 +78,18 @@ public class FluidContainerList {
         return list;
     }
 
+    public Collection<Item> getPossibleEmpty() {
+        return this.emptyToFilledMap.keySet();
+    }
+
+    public Collection<Category> getCategories() {
+        return this.emptyToFilledMap.values();
+    }
+
+    public void merge(FluidContainerList other) {
+        other.emptyToFilledMap.values().forEach(this::addCategory);
+    }
+
     public void add(Item empty, Item filled, int amount) {
         var c = this.emptyToFilledMap.computeIfAbsent(empty, i -> new Category(i, amount));
         c.addItem(filled);

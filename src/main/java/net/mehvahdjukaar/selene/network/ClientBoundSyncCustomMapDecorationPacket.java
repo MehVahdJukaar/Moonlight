@@ -25,7 +25,7 @@ public class ClientBoundSyncCustomMapDecorationPacket {
     private final MapItemSavedData.MapPatch colorPatch;
 
     private final CustomDecoration[] customDecoration;
-    private final CustomDataHolder.Instance[] customData;
+    private final CustomDataHolder.Instance<?>[] customData;
 
     public ClientBoundSyncCustomMapDecorationPacket(
             int mapId, byte pScale, boolean pLocked, @Nullable MapItemSavedData.MapPatch pColorPatch,

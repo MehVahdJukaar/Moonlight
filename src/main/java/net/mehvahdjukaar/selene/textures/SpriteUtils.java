@@ -17,7 +17,7 @@ public class SpriteUtils {
         int width = baseImage.getWidth();
         int height = baseImage.getHeight();
         if (Arrays.stream(overlays).anyMatch(n -> n.getHeight() != height || n.getWidth() != width)) {
-            throw new IllegalStateException("Could not merge images because they had different dimensions");
+            throw new IllegalStateException("Could not create images because they had different dimensions");
         }
         
         for (var o : overlays) {

@@ -76,7 +76,7 @@ public class VillagerBrainEvent extends Event {
      * Note that subsequent call to this from other mods in later event execution might override your activity if the time window is the same
      * If it's not it might be shortened or cut in two
      *
-     * @param activity  actiity to register
+     * @param activity  activity to register
      * @param startTime day time at which activity will start
      * @param endTime   day time at which activity will end. can also be less than start time
      */

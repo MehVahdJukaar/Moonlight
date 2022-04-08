@@ -1,39 +1,34 @@
 package net.mehvahdjukaar.selene.util;
 
 
-import com.google.common.collect.ImmutableSet;
+import net.mehvahdjukaar.selene.fluids.FluidContainerList;
 import net.mehvahdjukaar.selene.fluids.ISoftFluidHolder;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidHolder;
-import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
-import net.minecraft.core.BlockSource;
-import net.minecraft.core.dispenser.DispenseItemBehavior;
-import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.WorldlyContainer;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-
+import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DispenserHelper {
 
@@ -41,38 +36,29 @@ public class DispenserHelper {
         DispenserBlock.registerBehavior(behavior.item, behavior);
     }
 
-    //default spawn egg behavior
-    public static void registerSpawnEggBehavior(ItemLike egg) {
-        DispenserBlock.registerBehavior(egg, SPAWN_EGG_BEHAVIOR);
-    }
-
     //block placement behavior
     public static void registerPlaceBlockBehavior(ItemLike block) {
         DispenserBlock.registerBehavior(block, PLACE_BLOCK_BEHAVIOR);
     }
 
-    private static Set<Item> REGISTERED_FLUID_ITEMS = new HashSet<>();
+    private static final Set<Item> REGISTERED_FLUID_ITEMS = new HashSet<>();
 
     public static void registerFluidBehavior(SoftFluid f) {
-        //TODO: re add
-        /*
-        Set<Item> registeredFluidItems = new HashSet<>();
-        Map<Item, SoftFluid.FilledContainerCategory> map = f.getContainerList();
-        for (Item empty : map.keySet()) {
+        Collection<FluidContainerList.Category> categories = f.getContainerList().getCategories();
+        for (FluidContainerList.Category c : categories) {
+            Item empty = c.getEmptyContainer();
             //prevents registering stuff twice
-            if (empty != Items.AIR && !registeredFluidItems.contains(empty)){
+            if (empty != Items.AIR && !REGISTERED_FLUID_ITEMS.contains(empty)) {
                 registerCustomBehavior(new FillFluidHolderBehavior(empty));
-                registeredFluidItems.add(empty);
+                REGISTERED_FLUID_ITEMS.add(empty);
             }
-            for (Item full : map.get(empty).getItems()) {
-                if (full != Items.AIR && !registeredFluidItems.contains(full)){
+            for (Item full : c.getFilledItems()) {
+                if (full != Items.AIR && !REGISTERED_FLUID_ITEMS.contains(full)) {
                     registerCustomBehavior(new FillFluidHolderBehavior(full));
-                    registeredFluidItems.add(full);
+                    REGISTERED_FLUID_ITEMS.add(full);
                 }
             }
         }
-        REGISTERED_FLUID_ITEMS = ImmutableSet.copyOf(registeredFluidItems);
-        */
     }
 
     /**
@@ -141,8 +127,7 @@ public class DispenserHelper {
             ServerLevel world = source.getLevel();
             BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
             BlockEntity te = world.getBlockEntity(blockpos);
-            if (te instanceof WorldlyContainer) {
-                WorldlyContainer tile = ((WorldlyContainer) te);
+            if (te instanceof WorldlyContainer tile) {
                 if (tile.canPlaceItem(0, stack)) {
                     if (tile.isEmpty()) {
                         tile.setItem(0, stack.split(1));
@@ -171,8 +156,7 @@ public class DispenserHelper {
             ServerLevel world = source.getLevel();
             BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
             BlockEntity te = world.getBlockEntity(blockpos);
-            if (te instanceof ISoftFluidHolder) {
-                ISoftFluidHolder tile = ((ISoftFluidHolder) te);
+            if (te instanceof ISoftFluidHolder tile) {
 
                 ItemStack returnStack;
 
@@ -239,15 +223,5 @@ public class DispenserHelper {
 
     public static final DefaultDispenseItemBehavior PLACE_BLOCK_BEHAVIOR = new PlaceBlockDispenseBehavior();
     private static final DefaultDispenseItemBehavior SHOOT_BEHAVIOR = new DefaultDispenseItemBehavior();
-    public static final DefaultDispenseItemBehavior SPAWN_EGG_BEHAVIOR = new DefaultDispenseItemBehavior() {
-        @Override
-        public ItemStack execute(BlockSource source, ItemStack stack) {
-            Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
-            EntityType<?> type = ((SpawnEggItem) stack.getItem()).getType(stack.getTag());
-            type.spawn(source.getLevel(), stack, null, source.getPos().relative(direction), MobSpawnType.DISPENSER, direction != Direction.UP, false);
-            stack.shrink(1);
-            return stack;
-        }
-    };
 
 }

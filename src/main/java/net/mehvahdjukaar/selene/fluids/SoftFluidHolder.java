@@ -3,35 +3,29 @@ package net.mehvahdjukaar.selene.fluids;
 import net.mehvahdjukaar.selene.fluids.client.FluidParticleColors;
 import net.mehvahdjukaar.selene.util.PotionNBTHelper;
 import net.mehvahdjukaar.selene.util.Utils;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.stats.Stats;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.LingeringPotionItem;
-import net.minecraft.world.item.SplashPotionItem;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
-
 import java.util.List;
 
 /**
@@ -107,11 +101,12 @@ public class SoftFluidHolder {
             CompoundTag newCom = new CompoundTag();
             for (String s : nbtKey) {
                 //ignores bottle tag, handled separately since it's a diff item
-                if (this.nbt.contains(s) && !s.equals("Bottle")) {
-                    newCom.put(s, this.nbt.get(s));
+                Tag c = this.nbt.get(s);
+                if (c != null && !s.equals("Bottle")) {
+                    newCom.put(s, c);
                 }
             }
-            if(!newCom.isEmpty())stack.setTag(newCom);
+            if (!newCom.isEmpty()) stack.setTag(newCom);
         }
     }
 
@@ -170,8 +165,8 @@ public class SoftFluidHolder {
         //convert potions to water bottles
         Potion potion = PotionUtils.getPotion(filledContainerStack);
         boolean hasCustomPot = (com != null && com.contains("CustomPotionEffects"));
-        if (potion == Potions.WATER && !hasCustomPot){
-            s = SoftFluidRegistry.WATER;
+        if (potion == Potions.WATER && !hasCustomPot) {
+            s = SoftFluidRegistry.WATER.get();
         }
         //add tags to splash and lingering potions
         else if (potion != Potions.EMPTY || hasCustomPot) {
@@ -181,8 +176,9 @@ public class SoftFluidHolder {
         //copy nbt from item
         if (com != null) {
             for (String k : s.getNbtKeyFromItem()) {
-                if (com.contains(k)) {
-                    newCom.put(k, com.get(k));
+                Tag c = com.get(k);
+                if (c != null) {
+                    newCom.put(k, c);
                 }
             }
         }
@@ -227,7 +223,7 @@ public class SoftFluidHolder {
                 if (simulate) return ItemStack.EMPTY;
                 ItemStack stack = new ItemStack(category.getFirstFilled().get());
                 //case for lingering potions
-                if (this.fluid == SoftFluidRegistry.POTION) {
+                if (this.fluid == SoftFluidRegistry.POTION.get()) {
                     if (this.nbt != null && this.nbt.contains("Bottle") && !emptyContainer.getRegistryName().getNamespace().equals("inspirations")) {
                         String bottle = this.nbt.getString("Bottle");
                         if (bottle.equals("SPLASH")) stack = new ItemStack(Items.SPLASH_POTION);
@@ -236,7 +232,7 @@ public class SoftFluidHolder {
                 }
 
                 //converts water bottles into potions
-                if (emptyContainer == Items.GLASS_BOTTLE && fluid == SoftFluidRegistry.WATER)
+                if (emptyContainer == Items.GLASS_BOTTLE && fluid == SoftFluidRegistry.WATER.get())
                     stack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
 
                 this.applyNBTtoItemStack(stack);
@@ -290,7 +286,7 @@ public class SoftFluidHolder {
      * @return is same
      */
     public boolean isSameFluidAs(FluidStack fluidStack, CompoundTag com) {
-        return this.fluid.isEquivalent(fluidStack.getFluid()) && areNbtEquals(com,this.nbt);
+        return this.fluid.isEquivalent(fluidStack.getFluid()) && areNbtEquals(com, this.nbt);
     }
 
     /**
@@ -301,7 +297,7 @@ public class SoftFluidHolder {
      */
     //might be wrong
     public boolean isSameFluidAs(FluidStack fluidStack) {
-        return isSameFluidAs(fluidStack,fluidStack.getTag());
+        return isSameFluidAs(fluidStack, fluidStack.getTag());
     }
 
     private boolean areNbtEquals(CompoundTag nbt, CompoundTag nbt1) {
@@ -475,11 +471,12 @@ public class SoftFluidHolder {
         if (this.nbt != null && !this.nbt.isEmpty() && !fluidStack.isEmpty() && nbtKey != null) {
             CompoundTag newCom = new CompoundTag();
             for (String k : nbtKey) {
-                if (this.nbt.contains(k)) {
-                    newCom.put(k, this.nbt.get(k));
+                Tag c = this.nbt.get(k);
+                if (c != null) {
+                    newCom.put(k, c);
                 }
             }
-            if(!newCom.isEmpty()) fluidStack.setTag(newCom);
+            if (!newCom.isEmpty()) fluidStack.setTag(newCom);
         }
     }
 
@@ -735,15 +732,14 @@ public class SoftFluidHolder {
         if (this.isEmpty()) return -1;
         int tintColor = this.getTintColor(world, pos);
         //if tint color is white gets averaged color
-        if (tintColor == -1)
-            return FluidParticleColors.get(this.fluid.getID());
+        if (tintColor == -1) return FluidParticleColors.get(this.fluid);
         return tintColor;
     }
 
-    //grabs world/ fluidstack dependednt tint color if fluid has associated forge fluid. overrides normal tint color
+    //grabs world/ fluid stack dependent tint color if fluid has associated forge fluid. overrides normal tint color
     private void refreshSpecialColor(@Nullable LevelReader world, @Nullable BlockPos pos) {
 
-        if (fluid == SoftFluidRegistry.POTION) {
+        if (fluid == SoftFluidRegistry.POTION.get()) {
             this.specialColor = PotionNBTHelper.getColorFromNBT(this.nbt);
         } else {
             Fluid f = this.getFluid().getForgeFluid();
@@ -779,15 +775,6 @@ public class SoftFluidHolder {
             this.nbt = cmp.getCompound("NBT");
             String id = cmp.getString("Fluid");
             SoftFluid sf = SoftFluidRegistry.get(id);
-            //TODO: remove
-            //supplementaries backwards compat
-            if (sf.isEmpty()) {
-                sf = SoftFluidRegistry.get(id.replace("supplementaries", "minecraft"));
-                if (sf.isEmpty()) {
-                    sf = SoftFluidRegistry.get(id.replace("minecraft", "supplementaries"));
-                }
-            }
-
             this.setFluid(sf, this.nbt);
         }
     }
@@ -801,7 +788,7 @@ public class SoftFluidHolder {
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
         cmp.putInt("Count", this.count);
-        cmp.putString("Fluid", this.fluid.getID());
+        cmp.putString("Fluid", this.fluid.getRegistryName().toString());
         //for item render. needed for potion colors
         cmp.putInt("CachedColor", this.getTintColor(null, null));
         if (this.nbt != null && !this.nbt.isEmpty()) cmp.put("NBT", this.nbt);
@@ -819,7 +806,7 @@ public class SoftFluidHolder {
      */
     public boolean tryDrinkUpFluid(Player player, Level world) {
         if (!this.isEmpty() && this.containsFood()) {
-            if(this.fluid.getFoodProvider().consume(player, world, this::applyNBTtoItemStack)){
+            if (this.fluid.getFoodProvider().consume(player, world, this::applyNBTtoItemStack)) {
                 this.shrink(1);
                 return true;
             }
