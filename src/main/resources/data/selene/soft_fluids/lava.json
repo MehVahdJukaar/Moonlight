@@ -4,10 +4,19 @@
       "filled": [
         "minecraft:lava_bucket"
       ],
-      "fill_sound": "minecraft:item.bucket.fill",
-      "empty_sound": "minecraft:item.bucket.empty",
+      "fill_sound": "minecraft:item.bucket.fill_lava",
+      "empty_sound": "minecraft:item.bucket.empty_lava",
       "empty": "minecraft:bucket",
       "capacity": 4
+    },
+    {
+      "filled": [
+        "alexsmobs:lava_bottle"
+      ],
+      "fill_sound": "minecraft:item.bucket.fill_lava",
+      "empty_sound": "minecraft:item.bucket.empty_lava",
+      "empty": "minecraft:bottle",
+      "capacity": 1
     }
   ],
   "equivalent_fluids": [
@@ -17,5 +26,6 @@
   "id": "minecraft:lava",
   "luminosity": 15,
   "still_texture": "minecraft:block/lava_still",
-  "translation_key": "block.minecraft.lava"
+  "translation_key": "block.minecraft.lava",
+  "tint_method": "no_tint"
 }

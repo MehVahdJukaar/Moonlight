@@ -4,6 +4,8 @@
       "filled": [
         "minecraft:honey_bottle"
       ],
+      "fill_sound": "minecraft:block.honey_block.place",
+      "empty_sound": "minecraft:block.honey_block.break",
       "empty": "minecraft:glass_bottle",
       "capacity": 1
     },
@@ -11,6 +13,8 @@
       "filled": [
         "minecraft:honey_block"
       ],
+      "fill_sound": "minecraft:block.honey_block.place",
+      "empty_sound": "minecraft:block.honey_block.break",
       "empty": "minecraft:air",
       "capacity": 4
     }

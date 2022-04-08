@@ -12,6 +12,7 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -123,7 +124,12 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
     private static void registerUnchecked(SoftFluid... fluids) {
         Arrays.stream(fluids).forEach(s -> {
             s.getEquivalentFluids().forEach(f -> INSTANCE.fluidMap.put(f, s));
-            s.getContainerList().getPossibleFilled().forEach(i -> INSTANCE.itemMap.put(i, s));
+            s.getContainerList().getPossibleFilled().forEach(i -> {
+                //dont associate water to potion bottle
+                if (i != Items.POTION || !s.getRegistryName().toString().equals("minecraft:water")) {
+                    INSTANCE.itemMap.put(i, s);
+                }
+            });
             ResourceLocation key = s.getRegistryName();
             if (INSTANCE.idMap.containsKey(key)) {
                 INSTANCE.idMap.put(key, SoftFluid.create(INSTANCE.idMap.get(key), s));

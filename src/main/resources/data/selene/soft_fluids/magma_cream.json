@@ -5,6 +5,8 @@
       "filled": [
         "minecraft:magma_cream"
       ],
+      "fill_sound": "minecraft:block.slime_block.place",
+      "empty_sound": "minecraft:block.slime_block.break",
       "empty": "minecraft:air",
       "capacity": 1
     }

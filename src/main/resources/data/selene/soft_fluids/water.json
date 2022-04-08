@@ -9,6 +9,27 @@
       "empty_sound": "minecraft:item.bucket.empty",
       "empty": "minecraft:bucket",
       "capacity": 4
+    },
+    {
+      "filled": [
+        "minecraft:potion"
+      ],
+      "empty": "minecraft:glass_bottle",
+      "capacity": 1
+    },
+    {
+      "filled": [
+        "xercamod:item_glass_of_water"
+      ],
+      "empty": "xercamod:item_glass",
+      "capacity": 4
+    },
+    {
+      "filled": [
+        "tea_kettle:water_kettle"
+      ],
+      "empty": "tea_kettle:empty_kettle",
+      "capacity": 4
     }
   ],
   "equivalent_fluids": [

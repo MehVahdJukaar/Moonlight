@@ -16,7 +16,7 @@
         "simplefarming:milk_bottle",
         "farmersdelight:milk_bottle"
       ],
-      "empty": "minecraft:glass_bottle",
+      "empty": "minetcraft:glass_bottle",
       "capacity": 1
     },
     {

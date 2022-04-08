@@ -4,8 +4,8 @@
       "filled": [
         "minecraft:powder_snow_bucket"
       ],
-      "fill_sound": "minecraft:item.bucket.fill",
-      "empty_sound": "minecraft:item.bucket.empty",
+      "fill_sound": "minecraft:item.bucket.fill_powder_snow",
+      "empty_sound": "minecraft:item.bucket.empty_powder_snow",
       "empty": "minecraft:bucket",
       "capacity": 4
     }
