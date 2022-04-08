@@ -24,20 +24,30 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
+
+    public static final SoftFluidRegistry INSTANCE = new SoftFluidRegistry();
+
     // id -> SoftFluid
-    private static final HashMap<ResourceLocation, SoftFluid> ID_MAP = new HashMap<>();
+    private final HashMap<ResourceLocation, SoftFluid> idMap = new HashMap<>();
     // filled item -> SoftFluid. need to handle potions separately since they map to same item id
-    private static final HashMap<Item, SoftFluid> ITEM_MAP = new HashMap<>();
+    private final HashMap<Item, SoftFluid> itemMap = new HashMap<>();
     // forge fluid  -> SoftFluid
-    private static final HashMap<Fluid, SoftFluid> FLUID_MAP = new HashMap<>();
+    private final HashMap<Fluid, SoftFluid> fluidMap = new HashMap<>();
     //for stuff that is registers using a code built fluid
+    private boolean initializedDispenser = false;
+    private int currentReload = 0;
+
+    private SoftFluidRegistry() {
+        super(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create(), "soft_fluids");
+    }
+
 
     public static Collection<SoftFluid> getRegisteredFluids() {
-        return ID_MAP.values();
+        return INSTANCE.idMap.values();
     }
 
     public static SoftFluid get(String id) {
-        return ID_MAP.getOrDefault(new ResourceLocation(id), EMPTY);
+        return INSTANCE.idMap.getOrDefault(new ResourceLocation(id), EMPTY);
     }
 
     /**
@@ -47,11 +57,11 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
      * @return soft fluid. empty fluid if not found
      */
     public static SoftFluid get(ResourceLocation id) {
-        return ID_MAP.getOrDefault(id, EMPTY);
+        return INSTANCE.idMap.getOrDefault(id, EMPTY);
     }
 
     public static Optional<SoftFluid> getOptional(ResourceLocation id) {
-        return Optional.ofNullable(ID_MAP.getOrDefault(id, null));
+        return Optional.ofNullable(INSTANCE.idMap.getOrDefault(id, null));
     }
 
     /**
@@ -61,7 +71,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
      * @return soft fluid. empty fluid if not found
      */
     public static SoftFluid fromForgeFluid(Fluid fluid) {
-        return FLUID_MAP.getOrDefault(fluid, EMPTY);
+        return INSTANCE.fluidMap.getOrDefault(fluid, EMPTY);
     }
 
     /**
@@ -72,10 +82,10 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
      */
     @Nonnull
     public static SoftFluid fromItem(Item filledContainerItem) {
-        return ITEM_MAP.getOrDefault(filledContainerItem, EMPTY);
+        return INSTANCE.itemMap.getOrDefault(filledContainerItem, EMPTY);
     }
 
-
+    //vanilla built-in fluid references
     public static final SoftFluid EMPTY = SoftFluid.EMPTY;
     public static final FluidReference WATER = FluidReference.of("minecraft:water");
     public static final FluidReference LAVA = FluidReference.of("minecraft:lava");
@@ -91,17 +101,18 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
     public static final FluidReference SLIME = FluidReference.of("minecraft:slime");
     public static final FluidReference GHAST_TEAR = FluidReference.of("minecraft:ghast_tear");
     public static final FluidReference MAGMA_CREAM = FluidReference.of("minecraft:magma_cream");
+    public static final FluidReference POWDERED_SNOW = FluidReference.of("minecraft:powder_snow");
 
 
     private static void register(SoftFluid s) {
         if (ModList.get().isLoaded(s.getRegistryName().getNamespace())) {
             for (Fluid f : s.getEquivalentFluids()) {
                 //remove non-custom equivalent forge fluids in favor of this one
-                if (FLUID_MAP.containsKey(f)) {
-                    SoftFluid old = FLUID_MAP.get(f);
+                if (INSTANCE.fluidMap.containsKey(f)) {
+                    SoftFluid old = INSTANCE.fluidMap.get(f);
                     if (!old.isGenerated) {
-                        ID_MAP.remove(old.getRegistryName());
-                        old.getFilledContainer(Items.BUCKET).ifPresent(ITEM_MAP::remove);
+                        INSTANCE.idMap.remove(old.getRegistryName());
+                        old.getFilledContainer(Items.BUCKET).ifPresent(INSTANCE.itemMap::remove);
                     }
                 }
             }
@@ -111,13 +122,13 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
 
     private static void registerUnchecked(SoftFluid... fluids) {
         Arrays.stream(fluids).forEach(s -> {
-            s.getEquivalentFluids().forEach(f -> FLUID_MAP.put(f, s));
-            s.getContainerList().getPossibleFilled().forEach(i -> ITEM_MAP.put(i, s));
+            s.getEquivalentFluids().forEach(f -> INSTANCE.fluidMap.put(f, s));
+            s.getContainerList().getPossibleFilled().forEach(i -> INSTANCE.itemMap.put(i, s));
             ResourceLocation key = s.getRegistryName();
-            if (ID_MAP.containsKey(key)) {
-                ID_MAP.put(key, SoftFluid.create(ID_MAP.get(key), s));
+            if (INSTANCE.idMap.containsKey(key)) {
+                INSTANCE.idMap.put(key, SoftFluid.create(INSTANCE.idMap.get(key), s));
             } else {
-                ID_MAP.put(key, s);
+                INSTANCE.idMap.put(key, s);
             }
         });
     }
@@ -129,7 +140,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
                 if (f instanceof FlowingFluid flowingFluid && flowingFluid.getSource() != f) continue;
                 if (f instanceof ForgeFlowingFluid.Flowing || f == Fluids.EMPTY) continue;
                 //if fluid map contains fluid it meas that another equivalent fluid has already ben registered
-                if (FLUID_MAP.containsKey(f)) continue;
+                if (INSTANCE.fluidMap.containsKey(f)) continue;
                 //is not equivalent: create new SoftFluid from forge fluid
                 registerUnchecked((new SoftFluid.Builder(f)).build());
             } catch (Exception ignored) {
@@ -138,26 +149,19 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
     }
 
     public static void acceptClientFluids(ClientBoundSyncFluidsPacket packet) {
-        ID_MAP.clear();
-        FLUID_MAP.clear();
-        ITEM_MAP.clear();
+        INSTANCE.idMap.clear();
+        INSTANCE.fluidMap.clear();
+        INSTANCE.itemMap.clear();
         packet.getFluids().forEach(SoftFluidRegistry::register);
     }
 
 
-    public static SoftFluidRegistry INSTANCE = new SoftFluidRegistry();
-
-    public SoftFluidRegistry() {
-        super(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create(), "soft_fluids");
-    }
-
-    private boolean initializedDispenser = false;
-
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> jsons, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
-        ID_MAP.clear();
-        FLUID_MAP.clear();
-        ITEM_MAP.clear();
+        this.currentReload++;
+        this.idMap.clear();
+        this.fluidMap.clear();
+        this.itemMap.clear();
 
         for (var j : jsons.entrySet()) {
             Optional<SoftFluid> result = SoftFluid.CODEC.parse(JsonOps.INSTANCE, j.getValue())
@@ -165,14 +169,16 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
             result.ifPresent(SoftFluidRegistry::register);
         }
         convertAndRegisterAllForgeFluids();
-
-        if (!initializedDispenser) {
-            initializedDispenser = true;
+        if (!this.initializedDispenser) {
+            this.initializedDispenser = true;
             getRegisteredFluids().forEach(DispenserHelper::registerFluidBehavior);
         }
     }
 
 
+    /**
+     * Use these to store fluids instances. They are similar to vanilla holders since they need to refresh after data is reloaded
+     */
     public static class FluidReference implements Supplier<SoftFluid> {
 
         public static FluidReference of(String name) {
@@ -186,7 +192,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
         private final Object lock = new Object();
         private SoftFluid value;
         private final ResourceLocation id;
-        private boolean initialized;
+        private int reloadNumber = -1;
 
         private FluidReference(ResourceLocation id) {
             this.value = null;
@@ -196,9 +202,12 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
         @Override
         public SoftFluid get() {
             synchronized (lock) {
-                if (!initialized) {
-                    initialized = true;
+                if (INSTANCE.currentReload != this.reloadNumber) {
+                    this.reloadNumber = INSTANCE.currentReload;
                     this.value = SoftFluidRegistry.get(id);
+                    if (this.value.isEmpty()) {
+                        throw new UnsupportedOperationException("Soft Fluid not present: " + this.id);
+                    }
                 }
                 return value;
             }

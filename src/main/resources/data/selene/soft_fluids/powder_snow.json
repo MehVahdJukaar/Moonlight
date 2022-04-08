@@ -1,0 +1,17 @@
+{
+  "containers": [
+    {
+      "filled": [
+        "minecraft:powder_snow_bucket"
+      ],
+      "fill_sound": "minecraft:item.bucket.fill",
+      "empty_sound": "minecraft:item.bucket.empty",
+      "empty": "minecraft:bucket",
+      "capacity": 4
+    }
+  ],
+  "flowing_texture": "minecraft:block/powder_snow",
+  "id": "minecraft:powder_snow",
+  "still_texture": "minecraft:block/powder_snow",
+  "translation_key": "block.minecraft.powder_snow"
+}

@@ -40,6 +40,14 @@ public class FoodProvider {
         this.divider = divider;
     }
 
+    public Item getFood() {
+        return food;
+    }
+
+    public int getDivider() {
+        return divider;
+    }
+
     public boolean isEmpty() {
         return this == EMPTY;
     }

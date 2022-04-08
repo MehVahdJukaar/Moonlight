@@ -1,0 +1,21 @@
+{
+  "color": "#ff3f76e4",
+  "containers": [
+    {
+      "filled": [
+        "minecraft:water_bucket"
+      ],
+      "fill_sound": "minecraft:item.bucket.fill",
+      "empty_sound": "minecraft:item.bucket.empty",
+      "empty": "minecraft:bucket",
+      "capacity": 4
+    }
+  ],
+  "equivalent_fluids": [
+    "minecraft:water"
+  ],
+  "flowing_texture": "minecraft:block/water_flow",
+  "id": "minecraft:water",
+  "still_texture": "minecraft:block/water_still",
+  "translation_key": "block.minecraft.water"
+}

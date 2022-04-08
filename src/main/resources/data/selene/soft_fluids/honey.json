@@ -1,0 +1,33 @@
+{
+  "containers": [
+    {
+      "filled": [
+        "minecraft:honey_bottle"
+      ],
+      "empty": "minecraft:glass_bottle",
+      "capacity": 1
+    },
+    {
+      "filled": [
+        "minecraft:honey_block"
+      ],
+      "empty": "minecraft:air",
+      "capacity": 4
+    }
+  ],
+  "equivalent_fluids": [
+    "create:honey",
+    "cyclic:honey",
+    "inspirations:honey"
+  ],
+  "flowing_texture": "selene:blocks/honey_liquid",
+  "food": {
+    "divider": 1,
+    "item": "minecraft:honey_bottle"
+  },
+  "id": "minecraft:honey",
+  "still_texture": "selene:blocks/honey_liquid",
+  "tint_method": "no_tint",
+  "translation_key": "fluid.supplementaries.honey",
+  "use_texture_from": "create:honey"
+}

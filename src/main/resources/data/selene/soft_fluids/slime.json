@@ -1,0 +1,19 @@
+{
+  "containers": [
+    {
+      "filled": [
+        "minecraft:slime_ball"
+      ],
+      "empty": "minecraft:air",
+      "capacity": 1
+    }
+  ],
+  "equivalent_fluids": [
+    "cyclic:slime"
+  ],
+  "flowing_texture": "minecraft:block/slime_block",
+  "id": "minecraft:slime",
+  "still_texture": "minecraft:block/slime_block",
+  "tint_method": "no_tint",
+  "translation_key": "fluid.supplementaries.slime"
+}

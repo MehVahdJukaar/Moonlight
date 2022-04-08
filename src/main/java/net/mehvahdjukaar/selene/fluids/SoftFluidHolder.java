@@ -188,7 +188,7 @@ public class SoftFluidHolder {
             this.setFluid(s, newCom.isEmpty() ? null : newCom);
         }
 
-        var optionalCategory = s.getContainerList().getCategoryFromEmpty(filledContainer);
+        var optionalCategory = s.getContainerList().getCategoryFromFilled(filledContainer);
 
         if (optionalCategory.isPresent()) {
             var category = optionalCategory.get();
