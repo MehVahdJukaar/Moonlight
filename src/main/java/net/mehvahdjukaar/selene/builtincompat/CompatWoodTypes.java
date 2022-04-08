@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.builtincompat.mapatlas;
+package net.mehvahdjukaar.selene.builtincompat;
 
 import net.mehvahdjukaar.selene.block_set.BlockSetManager;
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;

@@ -106,7 +106,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
 
     //implementation fg.deobf("curse.maven:farmersdelight-398521:3575116")
-    implementation fg.deobf("curse.maven:map-atlases-forge-519759:3641038")
+    implementation fg.deobf("curse.maven:map-atlases-forge-519759:3723298")
 
 
 }

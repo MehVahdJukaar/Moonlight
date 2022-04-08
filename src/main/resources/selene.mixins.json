@@ -2,7 +2,7 @@
 {
   "minVersion": "0.8",
   "required": true,
-  "compatibilityLevel": "JAVA_16",
+  "compatibilityLevel": "JAVA_8",
   "refmap": "selene.refmap.json",
   "package": "net.mehvahdjukaar.selene.mixins",
   "mixins": [

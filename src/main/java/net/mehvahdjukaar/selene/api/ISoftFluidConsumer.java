@@ -1,5 +1,6 @@
-package net.mehvahdjukaar.selene.fluids;
+package net.mehvahdjukaar.selene.api;
 
+import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;

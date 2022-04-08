@@ -7,12 +7,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelReader;
@@ -25,24 +23,22 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.LingeringPotionItem;
-import net.minecraft.world.item.MilkBucketItem;
 import net.minecraft.world.item.SplashPotionItem;
-import net.minecraft.world.item.SuspiciousStewItem;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
+
+import java.util.List;
 
 /**
  * instance this fluid tank in your tile entity
  */
 @SuppressWarnings("unused")
+//this sucks
 public class SoftFluidHolder {
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
@@ -56,7 +52,7 @@ public class SoftFluidHolder {
     private SoftFluid fluid = SoftFluidRegistry.EMPTY;
     //special tint color. Used for dynamic tint fluids like water and potions
     private int specialColor = 0;
-    private boolean needColorRefresh = true;
+    private boolean needsColorRefresh = true;
 
     public SoftFluidHolder(int capacity) {
         this.capacity = capacity;
@@ -106,8 +102,8 @@ public class SoftFluidHolder {
 
     //handles special nbt items such as potions or soups
     private void applyNBTtoItemStack(ItemStack stack) {
-        String[] nbtKey = this.fluid.getNbtKeyFromItem();
-        if (this.nbt != null && !this.nbt.isEmpty() && nbtKey != null) {
+        List<String> nbtKey = this.fluid.getNbtKeyFromItem();
+        if (this.nbt != null && !this.nbt.isEmpty()) {
             CompoundTag newCom = new CompoundTag();
             for (String s : nbtKey) {
                 //ignores bottle tag, handled separately since it's a diff item
@@ -183,9 +179,8 @@ public class SoftFluidHolder {
         }
 
         //copy nbt from item
-        String[] nbtKey = s.getNbtKeyFromItem();
-        if (com != null && nbtKey != null) {
-            for (String k : nbtKey) {
+        if (com != null) {
+            for (String k : s.getNbtKeyFromItem()) {
                 if (com.contains(k)) {
                     newCom.put(k, com.get(k));
                 }
@@ -197,11 +192,10 @@ public class SoftFluidHolder {
             this.setFluid(s, newCom.isEmpty() ? null : newCom);
         }
 
-        Item empty = s.tryGettingEmptyItem(filledContainer);
-        SoftFluid.FilledContainerCategory category = s.tryGettingFilledItems(empty);
+        var optionalCategory = s.getContainerList().getCategoryFromEmpty(filledContainer);
 
-        if (category != null && empty != null) {
-
+        if (optionalCategory.isPresent()) {
+            var category = optionalCategory.get();
             int amount = category.getAmount();
             if (this.canAddSoftFluid(s, amount, newCom)) {
                 if (simulate) return ItemStack.EMPTY;
@@ -211,7 +205,7 @@ public class SoftFluidHolder {
                 if (sound != null && world != null && pos != null)
                     world.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);
 
-                return new ItemStack(empty);
+                return new ItemStack(category.getEmptyContainer());
             }
         }
         return null;
@@ -225,12 +219,13 @@ public class SoftFluidHolder {
      */
     @Nullable
     public ItemStack tryFillingItem(Item emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
-        SoftFluid.FilledContainerCategory category = fluid.tryGettingFilledItems(emptyContainer);
-        if (category != null) {
+        var opt = fluid.getContainerList().getCategoryFromEmpty(emptyContainer);
+        if (opt.isPresent()) {
+            var category = opt.get();
             int amount = category.getAmount();
             if (this.canRemove(amount)) {
                 if (simulate) return ItemStack.EMPTY;
-                ItemStack stack = new ItemStack(category.getFirstFilled());
+                ItemStack stack = new ItemStack(category.getFirstFilled().get());
                 //case for lingering potions
                 if (this.fluid == SoftFluidRegistry.POTION) {
                     if (this.nbt != null && this.nbt.contains("Bottle") && !emptyContainer.getRegistryName().getNamespace().equals("inspirations")) {
@@ -476,7 +471,7 @@ public class SoftFluidHolder {
     }
 
     private void applyNBTtoFluidStack(FluidStack fluidStack) {
-        String[] nbtKey = this.fluid.getNbtKeyFromItem();
+        List<String> nbtKey = this.fluid.getNbtKeyFromItem();
         if (this.nbt != null && !this.nbt.isEmpty() && !fluidStack.isEmpty() && nbtKey != null) {
             CompoundTag newCom = new CompoundTag();
             for (String k : nbtKey) {
@@ -707,7 +702,7 @@ public class SoftFluidHolder {
         this.nbt = nbt;
         this.specialColor = 0;
         if (this.fluid.isEmpty()) this.setCount(0);
-        this.needColorRefresh = true;
+        this.needsColorRefresh = true;
     }
 
     /**
@@ -716,9 +711,9 @@ public class SoftFluidHolder {
     public int getTintColor(@Nullable LevelReader world, @Nullable BlockPos pos) {
         SoftFluid.TintMethod method = this.fluid.getTintMethod();
         if (method == SoftFluid.TintMethod.NO_TINT) return -1;
-        if (this.needColorRefresh) {
+        if (this.needsColorRefresh) {
             this.refreshSpecialColor(world, pos);
-            this.needColorRefresh = false;
+            this.needsColorRefresh = false;
         }
         if (this.specialColor != 0) return this.specialColor;
         return this.fluid.getTintColor();
@@ -773,17 +768,6 @@ public class SoftFluidHolder {
     }
 
     /**
-     * returns associated food items
-     *
-     * @return food
-     */
-    public ItemStack getFood() {
-        ItemStack stack = new ItemStack(this.fluid.getFoodItem());
-        this.applyNBTtoItemStack(stack);
-        return stack;
-    }
-
-    /**
      * call from tile entity. loads tank from nbt
      *
      * @param compound nbt
@@ -834,85 +818,9 @@ public class SoftFluidHolder {
      * @return success
      */
     public boolean tryDrinkUpFluid(Player player, Level world) {
-        if (this.isEmpty()) return false;
-        ItemStack stack = this.getFood();
-        Item item = stack.getItem();
-
-        //case for xp
-        if (this.fluid == SoftFluidRegistry.XP) {
-            player.giveExperiencePoints(Utils.getXPinaBottle(1, world.random));
-            if (world.isClientSide) return true;
-            this.shrink(1);
-
-            player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1, 1);
-            return true;
-        }
-        //food
-        else if (this.containsFood()) {
-
-            FoodProperties food = item.getFoodProperties();
-            int div = this.fluid.getFoodDivider();
-            //single items are handled by items themselves
-            if (div == 1) {
-                stack.getItem().finishUsingItem(stack.copy(), world, player);
-                if (world.isClientSide) return true;
+        if (!this.isEmpty() && this.containsFood()) {
+            if(this.fluid.getFoodProvider().consume(player, world, this::applyNBTtoItemStack)){
                 this.shrink(1);
-                if (food == null || stack.getItem().isEdible()) {
-                    player.playNotifySound(item.getDrinkingSound(), SoundSource.PLAYERS, 1, 1);
-                }
-                //player already plays sound
-                return true;
-            }
-
-            boolean success = false;
-            //stew & bucket case
-            if (food != null && player.canEat(false)) {
-
-                if (item instanceof SuspiciousStewItem) susStewBehavior(player, stack, div);
-
-                if (world.isClientSide) return true;
-                player.getFoodData().eat(food.getNutrition() / div, food.getSaturationModifier() / (float) div);
-
-                success = true;
-            } else if (item instanceof MilkBucketItem) {
-                if (world.isClientSide) return true;
-                milkBottleBehavior(player, stack);
-                success = true;
-            }
-            if (success) {
-                this.shrink(1);
-                player.playNotifySound(item.getDrinkingSound(), SoundSource.PLAYERS, 1, 1);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //vanilla fluids special behaviors
-
-    //stew code
-    private static void susStewBehavior(Player player, ItemStack stack, int div) {
-        CompoundTag compoundnbt = stack.getTag();
-        if (compoundnbt != null && compoundnbt.contains("Effects", 9)) {
-            ListTag listnbt = compoundnbt.getList("Effects", 10);
-            for (int i = 0; i < listnbt.size(); ++i) {
-                int j = 160;
-                CompoundTag compoundnbt1 = listnbt.getCompound(i);
-                if (compoundnbt1.contains("EffectDuration", 3))
-                    j = compoundnbt1.getInt("EffectDuration") / div;
-                MobEffect effect = MobEffect.byId(compoundnbt1.getByte("EffectId"));
-                if (effect != null) {
-                    player.addEffect(new MobEffectInstance(effect, j));
-                }
-            }
-        }
-    }
-
-    //removes just 1 effect
-    private static boolean milkBottleBehavior(Player player, ItemStack stack) {
-        for (MobEffectInstance effect : player.getActiveEffectsMap().values()) {
-            if (effect.isCurativeItem(stack)) {
-                player.removeEffect(effect.getEffect());
                 return true;
             }
         }
@@ -929,18 +837,6 @@ public class SoftFluidHolder {
             return BUCKET_COUNT;
         }
         return 0;
-    }
-
-    public static ItemStack getEmptyBottle() {
-        return new ItemStack(Items.GLASS_BOTTLE);
-    }
-
-    public static ItemStack getEmptyBucket() {
-        return new ItemStack(Items.BUCKET);
-    }
-
-    public static ItemStack getEmptyBowl() {
-        return new ItemStack(Items.BOWL);
     }
 
 }

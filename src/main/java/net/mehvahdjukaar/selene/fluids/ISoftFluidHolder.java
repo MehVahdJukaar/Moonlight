@@ -5,6 +5,7 @@ package net.mehvahdjukaar.selene.fluids;
  */
 //idk how to forge cap xD
 public interface ISoftFluidHolder {
+
     SoftFluidHolder getSoftFluidHolder();
 
     default boolean canInteractWithFluidHolder(){

@@ -13,7 +13,10 @@ import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
@@ -23,7 +26,7 @@ public class BlockSetManager {
     private static boolean hasFilledBlockSets = false;
 
     //Frick mod loading is multi-threaded, so we need to beware of concurrent access
-    private static final Map<Class<? extends IBlockType>, IBlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new ConcurrentHashMap<>();
+    private static final Map<Class<? extends IBlockType>, BlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new ConcurrentHashMap<>();
     private static final ConcurrentLinkedDeque<Runnable> FINDER_ADDER = new ConcurrentLinkedDeque<>();
 
     //maps containing mod ids and block and items runnable. Block one is ready to run, items needs the bus supplied to it
@@ -37,22 +40,23 @@ public class BlockSetManager {
     /**
      * Registers a block set definition (like wood type, leaf type etc...)
      * Can be called only during mod startup (not during mod setup as it needs to run before registry events
-     * @param type class of the target block set
+     *
+     * @param type         class of the target block set
      * @param typeRegistry block set registry class instance. This contains all the logic that determines how a blockset
      *                     gets formed
-     * @param <T> IBlockType
+     * @param <T>          IBlockType
      */
-    public static <T extends IBlockType> void registerBlockSetDefinition(Class<T> type, IBlockTypeRegistry<T> typeRegistry){
+    public static <T extends IBlockType> void registerBlockSetDefinition(Class<T> type, BlockTypeRegistry<T> typeRegistry) {
         if (hasFilledBlockSets) {
             throw new UnsupportedOperationException(
-                    String.format("Tried to register block set definition %s for block type %s after registry events",typeRegistry, type ));
+                    String.format("Tried to register block set definition %s for block type %s after registry events", typeRegistry, type));
         }
-        BLOCK_SET_CONTAINERS.put(type,typeRegistry);
+        BLOCK_SET_CONTAINERS.put(type, typeRegistry);
     }
 
     /**
      * Use this function to register a (modded) block type finder manually.
-     * This is handy for bloc types that are unique and which can't be detected by the detection system defined in their BlockSetContainer class
+     * This is handy for block types that are unique and which can't be detected by the detection system defined in their BlockSetContainer class
      * Call during mod startup (not mod setup as it will be too late for this to affect block registration)
      *
      * @param woodFinder Finder object that will provide the modded block type when the time is right
@@ -62,15 +66,15 @@ public class BlockSetManager {
             throw new UnsupportedOperationException(
                     String.format("Tried to register block %s finder %s after registry events", type, woodFinder));
         }
-        FINDER_ADDER.add(()->{
-            IBlockTypeRegistry<T> container = getBlockSet(type);
+        FINDER_ADDER.add(() -> {
+            BlockTypeRegistry<T> container = getBlockSet(type);
             container.addFinder(woodFinder);
         });
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends IBlockType> IBlockTypeRegistry<T> getBlockSet(Class<T> type) {
-        return (IBlockTypeRegistry<T>) BLOCK_SET_CONTAINERS.get(type);
+    public static <T extends IBlockType> BlockTypeRegistry<T> getBlockSet(Class<T> type) {
+        return (BlockTypeRegistry<T>) BLOCK_SET_CONTAINERS.get(type);
     }
 
     @FunctionalInterface
@@ -78,15 +82,10 @@ public class BlockSetManager {
         void accept(RegistryEvent.Register<R> reg, Collection<T> wood);
     }
 
-
-
-
-
     @Deprecated
-    void addWoodRegistrationCallback(){};
     public static <R extends IForgeRegistryEntry<R>> void addWoodRegistrationCallback(
-            BlockSetRegistryCallback<WoodType,R> registrationFunction, Class<R> regType) {
-        addBlockSetRegistrationCallback(registrationFunction,regType, WoodType.class);
+            BlockSetRegistryCallback<WoodType, R> registrationFunction, Class<R> regType) {
+        addBlockSetRegistrationCallback(registrationFunction, regType, WoodType.class);
     }
 
     /**
@@ -98,7 +97,7 @@ public class BlockSetManager {
      * @param registrationFunction registry function
      */
     public static <T extends IBlockType, R extends IForgeRegistryEntry<R>> void addBlockSetRegistrationCallback(
-            BlockSetRegistryCallback<T,R> registrationFunction, Class<R> regType, Class<T> blockType) {
+            BlockSetRegistryCallback<T, R> registrationFunction, Class<R> regType, Class<T> blockType) {
         //this is horrible. worst shit ever
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         Consumer<RegistryEvent.Register<R>> eventConsumer;
@@ -176,13 +175,15 @@ public class BlockSetManager {
     }
 
 
-
     private static void initializeBlockSets() {
         FINDER_ADDER.forEach(Runnable::run);
         FINDER_ADDER.clear();
 
-        for(var c : BLOCK_SET_CONTAINERS.values()){
-            c.buildAll();
+        //wood types need to run before leaves
+        BLOCK_SET_CONTAINERS.get(WoodType.class).buildAll();
+
+        for (var c : BLOCK_SET_CONTAINERS.entrySet()) {
+            c.getValue().buildAll();
         }
     }
 

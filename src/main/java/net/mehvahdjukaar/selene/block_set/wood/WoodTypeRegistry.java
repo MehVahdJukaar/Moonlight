@@ -1,8 +1,7 @@
 package net.mehvahdjukaar.selene.block_set.wood;
 
 import com.google.common.collect.ImmutableMap;
-import net.mehvahdjukaar.selene.block_set.IBlockType;
-import net.mehvahdjukaar.selene.block_set.IBlockTypeRegistry;
+import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class WoodTypeRegistry implements IBlockTypeRegistry<WoodType> {
+public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     public static WoodTypeRegistry INSTANCE;
 
@@ -26,21 +25,6 @@ public class WoodTypeRegistry implements IBlockTypeRegistry<WoodType> {
      * Use addWoodEntryRegistrationCallback instead
      */
     public static Map<ResourceLocation, WoodType> WOOD_TYPES = new LinkedHashMap<>();
-
-
-    private boolean frozen = false;
-    private final List<IBlockType.SetFinder<WoodType>> WOOD_FINDERS = new ArrayList<>();
-    private final List<WoodType> builder = new ArrayList<>();
-
-    /**
-     * Gets corresponding wood type or oak if the provided one is not installed or missing
-     *
-     * @param name string resource location name of the type
-     * @return wood type
-     */
-    public WoodType getFromNBT(String name) {
-        return this.getTypes().getOrDefault(new ResourceLocation(name), this.getDefaultType());
-    }
 
     public static WoodType fromNBT(String name) {
         return WOOD_TYPES.getOrDefault(new ResourceLocation(name), WoodType.OAK_WOOD_TYPE);
@@ -60,45 +44,13 @@ public class WoodTypeRegistry implements IBlockTypeRegistry<WoodType> {
     }
 
     @Override
-    public void registerBlockType(WoodType newType) {
-        if (frozen) {
-            throw new UnsupportedOperationException("Tried to register wood types after registry events");
-        }
-        builder.add(newType);
-    }
-
-    @Override
-    public void finalizeAndFreeze() {
-        if (frozen) {
-            throw new UnsupportedOperationException("Wood types are already finalized");
-        }
-        LinkedHashMap<ResourceLocation, WoodType> linkedHashMap = new LinkedHashMap<>();
-        builder.forEach(e -> {
-            if (!linkedHashMap.containsKey(e.id)) {
-                linkedHashMap.put(e.id, e);
-                //Selene.LOGGER.warn("Found wood type with duplicate id ({}), skipping",e.id);
-            }
-        });
-        WOOD_TYPES = ImmutableMap.copyOf(linkedHashMap);
-        builder.clear();
-        this.frozen = true;
-    }
-
-    @Override
-    public void addFinder(IBlockType.SetFinder<WoodType> finder) {
-        if (frozen) {
-            throw new UnsupportedOperationException("Tried to register wood type finder after registry events");
-        }
-        WOOD_FINDERS.add(finder);
-    }
-
-    public List<IBlockType.SetFinder<WoodType>> getFinders() {
-        return WOOD_FINDERS;
+    protected void saveTypes(ImmutableMap<ResourceLocation, WoodType> types) {
+        WOOD_TYPES = types;
     }
 
     //returns if this block is the base plank block
     @Override
-    public Optional<WoodType> scanAndGet(Block baseBlock) {
+    public Optional<WoodType> detectTypeFromBlock(Block baseBlock) {
         ResourceLocation baseRes = baseBlock.getRegistryName();
         String name = null;
         String path = baseRes.getPath();
@@ -112,7 +64,7 @@ public class WoodTypeRegistry implements IBlockTypeRegistry<WoodType> {
         } else if (path.startsWith("plank_")) {
             name = path.substring("plank_".length());
         }
-        if (name != null) {
+        if (name != null && !baseRes.getNamespace().equals("securitycraft")) {
             BlockState state = baseBlock.defaultBlockState();
             //cant check if the block is a full one so I do this. Adding some checks here
             if (state.getProperties().size() <= 2 && !(baseBlock instanceof SlabBlock)) {

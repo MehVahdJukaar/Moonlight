@@ -54,8 +54,10 @@ public class DispenserHelper {
     private static Set<Item> REGISTERED_FLUID_ITEMS = new HashSet<>();
 
     public static void registerFluidBehavior(SoftFluid f) {
+        //TODO: re add
+        /*
         Set<Item> registeredFluidItems = new HashSet<>();
-        Map<Item, SoftFluid.FilledContainerCategory> map = f.getFilledContainersMap();
+        Map<Item, SoftFluid.FilledContainerCategory> map = f.getContainerList();
         for (Item empty : map.keySet()) {
             //prevents registering stuff twice
             if (empty != Items.AIR && !registeredFluidItems.contains(empty)){
@@ -70,6 +72,7 @@ public class DispenserHelper {
             }
         }
         REGISTERED_FLUID_ITEMS = ImmutableSet.copyOf(registeredFluidItems);
+        */
     }
 
     /**

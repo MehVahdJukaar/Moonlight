@@ -25,6 +25,8 @@ public class WoodType implements IBlockType {
     public final Material material;
     public final Block plankBlock;
     public final Block logBlock;
+    @Nullable
+    public final Block leaves;
     //lazy cause wood types are loaded before items, so we can only access blocks
     @Nullable
     public final Lazy<Item> signItem; //used for item textures
@@ -41,9 +43,28 @@ public class WoodType implements IBlockType {
         this.material = baseBlock.defaultBlockState().getMaterial();
         this.shortenedNamespace = id.getNamespace().equals("minecraft") ? "" : "_" + abbreviateString(id.getNamespace());
 
+        this.leaves = this.findLeaves();
         //checks if it has a sign
-        this.signItem = Lazy.of(()->this.findRelatedItem("sign"));
-        this.boatItem = Lazy.of(()->this.findRelatedItem("boat"));
+        this.signItem = Lazy.of(() -> this.findRelatedItem("sign"));
+        this.boatItem = Lazy.of(() -> this.findRelatedItem("boat"));
+    }
+
+    @Nullable
+    private Block findLeaves() {
+        ResourceLocation[] targets = {
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_leaves"),
+                new ResourceLocation(id.getNamespace(), "leaves_" + id.getPath())
+        };
+        Block found;
+        for (var r : targets) {
+            if (ForgeRegistries.BLOCKS.containsKey(r)) {
+                found = ForgeRegistries.BLOCKS.getValue(r);
+                if (found.defaultBlockState().getMaterial() == Material.LEAVES) {
+                    return found;
+                }
+            }
+        }
+        return null;
     }
 
     @Nullable
@@ -67,7 +88,12 @@ public class WoodType implements IBlockType {
         return this.id.toString();
     }
 
+    @Deprecated
     public String getWoodName() {
+        return this.getTypeName();
+    }
+
+    public String getTypeName() {
         return id.getPath();
     }
 
@@ -75,9 +101,9 @@ public class WoodType implements IBlockType {
         return id.getNamespace();
     }
 
-    public String getNameForTranslation(String append) {
-        //There's got to be a faster method call lol
-        return AssetGenerators.LangBuilder.getReadableName(this.getWoodName() + "_" + append);
+    @Override
+    public ResourceLocation getId() {
+        return id;
     }
 
     /**
@@ -85,19 +111,7 @@ public class WoodType implements IBlockType {
      */
     @Deprecated
     public String getAppendableId() {
-        return this.getWoodName() + this.shortenedNamespace;
-    }
-
-    /**
-     * Use this to get the new id of a block variant
-     *
-     * @param baseName base variant name
-     * @return something like mod_id/[baseName]_oak. ignores minecraft namespace
-     */
-    public String getVariantId(String baseName) {
-        String namespace = this.getNamespace();
-        if (namespace.equals("minecraft")) return baseName + "_" + this.getWoodName();
-        return this.getNamespace() + "/" + baseName + "_" + this.getWoodName();
+        return this.getTypeName() + this.shortenedNamespace;
     }
 
     /**
@@ -107,8 +121,8 @@ public class WoodType implements IBlockType {
      */
     public String getTexturePath() {
         String namespace = this.getNamespace();
-        if (namespace.equals("minecraft")) return this.getWoodName();
-        return this.getNamespace() + "/" + this.getWoodName();
+        if (namespace.equals("minecraft")) return this.getTypeName();
+        return this.getNamespace() + "/" + this.getTypeName();
     }
 
     public boolean canBurn() {
@@ -117,10 +131,6 @@ public class WoodType implements IBlockType {
 
     public MaterialColor getColor() {
         return this.material.getColor();
-    }
-
-    public boolean isVanilla() {
-        return this.getNamespace().equals("minecraft");
     }
 
 
@@ -158,10 +168,12 @@ public class WoodType implements IBlockType {
                 try {
                     Block plank = planksFinder.get();
                     Block log = logFinder.get();
-                    return Optional.of(new WoodType(id, plank, log));
-                } catch (Exception e) {
-                    Selene.LOGGER.warn("Failed to find custom wood type {}", id);
-                }
+                    var d = ForgeRegistries.BLOCKS.getValue(ForgeRegistries.BLOCKS.getDefaultKey());
+                    if(plank != d && log!=d && plank != null && log != null) {
+                        return Optional.of(new WoodType(id, plank, log));
+                    }
+                } catch (Exception ignored) {}
+                Selene.LOGGER.warn("Failed to find custom wood type {}", id);
             }
             return Optional.empty();
         }

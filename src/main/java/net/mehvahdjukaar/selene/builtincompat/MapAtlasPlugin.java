@@ -24,8 +24,9 @@ public class MapAtlasPlugin {
 
     @Nullable
     public static Integer getMapIdFromAtlas(ItemStack item, Level level, Object data) {
-        Map<String, MapItemSavedData> mapInfos = MapAtlasesAccessUtils.getAllMapInfoFromAtlas(level, item);
-        for (var e : mapInfos.entrySet()) {
+
+        Map<String, MapItemSavedData> mapInfo = MapAtlasesAccessUtils.getAllMapInfoFromAtlas(level, item);
+        for (var e : mapInfo.entrySet()) {
             if (e.getValue() == data) {
                 return MapAtlasesAccessUtils.getMapIntFromString(e.getKey());
             }
