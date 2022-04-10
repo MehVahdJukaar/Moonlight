@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.selene.network;
 
+import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.minecraft.nbt.CompoundTag;
@@ -27,15 +28,23 @@ public class ClientBoundSyncFluidsPacket {
             var r = SoftFluid.CODEC.parse(NbtOps.INSTANCE, pBuffer.readAnySizeNbt());
             r.result().ifPresent(fluids::add);
         }
-
     }
 
     public static void buffer(ClientBoundSyncFluidsPacket message, FriendlyByteBuf buffer) {
-        buffer.writeVarInt(message.fluids.size());
+
+        List<CompoundTag> encoded = new ArrayList<>();
         for (SoftFluid f : message.fluids) {
-            var r = SoftFluid.CODEC.encodeStart(NbtOps.INSTANCE, f);
-            r.result().ifPresent(t -> buffer.writeNbt((CompoundTag) t));
+            try {
+                var r = SoftFluid.CODEC.encodeStart(NbtOps.INSTANCE, f).resultOrPartial(
+                        e -> Selene.LOGGER.error("Failed encoding Soft Fluid {} : {}", f, e)
+                );
+                encoded.add(((CompoundTag) r.get()));
+            } catch (Exception e) {
+                Selene.LOGGER.error("Failed encoding Soft Fluid {} : {}", f, e);
+            }
         }
+        buffer.writeVarInt(encoded.size());
+        encoded.forEach(buffer::writeNbt);
     }
 
     public static void handler(ClientBoundSyncFluidsPacket message, Supplier<NetworkEvent.Context> contextSupplier) {

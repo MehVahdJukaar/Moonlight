@@ -62,9 +62,9 @@ public abstract class ResourcePackAwareDynamicTextureProvider implements Prepara
             this.regenerateTextures(manager);
         }
 
-        getLogger().info("Generated runtime client resources for pack {} in: {} seconds",
+        getLogger().info("Generated runtime client resources for pack {} in: {} ms",
                 this.getDynamicPack().getName(),
-                watch.elapsed().toSeconds());
+                watch.elapsed().toMillis());
 
         return CompletableFuture.supplyAsync(() -> null, workerExecutor)
                 .thenCompose(stage::wait)

@@ -12,7 +12,6 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -171,7 +170,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
 
         for (var j : jsons.entrySet()) {
             Optional<SoftFluid> result = SoftFluid.CODEC.parse(JsonOps.INSTANCE, j.getValue())
-                    .resultOrPartial(e -> Selene.LOGGER.error("Failed to read block growth JSON object for {} : {}", j.getKey(), e));
+                    .resultOrPartial(e -> Selene.LOGGER.error("Failed to soft fluid JSON object for {} : {}", j.getKey(), e));
             result.ifPresent(SoftFluidRegistry::register);
         }
         convertAndRegisterAllForgeFluids();
@@ -179,6 +178,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
             this.initializedDispenser = true;
             getRegisteredFluids().forEach(DispenserHelper::registerFluidBehavior);
         }
+        Selene.LOGGER.info("Registered {} Soft Fluids", this.fluidMap.size());
     }
 
 
