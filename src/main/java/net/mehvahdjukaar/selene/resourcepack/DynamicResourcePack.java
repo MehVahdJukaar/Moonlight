@@ -2,10 +2,9 @@ package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.core.Registry;
+import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -15,7 +14,6 @@ import net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import org.apache.logging.log4j.LogManager;
@@ -54,18 +52,17 @@ public abstract class DynamicResourcePack implements PackResources {
     public boolean generateDebugResources = false;
 
     public DynamicResourcePack(ResourceLocation name, PackType type) {
-        this(name , type, Pack.Position.TOP, false, false);
+        this(name, type, Pack.Position.TOP, false, false);
     }
 
     public DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
         this.packType = type;
-        //TODO: fix translation not working
-        var component = new TextComponent(AssetGenerators.LangBuilder.getReadableName(name.getNamespace()+"_dynamic_resources"));
+        var component = new TextComponent(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources"));
         //new TranslatableComponent("%s.%s.description", name.getNamespace(), name.getPath());
         this.packInfo = new PackMetadataSection(component, 6);
         this.resourcePackName = name;
         this.namespaces.add(name.getNamespace());
-        this.title = new TextComponent(AssetGenerators.LangBuilder.getReadableName(name.toString()));
+        this.title = new TextComponent(LangBuilder.getReadableName(name.toString()));
         ;//new TranslatableComponent("%s.%s.title", name.getNamespace(), name.getPath());
 
         this.position = position;
@@ -92,18 +89,20 @@ public abstract class DynamicResourcePack implements PackResources {
 
     /**
      * registers this pack. Intern calls AddPackFinderEvent
+     *
      * @param bus MOD event bus
      */
-    public void registerPack(IEventBus bus){
+    public void registerPack(IEventBus bus) {
         bus.addListener(this::register);
     }
 
     /**
      * same as register pack but takes the actual event. Use just one
+     *
      * @param event AddPackFindersEvent
      */
     public void register(AddPackFindersEvent event) {
-        if(event.getPackType() == this.packType) {
+        if (event.getPackType() == this.packType) {
             event.addRepositorySource((infoConsumer, packFactory) ->
                     infoConsumer.accept(new Pack(
                             this.getName(),    // id
@@ -193,11 +192,12 @@ public abstract class DynamicResourcePack implements PackResources {
                 Path p = Paths.get("debug", "generated_resource_pack").resolve(path.getNamespace() + "/" + path.getPath());
                 Files.createDirectories(p.getParent());
                 Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         }
     }
 
-    protected void addImage(ResourceLocation path, NativeImage image, RPUtils.ResType resType) {
+    protected void addImage(ResourceLocation path, NativeImage image, ResType resType) {
         try (image) {
             this.addBytes(path, image.asByteArray(), resType);
         } catch (Exception e) {
@@ -214,14 +214,15 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
-    public void addJson(ResourceLocation location, JsonElement json, RPUtils.ResType resType) {
-        this.addJson(RPUtils.resPath(location, resType), json);
+    public void addJson(ResourceLocation location, JsonElement json, ResType resType) {
+        this.addJson(resType.getPath(location), json);
     }
 
-    public void addBytes(ResourceLocation location, byte[] bytes, RPUtils.ResType resType) {
-        this.addBytes(RPUtils.resPath(location, resType), bytes);
+    public void addBytes(ResourceLocation location, byte[] bytes, ResType resType) {
+        this.addBytes(resType.getPath(location), bytes);
     }
 
+    //TODO: move to RP utils
     /**
      * This is a handy method for dynamic resource pack since it allows to specify the name of an existing resource
      * that will then be copied and modified replacing a certain keyword in it with another.
@@ -233,13 +234,13 @@ public abstract class DynamicResourcePack implements PackResources {
      * @param keyword     keyword to replace
      * @param replaceWith word to replace the keyword with
      */
-    public void addSimilarJsonResource(RPUtils.StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException{
+    public void addSimilarJsonResource(StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException {
         ResourceLocation fullPath = resource.location;
 
         String string = new String(resource.data, StandardCharsets.UTF_8);
 
         if (!string.contains(keyword)) {
-            throw new NoSuchElementException(String.format("Resource %s did not contain keyword %s. ",fullPath, keyword));
+            throw new NoSuchElementException(String.format("Resource %s did not contain keyword %s. ", fullPath, keyword));
         }
 
         string = string.replace(keyword, replaceWith);
@@ -256,15 +257,5 @@ public abstract class DynamicResourcePack implements PackResources {
         ResourceLocation newRes = new ResourceLocation(resourcePackName.getNamespace(), builder.toString());
         this.addBytes(newRes, string.getBytes());
     }
-
-    @FunctionalInterface
-    public interface TextTransform {
-        String accept(String input);
-       
-        static TextTransform replace(String from, String to){
-            return s -> s.replace(from,to);
-        }
-    }
-
 
 }

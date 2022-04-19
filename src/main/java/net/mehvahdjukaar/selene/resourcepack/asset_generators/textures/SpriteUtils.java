@@ -1,13 +1,22 @@
-package net.mehvahdjukaar.selene.textures;
+package net.mehvahdjukaar.selene.resourcepack.asset_generators.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import net.mehvahdjukaar.selene.Selene;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
+import java.io.IOException;
 import java.util.Arrays;
 
-public class SpriteUtils {
+public final class SpriteUtils {
+
+    /**
+     * Shorthand method to read a NativeImage
+     */
+    public static NativeImage readImage(ResourceManager manager, ResourceLocation resourceLocation) throws IOException {
+        return NativeImage.read(manager.getResource(resourceLocation).getInputStream());
+    }
 
     /**
      * Creates an image by combining two others taking alpha into consideration. Overlays are applied first in first out
@@ -29,8 +38,24 @@ public class SpriteUtils {
         }
     }
 
+    /**
+     * recolors the template image with the color grabbed from the given image restrained to its mask, if possible
+     */
+    @Nullable
+    public static NativeImage recolorFromVanilla(ResourceManager manager, NativeImage vanillaTexture, ResourceLocation vanillaMask,
+                                             ResourceLocation templateTexture) {
+        try (NativeImage scribbleMask = readImage(manager, vanillaMask);
+             NativeImage template = readImage(manager, templateTexture)) {
+            Respriter respriter = new Respriter(template);
+            return respriter.recolorImage(vanillaTexture, scribbleMask);
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
     //removes last 2 colors and adds another hilight
     public static Palette extrapolateSignBlockPalette(NativeImage planksTexture) {
+
         Palette palette = Palette.fromImage(planksTexture, null);
         int size = palette.size();
         if(size == 7) {
@@ -158,6 +183,19 @@ public class SpriteUtils {
         hsbvals[1] = saturation;
         hsbvals[2] = brightness;
         return hsbvals;
+    }
+
+    public static int averageColors(Integer ...colors){
+        int totalR= 0;
+        int totalG = 0;
+        int totalB = 0;
+        for(int c : colors){
+            totalR +=NativeImage.getR(c);
+            totalG +=NativeImage.getG(c);
+            totalB +=NativeImage.getB(c);
+        }
+        int size = colors.length;
+        return NativeImage.combine(255, totalB/size, totalG/size, totalR/size);
     }
 
         /*

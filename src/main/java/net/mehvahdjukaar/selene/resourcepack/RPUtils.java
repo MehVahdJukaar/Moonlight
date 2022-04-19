@@ -18,64 +18,6 @@ import java.util.function.Predicate;
 
 public class RPUtils {
 
-    /**
-     * Represents a generic resource that can be read multiple times. Consumes the original resource
-     */
-    public static class StaticResource{
-        public final byte[] data;
-        public final ResourceLocation location;
-        public final String sourceName;
-
-        public StaticResource(Resource original) {
-            byte[] data1;
-            try {
-                data1 = original.getInputStream().readAllBytes();
-            } catch (IOException e) {
-                data1 = new byte[]{};
-            }
-
-            this.data = data1;
-            this.location = original.getLocation();
-            this.sourceName = original.getSourceName();
-        }
-    }
-
-    public enum ResType {
-        GENERIC("%s"),
-        TAGS("tags/%s.json"),
-        LOOT_TABLES("loot_tables/%s.json"),
-        RECIPES("recipes/%s.json"),
-        ADVANCEMENTS("advancements/%s.json"),
-
-        LANG("lang/%s.json"),
-        TEXTURES("textures/%s.png"),
-        BLOCK_TEXTURES("textures/block/%s.png"),
-        ITEM_TEXTURES("textures/item/%s.png"),
-        ENTITY_TEXTURES("textures/entity/%s.png"),
-        MCMETA("textures/%s.png.mcmeta"),
-        BLOCK_MCMETA("textures/block/%s.png.mcmeta"),
-        ITEM_MCMETA("textures/item/%s.png.mcmeta"),
-        MODELS("models/%s.json"),
-        BLOCK_MODELS("models/block/%s.json"),
-        ITEM_MODELS("models/item/%s.json"),
-        BLOCKSTATES("blockstates/%s.json");
-
-        public final String loc;
-
-        ResType(String loc){
-            this.loc = loc;
-        }
-
-    }
-
-    public static ResourceLocation resPath(ResourceLocation relativeLocation, ResType type) {
-        return new ResourceLocation(relativeLocation.getNamespace(), String.format(type.loc, relativeLocation.getPath()));
-    }
-
-    public static ResourceLocation resPath(String relativeLocation, ResType type) {
-        return resPath(new ResourceLocation(relativeLocation), type);
-    }
-
     public static String serializeJson(JsonElement json) throws IOException {
         StringWriter stringWriter = new StringWriter();
 
@@ -98,7 +40,7 @@ public class RPUtils {
     public static NativeImage findFirstBlockTexture(ResourceManager manager, Block block) throws FileNotFoundException {
         String loc = findFirstBlockTextureLocation(manager, block, s -> true);
         try {
-            return NativeImage.read(manager.getResource(RPUtils.resPath(loc, ResType.TEXTURES)).getInputStream());
+            return NativeImage.read(manager.getResource(ResType.TEXTURES.getPath(loc)).getInputStream());
         } catch (IOException e) {
             throw new FileNotFoundException("Could not resolve texture "+loc);
         }
@@ -107,7 +49,7 @@ public class RPUtils {
     public static NativeImage findFirstItemTexture(ResourceManager manager, Item item) throws FileNotFoundException{
         String loc = findFirstItemTextureLocation(manager, item, s -> true);
         try {
-            return NativeImage.read(manager.getResource(RPUtils.resPath(loc, ResType.TEXTURES)).getInputStream());
+            return NativeImage.read(manager.getResource(ResType.TEXTURES.getPath(loc)).getInputStream());
         } catch (IOException e) {
             throw new FileNotFoundException("Could not resolve texture "+loc);
         }
@@ -123,12 +65,12 @@ public class RPUtils {
     public static String findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
         try {
             ResourceLocation res = block.getRegistryName();
-            Resource blockState = manager.getResource(RPUtils.resPath(res, ResType.BLOCKSTATES));
+            Resource blockState = manager.getResource( ResType.BLOCKSTATES.getPath(res));
 
             JsonElement bsElement = RPUtils.deserializeJson(blockState.getInputStream());
 
             String modelPath = findFirstResourceInJsonRecursive(bsElement.getAsJsonObject().get("variants"));
-            Resource model = manager.getResource(RPUtils.resPath(modelPath, ResType.MODELS));
+            Resource model = manager.getResource(ResType.MODELS.getPath(modelPath));
             JsonElement modelElement = RPUtils.deserializeJson(model.getInputStream());
 
             return findAllResourcesInJsonRecursive(modelElement.getAsJsonObject().getAsJsonObject("textures"))
@@ -148,7 +90,7 @@ public class RPUtils {
     public static String findFirstItemTextureLocation(ResourceManager manager, Item item, Predicate<String> texturePredicate) throws FileNotFoundException {
         try {
             ResourceLocation res = item.getRegistryName();
-            Resource itemModel = manager.getResource(RPUtils.resPath(res, ResType.ITEM_MODELS));
+            Resource itemModel = manager.getResource(ResType.ITEM_MODELS.getPath(res));
 
             JsonElement bsElement = RPUtils.deserializeJson(itemModel.getInputStream());
 

@@ -24,7 +24,7 @@ public interface IBlockType {
     default String getVariantId(String baseName) {
         String namespace = this.getNamespace();
         if (namespace.equals("minecraft")) return baseName + "_" + this.getTypeName();
-        return this.getNamespace() + "/" + baseName + "_" + this.getTypeName();
+        return namespace + "/" + baseName + "_" + this.getTypeName();
     }
 
     default String getNameForTranslation(String append) {

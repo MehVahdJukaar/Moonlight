@@ -147,7 +147,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
                 //if fluid map contains fluid it meas that another equivalent fluid has already ben registered
                 if (INSTANCE.fluidMap.containsKey(f)) continue;
                 //is not equivalent: create new SoftFluid from forge fluid
-                registerUnchecked((new SoftFluid.Builder(f)).build());
+                if(f.getRegistryName() != null) registerUnchecked((new SoftFluid.Builder(f)).build());
             } catch (Exception ignored) {
             }
         }
@@ -170,7 +170,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
 
         for (var j : jsons.entrySet()) {
             Optional<SoftFluid> result = SoftFluid.CODEC.parse(JsonOps.INSTANCE, j.getValue())
-                    .resultOrPartial(e -> Selene.LOGGER.error("Failed to soft fluid JSON object for {} : {}", j.getKey(), e));
+                    .resultOrPartial(e -> Selene.LOGGER.error("Failed to parse soft fluid JSON object for {} : {}", j.getKey(), e));
             result.ifPresent(SoftFluidRegistry::register);
         }
         convertAndRegisterAllForgeFluids();

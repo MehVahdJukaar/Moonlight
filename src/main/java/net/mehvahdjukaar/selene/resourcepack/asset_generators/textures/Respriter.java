@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.textures;
+package net.mehvahdjukaar.selene.resourcepack.asset_generators.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import org.jetbrains.annotations.Nullable;

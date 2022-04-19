@@ -251,12 +251,17 @@ public class SoftFluid {
          */
         public Builder(Fluid fluid) {
             FluidAttributes att = fluid.getAttributes();
-            this.stillTexture = att.getStillTexture();
-            this.flowingTexture = att.getFlowingTexture();
-            //TODO: fluid colors can depend on fluid stack
+            ResourceLocation still = att.getStillTexture();
+            if (still == null) still = new ResourceLocation("minecraft:block/water_still");
+            this.stillTexture = still;
+            ResourceLocation flowing = att.getFlowingTexture();
+            if (flowing == null) flowing = new ResourceLocation("minecraft:block/water_flowing");
+            this.flowingTexture = flowing;
+            //TODO: fluid colors & textures can depend on fluid stack
             this.color(att.getColor());
             this.luminosity = att.getLuminosity();
-            this.translationKey = att.getTranslationKey();
+            String tr = att.getTranslationKey();
+            if (tr != null) this.translationKey = tr;
             this.addEqFluid(fluid);
             this.id = fluid.getRegistryName();
         }
@@ -541,10 +546,10 @@ public class SoftFluid {
 
 
     protected static SoftFluid create(ResourceLocation id, ResourceLocation still, ResourceLocation flowing,
-                                    Optional<String> translation, Optional<Integer> luminosity, Optional<Integer> color,
-                                    Optional<SoftFluid.TintMethod> tint, Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
-                                    Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,
-                                    Optional<ResourceLocation> textureFrom) {
+                                      Optional<String> translation, Optional<Integer> luminosity, Optional<Integer> color,
+                                      Optional<SoftFluid.TintMethod> tint, Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
+                                      Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,
+                                      Optional<ResourceLocation> textureFrom) {
         SoftFluid.Builder builder = new SoftFluid.Builder(still, flowing, id);
         translation.ifPresent(builder::translationKey);
         luminosity.ifPresent(builder::luminosity);

@@ -1,8 +1,6 @@
-package net.mehvahdjukaar.selene.textures;
+package net.mehvahdjukaar.selene.resourcepack.asset_generators.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
-
-import java.awt.*;
 
 public class PaletteColor {
     public final int color;

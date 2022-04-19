@@ -33,6 +33,20 @@ public class Utils {
             player.setItemInHand(hand, ItemUtils.createFilledResult(player.getItemInHand(hand).copy(), player, newItem, player.isCreative()));
     }
 
+    public static void addStackToExisting(Player player, ItemStack stack){
+        var inv = player.getInventory();
+        boolean added = false;
+        for(int j = 0; j<inv.items.size(); j++){
+            if(inv.getItem(j).is(stack.getItem()) && inv.add(j,stack)){
+                added = true;
+                break;
+            }
+        }
+        if(!added && inv.add(stack)){
+            player.drop(stack, false);
+        }
+    }
+
     //xp bottle logic
     public static int getXPinaBottle(int bottleCount, Random rand) {
         int xp = 0;

@@ -2,14 +2,9 @@ package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.NativeImage;
-import net.mehvahdjukaar.selene.resourcepack.RPUtils.ResType;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
-import org.apache.commons.compress.archivers.sevenz.CLI;
 
 public class DynamicTexturePack extends DynamicResourcePack {
 

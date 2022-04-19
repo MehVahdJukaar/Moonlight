@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.textures;
+package net.mehvahdjukaar.selene.resourcepack.asset_generators.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import org.jetbrains.annotations.Nullable;
@@ -6,10 +6,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class Palette {
+
     private static final Comparator<PaletteColor> COMPARATOR = (a, b) -> Float.compare(a.luminance, b.luminance);
 
     private final ArrayList<PaletteColor> internal = new ArrayList<>();
 
+    //ordered from darkest to lightest
     public int size() {
         return internal.size();
     }
@@ -46,6 +48,13 @@ public class Palette {
         return internal.get(index);
     }
 
+    public PaletteColor getDarkest() {
+        return get(0);
+    }
+
+    public PaletteColor getLightest() {
+        return get(internal.size() - 1);
+    }
 
     public void remove(int index) {
         internal.remove(index);
@@ -55,6 +64,10 @@ public class Palette {
     public void remove(PaletteColor color) {
         internal.remove(color);
         this.sort();
+    }
+
+    public int calculateAverage() {
+        return SpriteUtils.averageColors(this.internal.stream().map(c -> c.color).toArray(Integer[]::new));
     }
 
     public static Palette fromImage(NativeImage image) {
@@ -90,6 +103,7 @@ public class Palette {
     }
 
     private void maybeReducePalette(int targetSize) {
+        //remove the one with least occurrence
         while (this.internal.size() > targetSize) {
             PaletteColor toRemove = internal.get(0);
             for (var p : internal) {
@@ -103,6 +117,7 @@ public class Palette {
     }
 
     private void maybeIncreasePalette(int targetSize) {
+        //adds a color in the space between the two colors that differ the most
         while (internal.size() < targetSize) {
             float lastLum = 0;
             int ind = 0;
@@ -114,16 +129,62 @@ public class Palette {
                 }
             }
 
-            int color0 = internal.get(ind - 1).color;
-            int color1 = internal.get(ind).color;
-
-            int r = (int) ((NativeImage.getR(color0) + NativeImage.getR(color1)) / 2f);
-            int g = (int) ((NativeImage.getG(color0) + NativeImage.getG(color1)) / 2f);
-            int b = (int) ((NativeImage.getB(color0) + NativeImage.getB(color1)) / 2f);
-            int newColor = NativeImage.combine(255, b, g, r);
+            int newColor = SpriteUtils.averageColors(internal.get(ind - 1).color, internal.get(ind).color);
 
             internal.add(new PaletteColor(0, 0, newColor));
             this.sort();
         }
     }
+
+    //add a highlight color
+    public void increaseUp() {
+        //float averageDeltaLum = (this.getLightest().luminance - this.getDarkest().luminance)/this.size()-1;
+        var lightest = this.getLightest();
+        var secondLightest = this.get(this.size() - 2);
+        //float newLum = lightest.luminance+averageDeltaLum;
+        var h1 = SpriteUtils.RGBtoHSV(lightest.color);
+        var h2 = SpriteUtils.RGBtoHSV(secondLightest.color);
+        //float lum1 = lightest.luminance;
+        // float lum2 = secondLightest.luminance;
+        float v1 = h1[2];
+        float v2 = h2[2];
+        float dv = v2 - v1;
+        float hue1 = h1[0];
+        float hue2 = h2[0];
+        float dh = hue2 - hue1;
+        float sat1 = h1[1];
+        float sat2 = h2[1];
+        float ds = sat2 - sat1;
+        float newHue = hue1 + (dh / dv) * 2 * dv;
+        float newSat = sat1 + (ds / dv) * 2 * dv;
+        float newVal = v1 + dv;
+        this.add(new PaletteColor(SpriteUtils.HSVtoRGB(newHue, newSat, newVal)));
+    }
+
+    //add a dark color
+    public void increaseDown() {
+        //float averageDeltaLum = (this.getLightest().luminance - this.getDarkest().luminance)/this.size()-1;
+        var darkest = this.getDarkest();
+        var secondDarkest = this.get(1);
+        //float newLum = lightest.luminance+averageDeltaLum;
+        var h2 = SpriteUtils.RGBtoHSV(darkest.color);
+        var h1 = SpriteUtils.RGBtoHSV(secondDarkest.color);
+        //float lum1 = lightest.luminance;
+        // float lum2 = secondLightest.luminance;
+        float v1 = h1[2];
+        float v2 = h2[2];
+        float dv = v2 - v1;
+        float hue1 = h1[0];
+        float hue2 = h2[0];
+        float dh = hue2 - hue1;
+        float sat1 = h1[1];
+        float sat2 = h2[1];
+        float ds = sat2 - sat1;
+        float newHue = hue2 + (dh / dv) * 2 * dv;
+        float newSat = sat2 + (ds / dv) * 2 * dv;
+        float newVal = v2 + dv;
+        this.add(new PaletteColor(SpriteUtils.HSVtoRGB(newHue, newSat, newVal)));
+    }
+
+
 }
