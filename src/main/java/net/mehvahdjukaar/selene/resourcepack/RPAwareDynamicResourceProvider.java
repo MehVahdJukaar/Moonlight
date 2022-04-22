@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.common.base.Stopwatch;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -43,14 +44,20 @@ abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePack> imp
         Stopwatch watch = Stopwatch.createStarted();
 
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
-
+        //TODO: cleanup this logic
         if (!this.hasBeenInitialized) {
             this.hasBeenInitialized = true;
             generateStaticAssetsOnStartup(manager);
             if (!resourcePackSupport) {
-                VanillaResourceManager vanillaManager = new VanillaResourceManager();
-                this.regenerateDynamicAssets(vanillaManager);
-                vanillaManager.close();
+                var pack = this.getRepository();
+                if(pack != null) {
+                    VanillaResourceManager vanillaManager = new VanillaResourceManager(pack);
+                    this.regenerateDynamicAssets(vanillaManager);
+                    vanillaManager.close();
+                }
+                else{
+                    this.regenerateDynamicAssets(manager);
+                }
             }
         }
 
@@ -68,6 +75,9 @@ abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePack> imp
                 .thenAcceptAsync((noResult) -> {
                 }, mainExecutor);
     }
+
+    @Nullable
+    protected abstract PackRepository getRepository();
 
     public boolean alreadyHasAssetAtLocation(ResourceManager manager, ResourceLocation res, ResType type) {
         ResourceLocation fullRes = type.getPath(res);

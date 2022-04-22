@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.selene.resourcepack.asset_generators.textures.Respriter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -32,6 +33,11 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
             ((ReloadableResourceManager) mc.getResourceManager())
                     .registerReloadListener(this);
         }
+    }
+
+    @Override
+    protected PackRepository getRepository() {
+        return Minecraft.getInstance().getResourcePackRepository();
     }
 
     protected boolean alreadyHasTextureAtLocation(ResourceManager manager, ResourceLocation res) {

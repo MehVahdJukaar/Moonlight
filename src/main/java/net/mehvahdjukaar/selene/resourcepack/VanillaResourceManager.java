@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -21,8 +20,7 @@ public class VanillaResourceManager implements ResourceManager, Closeable {
     private final PackType TYPE = PackType.CLIENT_RESOURCES;
     private final Map<String, PackResources> packs = new HashMap<>();
 
-    public VanillaResourceManager() {
-        PackRepository repository = Minecraft.getInstance().getResourcePackRepository();
+    public VanillaResourceManager(PackRepository repository) {
         var v = repository.getPack("vanilla");
         if (v != null) packs.put("vanilla", v.open());
         var m = repository.getPack("mod_resources");

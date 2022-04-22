@@ -15,9 +15,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -212,7 +214,9 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
                     this.reloadNumber = INSTANCE.currentReload;
                     this.value = SoftFluidRegistry.get(id);
                     if (this.value.isEmpty()) {
-                        throw new UnsupportedOperationException("Soft Fluid not present: " + this.id);
+                        //client might call this during server reload. remeber on single player this is the only object for both "sides"
+                        //we return empty so even client during reload can be fine
+                        //throw new UnsupportedOperationException("Soft Fluid not present: " + this.id);
                     }
                 }
                 return value;

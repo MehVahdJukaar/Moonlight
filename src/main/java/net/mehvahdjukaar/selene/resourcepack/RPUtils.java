@@ -13,7 +13,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
 public class RPUtils {
@@ -42,48 +45,55 @@ public class RPUtils {
         try {
             return NativeImage.read(manager.getResource(ResType.TEXTURES.getPath(loc)).getInputStream());
         } catch (IOException e) {
-            throw new FileNotFoundException("Could not resolve texture "+loc);
+            throw new FileNotFoundException("Could not resolve texture " + loc);
         }
     }
 
-    public static NativeImage findFirstItemTexture(ResourceManager manager, Item item) throws FileNotFoundException{
+    public static NativeImage findFirstItemTexture(ResourceManager manager, Item item) throws FileNotFoundException {
         String loc = findFirstItemTextureLocation(manager, item, s -> true);
         try {
             return NativeImage.read(manager.getResource(ResType.TEXTURES.getPath(loc)).getInputStream());
         } catch (IOException e) {
-            throw new FileNotFoundException("Could not resolve texture "+loc);
+            throw new FileNotFoundException("Could not resolve texture " + loc);
         }
     }
 
     /**
      * Grabs the first texture from a given block
-     * @param manager resource manager
-     * @param block target block
+     *
+     * @param manager          resource manager
+     * @param block            target block
      * @param texturePredicate predicate that will be applied to the texture name
      * @return found texture location
      */
     public static String findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
         try {
             ResourceLocation res = block.getRegistryName();
-            Resource blockState = manager.getResource( ResType.BLOCKSTATES.getPath(res));
+            Resource blockState = manager.getResource(ResType.BLOCKSTATES.getPath(res));
 
             JsonElement bsElement = RPUtils.deserializeJson(blockState.getInputStream());
 
             String modelPath = findFirstResourceInJsonRecursive(bsElement.getAsJsonObject().get("variants"));
-            Resource model = manager.getResource(ResType.MODELS.getPath(modelPath));
-            JsonElement modelElement = RPUtils.deserializeJson(model.getInputStream());
+            JsonElement modelElement;
+            try {
+                Resource model = manager.getResource(ResType.MODELS.getPath(modelPath));
+                modelElement = RPUtils.deserializeJson(model.getInputStream());
+            }catch (Exception e){
+                throw new Exception("Failed to parse model at " + modelPath);
+            }
 
             return findAllResourcesInJsonRecursive(modelElement.getAsJsonObject().getAsJsonObject("textures"))
                     .stream().filter(texturePredicate).findAny().get();
         } catch (Exception e) {
-            throw new FileNotFoundException("Could not find any texture associated to the given block "+block.getRegistryName());
+            throw new FileNotFoundException("Could not find any texture associated to the given block " + block.getRegistryName());
         }
     }
 
     /**
      * Grabs the first texture from a given item
-     * @param manager resource manager
-     * @param item target item
+     *
+     * @param manager          resource manager
+     * @param item             target item
      * @param texturePredicate predicate that will be applied to the texture name
      * @return found texture location
      */
@@ -97,7 +107,7 @@ public class RPUtils {
             return findAllResourcesInJsonRecursive(bsElement.getAsJsonObject().getAsJsonObject("textures"))
                     .stream().filter(texturePredicate).findAny().get();
         } catch (Exception e) {
-            throw new FileNotFoundException("Could not find any texture associated to the given item "+item.getRegistryName());
+            throw new FileNotFoundException("Could not find any texture associated to the given item " + item.getRegistryName());
         }
     }
 
