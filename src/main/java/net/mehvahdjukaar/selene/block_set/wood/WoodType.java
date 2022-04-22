@@ -2,7 +2,6 @@ package net.mehvahdjukaar.selene.block_set.wood;
 
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.block_set.IBlockType;
-import net.mehvahdjukaar.selene.resourcepack.AssetGenerators;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;

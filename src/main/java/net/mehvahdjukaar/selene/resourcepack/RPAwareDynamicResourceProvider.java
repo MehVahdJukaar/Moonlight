@@ -13,21 +13,19 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-abstract class RPAwareDynamicResourceProvider implements PreparableReloadListener {
+abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePack> implements PreparableReloadListener {
 
-    public final DynamicResourcePack dynamicPack;
+    public final T dynamicPack;
     private boolean hasBeenInitialized;
 
     //creates this object and registers it
-    protected RPAwareDynamicResourceProvider(DynamicResourcePack pack) {
+    protected RPAwareDynamicResourceProvider(T pack) {
         this.dynamicPack = pack;
     }
 
     public void register(IEventBus bus) {
         dynamicPack.registerPack(bus);
     }
-
-    public abstract DynamicDataPack getDynamicPack();
 
     public abstract Logger getLogger();
 
@@ -62,7 +60,7 @@ abstract class RPAwareDynamicResourceProvider implements PreparableReloadListene
         }
 
         getLogger().info("Generated runtime resources for pack {} in: {} ms",
-                this.getDynamicPack().getName(),
+                this.dynamicPack.getName(),
                 watch.elapsed().toMillis());
 
         return CompletableFuture.supplyAsync(() -> null, workerExecutor)
@@ -75,7 +73,7 @@ abstract class RPAwareDynamicResourceProvider implements PreparableReloadListene
         ResourceLocation fullRes = type.getPath(res);
         if (manager.hasResource(fullRes)) {
             try (var r = manager.getResource(fullRes)) {
-                return !r.getSourceName().equals(this.getDynamicPack().getName());
+                return !r.getSourceName().equals(this.dynamicPack.getName());
             } catch (IOException ignored) {
             }
         }

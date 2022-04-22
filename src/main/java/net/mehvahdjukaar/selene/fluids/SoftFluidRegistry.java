@@ -144,7 +144,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
                 if (f == null) continue;
                 if (f instanceof FlowingFluid flowingFluid && flowingFluid.getSource() != f) continue;
                 if (f instanceof ForgeFlowingFluid.Flowing || f == Fluids.EMPTY) continue;
-                //if fluid map contains fluid it meas that another equivalent fluid has already ben registered
+                //if fluid map contains fluid it means that another equivalent fluid has already been registered
                 if (INSTANCE.fluidMap.containsKey(f)) continue;
                 //is not equivalent: create new SoftFluid from forge fluid
                 if(f.getRegistryName() != null) registerUnchecked((new SoftFluid.Builder(f)).build());

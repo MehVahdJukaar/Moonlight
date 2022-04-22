@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.block_set;
 
-import net.mehvahdjukaar.selene.resourcepack.AssetGenerators;
+import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
@@ -29,14 +29,14 @@ public interface IBlockType {
 
     default String getNameForTranslation(String append) {
         //There's got to be a faster method call lol
-        return AssetGenerators.LangBuilder.getReadableName(this.getTypeName() + "_" + append);
+        return LangBuilder.getReadableName(this.getTypeName() + "_" + append);
     }
 
     default boolean isVanilla() {
         return this.getNamespace().equals("minecraft");
     }
 
-    abstract class SetFinder<T extends IBlockType>{
+    abstract class SetFinder<T extends IBlockType> {
 
         public abstract Optional<T> get();
     }

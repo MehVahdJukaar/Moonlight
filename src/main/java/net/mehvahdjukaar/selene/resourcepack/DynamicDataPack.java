@@ -2,7 +2,7 @@ package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.selene.data.BlockLootTableAccessor;
+import net.mehvahdjukaar.selene.misc.BlockLootTableAccessor;
 import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceKey;

@@ -6,7 +6,7 @@ import net.mehvahdjukaar.selene.block_set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.selene.builtincompat.CompatWoodTypes;
-import net.mehvahdjukaar.selene.data.ModCriteriaTriggers;
+import net.mehvahdjukaar.selene.misc.ModCriteriaTriggers;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.selene.network.ClientBoundSyncFluidsPacket;
 import net.mehvahdjukaar.selene.network.NetworkHandler;

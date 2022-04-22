@@ -15,7 +15,7 @@ import java.io.IOException;
  * Class responsible to generate assets and manage your dynamic resource texture pack (client)
  * Handles and registers your dynamic pack instance which needs to be provides
  */
-public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResourceProvider {
+public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResourceProvider<DynamicTexturePack> {
 
     protected RPAwareDynamicTextureProvider(DynamicTexturePack pack) {
         super(pack);
@@ -27,8 +27,11 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
     @Override
     public void register(IEventBus bus){
         super.register(bus);
-        ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager())
-                .registerReloadListener(this);
+        Minecraft mc = Minecraft.getInstance();
+        if(mc!=null) { //run data fuckery could give a null minecraft here...
+            ((ReloadableResourceManager) mc.getResourceManager())
+                    .registerReloadListener(this);
+        }
     }
 
     protected boolean alreadyHasTextureAtLocation(ResourceManager manager, ResourceLocation res) {

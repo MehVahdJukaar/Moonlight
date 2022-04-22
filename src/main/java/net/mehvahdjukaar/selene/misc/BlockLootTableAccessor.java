@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.data;
+package net.mehvahdjukaar.selene.misc;
 
 
 import net.minecraft.data.loot.BlockLoot;

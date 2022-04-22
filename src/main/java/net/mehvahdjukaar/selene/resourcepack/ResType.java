@@ -7,6 +7,7 @@ public enum ResType {
     GENERIC("%s"),
     TAGS("tags/%s.json"),
     LOOT_TABLES("loot_tables/%s.json"),
+    BLOCK_LOOT_TABLES("loot_tables/blocks/%s.json"),
     RECIPES("recipes/%s.json"),
     ADVANCEMENTS("advancements/%s.json"),
 

@@ -180,8 +180,8 @@ public class Palette {
         float sat1 = h1[1];
         float sat2 = h2[1];
         float ds = sat2 - sat1;
-        float newHue = hue2 + (dh / dv) * 2 * dv;
-        float newSat = sat2 + (ds / dv) * 2 * dv;
+        float newHue = hue2 - (dh * dv);
+        float newSat = sat2 - (ds * dv);
         float newVal = v2 + dv;
         this.add(new PaletteColor(SpriteUtils.HSVtoRGB(newHue, newSat, newVal)));
     }

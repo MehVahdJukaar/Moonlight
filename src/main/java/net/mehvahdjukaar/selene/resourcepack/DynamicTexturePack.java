@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.NativeImage;
+import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -39,7 +40,7 @@ public class DynamicTexturePack extends DynamicResourcePack {
         this.addJson(langName, language, ResType.LANG);
     }
 
-    public void addLang(ResourceLocation langName, AssetGenerators.LangBuilder builder) {
+    public void addLang(ResourceLocation langName, LangBuilder builder) {
         this.addJson(langName, builder.build(), ResType.LANG);
     }
 

@@ -9,7 +9,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * Class responsible to generate assets and manage your dynamic data pack (server)
  * Handles and registers your dynamic pack instance which needs to be provides
  */
-public abstract class RPAwareDynamicDataProvider extends RPAwareDynamicResourceProvider {
+public abstract class RPAwareDynamicDataProvider extends RPAwareDynamicResourceProvider<DynamicDataPack> {
 
     protected RPAwareDynamicDataProvider(DynamicDataPack pack) {
         super(pack);
@@ -21,11 +21,10 @@ public abstract class RPAwareDynamicDataProvider extends RPAwareDynamicResourceP
     @Override
     public void register(IEventBus bus) {
         super.register(bus);
-        MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListeners);
     }
 
-    @SubscribeEvent
-    private void onAddReloadListeners(final AddReloadListenerEvent event) {
+    public void onAddReloadListeners(final AddReloadListenerEvent event) {
         event.addListener(this);
     }
 }

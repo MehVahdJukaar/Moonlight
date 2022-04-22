@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.data.test;
+package net.mehvahdjukaar.selene.misc.test;
 
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
