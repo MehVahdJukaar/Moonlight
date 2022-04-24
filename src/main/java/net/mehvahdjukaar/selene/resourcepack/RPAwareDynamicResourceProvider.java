@@ -48,14 +48,14 @@ abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePack> imp
         if (!this.hasBeenInitialized) {
             this.hasBeenInitialized = true;
             generateStaticAssetsOnStartup(manager);
+            if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
             if (!resourcePackSupport) {
                 var pack = this.getRepository();
-                if(pack != null) {
+                if (pack != null) {
                     VanillaResourceManager vanillaManager = new VanillaResourceManager(pack);
                     this.regenerateDynamicAssets(vanillaManager);
                     vanillaManager.close();
-                }
-                else{
+                } else {
                     this.regenerateDynamicAssets(manager);
                 }
             }

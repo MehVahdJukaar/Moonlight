@@ -6,6 +6,12 @@ import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.resource.PathResourcePack;
+import net.minecraftforge.resource.ResourcePackLoader;
+
+import java.io.IOException;
 
 public class DynamicTexturePack extends DynamicResourcePack {
 
@@ -16,6 +22,26 @@ public class DynamicTexturePack extends DynamicResourcePack {
     public DynamicTexturePack(ResourceLocation name) {
         super(name, PackType.CLIENT_RESOURCES);
     }
+
+    void addPackLogo() {
+        this.generateDebugResources = true;
+        ModList.get().getModContainerById(this.mainNamespace).ifPresent(m -> {
+
+            IModInfo mod = m.getModInfo();
+
+            mod.getLogoFile().ifPresent(logo -> {
+                final PathResourcePack resourcePack = ResourcePackLoader.getPackFor(mod.getModId())
+                        .orElse(ResourcePackLoader.getPackFor("forge").
+                                orElseThrow(() -> new RuntimeException("Can't find forge, WHAT!")));
+                try {
+                    var b = resourcePack.getRootResource(logo).readAllBytes();
+                    this.addRootResource("pack.png", b);
+                } catch (IOException ignored) {
+                }
+            });
+        });
+    }
+
 
     /**
      * Adds a new textures and closes the passed native image
@@ -43,6 +69,4 @@ public class DynamicTexturePack extends DynamicResourcePack {
     public void addLang(ResourceLocation langName, LangBuilder builder) {
         this.addJson(langName, builder.build(), ResType.LANG);
     }
-
-
 }

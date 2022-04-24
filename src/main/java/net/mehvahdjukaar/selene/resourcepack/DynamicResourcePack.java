@@ -48,6 +48,8 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final ResourceLocation resourcePackName;
     private final Set<String> namespaces = new HashSet<>();
     private final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
+    private final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
+    protected final String mainNamespace;
 
     //for debug or to generate assets
     public boolean generateDebugResources = false;
@@ -62,6 +64,7 @@ public abstract class DynamicResourcePack implements PackResources {
         //new TranslatableComponent("%s.%s.description", name.getNamespace(), name.getPath());
         this.packInfo = new PackMetadataSection(component, 6);
         this.resourcePackName = name;
+        this.mainNamespace = name.getNamespace();
         this.namespaces.add(name.getNamespace());
         this.title = new TextComponent(LangBuilder.getReadableName(name.toString()));
         ;//new TranslatableComponent("%s.%s.title", name.getNamespace(), name.getPath());
@@ -131,10 +134,14 @@ public abstract class DynamicResourcePack implements PackResources {
         return serializer instanceof PackMetadataSectionSerializer ? (T) this.packInfo : null;
     }
 
+    public void addRootResource(String name, byte[] resource){
+        this.rootResources.put(name, resource);
+    }
+
     @Nullable
     @Override
-    public InputStream getRootResource(String p_10294_) {
-        return null;
+    public InputStream getRootResource(String pFileName) {
+        return new ByteArrayInputStream(this.rootResources.get(pFileName));
     }
 
     @Override

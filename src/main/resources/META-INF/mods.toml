@@ -19,6 +19,8 @@ issueTrackerURL="https://www.curseforge.com/minecraft/mc-mods/selene/issues" #op
 
     logoFile="icon.png" #optional
 
+    logoBlur = false
+
     itemIcon="minecraft:end_stone" #catalogue icon
 
     credits="" #optional
