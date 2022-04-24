@@ -180,7 +180,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
             this.initializedDispenser = true;
             getRegisteredFluids().forEach(DispenserHelper::registerFluidBehavior);
         }
-        Selene.LOGGER.info("Registered {} Soft Fluids", this.fluidMap.size());
+        Selene.LOGGER.info("Registered {} Soft Fluids", this.idMap.size());
     }
 
 

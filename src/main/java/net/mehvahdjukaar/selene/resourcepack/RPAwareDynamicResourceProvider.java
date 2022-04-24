@@ -66,7 +66,8 @@ abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePack> imp
             this.regenerateDynamicAssets(manager);
         }
 
-        getLogger().info("Generated runtime resources for pack {} in: {} ms",
+        getLogger().info("Generated runtime {} for pack {} in: {} ms",
+                this.dynamicPack.getPackType(),
                 this.dynamicPack.getName(),
                 watch.elapsed().toMillis());
 

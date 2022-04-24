@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final Component title;
     protected final ResourceLocation resourcePackName;
     private final Set<String> namespaces = new HashSet<>();
-    private final Map<ResourceLocation, byte[]> resources = new HashMap<>();
+    private final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
 
     //for debug or to generate assets
     public boolean generateDebugResources = false;
@@ -140,7 +141,9 @@ public abstract class DynamicResourcePack implements PackResources {
     public Collection<ResourceLocation> getResources(
             PackType packType, String namespace, String id, int maxDepth, Predicate<String> filter) {
 
+        //why are we only using server resources here?
         if (packType == this.packType && packType == PackType.SERVER_DATA && this.namespaces.contains(namespace)) {
+            //idk why but somebody had an issue with concurrency here during world load
             return this.resources.keySet().stream()
                     .filter(r -> (r.getNamespace().equals(namespace) && r.getPath().startsWith(id)))
                     .filter(r -> filter.test(r.toString()))
@@ -223,6 +226,7 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     //TODO: move to RP utils
+
     /**
      * This is a handy method for dynamic resource pack since it allows to specify the name of an existing resource
      * that will then be copied and modified replacing a certain keyword in it with another.
@@ -258,4 +262,7 @@ public abstract class DynamicResourcePack implements PackResources {
         this.addBytes(newRes, string.getBytes());
     }
 
+    public PackType getPackType() {
+        return packType;
+    }
 }
