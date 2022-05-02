@@ -6,6 +6,7 @@ import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.resource.PathResourcePack;
@@ -24,7 +25,6 @@ public class DynamicTexturePack extends DynamicResourcePack {
     }
 
     void addPackLogo() {
-        this.generateDebugResources = true;
         ModList.get().getModContainerById(this.mainNamespace).ifPresent(m -> {
 
             IModInfo mod = m.getModInfo();
@@ -42,6 +42,13 @@ public class DynamicTexturePack extends DynamicResourcePack {
         });
     }
 
+    protected void addImage(ResourceLocation path, NativeImage image, ResType resType) {
+        try (image) {
+            this.addBytes(path, image.asByteArray(), resType);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to add image {} to resource pack {}.", path, this.resourcePackName, e);
+        }
+    }
 
     /**
      * Adds a new textures and closes the passed native image

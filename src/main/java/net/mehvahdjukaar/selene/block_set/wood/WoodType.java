@@ -25,6 +25,12 @@ public class WoodType implements IBlockType {
     public final Block plankBlock;
     public final Block logBlock;
     @Nullable
+    public final Block stripped_log;
+    @Nullable
+    public final Block stripped_wood;
+    @Nullable
+    public final Block wood;
+    @Nullable
     public final Block leaves;
     //lazy cause wood types are loaded before items, so we can only access blocks
     @Nullable
@@ -42,28 +48,13 @@ public class WoodType implements IBlockType {
         this.material = baseBlock.defaultBlockState().getMaterial();
         this.shortenedNamespace = id.getNamespace().equals("minecraft") ? "" : "_" + abbreviateString(id.getNamespace());
 
-        this.leaves = this.findLeaves();
+        this.leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
+        this.stripped_log = this.findRelatedEntry("stripped", "log", ForgeRegistries.BLOCKS);
+        this.stripped_wood = this.findRelatedEntry("stripped", "wood", ForgeRegistries.BLOCKS);
+        this.wood = this.findRelatedEntry("wood", ForgeRegistries.BLOCKS);
         //checks if it has a sign
-        this.signItem = Lazy.of(() -> this.findRelatedItem("sign"));
-        this.boatItem = Lazy.of(() -> this.findRelatedItem("boat"));
-    }
-
-    @Nullable
-    private Block findLeaves() {
-        ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_leaves"),
-                new ResourceLocation(id.getNamespace(), "leaves_" + id.getPath())
-        };
-        Block found;
-        for (var r : targets) {
-            if (ForgeRegistries.BLOCKS.containsKey(r)) {
-                found = ForgeRegistries.BLOCKS.getValue(r);
-                if (found.defaultBlockState().getMaterial() == Material.LEAVES) {
-                    return found;
-                }
-            }
-        }
-        return null;
+        this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
+        this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
     }
 
     @Nullable
@@ -168,10 +159,11 @@ public class WoodType implements IBlockType {
                     Block plank = planksFinder.get();
                     Block log = logFinder.get();
                     var d = ForgeRegistries.BLOCKS.getValue(ForgeRegistries.BLOCKS.getDefaultKey());
-                    if(plank != d && log!=d && plank != null && log != null) {
+                    if (plank != d && log != d && plank != null && log != null) {
                         return Optional.of(new WoodType(id, plank, log));
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
                 Selene.LOGGER.warn("Failed to find custom wood type {}", id);
             }
             return Optional.empty();

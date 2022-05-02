@@ -2,9 +2,16 @@ package net.mehvahdjukaar.selene.resourcepack.asset_generators;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.Util;
+import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -27,6 +34,15 @@ public class LangBuilder {
 
     public void addEntry(Block block, String translation) {
         entries.put(block.getDescriptionId(), translation);
+    }
+
+    public <T extends ForgeRegistryEntry<V>, V extends IForgeRegistryEntry<V>> void addEntry(Registry<T> reg, T entry, String translation) {
+        entries.put(Util.makeDescriptionId(reg.key().getRegistryName().getPath(), reg.getKey(entry)), translation);
+    }
+
+    public <T extends ForgeRegistryEntry<V>, V extends IForgeRegistryEntry<V>> void addSimpleEntry(Registry<T> reg, T entry) {
+        entries.put(Util.makeDescriptionId(reg.key().getRegistryName().getPath(), reg.getKey(entry)),
+                LangBuilder.getReadableName(entry.getRegistryName().getPath()));
     }
 
     public void addEntry(Item item, String translation) {

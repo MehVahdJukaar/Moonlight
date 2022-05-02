@@ -23,6 +23,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
+
 public class VerticalSlabBlock extends WaterBlock {
     public static final EnumProperty<VerticalSlabType> TYPE = EnumProperty.create("type", VerticalSlabType.class);
 
@@ -86,9 +88,9 @@ public class VerticalSlabBlock extends WaterBlock {
     }
 
     @Override
-    public boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
+    public boolean canBeReplaced(BlockState state, @Nonnull BlockPlaceContext context) {
         VerticalSlabType type = state.getValue(TYPE);
-        return type != VerticalSlabType.DOUBLE && context.getItemInHand().getItem() == this.asItem() && context.replacingClickedOnBlock() && (context.getClickedFace() == type.direction && this.getDirectionForPlacement(context) == type.direction);
+        return type != VerticalSlabType.DOUBLE && context.getItemInHand().getItem() == this.asItem() && (context.replacingClickedOnBlock() && context.getClickedFace() == type.direction && this.getDirectionForPlacement(context) == type.direction || !context.replacingClickedOnBlock() && context.getClickedFace().getAxis() != type.direction.getAxis());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -15,7 +16,6 @@ import net.minecraft.world.level.block.Block;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
@@ -73,12 +73,13 @@ public class RPUtils {
 
             JsonElement bsElement = RPUtils.deserializeJson(blockState.getInputStream());
 
-            String modelPath = findFirstResourceInJsonRecursive(bsElement.getAsJsonObject().get("variants"));
+            //grabs the first resource location of a model
+            String modelPath = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model")).get(0);
             JsonElement modelElement;
             try {
                 Resource model = manager.getResource(ResType.MODELS.getPath(modelPath));
                 modelElement = RPUtils.deserializeJson(model.getInputStream());
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new Exception("Failed to parse model at " + modelPath);
             }
 
@@ -88,6 +89,8 @@ public class RPUtils {
             throw new FileNotFoundException("Could not find any texture associated to the given block " + block.getRegistryName());
         }
     }
+
+    //TODO: account for parents
 
     /**
      * Grabs the first texture from a given item
@@ -112,7 +115,9 @@ public class RPUtils {
     }
 
     public static String findFirstResourceInJsonRecursive(JsonElement element) throws NoSuchElementException {
-        if (element instanceof JsonObject) {
+        if (element instanceof JsonArray array) {
+            return findFirstResourceInJsonRecursive(array.get(0));
+        } else if (element instanceof JsonObject) {
             var entries = element.getAsJsonObject().entrySet();
             JsonElement child = entries.stream().findAny().get().getValue();
             return findFirstResourceInJsonRecursive(child);
@@ -120,11 +125,24 @@ public class RPUtils {
     }
 
     public static List<String> findAllResourcesInJsonRecursive(JsonElement element) {
-        if (element instanceof JsonObject) {
-            var entries = element.getAsJsonObject().entrySet();
-            var children = entries.stream().map(Map.Entry::getValue);
+        return findAllResourcesInJsonRecursive(element, s -> true);
+    }
+
+    public static List<String> findAllResourcesInJsonRecursive(JsonElement element, Predicate<String> filter) {
+        if (element instanceof JsonArray array) {
             List<String> list = new ArrayList<>();
-            children.map(RPUtils::findAllResourcesInJsonRecursive).forEach(list::addAll);
+
+            array.forEach(e -> list.addAll(findAllResourcesInJsonRecursive(e)));
+            return list;
+        } else if (element instanceof JsonObject json) {
+            var entries = json.entrySet();
+
+            List<String> list = new ArrayList<>();
+            for (var c : entries) {
+                if (c.getValue().isJsonPrimitive() && !filter.test(c.getKey())) continue;
+                var l = findAllResourcesInJsonRecursive(c.getValue(), filter);
+                list.addAll(l);
+            }
             return list;
         } else return List.of(element.getAsString());
     }

@@ -207,14 +207,6 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
-    protected void addImage(ResourceLocation path, NativeImage image, ResType resType) {
-        try (image) {
-            this.addBytes(path, image.asByteArray(), resType);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to add image {} to resource pack {}.", path, this.resourcePackName, e);
-        }
-    }
-
     private void addJson(ResourceLocation path, JsonElement json) {
         try {
             //json.toString().getBytes();
