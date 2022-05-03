@@ -11,6 +11,7 @@ public abstract class BlockTypeRegistry<T extends IBlockType> {
 
     protected boolean frozen = false;
     private final List<IBlockType.SetFinder<T>> finders = new ArrayList<>();
+    private final List<ResourceLocation> notInclude = new ArrayList<>();
     private final List<T> builder = new ArrayList<>();
 
     /**
@@ -41,7 +42,7 @@ public abstract class BlockTypeRegistry<T extends IBlockType> {
         builder.add(newType);
     }
 
-    public Collection<IBlockType.SetFinder<T>> getFinders(){
+    public Collection<IBlockType.SetFinder<T>> getFinders() {
         return finders;
     }
 
@@ -50,6 +51,13 @@ public abstract class BlockTypeRegistry<T extends IBlockType> {
             throw new UnsupportedOperationException("Tried to register block type finder after registry events");
         }
         finders.add(finder);
+    }
+
+    public void addRemover(ResourceLocation id) {
+        if (frozen) {
+            throw new UnsupportedOperationException("Tried remove a block type after registry events");
+        }
+        notInclude.add(id);
     }
 
     private void finalizeAndFreeze() {
@@ -69,8 +77,7 @@ public abstract class BlockTypeRegistry<T extends IBlockType> {
     }
 
 
-
-    public void buildAll(){
+    public void buildAll() {
         if (!frozen) {
             //adds default
             this.registerBlockType(this.getDefaultType());
@@ -78,9 +85,13 @@ public abstract class BlockTypeRegistry<T extends IBlockType> {
             //adds finders
             finders.stream().map(IBlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
             for (Block b : ForgeRegistries.BLOCKS) {
-                this.detectTypeFromBlock(b).ifPresent(this::registerBlockType);
+                this.detectTypeFromBlock(b).ifPresent(t -> {
+                    if (!notInclude.contains(t.getId())) this.registerBlockType(t);
+                });
             }
             this.finalizeAndFreeze();
         }
     }
+
+
 }

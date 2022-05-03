@@ -57,22 +57,6 @@ public class WoodType implements IBlockType {
         this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
     }
 
-    @Nullable
-    private Item findRelatedItem(String appendedName) {
-        ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + appendedName),
-                new ResourceLocation(id.getNamespace(), appendedName + "_" + id.getPath())
-        };
-        Item found = null;
-        for (var r : targets) {
-            if (ForgeRegistries.ITEMS.containsKey(r)) {
-                found = ForgeRegistries.ITEMS.getValue(r);
-                break;
-            }
-        }
-        return found;
-    }
-
     @Override
     public String toString() {
         return this.id.toString();

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.block_set;
 
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.event.RegistryEvent;
@@ -28,6 +29,7 @@ public class BlockSetManager {
     //Frick mod loading is multi-threaded, so we need to beware of concurrent access
     private static final Map<Class<? extends IBlockType>, BlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new ConcurrentHashMap<>();
     private static final ConcurrentLinkedDeque<Runnable> FINDER_ADDER = new ConcurrentLinkedDeque<>();
+    private static final ConcurrentLinkedDeque<Runnable> REMOVER_ADDER = new ConcurrentLinkedDeque<>();
 
     //maps containing mod ids and block and items runnable. Block one is ready to run, items needs the bus supplied to it
     //they will be run each mod at a time block first then items
@@ -59,16 +61,33 @@ public class BlockSetManager {
      * This is handy for block types that are unique and which can't be detected by the detection system defined in their BlockSetContainer class
      * Call during mod startup (not mod setup as it will be too late for this to affect block registration)
      *
-     * @param woodFinder Finder object that will provide the modded block type when the time is right
+     * @param blockFinder Finder object that will provide the modded block type when the time is right
      */
-    public static <T extends IBlockType> void addBlockTypeFinder(Class<T> type, IBlockType.SetFinder<T> woodFinder) {
+    public static <T extends IBlockType> void addBlockTypeFinder(Class<T> type, IBlockType.SetFinder<T> blockFinder) {
         if (hasFilledBlockSets) {
             throw new UnsupportedOperationException(
-                    String.format("Tried to register block %s finder %s after registry events", type, woodFinder));
+                    String.format("Tried to register block %s finder %s after registry events", type, blockFinder));
         }
         FINDER_ADDER.add(() -> {
             BlockTypeRegistry<T> container = getBlockSet(type);
-            container.addFinder(woodFinder);
+            container.addFinder(blockFinder);
+        });
+    }
+
+    /**
+     * Use this function to remove incorrectly detected block types from your mod. The opposite
+     * Call during mod startup (not mod setup as it will be too late for this to affect block registration)
+     *
+     * @param id id of the block that is getting erroneously added and should be removed
+     */
+    public static <T extends IBlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
+        if (hasFilledBlockSets) {
+            throw new UnsupportedOperationException(
+                    String.format("Tried to remove block type %s for type %s after registry events",id, type));
+        }
+        REMOVER_ADDER.add(() -> {
+            BlockTypeRegistry<T> container = getBlockSet(type);
+            container.addRemover(id);
         });
     }
 

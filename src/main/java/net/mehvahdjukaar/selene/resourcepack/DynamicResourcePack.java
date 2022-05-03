@@ -117,7 +117,7 @@ public abstract class DynamicResourcePack implements PackResources {
                             PackCompatibility.COMPATIBLE,
                             Pack.Position.TOP,
                             this.fixed, // fixed position? no
-                            PackSource.DEFAULT,
+                            PackSource.BUILT_IN,
                             this.hidden // hidden? no
                     )));
         }

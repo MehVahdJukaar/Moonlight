@@ -2,17 +2,17 @@ package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.NativeImage;
+import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.resource.PathResourcePack;
-import net.minecraftforge.resource.ResourcePackLoader;
+import net.minecraftforge.forgespi.locating.IModFile;
 
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class DynamicTexturePack extends DynamicResourcePack {
 
@@ -28,15 +28,18 @@ public class DynamicTexturePack extends DynamicResourcePack {
         ModList.get().getModContainerById(this.mainNamespace).ifPresent(m -> {
 
             IModInfo mod = m.getModInfo();
+            IModFile file = mod.getOwningFile().getFile();
 
             mod.getLogoFile().ifPresent(logo -> {
-                final PathResourcePack resourcePack = ResourcePackLoader.getPackFor(mod.getModId())
-                        .orElse(ResourcePackLoader.getPackFor("forge").
-                                orElseThrow(() -> new RuntimeException("Can't find forge, WHAT!")));
                 try {
-                    var b = resourcePack.getRootResource(logo).readAllBytes();
-                    this.addRootResource("pack.png", b);
-                } catch (IOException ignored) {
+                    if (file != null) {
+                        Path logoPath = file.findResource(logo);
+                        if (Files.exists(logoPath)) {
+                            this.addRootResource("pack.png", Files.readAllBytes(logoPath));
+                        }
+                    }
+                } catch (Exception e) {
+                    Selene.LOGGER.error("Failed to add dynamic pack logo. Why?");
                 }
             });
         });
