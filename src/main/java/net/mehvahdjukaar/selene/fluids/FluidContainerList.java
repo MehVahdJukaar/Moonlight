@@ -108,7 +108,7 @@ public class FluidContainerList {
         public static final Codec<Category> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
                 ResourceLocation.CODEC.fieldOf("empty").forGetter(c -> c.emptyContainer.getRegistryName()),
                 Codec.INT.fieldOf("capacity").forGetter(Category::getCapacity),
-                Registry.ITEM.byNameCodec().listOf().fieldOf("filled").forGetter(c -> c.filled.stream().toList()),
+                ResourceLocation.CODEC.listOf().fieldOf("filled").forGetter(c -> c.filled.stream().map(Item::getRegistryName).toList()),
                 SoundEvent.CODEC.optionalFieldOf("fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
                 SoundEvent.CODEC.optionalFieldOf("empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
         ).apply(instance, Category::decode));
@@ -131,11 +131,19 @@ public class FluidContainerList {
             this(emptyContainer, capacity, null, null);
         }
 
-        private static Category decode(ResourceLocation empty, int capacity, List<Item> filled,
+        private static Category decode(ResourceLocation empty, int capacity, List<ResourceLocation> filled,
                                        Optional<SoundEvent> fillSound, Optional<SoundEvent> emptySound) {
             if (!ForgeRegistries.ITEMS.containsKey(empty)) return EMPTY;
             var category = new Category(ForgeRegistries.ITEMS.getValue(empty), capacity, fillSound.orElse(null), emptySound.orElse(null));
-            filled.forEach(category::addItem);
+
+            filled.forEach(f->{
+                if(f.getNamespace().contains("immersiveengineering")){
+                    int aa = 1;
+                }
+                if(ForgeRegistries.ITEMS.containsKey(f)) {
+                    category.addItem(ForgeRegistries.ITEMS.getValue(f));
+                }
+            });
             if (category.isEmpty()) return EMPTY;
             return category;
         }

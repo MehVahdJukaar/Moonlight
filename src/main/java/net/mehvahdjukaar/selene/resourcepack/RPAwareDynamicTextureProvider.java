@@ -7,7 +7,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -28,8 +31,9 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
     @Override
     public void register(IEventBus bus){
         super.register(bus);
-        Minecraft mc = Minecraft.getInstance();
-        if(mc!=null) { //run data fuckery could give a null minecraft here...
+        //run data fuckery could give a null minecraft here...
+        if(!FMLLoader.getLaunchHandler().isData()) {
+            Minecraft mc = Minecraft.getInstance();
             ((ReloadableResourceManager) mc.getResourceManager())
                     .registerReloadListener(this);
         }

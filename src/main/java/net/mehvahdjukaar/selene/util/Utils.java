@@ -4,6 +4,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -124,5 +125,14 @@ public class Utils {
         return new Vec3(d0, d1, d2);
     }
 
+    //take values from 0 to 1
+    public static float averageAngles(Float ...angles){
+        float x = 0, y = 0;
+        for(float a : angles){
+            x += Mth.cos((float) (a*Math.PI*2));
+            y += Mth.sin((float) (a*Math.PI*2));
+        }
+        return (float) (Mth.atan2(y, x)/(Math.PI*2));
+    }
 
 }

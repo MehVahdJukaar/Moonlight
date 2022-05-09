@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.block_set.wood;
 
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.supplementaries.common.block.tiles.JarBlockTile;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -33,9 +34,7 @@ public class WoodType implements IBlockType {
     @Nullable
     public final Block leaves;
     //lazy cause wood types are loaded before items, so we can only access blocks
-    @Nullable
     public final Lazy<Item> signItem; //used for item textures
-    @Nullable
     public final Lazy<Item> boatItem;
 
     //remove

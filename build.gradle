@@ -108,6 +108,8 @@ dependencies {
     //implementation fg.deobf("curse.maven:farmersdelight-398521:3575116")
     implementation fg.deobf("curse.maven:map-atlases-forge-519759:3723298")
     implementation fg.deobf("curse.maven:immersive-weathering-forge-592449:3764895")
+    implementation fg.deobf("curse.maven:immersive-engineering-231951:3755665")
+
     //implementation fg.deobf("curse.maven:kubejs-forge-238086:3647098")
     //implementation fg.deobf("curse.maven:rhino-416294:3742385")
     //implementation fg.deobf("curse.maven:architectury-forge-419699:3760641")

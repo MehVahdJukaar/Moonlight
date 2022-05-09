@@ -1,9 +1,12 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
+import net.mehvahdjukaar.selene.resourcepack.asset_generators.textures.TextureImage;
+import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -45,19 +48,17 @@ public class DynamicTexturePack extends DynamicResourcePack {
         });
     }
 
-    protected void addImage(ResourceLocation path, NativeImage image, ResType resType) {
-        try (image) {
-            this.addBytes(path, image.asByteArray(), resType);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to add image {} to resource pack {}.", path, this.resourcePackName, e);
-        }
-    }
-
     /**
      * Adds a new textures and closes the passed native image
      */
-    public void addTexture(ResourceLocation textureLocation, NativeImage image) {
-        this.addImage(textureLocation, image, ResType.TEXTURES);
+    public void addAndCloseTexture(ResourceLocation path, TextureImage image) {
+        try (image) {
+            this.addBytes(path, image.getImage().asByteArray(), ResType.TEXTURES);
+            JsonObject mcmeta = image.serializeMcMeta();
+            if(mcmeta != null) this.addJson(path, mcmeta, ResType.MCMETA);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to add image {} to resource pack {}.", path, this.resourcePackName, e);
+        }
     }
 
     public void addBlockModel(ResourceLocation modelLocation, JsonElement model) {

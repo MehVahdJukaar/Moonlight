@@ -1,17 +1,67 @@
 package net.mehvahdjukaar.selene.resourcepack.asset_generators.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import net.mehvahdjukaar.selene.math.MthUtils;
+import net.mehvahdjukaar.selene.math.colors.HCLColor;
+import net.mehvahdjukaar.selene.math.colors.LABColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class Palette {
 
-    private static final Comparator<PaletteColor> COMPARATOR = (a, b) -> Float.compare(a.luminance, b.luminance);
+    private static Palette EMPTY = new Palette(List.of());
 
+    private float tolerance = 0;
+    //ordered from darkest to lightest (luminance)
     private final ArrayList<PaletteColor> internal = new ArrayList<>();
 
-    //ordered from darkest to lightest
+    protected Palette(Collection<PaletteColor> colors) {
+        this.internal.addAll(colors);
+        this.sort();
+    }
+
+    protected Palette(Collection<PaletteColor> colors, float tolerance) {
+        this.internal.addAll(colors);
+        this.sort();
+        this.updateTolerance(tolerance);
+    }
+
+    public boolean isEmpty() {
+        return this == EMPTY;
+    }
+
+
+    /**
+     * Changes tolerance settings and merge all colors that are close enough. Default value is always 0 which will accept any colors
+     *
+     * @param tolerance at what distance colors will be merged and consolidated into one
+     */
+    public void updateTolerance(float tolerance) {
+        if (this.tolerance == tolerance) return;
+        this.tolerance = tolerance;
+        if (tolerance == 0) return;
+        boolean recalculate = false;
+        do {
+            for (int i = 1; i < this.size(); i++) {
+                PaletteColor c0 = this.get(i - 1);
+                PaletteColor c1 = this.get(i);
+                if (c0.distanceTo(c1) <= tolerance) {
+                    Palette tempPal = new Palette(List.of(c0, c1));
+                    int after = i + 1;
+                    while (after < this.size() && tempPal.calculateAverage().distanceTo(this.get(after)) <= tolerance) {
+                        tempPal.add(this.get(after));
+                        after++;
+                    }
+                    tempPal.getValues().forEach(this::remove);
+                    this.add(tempPal.calculateAverage());
+                    recalculate = true;
+                }
+            }
+        } while (recalculate);
+    }
+
+
     public int size() {
         return internal.size();
     }
@@ -21,31 +71,45 @@ public class Palette {
     }
 
     private void sort() {
-        internal.sort(COMPARATOR);
+        Collections.sort(internal);
     }
 
-
-    public Palette(Collection<PaletteColor> colors) {
-        this.internal.addAll(colors);
-        this.sort();
-    }
-
-    public void add(PaletteColor color) {
+    private void addUnchecked(PaletteColor color) {
+        if (color.rgb().alpha() == 0) return;
         internal.add(color);
         this.sort();
     }
 
-    public void add(int index, PaletteColor color) {
-        internal.add(index, color);
-        this.sort();
+    public void add(PaletteColor color) {
+        if (color.rgb().alpha() == 0) return;
+        if (!hasColor(color)) {
+            internal.add(color);
+            this.sort();
+        }
     }
 
     public void set(int index, PaletteColor color) {
-        internal.set(index, color);
+        if (color.rgb().alpha() == 0) return;
+        if (!hasColor(color)) internal.set(index, color);
     }
 
     public PaletteColor get(int index) {
         return internal.get(index);
+    }
+
+    public boolean hasColor(PaletteColor color) {
+        return this.hasColor(color, this.tolerance);
+    }
+
+    public boolean hasColor(PaletteColor color, float tolerance) {
+        if (color.rgb().alpha() != 0) {
+            for (PaletteColor c : this.getValues()) {
+                if (c.distanceTo(color) <= tolerance) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public PaletteColor getDarkest() {
@@ -62,129 +126,283 @@ public class Palette {
     }
 
     public void remove(PaletteColor color) {
-        internal.remove(color);
-        this.sort();
-    }
-
-    public int calculateAverage() {
-        return SpriteUtils.averageColors(this.internal.stream().map(c -> c.color).toArray(Integer[]::new));
-    }
-
-    public static Palette fromImage(NativeImage image) {
-        return fromImage(image, null);
-    }
-
-    public static Palette fromImage(NativeImage image, @Nullable NativeImage mask) {
-        Map<Integer, PaletteColor> map = new HashMap<>();
-        for (int x = 0; x < image.getWidth(); x++) {
-            for (int y = 0; y < image.getHeight(); y++) {
-                if (mask == null || NativeImage.getA(mask.getPixelRGBA(x, y)) == 0) {
-                    int color = image.getPixelRGBA(x, y);
-                    if (NativeImage.getA(color) != 0) {
-                        int finalX = x;
-                        int finalY = y;
-                        var paletteColor = map.computeIfAbsent(color,
-                                p -> new PaletteColor(finalX, finalY, color));
-                        paletteColor.occurrence++;
-                    }
-                }
-            }
-        }
-        if (map.size() == 0) throw new UnsupportedOperationException("Palette mask must not cover the whole image");
-        return new Palette(map.values());
-    }
-
-    public void matchSize(int targetSize) {
-        if (this.size() <= 0 || targetSize <= 0) {
-            throw new UnsupportedOperationException("Palette size can't be 0");
-        }
-        this.maybeReducePalette(targetSize);
-        this.maybeIncreasePalette(targetSize);
-    }
-
-    private void maybeReducePalette(int targetSize) {
-        //remove the one with least occurrence
-        while (this.internal.size() > targetSize) {
-            PaletteColor toRemove = internal.get(0);
-            for (var p : internal) {
-                if (p.occurrence < toRemove.occurrence) {
-                    toRemove = p;
-                }
-            }
-            internal.remove(toRemove);
-        }
-        this.sort();
-    }
-
-    private void maybeIncreasePalette(int targetSize) {
-        //adds a color in the space between the two colors that differ the most
-        while (internal.size() < targetSize) {
-            float lastLum = 0;
-            int ind = 0;
-            for (int i = 1; i < internal.size(); i++) {
-                float d = internal.get(i).luminance - internal.get(i - 1).luminance;
-                if (d > lastLum) {
-                    lastLum = d;
-                    ind = i;
-                }
-            }
-
-            int newColor = SpriteUtils.averageColors(internal.get(ind - 1).color, internal.get(ind).color);
-
-            internal.add(new PaletteColor(0, 0, newColor));
+        if (internal.remove(color)) {
             this.sort();
         }
     }
 
-    //add a highlight color
-    public void increaseUp() {
-        //float averageDeltaLum = (this.getLightest().luminance - this.getDarkest().luminance)/this.size()-1;
-        var lightest = this.getLightest();
-        var secondLightest = this.get(this.size() - 2);
-        //float newLum = lightest.luminance+averageDeltaLum;
-        var h1 = SpriteUtils.RGBtoHSV(lightest.color);
-        var h2 = SpriteUtils.RGBtoHSV(secondLightest.color);
-        //float lum1 = lightest.luminance;
-        // float lum2 = secondLightest.luminance;
-        float v1 = h1[2];
-        float v2 = h2[2];
-        float dv = v2 - v1;
-        float hue1 = h1[0];
-        float hue2 = h2[0];
-        float dh = hue2 - hue1;
-        float sat1 = h1[1];
-        float sat2 = h2[1];
-        float ds = sat2 - sat1;
-        float newHue = hue1 + (dh / dv) * 2 * dv;
-        float newSat = sat1 + (ds / dv) * 2 * dv;
-        float newVal = v1 + dv;
-        this.add(new PaletteColor(SpriteUtils.HSVtoRGB(newHue, newSat, newVal)));
+    public PaletteColor calculateAverage() {
+        return new PaletteColor(LABColor.averageColors(this.getValues().stream().map(PaletteColor::lab).toArray(LABColor[]::new)));
     }
 
-    //add a dark color
-    public void increaseDown() {
-        //float averageDeltaLum = (this.getLightest().luminance - this.getDarkest().luminance)/this.size()-1;
-        var darkest = this.getDarkest();
-        var secondDarkest = this.get(1);
-        //float newLum = lightest.luminance+averageDeltaLum;
-        var h2 = SpriteUtils.RGBtoHSV(darkest.color);
-        var h1 = SpriteUtils.RGBtoHSV(secondDarkest.color);
-        //float lum1 = lightest.luminance;
-        // float lum2 = secondLightest.luminance;
-        float v1 = h1[2];
-        float v2 = h2[2];
-        float dv = v2 - v1;
-        float hue1 = h1[0];
-        float hue2 = h2[0];
-        float dh = hue2 - hue1;
-        float sat1 = h1[1];
-        float sat2 = h2[1];
-        float ds = sat2 - sat1;
-        float newHue = hue2 - (dh * dv);
-        float newSat = sat2 - (ds * dv);
-        float newVal = v2 + dv;
-        this.add(new PaletteColor(SpriteUtils.HSVtoRGB(newHue, newSat, newVal)));
+    /**
+     * Gets the color within this palette that most closely matches the average center color
+     */
+    public PaletteColor getCenterColor() {
+        PaletteColor center = calculateAverage();
+        return getColorClosestTo(center);
+    }
+
+    /**
+     * Gets the color within this palette that most closely matches the given color
+     */
+    private PaletteColor getColorClosestTo(PaletteColor target) {
+        PaletteColor bestMatch = target;
+        float lastDist = 10000;
+        for (var c : this.getValues()) {
+            float dist = target.distanceTo(c);
+            if (dist < lastDist) {
+                lastDist = dist;
+                bestMatch = c;
+            }
+        }
+        return bestMatch;
+    }
+
+    /**
+     * Adds or remove colors to match the target size
+     */
+    public void matchSize(int targetSize) {
+        if (this.size() == 0 || targetSize <= 0) {
+            throw new UnsupportedOperationException("Palette size can't be 0");
+        }
+        while (this.size() > targetSize) {
+            removeLeastUsed();
+        }
+        while (this.size() < targetSize) {
+            increaseInner();
+        }
+    }
+
+    /**
+     * Removes one color, the one that is least used
+     */
+    private void removeLeastUsed() {
+        //remove the one with least occurrence
+        PaletteColor toRemove = internal.get(0);
+        for (var p : internal) {
+            if (p.occurrence < toRemove.occurrence) {
+                toRemove = p;
+            }
+        }
+        this.remove(toRemove);
+    }
+
+    /**
+     * Removes one color, the one that is closest to other colors
+     */
+    private void reduce() {
+        int index = 0;
+        float minDelta = 10000;
+        float lastLum = this.get(0).luminance();
+        for (int i = 1; i < this.size(); i++) {
+            float l = this.get(i).luminance();
+            float dl = l - lastLum;
+            if (dl < minDelta) {
+                index = i;
+                minDelta = dl;
+            }
+            lastLum = l;
+        }
+        this.remove(this.get(index));
+    }
+
+    /**
+     * Calculates the average luminance different between each color. Ideally it should be somewhat constant
+     */
+    public float calculateAverageDeltaLuminance() {
+        List<Float> list = new ArrayList<>();
+        float lastLum = this.get(0).luminance();
+        for (int i = 1; i < this.size(); i++) {
+            float l = this.get(i).luminance();
+            list.add(l - lastLum);
+            lastLum = l;
+        }
+        float total = 0;
+        for (var v : list) total += v;
+        return total / (float) list.size();
+    }
+
+    /**
+     * Adds a color to the palette by interpolating existing colors
+     * Only works if it has at least 2 colors
+     */
+    public PaletteColor increaseInner() {
+        assert (this.size() < 2);
+        int index = 1;
+        float maxDelta = 0;
+        float lastLum = this.get(0).luminance();
+        for (int i = 1; i < this.size(); i++) {
+            float l = this.get(i).luminance();
+            float dl = l - lastLum;
+            if (dl > maxDelta) {
+                index = i;
+                maxDelta = dl;
+            }
+            lastLum = l;
+        }
+        var c1 = this.get(index).hcl();
+        var c2 = this.get(index - 1).hcl();
+        var newC = new PaletteColor(c1.mixWith(c2));
+        //always adds, ignoring tolerance since we do want to add something
+        this.addUnchecked(newC);
+        return newC;
+    }
+
+    /**
+     * Adds a highlight color, lighter than the lightest color present
+     * Only works if it has at least 2 colors
+     */
+    public PaletteColor increaseUp() {
+        assert (this.size() < 2);
+        float averageDeltaLum = this.calculateAverageDeltaLuminance();
+        HCLColor lightest = this.getLightest().hcl();
+        HCLColor secondLightest = this.get(this.size() - 2).hcl();
+        var cc = getNextColor(averageDeltaLum, lightest, secondLightest);
+        PaletteColor pl = new PaletteColor(cc);
+        this.add(pl);
+        return pl;
+    }
+
+    /**
+     * Adds an outline color, darker than the darkest color present
+     * Only works if it has at least 2 colors
+     */
+    public PaletteColor increaseDown() {
+        assert (this.size() < 2);
+        float averageDeltaLum = this.calculateAverageDeltaLuminance();
+        HCLColor darkest = this.getDarkest().hcl();
+        HCLColor secondDarkest = this.get(1).hcl();
+        var cc = getNextColor(-averageDeltaLum, darkest, secondDarkest);
+        PaletteColor pl = new PaletteColor(cc);
+        this.add(pl);
+        return pl;
+    }
+
+    private HCLColor getNextColor(float lumIncrease, HCLColor source, HCLColor previous) {
+        float newLum = source.luminance() + lumIncrease;
+        float h1 = source.hue();
+        float c1 = source.chroma();
+        float a1 = source.alpha();
+        float h2 = previous.hue();
+        float c2 = previous.chroma();
+        float a2 = previous.alpha();
+        float hueIncrease = (float) (-MthUtils.signedAngleDiff(h1 * Math.PI * 2, h2 * Math.PI * 2) / (Math.PI * 2.0));
+        //better be conservative here. some hue increase might look bad even if they are the same as the last hue diff
+        float newH = h1 + hueIncrease * 0.5f;
+        while (newH < 0) ++newH;
+
+        float newC = c1 + (c1 - c2);
+        float newA = a1 + (a1 - a2);
+        return new HCLColor(newH, newC, newLum, newA);
+    }
+
+    /**
+     * Combines multiple palettes into one, preserving their occurrence values
+     */
+    public static Palette merge(Palette... palettes) {
+        Map<Integer, PaletteColor> map = new HashMap<>();
+        for (Palette p : palettes) {
+            for (PaletteColor c : p.getValues()) {
+                int color = c.value();
+                if (map.containsKey(color)) {
+                    map.get(color).occurrence += c.occurrence;
+                } else map.put(color, c);
+            }
+        }
+        if (map.values().size() == 0) return EMPTY;
+        return new Palette(map.values());
     }
 
 
+    public static Palette fromImage(TextureImage image) {
+        return fromImage(image, null);
+    }
+
+    public static Palette fromImage(TextureImage image, @Nullable TextureImage mask) {
+        return fromImage(image, mask, 0);
+    }
+
+    /**
+     * Grabs a palette from an image.
+     * Differs from fromAnimatedImage since it will grab a palette that represents the entire image without concern over its animation frames
+     * For non-animated textures these two are the same
+     * If a mask is supplied it will only look at its transparent pixels
+     *
+     * @param textureImage target image
+     * @param textureMask  mask to select which part of the image to grab colors from
+     * @param tolerance    tolerance parameter which determines how close similar colors can be without being merged
+     * @return new palette
+     */
+    public static Palette fromImage(TextureImage textureImage, @Nullable TextureImage textureMask, float tolerance) {
+
+        //grabs separate palettes & then merges them
+        List<Palette> palettes = fromAnimatedImage(textureImage, textureMask, 0);
+
+        Palette palette = merge(palettes.toArray(new Palette[0]));
+        palette.updateTolerance(tolerance);
+        return palette;
+    }
+
+    public static List<Palette> fromAnimatedImage(TextureImage image) {
+        return fromAnimatedImage(image, null);
+    }
+
+    public static List<Palette> fromAnimatedImage(TextureImage image, @Nullable TextureImage mask) {
+        return fromAnimatedImage(image, mask, 0);
+    }
+
+    /**
+     * Grabs a palette list from an image. Each palette represents the colors of the given image frames.
+     * If a mask is supplied it will only look at its transparent pixels
+     *
+     * @param textureImage target image
+     * @param textureMask  mask to select which part of the image to grab colors from
+     * @param tolerance    tolerance parameter which determines how close similar colors can be without being merged
+     * @return new palette
+     */
+    public static List<Palette> fromAnimatedImage(TextureImage textureImage, @Nullable TextureImage textureMask, float tolerance) {
+        if (textureMask != null &&
+                (textureImage.framesSize() != textureMask.framesSize() ||
+                        textureMask.frameWidth() < textureImage.frameWidth() ||
+                        textureMask.frameHeight() < textureImage.frameHeight())) {
+            throw new UnsupportedOperationException("Palette mask needs to be at least as large as the target image and have the same format");
+        }
+
+        List<Palette> palettes = new ArrayList<>();
+
+        NativeImage mask = textureMask == null ? null : textureMask.getImage();
+        NativeImage image = textureImage.getImage();
+
+        List<Map<Integer, PaletteColor>> paletteBuilders = new ArrayList<>();
+
+        textureImage.forEachFrame((index, x, y) -> {
+            //when index changes we add a completed palette
+            if (paletteBuilders.size() <= index) {
+                paletteBuilders.add(new HashMap<>());
+            }
+            var builder = paletteBuilders.get(index);
+
+            if (mask == null || NativeImage.getA(mask.getPixelRGBA(x, y)) == 0) {
+                int color = image.getPixelRGBA(x, y);
+                if (NativeImage.getA(color) != 0) {
+                    var paletteColor = builder.computeIfAbsent(color,
+                            p -> new PaletteColor(color));
+                    paletteColor.occurrence++;
+                }
+            }
+        });
+
+        for (var p : paletteBuilders) {
+            Palette pal;
+            if (p.size() == 0) {
+                pal = EMPTY;
+            } else {
+                pal = new Palette(p.values(), tolerance);
+            }
+            palettes.add(pal);
+        }
+
+        return palettes;
+    }
 }

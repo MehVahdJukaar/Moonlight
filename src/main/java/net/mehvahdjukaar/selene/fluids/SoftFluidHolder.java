@@ -301,7 +301,19 @@ public class SoftFluidHolder {
     }
 
     private boolean areNbtEquals(CompoundTag nbt, CompoundTag nbt1) {
-        return (((nbt == null || nbt.isEmpty()) && (nbt1 == null || nbt1.isEmpty())) || nbt1.equals(nbt));
+        if ((nbt == null || nbt.isEmpty()) && (nbt1 == null || nbt1.isEmpty())) return true;
+        if (nbt == null || nbt1 == null) return false;
+        if (nbt1.contains("Bottle") && !nbt.contains("Bottle")) {
+            var n1 = nbt1.copy();
+            n1.remove("Bottle");
+            return n1.equals(nbt);
+        }
+        if (nbt.contains("Bottle") && !nbt1.contains("Bottle")) {
+            var n = nbt.copy();
+            n.remove("Bottle");
+            return n.equals(nbt1);
+        }
+        return nbt1.equals(nbt);
     }
 
     /**
@@ -471,6 +483,8 @@ public class SoftFluidHolder {
         if (this.nbt != null && !this.nbt.isEmpty() && !fluidStack.isEmpty() && nbtKey != null) {
             CompoundTag newCom = new CompoundTag();
             for (String k : nbtKey) {
+                //special case to convert to IE pot fluid
+                if(k.equals("Bottle") && fluidStack.getFluid().getRegistryName().getNamespace().equals("immersiveengineering"))continue;
                 Tag c = this.nbt.get(k);
                 if (c != null) {
                     newCom.put(k, c);
@@ -696,7 +710,14 @@ public class SoftFluidHolder {
     //called when it goes from empty to full
     public void setFluid(SoftFluid fluid, @Nullable CompoundTag nbt) {
         this.fluid = fluid;
-        this.nbt = nbt;
+        if(nbt != null){
+            nbt = nbt.copy();
+            //even more hardcoded shit
+            if(fluid.equals(SoftFluidRegistry.POTION.get()) && !nbt.contains("Bottles")){
+                nbt.putString("Bottles","REGULAR");
+            }
+        }
+        this.nbt = nbt.copy();
         this.specialColor = 0;
         if (this.fluid.isEmpty()) this.setCount(0);
         this.needsColorRefresh = true;
@@ -726,7 +747,7 @@ public class SoftFluidHolder {
     }
 
     /**
-     * @return tint color to be used on particle. Differs from getTintColor since it returns an average color extrapolated from their fluid textures
+     * @return tint color to be used on particle. Differs from getTintColor since it returns an mixWith color extrapolated from their fluid textures
      */
     public int getParticleColor(@Nullable LevelReader world, @Nullable BlockPos pos) {
         if (this.isEmpty()) return -1;
