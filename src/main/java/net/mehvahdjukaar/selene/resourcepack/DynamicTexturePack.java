@@ -2,11 +2,9 @@ package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.selene.Selene;
-import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
-import net.mehvahdjukaar.selene.resourcepack.asset_generators.textures.TextureImage;
-import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
+import net.mehvahdjukaar.selene.client.asset_generators.LangBuilder;
+import net.mehvahdjukaar.selene.client.asset_generators.textures.TextureImage;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;

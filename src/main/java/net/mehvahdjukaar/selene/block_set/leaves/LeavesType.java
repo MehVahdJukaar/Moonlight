@@ -29,10 +29,17 @@ public class LeavesType implements IBlockType {
         this.woodType = woodType;
     }
 
+    @Override
+    public String getTranslationKey() {
+        return "leaves_type." + this.getTypeName();
+    }
+
+    @Override
     public String getTypeName() {
         return id.getPath();
     }
 
+    @Override
     public String getNamespace() {
         return id.getNamespace();
     }

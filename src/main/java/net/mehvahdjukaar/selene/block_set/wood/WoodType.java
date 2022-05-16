@@ -2,7 +2,6 @@ package net.mehvahdjukaar.selene.block_set.wood;
 
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.block_set.IBlockType;
-import net.mehvahdjukaar.supplementaries.common.block.tiles.JarBlockTile;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -23,12 +22,30 @@ public class WoodType implements IBlockType {
 
     public final ResourceLocation id;
     public final Material material;
-    public final Block plankBlock;
-    public final Block logBlock;
+    public final Block planks;
+    public final Block log;
+
+    //additional optional blocks
     @Nullable
-    public final Block stripped_log;
+    public final Block slab;
     @Nullable
-    public final Block stripped_wood;
+    public final Block stairs;
+    @Nullable
+    public final Block fence;
+    @Nullable
+    public final Block fenceGate;
+    @Nullable
+    public final Block button;
+    @Nullable
+    public final Block pressurePlate;
+    @Nullable
+    public final Block door;
+    @Nullable
+    public final Block trapdoor;
+    @Nullable
+    public final Block strippedLog;
+    @Nullable
+    public final Block strippedWood;
     @Nullable
     public final Block wood;
     @Nullable
@@ -42,15 +59,24 @@ public class WoodType implements IBlockType {
 
     protected WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
         this.id = id;
-        this.plankBlock = baseBlock;
-        this.logBlock = logBlock;
+        this.planks = baseBlock;
+        this.log = logBlock;
         this.material = baseBlock.defaultBlockState().getMaterial();
         this.shortenedNamespace = id.getNamespace().equals("minecraft") ? "" : "_" + abbreviateString(id.getNamespace());
 
         this.leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
-        this.stripped_log = this.findRelatedEntry("stripped", "log", ForgeRegistries.BLOCKS);
-        this.stripped_wood = this.findRelatedEntry("stripped", "wood", ForgeRegistries.BLOCKS);
+        this.strippedLog = this.findRelatedEntry("stripped", "log", ForgeRegistries.BLOCKS);
+        this.strippedWood = this.findRelatedEntry("stripped", "wood", ForgeRegistries.BLOCKS);
         this.wood = this.findRelatedEntry("wood", ForgeRegistries.BLOCKS);
+        this.slab = this.findRelatedEntry("slab", ForgeRegistries.BLOCKS);
+        this.stairs = this.findRelatedEntry("stairs", ForgeRegistries.BLOCKS);
+        this.fence = this.findRelatedEntry("fence", ForgeRegistries.BLOCKS);
+        this.fenceGate = this.findRelatedEntry("fence_gate", ForgeRegistries.BLOCKS);
+        this.door = this.findRelatedEntry("door", ForgeRegistries.BLOCKS);
+        this.trapdoor = this.findRelatedEntry("trapdoor", ForgeRegistries.BLOCKS);
+        this.button = this.findRelatedEntry("button", ForgeRegistries.BLOCKS);
+        this.pressurePlate = this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS);
+
         //checks if it has a sign
         this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
         this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
@@ -106,7 +132,7 @@ public class WoodType implements IBlockType {
         return this.material.getColor();
     }
 
-
+    @Deprecated
     private static String abbreviateString(String string) {
         if (string.length() <= 5) return string;
         String[] a = string.split("_");
@@ -117,6 +143,10 @@ public class WoodType implements IBlockType {
         } else return string.substring(0, 4);
     }
 
+    @Override
+    public String getTranslationKey() {
+        return "wood_type." + this.getTypeName();
+    }
 
     public static class Finder extends SetFinder<WoodType> {
 
@@ -131,9 +161,13 @@ public class WoodType implements IBlockType {
         }
 
         public static Finder simple(String modId, String woodTypeName, String planksName, String logName) {
-            return new Finder(new ResourceLocation(modId, woodTypeName),
-                    () -> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(modId, planksName)),
-                    () -> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(modId, logName)));
+            return simple(new ResourceLocation(modId, woodTypeName), new ResourceLocation(modId, planksName), new ResourceLocation(modId, logName));
+        }
+
+        public static Finder simple(ResourceLocation woodTypeName, ResourceLocation planksName, ResourceLocation logName) {
+            return new Finder(woodTypeName,
+                    () -> ForgeRegistries.BLOCKS.getValue(planksName),
+                    () -> ForgeRegistries.BLOCKS.getValue(logName));
         }
 
         public Optional<WoodType> get() {
@@ -151,6 +185,7 @@ public class WoodType implements IBlockType {
             }
             return Optional.empty();
         }
-
     }
+
+
 }

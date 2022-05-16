@@ -1,15 +1,15 @@
-package net.mehvahdjukaar.selene.resourcepack.asset_generators;
+package net.mehvahdjukaar.selene.client.asset_generators;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.commons.lang3.StringUtils;
@@ -24,8 +24,27 @@ public class LangBuilder {
 
     //helper to make lang strings
     public static String getReadableName(String name) {
-        return Arrays.stream((name).replace(":","_").split("_"))
+        return Arrays.stream((name).replace(":", "_").split("_"))
                 .map(StringUtils::capitalize).collect(Collectors.joining(" "));
+    }
+
+    /**
+     * Attempts grabbig a translated component with the given key anr arguments. If none is found it will make the key itself readable
+     *
+     * @param key       translation key
+     * @param arguments optional arguments
+     * @return readable component
+     */
+    public static Component getReadableComponent(String key, String... arguments) {
+        Component translated = new TranslatableComponent(key, (Object[]) arguments);
+        if (translated.getString().equals(key)) {
+            StringBuilder aa = new StringBuilder();
+            for (String s : arguments) {
+                aa.append("_").append(s);
+            }
+            return new TextComponent(LangBuilder.getReadableName(key + aa));
+        }
+        return translated;
     }
 
     public void addGenericEntry(String key, String translation) {

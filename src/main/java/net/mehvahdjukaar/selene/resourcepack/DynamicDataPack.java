@@ -25,22 +25,6 @@ public class DynamicDataPack extends DynamicResourcePack {
         super(name, PackType.SERVER_DATA);
     }
 
-    @Deprecated
-    public enum TagType {
-        BLOCKS, ITEMS, ENTITY_TYPES
-    }
-
-    @Deprecated
-    public void addTag(ResourceLocation tagLocation, Collection<ResourceLocation> values, TagType... types) {
-        for (var v : types) {
-            switch (v) {
-                case BLOCKS -> addTag(tagLocation, values, Registry.BLOCK_REGISTRY);
-                case ITEMS -> addTag(tagLocation, values, Registry.ITEM_REGISTRY);
-                case ENTITY_TYPES -> addTag(tagLocation, values, Registry.ENTITY_TYPE_REGISTRY);
-            }
-        }
-    }
-
     public <T> void addTag(ResourceLocation tagLocation, Collection<ResourceLocation> values, ResourceKey<Registry<T>> type) {
         JsonObject json = new JsonObject();
         json.addProperty("replace", false);

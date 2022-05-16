@@ -1,6 +1,9 @@
 package net.mehvahdjukaar.selene.block_set;
 
-import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
+import net.mehvahdjukaar.selene.client.asset_generators.LangBuilder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -17,6 +20,8 @@ public interface IBlockType {
     String getTypeName();
 
     String getNamespace();
+
+    String getTranslationKey();
 
     /**
      * Use this to get the new id of a block variant
@@ -36,9 +41,19 @@ public interface IBlockType {
                 namespace + "/" + this.getTypeName() + "_" + baseName;
     }
 
-    default String getNameForTranslation(String append) {
-        //There's got to be a faster method call lol
-        return LangBuilder.getReadableName(this.getTypeName() + "_" + append);
+    default Component getReadableName() {
+        return LangBuilder.getReadableComponent(this.getTranslationKey());
+    }
+
+    /**
+     * Helper method to generate translation strings from existing name and block type ones.
+     * @param variantKey i.e: block.hanging_sign
+     * @return translated string from provided key with added translated name of this block type
+     */
+    default String getVariantReadableName(String variantKey) {
+        return LangBuilder.getReadableName(this.getTypeName()+"_"+variantKey);
+       // return LangBuilder.getReadableComponent(variantKey,
+       //         LangBuilder.getReadableComponent(this.getTranslationKey()).getString()).getString();
     }
 
     default boolean isVanilla() {
@@ -60,7 +75,8 @@ public interface IBlockType {
         var id = this.getId();
         ResourceLocation[] targets = {
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
-                new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post)
+                new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post),
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_planks_" + append + post),
         };
         V found = null;
         for (var r : targets) {

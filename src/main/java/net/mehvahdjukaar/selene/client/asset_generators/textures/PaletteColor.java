@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.resourcepack.asset_generators.textures;
+package net.mehvahdjukaar.selene.client.asset_generators.textures;
 
 import net.mehvahdjukaar.selene.math.colors.BaseColor;
 import net.mehvahdjukaar.selene.math.colors.HCLColor;

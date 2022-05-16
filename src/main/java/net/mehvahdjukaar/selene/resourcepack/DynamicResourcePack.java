@@ -1,8 +1,7 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonElement;
-import com.mojang.blaze3d.platform.NativeImage;
-import net.mehvahdjukaar.selene.resourcepack.asset_generators.LangBuilder;
+import net.mehvahdjukaar.selene.client.asset_generators.LangBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -31,6 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -75,7 +75,8 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     /**
-     * Dynamic textures are loaded after getNamespaces is called so unfortunately we need to know those in advance
+     * Dynamic textures are loaded after getNamespaces is called, so unfortunately we need to know those in advance
+     * Call this if you are adding stuff for another mod namespace
      **/
     public void addNamespaces(String... namespaces) {
         this.namespaces.addAll(Arrays.asList(namespaces));
@@ -90,6 +91,10 @@ public abstract class DynamicResourcePack implements PackResources {
         return title.getString();
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
 
     /**
      * registers this pack. Intern calls AddPackFinderEvent
@@ -134,7 +139,7 @@ public abstract class DynamicResourcePack implements PackResources {
         return serializer instanceof PackMetadataSectionSerializer ? (T) this.packInfo : null;
     }
 
-    public void addRootResource(String name, byte[] resource){
+    public void addRootResource(String name, byte[] resource) {
         this.rootResources.put(name, resource);
     }
 
@@ -224,6 +229,11 @@ public abstract class DynamicResourcePack implements PackResources {
         this.addBytes(resType.getPath(location), bytes);
     }
 
+
+    public PackType getPackType() {
+        return packType;
+    }
+
     //TODO: move to RP utils
 
     /**
@@ -238,30 +248,32 @@ public abstract class DynamicResourcePack implements PackResources {
      * @param replaceWith word to replace the keyword with
      */
     public void addSimilarJsonResource(StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException {
+        addSimilarJsonResource(resource, s -> s.replace(keyword, replaceWith));
+    }
+
+    public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform) throws NoSuchElementException {
+        addSimilarJsonResource(resource, textTransform, textTransform);
+    }
+
+    public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform, Function<String, String> pathTransform) throws NoSuchElementException {
         ResourceLocation fullPath = resource.location;
 
-        String string = new String(resource.data, StandardCharsets.UTF_8);
+        String fullText = new String(resource.data, StandardCharsets.UTF_8);
 
-        if (!string.contains(keyword)) {
-            throw new NoSuchElementException(String.format("Resource %s did not contain keyword %s. ", fullPath, keyword));
-        }
 
-        string = string.replace(keyword, replaceWith);
+        fullText = textTransform.apply(fullText);
         //calculates new path
         StringBuilder builder = new StringBuilder();
         String[] partial = fullPath.getPath().split("/");
         for (int i = 0; i < partial.length; i++) {
             if (i != 0) builder.append("/");
             if (i == partial.length - 1) {
-                builder.append(partial[i].replace(keyword, replaceWith));
+                builder.append(pathTransform.apply(partial[i]));
             } else builder.append(partial[i]);
         }
         //adds modified under my namespace
         ResourceLocation newRes = new ResourceLocation(resourcePackName.getNamespace(), builder.toString());
-        this.addBytes(newRes, string.getBytes());
+        this.addBytes(newRes, fullText.getBytes());
     }
 
-    public PackType getPackType() {
-        return packType;
-    }
 }

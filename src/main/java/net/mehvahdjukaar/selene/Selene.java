@@ -11,6 +11,7 @@ import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.selene.network.ClientBoundSyncFluidsPacket;
 import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.mehvahdjukaar.selene.villager_ai.VillagerAIManager;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -42,6 +43,10 @@ public class Selene {
         BlockSetManager.registerBlockSetDefinition(WoodType.class, new WoodTypeRegistry());
         BlockSetManager.registerBlockSetDefinition(LeavesType.class, new LeavesTypeRegistry());
         CompatWoodTypes.init();
+    }
+
+    public static ResourceLocation res(String replace) {
+        return new ResourceLocation(MOD_ID,replace);
     }
 
     @SubscribeEvent

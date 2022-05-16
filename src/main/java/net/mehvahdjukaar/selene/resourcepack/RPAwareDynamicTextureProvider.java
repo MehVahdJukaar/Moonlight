@@ -1,19 +1,15 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
-import com.mojang.blaze3d.platform.NativeImage;
-import net.mehvahdjukaar.selene.resourcepack.asset_generators.textures.Respriter;
+import net.mehvahdjukaar.selene.client.asset_generators.textures.TextureImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.loading.FMLLoader;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
+import java.util.function.Supplier;
 
 /**
  * Class responsible to generate assets and manage your dynamic resource texture pack (client)
@@ -44,8 +40,27 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
         return Minecraft.getInstance().getResourcePackRepository();
     }
 
-    protected boolean alreadyHasTextureAtLocation(ResourceManager manager, ResourceLocation res) {
+    public boolean alreadyHasTextureAtLocation(ResourceManager manager, ResourceLocation res) {
         return alreadyHasAssetAtLocation(manager, res, ResType.TEXTURES);
+    }
+
+
+    public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier){
+        ResourceLocation res = new ResourceLocation(this.dynamicPack.mainNamespace, relativePath);
+        if(!alreadyHasTextureAtLocation(manager, res)){
+            TextureImage textureImage = null;
+            try{
+                textureImage = textureSupplier.get();
+            }catch (Exception e){
+                getLogger().error("Failed to generate texture {}: {}", res,e);
+            }
+            if(textureImage == null){
+                getLogger().warn("Could not generate texture {}", res);
+            }
+            else{
+                this.dynamicPack.addAndCloseTexture(res,textureImage);
+            }
+        }
     }
 
 }

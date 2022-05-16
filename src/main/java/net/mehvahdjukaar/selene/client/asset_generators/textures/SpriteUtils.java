@@ -1,26 +1,20 @@
-package net.mehvahdjukaar.selene.resourcepack.asset_generators.textures;
+package net.mehvahdjukaar.selene.client.asset_generators.textures;
 
-import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.selene.math.colors.HSVColor;
-import net.mehvahdjukaar.selene.resourcepack.RPUtils;
-import net.mehvahdjukaar.selene.resourcepack.ResType;
+import net.mehvahdjukaar.selene.math.colors.RGBColor;
+import net.mehvahdjukaar.selene.math.kmeans.DataSet;
+import net.mehvahdjukaar.selene.math.kmeans.KMeans;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.GsonHelper;
-import org.apache.commons.compress.utils.IOUtils;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public final class SpriteUtils {
 
@@ -39,6 +33,11 @@ public final class SpriteUtils {
         }
     }
 
+    public static void grayscaleImage(NativeImage image){
+        forEachPixel(image,(x,y)->image.setPixelRGBA(x,y,
+                new RGBColor(image.getPixelRGBA(x,y)).asHCL().withChroma(0).asRGB().toInt()));
+    }
+
 
     //TODO: maybe use HCL here
 
@@ -50,7 +49,7 @@ public final class SpriteUtils {
      */
     public static List<Palette> extrapolateSignBlockPalette(TextureImage planksTexture) {
         List<Palette> newPalettes = new ArrayList<>();
-        List<Palette> oakPalettes = Palette.fromAnimatedImage(planksTexture, null, 1/300);
+        List<Palette> oakPalettes = Palette.fromAnimatedImage(planksTexture, null, 1/300f);
         for(Palette palette : oakPalettes) {
             int size = palette.size();
             if (size == 7) {
@@ -100,4 +99,34 @@ public final class SpriteUtils {
     }
 
 
+    public static void reduceColors(NativeImage image, Function<Integer, Integer> sizeFn) {
+
+        // read data
+        Palette p = Palette.fromImage(TextureImage.of(image, null), null, 0);
+
+        if (p.size() == 0) return;
+        DataSet<DataSet.ColorPoint> data = DataSet.fromPalette(p);
+
+        int size = sizeFn.apply(p.size());
+
+        if (size >= p.size()) return;
+
+        // cluster
+        KMeans.kmeans(data, size);
+
+        Map<Integer, Integer> colorToColorMap = new HashMap<>();
+
+        for (var c : data.getColorPoints()) {
+            var centroid = data.getLastCentroids().get(c.getClusterNo());
+            colorToColorMap.put(c.cast().getColor().value(), centroid.cast().getColor().value());
+        }
+
+        SpriteUtils.forEachPixel(image,(x,y)->{
+            int i = image.getPixelRGBA(x, y);
+            if (colorToColorMap.containsKey(i)) {
+                image.setPixelRGBA(x, y, colorToColorMap.get(i));
+            }
+        });
+
+    }
 }

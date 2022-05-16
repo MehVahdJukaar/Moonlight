@@ -568,7 +568,7 @@ public class SoftFluidHolder {
      * fills out tank to the maximum capacity
      */
     public void fillCount() {
-        this.setCount(capacity);
+        this.setCount((int) capacity);
     }
 
     /**
@@ -577,7 +577,7 @@ public class SoftFluidHolder {
      * @param inc bottles increment
      */
     public void grow(int inc) {
-        this.setCount(this.count + inc);
+        this.setCount((int) (this.count + inc));
     }
 
     /**
@@ -609,7 +609,7 @@ public class SoftFluidHolder {
     }
 
     public int getCount() {
-        return count;
+        return (int) count;
     }
 
     @Nonnull
@@ -643,7 +643,7 @@ public class SoftFluidHolder {
      */
     public void copy(SoftFluidHolder other) {
         this.setFluid(other.getFluid(), other.getNbt());
-        this.setCount(Math.min(this.capacity, other.getCount()));
+        this.setCount((int) Math.min(this.capacity, other.getCount()));
     }
 
     /**
@@ -655,7 +655,7 @@ public class SoftFluidHolder {
         FluidStack drainable = other.getFluidInTank(0).copy();// 250, IFluidHandler.FluidAction.SIMULATE);
         CompoundTag nbt = drainable.isEmpty() ? null : drainable.getTag();
         this.setFluid(SoftFluidRegistry.fromForgeFluid(drainable.getFluid()), nbt);
-        this.setCount(Math.min(this.capacity, other.getTankCapacity(0)));
+        this.setCount((int) Math.min(this.capacity, other.getTankCapacity(0)));
     }
 
     /**
@@ -710,14 +710,14 @@ public class SoftFluidHolder {
     //called when it goes from empty to full
     public void setFluid(SoftFluid fluid, @Nullable CompoundTag nbt) {
         this.fluid = fluid;
+        this.nbt = null;
         if(nbt != null){
-            nbt = nbt.copy();
+            this.nbt = nbt.copy();
             //even more hardcoded shit
-            if(fluid.equals(SoftFluidRegistry.POTION.get()) && !nbt.contains("Bottles")){
-                nbt.putString("Bottles","REGULAR");
+            if(fluid.equals(SoftFluidRegistry.POTION.get()) && !this.nbt.contains("Bottles")){
+                this.nbt.putString("Bottles","REGULAR");
             }
         }
-        this.nbt = nbt.copy();
         this.specialColor = 0;
         if (this.fluid.isEmpty()) this.setCount(0);
         this.needsColorRefresh = true;
@@ -808,7 +808,7 @@ public class SoftFluidHolder {
      */
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
-        cmp.putInt("Count", this.count);
+        cmp.putInt("Count", (int) this.count);
         cmp.putString("Fluid", this.fluid.getRegistryName().toString());
         //for item render. needed for potion colors
         cmp.putInt("CachedColor", this.getTintColor(null, null));

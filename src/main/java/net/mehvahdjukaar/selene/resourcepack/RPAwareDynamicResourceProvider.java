@@ -30,6 +30,10 @@ abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePack> imp
 
     public abstract Logger getLogger();
 
+    public T getPack() {
+        return dynamicPack;
+    }
+
     public abstract boolean dependsOnLoadedPacks();
 
     public abstract void regenerateDynamicAssets(ResourceManager manager);
@@ -91,13 +95,4 @@ abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePack> imp
         return false;
     }
 
-    @Nullable
-    public StaticResource getResOrLog(ResourceManager manager, ResourceLocation location) {
-        try {
-            return new StaticResource(manager.getResource(location));
-        } catch (Exception var4) {
-            this.getLogger().error("Could not find resource {} while generating dynamic resource pack", location);
-            return null;
-        }
-    }
 }

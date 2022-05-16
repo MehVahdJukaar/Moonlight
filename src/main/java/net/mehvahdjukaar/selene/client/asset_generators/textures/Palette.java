@@ -1,16 +1,19 @@
-package net.mehvahdjukaar.selene.resourcepack.asset_generators.textures;
+package net.mehvahdjukaar.selene.client.asset_generators.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.selene.math.MthUtils;
+import net.mehvahdjukaar.selene.math.colors.BaseColor;
 import net.mehvahdjukaar.selene.math.colors.HCLColor;
 import net.mehvahdjukaar.selene.math.colors.LABColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Palette {
 
-    private static Palette EMPTY = new Palette(List.of());
+    public static final float BASE_TOLERANCE = 1 / 200f;
+    private static final Palette EMPTY = new Palette(List.of());
 
     private float tolerance = 0;
     //ordered from darkest to lightest (luminance)
@@ -31,6 +34,9 @@ public class Palette {
         return this == EMPTY;
     }
 
+    public Palette copy(){
+        return new Palette(this.internal,tolerance);
+    }
 
     /**
      * Changes tolerance settings and merge all colors that are close enough. Default value is always 0 which will accept any colors
@@ -165,6 +171,13 @@ public class Palette {
     public void matchSize(int targetSize) {
         if (this.size() == 0 || targetSize <= 0) {
             throw new UnsupportedOperationException("Palette size can't be 0");
+        }
+        if (this.size() == 2) {
+            var lightest = this.getLightest();
+            var darkest = this.getDarkest();
+            Palette other = Palette.fromArc(lightest.hcl(), darkest.hcl(), targetSize);
+            this.internal.clear();
+            this.internal.addAll(other.getValues());
         }
         while (this.size() > targetSize) {
             removeLeastUsed();
@@ -314,13 +327,34 @@ public class Palette {
         return new Palette(map.values());
     }
 
+    public static Palette ofColors(Collection<BaseColor<?>> colors) {
+        return new Palette(colors.stream().map(PaletteColor::new).collect(Collectors.toSet()));
+    }
+
+    /**
+     * Creates a palette by interpolating a start and end point. Interpolation mode depends on the color space of the color provided
+     *
+     * @param light start color
+     * @param dark  end color
+     * @param size  number of colors to have
+     * @param <T>   type of color. Best if you use HCL or HCLV
+     * @return new Palette
+     */
+    public static <T extends BaseColor<T>> Palette fromArc(T light, T dark, int size) {
+        List<BaseColor<T>> colors = new ArrayList<>();
+        if (size <= 1) throw new IllegalArgumentException("Size must be greater than one");
+        for (int i = 0; i < size; i++) {
+            colors.add(dark.mixWith(light, i / (size - 1f)));
+        }
+        return new Palette(colors.stream().map(PaletteColor::new).collect(Collectors.toSet()));
+    }
 
     public static Palette fromImage(TextureImage image) {
         return fromImage(image, null);
     }
 
     public static Palette fromImage(TextureImage image, @Nullable TextureImage mask) {
-        return fromImage(image, mask, 0);
+        return fromImage(image, mask, BASE_TOLERANCE);
     }
 
     /**
@@ -349,7 +383,7 @@ public class Palette {
     }
 
     public static List<Palette> fromAnimatedImage(TextureImage image, @Nullable TextureImage mask) {
-        return fromAnimatedImage(image, mask, 0);
+        return fromAnimatedImage(image, mask, BASE_TOLERANCE);
     }
 
     /**

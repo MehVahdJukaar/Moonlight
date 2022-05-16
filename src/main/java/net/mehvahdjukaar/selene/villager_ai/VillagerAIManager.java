@@ -10,6 +10,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Schedule;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -28,28 +29,12 @@ public class VillagerAIManager {
     protected static final RegistryObject<Schedule> CUSTOM_VILLAGER_SCHEDULE =
             SCHEDULES.register("custom_villager_schedule", Schedule::new);
 
-    //dont even have priority lol
-    private static final List<Consumer<VillagerBrainEvent>> LISTENERS = new ArrayList<>();
-
-
-    /**
-     * registers a listener that will be called when villager brain is initialized.
-     * Used to add dynamic schedules as well as activities, sensor types and memories
-     * Ideally call during mod setup
-     * @param callback Listener to VillagerBrainEvent
-     */
-    public static void addVillagerAiEventListener(Consumer<VillagerBrainEvent> callback) {
-        LISTENERS.add(callback);
-    }
 
     //called by mixin
     public static void onRegisterBrainGoals(Brain<Villager> brain, AbstractVillager villager) {
         if(villager instanceof Villager v) {
             var event = new VillagerBrainEvent(brain, v);
-
-            for (var l : LISTENERS) {
-                l.accept(event);
-            }
+            MinecraftForge.EVENT_BUS.post(event);
             //dont waste time if it doesn't have a custom schedule
             if (event.hasCustomSchedule()) {
                 //finalize schedule

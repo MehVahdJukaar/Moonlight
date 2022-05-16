@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.selene.math.colors;
 
+import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.util.Mth;
 
 import javax.annotation.concurrent.Immutable;
+import java.util.List;
 
 @Immutable
 public abstract class BaseColor<T extends BaseColor<T>> {
@@ -29,8 +31,30 @@ public abstract class BaseColor<T extends BaseColor<T>> {
         return mixWith(color,0.5f);
     }
 
+    /**
+     * Mix two color together. Result varies with respect to their colorspace
+     * @param color second color
+     * @param bias how much of the second color should appear in the result
+     * @return mixed color
+     */
     public T mixWith(T color, float bias) {
         return color;
+    }
+
+    /**
+     * Utility to mixe multiple colors at once in equal parts
+     */
+    public static <C extends BaseColor<C>> C mixColors(List<C> colors) {
+        int size = colors.size();
+        C mixed = colors.get(0);
+        for(int i = 1; i<size; i++){
+            mixed = mixed.mixWith(colors.get(i),1/(i+1f));
+        }
+        return mixed;
+    }
+
+    public static <C extends BaseColor<C>> C mixColors(C ...colors) {
+        return mixColors(List.of(colors));
     }
 
     public abstract RGBColor asRGB();

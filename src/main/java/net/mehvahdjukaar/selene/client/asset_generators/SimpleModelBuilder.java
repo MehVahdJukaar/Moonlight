@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.resourcepack.asset_generators;
+package net.mehvahdjukaar.selene.client.asset_generators;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

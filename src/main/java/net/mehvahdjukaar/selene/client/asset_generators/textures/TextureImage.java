@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.selene.resourcepack.asset_generators.textures;
+package net.mehvahdjukaar.selene.client.asset_generators.textures;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.selene.resourcepack.ResType;
+import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class TextureImage implements AutoCloseable {
     private final int frameScale;
 
 
-    private TextureImage(NativeImage image,@Nullable AnimationMetadataSection metadata) {
+    private TextureImage(NativeImage image, @Nullable AnimationMetadataSection metadata) {
         this.image = image;
         this.metadata = metadata;
         int imgWidth = this.imageWidth(); // 16
@@ -50,16 +52,20 @@ public class TextureImage implements AutoCloseable {
      * Accepts a consumer that iterates over all image pixels, ordered by frame.
      * The given coordinates are global texture coordinates while the index represents the currently viewed frame
      */
-    public void forEachFrame(FramePixelConsumer framePixelConsumer){
-        for(int ind = 0; ind<maxFrames; ind++){
+    public void forEachFrame(FramePixelConsumer framePixelConsumer) {
+        for (int ind = 0; ind < maxFrames; ind++) {
             int xOff = getFrameX(ind);
             int yOff = getFrameY(ind);
             for (int x = 0; x < frameW; x++) {
                 for (int y = 0; y < frameH; y++) {
-                    framePixelConsumer.accept(ind, x + xOff, y+yOff);
+                    framePixelConsumer.accept(ind, x + xOff, y + yOff);
                 }
             }
         }
+    }
+
+    public void toGrayscale(){
+        SpriteUtils.grayscaleImage(this.image);
     }
 
     public int frameWidth() {
@@ -71,19 +77,18 @@ public class TextureImage implements AutoCloseable {
     }
 
     @FunctionalInterface
-    public interface FramePixelConsumer extends TriConsumer<Integer,Integer,Integer>{
+    public interface FramePixelConsumer extends TriConsumer<Integer, Integer, Integer> {
 
         @Override
         void accept(Integer frameIndex, Integer globalX, Integer globalY);
     }
 
 
-
-    public int getFrameX(int frameIndex){
-        return  (frameIndex % frameScale) * frameW; //(2 % 1) * 16
+    public int getFrameX(int frameIndex) {
+        return (frameIndex % frameScale) * frameW; //(2 % 1) * 16
     }
 
-    public int getFrameY(int frameIndex){
+    public int getFrameY(int frameIndex) {
         return (frameIndex / frameScale) * frameH; // (2/1) * 32
     }
 
@@ -100,15 +105,38 @@ public class TextureImage implements AutoCloseable {
         return metadata;
     }
 
-    public TextureImage makeCopy(){
+    public TextureImage makeCopy() {
         NativeImage im = new NativeImage(this.imageWidth(), this.imageHeight(), false);
         im.copyFrom(image);
         return new TextureImage(im, metadata);
     }
 
+    public TextureImage createAnimationTemplate(int length, AnimationMetadataSection useDataFrom) {
+        List<AnimationFrame> frameData = new ArrayList<>();
+        useDataFrom.forEachFrame((i, t) -> frameData.add(new AnimationFrame(i, t)));
+
+        return createAnimationTemplate(length, frameData, useDataFrom.getDefaultFrameTime(), useDataFrom.isInterpolatedFrames());
+    }
+
+    /**
+     * Creates a new image using the first frame of this one. Its frame data and frame lenght will be the one provided
+     */
+    public TextureImage createAnimationTemplate(int length, List<AnimationFrame> frameData, int frameTime, boolean interpolate) {
+        NativeImage im = new NativeImage(this.frameWidth(), this.frameHeight() * length, false);
+        TextureImage t = new TextureImage(im, new AnimationMetadataSection(frameData, this.frameW, this.frameH, frameTime, interpolate));
+
+        t.forEachFrame((i, x, y) -> {
+            int xo = x - t.getFrameX(i);
+            int yo = y - t.getFrameY(i);
+            t.image.setPixelRGBA(x, y, this.image.getPixelRGBA(xo, yo));
+        });
+        return t;
+    }
+
     /**
      * Opens a texture image from the given resource path. A texture image is composed of a NativeImage and its associated McMeta file
-     * @param manager resource manager
+     *
+     * @param manager      resource manager
      * @param relativePath relative texture path (does not include /textures)
      */
     public static TextureImage open(ResourceManager manager, ResourceLocation relativePath) throws IOException {
@@ -124,6 +152,15 @@ public class TextureImage implements AutoCloseable {
         } catch (Exception ignored) {
         }
         return new TextureImage(i, metadata);
+    }
+
+    //you shouldnt have to use this
+    public static TextureImage createNew(int width, int height, @Nullable AnimationMetadataSection animation) {
+        return new TextureImage(new NativeImage(width, height, false), animation);
+    }
+    //you shouldnt have to use this
+    public static TextureImage of(NativeImage image, @Nullable AnimationMetadataSection animation) {
+        return new TextureImage(image, animation);
     }
 
     @Override
@@ -241,14 +278,14 @@ public class TextureImage implements AutoCloseable {
     /**
      * Increases alpha of all pixels and sets the one that have alpha = 0 to background color
      */
-    public void removeAlpha(int backgroundColor){
+    public void removeAlpha(int backgroundColor) {
         for (int x = 0; x < image.getWidth(); ++x) {
             for (int y = 0; y < image.getHeight(); ++y) {
                 int oldValue = image.getPixelRGBA(x, y);
                 int a = NativeImage.getA(oldValue);
                 if (a == 0) {
                     image.setPixelRGBA(x, y, backgroundColor);
-                }else{
+                } else {
                     image.setPixelRGBA(x, y, NativeImage.combine(255,
                             NativeImage.getB(oldValue),
                             NativeImage.getG(oldValue),
