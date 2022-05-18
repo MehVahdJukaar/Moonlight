@@ -112,7 +112,7 @@ public final class SpriteUtils {
         if (size >= p.size()) return;
 
         // cluster
-        KMeans.kmeans(data, size);
+        KMeans.kMeans(data, size);
 
         Map<Integer, Integer> colorToColorMap = new HashMap<>();
 

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.selene.util;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
+import net.mehvahdjukaar.selene.math.MthUtils;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -93,8 +94,8 @@ public class Utils {
         source.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ)-> {
             Vec3 min = new Vec3(minX - 0.5, minY - 0.5, minZ - 0.5);
             Vec3 max = new Vec3(maxX - 0.5, maxY - 0.5, maxZ - 0.5);
-            Vec3 v1 = rotateVec3(min, direction);
-            Vec3 v2 = rotateVec3(max, direction);
+            Vec3 v1 = MthUtils.rotateVec3(min, direction);
+            Vec3 v2 = MthUtils.rotateVec3(max, direction);
             VoxelShape s = Shapes.create(0.5 + Math.min(v1.x, v2.x), 0.5 + Math.min(v1.y, v2.y), 0.5 + Math.min(v1.z, v2.z),
                     0.5 + Math.max(v1.x, v2.x), 0.5 + Math.max(v1.y, v2.y), 0.5 + Math.max(v1.z, v2.z));
             newShape.set(Shapes.or(newShape.get(), s));
@@ -102,37 +103,6 @@ public class Utils {
         return newShape.get();
     }
 
-    public static Vec3 rotateVec3(Vec3 vec, Direction dir) {
-        double cos = 1;
-        double sin = 0;
-        switch (dir) {
-            case SOUTH -> {
-                cos = -1;
-                sin = 0;
-            }
-            case WEST -> {
-                cos = 0;
-                sin = 1;
-            }
-            case EAST -> {
-                cos = 0;
-                sin = -1;
-            }
-        }
-        double d0 = vec.x * cos + vec.z * sin;
-        double d1 = vec.y;
-        double d2 = vec.z * cos - vec.x * sin;
-        return new Vec3(d0, d1, d2);
-    }
 
-    //take values from 0 to 1
-    public static float averageAngles(Float ...angles){
-        float x = 0, y = 0;
-        for(float a : angles){
-            x += Mth.cos((float) (a*Math.PI*2));
-            y += Mth.sin((float) (a*Math.PI*2));
-        }
-        return (float) (Mth.atan2(y, x)/(Math.PI*2));
-    }
 
 }

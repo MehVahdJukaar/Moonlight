@@ -8,11 +8,25 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.mehvahdjukaar.selene.Selene;
+import net.minecraft.Util;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Game;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.client.ForgeHooksClient;
 
@@ -78,6 +92,7 @@ public class FlatItemTextureManager {
             var texture = TEXTURE_CACHE.getIfPresent(res);
             if (texture != null) {
                 drawItem(texture, b.item);
+                //drawItem2(texture,new BlockPos(0,70,0),Direction.NORTH,1);
                 if (b.postProcessing != null) {
                     texture.download();
                     NativeImage img = texture.getPixels();
@@ -86,6 +101,114 @@ public class FlatItemTextureManager {
                 }
             }
         }
+    }
+
+    public static void drawItem2(FrameBufferBackedDynamicTexture tex, BlockPos mirrorPos, Direction mirrorDir, float partialTicks) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+
+        RenderTarget frameBuffer = tex.getFrameBuffer();
+        frameBuffer.clear(Minecraft.ON_OSX);
+        //render to this one
+        frameBuffer.bindWrite(true);
+
+        //gui setup code
+       // RenderSystem.clear(256, Minecraft.ON_OSX);
+
+       // Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
+       // PoseStack posestack = RenderSystem.getModelViewStack();
+      //  posestack.pushPose();
+        int size = tex.getWidth();
+
+        GameRenderer gameRenderer = mc.gameRenderer;
+        LevelRenderer levelRenderer = mc.levelRenderer;
+
+        PoseStack posestack = RenderSystem.getModelViewStack();
+        posestack.pushPose();
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.clear(16640, Minecraft.ON_OSX);
+
+        FogRenderer.setupNoFog();
+
+        RenderSystem.enableTexture();
+        RenderSystem.enableCull();
+
+        RenderSystem.viewport(0, 0, size, size);
+        gameRenderer.renderZoomed(1,0,0);
+        levelRenderer.doEntityOutline();
+        //RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
+       // gameRenderer.renderLevel(partialTicks,Util.getMillis(),new PoseStack());
+        /*
+        {
+
+            PoseStack poseStack = new PoseStack();
+
+
+            RenderSystem.viewport(0, 0, size, size);
+
+           // DummyCamera camera = new DummyCamera();
+            //camera.setPosition(mirrorPos);
+           // camera.setAnglesInternal(0, -180);
+Camera camera = gameRenderer.getMainCamera();
+
+            gameRenderer.lightTexture().updateLightTexture(partialTicks);
+
+            //Camera camera = this.mainCamera;
+
+            //this.renderDistance = (float)(this.minecraft.options.getEffectiveRenderDistance() * 16);
+            PoseStack posestack1 = new PoseStack();
+            // double d0 = this.getFov(camera, partialTicks, true);
+            float fov = 70;
+            int renderDistance = 30;
+            posestack1.last().pose().multiply(getProjectionMatrix(fov, size, renderDistance));
+
+
+            Matrix4f matrix4f = posestack1.last().pose();
+            RenderSystem.setProjectionMatrix(matrix4f);
+            //camera.setup(this.minecraft.level, (Entity)(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity()), !this.minecraft.options.getCameraType().isFirstPerson(), this.minecraft.options.getCameraType().isMirrored(), pPartialTicks);
+
+            //camera.setAnglesInternal(cameraSetup.getYaw(), cameraSetup.getPitch());
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(0));
+
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(-180));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(0 + 180.0F));
+            Matrix3f matrix3f = poseStack.last().normal().copy();
+            if (matrix3f.invert()) {
+                RenderSystem.setInverseViewRotationMatrix(matrix3f);
+            }
+
+            levelRenderer.prepareCullFrustum(poseStack, camera.getPosition(),
+                    getProjectionMatrix(Math.max(fov, mc.options.fov), size, renderDistance));
+            levelRenderer.renderLevel(poseStack, partialTicks, Util.getNanos(), false, camera,
+                    gameRenderer, gameRenderer.lightTexture(), matrix4f);
+
+        }*/
+        posestack.popPose();
+
+        RenderSystem.applyModelViewMatrix();
+
+        //reset projection
+      //  RenderSystem.setProjectionMatrix(oldProjection);
+
+        // RenderSystem.clear(256, Minecraft.ON_OSX);
+        //returns render calls to main render target
+        mc.getMainRenderTarget().bindWrite(true);
+
+    }
+
+    public static Matrix4f getProjectionMatrix(double pFov, int size, int renderDistance) {
+        PoseStack posestack = new PoseStack();
+        posestack.last().pose().setIdentity();
+        float zoom = 1;
+        float zoomX = 1;
+        float zoomY = 1;
+        if (zoom != 1.0F) {
+            posestack.translate((double)zoomX, (double)(-zoomY), 0.0D);
+            posestack.scale(zoom, zoom, 1.0F);
+        }
+
+        posestack.last().pose().multiply(Matrix4f.perspective(pFov, (float)size / size, 0.05F, renderDistance*4f));
+        return posestack.last().pose();
     }
 
     public static void drawItem(FrameBufferBackedDynamicTexture tex, Item item) {

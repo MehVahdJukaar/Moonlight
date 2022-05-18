@@ -11,7 +11,7 @@ public class KMeans {
     static final Double PRECISION = 0.01;
 
     /* K-Means++ implementation, initializes K centroids from data */
-    public static <A> LinkedList<IDataEntry<A>> kmeanspp(DataSet<A> data, int K) {
+    public static <A> LinkedList<IDataEntry<A>> kMeansPP(DataSet<A> data, int K) {
         LinkedList<IDataEntry<A>> centroids = new LinkedList<>();
 
         centroids.add(data.randomFromDataSet());
@@ -24,9 +24,9 @@ public class KMeans {
 
     /* K-Means itself, it takes a dataset and a number K and adds class numbers
      * to records in the dataset */
-    public static <A> void kmeans(DataSet<A> data, int K) {
+    public static <A> void kMeans(DataSet<A> data, int K) {
         // select K initial centroids
-        List<IDataEntry<A>> centroids = kmeanspp(data, K);
+        List<IDataEntry<A>> centroids = kMeansPP(data, K);
 
         // initialize Sum of Squared Errors to max, we'll lower it at each iteration
         Double SSE = Double.MAX_VALUE;

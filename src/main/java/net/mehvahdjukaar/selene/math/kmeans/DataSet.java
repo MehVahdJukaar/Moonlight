@@ -168,7 +168,7 @@ public class DataSet<A> {
                 }
             }
         }
-        throw new UnsupportedOperationException("aa");
+        throw new UnsupportedOperationException("Something bad happened");
     }
 
     public List<IDataEntry<A>> getColorPoints() {
