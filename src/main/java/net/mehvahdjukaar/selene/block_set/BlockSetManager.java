@@ -14,6 +14,7 @@ import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -83,7 +84,7 @@ public class BlockSetManager {
     public static <T extends IBlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
         if (hasFilledBlockSets) {
             throw new UnsupportedOperationException(
-                    String.format("Tried to remove block type %s for type %s after registry events",id, type));
+                    String.format("Tried to remove block type %s for type %s after registry events", id, type));
         }
         REMOVER_ADDER.add(() -> {
             BlockTypeRegistry<T> container = getBlockSet(type);
@@ -204,7 +205,19 @@ public class BlockSetManager {
         for (var c : BLOCK_SET_CONTAINERS.entrySet()) {
             c.getValue().buildAll();
         }
+
+        //remove not wanted ones
+        REMOVER_ADDER.forEach(Runnable::run);
+        REMOVER_ADDER.clear();
     }
 
 
+    public static Collection<BlockTypeRegistry<?>> getRegistries() {
+        return BLOCK_SET_CONTAINERS.values();
+    }
+
+    @Nullable
+    public static BlockTypeRegistry<?> getRegistry(Class<? extends IBlockType> typeClass) {
+        return BLOCK_SET_CONTAINERS.get(typeClass);
+    }
 }

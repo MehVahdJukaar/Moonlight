@@ -41,19 +41,8 @@ public interface IBlockType {
                 namespace + "/" + this.getTypeName() + "_" + baseName;
     }
 
-    default Component getReadableName() {
-        return LangBuilder.getReadableComponent(this.getTranslationKey());
-    }
-
-    /**
-     * Helper method to generate translation strings from existing name and block type ones.
-     * @param variantKey i.e: block.hanging_sign
-     * @return translated string from provided key with added translated name of this block type
-     */
-    default String getVariantReadableName(String variantKey) {
-        return LangBuilder.getReadableName(this.getTypeName()+"_"+variantKey);
-       // return LangBuilder.getReadableComponent(variantKey,
-       //         LangBuilder.getReadableComponent(this.getTranslationKey()).getString()).getString();
+    default String getReadableName() {
+        return LangBuilder.getReadableName(this.getTypeName());
     }
 
     default boolean isVanilla() {
@@ -87,5 +76,6 @@ public interface IBlockType {
         }
         return found;
     }
+
 
 }

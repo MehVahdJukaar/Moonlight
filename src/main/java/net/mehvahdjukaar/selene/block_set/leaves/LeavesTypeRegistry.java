@@ -2,12 +2,11 @@ package net.mehvahdjukaar.selene.block_set.leaves;
 
 import com.google.common.collect.ImmutableMap;
 import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
-import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
+import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.NotNull;
@@ -82,7 +81,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     @Override
     public void buildAll() {
-        if(!frozen) {
+        if (!frozen) {
             for (var v : WoodTypeRegistry.WOOD_TYPES.values()) {
                 if (v.leaves != null) {
                     this.registerBlockType(new LeavesType(v.id, v.leaves, v));
@@ -90,5 +89,13 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
             }
         }
         super.buildAll();
+    }
+
+
+    @Override
+    public void addTypeTranslations(DynamicLanguageManager.LanguageAccessor language) {
+        LEAVES_TYPES.forEach((r, w) -> {
+            if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
+        });
     }
 }

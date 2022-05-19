@@ -47,11 +47,12 @@ public class Palette {
         if (this.tolerance == tolerance) return;
         this.tolerance = tolerance;
         if (tolerance == 0) return;
-        boolean recalculate = false;
+        boolean recalculate;
         do {
+            recalculate = false;
             for (int i = 1; i < this.size(); i++) {
-                PaletteColor c0 = this.get(i - 1);
-                PaletteColor c1 = this.get(i);
+                PaletteColor c0 = this.get(i - 1); //first
+                PaletteColor c1 = this.get(i); //second
                 if (c0.distanceTo(c1) <= tolerance) {
                     Palette tempPal = new Palette(List.of(c0, c1));
                     int after = i + 1;
@@ -314,6 +315,7 @@ public class Palette {
      * Combines multiple palettes into one, preserving their occurrence values
      */
     public static Palette merge(Palette... palettes) {
+        if(palettes.length == 1)return new Palette(palettes[0].getValues());
         Map<Integer, PaletteColor> map = new HashMap<>();
         for (Palette p : palettes) {
             for (PaletteColor c : p.getValues()) {
@@ -374,7 +376,7 @@ public class Palette {
         List<Palette> palettes = fromAnimatedImage(textureImage, textureMask, 0);
 
         Palette palette = merge(palettes.toArray(new Palette[0]));
-        palette.updateTolerance(tolerance);
+        if(tolerance != 0) palette.updateTolerance(tolerance);
         return palette;
     }
 

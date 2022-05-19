@@ -25,6 +25,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -72,12 +73,15 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     private Map<String, MapBanner> bannerMarkers;
 
     //new decorations (stuff that gets rendered)
+    @Unique
     public Map<String, CustomDecoration> customDecorations = Maps.newLinkedHashMap();
 
     //world markers
+    @Unique
     private final Map<String, MapBlockMarker<?>> customMapMarkers = Maps.newHashMap();
 
     //custom data that can be stored in maps
+    @Unique
     public final Map<String, CustomDataHolder.Instance<?>> customData = new HashMap<>();
 
     @Override

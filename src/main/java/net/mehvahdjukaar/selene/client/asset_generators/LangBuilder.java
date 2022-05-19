@@ -2,6 +2,8 @@ package net.mehvahdjukaar.selene.client.asset_generators;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
@@ -17,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LangBuilder {
@@ -29,7 +32,7 @@ public class LangBuilder {
     }
 
     /**
-     * Attempts grabbig a translated component with the given key anr arguments. If none is found it will make the key itself readable
+     * Attempts grabbig a translated component with the given key and arguments. If none is found it will make the key itself readable
      *
      * @param key       translation key
      * @param arguments optional arguments
@@ -80,4 +83,39 @@ public class LangBuilder {
         return json;
     }
 
+    public Map<String, String> entries() {
+        return entries;
+    }
+
+
+    public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
+                                          String key, IBlockType type, Item item){
+        String base = lang.getEntry(key);
+        if(base != null){
+            String typeName = lang.getEntry(type.getTranslationKey());
+            if (typeName != null) {
+                lang.addEntry(item.getDescriptionId(), String.format(base, typeName));
+            }
+        };
+    }
+    public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
+                                         String key, IBlockType type, Block block){
+        String base = lang.getEntry(key);
+        if(base != null){
+            String typeName = lang.getEntry(type.getTranslationKey());
+            if (typeName != null) {
+                lang.addEntry(block.getDescriptionId(), String.format(base, typeName));
+            }
+        };
+    }
+    public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
+                                       String key, IBlockType type, EntityType<?> entityType){
+        String base = lang.getEntry(key);
+        if(base != null){
+            String typeName = lang.getEntry(type.getTranslationKey());
+            if (typeName != null) {
+                lang.addEntry(entityType.getDescriptionId(), String.format(base, typeName));
+            }
+        };
+    }
 }

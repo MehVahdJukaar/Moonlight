@@ -33,6 +33,7 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
             ((ReloadableResourceManager) mc.getResourceManager())
                     .registerReloadListener(this);
         }
+        DynamicLanguageManager.register(this);
     }
 
     @Override
@@ -63,4 +64,10 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
         }
     }
 
+
+    /**
+     * Use this method to add language entries that are dynamic and can be created based off existing entries.
+     * @param languageAccessor object used to access all currently registered language entries for the current lang file and add new ones
+     */
+    public void addDynamicTranslations(DynamicLanguageManager.LanguageAccessor languageAccessor){};
 }

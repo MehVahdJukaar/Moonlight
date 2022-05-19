@@ -145,7 +145,7 @@ public class WoodType implements IBlockType {
 
     @Override
     public String getTranslationKey() {
-        return "wood_type." + this.getTypeName();
+        return "wood_type." + this.getTypeName().replace("/",".");
     }
 
     public static class Finder extends SetFinder<WoodType> {
