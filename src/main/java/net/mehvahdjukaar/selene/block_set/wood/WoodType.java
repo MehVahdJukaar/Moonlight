@@ -54,6 +54,9 @@ public class WoodType implements IBlockType {
     public final Lazy<Item> signItem; //used for item textures
     public final Lazy<Item> boatItem;
 
+    @Nullable
+    private final net.minecraft.world.level.block.state.properties.WoodType vanillaType;
+
     //remove
     public final String shortenedNamespace;
 
@@ -80,6 +83,14 @@ public class WoodType implements IBlockType {
         //checks if it has a sign
         this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
         this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
+        String i = id.getNamespace().equals("minecraft") ? "" : id.getNamespace()+"/" + id.getPath();
+        var o = net.minecraft.world.level.block.state.properties.WoodType.values().filter(v->v.name().equals(i)).findAny();
+        this.vanillaType = o.orElse(null);
+    }
+
+    @Nullable
+    public net.minecraft.world.level.block.state.properties.WoodType toVanilla(){
+        return this.vanillaType;
     }
 
     @Override

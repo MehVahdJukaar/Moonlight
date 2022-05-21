@@ -25,6 +25,8 @@ import java.util.List;
 
 public class FrameBufferBackedDynamicTexture extends AbstractTexture {
 
+    boolean initialized = false;
+
     //thing where it renders stuff on
     private RenderTarget frameBuffer;
 
@@ -47,6 +49,10 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
 
     public FrameBufferBackedDynamicTexture(ResourceLocation resourceLocation , int size){
         this(resourceLocation, size, size);
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

@@ -37,10 +37,10 @@ public class MthUtils {
     }
 
     public static Vec3 getNormalFrom3DData(int direction) {
-        return V3toV3i(Direction.from3DDataValue(direction).getNormal());
+        return V3itoV3(Direction.from3DDataValue(direction).getNormal());
     }
 
-    public static Vec3 V3toV3i(Vec3i v) {
+    public static Vec3 V3itoV3(Vec3i v) {
         return new Vec3(v.getX(), v.getY(), v.getZ());
     }
 

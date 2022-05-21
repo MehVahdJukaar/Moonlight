@@ -36,7 +36,7 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class FlatItemTextureManager {
+public class RenderedTexturesManager {
 
     private record RenderingData(ResourceLocation id, Item item, @Nullable Consumer<NativeImage> postProcessing) {
     }
@@ -91,6 +91,7 @@ public class FlatItemTextureManager {
             ResourceLocation res = b.id;
             var texture = TEXTURE_CACHE.getIfPresent(res);
             if (texture != null) {
+                texture.initialized = true;
                 drawItem(texture, b.item);
                 //drawItem2(texture,new BlockPos(0,70,0),Direction.NORTH,1);
                 if (b.postProcessing != null) {
@@ -222,7 +223,7 @@ Camera camera = gameRenderer.getMainCamera();
         int size = 16;
 
         //gui setup code
-        RenderSystem.clear(256, Minecraft.ON_OSX);
+        //RenderSystem.clear(256, Minecraft.ON_OSX);
 
         Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
 

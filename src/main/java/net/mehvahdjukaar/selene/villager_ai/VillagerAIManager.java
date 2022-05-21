@@ -30,7 +30,7 @@ public class VillagerAIManager {
             SCHEDULES.register("custom_villager_schedule", Schedule::new);
 
 
-    //called by mixin
+    //called by mixin. Do not call
     public static void onRegisterBrainGoals(Brain<Villager> brain, AbstractVillager villager) {
         if(villager instanceof Villager v) {
             var event = new VillagerBrainEvent(brain, v);
