@@ -21,19 +21,16 @@ public class ClientBoundSyncCustomMapDecorationPacket {
     private final int mapId;
     private final byte scale;
     private final boolean locked;
-    @Nullable
-    private final MapItemSavedData.MapPatch colorPatch;
 
     private final CustomDecoration[] customDecoration;
     private final CustomDataHolder.Instance<?>[] customData;
 
     public ClientBoundSyncCustomMapDecorationPacket(
-            int mapId, byte pScale, boolean pLocked, @Nullable MapItemSavedData.MapPatch pColorPatch,
+            int mapId, byte pScale, boolean pLocked,
             CustomDecoration[] customDecoration, CustomDataHolder.Instance<?>[] customData) {
         this.mapId = mapId;
         this.scale = pScale;
         this.locked = pLocked;
-        this.colorPatch = pColorPatch;
 
         this.customData = customData;
         this.customDecoration = customDecoration;
@@ -43,17 +40,6 @@ public class ClientBoundSyncCustomMapDecorationPacket {
         this.mapId = pBuffer.readVarInt();
         this.scale = pBuffer.readByte();
         this.locked = pBuffer.readBoolean();
-
-        int i = pBuffer.readUnsignedByte();
-        if (i > 0) {
-            int j = pBuffer.readUnsignedByte();
-            int k = pBuffer.readUnsignedByte();
-            int l = pBuffer.readUnsignedByte();
-            byte[] byteArray = pBuffer.readByteArray();
-            this.colorPatch = new MapItemSavedData.MapPatch(k, l, i, j, byteArray);
-        } else {
-            this.colorPatch = null;
-        }
 
         this.customDecoration = new CustomDecoration[pBuffer.readVarInt()];
 
@@ -78,16 +64,6 @@ public class ClientBoundSyncCustomMapDecorationPacket {
         buffer.writeVarInt(message.mapId);
         buffer.writeByte(message.scale);
         buffer.writeBoolean(message.locked);
-
-        if (message.colorPatch != null) {
-            buffer.writeByte(message.colorPatch.width);
-            buffer.writeByte(message.colorPatch.height);
-            buffer.writeByte(message.colorPatch.startX);
-            buffer.writeByte(message.colorPatch.startY);
-            buffer.writeByteArray(message.colorPatch.mapColors);
-        } else {
-            buffer.writeByte(0);
-        }
 
         buffer.writeVarInt(message.customDecoration.length);
 
@@ -115,14 +91,12 @@ public class ClientBoundSyncCustomMapDecorationPacket {
                 String s = MapItem.makeKey(i);
                 MapItemSavedData mapData = Minecraft.getInstance().level.getMapData(s);
 
-                if (mapData == null) {
-
-                    mapData = MapItemSavedData.createForClient(message.scale, message.locked, Minecraft.getInstance().level.dimension());
-                    Minecraft.getInstance().level.setMapData(s, mapData);
+                if (mapData != null) {
+                    //mapData = MapItemSavedData.createForClient(message.scale, message.locked, Minecraft.getInstance().level.dimension());
+                    //Minecraft.getInstance().level.setMapData(s, mapData);
+                    message.applyToMap(mapData);
+                    mapRenderer.update(i, mapData);
                 }
-
-                message.applyToMap(mapData);
-                mapRenderer.update(i, mapData);
             }
         });
         context.setPacketHandled(true);
