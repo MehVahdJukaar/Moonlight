@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LangBuilder {
@@ -89,7 +88,7 @@ public class LangBuilder {
 
 
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
-                                          String key, IBlockType type, Item item){
+                                       String key, IBlockType type, Item item){
         String base = lang.getEntry(key);
         if(base != null){
             String typeName = lang.getEntry(type.getTranslationKey());
@@ -99,7 +98,7 @@ public class LangBuilder {
         };
     }
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
-                                         String key, IBlockType type, Block block){
+                                       String key, IBlockType type, Block block){
         String base = lang.getEntry(key);
         if(base != null){
             String typeName = lang.getEntry(type.getTranslationKey());

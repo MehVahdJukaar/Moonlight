@@ -6,6 +6,7 @@
   "refmap": "selene.refmap.json",
   "package": "net.mehvahdjukaar.selene.mixins",
   "mixins": [
+    "CreativeModeTabMixin",
     "GrindstoneMenuSlotMixin",
     "MapDataMixin",
     "MapExtendingRecipeMixin",

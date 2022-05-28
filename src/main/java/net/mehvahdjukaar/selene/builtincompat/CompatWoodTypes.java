@@ -21,5 +21,7 @@ public class CompatWoodTypes {
                 new ResourceLocation("culturaldelights:avocado"),
                 new ResourceLocation("minecraft:jungle_planks"),
                 new ResourceLocation("culturaldelights:avocado_log")));
+        BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "habitat","fairy_ring_mushroom", "fairy_ring_mushroom_planks" , "enhanced_fairy_ring_mushroom_stem"));
     }
 }

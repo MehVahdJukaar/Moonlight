@@ -23,21 +23,24 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nullable;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class RenderedTexturesManager {
 
-    private record RenderingData(ResourceLocation id,
-                                 Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction) {
+    private record RenderingData(
+            ResourceLocation id,
+            Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction,
+            boolean animated) {
     }
 
-    private static final Queue<RenderingData> REQUESTED_FOR_RENDERING = new ArrayDeque<>();
+    private static final List<RenderingData> REQUESTED_FOR_RENDERING = new ArrayList<>();
 
     private static final LoadingCache<ResourceLocation, FrameBufferBackedDynamicTexture> TEXTURE_CACHE = CacheBuilder.newBuilder()
-            .expireAfterAccess(4, TimeUnit.MINUTES)
+            .expireAfterAccess(2, TimeUnit.MINUTES)
             .removalListener(i -> {
                 FrameBufferBackedDynamicTexture value = (FrameBufferBackedDynamicTexture) i.getValue();
                 if (value != null) value.close();
@@ -55,19 +58,21 @@ public class RenderedTexturesManager {
     }
 
     public static FrameBufferBackedDynamicTexture getRenderedTexture(
-            ResourceLocation res, int size, Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction) {
+            ResourceLocation res, int size,
+            Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction,
+            boolean updateEachFrame) {
         var texture = TEXTURE_CACHE.getIfPresent(res);
         if (texture == null) {
             texture = new FrameBufferBackedDynamicTexture(res, size);
             TEXTURE_CACHE.put(res, texture);
             //add to queue which will render them next rendering cycle. Returned texture will be blank
-            REQUESTED_FOR_RENDERING.add(new RenderingData(res, textureDrawingFunction));
+            REQUESTED_FOR_RENDERING.add(new RenderingData(res, textureDrawingFunction, updateEachFrame));
         }
         return texture;
     }
 
     public static FrameBufferBackedDynamicTexture getFlatItemStackTexture(ResourceLocation res, ItemStack stack, int size) {
-        return getRenderedTexture(res, size, t -> drawItem(t, stack));
+        return getRenderedTexture(res, size, t -> drawItem(t, stack), true);
     }
 
     public static FrameBufferBackedDynamicTexture getFlatItemTexture(Item item, int size, String prefix) {
@@ -80,17 +85,24 @@ public class RenderedTexturesManager {
         ResourceLocation res = Selene.res(item.getRegistryName().toString().replace(":", "/")
                 + "/" + size + prefix);
 
-        Consumer<FrameBufferBackedDynamicTexture> factory = t -> {
-            drawItem(t, item.getDefaultInstance());
-            //drawItem2(texture,new BlockPos(0,70,0),Direction.NORTH,1);
-            if (postProcessing != null) {
-                t.download();
-                NativeImage img = t.getPixels();
-                postProcessing.accept(img);
-                t.upload();
-            }
-        };
-        return getRenderedTexture(res, size, factory);
+        var texture = TEXTURE_CACHE.getIfPresent(res);
+        if (texture == null) {
+            texture = new FrameBufferBackedDynamicTexture(res, size);
+            TEXTURE_CACHE.put(res, texture);
+            //add to queue which will render them next rendering cycle. Returned texture will be blank
+            Consumer<FrameBufferBackedDynamicTexture> factory = t -> {
+                drawItem(t, item.getDefaultInstance());
+                //drawItem2(texture,new BlockPos(0,70,0),Direction.NORTH,1);
+                if (postProcessing != null) {
+                    t.download();
+                    NativeImage img = t.getPixels();
+                    postProcessing.accept(img);
+                    t.upload();
+                }
+            };
+            REQUESTED_FOR_RENDERING.add(new RenderingData(res, factory, false));
+        }
+        return texture;
     }
 
     public static FrameBufferBackedDynamicTexture getFlatItemTexture(Item item, int size) {
@@ -99,14 +111,16 @@ public class RenderedTexturesManager {
 
     //called each rendering tick
     public static void updateTextures() {
-        while (true) {
-            RenderingData data = REQUESTED_FOR_RENDERING.poll();
-            if (data == null) return;
-            ResourceLocation res = data.id;
-            var texture = TEXTURE_CACHE.getIfPresent(res);
+        ListIterator<RenderingData> iter = REQUESTED_FOR_RENDERING.listIterator();
+        while (iter.hasNext()) {
+            var data = iter.next();
+            var texture = TEXTURE_CACHE.getIfPresent(data.id);
             if (texture != null) {
                 texture.initialized = true;
                 data.textureDrawingFunction.accept(texture);
+            }
+            if (!data.animated || texture == null) {
+                iter.remove();
             }
         }
     }

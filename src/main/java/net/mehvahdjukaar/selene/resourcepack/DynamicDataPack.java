@@ -52,6 +52,7 @@ public class DynamicDataPack extends DynamicResourcePack {
 
     public void addRecipe(FinishedRecipe recipe) {
         this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
+        this.addJson(recipe.getAdvancementId(), recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
     }
 
     public void addRecipeWithAdvancement(FinishedRecipe recipe) {

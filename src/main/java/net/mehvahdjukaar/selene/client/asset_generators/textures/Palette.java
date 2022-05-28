@@ -191,7 +191,7 @@ public class Palette {
     /**
      * Removes one color, the one that is least used
      */
-    private void removeLeastUsed() {
+    public void removeLeastUsed() {
         //remove the one with least occurrence
         PaletteColor toRemove = internal.get(0);
         for (var p : internal) {
@@ -205,7 +205,7 @@ public class Palette {
     /**
      * Removes one color, the one that is closest to other colors
      */
-    private void reduce() {
+    public void reduce() {
         int index = 0;
         float minDelta = 10000;
         float lastLum = this.get(0).luminance();

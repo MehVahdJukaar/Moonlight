@@ -14,44 +14,27 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class LeavesType implements IBlockType {
+public class LeavesType extends IBlockType {
 
     public static LeavesType OAK_LEAVES_TYPE = new LeavesType(new ResourceLocation("oak"), Blocks.OAK_LEAVES, WoodType.OAK_WOOD_TYPE);
 
-    public final ResourceLocation id;
     public final Block leaves;
-
     public final WoodType woodType;
 
     protected LeavesType(ResourceLocation id, Block leaves, @Nullable WoodType woodType) {
-        this.id = id;
+        super(id);
         this.leaves = leaves;
         this.woodType = woodType;
     }
 
     @Override
     public String getTranslationKey() {
-        return "leaves_type." + this.getTypeName();
+        return "leaves_type." + this.getNamespace() + "." + this.getTypeName();
     }
 
     @Override
-    public String getTypeName() {
-        return id.getPath();
-    }
-
-    @Override
-    public String getNamespace() {
-        return id.getNamespace();
-    }
-
-    @Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    @Override
-    public String toString() {
-        return this.id.toString();
+    protected void initializeChildren() {
+        this.addChild("leaves", leaves);
     }
 
     public static class Finder extends SetFinder<LeavesType> {

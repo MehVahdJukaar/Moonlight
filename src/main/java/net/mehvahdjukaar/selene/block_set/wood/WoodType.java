@@ -16,112 +16,74 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class WoodType implements IBlockType {
+public class WoodType extends IBlockType {
 
     public static WoodType OAK_WOOD_TYPE = new WoodType(new ResourceLocation("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
 
-    public final ResourceLocation id;
     public final Material material;
+
+
     public final Block planks;
     public final Block log;
 
     //additional optional blocks
+    //TODO: remove
     @Nullable
-    public final Block slab;
-    @Nullable
-    public final Block stairs;
-    @Nullable
-    public final Block fence;
-    @Nullable
-    public final Block fenceGate;
-    @Nullable
-    public final Block button;
-    @Nullable
-    public final Block pressurePlate;
-    @Nullable
-    public final Block door;
-    @Nullable
-    public final Block trapdoor;
-    @Nullable
+    @Deprecated
     public final Block strippedLog;
     @Nullable
-    public final Block strippedWood;
-    @Nullable
-    public final Block wood;
-    @Nullable
+    @Deprecated
     public final Block leaves;
     //lazy cause wood types are loaded before items, so we can only access blocks
+    @Deprecated
     public final Lazy<Item> signItem; //used for item textures
+    @Deprecated
     public final Lazy<Item> boatItem;
 
     @Nullable
     private final net.minecraft.world.level.block.state.properties.WoodType vanillaType;
 
-    //remove
-    public final String shortenedNamespace;
-
     protected WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
-        this.id = id;
+        super(id);
         this.planks = baseBlock;
         this.log = logBlock;
         this.material = baseBlock.defaultBlockState().getMaterial();
-        this.shortenedNamespace = id.getNamespace().equals("minecraft") ? "" : "_" + abbreviateString(id.getNamespace());
 
+        this.strippedLog = this.findLogRelatedBlock("stripped","");
         this.leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
-        this.strippedLog = this.findRelatedEntry("stripped", "log", ForgeRegistries.BLOCKS);
-        this.strippedWood = this.findRelatedEntry("stripped", "wood", ForgeRegistries.BLOCKS);
-        this.wood = this.findRelatedEntry("wood", ForgeRegistries.BLOCKS);
-        this.slab = this.findRelatedEntry("slab", ForgeRegistries.BLOCKS);
-        this.stairs = this.findRelatedEntry("stairs", ForgeRegistries.BLOCKS);
-        this.fence = this.findRelatedEntry("fence", ForgeRegistries.BLOCKS);
-        this.fenceGate = this.findRelatedEntry("fence_gate", ForgeRegistries.BLOCKS);
-        this.door = this.findRelatedEntry("door", ForgeRegistries.BLOCKS);
-        this.trapdoor = this.findRelatedEntry("trapdoor", ForgeRegistries.BLOCKS);
-        this.button = this.findRelatedEntry("button", ForgeRegistries.BLOCKS);
-        this.pressurePlate = this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS);
 
         //checks if it has a sign
         this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
         this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
-        String i = id.getNamespace().equals("minecraft") ? "" : id.getNamespace()+"/" + id.getPath();
-        var o = net.minecraft.world.level.block.state.properties.WoodType.values().filter(v->v.name().equals(i)).findAny();
+        String i = id.getNamespace().equals("minecraft") ? "" : id.getNamespace() + "/" + id.getPath();
+        var o = net.minecraft.world.level.block.state.properties.WoodType.values().filter(v -> v.name().equals(i)).findAny();
         this.vanillaType = o.orElse(null);
     }
 
     @Nullable
-    public net.minecraft.world.level.block.state.properties.WoodType toVanilla(){
+    protected Block findLogRelatedBlock(String append, String postpend) {
+        String post = postpend.isEmpty() ? "" : "_" + postpend;
+        var id = this.getId();
+        String log = this.log.getRegistryName().getPath();
+        ResourceLocation[] targets = {
+                new ResourceLocation(id.getNamespace(),  log+ "_" + append + post),
+                new ResourceLocation(id.getNamespace(), append + "_" + log + post),
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
+                new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post)
+        };
+        Block found = null;
+        for (var r : targets) {
+            if (ForgeRegistries.BLOCKS.containsKey(r)) {
+                found = ForgeRegistries.BLOCKS.getValue(r);
+                break;
+            }
+        }
+        return found;
+    }
+
+    @Nullable
+    public net.minecraft.world.level.block.state.properties.WoodType toVanilla() {
         return this.vanillaType;
-    }
-
-    @Override
-    public String toString() {
-        return this.id.toString();
-    }
-
-    @Deprecated
-    public String getWoodName() {
-        return this.getTypeName();
-    }
-
-    public String getTypeName() {
-        return id.getPath();
-    }
-
-    public String getNamespace() {
-        return id.getNamespace();
-    }
-
-    @Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    /**
-     * @return relatively short id used to append to blocks registryNames
-     */
-    @Deprecated
-    public String getAppendableId() {
-        return this.getTypeName() + this.shortenedNamespace;
     }
 
     /**
@@ -156,7 +118,37 @@ public class WoodType implements IBlockType {
 
     @Override
     public String getTranslationKey() {
-        return "wood_type." + this.getTypeName().replace("/",".");
+        return "wood_type." + this.getNamespace() + "." + this.getTypeName();
+    }
+
+    @Override
+    protected void initializeChildren() {
+        Block strippedWood = this.findLogRelatedBlock("stripped", "wood");
+        Block wood = this.findRelatedEntry("wood", ForgeRegistries.BLOCKS);
+        Block slab = this.findRelatedEntry("slab", ForgeRegistries.BLOCKS);
+        Block stairs = this.findRelatedEntry("stairs", ForgeRegistries.BLOCKS);
+        Block fence = this.findRelatedEntry("fence", ForgeRegistries.BLOCKS);
+        Block fenceGate = this.findRelatedEntry("fence_gate", ForgeRegistries.BLOCKS);
+        Block door = this.findRelatedEntry("door", ForgeRegistries.BLOCKS);
+        Block trapdoor = this.findRelatedEntry("trapdoor", ForgeRegistries.BLOCKS);
+        Block button = this.findRelatedEntry("button", ForgeRegistries.BLOCKS);
+        Block pressurePlate = this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS);
+        this.addChild("planks", this.planks);
+        this.addChild("log", this.log);
+        this.addChild("leaves", this.leaves);
+        this.addChild("stripped_log", this.strippedLog);
+        this.addChild("stripped_wood", strippedWood);
+        this.addChild("wood", wood);
+        this.addChild("slab", slab);
+        this.addChild("stairs", stairs);
+        this.addChild("fence", fence);
+        this.addChild("fence_gate", fenceGate);
+        this.addChild("door", door);
+        this.addChild("trapdoor", trapdoor);
+        this.addChild("button", button);
+        this.addChild("pressure_plate", pressurePlate);
+        this.addChild("sign", this.signItem.get());
+        this.addChild("boat", this.boatItem.get());
     }
 
     public static class Finder extends SetFinder<WoodType> {
@@ -181,6 +173,7 @@ public class WoodType implements IBlockType {
                     () -> ForgeRegistries.BLOCKS.getValue(logName));
         }
 
+        @Override
         public Optional<WoodType> get() {
             if (ModList.get().isLoaded(id.getNamespace())) {
                 try {

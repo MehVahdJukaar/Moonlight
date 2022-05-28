@@ -18,7 +18,7 @@ public class DynamicLanguageManager {
         PACKS.add(rpAwareDynamicTextureProvider);
     }
 
-
+    //called by mixin
     public static void addDynamicEntries(ResourceManager cachedResourceManager, List<LanguageInfo> cachedLanguageInfo, Map<String, String> map) {
         var lang = new LanguageAccessor(map, cachedLanguageInfo);
         BlockSetManager.getRegistries().forEach(r -> r.addTypeTranslations(lang));
@@ -41,7 +41,7 @@ public class DynamicLanguageManager {
         }
 
         public void addEntry(String key, String translation) {
-            languageLines.put(key, translation);
+            if(!languageLines.containsKey(key)) languageLines.put(key, translation);
         }
 
         public void addEntries(LangBuilder builder) {

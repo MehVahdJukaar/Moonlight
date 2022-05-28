@@ -212,6 +212,10 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
+    public void addResource(StaticResource resource) {
+        this.addBytes(resource.location, resource.data);
+    }
+
     private void addJson(ResourceLocation path, JsonElement json) {
         try {
             //json.toString().getBytes();

@@ -3,23 +3,31 @@ package net.mehvahdjukaar.selene.resourcepack;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
-import com.mojang.blaze3d.platform.NativeImage;
+import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.selene.resourcepack.recipe.IRecipeTemplate;
+import net.mehvahdjukaar.selene.resourcepack.recipe.ShapedRecipeTemplate;
+import net.mehvahdjukaar.selene.resourcepack.recipe.ShapelessRecipeTemplate;
+import net.mehvahdjukaar.selene.resourcepack.recipe.StoneCutterRecipeTemplate;
+import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.management.openmbean.InvalidOpenTypeException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class RPUtils {
@@ -41,16 +49,17 @@ public class RPUtils {
     }
 
     public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block) throws FileNotFoundException {
-        return findFirstBlockTextureLocation(manager,block,t->true);
+        return findFirstBlockTextureLocation(manager, block, t -> true);
     }
-        /**
-         * Grabs the first texture from a given block
-         *
-         * @param manager          resource manager
-         * @param block            target block
-         * @param texturePredicate predicate that will be applied to the texture name
-         * @return found texture location
-         */
+
+    /**
+     * Grabs the first texture from a given block
+     *
+     * @param manager          resource manager
+     * @param block            target block
+     * @param texturePredicate predicate that will be applied to the texture name
+     * @return found texture location
+     */
     public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
         try {
             ResourceLocation res = block.getRegistryName();
@@ -79,7 +88,7 @@ public class RPUtils {
     //TODO: account for parents
 
     public static ResourceLocation findFirstItemTextureLocation(ResourceManager manager, Item block) throws FileNotFoundException {
-        return findFirstItemTextureLocation(manager,block,t->true);
+        return findFirstItemTextureLocation(manager, block, t -> true);
     }
 
     /**
@@ -138,6 +147,77 @@ public class RPUtils {
         } else return List.of(element.getAsString());
     }
 
+    //recipe stuff
 
+    public static Recipe<?> readRecipe(ResourceManager manager, String location) {
+        return readRecipe(manager,ResType.RECIPES.getPath(location));
+    }
+
+    public static Recipe<?> readRecipe(ResourceManager manager, ResourceLocation location) {
+        try {
+            JsonObject element = RPUtils.deserializeJson(manager.getResource(location).getInputStream());
+            return RecipeManager.fromJson(location, element, ICondition.IContext.EMPTY);
+        } catch (Exception e) {
+            throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));
+        }
+    }
+
+    public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, String location) {
+        return readRecipeAsTemplate(manager,ResType.RECIPES.getPath(location));
+    }
+
+    public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, ResourceLocation location) {
+        try {
+            JsonObject element = RPUtils.deserializeJson(manager.getResource(location).getInputStream());
+            String type = GsonHelper.getAsString(element, "type");
+            RecipeSerializer<?> s = ForgeRegistries.RECIPE_SERIALIZERS.getValue(new ResourceLocation(type));
+            if (s == RecipeSerializer.SHAPED_RECIPE) {
+                return ShapedRecipeTemplate.fromJson(element);
+            } else if (s == RecipeSerializer.SHAPELESS_RECIPE) {
+                return ShapelessRecipeTemplate.fromJson(element);
+            } else if(s == RecipeSerializer.STONECUTTER){
+                return StoneCutterRecipeTemplate.fromJson(element);
+            }
+            throw new UnsupportedOperationException(String.format("Invalid recipe serializer: %s", s));
+        } catch (Exception e) {
+            throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));
+        }
+    }
+
+    public static <T extends IBlockType> Recipe<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, String baseID) {
+        if (original instanceof ShapedRecipe or) {
+            List<Ingredient> newList = new ArrayList<>();
+            for (var ingredient : or.getIngredients()) {
+                if (ingredient != null && ingredient.getItems().length > 0) {
+                    Item i = IBlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
+                    newList.add(Ingredient.of(i));
+                }
+            }
+            Item originalRes = or.getResultItem().getItem();
+            Item newRes = IBlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
+            if (newRes == originalRes) throw new UnsupportedOperationException("Failed to convert recipe");
+            ItemStack result = newRes.getDefaultInstance();
+            ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
+            NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
+            return new ShapedRecipe(newId, or.getGroup(), or.getWidth(), or.getHeight(), ingredients, result);
+        } else if (original instanceof ShapelessRecipe or) {
+            List<Ingredient> newList = new ArrayList<>();
+            for (var ingredient : or.getIngredients()) {
+                if (ingredient != null && ingredient.getItems().length > 0) {
+                    Item i = IBlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
+                    newList.add(Ingredient.of(i));
+                }
+            }
+            Item originalRes = or.getResultItem().getItem();
+            Item newRes = IBlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
+            if (newRes == originalRes) throw new UnsupportedOperationException("Failed to convert recipe");
+            ItemStack result = newRes.getDefaultInstance();
+            ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
+            NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
+            return new ShapelessRecipe(newId, or.getGroup(), result, ingredients);
+        } else {
+            throw new UnsupportedOperationException(String.format("Original recipe %s must be Shaped or Shapeless", original));
+        }
+    }
 
 }

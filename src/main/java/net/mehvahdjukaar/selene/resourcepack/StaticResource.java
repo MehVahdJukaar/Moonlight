@@ -16,7 +16,16 @@ public class StaticResource {
     public final ResourceLocation location;
     public final String sourceName;
 
-    public StaticResource(Resource original) {
+    private StaticResource(byte data[], ResourceLocation location, String sourceName){
+        this.data = data;
+        this.location = location;
+        this.sourceName = sourceName;
+    }
+
+    /**
+     * Converts and consume a resource to be used multiple time
+     */
+    public static StaticResource of(Resource original) {
         byte[] data1;
         try {
             data1 = original.getInputStream().readAllBytes();
@@ -25,15 +34,20 @@ public class StaticResource {
             Selene.LOGGER.error("Could not parse resource: {}", original.getLocation());
         }
 
-        this.data = data1;
-        this.location = original.getLocation();
-        this.sourceName = original.getSourceName();
+        return new StaticResource(data1,original.getLocation(), original.getSourceName());
+    }
+
+    /**
+     * Just used as a record
+     */
+    public static StaticResource create(byte data[], ResourceLocation location){
+        return new StaticResource(data, location, location.toString());
     }
 
     @Nullable
     public static StaticResource getOrLog(ResourceManager manager, ResourceLocation location) {
         try {
-            return new StaticResource(manager.getResource(location));
+            return of(manager.getResource(location));
         } catch (Exception var4) {
             Selene.LOGGER.error("Could not find resource {} while generating dynamic resource pack", location);
             return null;
@@ -41,6 +55,6 @@ public class StaticResource {
     }
 
     public static StaticResource getOrFail(ResourceManager manager, ResourceLocation location) throws IOException {
-        return new StaticResource(manager.getResource(location));
+        return of(manager.getResource(location));
     }
 }

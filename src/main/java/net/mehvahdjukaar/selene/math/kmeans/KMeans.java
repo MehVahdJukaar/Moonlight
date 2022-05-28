@@ -28,7 +28,7 @@ public class KMeans {
         // select K initial centroids
         List<IDataEntry<A>> centroids = kMeansPP(data, K);
 
-        // initialize Sum of Squared Errors to max, we'll lower it at each iteration
+        // initAfterSetup Sum of Squared Errors to max, we'll lower it at each iteration
         Double SSE = Double.MAX_VALUE;
 
         while (true) {

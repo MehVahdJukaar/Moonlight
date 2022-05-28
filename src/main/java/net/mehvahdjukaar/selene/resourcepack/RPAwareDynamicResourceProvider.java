@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePack> implements PreparableReloadListener {
+public abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePack> implements PreparableReloadListener {
 
     public final T dynamicPack;
     private boolean hasBeenInitialized;
