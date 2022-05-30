@@ -2,7 +2,7 @@ package net.mehvahdjukaar.selene.resourcepack.recipe;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
@@ -43,15 +43,16 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
         return new StoneCutterRecipeTemplate(i, count, group, ingredient);
     }
 
-    public <T extends IBlockType> SingleItemRecipeBuilder.Result createSimilar(T originalMat, T destinationMat, Item unlockItem) {
-        Item newRes = IBlockType.changeItemBlockType(this.result, originalMat, destinationMat);
-        if (newRes == this.result) throw new UnsupportedOperationException("Failed to convert recipe, result item must be different");
+    public <T extends BlockType> SingleItemRecipeBuilder.Result createSimilar(
+            T originalMat, T destinationMat, Item unlockItem, String id) {
+        Item newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
+        if (newRes == this.result) throw new UnsupportedOperationException(String.format("Could not convert output item %s",newRes));
 
         Ingredient ing = ingredient;
         if (ingredient.getItems().length > 0) {
             Item old = ingredient.getItems()[0].getItem();
             if (old != Items.BARRIER) {
-                Item i = IBlockType.changeItemBlockType(old, originalMat, destinationMat);
+                Item i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
                 ing = Ingredient.of(i);
             }
         }
@@ -63,8 +64,13 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
 
         AtomicReference<SingleItemRecipeBuilder.Result> newRecipe = new AtomicReference<>();
 
-        builder.save(r -> newRecipe.set((SingleItemRecipeBuilder.Result) r));
+        if(id == null) {
+            builder.save(r -> newRecipe.set((SingleItemRecipeBuilder.Result) r));
+        }else{
+            builder.save(r -> newRecipe.set((SingleItemRecipeBuilder.Result) r),id);
+        }
         return newRecipe.get();
     }
+
 
 }

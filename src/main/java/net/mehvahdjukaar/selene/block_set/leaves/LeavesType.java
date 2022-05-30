@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.selene.block_set.leaves;
 
 import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.block_set.IBlockType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;

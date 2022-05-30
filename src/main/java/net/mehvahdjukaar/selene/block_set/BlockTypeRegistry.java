@@ -5,13 +5,14 @@ import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class BlockTypeRegistry<T extends IBlockType> {
+public abstract class BlockTypeRegistry<T extends BlockType> {
 
     protected boolean frozen = false;
-    private final List<IBlockType.SetFinder<T>> finders = new ArrayList<>();
+    private final List<BlockType.SetFinder<T>> finders = new ArrayList<>();
     private final List<ResourceLocation> notInclude = new ArrayList<>();
     private final List<T> builder = new ArrayList<>();
 
@@ -23,6 +24,11 @@ public abstract class BlockTypeRegistry<T extends IBlockType> {
      */
     public T getFromNBT(String name) {
         return this.getTypes().getOrDefault(new ResourceLocation(name), this.getDefaultType());
+    }
+
+    @Nullable
+    public T get(ResourceLocation res){
+        return this.getTypes().get(res);
     }
 
     public abstract T getDefaultType();
@@ -43,11 +49,11 @@ public abstract class BlockTypeRegistry<T extends IBlockType> {
         builder.add(newType);
     }
 
-    public Collection<IBlockType.SetFinder<T>> getFinders() {
+    public Collection<BlockType.SetFinder<T>> getFinders() {
         return finders;
     }
 
-    public void addFinder(IBlockType.SetFinder<T> finder) {
+    public void addFinder(BlockType.SetFinder<T> finder) {
         if (frozen) {
             throw new UnsupportedOperationException("Tried to register block type finder after registry events");
         }
@@ -84,7 +90,7 @@ public abstract class BlockTypeRegistry<T extends IBlockType> {
             this.registerBlockType(this.getDefaultType());
             var finders = this.getFinders();
             //adds finders
-            finders.stream().map(IBlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
+            finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
             for (Block b : ForgeRegistries.BLOCKS) {
                 this.detectTypeFromBlock(b).ifPresent(t -> {
                     if (!notInclude.contains(t.getId())) this.registerBlockType(t);

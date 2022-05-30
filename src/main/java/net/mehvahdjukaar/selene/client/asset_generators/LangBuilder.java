@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.client.asset_generators;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.block_set.IBlockType;
 import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
 import net.minecraft.Util;
@@ -87,8 +88,14 @@ public class LangBuilder {
     }
 
 
+    @Deprecated
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
                                        String key, IBlockType type, Item item){
+        addDynamicEntry(lang,key,(BlockType)type,item);
+    }
+
+    public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
+                                       String key, BlockType type, Item item){
         String base = lang.getEntry(key);
         if(base != null){
             String typeName = lang.getEntry(type.getTranslationKey());
@@ -97,8 +104,15 @@ public class LangBuilder {
             }
         };
     }
+
+    @Deprecated
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
                                        String key, IBlockType type, Block block){
+        addDynamicEntry(lang, key, (BlockType) type, block);
+    }
+
+    public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
+                                       String key, BlockType type, Block block){
         String base = lang.getEntry(key);
         if(base != null){
             String typeName = lang.getEntry(type.getTranslationKey());
@@ -107,8 +121,15 @@ public class LangBuilder {
             }
         };
     }
+
+    @Deprecated
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
                                        String key, IBlockType type, EntityType<?> entityType){
+        addDynamicEntry(lang, key, (BlockType) type, entityType);
+    }
+
+    public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
+                                       String key, BlockType type, EntityType<?> entityType){
         String base = lang.getEntry(key);
         if(base != null){
             String typeName = lang.getEntry(type.getTranslationKey());

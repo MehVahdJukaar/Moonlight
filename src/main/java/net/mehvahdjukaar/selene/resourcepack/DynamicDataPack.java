@@ -52,14 +52,22 @@ public class DynamicDataPack extends DynamicResourcePack {
 
     public void addRecipe(FinishedRecipe recipe) {
         this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
-        this.addJson(recipe.getAdvancementId(), recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
+        ResourceLocation advancementId = recipe.getAdvancementId();
+        if (advancementId != null) {
+            this.addJson(recipe.getAdvancementId(), recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
+        }
     }
 
+    public void addRecipeNoAdvancement(FinishedRecipe recipe) {
+        this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
+    }
+
+    @Deprecated
     public void addRecipeWithAdvancement(FinishedRecipe recipe) {
         this.addRecipe(recipe);
         ResourceLocation advancementId = recipe.getAdvancementId();
         if (advancementId != null) {
-            this.addJson(advancementId, recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
+            //this.addJson(advancementId, recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
         }
     }
 

@@ -5,6 +5,7 @@ import net.mehvahdjukaar.selene.math.MthUtils;
 import net.mehvahdjukaar.selene.math.colors.BaseColor;
 import net.mehvahdjukaar.selene.math.colors.HCLColor;
 import net.mehvahdjukaar.selene.math.colors.LABColor;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class Palette {
 
-    public static final float BASE_TOLERANCE = 1 / 200f;
+    public static final float BASE_TOLERANCE = 1 / 180f;
     private static final Palette EMPTY = new Palette(List.of());
 
     private float tolerance = 0;
@@ -34,8 +35,8 @@ public class Palette {
         return this == EMPTY;
     }
 
-    public Palette copy(){
-        return new Palette(this.internal,tolerance);
+    public Palette copy() {
+        return new Palette(this.internal, tolerance);
     }
 
     /**
@@ -155,7 +156,7 @@ public class Palette {
      */
     private PaletteColor getColorClosestTo(PaletteColor target) {
         PaletteColor bestMatch = target;
-        float lastDist = 10000;
+        float lastDist = Float.MAX_VALUE;
         for (var c : this.getValues()) {
             float dist = target.distanceTo(c);
             if (dist < lastDist) {
@@ -183,8 +184,17 @@ public class Palette {
         while (this.size() > targetSize) {
             removeLeastUsed();
         }
+        boolean down = true;
         while (this.size() < targetSize) {
-            increaseInner();
+            if(this.hasLuminanceGap()){
+                increaseInner();
+            }else{
+                //increase up and down every cycle
+                if(down)increaseDown();
+                else increaseUp();
+                down = !down;
+            }
+
         }
     }
 
@@ -221,10 +231,39 @@ public class Palette {
         this.remove(this.get(index));
     }
 
+    private boolean hasLuminanceGap(){
+        return hasLuminanceGap(1.8f);
+    }
+
+    private boolean hasLuminanceGap(float cutoff){
+        List<Float> list = getLuminanceSteps();
+        float mean = getAverageLuminanceStep();
+
+        for(var s : list){
+            //if it has one step that is greater than 1.5 times the mean
+            if(s>cutoff*mean)return true;
+        }
+        return false;
+    }
+
     /**
-     * Calculates the average luminance different between each color. Ideally it should be somewhat constant
+     * This is just Normalized Standard Deviation (SD/Mean)
+     * @return How much luminance steps differ from eachother
      */
-    public float calculateAverageDeltaLuminance() {
+    public float getLuminanceStepVariationCoeff() {
+        List<Float> list = getLuminanceSteps();
+        float mean = getAverageLuminanceStep();
+        float sum = 0;
+        for (var s : list) {
+            sum += ((s - mean) * (s - mean));
+        }
+        return Mth.sqrt(sum / (list.size() - 1)) / mean;
+    }
+
+    /**
+     * @return A list containing the luminance increase between each color
+     */
+    public List<Float> getLuminanceSteps() {
         List<Float> list = new ArrayList<>();
         float lastLum = this.get(0).luminance();
         for (int i = 1; i < this.size(); i++) {
@@ -232,6 +271,14 @@ public class Palette {
             list.add(l - lastLum);
             lastLum = l;
         }
+        return list;
+    }
+
+    /**
+     * Calculates the average luminance different between each color. Ideally it should be somewhat constant
+     */
+    public float getAverageLuminanceStep() {
+        List<Float> list = getLuminanceSteps();
         float total = 0;
         for (var v : list) total += v;
         return total / (float) list.size();
@@ -269,7 +316,7 @@ public class Palette {
      */
     public PaletteColor increaseUp() {
         assert (this.size() < 2);
-        float averageDeltaLum = this.calculateAverageDeltaLuminance();
+        float averageDeltaLum = this.getAverageLuminanceStep();
         HCLColor lightest = this.getLightest().hcl();
         HCLColor secondLightest = this.get(this.size() - 2).hcl();
         var cc = getNextColor(averageDeltaLum, lightest, secondLightest);
@@ -284,7 +331,7 @@ public class Palette {
      */
     public PaletteColor increaseDown() {
         assert (this.size() < 2);
-        float averageDeltaLum = this.calculateAverageDeltaLuminance();
+        float averageDeltaLum = this.getAverageLuminanceStep();
         HCLColor darkest = this.getDarkest().hcl();
         HCLColor secondDarkest = this.get(1).hcl();
         var cc = getNextColor(-averageDeltaLum, darkest, secondDarkest);
@@ -315,7 +362,7 @@ public class Palette {
      * Combines multiple palettes into one, preserving their occurrence values
      */
     public static Palette merge(Palette... palettes) {
-        if(palettes.length == 1)return new Palette(palettes[0].getValues());
+        if (palettes.length == 1) return new Palette(palettes[0].getValues());
         Map<Integer, PaletteColor> map = new HashMap<>();
         for (Palette p : palettes) {
             for (PaletteColor c : p.getValues()) {
@@ -376,7 +423,7 @@ public class Palette {
         List<Palette> palettes = fromAnimatedImage(textureImage, textureMask, 0);
 
         Palette palette = merge(palettes.toArray(new Palette[0]));
-        if(tolerance != 0) palette.updateTolerance(tolerance);
+        if (tolerance != 0) palette.updateTolerance(tolerance);
         return palette;
     }
 

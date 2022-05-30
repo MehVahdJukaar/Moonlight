@@ -2,7 +2,7 @@ package net.mehvahdjukaar.selene.resourcepack.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
@@ -48,17 +48,20 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
         return new ShapelessRecipeTemplate(i, count, group, ingredientsList);
     }
 
-    public <T extends IBlockType> ShapelessRecipeBuilder.Result createSimilar(T originalMat, T destinationMat, Item unlockItem) {
-        Item newRes = IBlockType.changeItemBlockType(this.result, originalMat, destinationMat);
-        if (newRes == this.result) throw new UnsupportedOperationException("Failed to convert recipe");
+    public <T extends BlockType> ShapelessRecipeBuilder.Result createSimilar(
+            T originalMat, T destinationMat, Item unlockItem, String id) {
+        Item newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
+        if (newRes == this.result)
+            throw new UnsupportedOperationException(String.format("Could not convert output item %s", newRes));
+
 
         ShapelessRecipeBuilder builder = new ShapelessRecipeBuilder(newRes, this.count);
 
         for (var ing : this.ingredients) {
             if (ing.getItems().length > 0) {
                 Item old = ing.getItems()[0].getItem();
-                if(old != Items.BARRIER) {
-                    Item i = IBlockType.changeItemBlockType(old, originalMat, destinationMat);
+                if (old != Items.BARRIER) {
+                    Item i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
                     ing = Ingredient.of(i);
                 }
             }
@@ -69,7 +72,11 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
 
         AtomicReference<ShapelessRecipeBuilder.Result> newRecipe = new AtomicReference<>();
 
-        builder.save(r -> newRecipe.set((ShapelessRecipeBuilder.Result) r));
+        if (id == null) {
+            builder.save(r -> newRecipe.set((ShapelessRecipeBuilder.Result) r));
+        } else {
+            builder.save(r -> newRecipe.set((ShapelessRecipeBuilder.Result) r), id);
+        }
         return newRecipe.get();
     }
 

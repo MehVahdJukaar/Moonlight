@@ -16,6 +16,8 @@ public class CompatWoodTypes {
         BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "terraqueous","dense_cloud", "dense_cloud", "dense_cloud_column"));
         BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "the_bumblezone","beehive_beeswax", "beehive_beeswax", "filled_porous_honeycomb_block"));
+        BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "twigs","stripped_bamboo", "stripped_bamboo_planks" , "bundled_bamboo"));
         BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 new ResourceLocation("culturaldelights:avocado"),

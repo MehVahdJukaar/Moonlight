@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
-import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.block_set.leaves.LeavesType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.minecraft.resources.ResourceLocation;
@@ -23,10 +23,10 @@ import java.util.function.Predicate;
  *
  * @param <T>
  */
-public class BlockTypeResourceTransform<T extends IBlockType> {
+public class BlockTypeResourceTransform<T extends BlockType> {
 
     @FunctionalInterface
-    public interface WoodTextModifier<T extends IBlockType> extends TriFunction<String, ResourceLocation, T, String> {
+    public interface WoodTextModifier<T extends BlockType> extends TriFunction<String, ResourceLocation, T, String> {
         @Override
         String apply(String originalText, ResourceLocation blockId, T type);
     }
@@ -42,7 +42,7 @@ public class BlockTypeResourceTransform<T extends IBlockType> {
         this.modId = modId;
     }
 
-    public static <T extends IBlockType> BlockTypeResourceTransform<T> create(String modId, ResourceManager manager) {
+    public static <T extends BlockType> BlockTypeResourceTransform<T> create(String modId, ResourceManager manager) {
         return new BlockTypeResourceTransform<>(modId, manager);
     }
 

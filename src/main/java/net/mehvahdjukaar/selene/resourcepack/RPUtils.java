@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
-import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.resourcepack.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.selene.resourcepack.recipe.ShapedRecipeTemplate;
 import net.mehvahdjukaar.selene.resourcepack.recipe.ShapelessRecipeTemplate;
@@ -150,7 +150,7 @@ public class RPUtils {
     //recipe stuff
 
     public static Recipe<?> readRecipe(ResourceManager manager, String location) {
-        return readRecipe(manager,ResType.RECIPES.getPath(location));
+        return readRecipe(manager, ResType.RECIPES.getPath(location));
     }
 
     public static Recipe<?> readRecipe(ResourceManager manager, ResourceLocation location) {
@@ -163,38 +163,31 @@ public class RPUtils {
     }
 
     public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, String location) {
-        return readRecipeAsTemplate(manager,ResType.RECIPES.getPath(location));
+        return readRecipeAsTemplate(manager, ResType.RECIPES.getPath(location));
     }
+
 
     public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, ResourceLocation location) {
         try {
             JsonObject element = RPUtils.deserializeJson(manager.getResource(location).getInputStream());
-            String type = GsonHelper.getAsString(element, "type");
-            RecipeSerializer<?> s = ForgeRegistries.RECIPE_SERIALIZERS.getValue(new ResourceLocation(type));
-            if (s == RecipeSerializer.SHAPED_RECIPE) {
-                return ShapedRecipeTemplate.fromJson(element);
-            } else if (s == RecipeSerializer.SHAPELESS_RECIPE) {
-                return ShapelessRecipeTemplate.fromJson(element);
-            } else if(s == RecipeSerializer.STONECUTTER){
-                return StoneCutterRecipeTemplate.fromJson(element);
-            }
-            throw new UnsupportedOperationException(String.format("Invalid recipe serializer: %s", s));
+            return IRecipeTemplate.read(element);
+
         } catch (Exception e) {
             throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));
         }
     }
 
-    public static <T extends IBlockType> Recipe<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, String baseID) {
+    public static <T extends BlockType> Recipe<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, String baseID) {
         if (original instanceof ShapedRecipe or) {
             List<Ingredient> newList = new ArrayList<>();
             for (var ingredient : or.getIngredients()) {
                 if (ingredient != null && ingredient.getItems().length > 0) {
-                    Item i = IBlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
+                    Item i = BlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
                     newList.add(Ingredient.of(i));
                 }
             }
             Item originalRes = or.getResultItem().getItem();
-            Item newRes = IBlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
+            Item newRes = BlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
             if (newRes == originalRes) throw new UnsupportedOperationException("Failed to convert recipe");
             ItemStack result = newRes.getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
@@ -204,12 +197,12 @@ public class RPUtils {
             List<Ingredient> newList = new ArrayList<>();
             for (var ingredient : or.getIngredients()) {
                 if (ingredient != null && ingredient.getItems().length > 0) {
-                    Item i = IBlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
+                    Item i = BlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
                     newList.add(Ingredient.of(i));
                 }
             }
             Item originalRes = or.getResultItem().getItem();
-            Item newRes = IBlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
+            Item newRes = BlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
             if (newRes == originalRes) throw new UnsupportedOperationException("Failed to convert recipe");
             ItemStack result = newRes.getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());

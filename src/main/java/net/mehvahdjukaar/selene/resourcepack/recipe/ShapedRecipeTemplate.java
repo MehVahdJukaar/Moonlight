@@ -2,7 +2,7 @@ package net.mehvahdjukaar.selene.resourcepack.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder.Result>{
+public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder.Result> {
     public final Item result;
     public final int count;
     public final String group;
@@ -55,9 +55,10 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
         return new ShapedRecipeTemplate(i, count, group, patternList, keyMap);
     }
 
-    public <T extends IBlockType> ShapedRecipeBuilder.Result createSimilar(T originalMat, T destinationMat, Item unlockItem) {
-        Item newRes = IBlockType.changeItemBlockType(this.result, originalMat, destinationMat);
-        if (newRes == this.result) throw new UnsupportedOperationException("Failed to convert recipe");
+    public <T extends BlockType> ShapedRecipeBuilder.Result createSimilar(T originalMat, T destinationMat, Item unlockItem, String id) {
+        Item newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
+        if (newRes == this.result && originalMat != destinationMat)
+            throw new UnsupportedOperationException(String.format("Could not convert output item %s", newRes));
 
         ShapedRecipeBuilder builder = new ShapedRecipeBuilder(newRes, this.count);
 
@@ -65,8 +66,8 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
             Ingredient ing = e.getValue();
             if (ing.getItems().length > 0) {
                 Item old = ing.getItems()[0].getItem();
-                if(old != Items.BARRIER) {
-                    Item i = IBlockType.changeItemBlockType(old, originalMat, destinationMat);
+                if (old != Items.BARRIER) {
+                    Item i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
                     ing = Ingredient.of(i);
                 }
             }
@@ -77,7 +78,12 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
         builder.unlockedBy("has_planks", InventoryChangeTrigger.TriggerInstance.hasItems(unlockItem));
 
         AtomicReference<ShapedRecipeBuilder.Result> newRecipe = new AtomicReference<>();
-        builder.save(r -> newRecipe.set((ShapedRecipeBuilder.Result) r));
+
+        if (id == null) {
+            builder.save(r -> newRecipe.set((ShapedRecipeBuilder.Result) r));
+        } else {
+            builder.save(r -> newRecipe.set((ShapedRecipeBuilder.Result) r), id);
+        }
         return newRecipe.get();
     }
 

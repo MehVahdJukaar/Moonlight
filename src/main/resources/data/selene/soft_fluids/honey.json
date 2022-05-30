@@ -22,7 +22,9 @@
   "equivalent_fluids": [
     "create:honey",
     "cyclic:honey",
-    "inspirations:honey"
+    "inspirations:honey",
+    "the_bumblezone:honey_fluid",
+    "the_bumblezone:honey_fluid_still"
   ],
   "flowing_texture": "selene:blocks/honey_liquid",
   "food": {

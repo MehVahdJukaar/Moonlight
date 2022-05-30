@@ -28,7 +28,7 @@ public class BlockSetManager {
     private static boolean hasFilledBlockSets = false;
 
     //Frick mod loading is multi-threaded, so we need to beware of concurrent access
-    private static final Map<Class<? extends IBlockType>, BlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new ConcurrentHashMap<>();
+    private static final Map<Class<? extends BlockType>, BlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new ConcurrentHashMap<>();
     private static final ConcurrentLinkedDeque<Runnable> FINDER_ADDER = new ConcurrentLinkedDeque<>();
     private static final ConcurrentLinkedDeque<Runnable> REMOVER_ADDER = new ConcurrentLinkedDeque<>();
 
@@ -49,7 +49,7 @@ public class BlockSetManager {
      *                     gets formed
      * @param <T>          IBlockType
      */
-    public static <T extends IBlockType> void registerBlockSetDefinition(Class<T> type, BlockTypeRegistry<T> typeRegistry) {
+    public static <T extends BlockType> void registerBlockSetDefinition(Class<T> type, BlockTypeRegistry<T> typeRegistry) {
         if (hasFilledBlockSets) {
             throw new UnsupportedOperationException(
                     String.format("Tried to register block set definition %s for block type %s after registry events", typeRegistry, type));
@@ -64,7 +64,7 @@ public class BlockSetManager {
      *
      * @param blockFinder Finder object that will provide the modded block type when the time is right
      */
-    public static <T extends IBlockType> void addBlockTypeFinder(Class<T> type, IBlockType.SetFinder<T> blockFinder) {
+    public static <T extends BlockType> void addBlockTypeFinder(Class<T> type, BlockType.SetFinder<T> blockFinder) {
         if (hasFilledBlockSets) {
             throw new UnsupportedOperationException(
                     String.format("Tried to register block %s finder %s after registry events", type, blockFinder));
@@ -81,7 +81,7 @@ public class BlockSetManager {
      *
      * @param id id of the block that is getting erroneously added and should be removed
      */
-    public static <T extends IBlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
+    public static <T extends BlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
         if (hasFilledBlockSets) {
             throw new UnsupportedOperationException(
                     String.format("Tried to remove block type %s for type %s after registry events", id, type));
@@ -93,12 +93,12 @@ public class BlockSetManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends IBlockType> BlockTypeRegistry<T> getBlockSet(Class<T> type) {
+    public static <T extends BlockType> BlockTypeRegistry<T> getBlockSet(Class<T> type) {
         return (BlockTypeRegistry<T>) BLOCK_SET_CONTAINERS.get(type);
     }
 
     @FunctionalInterface
-    public interface BlockSetRegistryCallback<T extends IBlockType, R extends IForgeRegistryEntry<R>> {
+    public interface BlockSetRegistryCallback<T extends BlockType, R extends IForgeRegistryEntry<R>> {
         void accept(RegistryEvent.Register<R> reg, Collection<T> wood);
     }
 
@@ -116,7 +116,7 @@ public class BlockSetManager {
      *
      * @param registrationFunction registry function
      */
-    public static <T extends IBlockType, R extends IForgeRegistryEntry<R>> void addBlockSetRegistrationCallback(
+    public static <T extends BlockType, R extends IForgeRegistryEntry<R>> void addBlockSetRegistrationCallback(
             BlockSetRegistryCallback<T, R> registrationFunction, Class<R> regType, Class<T> blockType) {
         //this is horrible. worst shit ever
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -217,7 +217,7 @@ public class BlockSetManager {
     }
 
     @Nullable
-    public static BlockTypeRegistry<?> getRegistry(Class<? extends IBlockType> typeClass) {
+    public static BlockTypeRegistry<?> getRegistry(Class<? extends BlockType> typeClass) {
         return BLOCK_SET_CONTAINERS.get(typeClass);
     }
 }
