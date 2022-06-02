@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,15 +46,16 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
 
     public <T extends BlockType> SingleItemRecipeBuilder.Result createSimilar(
             T originalMat, T destinationMat, Item unlockItem, String id) {
-        Item newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
-        if (newRes == this.result) throw new UnsupportedOperationException(String.format("Could not convert output item %s",newRes));
+        ItemLike newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
+        if (newRes == null)
+            throw new UnsupportedOperationException(String.format("Could not convert output item %s", result));
 
         Ingredient ing = ingredient;
         if (ingredient.getItems().length > 0) {
             Item old = ingredient.getItems()[0].getItem();
             if (old != Items.BARRIER) {
-                Item i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
-                ing = Ingredient.of(i);
+                ItemLike i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
+                if (i != null) ing = Ingredient.of(i);
             }
         }
 
@@ -64,10 +66,10 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
 
         AtomicReference<SingleItemRecipeBuilder.Result> newRecipe = new AtomicReference<>();
 
-        if(id == null) {
+        if (id == null) {
             builder.save(r -> newRecipe.set((SingleItemRecipeBuilder.Result) r));
-        }else{
-            builder.save(r -> newRecipe.set((SingleItemRecipeBuilder.Result) r),id);
+        } else {
+            builder.save(r -> newRecipe.set((SingleItemRecipeBuilder.Result) r), id);
         }
         return newRecipe.get();
     }

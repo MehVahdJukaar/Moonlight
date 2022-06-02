@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.loading.FMLLoader;
 
@@ -33,6 +34,7 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
             ((ReloadableResourceManager) mc.getResourceManager())
                     .registerReloadListener(this);
         }
+        //MinecraftForge.EVENT_BUS.addListener(this::temp);
         DynamicLanguageManager.register(this);
     }
 
@@ -69,5 +71,14 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
      * Use this method to add language entries that are dynamic and can be created based off existing entries.
      * @param languageAccessor object used to access all currently registered language entries for the current lang file and add new ones
      */
+    //TODO: reformat
     public void addDynamicTranslations(DynamicLanguageManager.LanguageAccessor languageAccessor){};
+
+    private void temp(AfterLanguageLoadEvent e){
+        addDynamicTranslations(e);
+    }
+
+    public void addDynamicTranslations(AfterLanguageLoadEvent languageAccessor){
+        addDynamicTranslations((DynamicLanguageManager.LanguageAccessor)languageAccessor);
+    };
 }

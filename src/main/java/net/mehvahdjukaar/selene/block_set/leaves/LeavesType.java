@@ -6,6 +6,7 @@ import net.mehvahdjukaar.selene.block_set.IBlockType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.fml.ModList;
@@ -26,6 +27,11 @@ public class LeavesType extends IBlockType {
         super(id);
         this.leaves = leaves;
         this.woodType = woodType;
+    }
+
+    @Override
+    public ItemLike mainChild() {
+        return leaves;
     }
 
     @Override

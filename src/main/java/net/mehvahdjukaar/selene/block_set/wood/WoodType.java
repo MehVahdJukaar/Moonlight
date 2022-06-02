@@ -5,6 +5,7 @@ import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.block_set.IBlockType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Material;
@@ -51,7 +52,7 @@ public class WoodType extends IBlockType {
         this.log = logBlock;
         this.material = baseBlock.defaultBlockState().getMaterial();
 
-        this.strippedLog = this.findLogRelatedBlock("stripped","");
+        this.strippedLog = this.findLogRelatedBlock("stripped","log");
         this.leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
 
         //checks if it has a sign
@@ -81,6 +82,11 @@ public class WoodType extends IBlockType {
             }
         }
         return found;
+    }
+
+    @Override
+    public ItemLike mainChild() {
+        return planks;
     }
 
     @Nullable

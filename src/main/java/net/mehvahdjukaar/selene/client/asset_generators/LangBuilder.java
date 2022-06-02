@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.client.asset_generators;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.block_set.IBlockType;
 import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
@@ -23,32 +24,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class LangBuilder {
+
     private final Map<String, String> entries = new LinkedHashMap<>();
-
-    //helper to make lang strings
-    public static String getReadableName(String name) {
-        return Arrays.stream((name).replace(":", "_").split("_"))
-                .map(StringUtils::capitalize).collect(Collectors.joining(" "));
-    }
-
-    /**
-     * Attempts grabbig a translated component with the given key and arguments. If none is found it will make the key itself readable
-     *
-     * @param key       translation key
-     * @param arguments optional arguments
-     * @return readable component
-     */
-    public static Component getReadableComponent(String key, String... arguments) {
-        Component translated = new TranslatableComponent(key, (Object[]) arguments);
-        if (translated.getString().equals(key)) {
-            StringBuilder aa = new StringBuilder();
-            for (String s : arguments) {
-                aa.append("_").append(s);
-            }
-            return new TextComponent(LangBuilder.getReadableName(key + aa));
-        }
-        return translated;
-    }
 
     public void addGenericEntry(String key, String translation) {
         entries.put(key, translation);
@@ -88,54 +65,84 @@ public class LangBuilder {
     }
 
 
+    //utils
+
+    //helper to make lang strings
+    public static String getReadableName(String name) {
+        return Arrays.stream((name).replace(":", "_").split("_"))
+                .map(StringUtils::capitalize).collect(Collectors.joining(" "));
+    }
+
+    /**
+     * Attempts grabbig a translated component with the given key and arguments. If none is found it will make the key itself readable
+     *
+     * @param key       translation key
+     * @param arguments optional arguments
+     * @return readable component
+     */
+    public static Component getReadableComponent(String key, String... arguments) {
+        Component translated = new TranslatableComponent(key, (Object[]) arguments);
+        if (translated.getString().equals(key)) {
+            StringBuilder aa = new StringBuilder();
+            for (String s : arguments) {
+                aa.append("_").append(s);
+            }
+            return new TextComponent(LangBuilder.getReadableName(key + aa));
+        }
+        return translated;
+    }
+
     @Deprecated
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
-                                       String key, IBlockType type, Item item){
-        addDynamicEntry(lang,key,(BlockType)type,item);
+                                       String key, IBlockType type, Item item) {
+        addDynamicEntry(lang, key, (BlockType) type, item);
     }
 
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
-                                       String key, BlockType type, Item item){
+                                       String key, BlockType type, Item item) {
         String base = lang.getEntry(key);
-        if(base != null){
+        if (base != null) {
             String typeName = lang.getEntry(type.getTranslationKey());
             if (typeName != null) {
                 lang.addEntry(item.getDescriptionId(), String.format(base, typeName));
             }
-        };
+            else Selene.LOGGER.error("Could not find translation line {}", type.getTranslationKey());
+        } else Selene.LOGGER.error("Could not find translation line {}", key);
     }
 
     @Deprecated
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
-                                       String key, IBlockType type, Block block){
+                                       String key, IBlockType type, Block block) {
         addDynamicEntry(lang, key, (BlockType) type, block);
     }
 
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
-                                       String key, BlockType type, Block block){
+                                       String key, BlockType type, Block block) {
         String base = lang.getEntry(key);
-        if(base != null){
+        if (base != null) {
             String typeName = lang.getEntry(type.getTranslationKey());
             if (typeName != null) {
                 lang.addEntry(block.getDescriptionId(), String.format(base, typeName));
             }
-        };
+        }
+        ;
     }
 
     @Deprecated
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
-                                       String key, IBlockType type, EntityType<?> entityType){
+                                       String key, IBlockType type, EntityType<?> entityType) {
         addDynamicEntry(lang, key, (BlockType) type, entityType);
     }
 
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
-                                       String key, BlockType type, EntityType<?> entityType){
+                                       String key, BlockType type, EntityType<?> entityType) {
         String base = lang.getEntry(key);
-        if(base != null){
+        if (base != null) {
             String typeName = lang.getEntry(type.getTranslationKey());
             if (typeName != null) {
                 lang.addEntry(entityType.getDescriptionId(), String.format(base, typeName));
             }
-        };
+        }
+        ;
     }
 }

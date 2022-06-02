@@ -6,7 +6,9 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Represents a generic resource that can be read multiple times. Consumes the original resource
@@ -20,6 +22,10 @@ public class StaticResource {
         this.data = data;
         this.location = location;
         this.sourceName = sourceName;
+    }
+
+    public InputStream getInputStream(){
+        return new ByteArrayInputStream(data);
     }
 
     /**
@@ -49,7 +55,7 @@ public class StaticResource {
         try {
             return of(manager.getResource(location));
         } catch (Exception var4) {
-            Selene.LOGGER.error("Could not find resource {} while generating dynamic resource pack", location);
+            Selene.LOGGER.error("Could not find resource {}", location);
             return null;
         }
     }

@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,9 +57,9 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
     }
 
     public <T extends BlockType> ShapedRecipeBuilder.Result createSimilar(T originalMat, T destinationMat, Item unlockItem, String id) {
-        Item newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
-        if (newRes == this.result && originalMat != destinationMat)
-            throw new UnsupportedOperationException(String.format("Could not convert output item %s", newRes));
+        ItemLike newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
+        if (newRes == null)
+            throw new UnsupportedOperationException(String.format("Could not convert output item %s", result));
 
         ShapedRecipeBuilder builder = new ShapedRecipeBuilder(newRes, this.count);
 
@@ -67,8 +68,8 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
             if (ing.getItems().length > 0) {
                 Item old = ing.getItems()[0].getItem();
                 if (old != Items.BARRIER) {
-                    Item i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
-                    ing = Ingredient.of(i);
+                    ItemLike i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
+                    if(i != null) ing = Ingredient.of(i);
                 }
             }
             builder.define(e.getKey(), ing);

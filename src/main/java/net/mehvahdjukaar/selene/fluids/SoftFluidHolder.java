@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import net.mehvahdjukaar.selene.fluids.client.FluidParticleColors;
+import net.mehvahdjukaar.selene.client.FluidParticleColors;
 import net.mehvahdjukaar.selene.util.PotionNBTHelper;
 import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.core.BlockPos;

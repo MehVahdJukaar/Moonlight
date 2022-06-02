@@ -1,9 +1,14 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
+import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.block_set.BlockSetManager;
+import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.client.asset_generators.LangBuilder;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Event;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -17,20 +22,26 @@ public class DynamicLanguageManager {
     public static void register(RPAwareDynamicTextureProvider rpAwareDynamicTextureProvider) {
         PACKS.add(rpAwareDynamicTextureProvider);
     }
+    //TODO: figure out why event isnt working well
 
     //called by mixin
+    @ApiStatus.Internal
     public static void addDynamicEntries(ResourceManager cachedResourceManager, List<LanguageInfo> cachedLanguageInfo, Map<String, String> map) {
-        var lang = new LanguageAccessor(map, cachedLanguageInfo);
-        BlockSetManager.getRegistries().forEach(r -> r.addTypeTranslations(lang));
-        PACKS.forEach(p -> p.addDynamicTranslations(lang));
+        AfterLanguageLoadEvent languageEvent = new AfterLanguageLoadEvent(map, cachedLanguageInfo);
+        BlockSetManager.getRegistries().forEach(r -> r.addTypeTranslations(languageEvent));
+        //MinecraftForge.EVENT_BUS.post(languageEvent);
+       // Selene.LOGGER.info("Dispatching AfterLanguageLoad Event");
+        PACKS.forEach(p -> p.addDynamicTranslations(languageEvent));
     }
 
-    public static class LanguageAccessor {
+    //TODO: reformat with proper name
+    @Deprecated
+    public static class LanguageAccessor extends Event {
 
         private final Map<String, String> languageLines;
         private final List<LanguageInfo> languageInfo;
 
-        private LanguageAccessor(Map<String, String> lines, List<LanguageInfo> info) {
+        public LanguageAccessor(Map<String, String> lines, List<LanguageInfo> info) {
             this.languageInfo = info;
             this.languageLines = lines;
         }

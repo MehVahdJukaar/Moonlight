@@ -185,13 +185,25 @@ public class Palette {
             removeLeastUsed();
         }
         boolean down = true;
-        while (this.size() < targetSize) {
-            if(this.hasLuminanceGap()){
+        boolean canIncreaseDown = true;
+        boolean canIncreaseUp = true;
+        int currentSize;
+        while ((currentSize = this.size()) < targetSize) {
+            //safety check if palette is full
+            if(this.hasLuminanceGap() || (!canIncreaseDown && !canIncreaseUp)){
                 increaseInner();
             }else{
                 //increase up and down every cycle
                 if(down)increaseDown();
                 else increaseUp();
+                //if it didnt increase means we are at max luminance, probably white
+                if(currentSize == this.size()){
+                    if(down)canIncreaseDown = false;
+                    else canIncreaseUp = false;
+
+                    down = !down;
+                }
+                if(canIncreaseDown && canIncreaseUp)
                 down = !down;
             }
 
@@ -232,7 +244,7 @@ public class Palette {
     }
 
     private boolean hasLuminanceGap(){
-        return hasLuminanceGap(1.8f);
+        return hasLuminanceGap(1.7f);
     }
 
     private boolean hasLuminanceGap(float cutoff){

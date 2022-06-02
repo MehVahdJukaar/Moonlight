@@ -1,12 +1,10 @@
 package net.mehvahdjukaar.selene;
 
+import net.mehvahdjukaar.selene.client.TextureCache;
 import net.mehvahdjukaar.selene.client.texture_renderer.RenderedTexturesManager;
-import net.mehvahdjukaar.selene.client.texture_renderer.FrameBufferBackedDynamicTexture;
 import net.mehvahdjukaar.selene.fluids.FluidTextures;
-import net.mehvahdjukaar.selene.fluids.client.FluidParticleColors;
-import net.minecraft.client.Minecraft;
+import net.mehvahdjukaar.selene.client.FluidParticleColors;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -15,10 +13,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.loading.FMLLoader;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Mod.EventBusSubscriber(modid = Selene.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ClientSetup {
@@ -30,6 +24,7 @@ public class ClientSetup {
     @SubscribeEvent
     public static void onResourcePackChanged(ModelBakeEvent event) {
         FluidParticleColors.refresh();
+        TextureCache.refresh();
     }
 
     //textures

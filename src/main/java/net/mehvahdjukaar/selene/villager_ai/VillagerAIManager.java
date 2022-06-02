@@ -15,6 +15,7 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -31,6 +32,7 @@ public class VillagerAIManager {
 
 
     //called by mixin. Do not call
+    @ApiStatus.Internal
     public static void onRegisterBrainGoals(Brain<Villager> brain, AbstractVillager villager) {
         if(villager instanceof Villager v) {
             var event = new VillagerBrainEvent(brain, v);
@@ -46,6 +48,7 @@ public class VillagerAIManager {
 
 
     //just loads up the class to register the schedule
+    @ApiStatus.Internal
     public static void init() {
     }
 

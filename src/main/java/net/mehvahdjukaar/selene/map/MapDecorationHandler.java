@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -74,6 +75,7 @@ public class MapDecorationHandler {
     }
 
     @Nullable
+    @ApiStatus.Internal
     public static MapBlockMarker<?> readWorldMarker(CompoundTag compound) {
         for (String s : DECORATION_TYPES.keySet()) {
             if (compound.contains(s)) {
@@ -90,6 +92,7 @@ public class MapDecorationHandler {
      * @param pos    world position
      * @return markers found, null if none found
      */
+    @ApiStatus.Internal
     public static List<MapBlockMarker<?>> getMarkersFromWorld(BlockGetter reader, BlockPos pos) {
         List<MapBlockMarker<?>> list = new ArrayList<>();
         for (CustomDecorationType<?, ?> type : DECORATION_TYPES.values()) {

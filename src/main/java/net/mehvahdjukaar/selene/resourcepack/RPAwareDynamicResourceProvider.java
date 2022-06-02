@@ -45,6 +45,15 @@ public abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePa
     final public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
                                                 ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
                                                 Executor workerExecutor, Executor mainExecutor) {
+        reloadResources(manager);
+
+        return CompletableFuture.supplyAsync(() -> null, workerExecutor)
+                .thenCompose(stage::wait)
+                .thenAcceptAsync((noResult) -> {
+                }, mainExecutor);
+    }
+
+    protected void reloadResources(ResourceManager manager) {
         Stopwatch watch = Stopwatch.createStarted();
 
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
@@ -74,11 +83,6 @@ public abstract class RPAwareDynamicResourceProvider<T extends DynamicResourcePa
                 this.dynamicPack.getPackType(),
                 this.dynamicPack.getName(),
                 watch.elapsed().toMillis());
-
-        return CompletableFuture.supplyAsync(() -> null, workerExecutor)
-                .thenCompose(stage::wait)
-                .thenAcceptAsync((noResult) -> {
-                }, mainExecutor);
     }
 
     @Nullable

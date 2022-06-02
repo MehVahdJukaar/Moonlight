@@ -22,7 +22,8 @@ public abstract class RPAwareDynamicDataProvider extends RPAwareDynamicResourceP
     @Override
     public void register(IEventBus bus) {
         super.register(bus);
-        MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListeners);
+        //MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListeners);
+        MinecraftForge.EVENT_BUS.addListener(this::onEarlyReload);
     }
 
     @Override
@@ -32,7 +33,12 @@ public abstract class RPAwareDynamicDataProvider extends RPAwareDynamicResourceP
         return null;
     }
 
+    public void onEarlyReload(final EarlyPackReloadEvent event) {
+        this.reloadResources(event.getManager());
+    }
+
     public void onAddReloadListeners(final AddReloadListenerEvent event) {
-        event.addListener(this);
+        //event.addListener(this);
+
     }
 }

@@ -1,19 +1,33 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.misc.BlockLootTableAccessor;
+import net.mehvahdjukaar.selene.resourcepack.resources.TagBuilder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryManager;
 
 import java.util.Collection;
+import java.util.List;
 
 public class DynamicDataPack extends DynamicResourcePack {
 
@@ -25,18 +39,35 @@ public class DynamicDataPack extends DynamicResourcePack {
         super(name, PackType.SERVER_DATA);
     }
 
-    public <T> void addTag(ResourceLocation tagLocation, Collection<ResourceLocation> values, ResourceKey<Registry<T>> type) {
-        JsonObject json = new JsonObject();
-        json.addProperty("replace", false);
-        JsonArray array = new JsonArray();
+    //helpers. maybe remove
+    @Deprecated
+    public <T extends ForgeRegistryEntry<T>> void addTag(TagKey<?> key, Collection<T> values, ResourceKey<?> type) {
+        var builder = TagBuilder.of(key);
+        builder.addEntries(values);
+        this.addTag(builder,type);
+    }
+    //TODO: reformat
+    /*
+    public <R, T extends ForgeRegistryEntry<T>> void addTag(ResourceLocation key, Collection<T> values, ResourceKey<Registry<R>> type) {
+        var builder = new TagBuilder(key);
+        builder.addAllEntries(values);
+           this.addTag(builder,type);
+    }*/
 
-        values.forEach(v -> array.add(v.toString()));
-        json.add("values", array);
+    @Deprecated
+    public void addTag(ResourceLocation tagLocation, Collection<ResourceLocation> values, ResourceKey<?> type) {
+        var builder = TagBuilder.of(tagLocation);
+        values.forEach(builder::add);
+        this.addTag(builder,type);
+    }
+
+    public void addTag(TagBuilder builder,  ResourceKey<?> type){
+        JsonElement json = builder.build();
+        ResourceLocation tagId = builder.getId();
         String tagPath = type.location().getPath();
         if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item")) tagPath = tagPath + "s";
-        this.addJson(new ResourceLocation(tagLocation.getNamespace(),
-                tagPath + "/" + tagLocation.getPath()), json, ResType.TAGS);
-
+        this.addJson(new ResourceLocation(tagId.getNamespace(),
+                tagPath + "/" + tagId.getPath()), json, ResType.TAGS);
     }
 
     /**

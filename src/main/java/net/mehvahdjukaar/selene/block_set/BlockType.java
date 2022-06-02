@@ -9,11 +9,11 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class BlockType {
 
@@ -141,8 +141,10 @@ public abstract class BlockType {
     /**
      * Should be called after you register a block that is made out of this wood type
      */
-    public void addChild(String genericName, ItemLike itemLike) {
-        this.children.put(genericName, itemLike);
+    public void addChild(String genericName, @Nullable ItemLike itemLike) {
+        if(itemLike != null){
+            this.children.put(genericName, itemLike);
+        }
     }
 
     protected abstract void initializeChildren();
@@ -152,24 +154,30 @@ public abstract class BlockType {
         this.initializeChildren();
     }
 
-    ;
+    /**
+     * base block that this type originates from
+     */
+    public abstract ItemLike mainChild();
 
     /**
-     * Tries changing an item block tupe. returns the item itself it it fails
+     * Tries changing an item block type. returns null if it fails
      *
      * @param current        target item
      * @param originalMat    material from which the target item is made of
      * @param destinationMat desired block type
      */
-    public static Item changeItemBlockType(Item current, BlockType originalMat, BlockType destinationMat) {
-        AtomicReference<Item> newIng = new AtomicReference<>(current);
-        originalMat.getChildren().forEach((e) -> {
-            if (current == e.getValue().asItem()) {
-                Item replacement = destinationMat.getItemOfThis(e.getKey());
-                if (replacement != null) newIng.set(replacement);
+    @Nullable
+    public static ItemLike changeItemBlockType(ItemLike current, BlockType originalMat, BlockType destinationMat) {
+        if (destinationMat == originalMat) return current;
+        for (var c : originalMat.getChildren()) {
+            if (current.asItem() == c.getValue().asItem()) {
+                ItemLike replacement = destinationMat.getChild(c.getKey());
+                if (replacement != null) {
+                    return replacement;
+                }
             }
-        });
-        return newIng.get();
+        }
+        return null;
     }
 
 }

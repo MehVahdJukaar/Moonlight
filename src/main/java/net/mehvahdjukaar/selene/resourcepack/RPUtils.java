@@ -5,11 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
+import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.block_set.BlockType;
+import net.mehvahdjukaar.selene.client.TextureCache;
 import net.mehvahdjukaar.selene.resourcepack.recipe.IRecipeTemplate;
-import net.mehvahdjukaar.selene.resourcepack.recipe.ShapedRecipeTemplate;
-import net.mehvahdjukaar.selene.resourcepack.recipe.ShapelessRecipeTemplate;
-import net.mehvahdjukaar.selene.resourcepack.recipe.StoneCutterRecipeTemplate;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -18,17 +17,16 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.management.openmbean.InvalidOpenTypeException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class RPUtils {
 
@@ -61,6 +59,8 @@ public class RPUtils {
      * @return found texture location
      */
     public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
+        var cached = TextureCache.getCached(block, texturePredicate);
+        if (cached != null) return new ResourceLocation(cached);
         try {
             ResourceLocation res = block.getRegistryName();
             Resource blockState = manager.getResource(ResType.BLOCKSTATES.getPath(res));
@@ -68,7 +68,8 @@ public class RPUtils {
             JsonElement bsElement = RPUtils.deserializeJson(blockState.getInputStream());
 
             //grabs the first resource location of a model
-            String modelPath = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model")).get(0);
+            String modelPath = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"))
+                    .stream().findAny().get();
             JsonElement modelElement;
             try {
                 Resource model = manager.getResource(ResType.MODELS.getPath(modelPath));
@@ -76,13 +77,16 @@ public class RPUtils {
             } catch (Exception e) {
                 throw new Exception("Failed to parse model at " + modelPath);
             }
+            var textures = findAllResourcesInJsonRecursive(modelElement.getAsJsonObject().getAsJsonObject("textures"));
 
-            String value = findAllResourcesInJsonRecursive(modelElement.getAsJsonObject().getAsJsonObject("textures"))
-                    .stream().filter(texturePredicate).findAny().get();
-            return new ResourceLocation(value);
-        } catch (Exception e) {
-            throw new FileNotFoundException("Could not find any texture associated to the given block " + block.getRegistryName());
+            for (var t : textures) {
+                TextureCache.add(block, t);
+                if (texturePredicate.test(t)) return new ResourceLocation(t);
+            }
+        } catch (Exception ignored) {
         }
+        throw new FileNotFoundException("Could not find any texture associated to the given block " + block.getRegistryName());
+
     }
 
     //TODO: account for parents
@@ -100,18 +104,22 @@ public class RPUtils {
      * @return found texture location
      */
     public static ResourceLocation findFirstItemTextureLocation(ResourceManager manager, Item item, Predicate<String> texturePredicate) throws FileNotFoundException {
+        var cached = TextureCache.getCached(item, texturePredicate);
+        if (cached != null) return new ResourceLocation(cached);
         try {
             ResourceLocation res = item.getRegistryName();
             Resource itemModel = manager.getResource(ResType.ITEM_MODELS.getPath(res));
 
             JsonElement bsElement = RPUtils.deserializeJson(itemModel.getInputStream());
 
-            String value = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject().getAsJsonObject("textures"))
-                    .stream().filter(texturePredicate).findAny().get();
-            return new ResourceLocation(value);
-        } catch (Exception e) {
-            throw new FileNotFoundException("Could not find any texture associated to the given item " + item.getRegistryName());
-        }
+            var textures = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject().getAsJsonObject("textures"));
+            for (var t : textures) {
+                TextureCache.add(item, t);
+                if (texturePredicate.test(t)) return new ResourceLocation(t);
+            }
+
+        } catch (Exception ignored) {}
+        throw new FileNotFoundException("Could not find any texture associated to the given item " + item.getRegistryName());
     }
 
     public static String findFirstResourceInJsonRecursive(JsonElement element) throws NoSuchElementException {
@@ -124,28 +132,36 @@ public class RPUtils {
         } else return element.getAsString();
     }
 
-    public static List<String> findAllResourcesInJsonRecursive(JsonElement element) {
+    public static Set<String> findAllResourcesInJsonRecursive(JsonElement element) {
         return findAllResourcesInJsonRecursive(element, s -> true);
     }
 
-    public static List<String> findAllResourcesInJsonRecursive(JsonElement element, Predicate<String> filter) {
+    public static Set<String> findAllResourcesInJsonRecursive(JsonElement element, Predicate<String> filter) {
         if (element instanceof JsonArray array) {
-            List<String> list = new ArrayList<>();
+            Set<String> list = new HashSet<>();
 
-            array.forEach(e -> list.addAll(findAllResourcesInJsonRecursive(e)));
+            array.forEach(e -> list.addAll(findAllResourcesInJsonRecursive(e, filter)));
             return list;
         } else if (element instanceof JsonObject json) {
             var entries = json.entrySet();
 
-            List<String> list = new ArrayList<>();
+            Set<String> list = new HashSet<>();
             for (var c : entries) {
                 if (c.getValue().isJsonPrimitive() && !filter.test(c.getKey())) continue;
                 var l = findAllResourcesInJsonRecursive(c.getValue(), filter);
+
                 list.addAll(l);
             }
             return list;
-        } else return List.of(element.getAsString());
+        } else {
+            return Set.of(element.getAsString());
+        }
     }
+    /*
+    //this is actually slightly slower
+        var bbb = BlockModelDefinition.fromStream( new BlockModelDefinition.Context(),
+        new InputStreamReader(oakBlockstate.getInputStream(), StandardCharsets.UTF_8));
+     */
 
     //recipe stuff
 
@@ -182,14 +198,14 @@ public class RPUtils {
             List<Ingredient> newList = new ArrayList<>();
             for (var ingredient : or.getIngredients()) {
                 if (ingredient != null && ingredient.getItems().length > 0) {
-                    Item i = BlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
-                    newList.add(Ingredient.of(i));
+                    ItemLike i = BlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
+                    if (i != null) newList.add(Ingredient.of(i));
                 }
             }
             Item originalRes = or.getResultItem().getItem();
-            Item newRes = BlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
-            if (newRes == originalRes) throw new UnsupportedOperationException("Failed to convert recipe");
-            ItemStack result = newRes.getDefaultInstance();
+            ItemLike newRes = BlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
+            if (newRes == null) throw new UnsupportedOperationException("Failed to convert recipe");
+            ItemStack result = newRes.asItem().getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
             NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
             return new ShapedRecipe(newId, or.getGroup(), or.getWidth(), or.getHeight(), ingredients, result);
@@ -197,14 +213,14 @@ public class RPUtils {
             List<Ingredient> newList = new ArrayList<>();
             for (var ingredient : or.getIngredients()) {
                 if (ingredient != null && ingredient.getItems().length > 0) {
-                    Item i = BlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
-                    newList.add(Ingredient.of(i));
+                    ItemLike i = BlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
+                    if (i != null) newList.add(Ingredient.of(i));
                 }
             }
             Item originalRes = or.getResultItem().getItem();
-            Item newRes = BlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
-            if (newRes == originalRes) throw new UnsupportedOperationException("Failed to convert recipe");
-            ItemStack result = newRes.getDefaultInstance();
+            ItemLike newRes = BlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
+            if (newRes == null) throw new UnsupportedOperationException("Failed to convert recipe");
+            ItemStack result = newRes.asItem().getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
             NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
             return new ShapelessRecipe(newId, or.getGroup(), result, ingredients);
@@ -213,4 +229,36 @@ public class RPUtils {
         }
     }
 
+
+    //TODO: replace
+    //creates and add new jsons based off the ones at the given resources with the provided modifiers
+    public static <T extends BlockType> void addSimpleBlockResources(String modId, ResourceManager manager, DynamicResourcePack pack,
+                                                                     Map<T, Block> blocks, String replaceTarget, ResourceLocation... jsonsLocations) {
+        addBlockResources(manager, pack, blocks,
+                BlockTypeResTransformer.<T>create(modId, manager)
+                        .replaceSimpleBlock(modId, replaceTarget)
+                        .IDReplaceBlock(replaceTarget),
+                jsonsLocations);
+    }
+
+    public static <T extends BlockType> void addBlockResources(ResourceManager manager, DynamicResourcePack pack,
+                                                               Map<T, Block> blocks,
+                                                               BlockTypeResTransformer<T> modifier, ResourceLocation... jsonsLocations) {
+        List<StaticResource> original = Arrays.stream(jsonsLocations).map(s -> StaticResource.getOrLog(manager, s)).collect(Collectors.toList());
+
+        blocks.forEach((wood, value) -> {
+
+            for (var res : original) {
+                try {
+                    StaticResource newRes = modifier.transform(res, value.getRegistryName(), wood);
+
+                    assert newRes.location != res.location : "ids cant be the same";
+
+                    pack.addResource(newRes);
+                } catch (Exception e) {
+                    Selene.LOGGER.error("Failed to generate json from {}", res.location);
+                }
+            }
+        });
+    }
 }
