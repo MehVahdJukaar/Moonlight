@@ -60,7 +60,9 @@ public class RPUtils {
      */
     public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
         var cached = TextureCache.getCached(block, texturePredicate);
-        if (cached != null) return new ResourceLocation(cached);
+        if (cached != null){
+            return new ResourceLocation(cached);
+        }
         try {
             ResourceLocation res = block.getRegistryName();
             Resource blockState = manager.getResource(ResType.BLOCKSTATES.getPath(res));

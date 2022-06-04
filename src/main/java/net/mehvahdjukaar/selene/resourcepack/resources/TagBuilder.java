@@ -4,23 +4,24 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
-public class TagBuilder {
+//wrapped tag builder for easier use
+public class TagBuilder extends Tag.Builder {
 
     private final ResourceLocation id;
-    private final List<String> entries = new ArrayList<>();
-
-    private boolean replace = false;
 
     private TagBuilder(ResourceLocation location) {
         this.id = location;
+    }
+
+    public ResourceLocation getId() {
+        return id;
     }
 
     public static TagBuilder of(ResourceLocation location) {
@@ -31,33 +32,40 @@ public class TagBuilder {
         return new TagBuilder(key.location());
     }
 
+    private static final String SOURCE = "dyn_pack";
 
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    public TagBuilder setReplace(boolean replace) {
-        this.replace = replace;
-        return this;
-    }
 
     public TagBuilder add(ResourceLocation entry) {
-        return add(entry.toString());
-    }
-
-    public TagBuilder add(String entry) {
-        this.entries.add(entry);
+        super.addElement(entry, SOURCE);
         return this;
     }
 
-    public TagBuilder addAll(ResourceLocation... locations) {
-        entries.forEach(this::add);
+    public TagBuilder replace(boolean value) {
+        super.replace(value);
         return this;
     }
 
-    public TagBuilder addAll(String... locations) {
-        entries.forEach(this::add);
+    public TagBuilder replace() {
+        super.replace();
         return this;
+    }
+
+    public TagBuilder addTag(ResourceLocation pId) {
+        super.addTag(pId, SOURCE);
+        return this;
+    }
+
+    public TagBuilder addTag(TagKey<?> tagKey) {
+        return this.addTag(tagKey.location());
+    }
+
+    public TagBuilder addOptionalTag(ResourceLocation pId) {
+        super.addOptionalTag(pId, SOURCE);
+        return this;
+    }
+
+    public TagBuilder addTag(TagBuilder otherBuilder) {
+        return this.addTag(otherBuilder.getId());
     }
 
     public <V extends IForgeRegistryEntry<V>, T extends ForgeRegistryEntry<V>> TagBuilder addEntries(Collection<T> entries) {
@@ -65,30 +73,15 @@ public class TagBuilder {
         return this;
     }
 
-    public TagBuilder addTag(ResourceLocation resourceLocation) {
-        return this.add("#" + resourceLocation.toString());
+    public TagBuilder addFromJson(JsonObject pJson) {
+        super.addFromJson(pJson, SOURCE);
+        return this;
     }
 
-    public TagBuilder addTag(TagKey<?> tagKey) {
-        return this.add("#" + tagKey.location());
+    @Override
+    public JsonObject serializeToJson() {
+       return super.serializeToJson();
     }
 
-    public TagBuilder addTag(TagBuilder otherBuilder) {
-        return this.add("#" + otherBuilder.getId().toString());
-    }
-
-    public JsonElement build() {
-        JsonObject json = new JsonObject();
-        json.addProperty("replace", this.replace);
-        JsonArray array = new JsonArray();
-
-        entries.forEach(array::add);
-        json.add("values", array);
-        String tagPath = id.getPath();
-        if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item")) tagPath = tagPath + "s";
-        return json;
-    }
-
-    //TODO: add optional entries
 
 }

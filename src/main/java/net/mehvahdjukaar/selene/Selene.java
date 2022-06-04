@@ -6,9 +6,11 @@ import net.mehvahdjukaar.selene.block_set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.selene.builtincompat.CompatWoodTypes;
+import net.mehvahdjukaar.selene.map.MapDecorationRegistry;
 import net.mehvahdjukaar.selene.misc.ModCriteriaTriggers;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.selene.network.ClientBoundSyncFluidsPacket;
+import net.mehvahdjukaar.selene.network.ClientBoundSyncMapDecorationTypesPacket;
 import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.mehvahdjukaar.selene.villager_ai.VillagerAIManager;
 import net.minecraft.resources.ResourceLocation;
@@ -52,6 +54,7 @@ public class Selene {
     @SubscribeEvent
     public void addJsonListener(final AddReloadListenerEvent event) {
         event.addListener(SoftFluidRegistry.INSTANCE);
+        event.addListener(MapDecorationRegistry.DATA_DRIVEN_REGISTRY);
     }
 
     @SubscribeEvent
@@ -59,8 +62,13 @@ public class Selene {
         // if we're on the server, send syncing packets
         if (ServerLifecycleHooks.getCurrentServer() != null) {
             List<ServerPlayer> playerList = event.getPlayer() != null ? List.of(event.getPlayer()) : event.getPlayerList().getPlayers();
-            playerList.forEach(serverPlayer -> NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
-                    new ClientBoundSyncFluidsPacket(SoftFluidRegistry.getRegisteredFluids())));
+            playerList.forEach(serverPlayer -> {
+
+                NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
+                        new ClientBoundSyncFluidsPacket(SoftFluidRegistry.getRegisteredFluids()));
+                NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
+                        new ClientBoundSyncMapDecorationTypesPacket(MapDecorationRegistry.DATA_DRIVEN_REGISTRY.getTypes()));
+            });
         }
     }
 

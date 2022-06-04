@@ -24,5 +24,8 @@ public class NetworkHandler {
 
         INSTANCE.registerMessage(nextID(), ClientBoundSyncFluidsPacket.class, ClientBoundSyncFluidsPacket::buffer,
                 ClientBoundSyncFluidsPacket::new, ClientBoundSyncFluidsPacket::handler);
+
+        INSTANCE.registerMessage(nextID(), ClientBoundSyncMapDecorationTypesPacket.class, ClientBoundSyncMapDecorationTypesPacket::buffer,
+                ClientBoundSyncMapDecorationTypesPacket::new, ClientBoundSyncMapDecorationTypesPacket::handler);
     }
 }

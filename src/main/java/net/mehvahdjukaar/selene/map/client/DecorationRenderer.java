@@ -2,7 +2,7 @@ package net.mehvahdjukaar.selene.map.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.mehvahdjukaar.selene.map.CustomDecoration;
+import net.mehvahdjukaar.selene.map.CustomMapDecoration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -15,7 +15,7 @@ import com.mojang.math.Vector3f;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
-public class DecorationRenderer<T extends CustomDecoration> {
+public class DecorationRenderer<T extends CustomMapDecoration> {
     private final RenderType RENDER_TYPE;
     private final int mapColor;
     private final boolean renderOnFrame;

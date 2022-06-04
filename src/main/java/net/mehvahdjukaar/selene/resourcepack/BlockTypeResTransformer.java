@@ -64,10 +64,10 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
     public BlockTypeResTransformer<T> IDReplaceType(String oldTypeName) {
         return setIDModifier((s, id, w) -> {
-            return replaceType(s,id, w, oldTypeName);
+            return replaceType(s, id, w, oldTypeName);
         });
     }
-    
+
 
     public BlockTypeResTransformer<T> IDReplaceBlock(String blockName) {
         return setIDModifier((s, id, w) -> s.replace(blockName, id.getPath()));
@@ -91,7 +91,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
     public BlockTypeResTransformer<T> replaceBlockType(String oldTypeName) {
         this.addModifier((s, id, w) -> {
-            return replaceFullBlockType(s,id, w, oldTypeName, modId);
+            return replaceFullBlockType(s, id, w, oldTypeName, modId);
         });
         return this;
     }
@@ -136,13 +136,24 @@ public class BlockTypeResTransformer<T extends BlockType> {
      * Replaces the oak log textures with the log texture of the 'log' child of this block type. Meant for wood types
      */
     public BlockTypeResTransformer<T> replaceOakBark() {
-        return this.replaceWithTextureFromChild("minecraft:block/oak_log", "log", s ->!s.contains("end") && !s.contains("top"))
+        return this.replaceWithTextureFromChild("minecraft:block/oak_log", "log", s -> !s.contains("end") && !s.contains("top"))
                 .replaceWithTextureFromChild("minecraft:block/oak_log_top", "log", s -> s.contains("top") || s.contains("end"));
     }
 
     public BlockTypeResTransformer<T> replaceOakStripped() {
-        return this.replaceWithTextureFromChild("minecraft:block/stripped_oak_log", "log",s ->!s.contains("end") && !s.contains("top"))
+        return this.replaceWithTextureFromChild("minecraft:block/stripped_oak_log", "log", s -> !s.contains("end") && !s.contains("top"))
                 .replaceWithTextureFromChild("minecraft:block/stripped_oak_log_top", "log", s -> s.contains("top") || s.contains("end"));
+    }
+
+    public BlockTypeResTransformer<T> replaceWoodTextures(WoodType woodType) {
+        String n = woodType.getTypeName();
+        return this.replaceWithTextureFromChild("minecraft:block/" + n + "_planks", "planks")
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", "log", s -> !s.contains("end") && !s.contains("top"))
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", "log", s -> s.contains("top") || s.contains("end"))
+                .replaceWithTextureFromChild("minecraft:block/stripped" + n + "_log", "log", s -> !s.contains("end") && !s.contains("top"))
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", "log", s -> s.contains("top") || s.contains("end"));
+
+
     }
 
     public BlockTypeResTransformer<T> replaceWithTextureFromChild(String target, String textureFromChild) {
@@ -168,12 +179,10 @@ public class BlockTypeResTransformer<T extends BlockType> {
                     newTexture = RPUtils.findFirstItemTextureLocation(manager, i);
                 }
                 if (newTexture != null) {
-                    r = s.replace(target, newTexture.toString());
                     //try mc namespace
-                    if (r.equals(s) && target.contains("minecraft:")) {
-                        String t = target.replace("minecraft:", "");
-                        r = s.replace("\"" + t, "\"" + newTexture.toString());
-                    }
+                    r = s.replace("\"block\\/", "minecraft:block\\/" + newTexture.toString());
+                    
+                    r = r.replace(target, newTexture.toString());
                 }
             } catch (FileNotFoundException ignored) {
             }
@@ -183,8 +192,8 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
     /**
      * @param resource resource template to transform
-     * @param blockId id of the block that this is for
-     * @param type block type of the target block
+     * @param blockId  id of the block that this is for
+     * @param type     block type of the target block
      * @return new resource
      */
     public StaticResource transform(StaticResource resource, ResourceLocation blockId, T type) {
@@ -201,12 +210,16 @@ public class BlockTypeResTransformer<T extends BlockType> {
         return StaticResource.create(newText.getBytes(), newLocation);
     }
 
-    public static String replaceType(String original, ResourceLocation blockId, BlockType blockType, String oldTypeName){
+    public static String replaceType(String original, ResourceLocation blockId, BlockType blockType, String oldTypeName) {
         String prefix = "";
         Pattern pattern = Pattern.compile("(.*(?=\\/))");
         Matcher matcher = pattern.matcher(blockId.getPath());
         if (matcher.find()) prefix = "/" + matcher.group(1); //c/create/
-        Pattern p2 = Pattern.compile("(\\/\\w*?)" + oldTypeName); //(/a/b/cc_)oak
+        Pattern p2;
+        if (original.contains("block/")) { ///block(/b/cc_)oak
+            //needed so stuff matches the same as replaceFullBlockType
+            p2 = Pattern.compile("((?<=block)[\\w\\/]*?)" + oldTypeName);
+        } else p2 = Pattern.compile("(\\/\\w*?)" + oldTypeName); ///a/b(/cc_)oak
         Matcher m2 = p2.matcher(original);//->sup:block
         String finalPrefix = prefix;
         String newS = m2.replaceAll(m -> finalPrefix + m.group(1) + blockType.getTypeName());

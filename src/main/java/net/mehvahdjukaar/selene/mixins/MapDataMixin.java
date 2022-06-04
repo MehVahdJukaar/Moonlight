@@ -3,14 +3,16 @@ package net.mehvahdjukaar.selene.mixins;
 import com.google.common.collect.Maps;
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.map.*;
-import net.mehvahdjukaar.selene.map.markers.DummyMapBlockMarker;
+import net.mehvahdjukaar.selene.map.markers.GenericMapBlockMarker;
 import net.mehvahdjukaar.selene.map.markers.MapBlockMarker;
+import net.mehvahdjukaar.selene.map.type.IMapDecorationType;
 import net.mehvahdjukaar.selene.network.ClientBoundSyncCustomMapDecorationPacket;
 import net.mehvahdjukaar.selene.network.NetworkHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -19,14 +21,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapBanner;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraftforge.network.PacketDistributor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -53,7 +53,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Final
     @Shadow
-    Map<String, MapDecoration> decorations;
+    Map<String, net.minecraft.world.level.saveddata.maps.MapDecoration> decorations;
 
     @Final
     @Shadow
@@ -69,7 +69,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     //new decorations (stuff that gets rendered)
     @Unique
-    public Map<String, CustomDecoration> customDecorations = Maps.newLinkedHashMap();
+    public Map<String, CustomMapDecoration> customDecorations = Maps.newLinkedHashMap();
 
     //world markers
     @Unique
@@ -77,15 +77,15 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     //custom data that can be stored in maps
     @Unique
-    public final Map<String, CustomDataHolder.Instance<?>> customData = new HashMap<>();
+    public final Map<ResourceLocation, CustomDataHolder.Instance<?>> customData = new HashMap<>();
 
     @Override
-    public Map<String, CustomDataHolder.Instance<?>> getCustomData() {
+    public Map<ResourceLocation, CustomDataHolder.Instance<?>> getCustomData() {
         return customData;
     }
 
     @Override
-    public Map<String, CustomDecoration> getCustomDecorations() {
+    public Map<String, CustomMapDecoration> getCustomDecorations() {
         return customDecorations;
     }
 
@@ -100,7 +100,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Override
-    public <D extends CustomDecoration> void addCustomDecoration(MapBlockMarker<D> marker) {
+    public <D extends CustomMapDecoration> void addCustomDecoration(MapBlockMarker<D> marker) {
         D decoration = marker.createDecorationFromMarker(scale, x, z, dimension, locked);
         if (decoration != null) {
             this.customDecorations.put(marker.getMarkerId(), decoration);
@@ -127,15 +127,26 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         }
     }
 
+    /**
+     * @param world level
+     * @param pos world position where a marker providing block could be
+     * @return true if a marker was toggled
+     */
     @Override
-    public void toggleCustomDecoration(LevelAccessor world, BlockPos pos) {
+    public boolean toggleCustomDecoration(LevelAccessor world, BlockPos pos) {
+        if(world.isClientSide()){
+            List<MapBlockMarker<?>> markers = MapDecorationRegistry.getMarkersFromWorld(world, pos);
+            return !markers.isEmpty();
+        }
+
         double d0 = (double) pos.getX() + 0.5D;
         double d1 = (double) pos.getZ() + 0.5D;
         int i = 1 << this.scale;
         double d2 = (d0 - (double) this.x) / (double) i;
         double d3 = (d1 - (double) this.z) / (double) i;
         if (d2 >= -63.0D && d3 >= -63.0D && d2 <= 63.0D && d3 <= 63.0D) {
-            List<MapBlockMarker<?>> markers = MapDecorationHandler.getMarkersFromWorld(world, pos);
+            List<MapBlockMarker<?>> markers = MapDecorationRegistry.getMarkersFromWorld(world, pos);
+
             boolean changed = false;
             for (MapBlockMarker<?> marker : markers) {
                 if (marker != null) {
@@ -151,11 +162,13 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     changed = true;
                 }
             }
-            if (changed) this.setDirty();
+            if (changed) {
+                this.setDirty();
+                return true;
+            }
         }
+        return false;
     }
-
-
 
 
     @Inject(method = "locked", at = @At("RETURN"))
@@ -188,9 +201,9 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     if (!this.decorations.containsKey(com.getString("id"))) {
                         String name = com.getString("type");
 
-                        CustomDecorationType<? extends CustomDecoration, ?> type = MapDecorationHandler.get(name);
+                        IMapDecorationType<? extends CustomMapDecoration, ?> type = MapDecorationRegistry.get(name);
                         if (type != null) {
-                            MapBlockMarker<CustomDecoration> dummy = new DummyMapBlockMarker(type, com.getInt("x"), com.getInt("z"));
+                            MapBlockMarker<CustomMapDecoration> dummy = new GenericMapBlockMarker(type, com.getInt("x"), com.getInt("z"));
                             this.addCustomDecoration(dummy);
                         } else {
                             Selene.LOGGER.warn("Failed to load map decoration " + name + ". Skipping it");
@@ -204,7 +217,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
                 NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
                         new ClientBoundSyncCustomMapDecorationPacket(mapId, this.scale, this.locked,
-                                this.customDecorations.values().toArray(new CustomDecoration[0]),
+                                this.customDecorations.values().toArray(new CustomMapDecoration[0]),
                                 this.customData.values().toArray(new CustomDataHolder.Instance[0])));
             }
         }
@@ -217,7 +230,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             ListTag listNBT = compound.getList("customMarkers", 10);
 
             for (int j = 0; j < listNBT.size(); ++j) {
-                MapBlockMarker<?> marker = MapDecorationHandler.readWorldMarker(listNBT.getCompound(j));
+                MapBlockMarker<?> marker = MapDecorationRegistry.readWorldMarker(listNBT.getCompound(j));
                 if (marker != null) {
                     mapData.getCustomMarkers().put(marker.getMarkerId(), marker);
                     mapData.addCustomDecoration(marker);
@@ -226,7 +239,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
             var customData = mapData.getCustomData();
             customData.clear();
-            MapDecorationHandler.CUSTOM_MAP_DATA_TYPES.forEach((s, o) -> {
+            MapDecorationRegistry.CUSTOM_MAP_DATA_TYPES.forEach((s, o) -> {
                 CustomDataHolder.Instance<?> i = o.create(compound);
                 if (i != null) customData.put(s, i);
             });

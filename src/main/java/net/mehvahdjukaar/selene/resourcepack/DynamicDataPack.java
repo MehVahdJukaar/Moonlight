@@ -1,33 +1,21 @@
 package net.mehvahdjukaar.selene.resourcepack;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.misc.BlockLootTableAccessor;
 import net.mehvahdjukaar.selene.resourcepack.resources.TagBuilder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
 
+import java.io.ByteArrayInputStream;
 import java.util.Collection;
-import java.util.List;
 
 public class DynamicDataPack extends DynamicResourcePack {
 
@@ -44,7 +32,7 @@ public class DynamicDataPack extends DynamicResourcePack {
     public <T extends ForgeRegistryEntry<T>> void addTag(TagKey<?> key, Collection<T> values, ResourceKey<?> type) {
         var builder = TagBuilder.of(key);
         builder.addEntries(values);
-        this.addTag(builder,type);
+        this.addTag(builder, type);
     }
     //TODO: reformat
     /*
@@ -58,16 +46,24 @@ public class DynamicDataPack extends DynamicResourcePack {
     public void addTag(ResourceLocation tagLocation, Collection<ResourceLocation> values, ResourceKey<?> type) {
         var builder = TagBuilder.of(tagLocation);
         values.forEach(builder::add);
-        this.addTag(builder,type);
+        this.addTag(builder, type);
     }
 
-    public void addTag(TagBuilder builder,  ResourceKey<?> type){
-        JsonElement json = builder.build();
+    public void addTag(TagBuilder builder, ResourceKey<?> type) {
+
         ResourceLocation tagId = builder.getId();
         String tagPath = type.location().getPath();
         if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item")) tagPath = tagPath + "s";
-        this.addJson(new ResourceLocation(tagId.getNamespace(),
-                tagPath + "/" + tagId.getPath()), json, ResType.TAGS);
+        ResourceLocation loc = ResType.TAGS.getPath(new ResourceLocation(tagId.getNamespace(),
+                tagPath + "/" + tagId.getPath()));
+        //merge tags
+        if (this.resources.containsKey(loc)) {
+            var r = resources.get(loc);
+            var oldTag = RPUtils.deserializeJson(new ByteArrayInputStream(r));
+            builder.addFromJson(oldTag);
+        }
+        JsonElement json = builder.serializeToJson();
+        this.addJson(loc, json, ResType.GENERIC);
     }
 
     /**

@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.mehvahdjukaar.selene.map.CustomDecoration;
+import net.mehvahdjukaar.selene.map.CustomMapDecoration;
 import net.mehvahdjukaar.selene.map.ExpandedMapData;
 import net.mehvahdjukaar.selene.map.client.MapDecorationRenderHandler;
 import net.minecraft.client.gui.MapRenderer;
@@ -20,7 +20,7 @@ public abstract class MapItemRendererMixin {
     private void render(PoseStack poseStack, MultiBufferSource buffer, int mapId, MapItemSavedData mapData, boolean isOnFrame, int light, CallbackInfo ci) {
         if (mapData instanceof ExpandedMapData data) {
             int index = data.getVanillaDecorationSize();
-            for (CustomDecoration decoration : data.getCustomDecorations().values()) {
+            for (CustomMapDecoration decoration : data.getCustomDecorations().values()) {
 
                 if (MapDecorationRenderHandler.render(decoration, poseStack, buffer, mapData, isOnFrame, light, index))
                     index++;

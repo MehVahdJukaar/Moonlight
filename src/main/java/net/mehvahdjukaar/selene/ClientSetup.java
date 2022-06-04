@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.selene;
 
+import net.mehvahdjukaar.selene.client.FluidParticleColors;
 import net.mehvahdjukaar.selene.client.TextureCache;
 import net.mehvahdjukaar.selene.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.selene.fluids.FluidTextures;
-import net.mehvahdjukaar.selene.client.FluidParticleColors;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;

@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.map.markers;
 
-import net.mehvahdjukaar.selene.map.CustomDecoration;
-import net.mehvahdjukaar.selene.map.CustomDecorationType;
+import net.mehvahdjukaar.selene.map.CustomMapDecoration;
+import net.mehvahdjukaar.selene.map.type.IMapDecorationType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
@@ -15,16 +15,16 @@ import java.util.Objects;
  * represents a block tracker instance which keeps track of a placed block and creates its associated map decoration
  * @param <D> decoration
  */
-public abstract class MapBlockMarker<D extends CustomDecoration>  {
-    private final CustomDecorationType<D,?> type;
+public abstract class MapBlockMarker<D extends CustomMapDecoration>  {
+    private final IMapDecorationType<D,?> type;
     public BlockPos pos;
     //private final int rotation;
 
-    public MapBlockMarker(CustomDecorationType<D,?> type) {
+    public MapBlockMarker(IMapDecorationType<D,?> type) {
         this.type = type;
     }
 
-    public MapBlockMarker(CustomDecorationType<D,?> type, BlockPos pos) {
+    public MapBlockMarker(IMapDecorationType<D,?> type, BlockPos pos) {
         this(type);
         this.pos = pos;
     }
@@ -82,12 +82,12 @@ public abstract class MapBlockMarker<D extends CustomDecoration>  {
         return pos.getX() + "," + pos.getY() + "," + pos.getZ();
     }
 
-    public CustomDecorationType<D,?> getType() {
+    public IMapDecorationType<D,?> getType() {
         return type;
     }
 
     public String getTypeId(){
-        return this.type.getRegistryId();
+        return this.type.getId().toString();
     }
 
     public String getMarkerId(){
@@ -162,6 +162,6 @@ public abstract class MapBlockMarker<D extends CustomDecoration>  {
     /**
      * updates my map decoration after should update returns true
      */
-    public void updateDecoration(CustomDecoration old){}
+    public void updateDecoration(CustomMapDecoration old){}
 
 }

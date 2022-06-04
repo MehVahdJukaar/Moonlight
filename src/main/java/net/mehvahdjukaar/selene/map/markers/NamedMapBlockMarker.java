@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.map.markers;
 
-import net.mehvahdjukaar.selene.map.CustomDecoration;
-import net.mehvahdjukaar.selene.map.CustomDecorationType;
+import net.mehvahdjukaar.selene.map.CustomMapDecoration;
+import net.mehvahdjukaar.selene.map.type.IMapDecorationType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -10,17 +10,17 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 //see mapWorldMarker for more
-public abstract class NamedMapBlockMarker<D extends CustomDecoration> extends MapBlockMarker<D> {
+public abstract class NamedMapBlockMarker<D extends CustomMapDecoration> extends MapBlockMarker<D> {
 
     //additional data to be stored
     @Nullable
     public Component name;
 
-    public NamedMapBlockMarker(CustomDecorationType<D, ?> type) {
+    public NamedMapBlockMarker(IMapDecorationType<D, ?> type) {
         super(type);
     }
 
-    public NamedMapBlockMarker(CustomDecorationType<D, ?> type, BlockPos pos) {
+    public NamedMapBlockMarker(IMapDecorationType<D, ?> type, BlockPos pos) {
         super(type, pos);
     }
 
@@ -64,7 +64,7 @@ public abstract class NamedMapBlockMarker<D extends CustomDecoration> extends Ma
     }
 
     @Override
-    public void updateDecoration(CustomDecoration old) {
+    public void updateDecoration(CustomMapDecoration old) {
         old.setDisplayName(this.name);
     }
 }

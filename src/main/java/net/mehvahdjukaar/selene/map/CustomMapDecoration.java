@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.selene.map;
 
+import net.mehvahdjukaar.selene.map.type.IMapDecorationType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -11,14 +11,14 @@ import java.util.Objects;
  * Represents the actual map marker displayed on a map
  * default base simple decoration. this will be instanced in a map. equivalent of a tile entity or decorations for maps themselves
  */
-public class CustomDecoration {
-    private final CustomDecorationType<?,?> type;
+public class CustomMapDecoration {
+    private final IMapDecorationType<?,?> type;
     private Component displayName;
     private byte x;
     private byte y;
     private byte rot;
 
-    public CustomDecoration(CustomDecorationType<?,?> type, byte x, byte y, byte rot, @Nullable Component displayName) {
+    public CustomMapDecoration(IMapDecorationType<?,?> type, byte x, byte y, byte rot, @Nullable Component displayName) {
         this.type = type;
         this.x = x;
         this.y = y;
@@ -26,12 +26,8 @@ public class CustomDecoration {
         this.displayName = displayName;
     }
 
-    public CustomDecorationType<?,?> getType() {
+    public IMapDecorationType<?,?> getType() {
         return this.type;
-    }
-
-    public String getTypeId(){
-        return this.type.getRegistryId();
     }
 
     public byte getX() {
@@ -71,21 +67,20 @@ public class CustomDecoration {
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-        } else if (!(obj instanceof CustomDecoration)) {
-            return false;
-        } else {
-            CustomDecoration mapdecoration = (CustomDecoration)obj;
-            if (this.type != mapdecoration.type) {
+        } else if (obj instanceof CustomMapDecoration mapDecoration) {
+            if (this.type != mapDecoration.type) {
                 return false;
-            } else if (this.rot != mapdecoration.rot) {
+            } else if (this.rot != mapDecoration.rot) {
                 return false;
-            } else if (this.x != mapdecoration.x) {
+            } else if (this.x != mapDecoration.x) {
                 return false;
-            } else if (this.y != mapdecoration.y) {
+            } else if (this.y != mapDecoration.y) {
                 return false;
             } else {
-                return Objects.equals(this.displayName, mapdecoration.displayName);
+                return Objects.equals(this.displayName, mapDecoration.displayName);
             }
+        }else{
+            return false;
         }
     }
 
@@ -120,7 +115,7 @@ public class CustomDecoration {
      * implement this if you are adding new data to this base decoration class
      * @param buffer packed buffer
      */
-    public CustomDecoration(CustomDecorationType<?,?> type, FriendlyByteBuf buffer){
+    public CustomMapDecoration(IMapDecorationType<?,?> type, FriendlyByteBuf buffer){
         this(type, buffer.readByte(), buffer.readByte(), (byte)(buffer.readByte() & 15), buffer.readBoolean() ? buffer.readComponent() : null);
     }
 

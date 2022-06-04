@@ -47,9 +47,9 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final PackMetadataSection packInfo;
     protected final Component title;
     protected final ResourceLocation resourcePackName;
-    private final Set<String> namespaces = new HashSet<>();
-    private final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
-    private final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
+    protected final Set<String> namespaces = new HashSet<>();
+    protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
+    protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final String mainNamespace;
 
     //for debug or to generate assets

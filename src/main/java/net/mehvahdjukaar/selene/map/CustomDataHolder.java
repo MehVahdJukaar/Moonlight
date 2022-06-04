@@ -4,6 +4,7 @@ import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -14,11 +15,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 //TODO: this wasn't relly needed... could have done with simply a simple mixin since after all I'm only using it for 1 boolean value
-public record CustomDataHolder<T>(String id,
-        Function<CompoundTag, T> load,
-        BiConsumer<CompoundTag, T> save,
-        PropertyDispatch.TriFunction<MapItemSavedData, Entity, T, Boolean> onItemUpdate,
-        PropertyDispatch.TriFunction<MapItemSavedData, ItemStack, T, Component> onItemTooltip) {
+public record CustomDataHolder<T>(ResourceLocation id,
+                                  Function<CompoundTag, T> load,
+                                  BiConsumer<CompoundTag, T> save,
+                                  PropertyDispatch.TriFunction<MapItemSavedData, Entity, T, Boolean> onItemUpdate,
+                                  PropertyDispatch.TriFunction<MapItemSavedData, ItemStack, T, Component> onItemTooltip) {
 
     @Nullable
     public Instance<T> create(CompoundTag tag) {

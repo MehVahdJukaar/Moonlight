@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.example.map;
 
-import net.mehvahdjukaar.selene.map.CustomDecoration;
+import net.mehvahdjukaar.selene.map.CustomMapDecoration;
 import net.mehvahdjukaar.selene.map.markers.MapBlockMarker;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -12,7 +12,7 @@ import net.minecraft.world.level.BlockGetter;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public class ExampleMarker extends MapBlockMarker<CustomDecoration> {
+public class ExampleMarker extends MapBlockMarker<CustomMapDecoration> {
     //additional data to be stored
     @Nullable
     private Component name;
@@ -55,8 +55,8 @@ public class ExampleMarker extends MapBlockMarker<CustomDecoration> {
 
     @Nullable
     @Override
-    public CustomDecoration doCreateDecoration(byte mapX, byte mapY, byte rot) {
-        return new CustomDecoration(this.getType(),mapX,mapY,rot,name);
+    public CustomMapDecoration doCreateDecoration(byte mapX, byte mapY, byte rot) {
+        return new CustomMapDecoration(this.getType(),mapX,mapY,rot,name);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class ExampleMarker extends MapBlockMarker<CustomDecoration> {
     }
 
     @Override
-    public void updateDecoration(CustomDecoration old) {
+    public void updateDecoration(CustomMapDecoration old) {
         old.setDisplayName(this.name);
     }
 }

@@ -105,6 +105,10 @@ public class Palette {
         return internal.get(index);
     }
 
+    public int indexOf(PaletteColor color){
+        return this.internal.indexOf(color);
+    }
+
     public boolean hasColor(PaletteColor color) {
         return this.hasColor(color, this.tolerance);
     }
@@ -141,6 +145,16 @@ public class Palette {
 
     public PaletteColor calculateAverage() {
         return new PaletteColor(LABColor.averageColors(this.getValues().stream().map(PaletteColor::lab).toArray(LABColor[]::new)));
+    }
+
+    /**
+     * Grabs a color closest to the given value with 0 being the first color, 1 being the last
+     *
+     * @param slope percentage of palette. from 0 to 1
+     */
+    public PaletteColor getColorAtSlope(float slope) {
+        int index = Math.round((internal.size() - 1) * slope);
+        return internal.get(index);
     }
 
     /**
@@ -190,21 +204,21 @@ public class Palette {
         int currentSize;
         while ((currentSize = this.size()) < targetSize) {
             //safety check if palette is full
-            if(this.hasLuminanceGap() || (!canIncreaseDown && !canIncreaseUp)){
+            if (this.hasLuminanceGap() || (!canIncreaseDown && !canIncreaseUp)) {
                 increaseInner();
-            }else{
+            } else {
                 //increase up and down every cycle
-                if(down)increaseDown();
+                if (down) increaseDown();
                 else increaseUp();
                 //if it didnt increase means we are at max luminance, probably white
-                if(currentSize == this.size()){
-                    if(down)canIncreaseDown = false;
+                if (currentSize == this.size()) {
+                    if (down) canIncreaseDown = false;
                     else canIncreaseUp = false;
 
                     down = !down;
                 }
-                if(canIncreaseDown && canIncreaseUp)
-                down = !down;
+                if (canIncreaseDown && canIncreaseUp)
+                    down = !down;
             }
 
         }
@@ -243,23 +257,24 @@ public class Palette {
         this.remove(this.get(index));
     }
 
-    private boolean hasLuminanceGap(){
+    private boolean hasLuminanceGap() {
         return hasLuminanceGap(1.7f);
     }
 
-    private boolean hasLuminanceGap(float cutoff){
+    private boolean hasLuminanceGap(float cutoff) {
         List<Float> list = getLuminanceSteps();
         float mean = getAverageLuminanceStep();
 
-        for(var s : list){
+        for (var s : list) {
             //if it has one step that is greater than 1.5 times the mean
-            if(s>cutoff*mean)return true;
+            if (s > cutoff * mean) return true;
         }
         return false;
     }
 
     /**
      * This is just Normalized Standard Deviation (SD/Mean)
+     *
      * @return How much luminance steps differ from eachother
      */
     public float getLuminanceStepVariationCoeff() {
