@@ -173,7 +173,7 @@ public class BlockSetManager {
 
     //shittiest code ever lol
     protected static void registerLateBlockAndItems(RegistryEvent.Register<Item> event) {
-        //when the first registration function is called we find all wood types
+        //when the first registration function is called we find all block types
         if (!hasFilledBlockSets) {
             initializeBlockSets();
             hasFilledBlockSets = true;

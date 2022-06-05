@@ -9,6 +9,7 @@ import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.client.TextureCache;
 import net.mehvahdjukaar.selene.resourcepack.recipe.IRecipeTemplate;
+import net.mehvahdjukaar.selene.resourcepack.recipe.TemplateRecipeManager;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -188,7 +189,7 @@ public class RPUtils {
     public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, ResourceLocation location) {
         try {
             JsonObject element = RPUtils.deserializeJson(manager.getResource(location).getInputStream());
-            return IRecipeTemplate.read(element);
+            return TemplateRecipeManager.read(element);
 
         } catch (Exception e) {
             throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));

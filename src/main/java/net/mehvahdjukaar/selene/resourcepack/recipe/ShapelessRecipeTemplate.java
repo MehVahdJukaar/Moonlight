@@ -22,33 +22,27 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
     public final String group;
     public final List<Ingredient> ingredients;
 
-    private ShapelessRecipeTemplate(Item pResult, int pCount, String pGroup, List<Ingredient> ingredients) {
-        this.result = pResult;
-        this.count = pCount;
-        this.group = pGroup;
-        this.ingredients = ingredients;
-    }
-
-    public static ShapelessRecipeTemplate fromJson(JsonObject json) {
+    public ShapelessRecipeTemplate(JsonObject json) {
         JsonObject result = json.getAsJsonObject("result");
         ResourceLocation item = new ResourceLocation(result.get("item").getAsString());
         int count = 1;
         var c = result.get("count");
         if (c != null) count = c.getAsInt();
 
-        Item i = Registry.ITEM.get(item);
+        this.result = Registry.ITEM.get(item);
+        this.count = count;
 
         var g = json.get("group");
-        String group = g == null ? "" : g.getAsString();
+        this.group = g == null ? "" : g.getAsString();
 
         List<Ingredient> ingredientsList = new ArrayList<>();
         JsonArray ingredients = json.getAsJsonArray("ingredients");
         ingredients.forEach(p -> ingredientsList.add(Ingredient.fromJson(p)));
 
-
-        return new ShapelessRecipeTemplate(i, count, group, ingredientsList);
+        this.ingredients = ingredientsList;
     }
 
+    @Override
     public <T extends BlockType> ShapelessRecipeBuilder.Result createSimilar(
             T originalMat, T destinationMat, Item unlockItem, String id) {
         ItemLike newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
@@ -59,11 +53,15 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
         ShapelessRecipeBuilder builder = new ShapelessRecipeBuilder(newRes, this.count);
 
         for (var ing : this.ingredients) {
-            if (ing.getItems().length > 0) {
-                Item old = ing.getItems()[0].getItem();
-                if (old != Items.BARRIER) {
-                    ItemLike i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
-                    if(i != null) ing = Ingredient.of(i);
+            for(var in : ing.getItems()){
+                Item it = in.getItem();
+                if (it != Items.BARRIER) {
+                    ItemLike i = BlockType.changeItemBlockType(it, originalMat, destinationMat);
+                    if(i != null){
+                        //converts first ingredient it finds
+                        ing = Ingredient.of(i);
+                        break;
+                    }
                 }
             }
             builder.requires(ing);

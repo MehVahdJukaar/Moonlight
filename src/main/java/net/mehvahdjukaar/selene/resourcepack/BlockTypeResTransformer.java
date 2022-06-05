@@ -122,7 +122,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
     }
 
     public BlockTypeResTransformer<T> replaceOakLeaves() {
-        return this.replaceWithTextureFromChild("minecraft:block/oak_leaves", "leaves");
+        return this.replaceWithTextureFromChild("minecraft:block/oak_leaves", "leaves", s -> !s.contains("_snow"));
     }
 
     /**
@@ -136,22 +136,22 @@ public class BlockTypeResTransformer<T extends BlockType> {
      * Replaces the oak log textures with the log texture of the 'log' child of this block type. Meant for wood types
      */
     public BlockTypeResTransformer<T> replaceOakBark() {
-        return this.replaceWithTextureFromChild("minecraft:block/oak_log", "log", s -> !s.contains("end") && !s.contains("top"))
-                .replaceWithTextureFromChild("minecraft:block/oak_log_top", "log", s -> s.contains("top") || s.contains("end"));
+        return this.replaceWithTextureFromChild("minecraft:block/oak_log", "log", s -> !s.contains("_end") && !s.contains("_top"))
+                .replaceWithTextureFromChild("minecraft:block/oak_log_top", "log", s -> s.contains("_top") || s.contains("_end"));
     }
 
     public BlockTypeResTransformer<T> replaceOakStripped() {
-        return this.replaceWithTextureFromChild("minecraft:block/stripped_oak_log", "log", s -> !s.contains("end") && !s.contains("top"))
-                .replaceWithTextureFromChild("minecraft:block/stripped_oak_log_top", "log", s -> s.contains("top") || s.contains("end"));
+        return this.replaceWithTextureFromChild("minecraft:block/stripped_oak_log", "stripped_log", s -> !s.contains("_end") && !s.contains("_top"))
+                .replaceWithTextureFromChild("minecraft:block/stripped_oak_log_top", "stripped_log", s -> s.contains("_top") || s.contains("_end"));
     }
 
     public BlockTypeResTransformer<T> replaceWoodTextures(WoodType woodType) {
         String n = woodType.getTypeName();
         return this.replaceWithTextureFromChild("minecraft:block/" + n + "_planks", "planks")
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", "log", s -> !s.contains("end") && !s.contains("top"))
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", "log", s -> s.contains("top") || s.contains("end"))
-                .replaceWithTextureFromChild("minecraft:block/stripped" + n + "_log", "log", s -> !s.contains("end") && !s.contains("top"))
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", "log", s -> s.contains("top") || s.contains("end"));
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", "stripped_log", s -> !s.contains("_end") && !s.contains("_top"))
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", "stripped_log", s -> s.contains("_top") || s.contains("_end"))
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", "log", s -> !s.contains("_end") && !s.contains("_top"))
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", "log", s -> s.contains("_top") || s.contains("_end"));
 
 
     }
@@ -180,9 +180,9 @@ public class BlockTypeResTransformer<T extends BlockType> {
                 }
                 if (newTexture != null) {
                     //try mc namespace
-                    r = s.replace("\"block\\/", "minecraft:block\\/" + newTexture.toString());
-                    
-                    r = r.replace(target, newTexture.toString());
+                    r = s.replace("\"block\\/", "minecraft:block\\/" + newTexture);
+
+                    r = r.replace(target + "\"", newTexture + "\"");
                 }
             } catch (FileNotFoundException ignored) {
             }

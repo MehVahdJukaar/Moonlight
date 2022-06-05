@@ -25,25 +25,18 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
     public final List<String> pattern;
     public final Map<Character, Ingredient> keys;
 
-    private ShapedRecipeTemplate(Item pResult, int pCount, String pGroup, List<String> pPattern, Map<Character, Ingredient> pKey) {
-        this.result = pResult;
-        this.count = pCount;
-        this.group = pGroup;
-        this.pattern = pPattern;
-        this.keys = pKey;
-    }
-
-    public static ShapedRecipeTemplate fromJson(JsonObject json) {
+    public ShapedRecipeTemplate(JsonObject json) {
         JsonObject result = json.getAsJsonObject("result");
         ResourceLocation item = new ResourceLocation(result.get("item").getAsString());
         int count = 1;
         var c = result.get("count");
         if (c != null) count = c.getAsInt();
 
-        Item i = Registry.ITEM.get(item);
+        this.result = Registry.ITEM.get(item);
+        this.count = count;
 
         var g = json.get("group");
-        String group = g == null ? "" : g.getAsString();
+        this.group = g == null ? "" : g.getAsString();
 
         List<String> patternList = new ArrayList<>();
         JsonArray patterns = json.getAsJsonArray("pattern");
@@ -53,7 +46,8 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
         JsonObject keys = json.getAsJsonObject("key");
         keys.entrySet().forEach((e) -> keyMap.put(e.getKey().charAt(0), Ingredient.fromJson(e.getValue())));
 
-        return new ShapedRecipeTemplate(i, count, group, patternList, keyMap);
+        this.keys = keyMap;
+        this.pattern = patternList;
     }
 
     public <T extends BlockType> ShapedRecipeBuilder.Result createSimilar(T originalMat, T destinationMat, Item unlockItem, String id) {
@@ -65,11 +59,15 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
 
         for (var e : this.keys.entrySet()) {
             Ingredient ing = e.getValue();
-            if (ing.getItems().length > 0) {
-                Item old = ing.getItems()[0].getItem();
-                if (old != Items.BARRIER) {
-                    ItemLike i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
-                    if(i != null) ing = Ingredient.of(i);
+            for(var in : ing.getItems()){
+                Item it = in.getItem();
+                if (it != Items.BARRIER) {
+                    ItemLike i = BlockType.changeItemBlockType(it, originalMat, destinationMat);
+                    if(i != null){
+                        //converts first ingredient it finds
+                        ing = Ingredient.of(i);
+                        break;
+                    }
                 }
             }
             builder.define(e.getKey(), ing);

@@ -41,7 +41,8 @@ public class MapDecorationRegistry extends SimpleJsonResourceReloadListener {
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> jsons, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         //remove data driven types
-        dynamicTypes.forEach(t -> CUSTOM_MAP_DATA_TYPES.remove(t.getId()));
+        dynamicTypes.forEach(t -> DECORATION_TYPES.remove(t.getId()));
+        dynamicTypes.clear();
         for (var j : jsons.entrySet()) {
             Optional<SimpleDecorationType> result = SimpleDecorationType.CODEC.parse(JsonOps.INSTANCE, j.getValue())
                     .resultOrPartial(e -> Selene.LOGGER.error("Failed to parse Map Decoration JSON object for {} : {}", j.getKey(), e));
@@ -93,7 +94,9 @@ public class MapDecorationRegistry extends SimpleJsonResourceReloadListener {
     public static <T extends CustomMapDecoration> void register(IMapDecorationType<T, ?> newType) {
         ResourceLocation id = newType.getId();
         if (DECORATION_TYPES.containsKey(id)) {
-            throw new IllegalArgumentException("Duplicate map decoration registration " + id);
+            DECORATION_TYPES.put(id, newType);
+            Selene.LOGGER.error("Duplicate Map Marker registration: {}. This might be unwanted", id);
+            //throw new IllegalArgumentException("Duplicate map decoration registration " + id);
         } else {
             DECORATION_TYPES.put(id, newType);
         }

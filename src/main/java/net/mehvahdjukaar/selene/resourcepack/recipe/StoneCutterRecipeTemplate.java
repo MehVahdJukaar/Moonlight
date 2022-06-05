@@ -11,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,42 +21,39 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
     public final String group;
     public final Ingredient ingredient;
 
-    private StoneCutterRecipeTemplate(Item pResult, int pCount, String pGroup, Ingredient ingredient) {
-        this.result = pResult;
-        this.count = pCount;
-        this.group = pGroup;
-        this.ingredient = ingredient;
-    }
-
-    public static StoneCutterRecipeTemplate fromJson(JsonObject json) {
+    public StoneCutterRecipeTemplate(JsonObject json) {
         JsonElement result = json.get("result");
         ResourceLocation item = new ResourceLocation(result.getAsString());
         int count = 1;
         var c = json.get("count");
         if (c != null) count = c.getAsInt();
 
-        Item i = Registry.ITEM.get(item);
+        this.count = count;
+        this.result = Registry.ITEM.get(item);
 
         var g = json.get("group");
-        String group = g == null ? "" : g.getAsString();
+        this.group = g == null ? "" : g.getAsString();
 
-        Ingredient ingredient = Ingredient.fromJson(json.get("ingredient"));
-
-        return new StoneCutterRecipeTemplate(i, count, group, ingredient);
+        this.ingredient = Ingredient.fromJson(json.get("ingredient"));
     }
 
+    @Override
     public <T extends BlockType> SingleItemRecipeBuilder.Result createSimilar(
-            T originalMat, T destinationMat, Item unlockItem, String id) {
+            T originalMat, T destinationMat, Item unlockItem, @Nullable String id) {
         ItemLike newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
         if (newRes == null)
             throw new UnsupportedOperationException(String.format("Could not convert output item %s", result));
 
         Ingredient ing = ingredient;
-        if (ingredient.getItems().length > 0) {
-            Item old = ingredient.getItems()[0].getItem();
-            if (old != Items.BARRIER) {
-                ItemLike i = BlockType.changeItemBlockType(old, originalMat, destinationMat);
-                if (i != null) ing = Ingredient.of(i);
+        for (var in : ing.getItems()) {
+            Item it = in.getItem();
+            if (it != Items.BARRIER) {
+                ItemLike i = BlockType.changeItemBlockType(it, originalMat, destinationMat);
+                if (i != null) {
+                    //converts first ingredient it finds
+                    ing = Ingredient.of(i);
+                    break;
+                }
             }
         }
 

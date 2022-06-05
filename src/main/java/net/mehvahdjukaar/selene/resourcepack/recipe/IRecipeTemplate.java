@@ -19,17 +19,6 @@ public interface IRecipeTemplate<R extends FinishedRecipe> {
         return createSimilar(originalMat, destinationMat, unlockItem, null);
     }
 
-    static IRecipeTemplate<?> read(JsonObject recipe) throws UnsupportedOperationException {
-        String type = GsonHelper.getAsString(recipe, "type");
-        RecipeSerializer<?> s = ForgeRegistries.RECIPE_SERIALIZERS.getValue(new ResourceLocation(type));
-        if (s == RecipeSerializer.SHAPED_RECIPE) {
-            return ShapedRecipeTemplate.fromJson(recipe);
-        } else if (s == RecipeSerializer.SHAPELESS_RECIPE) {
-            return ShapelessRecipeTemplate.fromJson(recipe);
-        } else if (s == RecipeSerializer.STONECUTTER) {
-            return StoneCutterRecipeTemplate.fromJson(recipe);
-        }
-        throw new UnsupportedOperationException(String.format("Invalid recipe serializer: %s. Must be either shaped, shapeless or stonecutting", s));
-    }
+
 
 }

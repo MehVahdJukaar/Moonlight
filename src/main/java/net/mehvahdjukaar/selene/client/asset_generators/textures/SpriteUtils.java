@@ -7,6 +7,7 @@ import net.mehvahdjukaar.selene.math.kmeans.DataSet;
 import net.mehvahdjukaar.selene.math.kmeans.KMeans;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.Mth;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,17 +26,17 @@ public final class SpriteUtils {
         return NativeImage.read(manager.getResource(resourceLocation).getInputStream());
     }
 
-    public static void forEachPixel(NativeImage image, BiConsumer<Integer, Integer> function){
+    public static void forEachPixel(NativeImage image, BiConsumer<Integer, Integer> function) {
         for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
-                function.accept(x,y);
+                function.accept(x, y);
             }
         }
     }
 
-    public static void grayscaleImage(NativeImage image){
-        forEachPixel(image,(x,y)->image.setPixelRGBA(x,y,
-                new RGBColor(image.getPixelRGBA(x,y)).asHCL().withChroma(0).asRGB().toInt()));
+    public static void grayscaleImage(NativeImage image) {
+        forEachPixel(image, (x, y) -> image.setPixelRGBA(x, y,
+                new RGBColor(image.getPixelRGBA(x, y)).asHCL().withChroma(0).asRGB().toInt()));
     }
 
 
@@ -45,12 +46,13 @@ public final class SpriteUtils {
      * Algorithm that approximates and generates a texture to be used on signs based off its corresponding planks texture.
      * It basically removes last 2 colors and adds another highlight
      * Returns a list of Palettes to work with possible animated (plank) textures
+     *
      * @param planksTexture plank texture of the desired wood type
      */
     public static List<Palette> extrapolateSignBlockPalette(TextureImage planksTexture) {
         List<Palette> newPalettes = new ArrayList<>();
-        List<Palette> oakPalettes = Palette.fromAnimatedImage(planksTexture, null, 1/300f);
-        for(Palette palette : oakPalettes) {
+        List<Palette> oakPalettes = Palette.fromAnimatedImage(planksTexture, null, 1 / 300f);
+        for (Palette palette : oakPalettes) {
             int size = palette.size();
             if (size == 7) {
                 PaletteColor color = palette.get(size - 3);
@@ -58,7 +60,9 @@ public final class SpriteUtils {
                 //just saturates last color
                 float satIncrease = 1 / 0.94f;
                 float brightnessIncrease = 1 / 0.94f;
-                HSVColor newCol = new HSVColor(hsv.hue(), hsv.saturation() * satIncrease, hsv.value() * brightnessIncrease, hsv.alpha());
+                HSVColor newCol = new HSVColor(hsv.hue(),
+                        Mth.clamp(hsv.saturation() * satIncrease, 0, 1),
+                        Mth.clamp(hsv.value() * brightnessIncrease, 0, 1), hsv.alpha());
                 PaletteColor newP = new PaletteColor(newCol);
                 newP.occurrence = color.occurrence;
                 palette.set(size - 1, newP);
@@ -70,10 +74,12 @@ public final class SpriteUtils {
     }
 
     //
+
     /**
      * Algorithm that approximates and generates a texture to be used on wooden item.
      * It basically just darkens the first color
      * Returns just one Palette since items should not have animated textures
+     *
      * @param planksTexture plank texture of the desired wood type
      */
     public static Palette extrapolateWoodItemPalette(TextureImage planksTexture) {
@@ -83,7 +89,7 @@ public final class SpriteUtils {
         //just saturates last color
         float satIncrease = 1.11f;
         float brightnessIncrease = 0.945f;
-        HSVColor newCol = new HSVColor(hsv.hue(), hsv.saturation() * satIncrease, hsv.value() * brightnessIncrease,hsv.alpha());
+        HSVColor newCol = new HSVColor(hsv.hue(), hsv.saturation() * satIncrease, hsv.value() * brightnessIncrease, hsv.alpha());
         PaletteColor newP = new PaletteColor(newCol);
         newP.occurrence = color.occurrence;
         palette.set(0, newP);
@@ -91,9 +97,8 @@ public final class SpriteUtils {
     }
 
 
-
-
     //Better use LAB color
+    @Deprecated
     public static float getLuminance(int r, int g, int b) {
         return (0.299f * r + 0.587f * g + 0.114f * b);
     }
@@ -121,7 +126,7 @@ public final class SpriteUtils {
             colorToColorMap.put(c.cast().getColor().value(), centroid.cast().getColor().value());
         }
 
-        SpriteUtils.forEachPixel(image,(x,y)->{
+        SpriteUtils.forEachPixel(image, (x, y) -> {
             int i = image.getPixelRGBA(x, y);
             if (colorToColorMap.containsKey(i)) {
                 image.setPixelRGBA(x, y, colorToColorMap.get(i));

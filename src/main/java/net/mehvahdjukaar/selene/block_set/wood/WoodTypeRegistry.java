@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.block_set.wood;
 
 import com.google.common.collect.ImmutableMap;
 import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
+import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -112,7 +113,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
 
     @Override
-    public void addTypeTranslations(DynamicLanguageManager.LanguageAccessor language) {
+    public void addTypeTranslations(AfterLanguageLoadEvent language) {
         WOOD_TYPES.forEach((r, w) -> {
             if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
         });

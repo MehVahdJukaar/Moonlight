@@ -18,7 +18,7 @@ public class StaticResource {
     public final ResourceLocation location;
     public final String sourceName;
 
-    private StaticResource(byte data[], ResourceLocation location, String sourceName){
+    private StaticResource(byte[] data, ResourceLocation location, String sourceName){
         this.data = data;
         this.location = location;
         this.sourceName = sourceName;

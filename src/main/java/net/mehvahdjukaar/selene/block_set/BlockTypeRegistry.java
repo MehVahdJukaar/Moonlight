@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.selene.block_set;
 
 import com.google.common.collect.ImmutableMap;
+import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -104,7 +105,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
      * Called at the right time on language reload. Use to add translations of your block type names.
      * Useful to create more complex translation strings using RPAwareDynamicTextureProvider::addDynamicLanguage
      */
-    public void addTypeTranslations(DynamicLanguageManager.LanguageAccessor language){
+    public void addTypeTranslations(AfterLanguageLoadEvent language){
 
     }
 

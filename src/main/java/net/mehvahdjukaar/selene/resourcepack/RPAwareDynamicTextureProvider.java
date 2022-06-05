@@ -66,18 +66,19 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
         }
     }
 
-
-    /**
-     * Use this method to add language entries that are dynamic and can be created based off existing entries.
-     * @param languageAccessor object used to access all currently registered language entries for the current lang file and add new ones
-     */
+    
     //TODO: reformat
+    @Deprecated(forRemoval = true)
     public void addDynamicTranslations(DynamicLanguageManager.LanguageAccessor languageAccessor){};
 
     private void temp(AfterLanguageLoadEvent e){
         addDynamicTranslations(e);
     }
 
+    /**
+     * Use this method to add language entries that are dynamic and can be created based off existing entries.
+     * @param languageAccessor object used to access all currently registered language entries for the current lang file and add new ones
+     */
     public void addDynamicTranslations(AfterLanguageLoadEvent languageAccessor){
         addDynamicTranslations((DynamicLanguageManager.LanguageAccessor)languageAccessor);
     };

@@ -9,7 +9,6 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -56,21 +55,18 @@ public abstract class BlockType {
      * @return something like mod_id/[baseName]_oak. ignores minecraft namespace
      */
     public String getVariantId(String baseName) {
-        return getVariantId(baseName, true);
+        String namespace = this.getNamespace() + "/";
+        if (namespace.equals("minecraft")) namespace = "";
+        if (baseName.contains("%s")) return namespace + String.format(baseName, this.getTypeName());
+        else return namespace + baseName + "_" + this.getTypeName();
     }
 
     public String getVariantId(String baseName, boolean prefix) {
-        String namespace = this.getNamespace();
-        if (namespace.equals("minecraft")) return baseName + "_" + this.getTypeName();
-
-        return prefix ? namespace + "/" + baseName + "_" + this.getTypeName() :
-                namespace + "/" + this.getTypeName() + "_" + baseName;
+        return getVariantId(prefix ? baseName + "_%s" : "%s_" + baseName);
     }
 
     public String getVariantId(String postfix, String prefix) {
-        String namespace = this.getNamespace();
-        if (namespace.equals("minecraft")) return prefix + "_" + this.getTypeName() + "_" + postfix;
-        return namespace + "/" + prefix + "_" + this.getTypeName() + "_" + postfix;
+        return getVariantId(prefix + "_%s_" + postfix);
     }
 
     public String getReadableName() {
@@ -142,7 +138,7 @@ public abstract class BlockType {
      * Should be called after you register a block that is made out of this wood type
      */
     public void addChild(String genericName, @Nullable ItemLike itemLike) {
-        if(itemLike != null){
+        if (itemLike != null) {
             this.children.put(genericName, itemLike);
         }
     }
@@ -170,11 +166,18 @@ public abstract class BlockType {
     public static ItemLike changeItemBlockType(ItemLike current, BlockType originalMat, BlockType destinationMat) {
         if (destinationMat == originalMat) return current;
         for (var c : originalMat.getChildren()) {
-            if (current.asItem() == c.getValue().asItem()) {
-                ItemLike replacement = destinationMat.getChild(c.getKey());
-                if (replacement != null) {
-                    return replacement;
+            var child = c.getValue();
+            ItemLike replacement = null;
+            if(current instanceof Block && child instanceof Block){
+                if(current == child) {
+                    replacement = destinationMat.getChild(c.getKey());
                 }
+            }
+            else if (current.asItem() == c.getValue().asItem()) {
+                replacement = destinationMat.getChild(c.getKey());
+            }
+            if (replacement != null) {
+                return replacement;
             }
         }
         return null;
