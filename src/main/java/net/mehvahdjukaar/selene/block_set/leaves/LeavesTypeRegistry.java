@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.block_set.leaves;
 
 import com.google.common.collect.ImmutableMap;
 import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
+import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
@@ -19,21 +20,26 @@ import java.util.Optional;
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     public static LeavesTypeRegistry INSTANCE;
-
-    public LeavesTypeRegistry() {
-        INSTANCE = this;
-    }
-
+    
     /**
      * Do not access these to register your blocks since they are empty right before the last registration phase.
      * Use addWoodEntryRegistrationCallback instead
      */
     public static Map<ResourceLocation, LeavesType> LEAVES_TYPES = new LinkedHashMap<>();
+    
+    public LeavesTypeRegistry() {
+        super(LeavesType.class);
+        INSTANCE = this;
+    }
 
     public static LeavesType fromNBT(String name) {
         return LEAVES_TYPES.getOrDefault(new ResourceLocation(name), LeavesType.OAK_LEAVES_TYPE);
     }
 
+    public String typeName(){
+        return "leaves_type";
+    };
+    
     @Override
     public LeavesType getDefaultType() {
         return LeavesType.OAK_LEAVES_TYPE;

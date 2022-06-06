@@ -62,7 +62,8 @@ public final class SpriteUtils {
                 float brightnessIncrease = 1 / 0.94f;
                 HSVColor newCol = new HSVColor(hsv.hue(),
                         Mth.clamp(hsv.saturation() * satIncrease, 0, 1),
-                        Mth.clamp(hsv.value() * brightnessIncrease, 0, 1), hsv.alpha());
+                        Mth.clamp(hsv.value() * brightnessIncrease, 0, 1),
+                        hsv.alpha());
                 PaletteColor newP = new PaletteColor(newCol);
                 newP.occurrence = color.occurrence;
                 palette.set(size - 1, newP);
@@ -89,7 +90,10 @@ public final class SpriteUtils {
         //just saturates last color
         float satIncrease = 1.11f;
         float brightnessIncrease = 0.945f;
-        HSVColor newCol = new HSVColor(hsv.hue(), hsv.saturation() * satIncrease, hsv.value() * brightnessIncrease, hsv.alpha());
+        HSVColor newCol = new HSVColor(hsv.hue(),
+                Mth.clamp(hsv.saturation() * satIncrease,0,1),
+                Mth.clamp(hsv.value() * brightnessIncrease,0,1),
+                hsv.alpha());
         PaletteColor newP = new PaletteColor(newCol);
         newP.occurrence = color.occurrence;
         palette.set(0, newP);

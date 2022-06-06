@@ -32,6 +32,7 @@ public class DynamicLanguageManager {
         //MinecraftForge.EVENT_BUS.post(languageEvent);
        // Selene.LOGGER.info("Dispatching AfterLanguageLoad Event");
         PACKS.forEach(p -> p.addDynamicTranslations(languageEvent));
+        
     }
 
     //TODO: reformat with proper name

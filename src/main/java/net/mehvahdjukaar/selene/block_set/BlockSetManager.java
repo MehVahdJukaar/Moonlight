@@ -44,17 +44,16 @@ public class BlockSetManager {
      * Registers a block set definition (like wood type, leaf type etc...)
      * Can be called only during mod startup (not during mod setup as it needs to run before registry events
      *
-     * @param type         class of the target block set
      * @param typeRegistry block set registry class instance. This contains all the logic that determines how a blockset
      *                     gets formed
      * @param <T>          IBlockType
      */
-    public static <T extends BlockType> void registerBlockSetDefinition(Class<T> type, BlockTypeRegistry<T> typeRegistry) {
+    public static <T extends BlockType> void registerBlockSetDefinition(BlockTypeRegistry<T> typeRegistry) {
         if (hasFilledBlockSets) {
             throw new UnsupportedOperationException(
-                    String.format("Tried to register block set definition %s for block type %s after registry events", typeRegistry, type));
+                    String.format("Tried to register block set definition %s after registry events", typeRegistry));
         }
-        BLOCK_SET_CONTAINERS.put(type, typeRegistry);
+        BLOCK_SET_CONTAINERS.put(typeRegistry.getType(), typeRegistry);
     }
 
     /**

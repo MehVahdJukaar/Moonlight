@@ -42,8 +42,8 @@ public class Selene {
         VillagerAIManager.SCHEDULES.register(bus);
         bus.addListener(Selene::init);
         MinecraftForge.EVENT_BUS.register(this);
-        BlockSetManager.registerBlockSetDefinition(WoodType.class, new WoodTypeRegistry());
-        BlockSetManager.registerBlockSetDefinition(LeavesType.class, new LeavesTypeRegistry());
+        BlockSetManager.registerBlockSetDefinition(new WoodTypeRegistry());
+        BlockSetManager.registerBlockSetDefinition(new LeavesTypeRegistry());
         CompatWoodTypes.init();
     }
 

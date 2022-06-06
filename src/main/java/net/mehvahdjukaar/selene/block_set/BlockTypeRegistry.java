@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.selene.block_set;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.TypeToken;
 import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
 import net.minecraft.resources.ResourceLocation;
@@ -16,6 +17,15 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     private final List<BlockType.SetFinder<T>> finders = new ArrayList<>();
     private final List<ResourceLocation> notInclude = new ArrayList<>();
     private final List<T> builder = new ArrayList<>();
+    private final Class<T> typeClass;
+    
+    public BlockTypeRegistry(Class<T> typeClass){
+        this.typeClass = typeClass;
+    }
+
+    public Class<T> getType() {
+        return typeClass;
+    }
 
     /**
      * Gets corresponding block type or oak if the provided one is not installed or missing
@@ -35,6 +45,8 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     public abstract T getDefaultType();
 
     public abstract Map<ResourceLocation, T> getTypes();
+    
+    public abstract String typeName();
 
     /**
      * Returns an optional block Type based on the given block. Pretty much defines the logic of how a block set is constructed

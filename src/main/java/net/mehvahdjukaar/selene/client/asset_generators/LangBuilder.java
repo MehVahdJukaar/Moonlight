@@ -107,7 +107,8 @@ public class LangBuilder {
                 lang.addEntry(item.getDescriptionId(), String.format(base, typeName));
             }
             else Selene.LOGGER.error("Could not find translation line {}", type.getTranslationKey());
-        } else Selene.LOGGER.error("Could not find translation line {}", key);
+        } 
+        else Selene.LOGGER.error("Could not find translation line {}", key);
     }
 
     @Deprecated
@@ -125,7 +126,6 @@ public class LangBuilder {
                 lang.addEntry(block.getDescriptionId(), String.format(base, typeName));
             }
         }
-        ;
     }
 
     @Deprecated
@@ -143,6 +143,5 @@ public class LangBuilder {
                 lang.addEntry(entityType.getDescriptionId(), String.format(base, typeName));
             }
         }
-        ;
     }
 }

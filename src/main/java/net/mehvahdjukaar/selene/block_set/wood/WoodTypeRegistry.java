@@ -20,19 +20,24 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     public static WoodTypeRegistry INSTANCE;
 
-    public WoodTypeRegistry() {
-        INSTANCE = this;
-    }
-
     /**
      * Do not access these to register your blocks since they are empty right before the last registration phase.
      * Use addWoodEntryRegistrationCallback instead
      */
     public static Map<ResourceLocation, WoodType> WOOD_TYPES = new LinkedHashMap<>();
 
+    public WoodTypeRegistry() {
+        super(WoodType.class);
+        INSTANCE = this;
+    }
+
     public static WoodType fromNBT(String name) {
         return WOOD_TYPES.getOrDefault(new ResourceLocation(name), WoodType.OAK_WOOD_TYPE);
     }
+
+    public String typeName(){
+        return "wood_type";
+    };
 
     @Override
     public WoodType getDefaultType() {
