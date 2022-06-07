@@ -57,13 +57,15 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
 
         ShapedRecipeBuilder builder = new ShapedRecipeBuilder(newRes, this.count);
 
+        boolean atLeastOneChanged = false;
         for (var e : this.keys.entrySet()) {
             Ingredient ing = e.getValue();
-            for(var in : ing.getItems()){
+            for (var in : ing.getItems()) {
                 Item it = in.getItem();
                 if (it != Items.BARRIER) {
                     ItemLike i = BlockType.changeItemBlockType(it, originalMat, destinationMat);
-                    if(i != null){
+                    if (i != null) {
+                        atLeastOneChanged = true;
                         //converts first ingredient it finds
                         ing = Ingredient.of(i);
                         break;
@@ -72,6 +74,9 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
             }
             builder.define(e.getKey(), ing);
         }
+        //if recipe fails
+        if (!atLeastOneChanged) return null;
+
         this.pattern.forEach(builder::pattern);
         builder.group(group);
         builder.unlockedBy("has_planks", InventoryChangeTrigger.TriggerInstance.hasItems(unlockItem));

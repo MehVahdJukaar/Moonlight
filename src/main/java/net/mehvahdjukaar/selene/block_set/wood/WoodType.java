@@ -14,8 +14,11 @@ import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.IBindingsProvider;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -161,6 +164,7 @@ public class WoodType extends IBlockType {
 
     public static class Finder extends SetFinder<WoodType> {
 
+        private final Map<String, ResourceLocation> childNames = new HashMap<>();
         private final Supplier<Block> planksFinder;
         private final Supplier<Block> logFinder;
         private final ResourceLocation id;
@@ -181,6 +185,15 @@ public class WoodType extends IBlockType {
                     () -> ForgeRegistries.BLOCKS.getValue(logName));
         }
 
+        public void addChild(String childType, String childName){
+            addChild(childType, new ResourceLocation(id.getNamespace(), childName));
+        }
+
+        public void addChild(String childType, ResourceLocation childName){
+            this.childNames.put(childType, childName);
+        }
+
+        @ApiStatus.Internal
         @Override
         public Optional<WoodType> get() {
             if (ModList.get().isLoaded(id.getNamespace())) {
@@ -189,7 +202,9 @@ public class WoodType extends IBlockType {
                     Block log = logFinder.get();
                     var d = ForgeRegistries.BLOCKS.getValue(ForgeRegistries.BLOCKS.getDefaultKey());
                     if (plank != d && log != d && plank != null && log != null) {
-                        return Optional.of(new WoodType(id, plank, log));
+                        var w = new WoodType(id, plank, log);
+                        childNames.forEach((key, value) -> w.addChild(key, ForgeRegistries.BLOCKS.getValue(value)));
+                        return Optional.of(w);
                     }
                 } catch (Exception ignored) {
                 }

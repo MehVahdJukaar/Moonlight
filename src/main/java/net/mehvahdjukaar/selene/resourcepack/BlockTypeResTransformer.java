@@ -9,6 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.function.TriFunction;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
@@ -153,7 +154,21 @@ public class BlockTypeResTransformer<T extends BlockType> {
                 .replaceWithTextureFromChild("minecraft:block/" + n + "_log", "log", s -> !s.contains("_end") && !s.contains("_top"))
                 .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", "log", s -> s.contains("_top") || s.contains("_end"));
 
+    }
 
+    public BlockTypeResTransformer<T> replaceLeavesTextures(LeavesType woodType) {
+        String n = woodType.getTypeName();
+        return this.replaceWithTextureFromChild("minecraft:block/" + n + "_leaves", "leaves", s -> !s.contains("_snow"))
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", l -> wfl(l, "stripped_log"), s -> !s.contains("_end") && !s.contains("_top"))
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", l -> wfl(l, "stripped_log"), s -> s.contains("_top") || s.contains("_end"))
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", l -> wfl(l, "log"), s -> !s.contains("_end") && !s.contains("_top"))
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", l -> wfl(l, "log"), s -> s.contains("_top") || s.contains("_end"));
+
+    }
+
+    private @Nullable ItemLike wfl(T t, String s) {
+        if (t instanceof LeavesType l && l.woodType != null) return l.woodType.getChild(s);
+        return null;
     }
 
     public BlockTypeResTransformer<T> replaceWithTextureFromChild(String target, String textureFromChild) {
@@ -180,9 +195,9 @@ public class BlockTypeResTransformer<T extends BlockType> {
                 }
                 if (newTexture != null) {
                     //try mc namespace
-                    r = s.replace("\"block\\/", "minecraft:block\\/" + newTexture);
+                    r = s.replace("\"block/", "\"minecraft:block/");
 
-                    r = r.replace(target + "\"", newTexture + "\"");
+                    r = r.replace("\"" + target + "\"", "\"" + newTexture + "\"");
                 }
             } catch (FileNotFoundException ignored) {
             }

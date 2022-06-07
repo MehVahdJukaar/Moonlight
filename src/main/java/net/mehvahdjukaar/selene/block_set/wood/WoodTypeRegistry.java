@@ -1,10 +1,12 @@
 package net.mehvahdjukaar.selene.block_set.wood;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
 import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -82,6 +84,8 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 Material mat = state.getMaterial();
                 //and have correct material
                 if (mat == Material.WOOD || mat == Material.NETHER_WOOD) {
+                    //we do not allow "/" in the wood name
+                    name = name.replace("/","_");
                     ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
                     Block logBlock = findLog(id);
                     if (logBlock != null) {

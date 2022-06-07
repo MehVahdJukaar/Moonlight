@@ -15,6 +15,8 @@ public interface IRecipeTemplate<R extends FinishedRecipe> {
 
     <T extends BlockType> R createSimilar(T originalMat, T destinationMat, Item unlockItem, @Nullable String id);
 
+    //null if it fails to convert at least 1 ingredient
+    @Nullable
     default <T extends BlockType> R createSimilar(T originalMat, T destinationMat, Item unlockItem) {
         return createSimilar(originalMat, destinationMat, unlockItem, null);
     }

@@ -21,6 +21,7 @@ public class LeavesType extends IBlockType {
     public static LeavesType OAK_LEAVES_TYPE = new LeavesType(new ResourceLocation("oak"), Blocks.OAK_LEAVES, WoodType.OAK_WOOD_TYPE);
 
     public final Block leaves;
+    @Nullable
     public final WoodType woodType;
 
     protected LeavesType(ResourceLocation id, Block leaves, @Nullable WoodType woodType) {

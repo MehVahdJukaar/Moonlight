@@ -52,12 +52,14 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
 
         ShapelessRecipeBuilder builder = new ShapelessRecipeBuilder(newRes, this.count);
 
+        boolean atLeastOneChanged = false;
         for (var ing : this.ingredients) {
             for(var in : ing.getItems()){
                 Item it = in.getItem();
                 if (it != Items.BARRIER) {
                     ItemLike i = BlockType.changeItemBlockType(it, originalMat, destinationMat);
                     if(i != null){
+                        atLeastOneChanged = true;
                         //converts first ingredient it finds
                         ing = Ingredient.of(i);
                         break;
@@ -66,6 +68,9 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
             }
             builder.requires(ing);
         }
+        //if recipe fails
+        if (!atLeastOneChanged) return null;
+
         builder.group(group);
         builder.unlockedBy("has_planks", InventoryChangeTrigger.TriggerInstance.hasItems(unlockItem));
 

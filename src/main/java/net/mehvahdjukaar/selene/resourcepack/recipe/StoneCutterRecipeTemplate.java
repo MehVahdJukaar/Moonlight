@@ -44,18 +44,22 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
         if (newRes == null)
             throw new UnsupportedOperationException(String.format("Could not convert output item %s", result));
 
+        boolean atLeastOneChanged = false;
         Ingredient ing = ingredient;
         for (var in : ing.getItems()) {
             Item it = in.getItem();
             if (it != Items.BARRIER) {
                 ItemLike i = BlockType.changeItemBlockType(it, originalMat, destinationMat);
                 if (i != null) {
+                    atLeastOneChanged = true;
                     //converts first ingredient it finds
                     ing = Ingredient.of(i);
                     break;
                 }
             }
         }
+        //if recipe fails
+        if (!atLeastOneChanged) return null;
 
         SingleItemRecipeBuilder builder = SingleItemRecipeBuilder.stonecutting(ing, newRes);
         builder.group(group);
