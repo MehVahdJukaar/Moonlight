@@ -37,7 +37,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
     private final HashMap<Fluid, SoftFluid> fluidMap = new HashMap<>();
     //for stuff that is registers using a code built fluid
     private boolean initializedDispenser = false;
-    private int currentReload = 0;
+    int currentReload = 0;
 
     private SoftFluidRegistry() {
         super(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create(), "soft_fluids");
@@ -165,7 +165,6 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> jsons, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
-        this.currentReload++;
         this.idMap.clear();
         this.fluidMap.clear();
         this.itemMap.clear();
@@ -180,49 +179,13 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
             this.initializedDispenser = true;
             getRegisteredFluids().forEach(DispenserHelper::registerFluidBehavior);
         }
-        Selene.LOGGER.info("Registered {} Soft Fluids", this.idMap.size());
+        Selene.LOGGER.info("Loaded {} Soft Fluids", this.idMap.size());
+        //we need to do it at the very end otherwise we might grab stuff before it gets refreshed
+        this.currentReload++;
     }
 
 
-    /**
-     * Use these to store fluids instances. They are similar to vanilla holders since they need to refresh after data is reloaded
-     */
-    public static class FluidReference implements Supplier<SoftFluid> {
 
-        public static FluidReference of(String name) {
-            return new FluidReference(new ResourceLocation(name));
-        }
-
-        public static FluidReference of(ResourceLocation name) {
-            return new FluidReference(name);
-        }
-
-        private final Object lock = new Object();
-        private SoftFluid value;
-        private final ResourceLocation id;
-        private int reloadNumber = -1;
-
-        private FluidReference(ResourceLocation id) {
-            this.value = null;
-            this.id = id;
-        }
-
-        @Override
-        public SoftFluid get() {
-            synchronized (lock) {
-                if (INSTANCE.currentReload != this.reloadNumber) {
-                    this.reloadNumber = INSTANCE.currentReload;
-                    this.value = SoftFluidRegistry.get(id);
-                    if (this.value.isEmpty()) {
-                        //client might call this during server reload. remeber on single player this is the only object for both "sides"
-                        //we return empty so even client during reload can be fine
-                        //throw new UnsupportedOperationException("Soft Fluid not present: " + this.id);
-                    }
-                }
-                return value;
-            }
-        }
-    }
 
 
 }

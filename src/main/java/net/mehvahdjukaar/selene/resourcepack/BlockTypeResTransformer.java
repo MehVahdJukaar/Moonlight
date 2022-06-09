@@ -64,9 +64,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
     }
 
     public BlockTypeResTransformer<T> IDReplaceType(String oldTypeName) {
-        return setIDModifier((s, id, w) -> {
-            return replaceType(s, id, w, oldTypeName);
-        });
+        return setIDModifier((s, id, w) -> replaceType(s, id, w, oldTypeName));
     }
 
 
@@ -83,20 +81,22 @@ public class BlockTypeResTransformer<T extends BlockType> {
         return this;
     }
 
-    /**
-     * Add generic modifier
-     */
-    public BlockTypeResTransformer<T> addModifier(BiFunction<String, T, String> genericModifier) {
-        return this.addModifier((s, id, w) -> genericModifier.apply(s, w));
-    }
-
-    public BlockTypeResTransformer<T> replaceBlockType(String oldTypeName) {
-        this.addModifier((s, id, w) -> {
-            return replaceFullBlockType(s, id, w, oldTypeName, modId);
-        });
+    public BlockTypeResTransformer<T> replaceGenericType(String oldTypeName, String entryClass) {
+        this.addModifier((s, id, w) -> replaceFullGenericType(s, w, id, oldTypeName, modId, entryClass));
         return this;
     }
 
+    public BlockTypeResTransformer<T> replaceBlockType(String oldTypeName) {
+        this.addModifier((s, id, w) -> replaceFullBlockType(s, w, id, oldTypeName, modId));
+        return this;
+    }
+
+    public BlockTypeResTransformer<T> replaceItemType(String oldTypeName) {
+        this.addModifier((s, id, w) -> replaceFullItemType(s, w, id, oldTypeName, modId));
+        return this;
+    }
+
+    //TODO: maybe remove these 5
 
     /**
      * Replaces the provided block description with the equivalent of our own target block
@@ -107,13 +107,23 @@ public class BlockTypeResTransformer<T extends BlockType> {
     }
 
     public BlockTypeResTransformer<T> replaceSimpleBlock(String blockNamespace, String blockName) {
-        return replaceSimpleBlock(blockNamespace, blockName, ":block/", ":block/");
+        return replaceSimpleEntry(blockNamespace, blockName, ":block/", ":block/");
     }
 
-    public BlockTypeResTransformer<T> replaceSimpleBlock(String blockNamespace, String blockName, String inBetween, String inBetween2) {
+    public BlockTypeResTransformer<T> replaceSimpleItem(Item block) {
+        ResourceLocation res = block.getRegistryName();
+        return replaceSimpleItem(res.getNamespace(), res.getPath());
+    }
+
+    public BlockTypeResTransformer<T> replaceSimpleItem(String blockNamespace, String blockName) {
+        return replaceSimpleEntry(blockNamespace, blockName, ":item/", ":item/");
+    }
+
+    public BlockTypeResTransformer<T> replaceSimpleEntry(String blockNamespace, String blockName, String inBetween, String inBetween2) {
         return this.addModifier((s, id, w) -> s.replace(blockNamespace + inBetween + blockName,
                 id.getNamespace() + inBetween2 + id.getPath()));
     }
+
 
     /**
      * Simple string replacement
@@ -241,16 +251,33 @@ public class BlockTypeResTransformer<T extends BlockType> {
         return newS;
     }
 
-    //more sstrict version of the one above. specifically targets blocks
-    public static String replaceFullBlockType(String original, ResourceLocation blockId, BlockType blockType, String oldTypeName, String oldId) {
+    //more strict version of the one above. targets a specific class (e.g. blocks). Generally has less edge cases
+    public static String replaceFullBlockType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace) {
+        return replaceFullGenericType(text, blockType, blockId, oldTypeName, oldNamespace, "block");
+    }
+
+    public static String replaceFullItemType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace) {
+        return replaceFullGenericType(text, blockType, blockId, oldTypeName, oldNamespace, "item");
+    }
+
+    /**
+     * Specifically targets the whole block/ item string and replaces it whole with a new one
+     *
+     * @param classType    Registry entry type. E.G: "item" or "block"
+     * @param text         Text to apply this replacement to
+     * @param blockType    wood or leaf type that this new block has
+     * @param blockId      new block id to replace this entry with
+     * @param oldTypeName  original block type. E.G. "oak"
+     * @param oldNamespace original namespace of this entry. E.G. "quark"
+     */
+    public static String replaceFullGenericType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace, String classType) {
         String prefix = "";
         Pattern pattern = Pattern.compile("(.*(?=\\/))");
         Matcher matcher = pattern.matcher(blockId.getPath());
         if (matcher.find()) prefix = "/" + matcher.group(1); //c/create/
-        Pattern p2 = Pattern.compile(oldId + ":block(.*\\/.*)" + oldTypeName); //create:block(/a/b/cc_)oak
-        Matcher m2 = p2.matcher(original);//->sup:block
+        Pattern p2 = Pattern.compile(oldNamespace + ":" + classType + "(.*\\/.*)" + oldTypeName); //create:block(/a/b/cc_)oak
+        Matcher m2 = p2.matcher(text);//->sup:block
         String finalPrefix = prefix;
-        return m2.replaceAll(m -> blockId.getNamespace() + ":block" + finalPrefix + m.group(1) + blockType.getTypeName());
+        return m2.replaceAll(m -> blockId.getNamespace() + ":" + classType + finalPrefix + m.group(1) + blockType.getTypeName());
     }
-
 }

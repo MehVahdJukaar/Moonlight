@@ -15,12 +15,16 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 
 @SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
+/**
+ * Never store an instance of this directly. Always use SoftFluidReference otherwise it will not work on reload
+ */
 public class SoftFluid {
 
     public static final SoftFluid EMPTY = new SoftFluid(new SoftFluid.Builder(Fluids.EMPTY));

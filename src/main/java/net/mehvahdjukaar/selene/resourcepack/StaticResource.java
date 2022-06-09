@@ -39,6 +39,12 @@ public class StaticResource {
             data1 = new byte[]{};
             Selene.LOGGER.error("Could not parse resource: {}", original.getLocation());
         }
+        finally {
+            try {
+                original.close();
+            } catch (IOException e) {
+            }
+        }
 
         return new StaticResource(data1,original.getLocation(), original.getSourceName());
     }
