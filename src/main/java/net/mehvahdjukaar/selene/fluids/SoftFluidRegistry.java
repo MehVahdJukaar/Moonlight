@@ -160,6 +160,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
         INSTANCE.fluidMap.clear();
         INSTANCE.itemMap.clear();
         packet.getFluids().forEach(SoftFluidRegistry::register);
+        INSTANCE.currentReload++;
     }
 
 

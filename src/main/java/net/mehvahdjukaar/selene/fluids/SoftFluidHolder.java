@@ -34,6 +34,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 //this sucks (fluids)
 public class SoftFluidHolder {
+    private static final String POTION_TYPE_KEY = "Bottle";
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
     public static final int BUCKET_COUNT = 4;
@@ -102,7 +103,7 @@ public class SoftFluidHolder {
             for (String s : nbtKey) {
                 //ignores bottle tag, handled separately since it's a diff item
                 Tag c = this.nbt.get(s);
-                if (c != null && !s.equals("Bottle")) {
+                if (c != null && !s.equals(POTION_TYPE_KEY)) {
                     newCom.put(s, c);
                 }
             }
@@ -115,7 +116,7 @@ public class SoftFluidHolder {
         String type = "REGULAR";
         if (i instanceof SplashPotionItem) type = "SPLASH";
         else if (i instanceof LingeringPotionItem) type = "LINGERING";
-        com.putString("Bottle", type);
+        com.putString(POTION_TYPE_KEY, type);
     }
 
     /**
@@ -224,8 +225,8 @@ public class SoftFluidHolder {
                 ItemStack stack = new ItemStack(category.getFirstFilled().get());
                 //case for lingering potions
                 if (this.fluid.get() == SoftFluidRegistry.POTION.get()) {
-                    if (this.nbt != null && this.nbt.contains("Bottle") && !emptyContainer.getRegistryName().getNamespace().equals("inspirations")) {
-                        String bottle = this.nbt.getString("Bottle");
+                    if (this.nbt != null && this.nbt.contains(POTION_TYPE_KEY) && !emptyContainer.getRegistryName().getNamespace().equals("inspirations")) {
+                        String bottle = this.nbt.getString(POTION_TYPE_KEY);
                         if (bottle.equals("SPLASH")) stack = new ItemStack(Items.SPLASH_POTION);
                         else if (bottle.equals("LINGERING")) stack = new ItemStack(Items.LINGERING_POTION);
                     }
@@ -303,14 +304,14 @@ public class SoftFluidHolder {
     private boolean areNbtEquals(CompoundTag nbt, CompoundTag nbt1) {
         if ((nbt == null || nbt.isEmpty()) && (nbt1 == null || nbt1.isEmpty())) return true;
         if (nbt == null || nbt1 == null) return false;
-        if (nbt1.contains("Bottle") && !nbt.contains("Bottle")) {
+        if (nbt1.contains(POTION_TYPE_KEY) && !nbt.contains(POTION_TYPE_KEY)) {
             var n1 = nbt1.copy();
-            n1.remove("Bottle");
+            n1.remove(POTION_TYPE_KEY);
             return n1.equals(nbt);
         }
-        if (nbt.contains("Bottle") && !nbt1.contains("Bottle")) {
+        if (nbt.contains(POTION_TYPE_KEY) && !nbt1.contains(POTION_TYPE_KEY)) {
             var n = nbt.copy();
-            n.remove("Bottle");
+            n.remove(POTION_TYPE_KEY);
             return n.equals(nbt1);
         }
         return nbt1.equals(nbt);
@@ -484,7 +485,7 @@ public class SoftFluidHolder {
             CompoundTag newCom = new CompoundTag();
             for (String k : nbtKey) {
                 //special case to convert to IE pot fluid
-                if(k.equals("Bottle") && fluidStack.getFluid().getRegistryName().getNamespace().equals("immersiveengineering"))continue;
+                if(k.equals(POTION_TYPE_KEY) && fluidStack.getFluid().getRegistryName().getNamespace().equals("immersiveengineering"))continue;
                 Tag c = this.nbt.get(k);
                 if (c != null) {
                     newCom.put(k, c);
@@ -716,8 +717,8 @@ public class SoftFluidHolder {
         if(nbt != null){
             this.nbt = nbt.copy();
             //even more hardcoded shit
-            if(fluid.equals(SoftFluidRegistry.POTION.get()) && !this.nbt.contains("Bottles")){
-                this.nbt.putString("Bottles","REGULAR");
+            if(fluid.equals(SoftFluidRegistry.POTION.get()) && !this.nbt.contains(POTION_TYPE_KEY)){
+                this.nbt.putString(POTION_TYPE_KEY,"REGULAR");
             }
         }
         this.specialColor = 0;

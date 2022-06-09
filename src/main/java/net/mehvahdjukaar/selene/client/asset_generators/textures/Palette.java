@@ -196,7 +196,13 @@ public class Palette {
             this.internal.addAll(other.getValues());
         }
         while (this.size() > targetSize) {
-            removeLeastUsed();
+            if(this.size()>14) {
+                //too many color, we remove the least used
+                removeLeastUsed();
+            }else{
+                //we remove and merge the one close to eachother. we could do some smarter check here...
+                reduceAndAverage();
+            }
         }
         boolean down = true;
         boolean canIncreaseDown = true;
@@ -210,7 +216,7 @@ public class Palette {
                 //increase up and down every cycle
                 if (down) increaseDown();
                 else increaseUp();
-                //if it didnt increase means we are at max luminance, probably white
+                //if it didn't increase means we are at max luminance, probably white
                 if (currentSize == this.size()) {
                     if (down) canIncreaseDown = false;
                     else canIncreaseUp = false;
@@ -255,6 +261,31 @@ public class Palette {
             lastLum = l;
         }
         this.remove(this.get(index));
+    }
+
+    /**
+     * Same as before but merges these 2 colors
+     */
+    public void reduceAndAverage() {
+        int index = 0;
+        float minDelta = 10000;
+        float lastLum = this.get(0).luminance();
+        for (int i = 1; i < this.size(); i++) {
+            float l = this.get(i).luminance();
+            float dl = l - lastLum;
+            if (dl < minDelta) {
+                index = i;
+                minDelta = dl;
+            }
+            lastLum = l;
+        }
+        PaletteColor toRemove = this.get(index);
+        PaletteColor toRemove2 = this.get(index-1);
+        this.remove(toRemove);
+        this.remove(toRemove2);
+       var newColor = new PaletteColor(toRemove.lab().mixWith(toRemove2.lab()));
+        newColor.occurrence = toRemove.occurrence * toRemove2.occurrence;
+        this.add(newColor);
     }
 
     private boolean hasLuminanceGap() {
@@ -318,6 +349,7 @@ public class Palette {
     public PaletteColor increaseInner() {
         assert (this.size() < 2);
         int index = 1;
+        //finds max delta lum and adds a color there
         float maxDelta = 0;
         float lastLum = this.get(0).luminance();
         for (int i = 1; i < this.size(); i++) {
