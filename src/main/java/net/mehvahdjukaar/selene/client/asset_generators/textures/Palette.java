@@ -35,8 +35,11 @@ public class Palette {
         return this == EMPTY;
     }
 
+    /**
+     * Makes a copy of this palette
+     */
     public Palette copy() {
-        return new Palette(this.internal, tolerance);
+        return new Palette(new ArrayList(this.internal), tolerance);
     }
 
     /**

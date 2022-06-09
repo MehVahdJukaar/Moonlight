@@ -74,19 +74,21 @@ public class Respriter {
 
     /**
      * Move powerful method that recolors an image using the palette from the provided image and using its animation data
-     *
+     * Does not modify any of the given palettes
      */
     public TextureImage recolorWithAnimationOf(TextureImage textureImage) {
         return recolorWithAnimation(Palette.fromAnimatedImage(textureImage), textureImage.getMetadata());
     }
 
     //TODO: generalize and merge these two
+
     /**
      * Move powerful method that recolors an image using the palette provided and the animation data provided.
      * It will create a new animation strip made of the first frame of the original image colored with the given colors
+     * Does not modify any of the given palettes
      */
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable AnimationMetadataSection targetAnimationData) {
-        if(targetAnimationData == null) return recolor(targetPalettes);
+        if (targetAnimationData == null) return recolor(targetPalettes);
         //is restricted to use only first original palette since it must create a new animation following the given one
         Palette originalPalette = originalPalettes.get(0);
 
@@ -119,6 +121,7 @@ public class Respriter {
     /**
      * @param targetPalette New palette that will be applied. Frame order will be the same
      * @return new recolored image. Copy of template if it fails
+     * Does not modify any of the given palettes
      */
     public TextureImage recolor(Palette targetPalette) {
         return recolor(List.of(targetPalette));
@@ -127,6 +130,7 @@ public class Respriter {
     /**
      * @param targetPalettes New palettes that will be applied. Frame order will be the same
      * @return new recolored image. Copy of template if it fails. Always remember to close the provided texture
+     * Does not modify any of the given palettes
      */
     public TextureImage recolor(List<Palette> targetPalettes) {
 
@@ -160,6 +164,10 @@ public class Respriter {
     }
 
     //boxed so it's cleaner
+
+    /**
+     * Does not modify any of the given palettes
+     */
     private record ColorToColorMap(Map<Integer, Integer> map) {
 
         @Nullable
@@ -169,13 +177,15 @@ public class Respriter {
 
         @Nullable
         public static ColorToColorMap create(Palette originalPalette, Palette toPalette) {
-            toPalette.matchSize(originalPalette.size());
-            if (toPalette.size() != originalPalette.size()) {
+            //we dont want to modify original palette for later use here so we make a copy
+            Palette copy = toPalette.copy();
+            copy.matchSize(originalPalette.size());
+            if (copy.size() != originalPalette.size()) {
                 //provided swap palette had too little colors
                 return null;
             }
             //now they should be same size
-            return new ColorToColorMap(zipToMap(originalPalette.getValues(), toPalette.getValues()));
+            return new ColorToColorMap(zipToMap(originalPalette.getValues(), copy.getValues()));
         }
 
         private static Map<Integer, Integer> zipToMap(List<PaletteColor> keys, List<PaletteColor> values) {
