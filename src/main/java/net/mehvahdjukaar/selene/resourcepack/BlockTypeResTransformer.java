@@ -15,7 +15,6 @@ import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -64,7 +63,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
     }
 
     public BlockTypeResTransformer<T> IDReplaceType(String oldTypeName) {
-        return setIDModifier((s, id, w) -> replaceType(s, id, w, oldTypeName));
+        return setIDModifier((s, id, w) -> replaceTypeNoNamespace(s, w, id, oldTypeName));
     }
 
 
@@ -79,6 +78,10 @@ public class BlockTypeResTransformer<T extends BlockType> {
     public BlockTypeResTransformer<T> addModifier(TextModification<T> modifier) {
         this.textModifiers.add(modifier);
         return this;
+    }
+
+    public BlockTypeResTransformer<T> replaceSimpleType(String oldTypeName) {
+        return addModifier((s, id, w) -> replaceType(s, w, id, oldTypeName, modId));
     }
 
     public BlockTypeResTransformer<T> replaceGenericType(String oldTypeName, String entryClass) {
@@ -101,24 +104,29 @@ public class BlockTypeResTransformer<T extends BlockType> {
     /**
      * Replaces the provided block description with the equivalent of our own target block
      */
+    @Deprecated
     public BlockTypeResTransformer<T> replaceSimpleBlock(Block block) {
         ResourceLocation res = block.getRegistryName();
         return replaceSimpleBlock(res.getNamespace(), res.getPath());
     }
 
+    @Deprecated
     public BlockTypeResTransformer<T> replaceSimpleBlock(String blockNamespace, String blockName) {
         return replaceSimpleEntry(blockNamespace, blockName, ":block/", ":block/");
     }
 
+    @Deprecated
     public BlockTypeResTransformer<T> replaceSimpleItem(Item block) {
         ResourceLocation res = block.getRegistryName();
         return replaceSimpleItem(res.getNamespace(), res.getPath());
     }
 
+    @Deprecated
     public BlockTypeResTransformer<T> replaceSimpleItem(String blockNamespace, String blockName) {
         return replaceSimpleEntry(blockNamespace, blockName, ":item/", ":item/");
     }
 
+    @Deprecated
     public BlockTypeResTransformer<T> replaceSimpleEntry(String blockNamespace, String blockName, String inBetween, String inBetween2) {
         return this.addModifier((s, id, w) -> s.replace(blockNamespace + inBetween + blockName,
                 id.getNamespace() + inBetween2 + id.getPath()));
@@ -235,20 +243,12 @@ public class BlockTypeResTransformer<T extends BlockType> {
         return StaticResource.create(newText.getBytes(), newLocation);
     }
 
-    public static String replaceType(String original, ResourceLocation blockId, BlockType blockType, String oldTypeName) {
-        String prefix = "";
-        Pattern pattern = Pattern.compile("(.*(?=\\/))");
-        Matcher matcher = pattern.matcher(blockId.getPath());
-        if (matcher.find()) prefix = "/" + matcher.group(1); //c/create/
-        Pattern p2;
-        if (original.contains("block/")) { ///block(/b/cc_)oak
-            //needed so stuff matches the same as replaceFullBlockType
-            p2 = Pattern.compile("((?<=block)[\\w\\/]*?)" + oldTypeName);
-        } else p2 = Pattern.compile("(\\/\\w*?)" + oldTypeName); ///a/b(/cc_)oak
-        Matcher m2 = p2.matcher(original);//->sup:block
-        String finalPrefix = prefix;
-        String newS = m2.replaceAll(m -> finalPrefix + m.group(1) + blockType.getTypeName());
-        return newS;
+    public static String replaceTypeNoNamespace(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName) {
+        return replaceFullGenericType(text, blockType, blockId, oldTypeName, null, "");
+    }
+
+    public static String replaceType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace) {
+        return replaceFullGenericType(text, blockType, blockId, oldTypeName, oldNamespace, "");
     }
 
     //more strict version of the one above. targets a specific class (e.g. blocks). Generally has less edge cases
@@ -270,14 +270,39 @@ public class BlockTypeResTransformer<T extends BlockType> {
      * @param oldTypeName  original block type. E.G. "oak"
      * @param oldNamespace original namespace of this entry. E.G. "quark"
      */
+
+    //this is terrible
     public static String replaceFullGenericType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace, String classType) {
+
         String prefix = "";
         Pattern pattern = Pattern.compile("(.*(?=\\/))");
         Matcher matcher = pattern.matcher(blockId.getPath());
-        if (matcher.find()) prefix = "/" + matcher.group(1); //c/create/
-        Pattern p2 = Pattern.compile(oldNamespace + ":" + classType + "(.*\\/.*)" + oldTypeName); //create:block(/a/b/cc_)oak
-        Matcher m2 = p2.matcher(text);//->sup:block
-        String finalPrefix = prefix;
-        return m2.replaceAll(m -> blockId.getNamespace() + ":" + classType + finalPrefix + m.group(1) + blockType.getTypeName());
+        if (matcher.find()) prefix = matcher.group(1); //c/create/
+
+        if (oldNamespace == null) {
+            //simple mode
+            Pattern p2;
+            if (text.contains("block/")) { ///block(/b/cc_)oak
+                //needed so stuff matches the same as replaceFullBlockType
+                p2 = Pattern.compile("((?<=block)[\\w\\/]*?)" + oldTypeName);
+            } else p2 = Pattern.compile("(\\/\\w*?)" + oldTypeName); ///a/b(/cc_)oak
+            Matcher m2 = p2.matcher(text);//->sup:block
+            String finalPrefix = prefix;
+            String newS = m2.replaceAll(m -> "/" + finalPrefix + m.group(1) + blockType.getTypeName());
+            return newS;
+
+        } else {
+            Pattern p2;
+            if (classType.isEmpty()) {
+                p2 = Pattern.compile(oldNamespace + ":" + "(.*)" + oldTypeName); //create:block(/a/b/cc_)oak
+                if (!prefix.isEmpty()) prefix = prefix + "/";
+            } else {
+                prefix = "/" + prefix;
+                p2 = Pattern.compile(oldNamespace + ":" + classType + "(.*\\/.*)" + oldTypeName); //create:block(/a/b/cc_)oak
+            }
+            Matcher m2 = p2.matcher(text);//->sup:block
+            String finalPrefix = prefix;
+            return m2.replaceAll(m -> blockId.getNamespace() + ":" + classType + finalPrefix + m.group(1) + blockType.getTypeName());
+        }
     }
 }

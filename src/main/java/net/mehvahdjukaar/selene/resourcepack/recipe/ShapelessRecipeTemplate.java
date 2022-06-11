@@ -29,6 +29,13 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
     public final String group;
     public final List<Ingredient> ingredients;
 
+    ShapelessRecipeTemplate(ShapedRecipeTemplate shaped){
+        this.result = shaped.result;
+        this.count = shaped.count;
+        this.group = shaped.group;
+        this.ingredients = shaped.keys.values().stream().toList();
+    }
+
     public ShapelessRecipeTemplate(JsonObject json) {
         JsonObject result = json.getAsJsonObject("result");
         ResourceLocation item = new ResourceLocation(result.get("item").getAsString());

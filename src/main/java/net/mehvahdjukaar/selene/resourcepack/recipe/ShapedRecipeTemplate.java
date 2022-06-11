@@ -12,12 +12,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder.Result> {
@@ -104,5 +100,13 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
     @Override
     public void addCondition(ICondition condition) {
         this.conditions.add(condition);
+    }
+
+    public boolean shouldBeShapeless() {
+        return this.pattern.size() == 1 && this.pattern.get(0).length() == 1;
+    }
+
+    public ShapelessRecipeTemplate toShapeless() {
+        return new ShapelessRecipeTemplate(this);
     }
 }

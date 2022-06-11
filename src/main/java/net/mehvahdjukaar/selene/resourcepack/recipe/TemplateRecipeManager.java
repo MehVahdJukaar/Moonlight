@@ -44,6 +44,10 @@ public class TemplateRecipeManager {
 
         if (templateFactory != null) {
             var template = templateFactory.apply(recipe);
+            //special case for shaped with a single item...
+            if(template instanceof ShapedRecipeTemplate st && st.shouldBeShapeless()){
+                template = st.toShapeless();
+            }
             if (recipe.has("conditions")) {
                 JsonArray cond = recipe.get("conditions").getAsJsonArray();
                 List<ICondition> c = deserializeConditions(cond);
