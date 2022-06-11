@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.selene.resourcepack.recipe;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.selene.block_set.BlockType;
@@ -11,11 +12,17 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemRecipeBuilder.Result> {
+
+    private List<ICondition> conditions = new ArrayList<>();
+
     public final Item result;
     public final int count;
     public final String group;
@@ -73,8 +80,18 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
         } else {
             builder.save(r -> newRecipe.set((SingleItemRecipeBuilder.Result) r), id);
         }
+
         return newRecipe.get();
     }
 
 
+    @Override
+    public List<ICondition> getConditions() {
+        return conditions;
+    }
+
+    @Override
+    public void addCondition(ICondition condition) {
+        this.conditions.add(condition);
+    }
 }

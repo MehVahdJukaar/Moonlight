@@ -36,6 +36,9 @@ public class TagBuilder extends Tag.Builder {
 
 
     public TagBuilder add(ResourceLocation entry) {
+        if(entry.toString().equals("minecraft:air")){
+            throw new UnsupportedOperationException("Tried to tag air block. This is bad");
+        }
         super.addElement(entry, SOURCE);
         return this;
     }

@@ -1,15 +1,12 @@
 package net.mehvahdjukaar.selene.resourcepack.recipe;
 
-import com.google.gson.JsonObject;
 import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public interface IRecipeTemplate<R extends FinishedRecipe> {
 
@@ -21,6 +18,8 @@ public interface IRecipeTemplate<R extends FinishedRecipe> {
         return createSimilar(originalMat, destinationMat, unlockItem, null);
     }
 
+    void addCondition(ICondition condition);
 
+    List<ICondition> getConditions();
 
 }

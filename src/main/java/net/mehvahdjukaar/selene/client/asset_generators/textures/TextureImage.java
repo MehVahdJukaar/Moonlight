@@ -276,6 +276,30 @@ public class TextureImage implements AutoCloseable {
     }
 
     /**
+     * Same as before but only applies them on non transparent pixels
+     * Overlays are applied first in first out
+     * Closes all given overlays images
+     */
+    public void applyOverlayOnExisting(TextureImage... overlays) throws IllegalStateException {
+        int width = imageWidth();
+        int height = imageHeight();
+        if (Arrays.stream(overlays).anyMatch(n -> n.imageHeight() < height || n.imageWidth() < width)) {
+            throw new IllegalStateException("Could not create images because they had different dimensions");
+        }
+
+        for (var o : overlays) {
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    if(NativeImage.getA(image.getPixelRGBA(x,y))!=0) {
+                        image.blendPixel(x, y, o.image.getPixelRGBA(x, y));
+                    }
+                }
+            }
+            o.close();
+        }
+    }
+
+    /**
      * Increases alpha of all pixels and sets the one that have alpha = 0 to background color
      */
     public void removeAlpha(int backgroundColor) {

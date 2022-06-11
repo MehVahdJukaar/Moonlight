@@ -108,7 +108,7 @@ public class Palette {
         return internal.get(index);
     }
 
-    public int indexOf(PaletteColor color){
+    public int indexOf(PaletteColor color) {
         return this.internal.indexOf(color);
     }
 
@@ -188,10 +188,15 @@ public class Palette {
      * Adds or remove colors to match the target size
      */
     public void matchSize(int targetSize) {
+        matchSize(targetSize, null);
+    }
+
+    //TODO: make this depend on terger palette luminance step too
+    public void matchSize(int targetSize, @Nullable Float targetLumStep) {
         if (this.size() == 0 || targetSize <= 0) {
             throw new UnsupportedOperationException("Palette size can't be 0");
         }
-        if (this.size() == 2) {
+        if (this.size() == 2 && targetLumStep == null) {
             var lightest = this.getLightest();
             var darkest = this.getDarkest();
             Palette other = Palette.fromArc(lightest.hcl(), darkest.hcl(), targetSize);
@@ -199,13 +204,13 @@ public class Palette {
             this.internal.addAll(other.getValues());
         }
         while (this.size() > targetSize) {
-            if(this.size()>14) {
+            if (this.size() > 14) {
                 //too many color, we remove the least used
                 removeLeastUsed();
-            }else{
+            } else {
                 //we remove and merge the one close to eachother. we could do some smarter check here...
                 reduceAndAverage();
-            }
+            } //TODO: add this.shouldChangeRange(targetSize, targetLuminanceStep) and decrease outer. maybe not that needed since reduce does merge and remove outer colors too
         }
         boolean down = true;
         boolean canIncreaseDown = true;
@@ -213,7 +218,9 @@ public class Palette {
         int currentSize;
         while ((currentSize = this.size()) < targetSize) {
             //safety check if palette is full
-            if (this.hasLuminanceGap() || (!canIncreaseDown && !canIncreaseUp)) {
+            //increase inner if it shouldn't increase outer of if it can't increase outer
+            if ((!canIncreaseDown && !canIncreaseUp) ||
+                    (!this.shouldChangeRange(targetSize, targetLumStep))) { //&& this.hasLuminanceGap()
                 increaseInner();
             } else {
                 //increase up and down every cycle
@@ -231,6 +238,20 @@ public class Palette {
             }
 
         }
+    }
+
+    /**
+     * If this should cover more of the luminance spectrum by increasing max or min rather than increasing/decreasing inner
+     */
+    private boolean shouldChangeRange(int targetSize, @Nullable Float targetStep) {
+        if (targetStep == null) return false;
+        float targetRange = targetSize * targetStep;
+        float currentRange = this.getAverageLuminanceStep() * this.size();
+        float percentageCutoff = 0.18f; //if these are 18% diff
+        float inc = 1 + percentageCutoff;
+        float dec = 1 / inc;
+        float ratio = targetRange / currentRange;
+        return ratio > inc || ratio < dec;
     }
 
     /**
@@ -283,10 +304,10 @@ public class Palette {
             lastLum = l;
         }
         PaletteColor toRemove = this.get(index);
-        PaletteColor toRemove2 = this.get(index-1);
+        PaletteColor toRemove2 = this.get(index - 1);
         this.remove(toRemove);
         this.remove(toRemove2);
-       var newColor = new PaletteColor(toRemove.lab().mixWith(toRemove2.lab()));
+        var newColor = new PaletteColor(toRemove.lab().mixWith(toRemove2.lab()));
         newColor.occurrence = toRemove.occurrence * toRemove2.occurrence;
         this.add(newColor);
     }

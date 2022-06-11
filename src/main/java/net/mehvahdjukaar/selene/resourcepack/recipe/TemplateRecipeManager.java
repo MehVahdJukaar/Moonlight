@@ -1,12 +1,18 @@
 package net.mehvahdjukaar.selene.resourcepack.recipe;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -37,7 +43,13 @@ public class TemplateRecipeManager {
         var templateFactory = DESERIALIZERS.get(new ResourceLocation(type));
 
         if (templateFactory != null) {
-            return templateFactory.apply(recipe);
+            var template = templateFactory.apply(recipe);
+            if (recipe.has("conditions")) {
+                JsonArray cond = recipe.get("conditions").getAsJsonArray();
+                List<ICondition> c = deserializeConditions(cond);
+                c.forEach(template::addCondition);
+            }
+            return template;
         } else {
             throw new UnsupportedOperationException(String.format("Invalid recipe serializer: %s. Must be either shaped, shapeless or stonecutting", type));
         }
@@ -47,5 +59,17 @@ public class TemplateRecipeManager {
         registerTemplate(RecipeSerializer.SHAPED_RECIPE, ShapedRecipeTemplate::new);
         registerTemplate(RecipeSerializer.SHAPELESS_RECIPE, ShapelessRecipeTemplate::new);
         registerTemplate(RecipeSerializer.STONECUTTER, StoneCutterRecipeTemplate::new);
+    }
+
+    public static List<ICondition> deserializeConditions(JsonArray conditions) {
+        List<ICondition> list = new ArrayList<>();
+        for (int x = 0; x < conditions.size(); x++) {
+            if (!conditions.get(x).isJsonObject())
+                throw new JsonSyntaxException("Conditions must be an array of JsonObjects");
+
+            JsonObject json = conditions.get(x).getAsJsonObject();
+            list.add(CraftingHelper.getCondition(json));
+        }
+        return list;
     }
 }

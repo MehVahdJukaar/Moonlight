@@ -18,7 +18,9 @@ public class CompatWoodTypes {
                 "the_bumblezone", "beehive_beeswax", "beehive_beeswax", "filled_porous_honeycomb_block"));
         var bamboo = WoodType.Finder.simple(
                 "twigs", "stripped_bamboo", "stripped_bamboo_planks", "bundled_bamboo");
+
         bamboo.addChild("stripped_log", "stripped_bundled_bamboo");
+
         BlockSetManager.addBlockTypeFinder(WoodType.class, bamboo);
 
         BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(

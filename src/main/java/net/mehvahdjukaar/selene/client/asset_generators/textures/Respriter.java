@@ -179,7 +179,7 @@ public class Respriter {
         public static ColorToColorMap create(Palette originalPalette, Palette toPalette) {
             //we dont want to modify original palette for later use here so we make a copy
             Palette copy = toPalette.copy();
-            copy.matchSize(originalPalette.size());
+            copy.matchSize(originalPalette.size(), originalPalette.getAverageLuminanceStep());
             if (copy.size() != originalPalette.size()) {
                 //provided swap palette had too little colors
                 return null;
