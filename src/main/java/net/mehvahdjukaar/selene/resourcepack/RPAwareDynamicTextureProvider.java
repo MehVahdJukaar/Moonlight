@@ -49,7 +49,9 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
 
 
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier){
-        ResourceLocation res = new ResourceLocation(this.dynamicPack.mainNamespace, relativePath);
+
+        ResourceLocation res = relativePath.contains(":") ? new ResourceLocation(relativePath) :
+                new ResourceLocation(this.dynamicPack.mainNamespace, relativePath);
         if(!alreadyHasTextureAtLocation(manager, res)){
             TextureImage textureImage = null;
             try{

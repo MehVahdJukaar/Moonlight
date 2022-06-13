@@ -53,9 +53,10 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
 
     public <T extends BlockType> ShapedRecipeBuilder.Result createSimilar(T originalMat, T destinationMat, Item unlockItem, String id) {
         ItemLike newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
-        if (newRes == null)
-            throw new UnsupportedOperationException(String.format("Could not convert output item %s", result));
-
+        if (newRes == null) {
+            throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
+                    this.result, originalMat, destinationMat));
+        }
         ShapedRecipeBuilder builder = new ShapedRecipeBuilder(newRes, this.count);
 
         boolean atLeastOneChanged = false;

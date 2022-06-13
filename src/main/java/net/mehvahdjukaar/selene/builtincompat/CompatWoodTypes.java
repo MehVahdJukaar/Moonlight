@@ -16,8 +16,15 @@ public class CompatWoodTypes {
                 "terraqueous", "dense_cloud", "dense_cloud", "dense_cloud_column"));
         BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "the_bumblezone", "beehive_beeswax", "beehive_beeswax", "filled_porous_honeycomb_block"));
+        var verdant = WoodType.Finder.simple(
+                "nourished_end", "verdant", "verdant_planks", "verdant_stalk");
+        verdant.addChild("wood", "verdant_hyphae");
+        verdant.addChild("stripped_wood", "stripped_verdant_hyphae");
+        verdant.addChild("stripped_log", "stripped_verdant_stem");
+        BlockSetManager.addBlockTypeFinder(WoodType.class, verdant);
+
         var bamboo = WoodType.Finder.simple(
-                "twigs", "stripped_bamboo", "stripped_bamboo_planks", "bundled_bamboo");
+                "twigs", "bamboo", "stripped_bamboo_planks", "bundled_bamboo");
 
         bamboo.addChild("stripped_log", "stripped_bundled_bamboo");
 

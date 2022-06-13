@@ -104,11 +104,13 @@ public class LangBuilder {
         if (base != null) {
             String typeName = lang.getEntry(type.getTranslationKey());
             if (typeName != null) {
-                lang.addEntry(item.getDescriptionId(), String.format(base, typeName));
-            }
-            else Selene.LOGGER.error("Could not find translation line {}", type.getTranslationKey());
-        } 
-        else Selene.LOGGER.error("Could not find translation line {}", key);
+                try {
+                    lang.addEntry(item.getDescriptionId(), String.format(base, typeName));
+                } catch (Exception e) {
+                    Selene.LOGGER.error("Failed to add dynamic language entry: ", e);
+                }
+            } else Selene.LOGGER.error("Could not find translation line {}", type.getTranslationKey());
+        } else Selene.LOGGER.error("Could not find translation line {}", key);
     }
 
     @Deprecated

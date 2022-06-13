@@ -55,8 +55,7 @@ public abstract class BlockType {
      * @return something like mod_id/[baseName]_oak. ignores minecraft namespace
      */
     public String getVariantId(String baseName) {
-        String namespace = this.getNamespace() + "/";
-        if (namespace.equals("minecraft")) namespace = "";
+        String namespace = this.isVanilla() ? "" : this.getNamespace() + "/";
         if (baseName.contains("%s")) return namespace + String.format(baseName, this.getTypeName());
         else return namespace + baseName + "_" + this.getTypeName();
     }
@@ -168,12 +167,11 @@ public abstract class BlockType {
         for (var c : originalMat.getChildren()) {
             var child = c.getValue();
             ItemLike replacement = null;
-            if(current instanceof Block && child instanceof Block){
-                if(current == child) {
+            if (current instanceof Block && child instanceof Block) {
+                if (current == child) {
                     replacement = destinationMat.getChild(c.getKey());
                 }
-            }
-            else if (current.asItem() == c.getValue().asItem()) {
+            } else if (current.asItem() == c.getValue().asItem()) {
                 replacement = destinationMat.getChild(c.getKey());
             }
             if (replacement != null) {

@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeBuilder.Result> {
 
 
-    private List<ICondition> conditions = new ArrayList<>();
+    private final List<ICondition> conditions = new ArrayList<>();
 
     public final Item result;
     public final int count;
@@ -60,9 +60,10 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
     public <T extends BlockType> ShapelessRecipeBuilder.Result createSimilar(
             T originalMat, T destinationMat, Item unlockItem, String id) {
         ItemLike newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
-        if (newRes == null)
-            throw new UnsupportedOperationException(String.format("Could not convert output item %s", this.result));
-
+        if (newRes == null) {
+            throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
+                    this.result, originalMat, destinationMat));
+        }
 
         ShapelessRecipeBuilder builder = new ShapelessRecipeBuilder(newRes, this.count);
 

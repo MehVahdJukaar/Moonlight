@@ -22,6 +22,11 @@ public class PaletteColor implements Comparable<PaletteColor> {
         this(new RGBColor(color));
     }
 
+    public PaletteColor(BaseColor<?> color, int occurrence) {
+        this(color);
+        this.occurrence = occurrence;
+    }
+
     public PaletteColor(BaseColor<?> color) {
         var c = color.asRGB();
         if (c.alpha() == 0) this.color = new RGBColor(0);
@@ -45,6 +50,24 @@ public class PaletteColor implements Comparable<PaletteColor> {
 
     public HCLColor hcl() {
         return hcl;
+    }
+
+    /**
+     * Creates a new palette color from this by darkening it
+     */
+    public PaletteColor getDarkened() {
+        var p = new PaletteColor(this.lab.withLuminance(this.lab.luminance() * 0.9f));
+        p.occurrence = this.occurrence;
+        return p;
+    }
+
+    /**
+     * Creates a new palette color from this by lightnening it
+     */
+    public PaletteColor getLightened() {
+        var p = new PaletteColor(this.lab.withLuminance(this.lab.luminance() * 0.9f + 0.1f));
+        p.occurrence = this.occurrence;
+        return p;
     }
 
     public float luminance() {

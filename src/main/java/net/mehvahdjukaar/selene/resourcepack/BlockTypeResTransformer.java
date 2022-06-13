@@ -9,6 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.function.TriFunction;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
@@ -90,12 +91,12 @@ public class BlockTypeResTransformer<T extends BlockType> {
     }
 
     public BlockTypeResTransformer<T> replaceBlockType(String oldTypeName) {
-        this.addModifier((s, id, w) -> replaceFullBlockType(s, w, id, oldTypeName, modId));
+        this.addModifier((s, id, w) -> replaceFullGenericType(s, w, id, oldTypeName, modId, "block"));
         return this;
     }
 
     public BlockTypeResTransformer<T> replaceItemType(String oldTypeName) {
-        this.addModifier((s, id, w) -> replaceFullItemType(s, w, id, oldTypeName, modId));
+        this.addModifier((s, id, w) -> replaceFullGenericType(s, w, id, oldTypeName, modId, "item"));
         return this;
     }
 
@@ -155,32 +156,44 @@ public class BlockTypeResTransformer<T extends BlockType> {
      * Replaces the oak log textures with the log texture of the 'log' child of this block type. Meant for wood types
      */
     public BlockTypeResTransformer<T> replaceOakBark() {
-        return this.replaceWithTextureFromChild("minecraft:block/oak_log", "log", s -> !s.contains("_end") && !s.contains("_top"))
-                .replaceWithTextureFromChild("minecraft:block/oak_log_top", "log", s -> s.contains("_top") || s.contains("_end"));
+        return this.replaceWithTextureFromChild("minecraft:block/oak_log", "log", this::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/oak_log_top", "log", this::looksLikeTopLogTexture);
     }
 
+    @NotNull
+    private boolean looksLikeTopLogTexture(String s) {
+        s = new ResourceLocation(s).getPath();
+        return s.contains("_top") || s.contains("_end") || s.contains("_up");
+    }
+
+    @NotNull
+    private boolean looksLikeSideLogTexture(String s) {
+        return !looksLikeTopLogTexture(s);
+    }
+
+
     public BlockTypeResTransformer<T> replaceOakStripped() {
-        return this.replaceWithTextureFromChild("minecraft:block/stripped_oak_log", "stripped_log", s -> !s.contains("_end") && !s.contains("_top"))
-                .replaceWithTextureFromChild("minecraft:block/stripped_oak_log_top", "stripped_log", s -> s.contains("_top") || s.contains("_end"));
+        return this.replaceWithTextureFromChild("minecraft:block/stripped_oak_log", "stripped_log", this::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/stripped_oak_log_top", "stripped_log", this::looksLikeTopLogTexture);
     }
 
     public BlockTypeResTransformer<T> replaceWoodTextures(WoodType woodType) {
         String n = woodType.getTypeName();
         return this.replaceWithTextureFromChild("minecraft:block/" + n + "_planks", "planks")
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", "stripped_log", s -> !s.contains("_end") && !s.contains("_top"))
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", "stripped_log", s -> s.contains("_top") || s.contains("_end"))
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", "log", s -> !s.contains("_end") && !s.contains("_top"))
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", "log", s -> s.contains("_top") || s.contains("_end"));
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", "stripped_log", this::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", "stripped_log", this::looksLikeTopLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", "log", this::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", "log", this::looksLikeTopLogTexture);
 
     }
 
     public BlockTypeResTransformer<T> replaceLeavesTextures(LeavesType woodType) {
         String n = woodType.getTypeName();
         return this.replaceWithTextureFromChild("minecraft:block/" + n + "_leaves", "leaves", s -> !s.contains("_snow"))
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", l -> wfl(l, "stripped_log"), s -> !s.contains("_end") && !s.contains("_top"))
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", l -> wfl(l, "stripped_log"), s -> s.contains("_top") || s.contains("_end"))
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", l -> wfl(l, "log"), s -> !s.contains("_end") && !s.contains("_top"))
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", l -> wfl(l, "log"), s -> s.contains("_top") || s.contains("_end"));
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", l -> wfl(l, "stripped_log"), this::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", l -> wfl(l, "stripped_log"),this::looksLikeTopLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", l -> wfl(l, "log"), this::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", l -> wfl(l, "log"), this::looksLikeTopLogTexture);
 
     }
 
@@ -249,15 +262,6 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
     public static String replaceType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace) {
         return replaceFullGenericType(text, blockType, blockId, oldTypeName, oldNamespace, "");
-    }
-
-    //more strict version of the one above. targets a specific class (e.g. blocks). Generally has less edge cases
-    public static String replaceFullBlockType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace) {
-        return replaceFullGenericType(text, blockType, blockId, oldTypeName, oldNamespace, "block");
-    }
-
-    public static String replaceFullItemType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace) {
-        return replaceFullGenericType(text, blockType, blockId, oldTypeName, oldNamespace, "item");
     }
 
     /**

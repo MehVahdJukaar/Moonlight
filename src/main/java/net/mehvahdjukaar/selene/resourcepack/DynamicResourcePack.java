@@ -241,7 +241,7 @@ public abstract class DynamicResourcePack implements PackResources {
         return packType;
     }
 
-    //TODO: move to RP utils
+    //TODO: move to RP utils and merge with BlockResTypeTransform
 
     /**
      * This is a handy method for dynamic resource pack since it allows to specify the name of an existing resource
@@ -254,14 +254,16 @@ public abstract class DynamicResourcePack implements PackResources {
      * @param keyword     keyword to replace
      * @param replaceWith word to replace the keyword with
      */
+    @Deprecated
     public void addSimilarJsonResource(StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException {
         addSimilarJsonResource(resource, s -> s.replace(keyword, replaceWith));
     }
-
+    @Deprecated
     public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform) throws NoSuchElementException {
         addSimilarJsonResource(resource, textTransform, textTransform);
     }
 
+    @Deprecated
     public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform, Function<String, String> pathTransform) throws NoSuchElementException {
         ResourceLocation fullPath = resource.location;
 

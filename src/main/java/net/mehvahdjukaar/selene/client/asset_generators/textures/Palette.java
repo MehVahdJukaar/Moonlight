@@ -135,9 +135,14 @@ public class Palette {
         return get(internal.size() - 1);
     }
 
-    public void remove(int index) {
-        internal.remove(index);
+    /**
+     * @param index of the color to remove
+     * @return removed color
+     */
+    public PaletteColor remove(int index) {
+        var r = internal.remove(index);
         this.sort();
+        return r;
     }
 
     public void remove(PaletteColor color) {
@@ -256,8 +261,9 @@ public class Palette {
 
     /**
      * Removes one color, the one that is least used
+     * @return removed color
      */
-    public void removeLeastUsed() {
+    public PaletteColor removeLeastUsed() {
         //remove the one with least occurrence
         PaletteColor toRemove = internal.get(0);
         for (var p : internal) {
@@ -266,12 +272,13 @@ public class Palette {
             }
         }
         this.remove(toRemove);
+        return toRemove;
     }
 
     /**
      * Removes one color, the one that is closest to other colors
      */
-    public void reduce() {
+    public PaletteColor reduce() {
         int index = 0;
         float minDelta = 10000;
         float lastLum = this.get(0).luminance();
@@ -284,13 +291,14 @@ public class Palette {
             }
             lastLum = l;
         }
-        this.remove(this.get(index));
+        return this.remove(index);
     }
 
     /**
      * Same as before but merges these 2 colors
+     * @return newly added color
      */
-    public void reduceAndAverage() {
+    public PaletteColor reduceAndAverage() {
         int index = 0;
         float minDelta = 10000;
         float lastLum = this.get(0).luminance();
@@ -310,6 +318,7 @@ public class Palette {
         var newColor = new PaletteColor(toRemove.lab().mixWith(toRemove2.lab()));
         newColor.occurrence = toRemove.occurrence * toRemove2.occurrence;
         this.add(newColor);
+        return newColor;
     }
 
     private boolean hasLuminanceGap() {

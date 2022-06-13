@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemRecipeBuilder.Result> {
 
-    private List<ICondition> conditions = new ArrayList<>();
+    private final List<ICondition> conditions = new ArrayList<>();
 
     public final Item result;
     public final int count;
@@ -48,9 +48,10 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
     public <T extends BlockType> SingleItemRecipeBuilder.Result createSimilar(
             T originalMat, T destinationMat, Item unlockItem, @Nullable String id) {
         ItemLike newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
-        if (newRes == null)
-            throw new UnsupportedOperationException(String.format("Could not convert output item %s", result));
-
+        if (newRes == null) {
+            throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
+                    this.result, originalMat, destinationMat));
+        }
         boolean atLeastOneChanged = false;
         Ingredient ing = ingredient;
         for (var in : ing.getItems()) {
