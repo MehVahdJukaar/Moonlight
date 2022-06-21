@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import net.mehvahdjukaar.selene.Selene;
 import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.block_set.IBlockType;
+import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
@@ -92,6 +93,7 @@ public class LangBuilder {
         return translated;
     }
 
+
     @Deprecated
     public static void addDynamicEntry(DynamicLanguageManager.LanguageAccessor lang,
                                        String key, IBlockType type, Item item) {
@@ -104,13 +106,11 @@ public class LangBuilder {
         if (base != null) {
             String typeName = lang.getEntry(type.getTranslationKey());
             if (typeName != null) {
-                try {
-                    lang.addEntry(item.getDescriptionId(), String.format(base, typeName));
-                } catch (Exception e) {
-                    Selene.LOGGER.error("Failed to add dynamic language entry: ", e);
-                }
-            } else Selene.LOGGER.error("Could not find translation line {}", type.getTranslationKey());
-        } else Selene.LOGGER.error("Could not find translation line {}", key);
+                lang.addEntry(item.getDescriptionId(), String.format(base, typeName));
+            }
+            else Selene.LOGGER.error("Could not find translation line {}", type.getTranslationKey());
+        }
+        else Selene.LOGGER.error("Could not find translation line {}", key);
     }
 
     @Deprecated

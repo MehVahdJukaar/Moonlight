@@ -23,6 +23,12 @@ public class CompatWoodTypes {
         verdant.addChild("stripped_log", "stripped_verdant_stem");
         BlockSetManager.addBlockTypeFinder(WoodType.class, verdant);
 
+        var cerulean = WoodType.Finder.simple(
+                "nourished_end", "cerulean", "cerulean_planks", "cerulean_stem_thick");
+        cerulean.addChild("stripped_wood", "stripped_cerulean_hyphae");
+        cerulean.addChild("stripped_log", "cerulean_stem_stripped");
+        BlockSetManager.addBlockTypeFinder(WoodType.class, cerulean);
+
         var bamboo = WoodType.Finder.simple(
                 "twigs", "bamboo", "stripped_bamboo_planks", "bundled_bamboo");
 

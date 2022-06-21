@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class BlockType {
+public abstract class   BlockType {
 
     //stuff made out of this type
     private final Map<String, ItemLike> children = new HashMap<>();

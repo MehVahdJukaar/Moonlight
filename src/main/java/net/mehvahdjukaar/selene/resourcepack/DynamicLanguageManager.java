@@ -30,10 +30,11 @@ public class DynamicLanguageManager {
         AfterLanguageLoadEvent languageEvent = new AfterLanguageLoadEvent(map, cachedLanguageInfo);
         BlockSetManager.getRegistries().forEach(r -> r.addTypeTranslations(languageEvent));
         //MinecraftForge.EVENT_BUS.post(languageEvent);
-       // Selene.LOGGER.info("Dispatching AfterLanguageLoad Event");
+        // Selene.LOGGER.info("Dispatching AfterLanguageLoad Event");
         PACKS.forEach(p -> p.addDynamicTranslations(languageEvent));
-        
+
     }
+
 
     //TODO: reformat with proper name
     @Deprecated

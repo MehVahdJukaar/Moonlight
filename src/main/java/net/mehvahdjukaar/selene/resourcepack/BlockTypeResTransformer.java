@@ -3,6 +3,7 @@ package net.mehvahdjukaar.selene.resourcepack;
 import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.mehvahdjukaar.selene.block_set.leaves.LeavesType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;
+import net.mehvahdjukaar.selene.client.asset_generators.textures.SpriteUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
@@ -156,44 +157,33 @@ public class BlockTypeResTransformer<T extends BlockType> {
      * Replaces the oak log textures with the log texture of the 'log' child of this block type. Meant for wood types
      */
     public BlockTypeResTransformer<T> replaceOakBark() {
-        return this.replaceWithTextureFromChild("minecraft:block/oak_log", "log", this::looksLikeSideLogTexture)
-                .replaceWithTextureFromChild("minecraft:block/oak_log_top", "log", this::looksLikeTopLogTexture);
-    }
-
-    @NotNull
-    private boolean looksLikeTopLogTexture(String s) {
-        s = new ResourceLocation(s).getPath();
-        return s.contains("_top") || s.contains("_end") || s.contains("_up");
-    }
-
-    @NotNull
-    private boolean looksLikeSideLogTexture(String s) {
-        return !looksLikeTopLogTexture(s);
+        return this.replaceWithTextureFromChild("minecraft:block/oak_log", "log", SpriteUtils::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/oak_log_top", "log", SpriteUtils::looksLikeTopLogTexture);
     }
 
 
     public BlockTypeResTransformer<T> replaceOakStripped() {
-        return this.replaceWithTextureFromChild("minecraft:block/stripped_oak_log", "stripped_log", this::looksLikeSideLogTexture)
-                .replaceWithTextureFromChild("minecraft:block/stripped_oak_log_top", "stripped_log", this::looksLikeTopLogTexture);
+        return this.replaceWithTextureFromChild("minecraft:block/stripped_oak_log", "stripped_log", SpriteUtils::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/stripped_oak_log_top", "stripped_log", SpriteUtils::looksLikeTopLogTexture);
     }
 
     public BlockTypeResTransformer<T> replaceWoodTextures(WoodType woodType) {
         String n = woodType.getTypeName();
         return this.replaceWithTextureFromChild("minecraft:block/" + n + "_planks", "planks")
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", "stripped_log", this::looksLikeSideLogTexture)
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", "stripped_log", this::looksLikeTopLogTexture)
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", "log", this::looksLikeSideLogTexture)
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", "log", this::looksLikeTopLogTexture);
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", "stripped_log", SpriteUtils::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", "stripped_log", SpriteUtils::looksLikeTopLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", "log", SpriteUtils::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", "log", SpriteUtils::looksLikeTopLogTexture);
 
     }
 
     public BlockTypeResTransformer<T> replaceLeavesTextures(LeavesType woodType) {
         String n = woodType.getTypeName();
         return this.replaceWithTextureFromChild("minecraft:block/" + n + "_leaves", "leaves", s -> !s.contains("_snow"))
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", l -> wfl(l, "stripped_log"), this::looksLikeSideLogTexture)
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", l -> wfl(l, "stripped_log"),this::looksLikeTopLogTexture)
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", l -> wfl(l, "log"), this::looksLikeSideLogTexture)
-                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", l -> wfl(l, "log"), this::looksLikeTopLogTexture);
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", l -> wfl(l, "stripped_log"), SpriteUtils::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", l -> wfl(l, "stripped_log"),SpriteUtils::looksLikeTopLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log", l -> wfl(l, "log"), SpriteUtils::looksLikeSideLogTexture)
+                .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", l -> wfl(l, "log"), SpriteUtils::looksLikeTopLogTexture);
 
     }
 
@@ -298,11 +288,11 @@ public class BlockTypeResTransformer<T extends BlockType> {
         } else {
             Pattern p2;
             if (classType.isEmpty()) {
-                p2 = Pattern.compile(oldNamespace + ":" + "(.*)" + oldTypeName); //create:block(/a/b/cc_)oak
+                p2 = Pattern.compile(oldNamespace + ":" + "(.*?)" + oldTypeName); //create:block(/a/b/cc_)oak //.*
                 if (!prefix.isEmpty()) prefix = prefix + "/";
             } else {
                 prefix = "/" + prefix;
-                p2 = Pattern.compile(oldNamespace + ":" + classType + "(.*\\/.*)" + oldTypeName); //create:block(/a/b/cc_)oak
+                p2 = Pattern.compile(oldNamespace + ":" + classType + "(.*?\\/.*?)" + oldTypeName); //create:block(/a/b/cc_)oak
             }
             Matcher m2 = p2.matcher(text);//->sup:block
             String finalPrefix = prefix;

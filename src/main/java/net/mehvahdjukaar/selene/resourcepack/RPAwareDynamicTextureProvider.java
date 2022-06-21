@@ -68,7 +68,7 @@ public abstract class RPAwareDynamicTextureProvider extends RPAwareDynamicResour
         }
     }
 
-    
+
     //TODO: reformat
     @Deprecated(forRemoval = true)
     public void addDynamicTranslations(DynamicLanguageManager.LanguageAccessor languageAccessor){};

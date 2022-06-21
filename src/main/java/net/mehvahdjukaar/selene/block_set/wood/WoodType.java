@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.fml.IBindingsProvider;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.ApiStatus;
@@ -27,20 +26,9 @@ public class WoodType extends IBlockType {
     public static WoodType OAK_WOOD_TYPE = new WoodType(new ResourceLocation("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
 
     public final Material material;
-
-
     public final Block planks;
     public final Block log;
 
-    //additional optional blocks
-    //TODO: remove
-    @Nullable
-    @Deprecated
-    public final Block strippedLog;
-    @Nullable
-    @Deprecated
-    public final Block leaves;
-    //lazy cause wood types are loaded before items, so we can only access blocks
     @Deprecated
     public final Lazy<Item> signItem; //used for item textures
     @Deprecated
@@ -55,15 +43,12 @@ public class WoodType extends IBlockType {
         this.log = logBlock;
         this.material = baseBlock.defaultBlockState().getMaterial();
 
-        this.strippedLog = this.findLogRelatedBlock("stripped","log");
-        this.leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
-
-        //checks if it has a sign
-        this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
-        this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
         String i = id.getNamespace().equals("minecraft") ? "" : id.getNamespace() + "/" + id.getPath();
         var o = net.minecraft.world.level.block.state.properties.WoodType.values().filter(v -> v.name().equals(i)).findAny();
         this.vanillaType = o.orElse(null);
+
+        this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
+        this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
     }
 
     @Nullable
@@ -72,7 +57,7 @@ public class WoodType extends IBlockType {
         var id = this.getId();
         String log = this.log.getRegistryName().getPath();
         ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(),  log+ "_" + append + post),
+                new ResourceLocation(id.getNamespace(), log + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + log + post),
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post)
@@ -85,6 +70,10 @@ public class WoodType extends IBlockType {
             }
         }
         return found;
+    }
+
+    public Material getMaterial() {
+        return material;
     }
 
     @Override
@@ -134,6 +123,9 @@ public class WoodType extends IBlockType {
 
     @Override
     protected void initializeChildren() {
+
+        Block strippedLog = this.findLogRelatedBlock("stripped", "log");
+        Block leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
         Block strippedWood = this.findLogRelatedBlock("stripped", "wood");
         Block wood = this.findRelatedEntry("wood", ForgeRegistries.BLOCKS);
         Block slab = this.findRelatedEntry("slab", ForgeRegistries.BLOCKS);
@@ -146,8 +138,8 @@ public class WoodType extends IBlockType {
         Block pressurePlate = this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS);
         this.addChild("planks", this.planks);
         this.addChild("log", this.log);
-        this.addChild("leaves", this.leaves);
-        this.addChild("stripped_log", this.strippedLog);
+        this.addChild("leaves", leaves);
+        this.addChild("stripped_log", strippedLog);
         this.addChild("stripped_wood", strippedWood);
         this.addChild("wood", wood);
         this.addChild("slab", slab);
@@ -158,8 +150,8 @@ public class WoodType extends IBlockType {
         this.addChild("trapdoor", trapdoor);
         this.addChild("button", button);
         this.addChild("pressure_plate", pressurePlate);
-        this.addChild("sign", this.signItem.get());
-        this.addChild("boat", this.boatItem.get());
+        this.addChild("sign", signItem.get());
+        this.addChild("boat", boatItem.get());
     }
 
     public static class Finder extends SetFinder<WoodType> {
@@ -185,11 +177,11 @@ public class WoodType extends IBlockType {
                     () -> ForgeRegistries.BLOCKS.getValue(logName));
         }
 
-        public void addChild(String childType, String childName){
+        public void addChild(String childType, String childName) {
             addChild(childType, new ResourceLocation(id.getNamespace(), childName));
         }
 
-        public void addChild(String childType, ResourceLocation childName){
+        public void addChild(String childType, ResourceLocation childName) {
             this.childNames.put(childType, childName);
         }
 

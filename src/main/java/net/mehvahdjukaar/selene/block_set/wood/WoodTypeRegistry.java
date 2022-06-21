@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+//TODO: 1.19: cleanup static/instance
 public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     public static WoodTypeRegistry INSTANCE;

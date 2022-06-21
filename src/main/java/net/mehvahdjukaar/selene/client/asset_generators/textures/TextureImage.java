@@ -319,5 +319,31 @@ public class TextureImage implements AutoCloseable {
         }
     }
 
+    public void crop(TextureImage mask){
+        crop(mask, true);
+    }
+
+    /**
+     * Crop the given image with the provided mask. All that isnt transparent will be erased
+     * Closes the given mask
+     * @param mask mask
+     * @param inner if the operation should be reversed by keeping what is not transparent
+     */
+    public void crop(TextureImage mask, boolean inner){
+        int width = imageWidth();
+        int height = imageHeight();
+        if (mask.imageHeight() < height || mask.imageWidth() < width) {
+            throw new IllegalStateException("Could not create images because they had different dimensions");
+        }
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if(NativeImage.getA(mask.image.getPixelRGBA(x,y))!=0 == inner) {
+                    image.setPixelRGBA(x,y,0);
+                }
+            }
+        }
+        mask.close();
+    }
+
 }
 

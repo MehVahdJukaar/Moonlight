@@ -90,8 +90,9 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     public void buildAll() {
         if (!frozen) {
             for (var v : WoodTypeRegistry.WOOD_TYPES.values()) {
-                if (v.leaves != null) {
-                    this.registerBlockType(new LeavesType(v.id, v.leaves, v));
+                Block leaves = v.getBlockOfThis("leaves");
+                if (leaves != null) {
+                    this.registerBlockType(new LeavesType(v.id, leaves, v));
                 }
             }
         }

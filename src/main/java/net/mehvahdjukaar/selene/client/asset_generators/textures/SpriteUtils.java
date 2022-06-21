@@ -8,6 +8,7 @@ import net.mehvahdjukaar.selene.math.kmeans.KMeans;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -88,11 +89,11 @@ public final class SpriteUtils {
         PaletteColor color = palette.get(0);
         HSVColor hsv = color.rgb().asHSV();
         //just saturates last color
-        float satIncrease = 1.11f;
-        float brightnessIncrease = 0.945f;
+        float satMult = 1.11f;
+        float brightnessMult = 0.94f;
         HSVColor newCol = new HSVColor(hsv.hue(),
-                Mth.clamp(hsv.saturation() * satIncrease,0,1),
-                Mth.clamp(hsv.value() * brightnessIncrease,0,1),
+                Mth.clamp(hsv.saturation() * satMult,0,1),
+                Mth.clamp(hsv.value() * brightnessMult,0,1),
                 hsv.alpha());
         PaletteColor newP = new PaletteColor(newCol);
         newP.occurrence = color.occurrence;
@@ -137,5 +138,18 @@ public final class SpriteUtils {
             }
         });
 
+    }
+
+
+
+    @NotNull
+    public static boolean looksLikeTopLogTexture(String s) {
+        s = new ResourceLocation(s).getPath();
+        return s.contains("_top") || s.contains("_end") || s.contains("_up");
+    }
+
+    @NotNull
+    public static boolean looksLikeSideLogTexture(String s) {
+        return !looksLikeTopLogTexture(s);
     }
 }

@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.selene.resourcepack.resources;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
@@ -36,7 +34,7 @@ public class TagBuilder extends Tag.Builder {
 
 
     public TagBuilder add(ResourceLocation entry) {
-        if(entry.toString().equals("minecraft:air")){
+        if (entry.toString().equals("minecraft:air")) {
             throw new UnsupportedOperationException("Tried to tag air block. This is bad");
         }
         super.addElement(entry, SOURCE);
@@ -76,6 +74,12 @@ public class TagBuilder extends Tag.Builder {
         return this;
     }
 
+    public <V extends IForgeRegistryEntry<V>, T extends ForgeRegistryEntry<V>> TagBuilder addEntry(T entry) {
+        this.add(entry.getRegistryName());
+        return this;
+    }
+
+
     public TagBuilder addFromJson(JsonObject pJson) {
         super.addFromJson(pJson, SOURCE);
         return this;
@@ -83,7 +87,7 @@ public class TagBuilder extends Tag.Builder {
 
     @Override
     public JsonObject serializeToJson() {
-       return super.serializeToJson();
+        return super.serializeToJson();
     }
 
 
