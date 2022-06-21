@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.mixins;
 
 import com.google.common.collect.Maps;
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.map.*;
 import net.mehvahdjukaar.selene.map.markers.GenericMapBlockMarker;
 import net.mehvahdjukaar.selene.map.markers.MapBlockMarker;
@@ -206,7 +206,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                             MapBlockMarker<CustomMapDecoration> dummy = new GenericMapBlockMarker(type, com.getInt("x"), com.getInt("z"));
                             this.addCustomDecoration(dummy);
                         } else {
-                            Selene.LOGGER.warn("Failed to load map decoration " + name + ". Skipping it");
+                            Moonlight.LOGGER.warn("Failed to load map decoration " + name + ". Skipping it");
                         }
                     }
                 }

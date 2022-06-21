@@ -3,7 +3,7 @@ package net.mehvahdjukaar.selene.map;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.map.client.MapDecorationRenderHandler;
 import net.mehvahdjukaar.selene.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.selene.map.type.CustomDecorationType;
@@ -45,7 +45,7 @@ public class MapDecorationRegistry extends SimpleJsonResourceReloadListener {
         dynamicTypes.clear();
         for (var j : jsons.entrySet()) {
             Optional<SimpleDecorationType> result = SimpleDecorationType.CODEC.parse(JsonOps.INSTANCE, j.getValue())
-                    .resultOrPartial(e -> Selene.LOGGER.error("Failed to parse Map Decoration JSON object for {} : {}", j.getKey(), e));
+                    .resultOrPartial(e -> Moonlight.LOGGER.error("Failed to parse Map Decoration JSON object for {} : {}", j.getKey(), e));
 
             if (result.isPresent()) {
                 dynamicTypes.add(result.get());
@@ -95,7 +95,7 @@ public class MapDecorationRegistry extends SimpleJsonResourceReloadListener {
         ResourceLocation id = newType.getId();
         if (DECORATION_TYPES.containsKey(id)) {
             DECORATION_TYPES.put(id, newType);
-            Selene.LOGGER.error("Duplicate Map Marker registration: {}. This might be unwanted", id);
+            Moonlight.LOGGER.error("Duplicate Map Marker registration: {}. This might be unwanted", id);
             //throw new IllegalArgumentException("Duplicate map decoration registration " + id);
         } else {
             DECORATION_TYPES.put(id, newType);

@@ -7,7 +7,7 @@ public class LABColor extends BaseColor<LABColor> {
 
     public LABColor(float l, float a, float b, float alpha) {
         super(l, a, b, alpha);
-        //LAB can have a,b negative values
+        //LAB can have a,b negative getValues
     }
 
     @Override

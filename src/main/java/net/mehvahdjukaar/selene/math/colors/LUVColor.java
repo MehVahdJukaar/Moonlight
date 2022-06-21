@@ -7,7 +7,7 @@ public class LUVColor extends BaseColor<LUVColor> {
 
     public LUVColor(float l, float u, float v, float alpha) {
         super(l, u, v, alpha);
-        //LAB can have a,b negative values
+        //LAB can have a,b negative getValues
     }
 
     @Override

@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.network;
 
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.map.*;
 import net.mehvahdjukaar.selene.map.type.IMapDecorationType;
 import net.minecraft.client.Minecraft;
@@ -118,7 +118,7 @@ public class ClientBoundSyncCustomMapDecorationPacket {
                 CustomMapDecoration customDecoration = this.customDecoration[i];
                 if (customDecoration != null) decorations.put("icon-" + i, customDecoration);
                 else {
-                    Selene.LOGGER.warn("Failed to load custom map decoration, skipping");
+                    Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");
                 }
             }
             Map<ResourceLocation, CustomDataHolder.Instance<?>> customData = mapData.getCustomData();
@@ -126,7 +126,7 @@ public class ClientBoundSyncCustomMapDecorationPacket {
             for (CustomDataHolder.Instance<?> instance : this.customData) {
                 if (instance != null) customData.put(instance.getType().id(), instance);
                 else {
-                    Selene.LOGGER.warn("Failed to load custom map data, skipping");
+                    Moonlight.LOGGER.warn("Failed to load custom map data, skipping");
                 }
             }
 

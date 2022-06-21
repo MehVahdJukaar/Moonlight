@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.mixins;
 
 import net.mehvahdjukaar.selene.api.IThirdPersonAnimationProvider;
-import net.mehvahdjukaar.selene.util.TwoHandedAnimation;
+import net.mehvahdjukaar.selene.misc.TwoHandedAnimation;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.world.entity.LivingEntity;

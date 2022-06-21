@@ -1,12 +1,10 @@
 package net.mehvahdjukaar.selene.mixins;
 
-import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
+import net.mehvahdjukaar.selene.resources.DynamicLanguageHandler;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.resources.language.LanguageInfo;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,7 +34,7 @@ public abstract class LanguageManagerMixin {
             at = @At(value = "INVOKE",
                     target = "Lcom/google/common/collect/ImmutableMap;copyOf(Ljava/util/Map;)Lcom/google/common/collect/ImmutableMap;"))
     private static Map<String, String> addEntries(Map<String, String> map) {
-        DynamicLanguageManager.addDynamicEntries(cachedResourceManager, cachedLanguageInfo, map);
+        DynamicLanguageHandler.addDynamicEntries(cachedResourceManager, cachedLanguageInfo, map);
         return map;
     }
 

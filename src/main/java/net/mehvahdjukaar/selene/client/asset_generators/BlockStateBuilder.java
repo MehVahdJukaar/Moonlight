@@ -33,7 +33,7 @@ public class BlockStateBuilder {
         loop:
         for (BlockState fullState : block.getStateDefinition().getPossibleStates()) {
             Map<Property<?>, Comparable<?>> propertyValues = Maps.newLinkedHashMap(fullState.getValues());
-            //only allows default values for ignored ones so they are essentially removed
+            //only allows default getValues for ignored ones so they are essentially removed
             for (Property<?> p : ignored) {
                 if (propertyValues.get(p) != defaultState.getValue(p)) continue loop;
                 propertyValues.remove(p);

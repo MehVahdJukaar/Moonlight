@@ -1,16 +1,12 @@
 package net.mehvahdjukaar.selene.block_set.wood;
 
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.block_set.BlockType;
-import net.mehvahdjukaar.selene.block_set.IBlockType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
-import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.ApiStatus;
@@ -21,23 +17,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class WoodType extends IBlockType {
-
-    public static WoodType OAK_WOOD_TYPE = new WoodType(new ResourceLocation("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
+public class WoodType extends BlockType {
 
     public final Material material;
     public final Block planks;
     public final Block log;
-
-    @Deprecated(forRemoval = true)
-    public final Block strippedLog;
-    @Deprecated(forRemoval = true)
-    public final Block leaves;
-
-    @Deprecated(forRemoval = true)
-    public final Lazy<Item> signItem; //used for item textures
-    @Deprecated(forRemoval = true)
-    public final Lazy<Item> boatItem;
 
     @Nullable
     private final net.minecraft.world.level.block.state.properties.WoodType vanillaType;
@@ -51,11 +35,6 @@ public class WoodType extends IBlockType {
         String i = id.getNamespace().equals("minecraft") ? "" : id.getNamespace() + "/" + id.getPath();
         var o = net.minecraft.world.level.block.state.properties.WoodType.values().filter(v -> v.name().equals(i)).findAny();
         this.vanillaType = o.orElse(null);
-
-        this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
-        this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
-         strippedLog = this.findLogRelatedBlock("stripped", "log");
-         leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
     }
 
     @Nullable
@@ -112,52 +91,29 @@ public class WoodType extends IBlockType {
         return this.material.getColor();
     }
 
-    @Deprecated
-    private static String abbreviateString(String string) {
-        if (string.length() <= 5) return string;
-        String[] a = string.split("_");
-        if (a.length > 2) {
-            return "" + a[0].charAt(0) + a[1].charAt(0) + a[2].charAt(0) + (a.length > 3 ? a[3].charAt(0) : "");
-        } else if (a.length > 1) {
-            return "" + a[0].substring(0, Math.min(2, a[0].length())) + a[1].substring(0, Math.min(2, a[0].length()));
-        } else return string.substring(0, 4);
-    }
-
     @Override
     public String getTranslationKey() {
         return "wood_type." + this.getNamespace() + "." + this.getTypeName();
     }
 
     @Override
-    protected void initializeChildren() {
-
-
-        Block strippedWood = this.findLogRelatedBlock("stripped", "wood");
-        Block wood = this.findRelatedEntry("wood", ForgeRegistries.BLOCKS);
-        Block slab = this.findRelatedEntry("slab", ForgeRegistries.BLOCKS);
-        Block stairs = this.findRelatedEntry("stairs", ForgeRegistries.BLOCKS);
-        Block fence = this.findRelatedEntry("fence", ForgeRegistries.BLOCKS);
-        Block fenceGate = this.findRelatedEntry("fence_gate", ForgeRegistries.BLOCKS);
-        Block door = this.findRelatedEntry("door", ForgeRegistries.BLOCKS);
-        Block trapdoor = this.findRelatedEntry("trapdoor", ForgeRegistries.BLOCKS);
-        Block button = this.findRelatedEntry("button", ForgeRegistries.BLOCKS);
-        Block pressurePlate = this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS);
+    protected void initializeVanillaChildren() {
         this.addChild("planks", this.planks);
         this.addChild("log", this.log);
-        this.addChild("leaves", leaves);
-        this.addChild("stripped_log", strippedLog);
-        this.addChild("stripped_wood", strippedWood);
-        this.addChild("wood", wood);
-        this.addChild("slab", slab);
-        this.addChild("stairs", stairs);
-        this.addChild("fence", fence);
-        this.addChild("fence_gate", fenceGate);
-        this.addChild("door", door);
-        this.addChild("trapdoor", trapdoor);
-        this.addChild("button", button);
-        this.addChild("pressure_plate", pressurePlate);
-        this.addChild("sign", signItem.get());
-        this.addChild("boat", boatItem.get());
+        this.addChild("leaves", this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS));
+        this.addChild("stripped_log", this.findLogRelatedBlock("stripped", "log"));
+        this.addChild("stripped_wood", this.findLogRelatedBlock("stripped", "wood"));
+        this.addChild("wood", this.findRelatedEntry("wood", ForgeRegistries.BLOCKS));
+        this.addChild("slab", this.findRelatedEntry("slab", ForgeRegistries.BLOCKS));
+        this.addChild("stairs", this.findRelatedEntry("stairs", ForgeRegistries.BLOCKS));
+        this.addChild("fence", this.findRelatedEntry("fence", ForgeRegistries.BLOCKS));
+        this.addChild("fence_gate", this.findRelatedEntry("fence_gate", ForgeRegistries.BLOCKS));
+        this.addChild("door", this.findRelatedEntry("door", ForgeRegistries.BLOCKS));
+        this.addChild("trapdoor", this.findRelatedEntry("trapdoor", ForgeRegistries.BLOCKS));
+        this.addChild("button", this.findRelatedEntry("button", ForgeRegistries.BLOCKS));
+        this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS));
+        this.addChild("boat", this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
+        this.addChild("sign", this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
     }
 
     public static class Finder extends SetFinder<WoodType> {
@@ -206,7 +162,7 @@ public class WoodType extends IBlockType {
                     }
                 } catch (Exception ignored) {
                 }
-                Selene.LOGGER.warn("Failed to find custom wood type {}", id);
+                Moonlight.LOGGER.warn("Failed to find custom wood type {}", id);
             }
             return Optional.empty();
         }

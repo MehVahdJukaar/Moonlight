@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.network;
 
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.map.MapDecorationRegistry;
 import net.mehvahdjukaar.selene.map.type.SimpleDecorationType;
 import net.minecraft.nbt.CompoundTag;
@@ -37,11 +37,11 @@ public class ClientBoundSyncMapDecorationTypesPacket {
         for (SimpleDecorationType f : message.simpleTypes) {
             try {
                 var r = SimpleDecorationType.CODEC.encodeStart(NbtOps.INSTANCE, f).resultOrPartial(
-                        e -> Selene.LOGGER.error("Failed encoding Simple Map Decoration {} : {}", f, e)
+                        e -> Moonlight.LOGGER.error("Failed encoding Simple Map Decoration {} : {}", f, e)
                 );
                 encoded.add(((CompoundTag) r.get()));
             } catch (Exception e) {
-                Selene.LOGGER.error("Failed encoding Soft Fluid {} : {}", f, e);
+                Moonlight.LOGGER.error("Failed encoding Soft Fluid {} : {}", f, e);
             }
         }
         buffer.writeVarInt(encoded.size());

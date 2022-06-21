@@ -2,7 +2,7 @@ package net.mehvahdjukaar.selene.map.type;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.map.CustomMapDecoration;
 import net.mehvahdjukaar.selene.map.markers.GenericMapBlockMarker;
 import net.minecraft.core.BlockPos;
@@ -61,7 +61,7 @@ public class SimpleDecorationType implements IMapDecorationType<CustomMapDecorat
         try {
             return new CustomMapDecoration(this, buffer);
         } catch (Exception e) {
-            Selene.LOGGER.warn("Failed to load custom map decoration for decoration type" + this.getId() + ": " + e);
+            Moonlight.LOGGER.warn("Failed to load custom map decoration for decoration type" + this.getId() + ": " + e);
         }
         return null;
     }
@@ -75,7 +75,7 @@ public class SimpleDecorationType implements IMapDecorationType<CustomMapDecorat
                 marker.loadFromNBT(compound);
                 return marker;
             } catch (Exception e) {
-                Selene.LOGGER.warn("Failed to load world map marker for decoration type" + this.getId() + ": " + e);
+                Moonlight.LOGGER.warn("Failed to load world map marker for decoration type" + this.getId() + ": " + e);
             }
         }
         return null;

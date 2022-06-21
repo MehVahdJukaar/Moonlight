@@ -163,7 +163,7 @@ public final class ColorSpaces {
     }
 
     /**
-     * values from https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
+     * getValues from https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
      */
     public static XYZColor RGBtoXYZ(RGBColor color) {
         float red = color.red();

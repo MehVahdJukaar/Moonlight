@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.block_set;
 
-import net.mehvahdjukaar.selene.blocks.VerticalSlabBlock;
+import net.mehvahdjukaar.selene.impl.blocks.VerticalSlabBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;

@@ -1,9 +1,7 @@
 package net.mehvahdjukaar.selene.block_set;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.reflect.TypeToken;
-import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
+import net.mehvahdjukaar.selene.client.language.AfterLanguageLoadEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -14,13 +12,16 @@ import java.util.*;
 public abstract class BlockTypeRegistry<T extends BlockType> {
 
     protected boolean frozen = false;
+    private final String name;
     private final List<BlockType.SetFinder<T>> finders = new ArrayList<>();
     private final List<ResourceLocation> notInclude = new ArrayList<>();
     private final List<T> builder = new ArrayList<>();
     private final Class<T> typeClass;
-    
-    public BlockTypeRegistry(Class<T> typeClass){
+    private Map<ResourceLocation, T> types = new LinkedHashMap<>();
+
+    public BlockTypeRegistry(Class<T> typeClass, String name) {
         this.typeClass = typeClass;
+        this.name = name;
     }
 
     public Class<T> getType() {
@@ -34,26 +35,31 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
      * @return wood type
      */
     public T getFromNBT(String name) {
-        return this.getTypes().getOrDefault(new ResourceLocation(name), this.getDefaultType());
+        return this.getValues().getOrDefault(new ResourceLocation(name), this.getDefaultType());
     }
 
     @Nullable
-    public T get(ResourceLocation res){
-        return this.getTypes().get(res);
+    public T get(ResourceLocation res) {
+        return this.getValues().get(res);
     }
 
     public abstract T getDefaultType();
 
-    public abstract Map<ResourceLocation, T> getTypes();
-    
-    public abstract String typeName();
+    public Map<ResourceLocation, T> getValues(){
+        if (!frozen) {
+            throw new UnsupportedOperationException("Tried to access wood types too early");
+        }
+        return types;
+    };
+
+    public String typeName(){
+        return name;
+    };
 
     /**
      * Returns an optional block Type based on the given block. Pretty much defines the logic of how a block set is constructed
      */
     public abstract Optional<T> detectTypeFromBlock(Block block);
-
-    protected abstract void saveTypes(ImmutableMap<ResourceLocation, T> types);
 
     public void registerBlockType(T newType) {
         if (frozen) {
@@ -91,7 +97,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
                 //Selene.LOGGER.warn("Found wood type with duplicate id ({}), skipping",e.id);
             }
         });
-        saveTypes(ImmutableMap.copyOf(linkedHashMap));
+        this.types = ImmutableMap.copyOf(linkedHashMap);
         builder.clear();
         this.frozen = true;
     }
@@ -117,7 +123,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
      * Called at the right time on language reload. Use to add translations of your block type names.
      * Useful to create more complex translation strings using RPAwareDynamicTextureProvider::addDynamicLanguage
      */
-    public void addTypeTranslations(AfterLanguageLoadEvent language){
+    public void addTypeTranslations(AfterLanguageLoadEvent language) {
 
     }
 

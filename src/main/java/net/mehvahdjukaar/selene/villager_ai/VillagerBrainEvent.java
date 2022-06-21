@@ -4,14 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
@@ -138,7 +137,7 @@ public class VillagerBrainEvent extends Event {
                 memories.put(memoryModuleType, Optional.empty());
             }
         } catch (Exception e) {
-            Selene.LOGGER.warn("failed to register pumpkin sensor type for villagers: " + e);
+            Moonlight.LOGGER.warn("failed to register pumpkin sensor type for villagers: " + e);
         }
     }
 
@@ -170,7 +169,7 @@ public class VillagerBrainEvent extends Event {
             return true;
 
         } catch (Exception e) {
-            Selene.LOGGER.warn("failed to add task for activity {} for villagers: {}", activity, e);
+            Moonlight.LOGGER.warn("failed to add task for activity {} for villagers: {}", activity, e);
         }
         return false;
     }

@@ -1,61 +1,47 @@
 package net.mehvahdjukaar.selene.block_set.leaves;
 
-import com.google.common.collect.ImmutableMap;
 import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
-import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
-import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
+import net.mehvahdjukaar.selene.client.language.AfterLanguageLoadEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
+    public static LeavesType OAK_TYPE = new LeavesType(new ResourceLocation("oak"), Blocks.OAK_LEAVES, WoodTypeRegistry.OAK_TYPE);
+
     public static LeavesTypeRegistry INSTANCE;
-    
-    /**
-     * Do not access these to register your blocks since they are empty right before the last registration phase.
-     * Use addWoodEntryRegistrationCallback instead
-     */
-    public static Map<ResourceLocation, LeavesType> LEAVES_TYPES = new LinkedHashMap<>();
-    
-    public LeavesTypeRegistry() {
-        super(LeavesType.class);
-        INSTANCE = this;
+
+    public static Map<ResourceLocation, LeavesType> getTypes(){
+        return INSTANCE.getValues();
+    }
+
+    @Nullable
+    public static LeavesType getValue(ResourceLocation name) {
+        return INSTANCE.get(name);
     }
 
     public static LeavesType fromNBT(String name) {
-        return LEAVES_TYPES.getOrDefault(new ResourceLocation(name), LeavesType.OAK_LEAVES_TYPE);
+        return INSTANCE.getValues().getOrDefault(new ResourceLocation(name), OAK_TYPE);
     }
-
-    public String typeName(){
-        return "leaves_type";
-    };
+    
+    public LeavesTypeRegistry() {
+        super(LeavesType.class, "leaves_type");
+        INSTANCE = this;
+    }
     
     @Override
     public LeavesType getDefaultType() {
-        return LeavesType.OAK_LEAVES_TYPE;
-    }
-
-    @Override
-    public Map<ResourceLocation, LeavesType> getTypes() {
-        if (!frozen) {
-            throw new UnsupportedOperationException("Tried to access wood types too early");
-        }
-        return LEAVES_TYPES;
-    }
-
-    @Override
-    protected void saveTypes(ImmutableMap<ResourceLocation, LeavesType> types) {
-        LEAVES_TYPES = types;
+        return OAK_TYPE;
     }
 
     //returns if this block is the base plank block
@@ -89,7 +75,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     @Override
     public void buildAll() {
         if (!frozen) {
-            for (var v : WoodTypeRegistry.WOOD_TYPES.values()) {
+            for (var v : WoodTypeRegistry.getTypes().values()) {
                 Block leaves = v.getBlockOfThis("leaves");
                 if (leaves != null) {
                     this.registerBlockType(new LeavesType(v.id, leaves, v));
@@ -102,7 +88,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     @Override
     public void addTypeTranslations(AfterLanguageLoadEvent language) {
-        LEAVES_TYPES.forEach((r, w) -> {
+        this.getValues().forEach((r, w) -> {
             if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
         });
     }

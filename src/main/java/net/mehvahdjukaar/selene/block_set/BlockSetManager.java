@@ -101,12 +101,6 @@ public class BlockSetManager {
         void accept(RegistryEvent.Register<R> reg, Collection<T> wood);
     }
 
-    @Deprecated
-    public static <R extends IForgeRegistryEntry<R>> void addWoodRegistrationCallback(
-            BlockSetRegistryCallback<WoodType, R> registrationFunction, Class<R> regType) {
-        addBlockSetRegistrationCallback(registrationFunction, regType, WoodType.class);
-    }
-
     /**
      * Add a registry function meant to register a set of blocks that use a specific wood type
      * Other entries like items can access the block types directly since it will be filled
@@ -115,7 +109,7 @@ public class BlockSetManager {
      *
      * @param registrationFunction registry function
      */
-    public static <T extends BlockType, R extends IForgeRegistryEntry<R>> void addBlockSetRegistrationCallback(
+    public static <T extends BlockType, R extends IForgeRegistryEntry<R>> void addDynamicBlockRegistration(
             BlockSetRegistryCallback<T, R> registrationFunction, Class<R> regType, Class<T> blockType) {
         //this is horrible. worst shit ever
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -144,7 +138,7 @@ public class BlockSetManager {
                         if (registry instanceof ForgeRegistry fr) {
                             boolean frozen = fr.isLocked();
                             fr.unfreeze();
-                            registrationFunction.accept(e, getBlockSet(blockType).getTypes().values());
+                            registrationFunction.accept(e, getBlockSet(blockType).getValues().values());
                             if (frozen) fr.freeze();
                         }
                     };
@@ -158,13 +152,13 @@ public class BlockSetManager {
                 //items just get added to the queue. they will already be called with the correct event
 
                 Consumer<RegistryEvent.Register<Item>> itemEvent = e ->
-                        registrationFunction.accept((RegistryEvent.Register<R>) e, getBlockSet(blockType).getTypes().values());
+                        registrationFunction.accept((RegistryEvent.Register<R>) e, getBlockSet(blockType).getValues().values());
                 registrationQueues.getSecond().add(itemEvent);
             }
         } else {
             //non block /item event. just wraps it by giving it the wood types
 
-            eventConsumer = e -> registrationFunction.accept(e, getBlockSet(blockType).getTypes().values());
+            eventConsumer = e -> registrationFunction.accept(e, getBlockSet(blockType).getValues().values());
             bus.addGenericListener(regType, eventConsumer);
         }
     }
@@ -198,12 +192,7 @@ public class BlockSetManager {
         FINDER_ADDER.forEach(Runnable::run);
         FINDER_ADDER.clear();
 
-        //wood types need to run before leaves
-        BLOCK_SET_CONTAINERS.get(WoodType.class).buildAll();
-
-        for (var c : BLOCK_SET_CONTAINERS.entrySet()) {
-            c.getValue().buildAll();
-        }
+        BLOCK_SET_CONTAINERS.values().forEach(BlockTypeRegistry::buildAll);
 
         //remove not wanted ones
         REMOVER_ADDER.forEach(Runnable::run);

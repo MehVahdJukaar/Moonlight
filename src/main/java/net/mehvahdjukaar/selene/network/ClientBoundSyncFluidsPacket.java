@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.network;
 
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.minecraft.nbt.CompoundTag;
@@ -36,11 +36,11 @@ public class ClientBoundSyncFluidsPacket {
         for (SoftFluid f : message.fluids) {
             try {
                 var r = SoftFluid.CODEC.encodeStart(NbtOps.INSTANCE, f).resultOrPartial(
-                        e -> Selene.LOGGER.error("Failed encoding Soft Fluid {} : {}", f, e)
+                        e -> Moonlight.LOGGER.error("Failed encoding Soft Fluid {} : {}", f, e)
                 );
                 encoded.add(((CompoundTag) r.get()));
             } catch (Exception e) {
-                Selene.LOGGER.error("Failed encoding Soft Fluid {} : {}", f, e);
+                Moonlight.LOGGER.error("Failed encoding Soft Fluid {} : {}", f, e);
             }
         }
         buffer.writeVarInt(encoded.size());

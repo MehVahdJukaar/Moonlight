@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.block_set;
 
-import net.mehvahdjukaar.selene.client.asset_generators.LangBuilder;
+import net.mehvahdjukaar.selene.client.language.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class   BlockType {
+public abstract class BlockType {
 
     //stuff made out of this type
     private final Map<String, ItemLike> children = new HashMap<>();
@@ -142,11 +142,11 @@ public abstract class   BlockType {
         }
     }
 
-    protected abstract void initializeChildren();
+    protected abstract void initializeVanillaChildren();
 
     protected void initAfterSetup() {
         this.needsInit = false;
-        this.initializeChildren();
+        this.initializeVanillaChildren();
     }
 
     /**

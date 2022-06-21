@@ -4,13 +4,12 @@ import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
-import net.mehvahdjukaar.selene.Selene;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -147,7 +146,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
             this.cpuImage.close();
             this.cpuImage = null;
         } else {
-            Selene.LOGGER.warn("Trying to upload disposed texture {}", (int)this.getId());
+            Moonlight.LOGGER.warn("Trying to upload disposed texture {}", (int)this.getId());
         }
     }
 

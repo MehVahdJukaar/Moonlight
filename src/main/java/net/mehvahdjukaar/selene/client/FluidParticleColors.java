@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.client;
 
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.minecraft.client.Minecraft;
@@ -30,7 +30,7 @@ public class FluidParticleColors {
                 try {
                     averageColor = getColorFrom(sprite, f.getAttributes().getColor());
                 } catch (Exception e) {
-                    Selene.LOGGER.warn("Failed to load particle color for " + sprite.toString() + " using current resource pack. might be a broken png.mcmeta");
+                    Moonlight.LOGGER.warn("Failed to load particle color for " + sprite.toString() + " using current resource pack. might be a broken png.mcmeta");
                 }
                 PARTICLE_COLORS.put(key, averageColor);
             }
@@ -46,7 +46,7 @@ public class FluidParticleColors {
                 try {
                     averageColor = getColorFrom(sprite, s.getTintColor());
                 } catch (Exception e) {
-                    Selene.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
+                    Moonlight.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
                 }
                 PARTICLE_COLORS.put(key, averageColor);
             }

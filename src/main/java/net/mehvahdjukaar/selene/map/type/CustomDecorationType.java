@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.map.type;
 
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.map.CustomMapDecoration;
 import net.mehvahdjukaar.selene.map.markers.MapBlockMarker;
 import net.minecraft.core.BlockPos;
@@ -70,7 +70,7 @@ public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBl
         try {
             return decorationFactory.apply(this, buffer);
         } catch (Exception e) {
-            Selene.LOGGER.warn("Failed to load custom map decoration for decoration type" + this.getId() + ": " + e);
+            Moonlight.LOGGER.warn("Failed to load custom map decoration for decoration type" + this.getId() + ": " + e);
         }
         return null;
     }
@@ -85,7 +85,7 @@ public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBl
                 marker.loadFromNBT(compound);
                 return marker;
             } catch (Exception e) {
-                Selene.LOGGER.warn("Failed to load world map marker for decoration type" + this.getId() + ": " + e);
+                Moonlight.LOGGER.warn("Failed to load world map marker for decoration type" + this.getId() + ": " + e);
             }
         }
         return null;

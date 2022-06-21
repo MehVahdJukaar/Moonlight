@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.List;
 
 public class FluidTextures {
 
-    private static final String MOD_ID = Selene.MOD_ID;
+    private static final String MOD_ID = Moonlight.MOD_ID;
 
     //minecraft
     public static final ResourceLocation WATER_TEXTURE = new ResourceLocation("minecraft:block/water_still");

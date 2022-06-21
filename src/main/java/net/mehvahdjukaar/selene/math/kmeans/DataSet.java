@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.selene.math.kmeans;
 
 
-import net.mehvahdjukaar.selene.client.asset_generators.textures.Palette;
-import net.mehvahdjukaar.selene.client.asset_generators.textures.PaletteColor;
+import net.mehvahdjukaar.selene.client.textures.Palette;
+import net.mehvahdjukaar.selene.client.textures.PaletteColor;
 import net.mehvahdjukaar.selene.math.colors.BaseColor;
 import net.mehvahdjukaar.selene.math.colors.LABColor;
 import net.mehvahdjukaar.selene.math.colors.RGBColor;

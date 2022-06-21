@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @Mixin(MapItem.class)
-public class MapItemMixin {
+public abstract class MapItemMixin {
 
     //since I'm here might aswell mixin instead of event
     @Inject(method = "appendHoverText", at = @At("HEAD"))

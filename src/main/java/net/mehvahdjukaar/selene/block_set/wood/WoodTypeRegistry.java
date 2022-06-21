@@ -1,63 +1,48 @@
 package net.mehvahdjukaar.selene.block_set.wood;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
-import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
+import net.mehvahdjukaar.selene.client.language.AfterLanguageLoadEvent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-//TODO: 1.19: cleanup static/instance
 public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
+
+    public static WoodType OAK_TYPE = new WoodType(new ResourceLocation("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
 
     public static WoodTypeRegistry INSTANCE;
 
-    /**
-     * Do not access these to register your blocks since they are empty right before the last registration phase.
-     * Use addWoodEntryRegistrationCallback instead
-     */
-    public static Map<ResourceLocation, WoodType> WOOD_TYPES = new LinkedHashMap<>();
+    public static Map<ResourceLocation, WoodType> getTypes(){
+        return INSTANCE.getValues();
+    }
 
-    public WoodTypeRegistry() {
-        super(WoodType.class);
-        INSTANCE = this;
+    @Nullable
+    public static WoodType getValue(ResourceLocation name) {
+        return INSTANCE.get(name);
     }
 
     public static WoodType fromNBT(String name) {
-        return WOOD_TYPES.getOrDefault(new ResourceLocation(name), WoodType.OAK_WOOD_TYPE);
+        return INSTANCE.getValues().getOrDefault(new ResourceLocation(name), OAK_TYPE);
     }
 
-    public String typeName(){
-        return "wood_type";
-    };
+    //instance stuff
+
+    public WoodTypeRegistry() {
+        super(WoodType.class, "wood_type");
+        INSTANCE = this;
+    }
 
     @Override
     public WoodType getDefaultType() {
-        return WoodType.OAK_WOOD_TYPE;
-    }
-
-    @Override
-    public Map<ResourceLocation, WoodType> getTypes() {
-        if (!frozen) {
-            throw new UnsupportedOperationException("Tried to access wood types too early");
-        }
-        return WOOD_TYPES;
-    }
-
-    @Override
-    protected void saveTypes(ImmutableMap<ResourceLocation, WoodType> types) {
-        WOOD_TYPES = types;
+        return OAK_TYPE;
     }
 
     //returns if this block is the base plank block
@@ -124,7 +109,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     @Override
     public void addTypeTranslations(AfterLanguageLoadEvent language) {
-        WOOD_TYPES.forEach((r, w) -> {
+        getValues().forEach((r, w) -> {
             if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
         });
     }

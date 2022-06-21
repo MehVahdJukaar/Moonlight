@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.network;
 
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -16,7 +16,7 @@ public class NetworkHandler {
     }
 
     public static void registerMessages() {
-        INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation(Selene.MOD_ID, "network"), () -> PROTOCOL_VERSION,
+        INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation(Moonlight.MOD_ID, "network"), () -> PROTOCOL_VERSION,
                 PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
         INSTANCE.registerMessage(nextID(), ClientBoundSyncCustomMapDecorationPacket.class, ClientBoundSyncCustomMapDecorationPacket::buffer,

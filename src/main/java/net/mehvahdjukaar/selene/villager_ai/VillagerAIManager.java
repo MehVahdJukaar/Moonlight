@@ -1,30 +1,21 @@
 package net.mehvahdjukaar.selene.villager_ai;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.function.Consumer;
-
 public class VillagerAIManager {
 
-    public static final DeferredRegister<Schedule> SCHEDULES = DeferredRegister.create(ForgeRegistries.SCHEDULES, Selene.MOD_ID);
+    public static final DeferredRegister<Schedule> SCHEDULES = DeferredRegister.create(ForgeRegistries.SCHEDULES, Moonlight.MOD_ID);
 
     //schedule to which all the tasks are registered to
     protected static final RegistryObject<Schedule> CUSTOM_VILLAGER_SCHEDULE =
@@ -67,7 +58,7 @@ public class VillagerAIManager {
             Villager.MEMORY_TYPES = builder.build();
 
         } catch (Exception e) {
-            Selene.LOGGER.warn("failed to register pumpkin sensor type for villagers: " + e);
+            Moonlight.LOGGER.warn("failed to register pumpkin sensor type for villagers: " + e);
         }
     }
 

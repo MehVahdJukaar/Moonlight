@@ -3,7 +3,7 @@ package net.mehvahdjukaar.selene.fluids;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.network.ClientBoundSyncFluidsPacket;
 import net.mehvahdjukaar.selene.util.DispenserHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -15,15 +15,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.Supplier;
 
 public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
 
@@ -172,7 +169,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
 
         for (var j : jsons.entrySet()) {
             Optional<SoftFluid> result = SoftFluid.CODEC.parse(JsonOps.INSTANCE, j.getValue())
-                    .resultOrPartial(e -> Selene.LOGGER.error("Failed to parse soft fluid JSON object for {} : {}", j.getKey(), e));
+                    .resultOrPartial(e -> Moonlight.LOGGER.error("Failed to parse soft fluid JSON object for {} : {}", j.getKey(), e));
             result.ifPresent(SoftFluidRegistry::register);
         }
         convertAndRegisterAllForgeFluids();
@@ -180,7 +177,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
             this.initializedDispenser = true;
             getRegisteredFluids().forEach(DispenserHelper::registerFluidBehavior);
         }
-        Selene.LOGGER.info("Loaded {} Soft Fluids", this.idMap.size());
+        Moonlight.LOGGER.info("Loaded {} Soft Fluids", this.idMap.size());
         //we need to do it at the very end otherwise we might grab stuff before it gets refreshed
         this.currentReload++;
     }

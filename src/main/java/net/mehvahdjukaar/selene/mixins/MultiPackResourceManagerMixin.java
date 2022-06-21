@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.mixins;
 
-import net.mehvahdjukaar.selene.resourcepack.EarlyPackReloadEvent;
+import net.mehvahdjukaar.selene.resources.pack.EarlyPackReloadEvent;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.CloseableResourceManager;

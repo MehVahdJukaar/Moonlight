@@ -1,33 +1,26 @@
 package net.mehvahdjukaar.selene.block_set.leaves;
 
-import net.mehvahdjukaar.selene.Selene;
+import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.block_set.BlockType;
-import net.mehvahdjukaar.selene.block_set.IBlockType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class LeavesType extends IBlockType {
-
-    public static LeavesType OAK_LEAVES_TYPE = new LeavesType(new ResourceLocation("oak"), Blocks.OAK_LEAVES, WoodType.OAK_WOOD_TYPE);
+public class LeavesType extends BlockType {
 
     public final Block leaves;
-    @Nullable
-    public final WoodType woodType;
+    public WoodType woodType;
 
-    protected LeavesType(ResourceLocation id, Block leaves, @Nullable WoodType woodType) {
+    protected LeavesType(ResourceLocation id, Block leaves) {
         super(id);
         this.leaves = leaves;
-        this.woodType = woodType;
     }
 
     @Override
@@ -41,8 +34,10 @@ public class LeavesType extends IBlockType {
     }
 
     @Override
-    protected void initializeChildren() {
+    protected void initializeVanillaChildren() {
         this.addChild("leaves", leaves);
+        this.woodType = WoodTypeRegistry.getValue(id);
+
     }
 
     public static class Finder extends SetFinder<LeavesType> {
@@ -67,12 +62,11 @@ public class LeavesType extends IBlockType {
                     Block leaves = leavesFinder.get();
                     var d = ForgeRegistries.BLOCKS.getValue(ForgeRegistries.BLOCKS.getDefaultKey());
                     if (leaves != d && leaves != null) {
-                        WoodType w = WoodTypeRegistry.WOOD_TYPES.get(id);
-                        return Optional.of(new LeavesType(id, leaves, w));
+                        return Optional.of(new LeavesType(id, leaves));
                     }
                 } catch (Exception ignored) {
                 }
-                Selene.LOGGER.warn("Failed to find custom wood type {}", id);
+                Moonlight.LOGGER.warn("Failed to find custom wood type {}", id);
             }
             return Optional.empty();
         }
