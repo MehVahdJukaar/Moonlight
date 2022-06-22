@@ -131,7 +131,6 @@ public class WoodType extends IBlockType {
     @Override
     protected void initializeChildren() {
 
-
         Block strippedWood = this.findLogRelatedBlock("stripped", "wood");
         Block wood = this.findRelatedEntry("wood", ForgeRegistries.BLOCKS);
         Block slab = this.findRelatedEntry("slab", ForgeRegistries.BLOCKS);
