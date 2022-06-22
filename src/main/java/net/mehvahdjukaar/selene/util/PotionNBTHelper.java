@@ -20,11 +20,9 @@ import static net.minecraft.world.item.alchemy.PotionUtils.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public class PotionNBTHelper {
-    private static final MutableComponent EMPTY = (new TranslatableComponent("effect.none")).withStyle(ChatFormatting.GRAY);
+    private static final MutableComponent EMPTY = (Component.translatable("effect.none")).withStyle(ChatFormatting.GRAY);
 
     //I need this cause I'm using block entity tag so I can't give PotionUtil methods an itemStack directly
     public static void addPotionTooltip(@Nullable CompoundTag com, List<Component> tooltip, float durationFactor) {

@@ -7,13 +7,10 @@ import net.mehvahdjukaar.selene.block_set.BlockType;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -33,13 +30,13 @@ public class LangBuilder {
         entries.put(block.getDescriptionId(), translation);
     }
 
-    public <T extends ForgeRegistryEntry<V>, V extends IForgeRegistryEntry<V>> void addEntry(Registry<T> reg, T entry, String translation) {
-        entries.put(Util.makeDescriptionId(reg.key().getRegistryName().getPath(), reg.getKey(entry)), translation);
+    public <T> void addEntry(Registry<T> reg, T entry, String translation) {
+        entries.put(Util.makeDescriptionId(reg.key().location().getPath(), reg.getKey(entry)), translation);
     }
 
-    public <T extends ForgeRegistryEntry<V>, V extends IForgeRegistryEntry<V>> void addSimpleEntry(Registry<T> reg, T entry) {
-        entries.put(Util.makeDescriptionId(reg.key().getRegistryName().getPath(), reg.getKey(entry)),
-                LangBuilder.getReadableName(entry.getRegistryName().getPath()));
+    public <T> void addSimpleEntry(Registry<T> reg, T entry) {
+        entries.put(Util.makeDescriptionId(reg.key().location().getPath(), reg.getKey(entry)),
+                LangBuilder.getReadableName(reg.getKey(entry).getPath()));
     }
 
     public void addEntry(Item item, String translation) {
@@ -79,13 +76,13 @@ public class LangBuilder {
      * @return readable component
      */
     public static Component getReadableComponent(String key, String... arguments) {
-        Component translated = new TranslatableComponent(key, (Object[]) arguments);
+        Component translated = Component.translatable(key, (Object[]) arguments);
         if (translated.getString().equals(key)) {
             StringBuilder aa = new StringBuilder();
             for (String s : arguments) {
                 aa.append("_").append(s);
             }
-            return new TextComponent(LangBuilder.getReadableName(key + aa));
+            return Component.literal(LangBuilder.getReadableName(key + aa));
         }
         return translated;
     }

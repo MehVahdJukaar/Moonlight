@@ -1,18 +1,17 @@
 package net.mehvahdjukaar.selene.block_set;
 
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.selene.block_set.wood.WoodType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegisterEvent;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class BlockSetManager {
     //they will be run each mod at a time block first then items
     private static final Map<String, Pair<
             List<Runnable>, //block registration function
-            List<Consumer<RegistryEvent.Register<Item>>> //item registration function
+            List<Consumer<IForgeRegistry<Item>>> //item registration function
             >>
             LATE_REGISTRATION_QUEUE = new ConcurrentHashMap<>();
 
@@ -97,8 +96,13 @@ public class BlockSetManager {
     }
 
     @FunctionalInterface
-    public interface BlockSetRegistryCallback<T extends BlockType, R extends IForgeRegistryEntry<R>> {
-        void accept(RegistryEvent.Register<R> reg, Collection<T> wood);
+    public interface BlockSetRegistryCallback<T extends BlockType> {
+        void accept(IForgeRegistry<Block> reg, Collection<T> wood);
+    }
+
+    @FunctionalInterface
+    public interface ItemSetRegistryCallback<T extends BlockType> {
+        void accept(IForgeRegistry<Item> reg, Collection<T> wood);
     }
 
     /**
@@ -109,63 +113,65 @@ public class BlockSetManager {
      *
      * @param registrationFunction registry function
      */
-    public static <T extends BlockType, R extends IForgeRegistryEntry<R>> void addDynamicBlockRegistration(
-            BlockSetRegistryCallback<T, R> registrationFunction, Class<R> regType, Class<T> blockType) {
+    public static <T extends BlockType> void addDynamicBlockRegistration(
+            BlockSetRegistryCallback<T> registrationFunction, Class<T> blockType) {
+
+        Consumer<RegisterEvent> eventConsumer;
+
+        Pair<List<Runnable>, List<Consumer<IForgeRegistry<Item>>>> registrationQueues = getOrAddQueue();
+
+        //if block makes a function that just adds the bus and runnable to the queue whenever reg block is fired
+        eventConsumer = e -> {
+            if (e.getRegistryKey().equals(ForgeRegistries.BLOCKS.getRegistryKey())) {
+                //actual runnable which will registers the blocks
+                Runnable lateRegistration = () -> {
+
+                    IForgeRegistry<Block> fr = e.getForgeRegistry();
+
+                    registrationFunction.accept(fr, getBlockSet(blockType).getValues().values());
+
+                };
+                //when this reg block event fires we only add a runnable to the queue
+                registrationQueues.getFirst().add(lateRegistration);
+            }
+        };
+        //registering block event to the bus
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(EventPriority.HIGHEST, eventConsumer);
+    }
+
+    public static <T extends BlockType> void addDynamicItemRegistration(
+            ItemSetRegistryCallback<T> registrationFunction, Class<T> blockType) {
+
+        Pair<List<Runnable>, List<Consumer<IForgeRegistry<Item>>>> registrationQueues = getOrAddQueue();
+
+        //items just get added to the queue. they will already be called with the correct event
+
+        Consumer<IForgeRegistry<Item>> itemEvent = e ->
+                registrationFunction.accept(e, getBlockSet(blockType).getValues().values());
+
+        registrationQueues.getSecond().add(itemEvent);
+    }
+
+    @NotNull
+    private static Pair<List<Runnable>, List<Consumer<IForgeRegistry<Item>>>> getOrAddQueue() {
         //this is horrible. worst shit ever
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        Consumer<RegistryEvent.Register<R>> eventConsumer;
-
-        if (regType == Block.class || regType == Item.class) {
-
-            //get the queue corresponding to this certain mod
-            String modId = ModLoadingContext.get().getActiveContainer().getModId();
-
-            var registrationQueues =
-                    LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {
-                        //if absent we register its registration callback
-                        bus.addGenericListener(Item.class, EventPriority.HIGHEST, BlockSetManager::registerLateBlockAndItems);
-                        return Pair.of(new ArrayList<>(), new ArrayList<>());
-                    });
-
-
-            if (regType == Block.class) {
-                //if block makes a function that just adds the bus and runnable to the queue whenever reg block is fired
-                eventConsumer = e -> {
-                    //actual runnable which will registers the blocks
-                    Runnable lateRegistration = () -> {
-
-                        IForgeRegistry<?> registry = e.getRegistry();
-                        if (registry instanceof ForgeRegistry fr) {
-                            boolean frozen = fr.isLocked();
-                            fr.unfreeze();
-                            registrationFunction.accept(e, getBlockSet(blockType).getValues().values());
-                            if (frozen) fr.freeze();
-                        }
-                    };
-                    //when this reg block event fires we only add a runnable to the queue
-                    registrationQueues.getFirst().add(lateRegistration);
-                };
-                //registering block event to the bus
-
-                bus.addGenericListener(regType, EventPriority.HIGHEST, eventConsumer);
-            } else {
-                //items just get added to the queue. they will already be called with the correct event
-
-                Consumer<RegistryEvent.Register<Item>> itemEvent = e ->
-                        registrationFunction.accept((RegistryEvent.Register<R>) e, getBlockSet(blockType).getValues().values());
-                registrationQueues.getSecond().add(itemEvent);
-            }
-        } else {
-            //non block /item event. just wraps it by giving it the wood types
-
-            eventConsumer = e -> registrationFunction.accept(e, getBlockSet(blockType).getValues().values());
-            bus.addGenericListener(regType, eventConsumer);
-        }
+        //get the queue corresponding to this certain mod
+        String modId = ModLoadingContext.get().getActiveContainer().getModId();
+        return LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {
+            //if absent we register its registration callback
+            bus.addListener(EventPriority.HIGHEST, BlockSetManager::registerLateBlockAndItems);
+            return Pair.of(new ArrayList<>(), new ArrayList<>());
+        });
     }
 
 
     //shittiest code ever lol
-    protected static void registerLateBlockAndItems(RegistryEvent.Register<Item> event) {
+    protected static void registerLateBlockAndItems(RegisterEvent event) {
+        //fires for items
+        if (!event.getRegistryKey().equals(ForgeRegistries.ITEMS.getRegistryKey())) return;
+
         //when the first registration function is called we find all block types
         if (!hasFilledBlockSets) {
             initializeBlockSets();
@@ -176,12 +182,13 @@ public class BlockSetManager {
         var registrationQueues =
                 LATE_REGISTRATION_QUEUE.get(modId);
         if (registrationQueues != null) {
+            IForgeRegistry<Item> fr = event.getForgeRegistry();
             //register blocks
             var blockQueue = registrationQueues.getFirst();
             blockQueue.forEach(Runnable::run);
             //registers items
             var itemQueue = registrationQueues.getSecond();
-            itemQueue.forEach(q -> q.accept(event));
+            itemQueue.forEach(q -> q.accept(fr));
         }
         //clears stuff that's been execured. not really needed but just to be safe its here
         LATE_REGISTRATION_QUEUE.remove(modId);

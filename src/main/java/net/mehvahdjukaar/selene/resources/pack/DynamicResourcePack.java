@@ -64,13 +64,13 @@ public abstract class DynamicResourcePack implements PackResources {
 
     public DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
         this.packType = type;
-        var component = new TextComponent(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources"));
+        var component = Component.literal(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources"));
         //new TranslatableComponent("%s.%s.description", name.getNamespace(), name.getPath());
         this.packInfo = new PackMetadataSection(component, 6);
         this.resourcePackName = name;
         this.mainNamespace = name.getNamespace();
         this.namespaces.add(name.getNamespace());
-        this.title = new TextComponent(LangBuilder.getReadableName(name.toString()));
+        this.title = Component.literal(LangBuilder.getReadableName(name.toString()));
         ;//new TranslatableComponent("%s.%s.title", name.getNamespace(), name.getPath());
 
         this.position = position;
@@ -135,6 +135,11 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     @Override
+    public boolean isHidden() {
+        return this.hidden;
+    }
+
+    @Override
     public Set<String> getNamespaces(PackType packType) {
         return this.namespaces;
     }
@@ -157,14 +162,14 @@ public abstract class DynamicResourcePack implements PackResources {
 
     @Override
     public Collection<ResourceLocation> getResources(
-            PackType packType, String namespace, String id, int maxDepth, Predicate<String> filter) {
+            PackType packType, String namespace, String id, Predicate<ResourceLocation> filter) {
 
         //why are we only using server resources here?
         if (packType == this.packType && packType == PackType.SERVER_DATA && this.namespaces.contains(namespace)) {
             //idk why but somebody had an issue with concurrency here during world load
             return this.resources.keySet().stream()
                     .filter(r -> (r.getNamespace().equals(namespace) && r.getPath().startsWith(id)))
-                    .filter(r -> filter.test(r.toString()))
+                    .filter(filter)
                     .collect(Collectors.toList());
         }
         return NO_RESOURCES;

@@ -6,7 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -108,7 +108,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
 
     public InteractionResult interact(Player player, InteractionHand handIn, int slot) {
         if (!this.isAccessibleBy(player)) {
-            player.displayClientMessage(new TranslatableComponent("container.isLocked", ""), true);
+            player.displayClientMessage(Component.translatable("container.isLocked", ""), true);
         } else if (handIn == InteractionHand.MAIN_HAND) {
             ItemStack handItem = player.getItemInHand(handIn);
             //remove

@@ -89,7 +89,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         this.baseTick();
 
         if (!this.hasBeenShot) {
-            this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner(), this.blockPosition());
+            this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner());
             this.hasBeenShot = true;
         }
 

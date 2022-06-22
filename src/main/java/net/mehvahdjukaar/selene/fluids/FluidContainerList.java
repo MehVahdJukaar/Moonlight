@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.fluids;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -106,9 +107,9 @@ public class FluidContainerList {
         private static final Category EMPTY = new Category(Items.AIR, 1);
 
         public static final Codec<Category> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-                ResourceLocation.CODEC.fieldOf("empty").forGetter(c -> c.emptyContainer.getRegistryName()),
+                ResourceLocation.CODEC.fieldOf("empty").forGetter(c -> Utils.getID(c.emptyContainer)),
                 Codec.INT.fieldOf("capacity").forGetter(Category::getCapacity),
-                ResourceLocation.CODEC.listOf().fieldOf("filled").forGetter(c -> c.filled.stream().map(Item::getRegistryName).toList()),
+                ResourceLocation.CODEC.listOf().fieldOf("filled").forGetter(c -> c.filled.stream().map(Utils::getID).toList()),
                 SoundEvent.CODEC.optionalFieldOf("fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
                 SoundEvent.CODEC.optionalFieldOf("empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
         ).apply(instance, Category::decode));

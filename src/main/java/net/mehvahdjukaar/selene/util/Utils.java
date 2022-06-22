@@ -5,15 +5,24 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import net.mehvahdjukaar.selene.math.MthUtils;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Random;
@@ -22,8 +31,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Utils {
 
-    public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem, boolean bothsides) {
-        if (!player.level.isClientSide || bothsides)
+    public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem, boolean bothSides) {
+        if (!player.level.isClientSide || bothSides)
             player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem, player.isCreative()));
     }
 
@@ -103,6 +112,15 @@ public class Utils {
         return newShape.get();
     }
 
-
-
+    public static ResourceLocation getID(Object object){
+        return switch (object){
+            case Block b -> ForgeRegistries.BLOCKS.getKey(b);
+            case Item i -> ForgeRegistries.ITEMS.getKey(i);
+            case EntityType e -> ForgeRegistries.ENTITIES.getKey(e);
+            case Biome b -> ForgeRegistries.BIOMES.getKey(b);
+            case Fluid f -> ForgeRegistries.FLUIDS.getKey(f);
+            case BlockEntityType b -> ForgeRegistries.BLOCK_ENTITIES.getKey(b);
+            default -> throw new UnsupportedOperationException("Unknown class type "+ object.getClass());
+        };
+    }
 }

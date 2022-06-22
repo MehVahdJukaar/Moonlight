@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -12,8 +12,13 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.client.IFluidTypeRenderProperties;
+import net.minecraftforge.client.RenderProperties;
 import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -78,8 +83,8 @@ public class SoftFluid {
         return food;
     }
 
-    public TranslatableComponent getTranslatedName() {
-        return new TranslatableComponent(this.translationKey);
+    public Component getTranslatedName() {
+        return Component.translatable(this.translationKey);
     }
 
     public String getTranslationKey() {
@@ -254,20 +259,22 @@ public class SoftFluid {
          * @param fluid equivalent forge fluid
          */
         public Builder(Fluid fluid) {
-            FluidAttributes att = fluid.getAttributes();
-            ResourceLocation still = att.getStillTexture();
+            FluidType type = fluid.getFluidType();
+            //TODO: make client only stuff for this
+            var prop = RenderProperties.get(fluid);
+            ResourceLocation still = prop.getStillTexture();
             if (still == null) still = new ResourceLocation("minecraft:block/water_still");
             this.stillTexture = still;
-            ResourceLocation flowing = att.getFlowingTexture();
+            ResourceLocation flowing = prop.getFlowingTexture();
             if (flowing == null) flowing = new ResourceLocation("minecraft:block/water_flowing");
             this.flowingTexture = flowing;
             //TODO: fluid colors & textures can depend on fluid stack
-            this.color(att.getColor());
-            this.luminosity = att.getLuminosity();
-            String tr = att.getTranslationKey();
+            this.color(prop.getColorTint());
+            this.luminosity = type.getLightLevel();
+            String tr = type.getDescriptionId();
             if (tr != null) this.translationKey = tr;
             this.addEqFluid(fluid);
-            this.id = fluid.getRegistryName();
+            this.id = Utils.getID(fluid);
         }
 
         /**
@@ -519,15 +526,11 @@ public class SoftFluid {
         FLOWING, //use particle for flowing
         STILL_AND_FLOWING; //both gray-scaled
 
-        public static final Codec<TintMethod> CODEC = StringRepresentable.fromEnum(TintMethod::values, TintMethod::byName);
+        public static final Codec<TintMethod> CODEC = StringRepresentable.fromEnum(TintMethod::values);
 
         @Override
         public String getSerializedName() {
             return this.name().toLowerCase(Locale.ROOT);
-        }
-
-        public static TintMethod byName(String name) {
-            return TintMethod.valueOf(name.toUpperCase(Locale.ROOT));
         }
     }
 

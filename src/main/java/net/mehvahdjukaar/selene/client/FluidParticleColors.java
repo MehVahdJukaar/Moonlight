@@ -3,6 +3,7 @@ package net.mehvahdjukaar.selene.client;
 import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -20,7 +21,7 @@ public class FluidParticleColors {
     public static void refresh() {
         PARTICLE_COLORS.clear();
         for (Fluid f : ForgeRegistries.FLUIDS) {
-            ResourceLocation key = f.getRegistryName();
+            ResourceLocation key = Utils.getID(f);
             if (!PARTICLE_COLORS.containsKey(key)) {
                 ResourceLocation location = f.getAttributes().getStillTexture();
                 if (location == null) continue;
@@ -54,7 +55,7 @@ public class FluidParticleColors {
     }
 
     public static int get(Fluid f) {
-        return PARTICLE_COLORS.getOrDefault(f.getRegistryName(), -1);
+        return PARTICLE_COLORS.getOrDefault(Utils.getID(f), -1);
     }
 
     public static int get(SoftFluid s) {

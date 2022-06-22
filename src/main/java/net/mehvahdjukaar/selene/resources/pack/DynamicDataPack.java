@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import net.mehvahdjukaar.selene.misc.BlockLootTableAccessor;
 import net.mehvahdjukaar.selene.resources.RPUtils;
 import net.mehvahdjukaar.selene.resources.ResType;
-import net.mehvahdjukaar.selene.resources.TagBuilder;
+import net.mehvahdjukaar.selene.resources.SimpleTagBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +14,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
@@ -29,29 +28,8 @@ public class DynamicDataPack extends DynamicResourcePack {
         super(name, PackType.SERVER_DATA);
     }
 
-    //helpers. maybe remove
-    @Deprecated
-    public <T extends ForgeRegistryEntry<T>> void addTag(TagKey<?> key, Collection<T> values, ResourceKey<?> type) {
-        var builder = TagBuilder.of(key);
-        builder.addEntries(values);
-        this.addTag(builder, type);
-    }
-    //TODO: reformat
-    /*
-    public <R, T extends ForgeRegistryEntry<T>> void addTag(ResourceLocation key, Collection<T> getValues, ResourceKey<Registry<R>> type) {
-        var builder = new TagBuilder(key);
-        builder.addAllEntries(getValues);
-           this.addTag(builder,type);
-    }*/
 
-    @Deprecated
-    public void addTag(ResourceLocation tagLocation, Collection<ResourceLocation> values, ResourceKey<?> type) {
-        var builder = TagBuilder.of(tagLocation);
-        values.forEach(builder::add);
-        this.addTag(builder, type);
-    }
-
-    public void addTag(TagBuilder builder, ResourceKey<?> type) {
+    public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
 
         ResourceLocation tagId = builder.getId();
         String tagPath = type.location().getPath();
@@ -99,6 +77,7 @@ public class DynamicDataPack extends DynamicResourcePack {
             //this.addJson(advancementId, recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
         }
     }
+
 
 
 }
