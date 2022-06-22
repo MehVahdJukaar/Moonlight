@@ -12,7 +12,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -92,13 +91,8 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
 
     public boolean alreadyHasAssetAtLocation(ResourceManager manager, ResourceLocation res, ResType type) {
         ResourceLocation fullRes = type.getPath(res);
-        if (manager.hasResource(fullRes)) {
-            try (var r = manager.getResource(fullRes)) {
-                return !r.getSourceName().equals(this.dynamicPack.getName());
-            } catch (IOException ignored) {
-            }
-        }
-        return false;
+        var resource = manager.getResource(fullRes);
+        return resource.filter(value -> !value.sourcePackId().equals(this.dynamicPack.getName())).isPresent();
     }
 
 }

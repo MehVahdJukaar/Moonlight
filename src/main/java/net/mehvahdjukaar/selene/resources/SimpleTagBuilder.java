@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.resources;
 
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.selene.util.Utils;
+import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
@@ -70,17 +71,6 @@ public class SimpleTagBuilder extends TagBuilder {
     public SimpleTagBuilder addEntry(Object entry) {
         this.add(Utils.getID(entry));
         return this;
-    }
-
-
-    public SimpleTagBuilder addFromJson(JsonObject pJson) {
-        super.addFromJson(pJson, SOURCE);
-        return this;
-    }
-
-    @Override
-    public JsonObject serializeToJson() {
-        return super.serializeToJson();
     }
 
 
