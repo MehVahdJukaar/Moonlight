@@ -27,5 +27,8 @@ public class NetworkHandler {
 
         INSTANCE.registerMessage(nextID(), ClientBoundSyncMapDecorationTypesPacket.class, ClientBoundSyncMapDecorationTypesPacket::buffer,
                 ClientBoundSyncMapDecorationTypesPacket::new, ClientBoundSyncMapDecorationTypesPacket::handler);
+
+        INSTANCE.registerMessage(nextID(), SyncCommonConfigsPacket.class, SyncCommonConfigsPacket::buffer,
+                SyncCommonConfigsPacket::new, SyncCommonConfigsPacket::handler);
     }
 }

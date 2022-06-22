@@ -17,7 +17,7 @@ public class BlockTypeBasedBlockItem<T extends BlockType> extends BlockItem {
     public BlockTypeBasedBlockItem(Block pBlock, Properties pProperties, T blockType) {
         super(pBlock, pProperties);
         this.blockType = blockType;
-        this.burnTime = Lazy.of(()->blockType.mainChild().asItem()
+        this.burnTime = Lazy.of(() -> blockType.mainChild().asItem()
                 .getBurnTime(blockType.mainChild().asItem().getDefaultInstance(), null));
     }
 
@@ -27,9 +27,9 @@ public class BlockTypeBasedBlockItem<T extends BlockType> extends BlockItem {
     }
 
     @Override
-    protected boolean allowdedIn(CreativeModeTab pCategory) {
+    protected boolean allowedIn(CreativeModeTab tab) {
         if (blockType.mainChild().asItem().getItemCategory() == null) return false;
-        return super.allowdedIn(pCategory);
+        return super.allowedIn(tab);
     }
 
     public T getBlockType() {

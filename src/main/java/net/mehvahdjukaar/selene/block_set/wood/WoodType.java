@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.block_set.wood;
 
 import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.block_set.BlockType;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -41,7 +42,7 @@ public class WoodType extends BlockType {
     protected Block findLogRelatedBlock(String append, String postpend) {
         String post = postpend.isEmpty() ? "" : "_" + postpend;
         var id = this.getId();
-        String log = this.log.getRegistryName().getPath();
+        String log = Utils.getID(this.log).getPath();
         ResourceLocation[] targets = {
                 new ResourceLocation(id.getNamespace(), log + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + log + post),

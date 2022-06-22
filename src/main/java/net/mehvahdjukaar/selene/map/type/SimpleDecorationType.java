@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import org.jetbrains.annotations.Nullable;
@@ -85,7 +86,7 @@ public class SimpleDecorationType implements IMapDecorationType<CustomMapDecorat
     @Override
     public GenericMapBlockMarker<CustomMapDecoration> getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos) {
         if (this.target != null) {
-            if (target.test(reader.getBlockState(pos), new Random(0))) {
+            if (target.test(reader.getBlockState(pos), RandomSource.create(0))) {
                 return new GenericMapBlockMarker<>(this, pos);
             }
         }

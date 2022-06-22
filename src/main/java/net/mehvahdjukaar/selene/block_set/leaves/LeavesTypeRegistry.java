@@ -3,6 +3,7 @@ package net.mehvahdjukaar.selene.block_set.leaves;
 import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.selene.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -12,16 +13,17 @@ import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
-    public static LeavesType OAK_TYPE = new LeavesType(new ResourceLocation("oak"), Blocks.OAK_LEAVES, WoodTypeRegistry.OAK_TYPE);
+    public static LeavesType OAK_TYPE = new LeavesType(new ResourceLocation("oak"), Blocks.OAK_LEAVES);
 
     public static LeavesTypeRegistry INSTANCE;
 
-    public static Map<ResourceLocation, LeavesType> getTypes(){
+    public static Collection<LeavesType> getTypes(){
         return INSTANCE.getValues();
     }
 
@@ -31,7 +33,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     public static LeavesType fromNBT(String name) {
-        return INSTANCE.getValues().getOrDefault(new ResourceLocation(name), OAK_TYPE);
+        return INSTANCE.getFromNBT(name);
     }
     
     public LeavesTypeRegistry() {
@@ -47,7 +49,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     //returns if this block is the base plank block
     @Override
     public Optional<LeavesType> detectTypeFromBlock(@NotNull Block baseBlock) {
-        ResourceLocation baseRes = baseBlock.getRegistryName();
+        ResourceLocation baseRes = Utils.getID(baseBlock);
         String name = null;
         String path = baseRes.getPath();
         //needs to contain planks in its name
@@ -64,7 +66,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
                 if (mat == Material.LEAVES) {
                     ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
 
-                    return Optional.of(new LeavesType(id, baseBlock, null));
+                    return Optional.of(new LeavesType(id, baseBlock));
                 }
             }
             //}
@@ -73,22 +75,8 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     @Override
-    public void buildAll() {
-        if (!frozen) {
-            for (var v : WoodTypeRegistry.getTypes().values()) {
-                Block leaves = v.getBlockOfThis("leaves");
-                if (leaves != null) {
-                    this.registerBlockType(new LeavesType(v.id, leaves, v));
-                }
-            }
-        }
-        super.buildAll();
-    }
-
-
-    @Override
     public void addTypeTranslations(AfterLanguageLoadEvent language) {
-        this.getValues().forEach((r, w) -> {
+        this.getValues().forEach((w) -> {
             if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
         });
     }

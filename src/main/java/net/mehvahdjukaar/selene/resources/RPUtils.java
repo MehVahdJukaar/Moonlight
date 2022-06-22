@@ -11,6 +11,7 @@ import net.mehvahdjukaar.selene.client.TextureCache;
 import net.mehvahdjukaar.selene.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.selene.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.selene.resources.recipe.TemplateRecipeManager;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -62,22 +63,23 @@ public class RPUtils {
      */
     public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
         var cached = TextureCache.getCached(block, texturePredicate);
-        if (cached != null){
+        if (cached != null) {
             return new ResourceLocation(cached);
         }
-        try {
-            ResourceLocation res = block.getRegistryName();
-            Resource blockState = manager.getResource(ResType.BLOCKSTATES.getPath(res));
+        ResourceLocation res = Utils.getID(block);
+        var blockState = manager.getResource(ResType.BLOCKSTATES.getPath(res));
+        try(var bsStream = blockState.get().open()) {
 
-            JsonElement bsElement = RPUtils.deserializeJson(blockState.getInputStream());
+
+            JsonElement bsElement = RPUtils.deserializeJson(bsStream);
 
             //grabs the first resource location of a model
             String modelPath = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"))
                     .stream().findAny().get();
             JsonElement modelElement;
-            try {
-                Resource model = manager.getResource(ResType.MODELS.getPath(modelPath));
-                modelElement = RPUtils.deserializeJson(model.getInputStream());
+            var model = manager.getResource(ResType.MODELS.getPath(modelPath));
+            try(var modelStream = model.get().open()) {
+                modelElement = RPUtils.deserializeJson(modelStream);
             } catch (Exception e) {
                 throw new Exception("Failed to parse model at " + modelPath);
             }
@@ -89,7 +91,7 @@ public class RPUtils {
             }
         } catch (Exception ignored) {
         }
-        throw new FileNotFoundException("Could not find any texture associated to the given block " + block.getRegistryName());
+        throw new FileNotFoundException("Could not find any texture associated to the given block " + res);
 
     }
 
@@ -110,11 +112,11 @@ public class RPUtils {
     public static ResourceLocation findFirstItemTextureLocation(ResourceManager manager, Item item, Predicate<String> texturePredicate) throws FileNotFoundException {
         var cached = TextureCache.getCached(item, texturePredicate);
         if (cached != null) return new ResourceLocation(cached);
-        try {
-            ResourceLocation res = item.getRegistryName();
-            Resource itemModel = manager.getResource(ResType.ITEM_MODELS.getPath(res));
+        ResourceLocation res = Utils.getID(item);
+        var itemModel = manager.getResource(ResType.ITEM_MODELS.getPath(res));
+        try (var stream = itemModel.get().open()) {
 
-            JsonElement bsElement = RPUtils.deserializeJson(itemModel.getInputStream());
+            JsonElement bsElement = RPUtils.deserializeJson(stream);
 
             var textures = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject().getAsJsonObject("textures"));
             for (var t : textures) {
@@ -122,8 +124,9 @@ public class RPUtils {
                 if (texturePredicate.test(t)) return new ResourceLocation(t);
             }
 
-        } catch (Exception ignored) {}
-        throw new FileNotFoundException("Could not find any texture associated to the given item " + item.getRegistryName());
+        } catch (Exception ignored) {
+        }
+        throw new FileNotFoundException("Could not find any texture associated to the given item " + res);
     }
 
     public static String findFirstResourceInJsonRecursive(JsonElement element) throws NoSuchElementException {
@@ -174,8 +177,9 @@ public class RPUtils {
     }
 
     public static Recipe<?> readRecipe(ResourceManager manager, ResourceLocation location) {
-        try {
-            JsonObject element = RPUtils.deserializeJson(manager.getResource(location).getInputStream());
+        var resource = manager.getResource(location);
+        try (var stream = resource.get().open()) {
+            JsonObject element = RPUtils.deserializeJson(stream);
             return RecipeManager.fromJson(location, element, ICondition.IContext.EMPTY);
         } catch (Exception e) {
             throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));
@@ -188,8 +192,9 @@ public class RPUtils {
 
 
     public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, ResourceLocation location) {
-        try {
-            JsonObject element = RPUtils.deserializeJson(manager.getResource(location).getInputStream());
+        var resource = manager.getResource(location);
+        try (var stream = resource.get().open()) {
+            JsonObject element = RPUtils.deserializeJson(stream);
             return TemplateRecipeManager.read(element);
 
         } catch (Exception e) {
@@ -233,36 +238,4 @@ public class RPUtils {
         }
     }
 
-
-    //TODO: replace
-    //creates and add new jsons based off the ones at the given resources with the provided modifiers
-    public static <T extends BlockType> void addSimpleBlockResources(String modId, ResourceManager manager, DynamicResourcePack pack,
-                                                                     Map<T, Block> blocks, String replaceTarget, ResourceLocation... jsonsLocations) {
-        addBlockResources(manager, pack, blocks,
-                BlockTypeResTransformer.<T>create(modId, manager)
-                        .replaceSimpleBlock(modId, replaceTarget)
-                        .IDReplaceBlock(replaceTarget),
-                jsonsLocations);
-    }
-
-    public static <T extends BlockType> void addBlockResources(ResourceManager manager, DynamicResourcePack pack,
-                                                               Map<T, Block> blocks,
-                                                               BlockTypeResTransformer<T> modifier, ResourceLocation... jsonsLocations) {
-        List<StaticResource> original = Arrays.stream(jsonsLocations).map(s -> StaticResource.getOrLog(manager, s)).collect(Collectors.toList());
-
-        blocks.forEach((wood, value) -> {
-
-            for (var res : original) {
-                try {
-                    StaticResource newRes = modifier.transform(res, value.getRegistryName(), wood);
-
-                    assert newRes.location != res.location : "ids cant be the same";
-
-                    pack.addResource(newRes);
-                } catch (Exception e) {
-                    Moonlight.LOGGER.error("Failed to generate json from {}", res.location);
-                }
-            }
-        });
-    }
 }

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.selene.impl.items;
 
 import net.mehvahdjukaar.selene.block_set.wood.WoodType;
+import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
@@ -15,7 +16,7 @@ public class WoodBasedBlockItem extends BlockTypeBasedBlockItem<WoodType> {
     }
 
     public WoodBasedBlockItem(Block blockIn, Properties builder, int burnTicks) {
-        this(blockIn, builder, WoodType.OAK_WOOD_TYPE, burnTicks);
+        this(blockIn, builder, WoodTypeRegistry.OAK_TYPE, burnTicks);
     }
 
     public WoodBasedBlockItem(Block blockIn, Properties builder, WoodType woodType, int burnTicks) {

@@ -237,7 +237,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
         String prefix = "";
         Pattern pattern = Pattern.compile("(.*(?=\\/))");
         Matcher matcher = pattern.matcher(blockId.getPath());
-        if (matcher.find()) prefix = matcher.group(1); //c/create/
+        if (matcher.find()) prefix = matcher.group(1); //c/merge/
 
         if (oldNamespace == null) {
             //simple mode
@@ -254,11 +254,11 @@ public class BlockTypeResTransformer<T extends BlockType> {
         } else {
             Pattern p2;
             if (classType.isEmpty()) {
-                p2 = Pattern.compile(oldNamespace + ":" + "(.*?)" + oldTypeName); //create:block(/a/b/cc_)oak //.*
+                p2 = Pattern.compile(oldNamespace + ":" + "(.*?)" + oldTypeName); //merge:block(/a/b/cc_)oak //.*
                 if (!prefix.isEmpty()) prefix = prefix + "/";
             } else {
                 prefix = "/" + prefix;
-                p2 = Pattern.compile(oldNamespace + ":" + classType + "(.*?\\/.*?)" + oldTypeName); //create:block(/a/b/cc_)oak
+                p2 = Pattern.compile(oldNamespace + ":" + classType + "(.*?\\/.*?)" + oldTypeName); //merge:block(/a/b/cc_)oak
             }
             Matcher m2 = p2.matcher(text);//->sup:block
             String finalPrefix = prefix;

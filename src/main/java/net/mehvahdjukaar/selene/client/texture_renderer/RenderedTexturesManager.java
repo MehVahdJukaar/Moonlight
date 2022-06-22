@@ -10,6 +10,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import net.mehvahdjukaar.selene.Moonlight;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -82,7 +83,7 @@ public class RenderedTexturesManager {
     public static FrameBufferBackedDynamicTexture getFlatItemTexture(Item item, int size, String prefix, @Nullable Consumer<NativeImage> postProcessing) {
         //texture id for item size pair
         if (!prefix.isEmpty()) prefix = "/" + prefix;
-        ResourceLocation res = Moonlight.res(item.getRegistryName().toString().replace(":", "/")
+        ResourceLocation res = Moonlight.res(Utils.getID(item).toString().replace(":", "/")
                 + "/" + size + prefix);
 
         var texture = TEXTURE_CACHE.getIfPresent(res);

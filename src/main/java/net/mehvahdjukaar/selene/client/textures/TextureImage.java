@@ -146,19 +146,21 @@ public class TextureImage implements AutoCloseable {
         ResourceLocation metadataLoc = ResType.MCMETA.getPath(relativePath);
         AnimationMetadataSection metadata = null;
 
-        try (InputStream metadataStream = manager.getResource(metadataLoc).getInputStream()) {
-            metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
+        var res = manager.getResource(metadataLoc);
+        if(res.isPresent()){
+            try (InputStream metadataStream = res.get().open()) {
+                metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
 
-        } catch (Exception ignored) {
+            } catch (Exception ignored) {}
         }
+
         return new TextureImage(i, metadata);
     }
 
-    //you shouldnt have to use this
     public static TextureImage createNew(int width, int height, @Nullable AnimationMetadataSection animation) {
         return new TextureImage(new NativeImage(width, height, false), animation);
     }
-    //you shouldnt have to use this
+
     public static TextureImage of(NativeImage image, @Nullable AnimationMetadataSection animation) {
         return new TextureImage(image, animation);
     }
@@ -262,7 +264,7 @@ public class TextureImage implements AutoCloseable {
         int width = imageWidth();
         int height = imageHeight();
         if (Arrays.stream(overlays).anyMatch(n -> n.imageHeight() < height || n.imageWidth() < width)) {
-            throw new IllegalStateException("Could not create images because they had different dimensions");
+            throw new IllegalStateException("Could not merge images because they had different dimensions");
         }
 
         for (var o : overlays) {
@@ -284,7 +286,7 @@ public class TextureImage implements AutoCloseable {
         int width = imageWidth();
         int height = imageHeight();
         if (Arrays.stream(overlays).anyMatch(n -> n.imageHeight() < height || n.imageWidth() < width)) {
-            throw new IllegalStateException("Could not create images because they had different dimensions");
+            throw new IllegalStateException("Could not merge images because they had different dimensions");
         }
 
         for (var o : overlays) {
@@ -333,7 +335,7 @@ public class TextureImage implements AutoCloseable {
         int width = imageWidth();
         int height = imageHeight();
         if (mask.imageHeight() < height || mask.imageWidth() < width) {
-            throw new IllegalStateException("Could not create images because they had different dimensions");
+            throw new IllegalStateException("Could not merge images because they had different dimensions");
         }
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {

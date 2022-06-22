@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.misc;
 
-public class TwoHandedAnimation {
+public class AnimationState {
 
     private boolean twoHanded = false;
 

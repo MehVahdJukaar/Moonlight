@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.api;
 
-import net.mehvahdjukaar.selene.misc.TwoHandedAnimation;
+import net.mehvahdjukaar.selene.misc.AnimationState;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,9 +24,9 @@ public interface IThirdPersonAnimationProvider {
      * @param twoHanded set to true to skip off hand animation
      * @return True if default animation should be skipped
      */
-     <T extends LivingEntity> boolean poseRightArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand, TwoHandedAnimation twoHanded);
+     <T extends LivingEntity> boolean poseRightArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand, AnimationState twoHanded);
 
-    default <T extends LivingEntity> boolean poseRightArmGeneric(ItemStack stack, AgeableListModel<T> model, T entity, HumanoidArm mainHand, TwoHandedAnimation twoHanded){
+    default <T extends LivingEntity> boolean poseRightArmGeneric(ItemStack stack, AgeableListModel<T> model, T entity, HumanoidArm mainHand, AnimationState twoHanded){
         return poseRightArm(stack, (HumanoidModel)model, entity, mainHand, twoHanded);
     }
 
@@ -38,9 +38,9 @@ public interface IThirdPersonAnimationProvider {
      * @param mainHand hand side
      * @return True if default animation should be skipped
      */
-    <T extends LivingEntity> boolean poseLeftArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand,TwoHandedAnimation twoHanded);
+    <T extends LivingEntity> boolean poseLeftArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand, AnimationState twoHanded);
 
-    default <T extends LivingEntity> boolean poseLeftArmGeneric(ItemStack stack, AgeableListModel<T> model, T entity, HumanoidArm mainHand, TwoHandedAnimation twoHanded){
+    default <T extends LivingEntity> boolean poseLeftArmGeneric(ItemStack stack, AgeableListModel<T> model, T entity, HumanoidArm mainHand, AnimationState twoHanded){
         return poseLeftArm(stack, (HumanoidModel)model, entity, mainHand, twoHanded);
     }
 

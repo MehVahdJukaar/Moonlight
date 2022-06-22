@@ -1,52 +1,55 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.selene.Moonlight;
-import net.mehvahdjukaar.selene.network.ClientBoundSyncFluidsPacket;
-import net.mehvahdjukaar.selene.util.DispenserHelper;
+import net.mehvahdjukaar.selene.util.Utils;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.*;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
+public class SoftFluidRegistry {
 
-    public static final SoftFluidRegistry INSTANCE = new SoftFluidRegistry();
+    public static final SoftFluid EMPTY = new SoftFluid.Builder(Fluids.EMPTY).build();
 
-    // id -> SoftFluid
-    private final HashMap<ResourceLocation, SoftFluid> idMap = new HashMap<>();
-    // filled item -> SoftFluid. need to handle potions separately since they map to same item id
-    private final HashMap<Item, SoftFluid> itemMap = new HashMap<>();
+    public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(Moonlight.res("soft_fluids"));
+    public static final DeferredRegister<SoftFluid> DEFERRED_REGISTER = DeferredRegister.create(KEY, KEY.location().getNamespace());
+    public static final Supplier<IForgeRegistry<SoftFluid>> SOFT_FLUIDS = DEFERRED_REGISTER.makeRegistry(() ->
+            new RegistryBuilder<SoftFluid>()
+                    .setDefaultKey(EMPTY.getRegistryName())
+                    .dataPackRegistry(SoftFluid.CODEC, SoftFluid.CODEC)
+                    .onAdd(SoftFluidRegistry::onAdd)
+                    .onCreate(SoftFluidRegistry::onCreate)
+                    .onClear(SoftFluidRegistry::onClear)
+                    .onValidate(SoftFluidRegistry::addExistingForgeFluids)
+                    .allowModification()
+                    .disableSaving());
+
+    //slave maps
+    // containers -> SoftFluid
+    private static final HashMap<Item, SoftFluid> ITEM_MAP = new HashMap<>();
     // forge fluid  -> SoftFluid
-    private final HashMap<Fluid, SoftFluid> fluidMap = new HashMap<>();
-    //for stuff that is registers using a code built fluid
-    private boolean initializedDispenser = false;
-    int currentReload = 0;
-
-    private SoftFluidRegistry() {
-        super(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create(), "soft_fluids");
-    }
+    private static final HashMap<Fluid, SoftFluid> FLUID_MAP = new HashMap<>();
 
 
-    public static Collection<SoftFluid> getRegisteredFluids() {
-        return INSTANCE.idMap.values();
+    public static Collection<SoftFluid> getValues() {
+        return SOFT_FLUIDS.get().getValues();
     }
 
     public static SoftFluid get(String id) {
-        return INSTANCE.idMap.getOrDefault(new ResourceLocation(id), EMPTY);
+        return get(new ResourceLocation(id));
     }
 
     /**
@@ -56,11 +59,13 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
      * @return soft fluid. empty fluid if not found
      */
     public static SoftFluid get(ResourceLocation id) {
-        return INSTANCE.idMap.getOrDefault(id, EMPTY);
+        return SOFT_FLUIDS.get().getValue(id);
     }
 
     public static Optional<SoftFluid> getOptional(ResourceLocation id) {
-        return Optional.ofNullable(INSTANCE.idMap.getOrDefault(id, null));
+        var s = get(id);
+        if (s.isEmpty()) return Optional.empty();
+        return Optional.of(s);
     }
 
     /**
@@ -70,7 +75,7 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
      * @return soft fluid. empty fluid if not found
      */
     public static SoftFluid fromForgeFluid(Fluid fluid) {
-        return INSTANCE.fluidMap.getOrDefault(fluid, EMPTY);
+        return FLUID_MAP.getOrDefault(fluid, EMPTY);
     }
 
     /**
@@ -81,109 +86,56 @@ public class SoftFluidRegistry extends SimpleJsonResourceReloadListener {
      */
     @Nonnull
     public static SoftFluid fromItem(Item filledContainerItem) {
-        return INSTANCE.itemMap.getOrDefault(filledContainerItem, EMPTY);
+        return ITEM_MAP.getOrDefault(filledContainerItem, EMPTY);
     }
 
-    //vanilla built-in fluid references
-    public static final SoftFluid EMPTY = SoftFluid.EMPTY;
-    public static final FluidReference WATER = FluidReference.of("minecraft:water");
-    public static final FluidReference LAVA = FluidReference.of("minecraft:lava");
-    public static final FluidReference HONEY = FluidReference.of("minecraft:honey");
-    public static final FluidReference MILK = FluidReference.of("minecraft:milk");
-    public static final FluidReference MUSHROOM_STEW = FluidReference.of("minecraft:mushroom_stew");
-    public static final FluidReference BEETROOT_SOUP = FluidReference.of("minecraft:beetroot_stew");
-    public static final FluidReference RABBIT_STEW = FluidReference.of("minecraft:rabbit_stew");
-    public static final FluidReference SUS_STEW = FluidReference.of("minecraft:suspicious_stew");
-    public static final FluidReference POTION = FluidReference.of("minecraft:potion");
-    public static final FluidReference DRAGON_BREATH = FluidReference.of("minecraft:dragon_breath");
-    public static final FluidReference XP = FluidReference.of("minecraft:experience");
-    public static final FluidReference SLIME = FluidReference.of("minecraft:slime");
-    public static final FluidReference GHAST_TEAR = FluidReference.of("minecraft:ghast_tear");
-    public static final FluidReference MAGMA_CREAM = FluidReference.of("minecraft:magma_cream");
-    public static final FluidReference POWDERED_SNOW = FluidReference.of("minecraft:powder_snow");
+    public static void onAdd(IForgeRegistryInternal<SoftFluid> owner, RegistryManager stage, int id,
+                             ResourceKey<SoftFluid> key, SoftFluid s, @Nullable SoftFluid oldObj) {
 
-
-    private static void register(SoftFluid s) {
-        if (ModList.get().isLoaded(s.getRegistryName().getNamespace())) {
-            for (Fluid f : s.getEquivalentFluids()) {
-                //remove non-custom equivalent forge fluids in favor of this one
-                if (INSTANCE.fluidMap.containsKey(f)) {
-                    SoftFluid old = INSTANCE.fluidMap.get(f);
-                    if (!old.isGenerated) {
-                        INSTANCE.idMap.remove(old.getRegistryName());
-                        old.getFilledContainer(Items.BUCKET).ifPresent(INSTANCE.itemMap::remove);
-                    }
-                }
-            }
-            registerUnchecked(s);
-        }
-    }
-
-    private static void registerUnchecked(SoftFluid... fluids) {
-        Arrays.stream(fluids).forEach(s -> {
-            s.getEquivalentFluids().forEach(f -> INSTANCE.fluidMap.put(f, s));
-            s.getContainerList().getPossibleFilled().forEach(i -> {
-                //dont associate water to potion bottle
-                if (i != Items.POTION || !s.getRegistryName().toString().equals("minecraft:water")) {
-                    INSTANCE.itemMap.put(i, s);
-                }
-            });
-            ResourceLocation key = s.getRegistryName();
-            if (INSTANCE.idMap.containsKey(key)) {
-                INSTANCE.idMap.put(key, SoftFluid.create(INSTANCE.idMap.get(key), s));
-            } else {
-                INSTANCE.idMap.put(key, s);
+        s.getEquivalentFluids().forEach(f -> FLUID_MAP.put(f, s));
+        s.getContainerList().getPossibleFilled().forEach(i -> {
+            //dont associate water to potion bottle
+            if (i != Items.POTION || !s.getRegistryName().toString().equals("minecraft:water")) {
+                ITEM_MAP.put(i, s);
             }
         });
+        //merge stuff
+        if (oldObj != null) {
+            owner.register(key.location(), SoftFluid.merge(oldObj, s));
+        }
     }
 
-    private static void convertAndRegisterAllForgeFluids() {
-        for (Fluid f : ForgeRegistries.FLUIDS) {
-            try {
-                if (f == null) continue;
-                if (f instanceof FlowingFluid flowingFluid && flowingFluid.getSource() != f) continue;
-                if (f instanceof ForgeFlowingFluid.Flowing || f == Fluids.EMPTY) continue;
-                //if fluid map contains fluid it means that another equivalent fluid has already been registered
-                if (INSTANCE.fluidMap.containsKey(f)) continue;
-                //is not equivalent: create new SoftFluid from forge fluid
-                if(f.getRegistryName() != null) registerUnchecked((new SoftFluid.Builder(f)).build());
-            } catch (Exception ignored) {
+    public static void onCreate(IForgeRegistryInternal<SoftFluid> owner, RegistryManager stage) {
+        ITEM_MAP.clear();
+        FLUID_MAP.clear();
+        owner.register(EMPTY.getRegistryName(), EMPTY);
+    }
+
+    public static void onClear(IForgeRegistryInternal<SoftFluid> owner, RegistryManager stage) {
+        ITEM_MAP.clear();
+        FLUID_MAP.clear();
+    }
+
+    private static void addExistingForgeFluids(IForgeRegistryInternal<SoftFluid> softFluids, RegistryManager registryManager, int i, ResourceLocation resourceLocation, SoftFluid softFluid) {
+        //only runs on the first object
+        if (i == 0) {
+            for (Fluid f : ForgeRegistries.FLUIDS) {
+                try {
+                    if (f == null) continue;
+                    if (f instanceof FlowingFluid flowingFluid && flowingFluid.getSource() != f) continue;
+                    if (f instanceof ForgeFlowingFluid.Flowing || f == Fluids.EMPTY) continue;
+                    //if fluid map contains fluid it means that another equivalent fluid has already been registered
+                    if (FLUID_MAP.containsKey(f)) continue;
+                    //is not equivalent: create new SoftFluid from forge fluid
+                    if (Utils.getID(f) != null) {
+                        SoftFluid sf = (new SoftFluid.Builder(f)).build();
+                        softFluids.register(sf.getRegistryName(), sf);
+                    }
+                } catch (Exception ignored) {
+                }
             }
         }
     }
 
-    public static void acceptClientFluids(ClientBoundSyncFluidsPacket packet) {
-        INSTANCE.idMap.clear();
-        INSTANCE.fluidMap.clear();
-        INSTANCE.itemMap.clear();
-        packet.getFluids().forEach(SoftFluidRegistry::register);
-        INSTANCE.currentReload++;
-    }
-
-
-    @Override
-    protected void apply(Map<ResourceLocation, JsonElement> jsons, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
-        this.idMap.clear();
-        this.fluidMap.clear();
-        this.itemMap.clear();
-
-        for (var j : jsons.entrySet()) {
-            Optional<SoftFluid> result = SoftFluid.CODEC.parse(JsonOps.INSTANCE, j.getValue())
-                    .resultOrPartial(e -> Moonlight.LOGGER.error("Failed to parse soft fluid JSON object for {} : {}", j.getKey(), e));
-            result.ifPresent(SoftFluidRegistry::register);
-        }
-        convertAndRegisterAllForgeFluids();
-        if (!this.initializedDispenser) {
-            this.initializedDispenser = true;
-            getRegisteredFluids().forEach(DispenserHelper::registerFluidBehavior);
-        }
-        Moonlight.LOGGER.info("Loaded {} Soft Fluids", this.idMap.size());
-        //we need to do it at the very end otherwise we might grab stuff before it gets refreshed
-        this.currentReload++;
-    }
-
-
-
-
-
 }
+

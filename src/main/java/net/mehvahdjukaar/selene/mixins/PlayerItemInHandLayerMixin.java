@@ -5,6 +5,7 @@ import net.mehvahdjukaar.selene.api.IThirdPersonSpecialItemRenderer;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -22,8 +23,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PlayerItemInHandLayer.class)
 public abstract class PlayerItemInHandLayerMixin<T extends Player, M extends EntityModel<T> & ArmedModel & HeadedModel> extends ItemInHandLayer<T, M> {
 
-    public PlayerItemInHandLayerMixin(RenderLayerParent<T, M> parent) {
-        super(parent);
+
+    public PlayerItemInHandLayerMixin(RenderLayerParent<T, M> p_234846_, ItemInHandRenderer p_234847_) {
+        super(p_234846_, p_234847_);
     }
 
     @Inject(method = "renderArmWithItem", at = @At(value = "HEAD"), cancellable = true)

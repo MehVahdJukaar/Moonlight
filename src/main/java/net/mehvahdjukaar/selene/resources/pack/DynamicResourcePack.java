@@ -6,7 +6,6 @@ import net.mehvahdjukaar.selene.resources.RPUtils;
 import net.mehvahdjukaar.selene.resources.ResType;
 import net.mehvahdjukaar.selene.resources.StaticResource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;

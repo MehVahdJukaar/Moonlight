@@ -3,6 +3,7 @@ package net.mehvahdjukaar.selene.resources.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -20,14 +21,14 @@ public class TemplateRecipeManager {
     private static final Map<ResourceLocation, Function<JsonObject, ? extends IRecipeTemplate<?>>> DESERIALIZERS = new HashMap<>();
 
     /**
-     * Registers a recipe template deserializer. Will be used to parse existing recipes and be able to create new ones
+     * Registers a recipe template deserializer. Will be used to parse existing recipes and be able to merge new ones
      *
      * @param deserializer usually IRecipeTemplate::new
      * @param serializer   recipe serializer type
      */
     public static <T extends IRecipeTemplate<?>> void registerTemplate(
             RecipeSerializer<?> serializer, Function<JsonObject, T> deserializer) {
-        registerTemplate(serializer.getRegistryName(), deserializer);
+        registerTemplate(Utils.getID(serializer), deserializer);
     }
 
     public static <T extends IRecipeTemplate<?>> void registerTemplate(

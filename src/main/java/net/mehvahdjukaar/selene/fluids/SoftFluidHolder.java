@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.selene.fluids;
 
-import net.mehvahdjukaar.selene.client.FluidParticleColors;
+import net.mehvahdjukaar.selene.client.SoftFluidClient;
 import net.mehvahdjukaar.selene.util.PotionNBTHelper;
 import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.core.BlockPos;
@@ -20,9 +20,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.client.IFluidTypeRenderProperties;
+import net.minecraftforge.client.RenderProperties;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,6 +36,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 //this sucks (fluids)
 public class SoftFluidHolder {
+
     private static final String POTION_TYPE_KEY = "Bottle";
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
@@ -44,7 +47,7 @@ public class SoftFluidHolder {
     private final int capacity;
     @Nullable
     private CompoundTag nbt = null;
-    private FluidReference fluid = FluidReference.of(SoftFluidRegistry.EMPTY);
+    private RegistryObject<SoftFluid> fluid = VanillaSoftFluids.EMPTY;
     //special tint color. Used for dynamic tint fluids like water and potions
     private int specialColor = 0;
     private boolean needsColorRefresh = true;
@@ -111,7 +114,7 @@ public class SoftFluidHolder {
         }
     }
 
-    //same syntax as create
+    //same syntax as merge
     private void addPotionTag(Item i, CompoundTag com) {
         String type = "REGULAR";
         if (i instanceof SplashPotionItem) type = "SPLASH";
@@ -167,7 +170,7 @@ public class SoftFluidHolder {
         Potion potion = PotionUtils.getPotion(filledContainerStack);
         boolean hasCustomPot = (com != null && com.contains("CustomPotionEffects"));
         if (potion == Potions.WATER && !hasCustomPot) {
-            s = SoftFluidRegistry.WATER.get();
+            s = VanillaSoftFluids.WATER.get();
         }
         //add tags to splash and lingering potions
         else if (potion != Potions.EMPTY || hasCustomPot) {
@@ -224,8 +227,8 @@ public class SoftFluidHolder {
                 if (simulate) return ItemStack.EMPTY;
                 ItemStack stack = new ItemStack(category.getFirstFilled().get());
                 //case for lingering potions
-                if (this.fluid.get() == SoftFluidRegistry.POTION.get()) {
-                    if (this.nbt != null && this.nbt.contains(POTION_TYPE_KEY) && !emptyContainer.getRegistryName().getNamespace().equals("inspirations")) {
+                if (this.fluid.get() == VanillaSoftFluids.POTION.get()) {
+                    if (this.nbt != null && this.nbt.contains(POTION_TYPE_KEY) && !Utils.getID(emptyContainer).getNamespace().equals("inspirations")) {
                         String bottle = this.nbt.getString(POTION_TYPE_KEY);
                         if (bottle.equals("SPLASH")) stack = new ItemStack(Items.SPLASH_POTION);
                         else if (bottle.equals("LINGERING")) stack = new ItemStack(Items.LINGERING_POTION);
@@ -233,7 +236,7 @@ public class SoftFluidHolder {
                 }
 
                 //converts water bottles into potions
-                if (emptyContainer == Items.GLASS_BOTTLE && fluid.get() == SoftFluidRegistry.WATER.get())
+                if (emptyContainer == Items.GLASS_BOTTLE && fluid.get() == VanillaSoftFluids.WATER.get())
                     stack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
 
                 this.applyNBTtoItemStack(stack);
@@ -485,7 +488,9 @@ public class SoftFluidHolder {
             CompoundTag newCom = new CompoundTag();
             for (String k : nbtKey) {
                 //special case to convert to IE pot fluid
-                if(k.equals(POTION_TYPE_KEY) && fluidStack.getFluid().getRegistryName().getNamespace().equals("immersiveengineering"))continue;
+                if (k.equals(POTION_TYPE_KEY) && Utils.getID(fluidStack.getFluid()).getNamespace().equals("immersiveengineering")) {
+                    continue;
+                }
                 Tag c = this.nbt.get(k);
                 if (c != null) {
                     newCom.put(k, c);
@@ -588,7 +593,7 @@ public class SoftFluidHolder {
      */
     public void shrink(int inc) {
         this.grow(-inc);
-        if (this.count == 0){
+        if (this.count == 0) {
             this.clear();
         }
     }
@@ -616,7 +621,7 @@ public class SoftFluidHolder {
     }
 
     @Nonnull
-    public FluidReference getFluid() {
+    public RegistryObject<SoftFluid> getFluid() {
         return fluid;
     }
 
@@ -633,7 +638,7 @@ public class SoftFluidHolder {
      * resets & clears the tank
      */
     public void clear() {
-        this.fluid = FluidReference.of(SoftFluidRegistry.EMPTY);
+        this.fluid = VanillaSoftFluids.EMPTY;
         this.setCount(0);
         this.nbt = null;
         this.specialColor = 0;
@@ -712,13 +717,13 @@ public class SoftFluidHolder {
 
     //called when it goes from empty to full
     public void setFluid(SoftFluid fluid, @Nullable CompoundTag nbt) {
-        this.fluid = FluidReference.of(fluid);
+        this.fluid = RegistryObject.create(fluid.getRegistryName(), SoftFluidRegistry.SOFT_FLUIDS.get());
         this.nbt = null;
-        if(nbt != null){
+        if (nbt != null) {
             this.nbt = nbt.copy();
             //even more hardcoded shit
-            if(fluid.equals(SoftFluidRegistry.POTION.get()) && !this.nbt.contains(POTION_TYPE_KEY)){
-                this.nbt.putString(POTION_TYPE_KEY,"REGULAR");
+            if (fluid.equals(VanillaSoftFluids.POTION.get()) && !this.nbt.contains(POTION_TYPE_KEY)) {
+                this.nbt.putString(POTION_TYPE_KEY, "REGULAR");
             }
         }
         this.specialColor = 0;
@@ -756,25 +761,26 @@ public class SoftFluidHolder {
         if (this.isEmpty()) return -1;
         int tintColor = this.getTintColor(world, pos);
         //if tint color is white gets averaged color
-        if (tintColor == -1) return FluidParticleColors.get(this.fluid.get());
+        if (tintColor == -1) return SoftFluidClient.get(this.fluid.get());
         return tintColor;
     }
 
     //grabs world/ fluid stack dependent tint color if fluid has associated forge fluid. overrides normal tint color
     private void refreshSpecialColor(@Nullable LevelReader world, @Nullable BlockPos pos) {
 
-        if (fluid.get() == SoftFluidRegistry.POTION.get()) {
+        if (fluid.get() == VanillaSoftFluids.POTION.get()) {
             this.specialColor = PotionNBTHelper.getColorFromNBT(this.nbt);
         } else {
             Fluid f = this.fluid.get().getForgeFluid();
             if (f != Fluids.EMPTY) {
-                FluidAttributes att = f.getAttributes();
-                //world accessor
-                int w = -1;
-                if (world != null && pos != null) w = att.getColor(world, pos);
-                //stack accessor
-                if (w == -1) w = att.getColor(this.toEquivalentForgeFluid(1));
-                if (w != -1) this.specialColor = w;
+                var prop = RenderProperties.get(f);
+                if (prop != IFluidTypeRenderProperties.DUMMY) {
+                    //world accessor
+                    int w;
+                    //stack accessor
+                    w = prop.getColorTint(this.toEquivalentForgeFluid(1));
+                    if (w != -1) this.specialColor = w;
+                }
             }
         }
 

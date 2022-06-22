@@ -1,12 +1,21 @@
 package net.mehvahdjukaar.selene.resources;
 
+import net.minecraft.client.gui.font.FontManager;
+import net.minecraft.client.gui.screens.LoadingOverlay;
+import net.minecraft.client.resources.language.ClientLanguage;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagLoader;
+import net.minecraft.world.level.storage.loot.LootTables;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -33,75 +42,39 @@ public class VanillaResourceManager implements ResourceManager, Closeable {
     }
 
     @Override
-    public boolean hasResource(ResourceLocation location) {
-        return packs.values().stream().anyMatch(p -> p.hasResource(TYPE, location));
-    }
-
-    @Override
-    public List<Resource> getResources(ResourceLocation p_10730_) throws IOException {
-        throw new IOException("Operation not supported");
-    }
-
-    @Override
-    public Collection<ResourceLocation> listResources(String p_10726_, Predicate<String> p_10727_) {
-        return Collections.emptySet();
-    }
-
-    @Override
     public Stream<PackResources> listPacks() {
         return this.packs.values().stream();
     }
 
     @Override
-    public Resource getResource(ResourceLocation location) throws IOException {
+    public Optional<Resource> getResource(ResourceLocation location) {
         for (var p : packs.values()) {
             if (p.hasResource(TYPE, location)) {
-                //code from VanillaPackResources
-                return new Resource() {
-                    @Nullable
-                    InputStream inputStream;
-
-                    public void close() throws IOException {
-                        if (this.inputStream != null) {
-                            this.inputStream.close();
-                        }
-
-                    }
-
-                    public ResourceLocation getLocation() {
-                        return location;
-                    }
-
-                    public InputStream getInputStream() {
-                        try {
-                            this.inputStream = p.getResource(TYPE, location);
-                        } catch (IOException ioexception) {
-                            throw new UncheckedIOException("Could not get client resource from vanilla pack", ioexception);
-                        }
-
-                        return this.inputStream;
-                    }
-
-                    public boolean hasMetadata() {
-                        return false;
-                    }
-
-                    @Nullable
-                    public <T> T getMetadata(MetadataSectionSerializer<T> p_143773_) {
-                        return (T) null;
-                    }
-
-                    public String getSourceName() {
-                        return location.toString();
-                    }
-                };
+                return Optional.of(new Resource(p.getName(), () -> p.getResource(TYPE, location)));
             }
         }
-        throw new FileNotFoundException(location.toString());
+        return Optional.empty();
     }
-
     @Override
     public void close(){
         this.packs.values().forEach(PackResources::close);
+    }
+
+
+    //old getResources
+    @Override
+    public List<Resource> getResourceStack(ResourceLocation p_215562_) {
+        return List.of();
+    }
+
+    @Override
+    public Map<ResourceLocation, Resource> listResources(String p_215563_, Predicate<ResourceLocation> p_215564_) {
+        return Collections.emptyMap();
+    }
+
+    //old listResources
+    @Override
+    public Map<ResourceLocation, List<Resource>> listResourceStacks(String p_215565_, Predicate<ResourceLocation> p_215566_) {
+        return Collections.emptyMap();
     }
 }

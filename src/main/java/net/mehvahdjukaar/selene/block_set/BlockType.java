@@ -6,7 +6,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -81,13 +80,13 @@ public abstract class BlockType {
     }
 
     @Nullable
-    protected <V extends IForgeRegistryEntry<V>> V findRelatedEntry(String appendedName, IForgeRegistry<V> reg) {
+    protected <V> V findRelatedEntry(String appendedName, IForgeRegistry<V> reg) {
         return findRelatedEntry(appendedName, "", reg);
     }
 
     @Nullable
-    protected <V extends IForgeRegistryEntry<V>> V findRelatedEntry(String append, String postpend, IForgeRegistry<V> reg) {
-        String post = postpend.isEmpty() ? "" : "_" + postpend;
+    protected <V> V findRelatedEntry(String append, String postPend, IForgeRegistry<V> reg) {
+        String post = postPend.isEmpty() ? "" : "_" + postPend;
         var id = this.getId();
         ResourceLocation[] targets = {
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),

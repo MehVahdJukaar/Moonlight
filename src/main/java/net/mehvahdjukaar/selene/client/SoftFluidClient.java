@@ -3,6 +3,7 @@ package net.mehvahdjukaar.selene.client;
 import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
 import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.selene.fluids.SoftFluidRegistryOld;
 import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -10,33 +11,30 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
-public class FluidParticleColors {
+public class SoftFluidClient {
+
     private static final HashMap<ResourceLocation, Integer> PARTICLE_COLORS = new HashMap<>();
+
+    public static void addTextures(TextureStitchEvent.Pre event) {
+        Set<ResourceLocation> textures = new HashSet<>();
+        for(var f : SoftFluidRegistry.getValues()){
+            textures.add(f.getStillTexture());
+            textures.add(f.getFlowingTexture());
+        }
+        textures.forEach(event::addSprite);
+    }
 
     //TODO: possibly do it for ALL fluids, not only non grayscale ones
     public static void refresh() {
         PARTICLE_COLORS.clear();
-        for (Fluid f : ForgeRegistries.FLUIDS) {
-            ResourceLocation key = Utils.getID(f);
-            if (!PARTICLE_COLORS.containsKey(key)) {
-                ResourceLocation location = f.getAttributes().getStillTexture();
-                if (location == null) continue;
-                TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
-                TextureAtlasSprite sprite = textureMap.getSprite(location);
-                int averageColor = -1;
-                try {
-                    averageColor = getColorFrom(sprite, f.getAttributes().getColor());
-                } catch (Exception e) {
-                    Moonlight.LOGGER.warn("Failed to load particle color for " + sprite.toString() + " using current resource pack. might be a broken png.mcmeta");
-                }
-                PARTICLE_COLORS.put(key, averageColor);
-            }
-        }
-        for (SoftFluid s : SoftFluidRegistry.getRegisteredFluids()) {
+        for (SoftFluid s : SoftFluidRegistry.getValues()) {
             ResourceLocation key = s.getRegistryName();
             if (!PARTICLE_COLORS.containsKey(key) && !s.isColored()) {
                 ResourceLocation location = s.getStillTexture();

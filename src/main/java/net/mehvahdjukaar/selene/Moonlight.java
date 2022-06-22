@@ -4,9 +4,11 @@ import net.mehvahdjukaar.selene.block_set.BlockSetManager;
 import net.mehvahdjukaar.selene.block_set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.selene.block_set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.selene.builtincompat.CompatWoodTypes;
+import net.mehvahdjukaar.selene.fluids.SoftFluid;
+import net.mehvahdjukaar.selene.fluids.SoftFluidRegistryOld;
+import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.selene.map.MapDecorationRegistry;
 import net.mehvahdjukaar.selene.misc.ModCriteriaTriggers;
-import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.selene.network.ClientBoundSyncFluidsPacket;
 import net.mehvahdjukaar.selene.network.ClientBoundSyncMapDecorationTypesPacket;
 import net.mehvahdjukaar.selene.network.NetworkHandler;
@@ -22,6 +24,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.NewRegistryEvent;
+import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +42,7 @@ public class Moonlight {
     public Moonlight() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         VillagerAIManager.SCHEDULES.register(bus);
+        SoftFluidRegistry.DEFERRED_REGISTER.register(bus);
         bus.addListener(Moonlight::init);
         MinecraftForge.EVENT_BUS.register(this);
         BlockSetManager.registerBlockSetDefinition(new WoodTypeRegistry());
@@ -50,8 +55,13 @@ public class Moonlight {
     }
 
     @SubscribeEvent
+    public void addDataPackRegistries(NewRegistryEvent event){
+        RegistryBuilder<SoftFluid> builder = new RegistryBuilder<>();
+    }
+
+    @SubscribeEvent
     public void addJsonListener(final AddReloadListenerEvent event) {
-        event.addListener(SoftFluidRegistry.INSTANCE);
+        event.addListener(SoftFluidRegistryOld.INSTANCE);
         event.addListener(MapDecorationRegistry.DATA_DRIVEN_REGISTRY);
     }
 
@@ -63,7 +73,7 @@ public class Moonlight {
             playerList.forEach(serverPlayer -> {
 
                 NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
-                        new ClientBoundSyncFluidsPacket(SoftFluidRegistry.getRegisteredFluids()));
+                        new ClientBoundSyncFluidsPacket(SoftFluidRegistryOld.getValues()));
                 NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
                         new ClientBoundSyncMapDecorationTypesPacket(MapDecorationRegistry.DATA_DRIVEN_REGISTRY.getTypes()));
             });
@@ -72,10 +82,9 @@ public class Moonlight {
 
     public static void init(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            ModCriteriaTriggers.init();
             NetworkHandler.registerMessages();
+            ModCriteriaTriggers.init();
             VillagerAIManager.init();
-
         });
     }
 

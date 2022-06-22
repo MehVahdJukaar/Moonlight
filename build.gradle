@@ -51,6 +51,9 @@ minecraft {
             property 'mixin.env.remapRefMap', 'true'
             arg "-mixin.config=${project.mod_id}.mixins.json".toString()
 
+            //jvmArg '-Xmx7G'
+            jvmArg '--enable-preview'
+
             workingDirectory project.file('run')
 
             // Recommendedo logging data for a userdev environment

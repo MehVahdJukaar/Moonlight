@@ -12,27 +12,24 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.IFluidTypeRenderProperties;
 import net.minecraftforge.client.RenderProperties;
-import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 
-@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
+
 /**
  * Never store an instance of this directly. Always use SoftFluidReference otherwise it will not work on reload
  */
+@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 public class SoftFluid {
-
-    public static final SoftFluid EMPTY = new SoftFluid(new SoftFluid.Builder(Fluids.EMPTY));
 
     private final ResourceLocation id;
     private final ResourceLocation stillTexture;
@@ -54,9 +51,6 @@ public class SoftFluid {
     public final boolean isGenerated;
 
     private SoftFluid(Builder builder) {
-        this.stillTexture = builder.stillTexture;
-        this.flowingTexture = builder.flowingTexture;
-        this.tintColor = builder.tintColor;
         this.tintMethod = builder.tintMethod;
         this.equivalentFluids = builder.equivalentFluids;
         this.luminosity = builder.luminosity;
@@ -65,7 +59,27 @@ public class SoftFluid {
         this.id = builder.id;
         this.translationKey = builder.translationKey;
         this.NBTFromItem = builder.NBTFromItem;
+
         this.useTexturesFrom = builder.useTexturesFrom;
+        ResourceLocation still = builder.stillTexture;
+        ResourceLocation flowing = builder.flowingTexture;
+        int tint = builder.tintColor;
+
+        if (this.useTexturesFrom != null) {
+            Fluid f = ForgeRegistries.FLUIDS.getValue(useTexturesFrom);
+            if (f != null && f != Fluids.EMPTY) {
+                var prop = RenderProperties.get(f);
+                if (prop != IFluidTypeRenderProperties.DUMMY) {
+                    var s = new FluidStack(f, 1000);
+                    still = prop.getStillTexture(s);
+                    flowing = prop.getFlowingTexture(s);
+                    tint = prop.getColorTint(s);
+                }
+            }
+        }
+        this.stillTexture = still;
+        this.flowingTexture = flowing;
+        this.tintColor = tint;
 
         //TODO: remove
         this.isGenerated = builder.custom;
@@ -259,22 +273,17 @@ public class SoftFluid {
          * @param fluid equivalent forge fluid
          */
         public Builder(Fluid fluid) {
+            this(new ResourceLocation("block/water_still"), new ResourceLocation("minecraft:block/water_flowing"),
+                    Utils.getID(fluid));
+            //these textures are later overwritten by copy textures from;
+
             FluidType type = fluid.getFluidType();
-            //TODO: make client only stuff for this
-            var prop = RenderProperties.get(fluid);
-            ResourceLocation still = prop.getStillTexture();
-            if (still == null) still = new ResourceLocation("minecraft:block/water_still");
-            this.stillTexture = still;
-            ResourceLocation flowing = prop.getFlowingTexture();
-            if (flowing == null) flowing = new ResourceLocation("minecraft:block/water_flowing");
-            this.flowingTexture = flowing;
-            //TODO: fluid colors & textures can depend on fluid stack
-            this.color(prop.getColorTint());
-            this.luminosity = type.getLightLevel();
-            String tr = type.getDescriptionId();
-            if (tr != null) this.translationKey = tr;
+
+            this.luminosity(type.getLightLevel());
             this.addEqFluid(fluid);
-            this.id = Utils.getID(fluid);
+            this.copyTexturesFrom(id);
+            String tr = type.getDescriptionId();
+            if (tr != null) this.translationKey(tr);
         }
 
         /**
@@ -364,20 +373,13 @@ public class SoftFluid {
         }
 
         /**
-         * gives this soft fluid a flowing & still texture from a forge fluid that might not be installed
+         * gives this soft fluid a flowing & still texture from a forge fluid that might not be installed. Also copies color
          *
          * @param fluidRes modded optional forge fluid from which the texture will be taken
          * @return builder
          */
         public final Builder copyTexturesFrom(ResourceLocation fluidRes) {
             this.useTexturesFrom = fluidRes;
-            if (ForgeRegistries.FLUIDS.containsKey(fluidRes)) {
-                Fluid f = ForgeRegistries.FLUIDS.getValue(fluidRes);
-                if (f != null && f != Fluids.EMPTY) {
-                    this.flowingTexture = f.getAttributes().getFlowingTexture();
-                    this.stillTexture = f.getAttributes().getStillTexture();
-                }
-            }
             return this;
         }
 
@@ -534,7 +536,6 @@ public class SoftFluid {
         }
     }
 
-
     public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             ResourceLocation.CODEC.fieldOf("id").forGetter(SoftFluid::getRegistryName),
             ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
@@ -557,6 +558,9 @@ public class SoftFluid {
                                       Optional<SoftFluid.TintMethod> tint, Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
                                       Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,
                                       Optional<ResourceLocation> textureFrom) {
+        //if not installed return dummy empty fluid
+        if(!ModList.get().isLoaded(id.getNamespace())) return SoftFluidRegistry.EMPTY;
+
         SoftFluid.Builder builder = new SoftFluid.Builder(still, flowing, id);
         translation.ifPresent(builder::translationKey);
         luminosity.ifPresent(builder::luminosity);
@@ -570,7 +574,8 @@ public class SoftFluid {
         return builder.build();
     }
 
-    protected static SoftFluid create(SoftFluid originalFluid, SoftFluid newFluid) {
+    //merge 2 fluids together. TODO: remove?
+    protected static SoftFluid merge(SoftFluid originalFluid, SoftFluid newFluid) {
         var builder = new SoftFluid.Builder(newFluid.stillTexture, newFluid.flowingTexture, originalFluid.id);
         builder.translationKey(newFluid.getTranslationKey());
         builder.luminosity(newFluid.getLuminosity());

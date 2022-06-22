@@ -2,7 +2,7 @@ package net.mehvahdjukaar.selene.network;
 
 import net.mehvahdjukaar.selene.Moonlight;
 import net.mehvahdjukaar.selene.fluids.SoftFluid;
-import net.mehvahdjukaar.selene.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.selene.fluids.SoftFluidRegistryOld;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
@@ -51,7 +51,7 @@ public class ClientBoundSyncFluidsPacket {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             if (context.getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
-                SoftFluidRegistry.acceptClientFluids(message);
+                SoftFluidRegistryOld.acceptClientFluids(message);
             }
         });
         context.setPacketHandled(true);

@@ -71,7 +71,7 @@ public class WaterTest {
     public boolean tesselate(BlockAndTintGetter tintGetter, BlockPos pos, VertexConsumer vertexConsumer, FluidState fluidState) {
         TextureAtlasSprite[] sprites = ForgeHooksClient.getFluidSprites(tintGetter, pos, fluidState);
         BlockState blockstate = tintGetter.getBlockState(pos);
-        int color = fluidState.getType().getAttributes().getColor(tintGetter, pos);
+        int color = 1;// fluidState.getType().getAttributes().getColor(tintGetter, pos);
         float alpha = (float)(color >> 24 & 255) / 255.0F;
         float red = (float)(color >> 16 & 255) / 255.0F;
         float green = (float)(color >> 8 & 255) / 255.0F;

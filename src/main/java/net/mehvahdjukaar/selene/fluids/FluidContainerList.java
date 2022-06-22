@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class FluidContainerList {
 
     /*
-    public static final Codec<FluidContainerList> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+    public static final Codec<FluidContainerList> CODEC = RecordCodecBuilder.merge((instance) -> instance.group(
             Category.CODEC.listOf().fieldOf("containers").forGetter(FluidContainerList::encodeList)
     ).apply(instance, FluidContainerList::new));
     */
@@ -99,7 +99,8 @@ public class FluidContainerList {
     public void add(Item empty, Item filled, int amount, SoundEvent fillSound, SoundEvent emptySound) {
         var c = this.emptyToFilledMap.computeIfAbsent(empty, i -> new Category(i, amount));
         c.addItem(filled);
-        c.setSounds(fillSound, emptySound);
+        c.fillSound = fillSound;
+        c.emptySound = emptySound;
     }
 
     public static class Category {
@@ -186,12 +187,6 @@ public class FluidContainerList {
 
         public Optional<Item> getFirstFilled() {
             return this.filled.stream().findFirst();
-        }
-
-        //TODO: remove
-        public void setSounds(SoundEvent fill, SoundEvent empty) {
-            this.fillSound = fill;
-            this.emptySound = empty;
         }
     }
 

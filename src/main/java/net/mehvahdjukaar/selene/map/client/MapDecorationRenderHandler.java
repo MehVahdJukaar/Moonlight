@@ -20,7 +20,7 @@ public class MapDecorationRenderHandler {
 
     //bindSimpleRenderer(MapDecorationRegistry.GENERIC_STRUCTURE_TYPE);
 
-    //TODO: create atlas for markers for all textures on an atlas for simple renderers!!
+    //TODO: merge atlas for markers for all textures on an atlas for simple renderers!!
 
     /**
      * Registers a renderer for this decoration. Use it to add fancy ones

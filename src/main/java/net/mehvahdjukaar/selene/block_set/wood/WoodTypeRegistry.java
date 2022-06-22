@@ -2,6 +2,7 @@ package net.mehvahdjukaar.selene.block_set.wood;
 
 import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
 import net.mehvahdjukaar.selene.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.selene.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -11,7 +12,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.Optional;
 
 public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
@@ -20,7 +21,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     public static WoodTypeRegistry INSTANCE;
 
-    public static Map<ResourceLocation, WoodType> getTypes(){
+    public static Collection<WoodType> getTypes() {
         return INSTANCE.getValues();
     }
 
@@ -30,7 +31,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     }
 
     public static WoodType fromNBT(String name) {
-        return INSTANCE.getValues().getOrDefault(new ResourceLocation(name), OAK_TYPE);
+        return INSTANCE.getFromNBT(name);
     }
 
     //instance stuff
@@ -48,7 +49,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     //returns if this block is the base plank block
     @Override
     public Optional<WoodType> detectTypeFromBlock(Block baseBlock) {
-        ResourceLocation baseRes = baseBlock.getRegistryName();
+        ResourceLocation baseRes = Utils.getID(baseBlock);
         String name = null;
         String path = baseRes.getPath();
         //needs to contain planks in its name
@@ -71,7 +72,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 //and have correct material
                 if (mat == Material.WOOD || mat == Material.NETHER_WOOD) {
                     //we do not allow "/" in the wood name
-                    name = name.replace("/","_");
+                    name = name.replace("/", "_");
                     ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
                     Block logBlock = findLog(id);
                     if (logBlock != null) {
@@ -109,7 +110,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     @Override
     public void addTypeTranslations(AfterLanguageLoadEvent language) {
-        getValues().forEach((r, w) -> {
+        getValues().forEach((w) -> {
             if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
         });
     }

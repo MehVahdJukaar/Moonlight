@@ -11,10 +11,8 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.NotActiveException;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -23,8 +21,12 @@ public final class SpriteUtils {
     /**
      * Shorthand method to read a NativeImage
      */
-    public static NativeImage readImage(ResourceManager manager, ResourceLocation resourceLocation) throws IOException {
-        return NativeImage.read(manager.getResource(resourceLocation).getInputStream());
+    public static NativeImage readImage(ResourceManager manager, ResourceLocation resourceLocation) throws IOException, NoSuchElementException {
+        try (var res = manager.getResource(resourceLocation).get().open()) {
+            return NativeImage.read(res);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 
     public static void forEachPixel(NativeImage image, BiConsumer<Integer, Integer> function) {
@@ -92,8 +94,8 @@ public final class SpriteUtils {
         float satMult = 1.11f;
         float brightnessMult = 0.94f;
         HSVColor newCol = new HSVColor(hsv.hue(),
-                Mth.clamp(hsv.saturation() * satMult,0,1),
-                Mth.clamp(hsv.value() * brightnessMult,0,1),
+                Mth.clamp(hsv.saturation() * satMult, 0, 1),
+                Mth.clamp(hsv.value() * brightnessMult, 0, 1),
                 hsv.alpha());
         PaletteColor newP = new PaletteColor(newCol);
         newP.occurrence = color.occurrence;
@@ -139,7 +141,6 @@ public final class SpriteUtils {
         });
 
     }
-
 
 
     @NotNull

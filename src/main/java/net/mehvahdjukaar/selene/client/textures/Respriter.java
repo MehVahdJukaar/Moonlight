@@ -84,12 +84,12 @@ public class Respriter {
 
     /**
      * Move powerful method that recolors an image using the palette provided and the animation data provided.
-     * It will create a new animation strip made of the first frame of the original image colored with the given colors
+     * It will merge a new animation strip made of the first frame of the original image colored with the given colors
      * Does not modify any of the given palettes
      */
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable AnimationMetadataSection targetAnimationData) {
         if (targetAnimationData == null) return recolor(targetPalettes);
-        //is restricted to use only first original palette since it must create a new animation following the given one
+        //is restricted to use only first original palette since it must merge a new animation following the given one
         Palette originalPalette = originalPalettes.get(0);
 
         TextureImage texture = imageToRecolor.createAnimationTemplate(targetPalettes.size(), targetAnimationData);

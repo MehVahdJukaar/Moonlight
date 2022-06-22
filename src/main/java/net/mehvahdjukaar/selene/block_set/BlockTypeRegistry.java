@@ -35,21 +35,21 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
      * @return wood type
      */
     public T getFromNBT(String name) {
-        return this.getValues().getOrDefault(new ResourceLocation(name), this.getDefaultType());
+        return this.types.getOrDefault(new ResourceLocation(name), this.getDefaultType());
     }
 
     @Nullable
     public T get(ResourceLocation res) {
-        return this.getValues().get(res);
+        return this.types.get(res);
     }
 
     public abstract T getDefaultType();
 
-    public Map<ResourceLocation, T> getValues(){
+    public Collection<T> getValues(){
         if (!frozen) {
             throw new UnsupportedOperationException("Tried to access wood types too early");
         }
-        return types;
+        return Collections.unmodifiableCollection(types.values());
     };
 
     public String typeName(){
@@ -121,7 +121,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     /**
      * Called at the right time on language reload. Use to add translations of your block type names.
-     * Useful to create more complex translation strings using RPAwareDynamicTextureProvider::addDynamicLanguage
+     * Useful to merge more complex translation strings using RPAwareDynamicTextureProvider::addDynamicLanguage
      */
     public void addTypeTranslations(AfterLanguageLoadEvent language) {
 

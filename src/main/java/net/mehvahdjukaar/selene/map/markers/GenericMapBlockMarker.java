@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 
 /**
  * utility class do not instance
- * used to create decorations for decoration types that don't have a block marker (for structure decorations for example)
+ * used to merge decorations for decoration types that don't have a block marker (for structure decorations for example)
  */
 public class GenericMapBlockMarker<T extends CustomMapDecoration> extends MapBlockMarker<T> {
 

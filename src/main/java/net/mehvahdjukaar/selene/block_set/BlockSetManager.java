@@ -128,7 +128,7 @@ public class BlockSetManager {
 
                     IForgeRegistry<Block> fr = e.getForgeRegistry();
 
-                    registrationFunction.accept(fr, getBlockSet(blockType).getValues().values());
+                    registrationFunction.accept(fr, getBlockSet(blockType).getValues());
 
                 };
                 //when this reg block event fires we only add a runnable to the queue
@@ -144,11 +144,9 @@ public class BlockSetManager {
             ItemSetRegistryCallback<T> registrationFunction, Class<T> blockType) {
 
         Pair<List<Runnable>, List<Consumer<IForgeRegistry<Item>>>> registrationQueues = getOrAddQueue();
-
         //items just get added to the queue. they will already be called with the correct event
-
         Consumer<IForgeRegistry<Item>> itemEvent = e ->
-                registrationFunction.accept(e, getBlockSet(blockType).getValues().values());
+                registrationFunction.accept(e, getBlockSet(blockType).getValues());
 
         registrationQueues.getSecond().add(itemEvent);
     }

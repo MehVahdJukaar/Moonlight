@@ -1,9 +1,8 @@
 package net.mehvahdjukaar.selene;
 
-import net.mehvahdjukaar.selene.client.FluidParticleColors;
+import net.mehvahdjukaar.selene.client.SoftFluidClient;
 import net.mehvahdjukaar.selene.client.TextureCache;
 import net.mehvahdjukaar.selene.client.texture_renderer.RenderedTexturesManager;
-import net.mehvahdjukaar.selene.fluids.FluidTextures;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -23,7 +22,7 @@ public class ClientSetup {
 
     @SubscribeEvent
     public static void onResourcePackChanged(ModelBakeEvent event) {
-        FluidParticleColors.refresh();
+        SoftFluidClient.refresh();
         TextureCache.refresh();
     }
 
@@ -31,7 +30,7 @@ public class ClientSetup {
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         if (event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
-            FluidTextures.getTexturesToStitch().forEach(event::addSprite);
+            SoftFluidClient.addTextures(event);
         }
     }
 

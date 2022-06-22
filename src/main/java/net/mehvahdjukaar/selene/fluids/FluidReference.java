@@ -9,6 +9,7 @@ import java.util.function.Supplier;
  */
 //I wish I could use vanilla holders here
 //TODO: 1.19: use vanilla registry and holders
+    @Deprecated
 public class FluidReference implements Supplier<SoftFluid> {
 
     public static FluidReference of(SoftFluid instance) {
@@ -35,12 +36,12 @@ public class FluidReference implements Supplier<SoftFluid> {
 
     @Override
     public SoftFluid get() {
-        int n = SoftFluidRegistry.INSTANCE.currentReload;
+        int n = SoftFluidRegistryOld.INSTANCE.currentReload;
         if (n == 0) return SoftFluidRegistry.EMPTY; //if registry hasn't been initialized yet
         synchronized (lock) {
             if (n != this.reloadNumber) {
-                this.reloadNumber = SoftFluidRegistry.INSTANCE.currentReload;
-                this.value = SoftFluidRegistry.get(id);
+                this.reloadNumber = SoftFluidRegistryOld.INSTANCE.currentReload;
+                this.value = SoftFluidRegistryOld.get(id);
                 if (this.value.isEmpty()) {
                     //client might call this during server reload. remeber on single player this is the only object for both "sides"
                     //we return empty so even client during reload can be fine

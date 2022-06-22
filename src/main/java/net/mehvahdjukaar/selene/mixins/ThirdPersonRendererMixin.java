@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.selene.mixins;
 
 import net.mehvahdjukaar.selene.api.IThirdPersonAnimationProvider;
-import net.mehvahdjukaar.selene.misc.TwoHandedAnimation;
+import net.mehvahdjukaar.selene.misc.AnimationState;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(HumanoidModel.class)
 public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends AgeableListModel<T> {
 
-    public TwoHandedAnimation animationType = new TwoHandedAnimation();
+    public AnimationState animationType = new AnimationState();
 
     @Inject(method = "poseRightArm", at = @At(value = "HEAD"), cancellable = true, require = 0)
     public void poseRightArm(T entity, CallbackInfo ci) {
@@ -48,7 +48,7 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
     }
 
     @Inject(method = "setupAnim*", at = @At(value = "RETURN"), require = 0)
-    public void setupAnim(T p_225597_1_, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_, CallbackInfo ci) {
+    public void setupAnim(T t, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_, CallbackInfo ci) {
         this.animationType.setTwoHanded(false);
     }
 
