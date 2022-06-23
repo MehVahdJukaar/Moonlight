@@ -146,13 +146,12 @@ dependencies {
     // implementation fg.deobf("curse.maven:kiwi-303657:3577626")
 
 
-    implementation fg.deobf("curse.maven:map-atlases-forge-519759:3723298")
+    //implementation fg.deobf("curse.maven:map-atlases-forge-519759:3723298")
 
-    implementation fg.deobf("curse.maven:configured-457570:3640884")
+    //implementation fg.deobf("curse.maven:configured-457570:3640884")
 
-    implementation fg.deobf("curse.maven:jei-238222:3682513")
-    implementation fg.deobf("curse.maven:jei-238222:3682513")
-    implementation fg.deobf("curse.maven:mmmmmmmmmmmm-225738:3843050")
+    //implementation fg.deobf("curse.maven:jei-238222:3682513")
+    //implementation fg.deobf("curse.maven:mmmmmmmmmmmm-225738:3843050")
 
 
     annotationProcessor "org.spongepowered:mixin:${project.mixin_version}:processor"

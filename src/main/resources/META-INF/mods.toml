@@ -9,11 +9,11 @@ issueTrackerURL="https://www.curseforge.com/minecraft/mc-mods/selene/issues" #op
 
 [[mods]] #mandatory
 
-    modId="selene" #mandatory
+    modId="moonlight" #mandatory
 
     version="${file.jarVersion}" #mandatory
 
-    displayName="Selene" #mandatory
+    displayName="Moonlight" #mandatory
 
     displayURL="https://www.curseforge.com/minecraft/mc-mods/selene" #optional
 
@@ -32,7 +32,7 @@ issueTrackerURL="https://www.curseforge.com/minecraft/mc-mods/selene/issues" #op
     '''
 
 
-[[dependencies.selene]] #optional
+[[dependencies.moonlight]] #optional
 
     modId="forge" #mandatory
 
@@ -44,13 +44,13 @@ issueTrackerURL="https://www.curseforge.com/minecraft/mc-mods/selene/issues" #op
 
     side="BOTH"
 
-[[dependencies.selene]]
+[[dependencies.moonlight]]
 
     modId="minecraft"
 
     mandatory=true
 
-    versionRange="[1.18,1.19)"
+    versionRange="[1.19,1.20)"
 
     ordering="NONE"
 

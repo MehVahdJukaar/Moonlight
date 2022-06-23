@@ -1,0 +1,27 @@
+
+{
+  "minVersion": "0.8",
+  "required": true,
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "moonlight.refmap.json",
+  "package": "net.mehvahdjukaar.moonlight.mixins",
+  "mixins": [
+    "CreativeModeTabMixin",
+    "GrindstoneMenuSlotMixin",
+    "MapDataMixin",
+    "MapExtendingRecipeMixin",
+    "MapItemMixin",
+    "MultiPackResourceManagerMixin",
+    "VillagerMixin"
+  ],
+  "client": [
+    "FirstPersonRendererMixin",
+    "LanguageManagerMixin",
+    "MapItemRendererMixin",
+    "PlayerItemInHandLayerMixin",
+    "ThirdPersonRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "color": "#ff33ff",
+  "containers": [
+    {
+      "filled": [
+        "minecraft:dragon_breath"
+      ],
+      "empty": "minecraft:glass_bottle",
+      "capacity": 1
+    }
+  ],
+  "flowing_texture": "moonlight:blocks/potion_flow",
+  "id": "minecraft:dragon_breath",
+  "luminosity": 3,
+  "still_texture": "moonlight:blocks/dragon_breath_liquid",
+  "translation_key": "item.minecraft.dragon_breath"
+}
