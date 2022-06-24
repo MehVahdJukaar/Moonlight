@@ -93,6 +93,11 @@ public class SoftFluid {
         this.isGenerated = builder.custom;
     }
 
+    //in case I decide to yeet ObjectReferences use this for equality
+    public boolean is(ResourceLocation id){
+        return this.id == id;
+    }
+
     @Nullable
     public ResourceLocation getTextureOverride() {
         return useTexturesFrom;

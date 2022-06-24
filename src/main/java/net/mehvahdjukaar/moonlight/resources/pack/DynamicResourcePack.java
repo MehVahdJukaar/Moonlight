@@ -261,16 +261,16 @@ public abstract class DynamicResourcePack implements PackResources {
      * @param keyword     keyword to replace
      * @param replaceWith word to replace the keyword with
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public void addSimilarJsonResource(StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException {
         addSimilarJsonResource(resource, s -> s.replace(keyword, replaceWith));
     }
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform) throws NoSuchElementException {
         addSimilarJsonResource(resource, textTransform, textTransform);
     }
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform, Function<String, String> pathTransform) throws NoSuchElementException {
         ResourceLocation fullPath = resource.location;
 

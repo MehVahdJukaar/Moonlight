@@ -67,7 +67,7 @@ public class SimpleTagBuilder extends TagBuilder {
         return this.addTag(otherBuilder.getId());
     }
 
-    public SimpleTagBuilder addEntries(Collection<Object> entries) {
+    public SimpleTagBuilder addEntries(Collection<?> entries) {
         entries.forEach(e -> this.add(Utils.getID(e)));
         return this;
     }

@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.misc;
 
-public class AnimationState {
+public class DualWeildState {
 
     private boolean twoHanded = false;
 

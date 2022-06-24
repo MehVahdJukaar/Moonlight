@@ -37,7 +37,7 @@
     "cofh_core:potion",
     "immersiveengineering:potion"
   ],
-  "flowing_texture": "moonlight:blocks/potion_flow",
+  "flowing_texture": "moonlight:soft_fluids/potion_flow",
   "food": {
     "divider": 1,
     "item": "minecraft:potion"
@@ -48,7 +48,7 @@
     "Bottle",
     "CustomPotionEffects"
   ],
-  "still_texture": "moonlight:blocks/potion_still",
+  "still_texture": "moonlight:soft_fluids/potion_still",
   "translation_key": "item.minecraft.potion",
   "use_texture_from": "create:potion"
 }

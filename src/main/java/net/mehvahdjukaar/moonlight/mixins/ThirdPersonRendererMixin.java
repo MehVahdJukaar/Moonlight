@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.mixins;
 
 import net.mehvahdjukaar.moonlight.api.IThirdPersonAnimationProvider;
-import net.mehvahdjukaar.moonlight.misc.AnimationState;
+import net.mehvahdjukaar.moonlight.misc.DualWeildState;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(HumanoidModel.class)
 public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends AgeableListModel<T> {
 
-    public AnimationState animationType = new AnimationState();
+    public DualWeildState animationType = new DualWeildState();
 
     @Inject(method = "poseRightArm", at = @At(value = "HEAD"), cancellable = true, require = 0)
     public void poseRightArm(T entity, CallbackInfo ci) {

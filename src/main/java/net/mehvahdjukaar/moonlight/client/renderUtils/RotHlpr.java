@@ -48,32 +48,4 @@ public class RotHlpr {
         return YAW2ROT.getOrDefault(rot, def);
     }
 
-    public static double wrapRad(double pValue) {
-        double p = Math.PI * 2;
-        double d0 = pValue % p;
-        if (d0 >= Math.PI) {
-            d0 -= p;
-        }
-
-        if (d0 < -Math.PI) {
-            d0 += p;
-        }
-
-        return d0;
-    }
-
-    public static float wrapRad(float pValue) {
-        float p = (float) (Math.PI * 2);
-        float d0 = pValue % p;
-        if (d0 >= Math.PI) {
-            d0 -= p;
-        }
-
-        if (d0 < -Math.PI) {
-            d0 += p;
-        }
-
-        return d0;
-    }
-
 }

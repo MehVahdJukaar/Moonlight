@@ -16,6 +16,7 @@ import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -92,7 +93,7 @@ public class Moonlight {
             });
         }
     }
-
+    
     public static void init(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             NetworkHandler.registerMessages();

@@ -40,13 +40,13 @@
     "create:milk",
     "inspirations:milk"
   ],
-  "flowing_texture": "moonlight:blocks/potion_flow",
+  "flowing_texture": "moonlight:soft_fluids/potion_flow",
   "food": {
     "divider": 3,
     "item": "minecraft:milk_bucket"
   },
   "id": "minecraft:milk",
-  "still_texture": "moonlight:blocks/milk_liquid",
+  "still_texture": "moonlight:soft_fluids/milk_liquid",
   "tint_method": "no_tint",
   "translation_key": "fluid.supplementaries.milk",
   "use_texture_from": "create:milk"

@@ -26,13 +26,13 @@
     "the_bumblezone:honey_fluid",
     "the_bumblezone:honey_fluid_still"
   ],
-  "flowing_texture": "moonlight:blocks/honey_liquid",
+  "flowing_texture": "moonlight:soft_fluids/honey_liquid",
   "food": {
     "divider": 1,
     "item": "minecraft:honey_bottle"
   },
   "id": "minecraft:honey",
-  "still_texture": "moonlight:blocks/honey_liquid",
+  "still_texture": "moonlight:soft_fluids/honey_liquid",
   "tint_method": "no_tint",
   "translation_key": "fluid.supplementaries.honey",
   "use_texture_from": "create:honey"

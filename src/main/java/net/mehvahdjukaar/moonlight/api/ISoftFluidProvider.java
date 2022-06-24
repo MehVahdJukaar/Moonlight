@@ -1,5 +1,6 @@
-package net.mehvahdjukaar.moonlight.fluids;
+package net.mehvahdjukaar.moonlight.api;
 
+import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;

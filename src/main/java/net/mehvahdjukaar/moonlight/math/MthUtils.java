@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.math;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Random;
@@ -86,6 +87,34 @@ public class MthUtils {
         return (float) (Mth.atan2(y, x) / (Math.PI * 2));
     }
 
+    public static double wrapRad(double pValue) {
+        double p = Math.PI * 2;
+        double d0 = pValue % p;
+        if (d0 >= Math.PI) {
+            d0 -= p;
+        }
+
+        if (d0 < -Math.PI) {
+            d0 += p;
+        }
+
+        return d0;
+    }
+
+    public static float wrapRad(float pValue) {
+        float p = (float) (Math.PI * 2);
+        float d0 = pValue % p;
+        if (d0 >= Math.PI) {
+            d0 -= p;
+        }
+
+        if (d0 < -Math.PI) {
+            d0 += p;
+        }
+
+        return d0;
+    }
+
     /**
      * @param rand a rng
      * @param max  maximum value. Has to be >0
@@ -96,7 +125,7 @@ public class MthUtils {
      * @return a number between 0 and max
      * The bias parameters control how much the average is skewed toward 0 or max
      */
-    public static float nextWeighted(Random rand, float max, float bias) {
+    public static float nextWeighted(RandomSource rand, float max, float bias) {
         float r = rand.nextFloat();
         if (bias <= 0) {
             if (bias == 0) return r * max;
@@ -109,11 +138,11 @@ public class MthUtils {
     /**
      * Same as above but value is included between max and min
      */
-    public static float nextWeighted(Random rand, float max, float bias, float min) {
+    public static float nextWeighted(RandomSource rand, float max, float bias, float min) {
         return nextWeighted(rand, max, bias) + min;
     }
 
-    public static float nextWeighted(Random rand, float max) {
+    public static float nextWeighted(RandomSource rand, float max) {
         return nextWeighted(rand, max, 1);
     }
 
