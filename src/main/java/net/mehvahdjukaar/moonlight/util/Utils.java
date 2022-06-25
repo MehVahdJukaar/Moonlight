@@ -1,8 +1,12 @@
 package net.mehvahdjukaar.moonlight.util;
 
+import com.google.common.annotations.Beta;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
+import io.netty.util.internal.UnstableApi;
+import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.math.MthUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
@@ -143,6 +147,10 @@ public class Utils {
         return ForgeRegistries.RECIPE_SERIALIZERS.getKey(object);
     }
 
+    public static ResourceLocation getID(SoftFluid object) {
+        return SoftFluidRegistry.getID(object);
+    }
+
     public static ResourceLocation getID(Object object) {
         if (object instanceof Block b) return getID(b);
         if (object instanceof Item b) return getID(b);
@@ -151,6 +159,7 @@ public class Utils {
         if (object instanceof Fluid b) return getID(b);
         if (object instanceof BlockEntityType b) return getID(b);
         if (object instanceof RecipeSerializer b) return getID(b);
+        if(object instanceof SoftFluid s)return getID(s);
         throw new UnsupportedOperationException("Unknown class type " + object.getClass());
     }
 
@@ -160,10 +169,6 @@ public class Utils {
             if (level != null) return level.registryAccess();
         }
         return ServerLifecycleHooks.getCurrentServer().registryAccess();
-    }
-
-    public static RegistryAccess getRegistryAccess() {
-        return hackyGetRegistryAccess();
     }
 
     /**

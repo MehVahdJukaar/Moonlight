@@ -13,12 +13,12 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.*;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class SoftFluidRegistry {
@@ -26,14 +26,14 @@ public class SoftFluidRegistry {
     private static final ResourceLocation FLUIDS_MAP_KEY = Moonlight.res("fluids_map");
     private static final ResourceLocation ITEMS_MAP_KEY = Moonlight.res("items_map");
 
-    public static final SoftFluid EMPTY = new SoftFluid.Builder(new ResourceLocation("")
-            , new ResourceLocation(""),
-            new ResourceLocation("empty")).build();
+    public static final SoftFluid EMPTY = new SoftFluid.Builder(new ResourceLocation(""),
+            new ResourceLocation("")).build();
 
     public static final ResourceKey<Registry<SoftFluid>> REGISTRY_KEY = ResourceKey.createRegistryKey(Moonlight.res("soft_fluids"));
     public static final DeferredRegister<SoftFluid> DEFERRED_REGISTER = DeferredRegister.create(REGISTRY_KEY, REGISTRY_KEY.location().getNamespace());
     public static final Supplier<IForgeRegistry<SoftFluid>> SOFT_FLUIDS = DEFERRED_REGISTER.makeRegistry(() ->
             new RegistryBuilder<SoftFluid>()
+                    .setDefaultKey(Moonlight.res("empty"))
                     .dataPackRegistry(SoftFluid.CODEC, SoftFluid.CODEC)
                     .onCreate(SoftFluidRegistry::onCreate)
                     .onClear(SoftFluidRegistry::onClear)
@@ -49,15 +49,25 @@ public class SoftFluidRegistry {
     }
 
     private static Registry<SoftFluid> getDataPackRegistry() {
-        return Utils.getRegistryAccess().registryOrThrow(REGISTRY_KEY);
+        return Utils.hackyGetRegistryAccess().registryOrThrow(REGISTRY_KEY);
     }
 
     public static Collection<SoftFluid> getValues() {
         return getDataPackRegistry().stream().toList();
     }
 
+    public static Set<Map.Entry<ResourceKey<SoftFluid>, SoftFluid>> getEntries() {
+        return getDataPackRegistry().entrySet();
+    }
+
     public static SoftFluid get(String id) {
         return get(new ResourceLocation(id));
+    }
+
+
+    @Nullable
+    public static ResourceLocation getID(SoftFluid s) {
+        return getDataPackRegistry().getKey(s);
     }
 
     /**
@@ -67,6 +77,7 @@ public class SoftFluidRegistry {
      * @return soft fluid. empty fluid if not found
      */
     public static SoftFluid get(ResourceLocation id) {
+        if(id.getNamespace().equals("selene"))id = Moonlight.res(id.getPath()); //backwards compat
         return getDataPackRegistry().get(id);
     }
 
@@ -123,14 +134,14 @@ public class SoftFluidRegistry {
                     //calling vanilla register function because calling that deferred register or forge registry now does nothing
                     //cope
                     //SOFT_FLUIDS.get().register(sf.getRegistryName(),sf);
-                    Registry.register(reg, sf.getRegistryName(), sf);
+                    Registry.register(reg, Utils.getID(f), sf);
                     fluidMap.put(f, sf);
                 }
             } catch (Exception ignored) {
             }
         }
         //adds empty fluid
-        Registry.register(reg, EMPTY.getRegistryName(),  EMPTY);
+        Registry.register(reg, Moonlight.res("empty"),  EMPTY);
         reg.freeze();
     }
 
@@ -138,15 +149,18 @@ public class SoftFluidRegistry {
         var itemMap = getItemsMap();
         var fluidsMap = getFluidsMap();
         for (var s : getValues()) {
-            s.getEquivalentFluids().forEach(f -> fluidsMap.put(f, s));
-            s.getContainerList().getPossibleFilled().forEach(i -> {
-                //don't associate water to potion bottle
-                if (i != Items.POTION || !s.getRegistryName().toString().equals("minecraft:water")) {
-                    itemMap.put(i, s);
-                }
-            });
+            if(ModList.get().isLoaded(s.getFromMod())) {
+                s.getEquivalentFluids().forEach(f -> fluidsMap.put(f, s));
+                s.getContainerList().getPossibleFilled().forEach(i -> {
+                    //don't associate water to potion bottle
+                    if (i != Items.POTION || !(getID(s).toString().equals("minecraft:water"))) {
+                        itemMap.put(i, s);
+                    }
+                });
+            }
         }
     }
+
 
     public static void postInitClient() {
         populateSlaveMaps();

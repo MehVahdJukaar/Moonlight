@@ -14,7 +14,6 @@
     "divider": 2,
     "item": "minecraft:suspicious_stew"
   },
-  "id": "minecraft:suspicious_stew",
   "preserved_tags_from_item": [
     "Effects"
   ],

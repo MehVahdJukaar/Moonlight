@@ -7,7 +7,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
@@ -62,12 +61,12 @@ public class FoodProvider {
         if (nbtApplier != null) nbtApplier.accept(stack);
 
         //food
-        FoodProperties foodProperties = this.food.getFoodProperties();
+        FoodProperties foodProperties = this.food.getFoodProperties(stack, player);
         //single items are handled by items themselves
         if (this.divider == 1) {
             this.food.finishUsingItem(stack.copy(), world, player);
             if (foodProperties == null || stack.getItem().isEdible()) {
-                player.playNotifySound(this.food.getDrinkingSound(), SoundSource.PLAYERS, 1, 1);
+                player.playSound(this.food.getDrinkingSound(), 1, 1);
             }
             //player already plays sound
             return true;
@@ -75,7 +74,7 @@ public class FoodProvider {
         if (foodProperties != null && player.canEat(false)) {
 
             player.getFoodData().eat(foodProperties.getNutrition() / this.divider, foodProperties.getSaturationModifier() / (float) this.divider);
-            player.playNotifySound(this.food.getDrinkingSound(), SoundSource.PLAYERS, 1, 1);
+            player.playSound(this.food.getDrinkingSound(), 1, 1);
             return true;
         }
         return false;
@@ -90,7 +89,7 @@ public class FoodProvider {
         @Override
         public boolean consume(Player player, Level world, @Nullable Consumer<ItemStack> nbtApplier) {
             player.giveExperiencePoints(Utils.getXPinaBottle(1, world.random));
-            player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1, 1);
+            player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1, 1);
             return true;
         }
     };
@@ -107,7 +106,7 @@ public class FoodProvider {
                     break;
                 }
             }
-            player.playNotifySound(this.food.getDrinkingSound(), SoundSource.PLAYERS, 1, 1);
+            player.playSound(this.food.getDrinkingSound(), 1, 1);
             return true;
         }
     };
@@ -137,7 +136,7 @@ public class FoodProvider {
                     }
                 }
                 player.getFoodData().eat(foodProperties.getNutrition() / this.divider, foodProperties.getSaturationModifier() / (float) this.divider);
-                player.playNotifySound(this.food.getDrinkingSound(), SoundSource.PLAYERS, 1, 1);
+                player.playSound(this.food.getDrinkingSound(), 1, 1);
                 return true;
             }
             return false;

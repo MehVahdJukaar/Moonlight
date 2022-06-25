@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.network.SyncCommonConfigsPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.config.IConfigSpec;
@@ -34,9 +35,10 @@ public class SyncedCommonConfigs extends ModConfig {
 
     private void register() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.addListener(this::onPlayerLoggedIn);
-        bus.addListener(this::onPlayerLoggedOut);
         bus.addListener(this::onConfigChange);
+        MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
+        MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
+
     }
 
 
@@ -50,6 +52,7 @@ public class SyncedCommonConfigs extends ModConfig {
     protected void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getPlayer().level.isClientSide) {
             //ServerConfigs.cached.refresh();
+            onRefresh();
         }
     }
 
@@ -57,6 +60,7 @@ public class SyncedCommonConfigs extends ModConfig {
         if (event.getConfig().getSpec() == this.getSpec()) {
             //send this configuration to connected clients
             sendSyncedConfigsToAllPlayers();
+            onRefresh();
         }
     }
 

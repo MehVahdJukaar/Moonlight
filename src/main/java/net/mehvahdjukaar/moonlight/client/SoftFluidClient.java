@@ -42,10 +42,11 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
     //TODO: possibly do it for ALL fluids, not only non grayscale ones
     public static void refresh() {
         if (Minecraft.getInstance().level == null) return;
-        var v = SoftFluidRegistry.getValues();
+        var v = SoftFluidRegistry.getEntries();
         PARTICLE_COLORS.clear();
-        for (SoftFluid s : v) {
-            ResourceLocation key = s.getRegistryName();
+        for (var entry : v) {
+            SoftFluid s = entry.getValue();
+            ResourceLocation key = entry.getKey().location();
             if (!PARTICLE_COLORS.containsKey(key) && !s.isColored()) {
                 ResourceLocation location = s.getStillTexture();
                 if (location == null) continue;
@@ -62,12 +63,8 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
         }
     }
 
-    public static int get(Fluid f) {
-        return PARTICLE_COLORS.getOrDefault(Utils.getID(f), -1);
-    }
-
     public static int get(SoftFluid s) {
-        return PARTICLE_COLORS.getOrDefault(s.getRegistryName(), -1);
+        return PARTICLE_COLORS.getOrDefault(SoftFluidRegistry.getID(s), -1);
     }
 
 

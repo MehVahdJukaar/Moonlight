@@ -36,7 +36,6 @@
     "minecraft:water"
   ],
   "flowing_texture": "minecraft:block/water_flow",
-  "id": "minecraft:water",
   "still_texture": "minecraft:block/water_still",
   "translation_key": "block.minecraft.water"
 }

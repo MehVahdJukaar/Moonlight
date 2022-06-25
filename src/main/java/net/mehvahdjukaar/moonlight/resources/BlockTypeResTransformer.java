@@ -67,11 +67,9 @@ public class BlockTypeResTransformer<T extends BlockType> {
         return setIDModifier((s, id, w) -> replaceTypeNoNamespace(s, w, id, oldTypeName));
     }
 
-
     public BlockTypeResTransformer<T> IDReplaceBlock(String blockName) {
         return setIDModifier((s, id, w) -> s.replace(blockName, id.getPath()));
     }
-
 
     /**
      * Add generic modifier

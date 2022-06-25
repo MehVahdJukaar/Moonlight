@@ -10,7 +10,6 @@
     }
   ],
   "flowing_texture": "moonlight:soft_fluids/potion_flow",
-  "id": "minecraft:ghast_tear",
   "still_texture": "moonlight:soft_fluids/milk_liquid",
   "translation_key": "item.minecraft.ghast_tear"
 }

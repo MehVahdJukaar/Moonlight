@@ -17,7 +17,6 @@
     "divider": 2,
     "item": "minecraft:rabbit_stew"
   },
-  "id": "minecraft:rabbit_stew",
   "still_texture": "moonlight:soft_fluids/soup_liquid",
   "translation_key": "item.minecraft.rabbit_stew",
   "use_texture_from": "inspirations:rabbit_stew"

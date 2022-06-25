@@ -1,5 +1,6 @@
-package net.mehvahdjukaar.moonlight.util;
+package net.mehvahdjukaar.moonlight.misc;
 
+import net.mehvahdjukaar.moonlight.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;

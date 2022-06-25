@@ -1,14 +1,8 @@
 package net.mehvahdjukaar.moonlight.fluids;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.util.Utils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -19,10 +13,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.IFluidTypeRenderProperties;
 import net.minecraftforge.client.RenderProperties;
+import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fml.ModList;
@@ -39,10 +32,11 @@ import java.util.function.Function;
 @SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 public class SoftFluid {
 
-    private final ResourceLocation id;
+
     private final ResourceLocation stillTexture;
     private final ResourceLocation flowingTexture;
 
+    private final String fromMod;
     private final String translationKey;
     private final int luminosity;
     private final int tintColor;
@@ -64,7 +58,7 @@ public class SoftFluid {
         this.luminosity = builder.luminosity;
         this.containerList = builder.containerList;
         this.food = builder.food;
-        this.id = builder.id;
+        this.fromMod = builder.fromMod;
         this.translationKey = builder.translationKey;
         this.NBTFromItem = builder.NBTFromItem;
 
@@ -93,9 +87,11 @@ public class SoftFluid {
         this.isGenerated = builder.custom;
     }
 
-    //in case I decide to yeet ObjectReferences use this for equality
-    public boolean is(ResourceLocation id){
-        return this.id == id;
+    //better to call registry directly. Here we cache the name
+    private final Lazy<ResourceLocation> cachedID = Lazy.of(()->SoftFluidRegistry.getID(this));
+    @Deprecated
+    public ResourceLocation getRegistryName(){
+        return cachedID.get();
     }
 
     @Nullable
@@ -118,13 +114,8 @@ public class SoftFluid {
         return translationKey;
     }
 
-    public ResourceLocation getRegistryName() {
-        return id;
-    }
-
-    @Override
-    public String toString() {
-        return this.getRegistryName().toString();
+    public String getFromMod() {
+        return fromMod;
     }
 
     /**
@@ -239,10 +230,10 @@ public class SoftFluid {
     //TODO: builder isn't needed anymore. maybe remove
     @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
-        private final ResourceLocation id;
         private ResourceLocation stillTexture;
         private ResourceLocation flowingTexture;
 
+        private String fromMod = "minecraft";
         private String translationKey = "fluid.selene.generic_fluid";
 
         private int luminosity = 0;
@@ -264,20 +255,10 @@ public class SoftFluid {
          *
          * @param stillTexture   still fluid texture
          * @param flowingTexture flowing fluid texture
-         * @param id             registry id
          */
-        public Builder(ResourceLocation stillTexture, ResourceLocation flowingTexture, ResourceLocation id) {
+        public Builder(ResourceLocation stillTexture, ResourceLocation flowingTexture) {
             this.stillTexture = stillTexture;
             this.flowingTexture = flowingTexture;
-            this.id = id;
-        }
-
-        public Builder(String stillTexture, String flowingTexture, String id) {
-            this(new ResourceLocation(stillTexture), new ResourceLocation(flowingTexture), new ResourceLocation(id));
-        }
-
-        public Builder(ResourceLocation stillTexture, ResourceLocation flowingTexture, String id) {
-            this(stillTexture, flowingTexture, new ResourceLocation(id));
         }
 
         /**
@@ -286,15 +267,14 @@ public class SoftFluid {
          * @param fluid equivalent forge fluid
          */
         public Builder(Fluid fluid) {
-            this(new ResourceLocation("block/water_still"), new ResourceLocation("minecraft:block/water_flowing"),
-                    Utils.getID(fluid));
+            this(new ResourceLocation("block/water_still"), new ResourceLocation("minecraft:block/water_flowing"));
             //these textures are later overwritten by copy textures from;
 
             FluidType type = fluid.getFluidType();
 
             this.luminosity(type.getLightLevel());
             this.addEqFluid(fluid);
-            this.copyTexturesFrom(id);
+            this.copyTexturesFrom(Utils.getID(fluid));
             String tr = type.getDescriptionId();
             if (tr != null) this.translationKey(tr);
         }
@@ -524,6 +504,11 @@ public class SoftFluid {
         public SoftFluid build() {
             return new SoftFluid(this);
         }
+
+        public final Builder fromMod(String s) {
+            this.fromMod = s;
+            return this;
+        }
     }
 
 
@@ -550,9 +535,9 @@ public class SoftFluid {
     }
 
     public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            ResourceLocation.CODEC.fieldOf("id").forGetter(SoftFluid::getRegistryName),
             ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
             ResourceLocation.CODEC.fieldOf("flowing_texture").forGetter(SoftFluid::getFlowingTexture),
+            Codec.STRING.optionalFieldOf("from_mod").forGetter(getHackyOptional(SoftFluid::getFromMod)),
             Codec.STRING.optionalFieldOf("translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
             Codec.INT.optionalFieldOf("luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
             Utils.HEX_CODEC.optionalFieldOf("color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
@@ -566,15 +551,14 @@ public class SoftFluid {
     ).apply(instance, SoftFluid::create));
 
 
-    protected static SoftFluid create(ResourceLocation id, ResourceLocation still, ResourceLocation flowing,
+    protected static SoftFluid create(ResourceLocation still, ResourceLocation flowing, Optional<String> fromMod,
                                       Optional<String> translation, Optional<Integer> luminosity, Optional<Integer> color,
                                       Optional<SoftFluid.TintMethod> tint, Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
                                       Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,
                                       Optional<ResourceLocation> textureFrom) {
-        //if not installed return dummy empty fluid
-        if(!ModList.get().isLoaded(id.getNamespace())) return SoftFluidRegistry.EMPTY;
 
-        SoftFluid.Builder builder = new SoftFluid.Builder(still, flowing, id);
+        SoftFluid.Builder builder = new SoftFluid.Builder(still, flowing);
+        fromMod.ifPresent(builder::fromMod);
         translation.ifPresent(builder::translationKey);
         luminosity.ifPresent(builder::luminosity);
         color.ifPresent(builder::color);
@@ -589,7 +573,7 @@ public class SoftFluid {
 
     //merge 2 fluids together. TODO: remove?
     protected static SoftFluid merge(SoftFluid originalFluid, SoftFluid newFluid) {
-        var builder = new SoftFluid.Builder(newFluid.stillTexture, newFluid.flowingTexture, originalFluid.id);
+        var builder = new SoftFluid.Builder(newFluid.stillTexture, newFluid.flowingTexture);
         builder.translationKey(newFluid.getTranslationKey());
         builder.luminosity(newFluid.getLuminosity());
         builder.color(newFluid.getTintColor());
@@ -606,7 +590,7 @@ public class SoftFluid {
         return builder.build();
     }
 
-    private static final SoftFluid DEFAULT_DUMMY = new SoftFluid(new SoftFluid.Builder(new ResourceLocation(""), new ResourceLocation(""), new ResourceLocation("")));
+    private static final SoftFluid DEFAULT_DUMMY = new SoftFluid(new SoftFluid.Builder(new ResourceLocation(""), new ResourceLocation("")));
 
     //hacky. gets an optional if the fluid value is its default one
     private static <T> Function<SoftFluid, Optional<T>> getHackyOptional(final Function<SoftFluid, T> getter) {

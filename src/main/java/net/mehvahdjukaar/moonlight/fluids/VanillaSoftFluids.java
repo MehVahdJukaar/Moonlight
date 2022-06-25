@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.fluids;
 
-import net.mehvahdjukaar.moonlight.util.ObjectReference;
+import net.mehvahdjukaar.moonlight.Moonlight;
+import net.mehvahdjukaar.moonlight.misc.ObjectReference;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -24,9 +25,9 @@ public class VanillaSoftFluids {
     public static final ObjectReference<SoftFluid> POWDERED_SNOW = create("powder_snow");
 
     private static RegistryObject<SoftFluid> get1(String name) {
-        return RegistryObject.create(new ResourceLocation("water"), SoftFluidRegistry.SOFT_FLUIDS.get());
+        return RegistryObject.create(new ResourceLocation(name), SoftFluidRegistry.SOFT_FLUIDS.get());
     }
     private static ObjectReference<SoftFluid> create(String name) {
-        return new ObjectReference<>(new ResourceLocation(name), SoftFluidRegistry.REGISTRY_KEY);
+        return new ObjectReference<>(Moonlight.res(name), SoftFluidRegistry.REGISTRY_KEY);
     }
 }

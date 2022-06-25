@@ -42,7 +42,6 @@
     "divider": 1,
     "item": "minecraft:potion"
   },
-  "id": "minecraft:potion",
   "preserved_tags_from_item": [
     "Potion",
     "Bottle",

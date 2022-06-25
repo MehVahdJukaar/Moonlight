@@ -17,7 +17,6 @@
     "divider": 2,
     "item": "minecraft:mushroom_stew"
   },
-  "id": "minecraft:mushroom_stew",
   "still_texture": "moonlight:soft_fluids/soup_liquid",
   "translation_key": "item.minecraft.mushroom_stew",
   "use_texture_from": "inspirations:mushroom_stew"

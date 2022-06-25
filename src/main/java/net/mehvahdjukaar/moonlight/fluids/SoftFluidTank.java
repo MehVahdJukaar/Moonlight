@@ -24,6 +24,7 @@ import net.minecraftforge.client.IFluidTypeRenderProperties;
 import net.minecraftforge.client.RenderProperties;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,6 +46,7 @@ public class SoftFluidTank {
     private final int capacity;
     @Nullable
     private CompoundTag nbt = null;
+    @NotNull
     private SoftFluid fluid = VanillaSoftFluids.EMPTY.get();
     //special tint color. Used for dynamic tint fluids like water and potions
     private int specialColor = 0;
@@ -709,13 +711,16 @@ public class SoftFluidTank {
      *
      * @param fluid soft fluid
      */
-    public void setFluid(SoftFluid fluid) {
+    public void setFluid(@NotNull SoftFluid fluid) {
         this.setFluid(fluid, null);
     }
 
     //called when it goes from empty to full
-    public void setFluid(SoftFluid fluid, @Nullable CompoundTag nbt) {
+    public void setFluid(@NotNull SoftFluid fluid, @Nullable CompoundTag nbt) {
         this.fluid = fluid;
+        if(fluid == null){
+            int a = 1;
+        }
         this.nbt = null;
         if (nbt != null) {
             this.nbt = nbt.copy();
@@ -816,7 +821,7 @@ public class SoftFluidTank {
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
         cmp.putInt("Count", (int) this.count);
-        cmp.putString("Fluid", this.fluid.getRegistryName().toString());
+        cmp.putString("Fluid", SoftFluidRegistry.getID(this.fluid).toString());
         //for item render. needed for potion colors
         cmp.putInt("CachedColor", this.getTintColor(null, null));
         if (this.nbt != null && !this.nbt.isEmpty()) cmp.put("NBT", this.nbt);

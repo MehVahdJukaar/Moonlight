@@ -23,7 +23,6 @@
     "minecraft:lava"
   ],
   "flowing_texture": "minecraft:block/lava_flow",
-  "id": "minecraft:lava",
   "luminosity": 15,
   "still_texture": "minecraft:block/lava_still",
   "translation_key": "block.minecraft.lava",

@@ -9,6 +9,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegisterEvent;
 import org.jetbrains.annotations.NotNull;
@@ -126,9 +127,13 @@ public class BlockSetManager {
                 //actual runnable which will registers the blocks
                 Runnable lateRegistration = () -> {
 
-                    IForgeRegistry<Block> fr = e.getForgeRegistry();
-
-                    registrationFunction.accept(fr, getBlockSet(blockType).getValues());
+                    IForgeRegistry<Block> registry = e.getForgeRegistry();
+                    if (registry instanceof ForgeRegistry fr) {
+                        boolean frozen = fr.isLocked();
+                        fr.unfreeze();
+                        registrationFunction.accept(registry, getBlockSet(blockType).getValues());
+                        if (frozen) fr.freeze();
+                    }
 
                 };
                 //when this reg block event fires we only add a runnable to the queue
