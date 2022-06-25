@@ -2,10 +2,18 @@ package net.mehvahdjukaar.moonlight.builtincompat;
 
 import net.mehvahdjukaar.moonlight.block_set.BlockSetManager;
 import net.mehvahdjukaar.moonlight.block_set.wood.WoodType;
+import net.minecraft.resources.ResourceLocation;
 
 public class CompatWoodTypes {
 
     public static void init() {
+
+        BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus"),
+                new ResourceLocation("domum_ornamentum:green_cactus_extra"),new ResourceLocation("cactus")));
+        BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus"),
+                new ResourceLocation("domum_ornamentum:cactus_extra"),new ResourceLocation("cactus")));
+        BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "darkerdepths", "petrified", "petrified_planks", "petrified_log"));
         BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "pokecube_legends", "concrete", "concrete_planks", "concrete_log"));
         BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(

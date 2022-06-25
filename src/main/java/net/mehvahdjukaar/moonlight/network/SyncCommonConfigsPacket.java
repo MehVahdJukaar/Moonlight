@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.network;
 
 import com.electronwill.nightconfig.toml.TomlFormat;
 import net.mehvahdjukaar.moonlight.Moonlight;
-import net.mehvahdjukaar.moonlight.configs.SyncedCommonConfigs;
+import net.mehvahdjukaar.moonlight.configs.SyncedModConfigs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ConfigTracker;
@@ -49,7 +49,7 @@ public class SyncCommonConfigsPacket {
             Optional<ModConfig> config = CONFIG_SETS.get(ModConfig.Type.COMMON).stream()
                     .filter(c -> c.getFileName().equals(message.fineName)).findFirst();
 
-            if (config.orElse(null) instanceof SyncedCommonConfigs cfg && cfg.getSpec() instanceof ForgeConfigSpec spec) {
+            if (config.orElse(null) instanceof SyncedModConfigs cfg && cfg.getSpec() instanceof ForgeConfigSpec spec) {
                 spec.setConfig(TomlFormat.instance().createParser().parse(new ByteArrayInputStream(message.configData)));
                 cfg.onRefresh();
                 //ServerConfigs.cached.refresh();

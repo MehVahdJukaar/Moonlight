@@ -13,21 +13,20 @@ import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class SyncedCommonConfigs extends ModConfig {
+public class SyncedModConfigs extends ModConfig {
 
-    public SyncedCommonConfigs(IConfigSpec<?> spec, ModContainer container, String fileName) {
+    public SyncedModConfigs(IConfigSpec<?> spec, ModContainer container, String fileName) {
         super(Type.COMMON, spec, container, fileName);
         this.register();
     }
 
-    public SyncedCommonConfigs(IConfigSpec<?> spec, ModContainer activeContainer) {
+    public SyncedModConfigs(IConfigSpec<?> spec, ModContainer activeContainer) {
         super(Type.COMMON, spec, activeContainer);
         this.register();
     }
@@ -45,7 +44,7 @@ public class SyncedCommonConfigs extends ModConfig {
     protected void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getPlayer() instanceof ServerPlayer serverPlayer) {
             //send this configuration to connected clients
-            syncServerConfigs(serverPlayer);
+            syncConfigs(serverPlayer);
         }
     }
 
@@ -70,21 +69,15 @@ public class SyncedCommonConfigs extends ModConfig {
         if (currentServer != null) {
             PlayerList playerList = currentServer.getPlayerList();
             for (ServerPlayer player : playerList.getPlayers()) {
-                syncServerConfigs(player);
+                syncConfigs(player);
             }
         }
     }
 
     //send configs from server -> client
-    public void syncServerConfigs(ServerPlayer player) {
+    public void syncConfigs(ServerPlayer player) {
         try {
-            var string = this.getFullPath();
-            var s2 = FMLPaths.CONFIGDIR.get().resolve(this.getFileName()).toAbsolutePath();
-            if (s2 != string) {
-                int aaa = 1;
-            }
-
-            final byte[] configData = Files.readAllBytes(string);
+            final byte[] configData = Files.readAllBytes(this.getFullPath());
             NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
                     new SyncCommonConfigsPacket(configData, this.getFileName()));
         } catch (IOException e) {
