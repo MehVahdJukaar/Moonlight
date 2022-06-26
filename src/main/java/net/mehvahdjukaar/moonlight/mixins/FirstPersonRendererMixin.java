@@ -22,8 +22,8 @@ public abstract class FirstPersonRendererMixin {
             ordinal = 1), require = 0)
     public void renderItem(AbstractClientPlayer entity, float partialTicks, float pitch, InteractionHand hand, float attackAnim, ItemStack stack, float handHeight, PoseStack matrixStack, MultiBufferSource buffer, int light, CallbackInfo ci) {
         Item item = stack.getItem();
-        if (item instanceof IFirstPersonAnimationProvider) {
-            ((IFirstPersonAnimationProvider) item).animateItemFirstPerson(entity, stack, hand, matrixStack, partialTicks, pitch, attackAnim, handHeight);
+        if (item instanceof IFirstPersonAnimationProvider provider) {
+            provider.animateItemFirstPerson(entity, stack, hand, matrixStack, partialTicks, pitch, attackAnim, handHeight);
         }
     }
 

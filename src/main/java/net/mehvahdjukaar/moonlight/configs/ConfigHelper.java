@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.configs;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
-import net.mehvahdjukaar.moonlight.Moonlight;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -45,6 +44,10 @@ public class ConfigHelper {
         replacementConfig.save();
 
         targetSpec.setConfig(replacementConfig);
+    }
+
+    public static void reloadConfigFile(ModConfig config) {
+        loadConfigFile(config.getFileName(), (ForgeConfigSpec) config.getSpec());
     }
 
 

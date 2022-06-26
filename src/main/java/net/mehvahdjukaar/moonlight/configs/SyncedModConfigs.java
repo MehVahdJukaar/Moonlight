@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.configs;
 
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.network.NetworkHandler;
-import net.mehvahdjukaar.moonlight.network.SyncCommonConfigsPacket;
+import net.mehvahdjukaar.moonlight.network.SyncModConfigsPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -79,7 +79,7 @@ public class SyncedModConfigs extends ModConfig {
         try {
             final byte[] configData = Files.readAllBytes(this.getFullPath());
             NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
-                    new SyncCommonConfigsPacket(configData, this.getFileName()));
+                    new SyncModConfigsPacket(configData, this.getFileName()));
         } catch (IOException e) {
             Moonlight.LOGGER.error("Failed to sync common configs", e);
         }
