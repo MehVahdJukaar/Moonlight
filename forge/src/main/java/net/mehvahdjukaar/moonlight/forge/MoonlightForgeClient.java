@@ -1,6 +1,5 @@
-package net.mehvahdjukaar.moonlight.platform.client.forge;
+package net.mehvahdjukaar.moonlight.forge;
 
-import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.mehvahdjukaar.moonlight.MoonlightClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
@@ -20,7 +19,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import java.util.function.Function;
 
 @Mod.EventBusSubscriber(modid = MoonlightForge.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ClientSetup {
+public class MoonlightForgeClient {
 
     @SubscribeEvent
     public static void init(final FMLClientSetupEvent event) {
@@ -46,7 +45,7 @@ public class ClientSetup {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void registerParticles(ParticleFactoryRegisterEvent event) {
-        MoonlightClient.onRegisterParticles(ClientSetup::registerParticle);
+        MoonlightClient.onRegisterParticles(MoonlightForgeClient::registerParticle);
     }
 
     private static <T extends ParticleOptions> void registerParticle(ParticleType<T> type, Function<SpriteSet,
