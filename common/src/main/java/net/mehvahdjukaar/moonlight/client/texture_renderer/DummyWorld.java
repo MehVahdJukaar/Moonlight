@@ -16,12 +16,11 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
 import org.jetbrains.annotations.Nullable;
@@ -38,8 +37,9 @@ public class DummyWorld extends Level {
     private DummyWorld() {
         super(new ClientLevel.ClientLevelData(Difficulty.NORMAL, false, false),
                 ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("dummy")),
-                RegistryAccess.BUILTIN.get().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
-                () -> InactiveProfiler.INSTANCE, true, false, 0, 0);
+                RegistryAccess.BUILTIN.get().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getOrCreateHolder(DimensionType.OVERWORLD_LOCATION),
+                () -> InactiveProfiler.INSTANCE, true, false, 0);
+
     }
 
     @Override
@@ -61,12 +61,12 @@ public class DummyWorld extends Level {
         throw new IllegalStateException("not implemented");
     }
 
-    @Override
+
     public void playSeededSound(@Nullable Player p_220363_, double p_220364_, double p_220365_, double p_220366_, SoundEvent p_220367_, SoundSource p_220368_, float p_220369_, float p_220370_, long p_220371_) {
         throw new IllegalStateException("not implemented");
     }
 
-    @Override
+
     public void playSeededSound(@Nullable Player p_220372_, Entity p_220373_, SoundEvent p_220374_, SoundSource p_220375_, float p_220376_, float p_220377_, long p_220378_) {
         throw new IllegalStateException("not implemented");
     }
@@ -131,10 +131,6 @@ public class DummyWorld extends Level {
         throw new IllegalStateException("not implemented");
     }
 
-    @Override
-    public void gameEvent(GameEvent p_220404_, Vec3 p_220405_, GameEvent.Context p_220406_) {
-
-    }
 
     @Override
     public void gameEvent(@Nullable Entity pEntity, GameEvent pEvent, BlockPos pPos) {

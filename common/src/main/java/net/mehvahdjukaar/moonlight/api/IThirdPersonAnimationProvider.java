@@ -26,9 +26,6 @@ public interface IThirdPersonAnimationProvider {
      */
      <T extends LivingEntity> boolean poseRightArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand, DualWeildState twoHanded);
 
-    default <T extends LivingEntity> boolean poseRightArmGeneric(ItemStack stack, AgeableListModel<T> model, T entity, HumanoidArm mainHand, DualWeildState twoHanded){
-        return poseRightArm(stack, (HumanoidModel)model, entity, mainHand, twoHanded);
-    }
 
     /**
      * animate left hand
@@ -40,9 +37,6 @@ public interface IThirdPersonAnimationProvider {
      */
     <T extends LivingEntity> boolean poseLeftArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand, DualWeildState twoHanded);
 
-    default <T extends LivingEntity> boolean poseLeftArmGeneric(ItemStack stack, AgeableListModel<T> model, T entity, HumanoidArm mainHand, DualWeildState twoHanded){
-        return poseLeftArm(stack, (HumanoidModel)model, entity, mainHand, twoHanded);
-    }
 
     default boolean isTwoHanded(){
         return false;

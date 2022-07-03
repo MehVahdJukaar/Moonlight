@@ -1,10 +1,10 @@
 package net.mehvahdjukaar.moonlight.block_set;
 
 import com.google.common.collect.ImmutableMap;
-import net.mehvahdjukaar.moonlight.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.client.language.IAfterLanguageLoadEvent;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -107,7 +107,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             var finders = this.getFinders();
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
-            for (Block b : ForgeRegistries.BLOCKS) {
+            for (Block b : Registry.BLOCK) {
                 this.detectTypeFromBlock(b).ifPresent(t -> {
                     if (!notInclude.contains(t.getId())) this.registerBlockType(t);
                 });
@@ -120,7 +120,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
      * Called at the right time on language reload. Use to add translations of your block type names.
      * Useful to merge more complex translation strings using RPAwareDynamicTextureProvider::addDynamicLanguage
      */
-    public void addTypeTranslations(AfterLanguageLoadEvent language) {
+    public void addTypeTranslations(IAfterLanguageLoadEvent language) {
 
     }
 

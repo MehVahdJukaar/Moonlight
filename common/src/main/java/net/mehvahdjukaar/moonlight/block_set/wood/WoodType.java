@@ -2,14 +2,14 @@ package net.mehvahdjukaar.moonlight.block_set.wood;
 
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.block_set.BlockType;
+import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.util.Utils;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,8 +51,8 @@ public class WoodType extends BlockType {
         };
         Block found = null;
         for (var r : targets) {
-            if (ForgeRegistries.BLOCKS.containsKey(r)) {
-                found = ForgeRegistries.BLOCKS.getValue(r);
+            if (Registry.BLOCK.containsKey(r)) {
+                found = Registry.BLOCK.get(r);
                 break;
             }
         }
@@ -101,20 +101,20 @@ public class WoodType extends BlockType {
     protected void initializeVanillaChildren() {
         this.addChild("planks", this.planks);
         this.addChild("log", this.log);
-        this.addChild("leaves", this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS));
+        this.addChild("leaves", this.findRelatedEntry("leaves", Registry.BLOCK));
         this.addChild("stripped_log", this.findLogRelatedBlock("stripped", "log"));
         this.addChild("stripped_wood", this.findLogRelatedBlock("stripped", "wood"));
-        this.addChild("wood", this.findRelatedEntry("wood", ForgeRegistries.BLOCKS));
-        this.addChild("slab", this.findRelatedEntry("slab", ForgeRegistries.BLOCKS));
-        this.addChild("stairs", this.findRelatedEntry("stairs", ForgeRegistries.BLOCKS));
-        this.addChild("fence", this.findRelatedEntry("fence", ForgeRegistries.BLOCKS));
-        this.addChild("fence_gate", this.findRelatedEntry("fence_gate", ForgeRegistries.BLOCKS));
-        this.addChild("door", this.findRelatedEntry("door", ForgeRegistries.BLOCKS));
-        this.addChild("trapdoor", this.findRelatedEntry("trapdoor", ForgeRegistries.BLOCKS));
-        this.addChild("button", this.findRelatedEntry("button", ForgeRegistries.BLOCKS));
-        this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS));
-        this.addChild("boat", this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
-        this.addChild("sign", this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
+        this.addChild("wood", this.findRelatedEntry("wood", Registry.BLOCK));
+        this.addChild("slab", this.findRelatedEntry("slab", Registry.BLOCK));
+        this.addChild("stairs", this.findRelatedEntry("stairs", Registry.BLOCK));
+        this.addChild("fence", this.findRelatedEntry("fence", Registry.BLOCK));
+        this.addChild("fence_gate", this.findRelatedEntry("fence_gate", Registry.BLOCK));
+        this.addChild("door", this.findRelatedEntry("door", Registry.BLOCK));
+        this.addChild("trapdoor", this.findRelatedEntry("trapdoor", Registry.BLOCK));
+        this.addChild("button", this.findRelatedEntry("button", Registry.BLOCK));
+        this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", Registry.BLOCK));
+        this.addChild("boat", this.findRelatedEntry("boat", Registry.ITEM));
+        this.addChild("sign", this.findRelatedEntry("sign", Registry.ITEM));
     }
 
     public static class Finder extends SetFinder<WoodType> {
@@ -136,8 +136,8 @@ public class WoodType extends BlockType {
 
         public static Finder simple(ResourceLocation woodTypeName, ResourceLocation planksName, ResourceLocation logName) {
             return new Finder(woodTypeName,
-                    () -> ForgeRegistries.BLOCKS.getValue(planksName),
-                    () -> ForgeRegistries.BLOCKS.getValue(logName));
+                    () -> Registry.BLOCK.get(planksName),
+                    () -> Registry.BLOCK.get(logName));
         }
 
         public void addChild(String childType, String childName) {
@@ -151,14 +151,14 @@ public class WoodType extends BlockType {
         @ApiStatus.Internal
         @Override
         public Optional<WoodType> get() {
-            if (ModList.get().isLoaded(id.getNamespace())) {
+            if (PlatformHelper.isModLoaded(id.getNamespace())) {
                 try {
                     Block plank = planksFinder.get();
                     Block log = logFinder.get();
-                    var d = ForgeRegistries.BLOCKS.getValue(ForgeRegistries.BLOCKS.getDefaultKey());
+                    var d = Registry.BLOCK.get(Registry.BLOCK.getDefaultKey());
                     if (plank != d && log != d && plank != null && log != null) {
                         var w = new WoodType(id, plank, log);
-                        childNames.forEach((key, value) -> w.addChild(key, ForgeRegistries.BLOCKS.getValue(value)));
+                        childNames.forEach((key, value) -> w.addChild(key, Registry.BLOCK.get(value)));
                         return Optional.of(w);
                     }
                 } catch (Exception ignored) {

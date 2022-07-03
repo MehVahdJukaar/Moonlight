@@ -32,9 +32,11 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
 
     private static final HashMap<ResourceLocation, Integer> PARTICLE_COLORS = new HashMap<>();
 
-    public static void addTextures(TextureStitchEvent.Pre event) {
+    public static List<ResourceLocation> getTexturesToStitch() {
         //fluids aren't registered here, so we can't just iterate over them
-        TEXTURES_TO_STITCH.forEach(e -> event.addSprite(new ResourceLocation(e.getNamespace(), "soft_fluids/" + e.getPath())));
+        var list = new ArrayList<ResourceLocation>();
+        TEXTURES_TO_STITCH.forEach(e -> list.add(new ResourceLocation(e.getNamespace(), "soft_fluids/" + e.getPath())));
+        return list;
     }
 
     //TODO: possibly do it for ALL fluids, not only non grayscale ones

@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.mixins.accessor.BrainAccessor;
+import net.mehvahdjukaar.moonlight.villager_ai.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.villager_ai.VillagerAIManager;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -24,7 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class VillagerBrainEvent  extends Event {
+public class VillagerBrainEvent extends Event implements IVillagerBrainEvent {
 
     private TreeMap<Integer, Activity> scheduleBuilder = null;
 

@@ -1,44 +1,25 @@
 package net.mehvahdjukaar.moonlight.block_set;
 
-import com.mojang.datafixers.util.Pair;
+import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.misc.Registrator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegisterEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.function.Consumer;
 
 public class BlockSetManager {
-
-    private static boolean hasFilledBlockSets = false;
 
     //Frick mod loading is multi-threaded, so we need to beware of concurrent access
     private static final Map<Class<? extends BlockType>, BlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new ConcurrentHashMap<>();
     private static final ConcurrentLinkedDeque<Runnable> FINDER_ADDER = new ConcurrentLinkedDeque<>();
     private static final ConcurrentLinkedDeque<Runnable> REMOVER_ADDER = new ConcurrentLinkedDeque<>();
 
-    //maps containing mod ids and block and items runnable. Block one is ready to run, items needs the bus supplied to it
-    //they will be run each mod at a time block first then items
-    private static final Map<String, Pair<
-            List<Runnable>, //block registration function
-            List<Consumer<IForgeRegistry<Item>>> //item registration function
-            >>
-            LATE_REGISTRATION_QUEUE = new ConcurrentHashMap<>();
 
     /**
      * Registers a block set definition (like wood type, leaf type etc...)
@@ -49,7 +30,7 @@ public class BlockSetManager {
      * @param <T>          IBlockType
      */
     public static <T extends BlockType> void registerBlockSetDefinition(BlockTypeRegistry<T> typeRegistry) {
-        if (hasFilledBlockSets) {
+        if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(
                     String.format("Tried to register block set definition %s after registry events", typeRegistry));
         }
@@ -64,7 +45,7 @@ public class BlockSetManager {
      * @param blockFinder Finder object that will provide the modded block type when the time is right
      */
     public static <T extends BlockType> void addBlockTypeFinder(Class<T> type, BlockType.SetFinder<T> blockFinder) {
-        if (hasFilledBlockSets) {
+        if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(
                     String.format("Tried to register block %s finder %s after registry events", type, blockFinder));
         }
@@ -81,7 +62,7 @@ public class BlockSetManager {
      * @param id id of the block that is getting erroneously added and should be removed
      */
     public static <T extends BlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
-        if (hasFilledBlockSets) {
+        if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(
                     String.format("Tried to remove block type %s for type %s after registry events", id, type));
         }
@@ -97,13 +78,8 @@ public class BlockSetManager {
     }
 
     @FunctionalInterface
-    public interface BlockSetRegistryCallback<T extends BlockType> {
-        void accept(IForgeRegistry<Block> reg, Collection<T> wood);
-    }
-
-    @FunctionalInterface
-    public interface ItemSetRegistryCallback<T extends BlockType> {
-        void accept(IForgeRegistry<Item> reg, Collection<T> wood);
+    public interface BlockTypeRegistryCallback<E, T extends BlockType> {
+        void accept(Registrator<E> reg, Collection<T> wood);
     }
 
     /**
@@ -114,91 +90,28 @@ public class BlockSetManager {
      *
      * @param registrationFunction registry function
      */
+    @ExpectPlatform
     public static <T extends BlockType> void addDynamicBlockRegistration(
-            BlockSetRegistryCallback<T> registrationFunction, Class<T> blockType) {
-
-        Consumer<RegisterEvent> eventConsumer;
-
-        Pair<List<Runnable>, List<Consumer<IForgeRegistry<Item>>>> registrationQueues = getOrAddQueue();
-
-        //if block makes a function that just adds the bus and runnable to the queue whenever reg block is fired
-        eventConsumer = e -> {
-            if (e.getRegistryKey().equals(ForgeRegistries.BLOCKS.getRegistryKey())) {
-                //actual runnable which will registers the blocks
-                Runnable lateRegistration = () -> {
-
-                    IForgeRegistry<Block> registry = e.getForgeRegistry();
-                    if (registry instanceof ForgeRegistry fr) {
-                        boolean frozen = fr.isLocked();
-                        fr.unfreeze();
-                        registrationFunction.accept(registry, getBlockSet(blockType).getValues());
-                        if (frozen) fr.freeze();
-                    }
-
-                };
-                //when this reg block event fires we only add a runnable to the queue
-                registrationQueues.getFirst().add(lateRegistration);
-            }
-        };
-        //registering block event to the bus
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.addListener(EventPriority.HIGHEST, eventConsumer);
+            BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
+        throw new AssertionError();
     }
 
+    @ExpectPlatform
     public static <T extends BlockType> void addDynamicItemRegistration(
-            ItemSetRegistryCallback<T> registrationFunction, Class<T> blockType) {
-
-        Pair<List<Runnable>, List<Consumer<IForgeRegistry<Item>>>> registrationQueues = getOrAddQueue();
-        //items just get added to the queue. they will already be called with the correct event
-        Consumer<IForgeRegistry<Item>> itemEvent = e ->
-                registrationFunction.accept(e, getBlockSet(blockType).getValues());
-
-        registrationQueues.getSecond().add(itemEvent);
+            BlockTypeRegistryCallback<Item,T> registrationFunction, Class<T> blockType) {
+        throw new AssertionError();
     }
 
-    @NotNull
-    private static Pair<List<Runnable>, List<Consumer<IForgeRegistry<Item>>>> getOrAddQueue() {
-        //this is horrible. worst shit ever
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        //get the queue corresponding to this certain mod
-        String modId = ModLoadingContext.get().getActiveContainer().getModId();
-        return LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {
-            //if absent we register its registration callback
-            bus.addListener(EventPriority.HIGHEST, BlockSetManager::registerLateBlockAndItems);
-            return Pair.of(new ArrayList<>(), new ArrayList<>());
-        });
+    @ExpectPlatform
+    protected static boolean hasFilledBlockSets() {
+        throw new AssertionError();
     }
 
 
-    //shittiest code ever lol
-    protected static void registerLateBlockAndItems(RegisterEvent event) {
-        //fires for items
-        if (!event.getRegistryKey().equals(ForgeRegistries.ITEMS.getRegistryKey())) return;
-
-        //when the first registration function is called we find all block types
-        if (!hasFilledBlockSets) {
-            initializeBlockSets();
-            hasFilledBlockSets = true;
-        }
-        //get the queue corresponding to this certain mod
-        String modId = ModLoadingContext.get().getActiveContainer().getModId();
-        var registrationQueues =
-                LATE_REGISTRATION_QUEUE.get(modId);
-        if (registrationQueues != null) {
-            IForgeRegistry<Item> fr = event.getForgeRegistry();
-            //register blocks
-            var blockQueue = registrationQueues.getFirst();
-            blockQueue.forEach(Runnable::run);
-            //registers items
-            var itemQueue = registrationQueues.getSecond();
-            itemQueue.forEach(q -> q.accept(fr));
-        }
-        //clears stuff that's been execured. not really needed but just to be safe its here
-        LATE_REGISTRATION_QUEUE.remove(modId);
-    }
-
-
-    private static void initializeBlockSets() {
+    //do NOT call
+    @ApiStatus.Internal
+    public static void initializeBlockSets() {
+        if(hasFilledBlockSets())throw new UnsupportedOperationException("block sets have already bee initialized");
         FINDER_ADDER.forEach(Runnable::run);
         FINDER_ADDER.clear();
 

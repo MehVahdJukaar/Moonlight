@@ -1,12 +1,7 @@
 package net.mehvahdjukaar.moonlight.villager_ai;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.Moonlight;
-import net.mehvahdjukaar.moonlight.mixins.accessor.BrainAccessor;
-import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -17,8 +12,6 @@ import net.minecraft.world.entity.schedule.Activity;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
 
 public interface IVillagerBrainEvent {
 
@@ -48,7 +41,6 @@ public interface IVillagerBrainEvent {
      */
     public void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends Behavior<? super Villager>>> activityPackage);
 
-
     /**
      * Adds an activity to the schedule. will override any activity that is in that specified time window
      * Note that subsequent call to this from other mods in later event execution might override your activity if the time window is the same
@@ -59,9 +51,6 @@ public interface IVillagerBrainEvent {
      * @param endTime   day time at which activity will end. can also be less than start time
      */
     public void scheduleActivity(Activity activity, int startTime, int endTime);
-
-
-    //this might be bad
 
     /**
      * Adds a sensor to the villager
@@ -79,4 +68,7 @@ public interface IVillagerBrainEvent {
      * @return if successfull
      */
     public <P extends Pair<Integer, ? extends Behavior<Villager>>> boolean addTaskToActivity(Activity activity, P task);
+
+
 }
+

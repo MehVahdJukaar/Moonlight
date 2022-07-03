@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 public class VillagerAIManagerImpl {
     @org.jetbrains.annotations.ApiStatus.Internal
     public static void onRegisterBrainGoals(Brain<Villager> brain, AbstractVillager villager) {
-        if(villager instanceof Villager v) {
+        if (villager instanceof Villager v) {
             var event = new VillagerBrainEvent(brain, v);
             MinecraftForge.EVENT_BUS.post(event);
             //dont waste time if it doesn't have a custom schedule
@@ -24,6 +24,6 @@ public class VillagerAIManagerImpl {
     }
 
     public static void addListener(Consumer<IVillagerBrainEvent> eventConsumer) {
-        MinecraftForge.EVENT_BUS.addListener(e-> eventConsumer.accept((IVillagerBrainEvent) e));
+        MinecraftForge.EVENT_BUS.addListener(e -> eventConsumer.accept((VillagerBrainEvent) e));
     }
 }

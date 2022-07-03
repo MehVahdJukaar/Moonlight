@@ -21,7 +21,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -247,14 +246,15 @@ Camera camera = gameRenderer.getMainCamera();
         //RenderSystem.clear(256, Minecraft.ON_OSX);
         Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
         Matrix4f matrix4f = Matrix4f.orthographic(0.0F,
-                size, 0, size, 1000.0F, ForgeHooksClient.getGuiFarPlane());
+                size, 0, size, 1000.0F, 3000); //ForgeHooksClient.getGuiFarPlane()
         RenderSystem.setProjectionMatrix(matrix4f);
 
         //model view stuff
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
         posestack.setIdentity();
-        posestack.translate(0.0D, 0.0D, 1000F - ForgeHooksClient.getGuiFarPlane());
+
+        posestack.translate(0.0D, 0.0D, 1000F - 3000); //ForgeHooksClient.getGuiFarPlane()
         //apply new model view transformation
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();

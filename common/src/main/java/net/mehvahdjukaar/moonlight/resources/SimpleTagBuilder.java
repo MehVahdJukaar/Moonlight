@@ -39,11 +39,13 @@ public class SimpleTagBuilder extends TagBuilder {
         return this;
     }
 
+    @Override
     public SimpleTagBuilder replace(boolean value) {
         super.replace(value);
         return this;
     }
 
+    @Override
     public SimpleTagBuilder replace() {
         super.replace();
         return this;

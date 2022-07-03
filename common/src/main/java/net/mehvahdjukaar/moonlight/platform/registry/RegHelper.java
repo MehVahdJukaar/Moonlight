@@ -1,6 +1,9 @@
 package net.mehvahdjukaar.moonlight.platform.registry;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.impl.ModStairBlock;
+import net.mehvahdjukaar.moonlight.impl.blocks.VerticalSlabBlock;
+import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
@@ -10,17 +13,27 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class RegHelper {
@@ -158,6 +171,53 @@ public class RegHelper {
     @ExpectPlatform //fabric
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
         throw new AssertionError();
+    }
+
+
+
+    public enum VariantType {
+        BLOCK(Block::new),
+        SLAB(SlabBlock::new),
+        VERTICAL_SLAB(VerticalSlabBlock::new),
+        WALL(WallBlock::new),
+        STAIRS(ModStairBlock::new);
+        private final BiFunction<Supplier<Block>, BlockBehaviour.Properties, Block> constructor;
+
+        VariantType(BiFunction<Supplier<Block>, BlockBehaviour.Properties, Block> constructor) {
+            this.constructor = constructor;
+        }
+
+        VariantType(Function<BlockBehaviour.Properties, Block> constructor) {
+            this.constructor = (b, p) -> constructor.apply(p);
+        }
+
+        private Block create(Block parent) {
+            return this.constructor.apply(()->parent, BlockBehaviour.Properties.copy(parent));
+        }
+    }
+
+    /**
+     * Utility to register a full block set
+     * @return registry object map
+     */
+    public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
+                                                                                   Block parentBlock, boolean isHidden) {
+
+        EnumMap<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
+        for (VariantType type : VariantType.values()) {
+            String modId = baseName.getNamespace();
+            String name = baseName.getPath();
+            if (!type.equals(VariantType.BLOCK)) name += "_" + type.name().toLowerCase(Locale.ROOT);
+            Supplier<Block> block = registerBlock(new ResourceLocation(modId, name), () -> type.create(parentBlock));
+            CreativeModeTab tab = switch (type) {
+                case VERTICAL_SLAB -> !isHidden && PlatformHelper.isModLoaded("quark") ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
+                case WALL -> !isHidden ? CreativeModeTab.TAB_DECORATIONS : null;
+                default -> !isHidden ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
+            };
+            registerItem(new ResourceLocation(modId, name), () -> new BlockItem(block.get(), (new Item.Properties()).tab(tab)));
+            map.put(type, block);
+        }
+        return map;
     }
 
 }

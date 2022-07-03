@@ -9,12 +9,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Random;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.Random;
 
 //base type for simple data driven type. Basically a simple version of CustomDecorationType that can be serialized
 public class SimpleDecorationType implements IMapDecorationType<CustomMapDecoration, GenericMapBlockMarker<CustomMapDecoration>> {
@@ -85,7 +85,7 @@ public class SimpleDecorationType implements IMapDecorationType<CustomMapDecorat
     @Override
     public GenericMapBlockMarker<CustomMapDecoration> getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos) {
         if (this.target != null) {
-            if (target.test(reader.getBlockState(pos), Random.create(0))) {
+            if (target.test(reader.getBlockState(pos),new Random())) {
                 return new GenericMapBlockMarker<>(this, pos);
             }
         }

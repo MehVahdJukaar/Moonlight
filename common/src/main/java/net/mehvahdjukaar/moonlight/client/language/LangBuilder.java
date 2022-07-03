@@ -89,7 +89,7 @@ public class LangBuilder {
     }
 
 
-    public static void addDynamicEntry(AfterLanguageLoadEvent lang,
+    public static void addDynamicEntry(IAfterLanguageLoadEvent lang,
                                        String key, BlockType type, Item item) {
         String base = lang.getEntry(key);
         if (base != null) {
@@ -100,7 +100,7 @@ public class LangBuilder {
         } else Moonlight.LOGGER.error("Could not find translation line {}", key);
     }
 
-    public static void addDynamicEntry(AfterLanguageLoadEvent lang,
+    public static void addDynamicEntry(IAfterLanguageLoadEvent lang,
                                        String key, BlockType type, Block block) {
         String base = lang.getEntry(key);
         if (base != null) {
@@ -111,7 +111,7 @@ public class LangBuilder {
         }
     }
 
-    public static void addDynamicEntry(AfterLanguageLoadEvent lang,
+    public static void addDynamicEntry(IAfterLanguageLoadEvent lang,
                                        String key, BlockType type, EntityType<?> entityType) {
         String base = lang.getEntry(key);
         if (base != null) {

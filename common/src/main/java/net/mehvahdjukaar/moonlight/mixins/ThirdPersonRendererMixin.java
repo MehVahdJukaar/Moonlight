@@ -27,7 +27,7 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
         ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
         Item item = stack.getItem();
         if (item instanceof IThirdPersonAnimationProvider thirdPersonAnimationProvider) {
-            if (thirdPersonAnimationProvider.poseRightArmGeneric(stack, this, entity, handSide, this.animationType)) {
+            if (thirdPersonAnimationProvider.poseRightArm(stack, (HumanoidModel<T>)(Object) this, entity, handSide, this.animationType)) {
                 ci.cancel();
             }
         }
@@ -41,7 +41,7 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
         ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         Item item = stack.getItem();
         if (item instanceof IThirdPersonAnimationProvider thirdPersonAnimationProvider) {
-            if (thirdPersonAnimationProvider.poseLeftArmGeneric(stack, this, entity, handSide, this.animationType)) {
+            if (thirdPersonAnimationProvider.poseLeftArmGeneric(stack, (HumanoidModel<T>)(Object) this, entity, handSide, this.animationType)) {
                 ci.cancel();
             }
         }

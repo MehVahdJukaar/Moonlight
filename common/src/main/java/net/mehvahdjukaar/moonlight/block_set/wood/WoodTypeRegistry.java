@@ -1,15 +1,15 @@
 package net.mehvahdjukaar.moonlight.block_set.wood;
 
 import net.mehvahdjukaar.moonlight.block_set.BlockTypeRegistry;
-import net.mehvahdjukaar.moonlight.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.client.language.IAfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.util.Utils;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -99,8 +99,8 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         };
         Block temp = null;
         for (var r : test) {
-            if (ForgeRegistries.BLOCKS.containsKey(r)) {
-                temp = ForgeRegistries.BLOCKS.getValue(r);
+            if (Registry.BLOCK.containsKey(r)) {
+                temp = Registry.BLOCK.get(r);
                 break;
             }
         }
@@ -109,7 +109,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
 
     @Override
-    public void addTypeTranslations(AfterLanguageLoadEvent language) {
+    public void addTypeTranslations(IAfterLanguageLoadEvent language) {
         getValues().forEach((w) -> {
             if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
         });

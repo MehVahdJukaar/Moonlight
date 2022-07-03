@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.resources.ResType;
 import net.mehvahdjukaar.moonlight.resources.StaticResource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -63,13 +64,13 @@ public abstract class DynamicResourcePack implements PackResources {
 
     public DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
         this.packType = type;
-        var component = Component.literal(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources"));
+        var component = new TextComponent(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources"));
         //new TranslatableComponent("%s.%s.description", name.getNamespace(), name.getPath());
         this.packInfo = new PackMetadataSection(component, 6);
         this.resourcePackName = name;
         this.mainNamespace = name.getNamespace();
         this.namespaces.add(name.getNamespace());
-        this.title = Component.literal(LangBuilder.getReadableName(name.toString()));
+        this.title = new TextComponent(LangBuilder.getReadableName(name.toString()));
         ;//new TranslatableComponent("%s.%s.title", name.getNamespace(), name.getPath());
 
         this.position = position;

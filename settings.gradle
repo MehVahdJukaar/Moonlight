@@ -11,5 +11,5 @@ include("common")
 include("fabric")
 include("forge")
 
-rootProject.name = "moonlight-mod"
+rootProject.name = "moonlight-multi"
 

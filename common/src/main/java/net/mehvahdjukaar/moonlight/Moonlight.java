@@ -15,18 +15,22 @@ public class Moonlight {
         return new ResourceLocation(MOD_ID, name);
     }
 
-    //called either on mod creation on fabric or mod setup on forge
+    //called either on mod creation
     public static void commonInit() {
         ModMessages.registerMessages();
     }
 
+    //mod registration
+    public static void commonRegistration() {
+
+    }
+
+    //mod setup
     public static void commonSetup() {
 
     }
 
-    public static void commonRegistration() {
 
-    }
 
     //hanging roots item override (mixin for fabric override for forge)
     //RE add lightning strike growths

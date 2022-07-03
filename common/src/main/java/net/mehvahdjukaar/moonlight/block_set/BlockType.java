@@ -1,11 +1,11 @@
 package net.mehvahdjukaar.moonlight.block_set;
 
 import net.mehvahdjukaar.moonlight.client.language.LangBuilder;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -80,12 +80,12 @@ public abstract class BlockType {
     }
 
     @Nullable
-    protected <V> V findRelatedEntry(String appendedName, IForgeRegistry<V> reg) {
+    protected <V> V findRelatedEntry(String appendedName, Registry<V> reg) {
         return findRelatedEntry(appendedName, "", reg);
     }
 
     @Nullable
-    protected <V> V findRelatedEntry(String append, String postPend, IForgeRegistry<V> reg) {
+    protected <V> V findRelatedEntry(String append, String postPend, Registry<V> reg) {
         String post = postPend.isEmpty() ? "" : "_" + postPend;
         var id = this.getId();
         ResourceLocation[] targets = {
@@ -96,7 +96,7 @@ public abstract class BlockType {
         V found = null;
         for (var r : targets) {
             if (reg.containsKey(r)) {
-                found = reg.getValue(r);
+                found = reg.get(r);
                 break;
             }
         }
