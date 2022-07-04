@@ -5,9 +5,9 @@ license = "Insert License Here"
 
 
 [[mods]]
-modId = "immersive_weathering"
+modId = "moonlight"
 version = "${version}"
-displayName = "Immersive Weathering"
+displayName = "Moonlight Library"
 authors = "Me!"
 
 logoFile="icon.png" #optional
@@ -16,14 +16,14 @@ This is an example description! Tell everyone what your mod is about!
 '''
 #logoFile = ""
 
-[[dependencies.immersive_weathering]]
+[[dependencies.moonlight]]
 modId = "forge"
 mandatory = true
 versionRange = "[40,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.immersive_weathering]]
+[[dependencies.moonlight]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.18.2,)"

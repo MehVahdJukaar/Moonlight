@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight;
 
 import net.mehvahdjukaar.moonlight.network.ModMessages;
+import net.mehvahdjukaar.moonlight.platform.registry.RegHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

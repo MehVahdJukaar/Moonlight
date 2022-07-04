@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.client;
+package net.mehvahdjukaar.moonlight.client.forge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;

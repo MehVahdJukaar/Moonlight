@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -20,10 +21,10 @@ public class ConfigSpec {
 
     private final List<ConfigCategory> categories;
 
-    private final String name;
+    private final ResourceLocation name;
     private final File file;
 
-    public ConfigSpec(String name, ImmutableList<ConfigCategory> categories, String filePath) {
+    public ConfigSpec(ResourceLocation name, ImmutableList<ConfigCategory> categories, String filePath) {
         this.name = name;
         this.categories = categories;
         this.file = new File(FabricLoader.getInstance().getConfigDir().toFile(), filePath);
@@ -34,7 +35,7 @@ public class ConfigSpec {
         return categories;
     }
 
-    public String getName() {
+    public ResourceLocation getName() {
         return name;
     }
 
@@ -69,5 +70,9 @@ public class ConfigSpec {
             GSON.toJson(jo, writer);
         } catch (IOException ignored) {
         }
+    }
+
+    public String getTitleKey() {
+        return "config." + this.getName().toLanguageKey();
     }
 }

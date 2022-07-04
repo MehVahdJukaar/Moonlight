@@ -36,6 +36,8 @@ dependencies {
     // modImplementation(include("curse.maven:modmenu-308702:3850113"))
     modImplementation(include("com.terraformersmc:modmenu:${project.modmenu_version}"))
 
+
+
 }
 
 

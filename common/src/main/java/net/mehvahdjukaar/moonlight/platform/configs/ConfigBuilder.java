@@ -1,42 +1,48 @@
 package net.mehvahdjukaar.moonlight.platform.configs;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.Moonlight;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public abstract class ConfigBuilder {
 
     @ExpectPlatform
-    public static ConfigBuilder create(String name, ConfigBuilder.ConfigType type) {
+    public static ConfigBuilder create(ResourceLocation name, ConfigBuilder.ConfigType type) {
         throw new AssertionError();
     }
 
-
     private final String name;
+    private final String modId;
     protected final ConfigType type;
 
-    public ConfigBuilder(String name, ConfigType type) {
-        this.name = name;
+    public ConfigBuilder(ResourceLocation name, ConfigType type) {
+        this.name = name.getPath();
+        this.modId = name.getNamespace();
         this.type = type;
     }
 
     public enum ConfigType {
         CLIENT, COMMON;
-
-        public String getFileName(){
-            return Moonlight.MOD_ID+"-"+this.toString().toLowerCase(Locale.ROOT)+".json";
-        }
     }
 
-    public abstract void buildAndRegister();
+    protected String getFileName() {
+        return this.modId + "-" + name + ".json";
+    }
+
+    public abstract Object buildAndRegister();
+
+    public abstract Object build();
 
     public String getName() {
         return name;
+    }
+
+    public String getModId() {
+        return modId;
     }
 
     public abstract ConfigBuilder push(String category);
@@ -56,20 +62,29 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<String> define(String name, String defaultValue);
 
-    public Supplier<List<String>> define(String name, List<String> defaultValue){
-        return define(name, defaultValue, s->true);
-    };
+    public Supplier<List<String>> define(String name, List<String> defaultValue) {
+        return define(name, defaultValue, s -> true);
+    }
 
-    public abstract <T extends String>  Supplier<List<T>> define(String name, List<T> defaultValue, Predicate<T> predicate);
+    protected abstract String currentCategory();
+
+    public abstract <T extends String> Supplier<List<T>> define(String name, List<T> defaultValue, Predicate<T> predicate);
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
 
-    public static Component descriptionKey(String name) {
-        return Component.translatable("text.immersive_weathering." + name);
+    public Component description(String name) {
+        return Component.translatable(translationKey(name));
     }
 
-    public static Component tooltipKey(String name) {
-        return Component.translatable("text.immersive_weathering." + name + ".descriptionKey");
+    public Component tooltip(String name) {
+        return Component.translatable(tooltipKey(name));
+    }
+
+    public String tooltipKey(String name) {
+        return "config." + this.modId + "." + currentCategory() + "." + name+ ".description";
+    }
+    public String translationKey(String name){
+        return "config." + this.modId + "." + currentCategory() + "." + name;
     }
 }

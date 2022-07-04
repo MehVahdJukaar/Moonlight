@@ -4,17 +4,22 @@ import com.google.common.collect.ImmutableMap;
 import net.mehvahdjukaar.moonlight.platform.registry.RegHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -49,7 +54,8 @@ public class RegHelperImpl {
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
 
             DeferredRegister<T> r = (DeferredRegister<T>) DeferredRegister.create(REG_TO_FR.get(reg), modId);
-            FMLJavaModLoadingContext.get().getModEventBus().register(r);
+            var bus = FMLJavaModLoadingContext.get().getModEventBus();
+            r.register(bus);
             return r;
         });
         //forge we don't care about mod id since it's always the active container one
@@ -58,6 +64,12 @@ public class RegHelperImpl {
 
     public static Supplier<SimpleParticleType> registerParticle(ResourceLocation name) {
         return register(name, ()->new SimpleParticleType(true), Registry.PARTICLE_TYPE);
+    }
+
+    public static <C extends AbstractContainerMenu> Supplier<MenuType<C>> registerMenuType(
+            ResourceLocation name,
+            PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
+        return register(name, ()-> IForgeMenuType.create(containerFactory::apply), Registry.MENU);
     }
 
     public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {

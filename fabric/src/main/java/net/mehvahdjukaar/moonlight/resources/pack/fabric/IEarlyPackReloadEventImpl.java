@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 public class IEarlyPackReloadEventImpl {
 
-    static IEarlyPackReloadEvent create(List<PackResources> packs, CloseableResourceManager manager) {
+    public static IEarlyPackReloadEvent create(List<PackResources> packs, CloseableResourceManager manager) {
         return new EarlyPackReloadEvent(packs, manager);
     }
 }

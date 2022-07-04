@@ -77,10 +77,6 @@ public class PlatformHelperImpl {
         return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnChance();
     }
 
-    public static ConfigBuilder getConfigBuilder(String name, ConfigBuilder.ConfigType type) {
-        return new ConfigBuilderImpl(name, type);
-    }
-
     public static void addFeatureToBiome(GenerationStep.Decoration step, TagKey<Biome> tagKey, ResourceKey<PlacedFeature> feature) {
         BiomeModifications.addFeature(BiomeSelectors.tag(tagKey), step, feature);
     }

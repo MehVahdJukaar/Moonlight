@@ -2,17 +2,24 @@ package net.mehvahdjukaar.moonlight.platform.registry.fabric;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.mehvahdjukaar.moonlight.platform.registry.RegHelper;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -59,6 +66,13 @@ public class RegHelperImpl {
         return register(name, FabricParticleTypes::simple, Registry.PARTICLE_TYPE);
     }
 
+    public static <C extends AbstractContainerMenu> Supplier<MenuType<C>> registerMenuType(
+            ResourceLocation name,
+            PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
+
+        return null;
+    }
+
     public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {
         Supplier<EntityType<T>> s = () -> EntityType.Builder.of(factory, category).sized(width, height).build(name.toString());
         return register(name, s, Registry.ENTITY_TYPE);
@@ -82,6 +96,8 @@ public class RegHelperImpl {
     public static void registerCompostable(ItemLike item, float chance) {
         ComposterBlock.COMPOSTABLES.put(item, chance);
     }
+
+
 
 
 }

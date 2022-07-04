@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.platform.configs.forge;
 
 import net.mehvahdjukaar.moonlight.platform.configs.ConfigBuilder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -11,71 +12,83 @@ import java.util.function.Supplier;
 
 public class ConfigBuilderImpl extends ConfigBuilder {
 
-    public static ConfigBuilder create(String name, ConfigBuilder.ConfigType type) {
+    public static ConfigBuilder create(ResourceLocation name, ConfigBuilder.ConfigType type) {
         return new ConfigBuilderImpl(name, type);
     }
 
     private final ForgeConfigSpec.Builder builder;
 
-    public ConfigBuilderImpl(String name, ConfigType type) {
+    private String cat = null;
+
+    public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);
         this.builder = new ForgeConfigSpec.Builder();
     }
 
     @Override
-    public void buildAndRegister() {
+    protected String currentCategory() {
+        return cat;
+    }
+
+    @Override
+    public ForgeConfigSpec buildAndRegister() {
         ModConfig.Type t = this.type == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
-        ModLoadingContext.get().registerConfig(t, this.builder.build());
+        ForgeConfigSpec spec = build();
+        ModLoadingContext.get().registerConfig(t, spec);
+        return spec;
+    }
+
+    @Override
+    public ForgeConfigSpec build() {
+        return this.builder.build();
     }
 
     @Override
     public ConfigBuilderImpl push(String category) {
+        assert cat == null;
         builder.push(category);
+        cat = category;
         return this;
     }
 
     @Override
     public ConfigBuilderImpl pop() {
+        assert cat != null;
         builder.pop();
+        cat = null;
         return this;
     }
 
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
-        var value = builder.translation(tooltipKey(name).getKey()).define(name, defaultValue);
-        return value::get;
+        return builder.translation(tooltipKey(name)).define(name, defaultValue);
     }
 
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
-        var value = builder.translation(tooltipKey(name).getKey()).defineInRange(name, defaultValue, min, max);
-        return value::get;
+        return builder.translation(tooltipKey(name)).defineInRange(name, defaultValue, min, max);
     }
 
     @Override
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
-        var value = builder.translation(tooltipKey(name).getKey()).defineInRange(name, defaultValue, min, max);
-        return value::get;
+        return builder.translation(tooltipKey(name)).defineInRange(name, defaultValue, min, max);
     }
 
     @Override
     public Supplier<String> define(String name, String defaultValue) {
-        ForgeConfigSpec.ConfigValue<String> value = builder.translation(tooltipKey(name).getKey()).define(name, defaultValue);
-        return value::get;
+        return builder.translation(tooltipKey(name)).define(name, defaultValue);
     }
 
     @Override
     public <T extends String> Supplier<List<T>> define(String name, List<T> defaultValue, Predicate<T> predicate) {
-           var value = builder.translation(tooltipKey(name).getKey()).defineList(name, defaultValue,
+           var value = builder.translation(tooltipKey(name)).defineList(name, defaultValue,
                    o -> predicate.test((T) o));
             return ()-> (List<T>) value.get();
-
     }
 
 
     @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
-        var value = builder.translation(tooltipKey(name).getKey()).defineEnum(name, defaultValue);
-        return value::get;
+        return builder.translation(tooltipKey(name)).defineEnum(name, defaultValue);
     }
 }

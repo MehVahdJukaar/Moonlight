@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.platform.network.fabric;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.platform.network.Message;
 import net.mehvahdjukaar.moonlight.platform.network.ChannelHandler;
 import net.minecraft.network.FriendlyByteBuf;
@@ -41,7 +42,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
                     res, (server, player, h, buf, r) -> server.execute(() ->
                             decoder.apply(buf).handle(new Wrapper(player, direction))));
         } else {
-            FabricClientNetwork.register(res, decoder);
+            if(PlatformHelper.getEnv().isClient()) FabricClientNetwork.register(res, decoder);
         }
     }
 
