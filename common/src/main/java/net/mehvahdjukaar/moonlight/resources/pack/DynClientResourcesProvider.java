@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.resources.pack;
 
 import net.mehvahdjukaar.moonlight.client.language.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.client.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.resources.DynamicLanguageHandler;
 import net.mehvahdjukaar.moonlight.resources.ResType;
 import net.minecraft.client.Minecraft;
@@ -9,8 +10,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.util.function.Supplier;
 
@@ -31,7 +30,7 @@ public abstract class DynClientResourcesProvider extends DynResourceProvider<Dyn
     public void register() {
         super.register();
         //run data could give a null minecraft here...
-        if (!FMLLoader.getLaunchHandler().isData()) {
+        if (!PlatformHelper.isData()) {
             Minecraft mc = Minecraft.getInstance();
             ((ReloadableResourceManager) mc.getResourceManager())
                     .registerReloadListener(this);

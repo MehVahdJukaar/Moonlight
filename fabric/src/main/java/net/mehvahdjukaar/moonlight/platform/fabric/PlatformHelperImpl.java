@@ -3,14 +3,19 @@ package net.mehvahdjukaar.moonlight.platform.fabric;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.mehvahdjukaar.moonlight.Moonlight;
+import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.platform.configs.fabric.ConfigBuilderImpl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.tags.TagKey;
@@ -38,6 +43,10 @@ public class PlatformHelperImpl {
 
     public static PlatformHelper.Platform getPlatform() {
         return PlatformHelper.Platform.FABRIC;
+    }
+
+    public static boolean isData() {
+        return false;
     }
 
     public static boolean isModLoaded(String name) {
@@ -90,9 +99,19 @@ public class PlatformHelperImpl {
     }
 
     public static boolean isDev() {
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+    }
+
+    public static int getBurnTime(ItemStack stack) {
+        return FuelRegistry.INSTANCE.get(stack.getItem());
+    }
+
+    @Nullable
+    public static MinecraftServer getCurrentServer() {
+        return MoonlightFabric.currentServer;
     }
 
 

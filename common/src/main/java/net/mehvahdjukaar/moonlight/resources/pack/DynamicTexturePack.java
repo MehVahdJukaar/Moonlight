@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.resources.pack;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.client.language.LangBuilder;
 import net.mehvahdjukaar.moonlight.client.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.platform.ClientPlatformHelper;
@@ -10,9 +9,6 @@ import net.mehvahdjukaar.moonlight.resources.ResType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.forgespi.locating.IModFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,10 +25,11 @@ public class DynamicTexturePack extends DynamicResourcePack {
 
     void addPackLogo() {
         Path logoPath = ClientPlatformHelper.getModIcon(this.mainNamespace);
-        if(logoPath != null) {
+        if (logoPath != null) {
             try {
                 this.addRootResource("pack.png", Files.readAllBytes(logoPath));
-            }catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
         }
     }
 
@@ -43,7 +40,7 @@ public class DynamicTexturePack extends DynamicResourcePack {
         try (image) {
             this.addBytes(path, image.getImage().asByteArray(), ResType.TEXTURES);
             JsonObject mcmeta = image.serializeMcMeta();
-            if(mcmeta != null) this.addJson(path, mcmeta, ResType.MCMETA);
+            if (mcmeta != null) this.addJson(path, mcmeta, ResType.MCMETA);
         } catch (Exception e) {
             LOGGER.warn("Failed to add image {} to resource pack {}.", path, this.resourcePackName, e);
         }

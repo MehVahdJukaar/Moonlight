@@ -77,7 +77,7 @@ public class SyncedModConfigs extends ModConfig {
     public void syncConfigs(ServerPlayer player) {
         try {
             final byte[] configData = Files.readAllBytes(this.getFullPath());
-            ModMessages.CHANNEL.sendToPlayerClient(new SyncModConfigsPacket(configData, this.getFileName()));
+            ModMessages.CHANNEL.sendToPlayerClient(player, new SyncModConfigsPacket(configData, this.getFileName()));
         } catch (IOException e) {
             Moonlight.LOGGER.error("Failed to sync common configs", e);
         }

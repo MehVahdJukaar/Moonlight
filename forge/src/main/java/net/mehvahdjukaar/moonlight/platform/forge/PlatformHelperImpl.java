@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -26,6 +27,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -38,6 +40,11 @@ public class PlatformHelperImpl {
     public static boolean isDev() {
         return !FMLLoader.isProduction();
     }
+
+    public static boolean isData() {
+        return FMLLoader.getLaunchHandler().isData();
+    }
+
 
     public static PlatformHelper.Platform getPlatform() {
         return PlatformHelper.Platform.FORGE;
@@ -100,6 +107,15 @@ public class PlatformHelperImpl {
             }
         };
         bus.addListener(consumer);
+    }
+
+    public static int getBurnTime(ItemStack stack) {
+        return stack.getBurnTime(null);
+    }
+
+    @Nullable
+    public static MinecraftServer getCurrentServer() {
+        return ServerLifecycleHooks.getCurrentServer();
     }
 
 

@@ -24,64 +24,6 @@ public class MoonlightFabricClient implements ClientModInitializer {
         MoonlightClient.onRegisterBlockColors(ColorProviderRegistry.BLOCK::register);
         MoonlightClient.onRegisterItemColors(ColorProviderRegistry.ITEM::register);
         MoonlightClient.onRegisterParticles(MoonlightFabricClient::registerParticle);
-
-        ClientSpriteRegistryCallback.event(InventoryMenu.BLOCK_ATLAS).register(((atlasTexture, registry) -> {
-            registry.register(Moonlight.res( "particle/ember_0"));
-            registry.register(Moonlight.res( "particle/soot_0"));
-            registry.register(Moonlight.res( "particle/ember_1"));
-            registry.register(Moonlight.res( "particle/soot_1"));
-            registry.register(Moonlight.res( "particle/emberspark_0"));
-            registry.register(Moonlight.res( "particle/emberspark_1"));
-            registry.register(Moonlight.res( "particle/moss_0"));
-            registry.register(Moonlight.res( "particle/moss_1"));
-
-            registry.register(Moonlight.res( "particle/oak_leaf_0"));
-            registry.register(Moonlight.res( "particle/birch_leaf_0"));
-            registry.register(Moonlight.res( "particle/spruce_leaf_0"));
-            registry.register(Moonlight.res( "particle/jungle_leaf_0"));
-            registry.register(Moonlight.res( "particle/acacia_leaf_0"));
-            registry.register(Moonlight.res( "particle/dark_oak_leaf_0"));
-            registry.register(Moonlight.res( "particle/azalea_leaf_0"));
-            registry.register(Moonlight.res( "particle/azalea_flower_0"));
-            registry.register(Moonlight.res( "particle/oak_leaf_1"));
-            registry.register(Moonlight.res( "particle/birch_leaf_1"));
-            registry.register(Moonlight.res( "particle/spruce_leaf_1"));
-            registry.register(Moonlight.res( "particle/jungle_leaf_1"));
-            registry.register(Moonlight.res( "particle/acacia_leaf_1"));
-            registry.register(Moonlight.res( "particle/dark_oak_leaf_1"));
-            registry.register(Moonlight.res( "particle/azalea_leaf_1"));
-            registry.register(Moonlight.res( "particle/azalea_flower_1"));
-
-
-            registry.register(Moonlight.res( "particle/oak_bark_0"));
-            registry.register(Moonlight.res( "particle/birch_bark_0"));
-            registry.register(Moonlight.res( "particle/spruce_bark_0"));
-            registry.register(Moonlight.res( "particle/jungle_bark_0"));
-            registry.register(Moonlight.res( "particle/acacia_bark_0"));
-            registry.register(Moonlight.res( "particle/dark_oak_bark_0"));
-            registry.register(Moonlight.res( "particle/nether_scale_0"));
-            registry.register(Moonlight.res( "particle/oak_bark_1"));
-            registry.register(Moonlight.res( "particle/birch_bark_1"));
-            registry.register(Moonlight.res( "particle/spruce_bark_1"));
-            registry.register(Moonlight.res( "particle/jungle_bark_1"));
-            registry.register(Moonlight.res( "particle/acacia_bark_1"));
-            registry.register(Moonlight.res( "particle/dark_oak_bark_1"));
-            registry.register(Moonlight.res( "particle/nether_scale_1"));
-            registry.register(Moonlight.res( "particle/oak_bark_2"));
-            registry.register(Moonlight.res( "particle/birch_bark_2"));
-            registry.register(Moonlight.res( "particle/spruce_bark_2"));
-            registry.register(Moonlight.res( "particle/jungle_bark_2"));
-            registry.register(Moonlight.res( "particle/acacia_bark_2"));
-            registry.register(Moonlight.res( "particle/dark_oak_bark_2"));
-            registry.register(Moonlight.res( "particle/nether_scale_2"));
-
-
-            //flower crowns
-            registry.register(Moonlight.res( "particle/bee_0"));
-            registry.register(Moonlight.res( "particle/bee_1"));
-        }));
-
-
     }
 
     private static <T extends ParticleOptions> void registerParticle(ParticleType<T> type, Function<SpriteSet,

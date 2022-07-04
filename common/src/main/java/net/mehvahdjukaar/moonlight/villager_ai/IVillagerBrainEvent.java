@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.villager_ai;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.mehvahdjukaar.moonlight.platform.event.SimpleEvent;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -13,7 +14,7 @@ import net.minecraft.world.entity.schedule.Activity;
 import java.util.Map;
 import java.util.Optional;
 
-public interface IVillagerBrainEvent {
+public interface IVillagerBrainEvent extends SimpleEvent {
 
     /**
      * If possible do not access the villager brain directly. The whole porpouse of this is to makde adding activities work better
@@ -21,7 +22,7 @@ public interface IVillagerBrainEvent {
      *
      * @return villager entity
      */
-    public Villager getVillager();
+    Villager getVillager();
 
     /**
      * access the brain memories to add new ones or remove existing ones
@@ -29,7 +30,7 @@ public interface IVillagerBrainEvent {
      *
      * @return brain memories
      */
-    public Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> getMemories();
+    Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> getMemories();
 
     /**
      * add an activity to the brain.
@@ -39,7 +40,7 @@ public interface IVillagerBrainEvent {
      * @param activity        the identifier of the activity
      * @param activityPackage the play package itself that will be executed
      */
-    public void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends Behavior<? super Villager>>> activityPackage);
+    void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends Behavior<? super Villager>>> activityPackage);
 
     /**
      * Adds an activity to the schedule. will override any activity that is in that specified time window
@@ -50,14 +51,14 @@ public interface IVillagerBrainEvent {
      * @param startTime day time at which activity will start
      * @param endTime   day time at which activity will end. can also be less than start time
      */
-    public void scheduleActivity(Activity activity, int startTime, int endTime);
+    void scheduleActivity(Activity activity, int startTime, int endTime);
 
     /**
      * Adds a sensor to the villager
      *
      * @param newSensor sensor to be added
      */
-    public void addSensor(SensorType<? extends Sensor<Villager>> newSensor);
+    void addSensor(SensorType<? extends Sensor<Villager>> newSensor);
 
     /**
      * Used to add a single task to an existing activity. Useful so you can add to existing activities without overriding or having to override the entire activity.
@@ -67,7 +68,7 @@ public interface IVillagerBrainEvent {
      * @param task     task to add with its priority
      * @return if successfull
      */
-    public <P extends Pair<Integer, ? extends Behavior<Villager>>> boolean addTaskToActivity(Activity activity, P task);
+    <P extends Pair<Integer, ? extends Behavior<Villager>>> boolean addTaskToActivity(Activity activity, P task);
 
 
 }

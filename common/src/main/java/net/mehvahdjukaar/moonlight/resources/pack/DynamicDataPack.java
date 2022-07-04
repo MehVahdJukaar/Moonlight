@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.resources.pack;
 
 import com.google.gson.JsonElement;
-import net.mehvahdjukaar.moonlight.misc.BlockLootTableAccessor;
+import net.mehvahdjukaar.moonlight.mixins.accessor.BlockLootAccessor;
 import net.mehvahdjukaar.moonlight.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.resources.ResType;
 import net.mehvahdjukaar.moonlight.resources.SimpleTagBuilder;
@@ -51,7 +51,8 @@ public class DynamicDataPack extends DynamicResourcePack {
      */
     public void addSimpleBlockLootTable(Block block) {
         this.addJson(block.getLootTable(),
-                LootTables.serialize(BlockLootTableAccessor.dropping(block).setParamSet(LootContextParamSets.BLOCK).build()),
+                LootTables.serialize(BlockLootAccessor.invokeCreateSingleItemTable(block)
+                        .setParamSet(LootContextParamSets.BLOCK).build()),
                 ResType.LOOT_TABLES);
     }
 

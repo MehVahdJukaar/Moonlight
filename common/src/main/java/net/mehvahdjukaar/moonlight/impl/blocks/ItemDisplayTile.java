@@ -179,11 +179,6 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        this.load(pkt.getTag());
-    }
-
-    @Override
     public int getContainerSize() {
         return stacks.size();
     }

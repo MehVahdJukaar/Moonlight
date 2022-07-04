@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.impl.blocks;
+package net.mehvahdjukaar.moonlight.impl.blocks.forge;
 
 import net.mehvahdjukaar.moonlight.api.IBlockHolder;
 import net.minecraft.core.BlockPos;

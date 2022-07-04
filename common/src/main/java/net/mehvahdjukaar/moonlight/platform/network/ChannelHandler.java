@@ -38,8 +38,5 @@ public abstract class ChannelHandler {
         PLAY_TO_SERVER, PLAY_TO_CLIENT;
     }
 
-    @ExpectPlatform
-    public void sendToPlayerClient(ServerPlayer serverPlayer, Message message){
-        throw new AssertionError();
-    }
+    public abstract void sendToPlayerClient(ServerPlayer serverPlayer, Message message);
 }

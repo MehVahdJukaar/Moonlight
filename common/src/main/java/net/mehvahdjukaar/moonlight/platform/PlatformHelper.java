@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.platform.configs.ConfigBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.tags.TagKey;
@@ -32,6 +33,12 @@ public class PlatformHelper {
     public static boolean isDev() {
         throw new AssertionError();
     }
+
+    @ExpectPlatform
+    public static boolean isData() {
+        throw new AssertionError();
+    }
+
 
     public enum Platform {
         FORGE, FABRIC;
@@ -95,6 +102,11 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
+    @Nullable
+    @ExpectPlatform
+    public static MinecraftServer getCurrentServer(){
+        throw new AssertionError();
+    }
 
     @ExpectPlatform
     public static boolean isModLoaded(String name) {
@@ -132,5 +144,10 @@ public class PlatformHelper {
     @ExpectPlatform
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static int getBurnTime(ItemStack stack) {
+        throw new AssertionError();
     }
 }

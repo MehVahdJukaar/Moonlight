@@ -11,7 +11,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +19,14 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeBuilder.Result> {
 
 
-    private final List<ICondition> conditions = new ArrayList<>();
+    private final List<Object> conditions = new ArrayList<>();
 
     public final Item result;
     public final int count;
     public final String group;
     public final List<Ingredient> ingredients;
 
-    ShapelessRecipeTemplate(ShapedRecipeTemplate shaped){
+    ShapelessRecipeTemplate(ShapedRecipeTemplate shaped) {
         this.result = shaped.result;
         this.count = shaped.count;
         this.group = shaped.group;
@@ -67,11 +66,11 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
 
         boolean atLeastOneChanged = false;
         for (var ing : this.ingredients) {
-            for(var in : ing.getItems()){
+            for (var in : ing.getItems()) {
                 Item it = in.getItem();
                 if (it != Items.BARRIER) {
                     ItemLike i = BlockType.changeItemBlockType(it, originalMat, destinationMat);
-                    if(i != null){
+                    if (i != null) {
                         atLeastOneChanged = true;
                         //converts first ingredient it finds
                         ing = Ingredient.of(i);
@@ -98,12 +97,12 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
     }
 
     @Override
-    public void addCondition(ICondition condition) {
+    public void addCondition(Object condition) {
         this.conditions.add(condition);
     }
 
     @Override
-    public List<ICondition> getConditions() {
+    public List<Object> getConditions() {
         return conditions;
     }
 }

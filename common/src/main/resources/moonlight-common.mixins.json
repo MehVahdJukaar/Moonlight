@@ -18,6 +18,12 @@
     "MapItemMixin",
     "MultiPackResourceManagerMixin",
     "VillagerMixin",
+    "accessor.BlockLootAccessor",
+    "accessor.CriteriaTriggerAccessor",
+    "accessor.DispenserBlockAccessor",
+    "accessor.DispenserBlockEntityAccessor",
+    "accessor.FallingBlockEntityAccessor",
+    "accessor.ProjectileAccessor",
     "accessor.VillagerAccessor"
   ],
   "injectors": {

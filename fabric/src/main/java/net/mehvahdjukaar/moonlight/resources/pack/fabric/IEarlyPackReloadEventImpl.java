@@ -1,15 +1,17 @@
 package net.mehvahdjukaar.moonlight.resources.pack.fabric;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.resources.pack.IEarlyPackReloadEvent;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
-import net.minecraft.server.packs.resources.ResourceManager;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-public interface IEarlyPackReloadEventImpl {
+public class IEarlyPackReloadEventImpl {
 
-    public static void postEvent(List<PackResources> packs, CloseableResourceManager manager) {
-        throw new AssertionError();
+    static IEarlyPackReloadEvent create(List<PackResources> packs, CloseableResourceManager manager) {
+        return new EarlyPackReloadEvent(packs, manager);
     }
 }

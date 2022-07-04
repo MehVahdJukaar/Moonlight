@@ -1,10 +1,8 @@
 package net.mehvahdjukaar.moonlight.resources.pack;
 
+import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.platform.event.EventHelper;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 /**
  * Class responsible to generate assets and manage your dynamic data pack (server)
@@ -23,12 +21,12 @@ public abstract class DynServerResourcesProvider extends DynResourceProvider<Dyn
     public void register() {
         super.register();
         //MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListeners);
-        MinecraftForge.EVENT_BUS.addListener(this::onEarlyReload);
+        EventHelper.addListener(this::onEarlyReload, IEarlyPackReloadEvent.class);
     }
 
     @Override
     protected PackRepository getRepository() {
-        var s = ServerLifecycleHooks.getCurrentServer();
+        var s = PlatformHelper.getCurrentServer();
         if (s != null) return s.getPackRepository();
         return null;
     }
@@ -37,8 +35,7 @@ public abstract class DynServerResourcesProvider extends DynResourceProvider<Dyn
         this.reloadResources(event.getManager());
     }
 
-    public void onAddReloadListeners(final AddReloadListenerEvent event) {
-        //event.addListener(this);
-
-    }
+    //public void onAddReloadListeners(final AddReloadListenerEvent event) {
+    //event.addListener(this);
+    // }
 }

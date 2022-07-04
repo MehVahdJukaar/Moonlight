@@ -16,5 +16,6 @@ public class ClientPlatformHelperImpl {
     }
 
     public static Path getModIcon(String modId) {
+        return null;
     }
 }

@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.moonlight.resources.recipe;
 
+import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.block_set.BlockType;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -18,8 +18,9 @@ public interface IRecipeTemplate<R extends FinishedRecipe> {
         return createSimilar(originalMat, destinationMat, unlockItem, null);
     }
 
-    void addCondition(ICondition condition);
+    //cast these to ICondition. Forge Only
+    void addCondition(Object condition);
 
-    List<ICondition> getConditions();
+    List<Object> getConditions();
 
 }

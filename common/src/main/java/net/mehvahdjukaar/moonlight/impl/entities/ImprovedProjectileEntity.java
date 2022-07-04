@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.impl.entities;
 
+import net.mehvahdjukaar.moonlight.mixins.accessor.ProjectileAccessor;
+import net.mehvahdjukaar.moonlight.platform.event.EventHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -20,7 +22,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -88,9 +89,9 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         //base tick stuff
         this.baseTick();
 
-        if (!this.hasBeenShot) {
+        if (! ((ProjectileAccessor) this).getHasBeenShot()) {
             this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner());
-            this.hasBeenShot = true;
+            ((ProjectileAccessor)this).setHasBeenShot(true);
         }
 
         //fixed vanilla arrow code. You're welcome
@@ -217,7 +218,8 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                     }
                 }
 
-                if (!portalHit && blockHitResult != null && type != HitResult.Type.MISS && !noPhysics && !ForgeEventFactory.onProjectileImpact(this, blockHitResult)) {
+                if (!portalHit && blockHitResult != null && type != HitResult.Type.MISS && !noPhysics &&
+                        !EventHelper.onProjectileImpact(this, blockHitResult)) {
                     this.onHit(blockHitResult);
                     this.hasImpulse = true; //idk what this does
                 }

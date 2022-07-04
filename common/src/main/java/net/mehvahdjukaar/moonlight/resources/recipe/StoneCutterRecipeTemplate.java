@@ -11,7 +11,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.conditions.ICondition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemRecipeBuilder.Result> {
 
-    private final List<ICondition> conditions = new ArrayList<>();
+    private final List<Object> conditions = new ArrayList<>();
 
     public final Item result;
     public final int count;
@@ -86,12 +85,12 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
 
 
     @Override
-    public List<ICondition> getConditions() {
+    public List<Object> getConditions() {
         return conditions;
     }
 
     @Override
-    public void addCondition(ICondition condition) {
+    public void addCondition(Object condition) {
         this.conditions.add(condition);
     }
 }

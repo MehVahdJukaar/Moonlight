@@ -5,6 +5,6 @@ import net.minecraft.resources.ResourceLocation;
 
 public class NetworkHelperImpl {
     public static ChannelHandler createChannel(ResourceLocation channelMame) {
-        return new FabricChannelHandler(channelMame);
+        return new ChannelHandlerImpl(channelMame);
     }
 }

@@ -6,7 +6,6 @@
   "client": [
   ],
   "mixins": [
-    "DedicatedServerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

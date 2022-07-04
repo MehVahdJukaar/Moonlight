@@ -7,7 +7,6 @@ architectury {
     forge()
 }
 
-String mod_id = project.mod_id
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
@@ -16,8 +15,8 @@ loom {
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
-        mixinConfig mod_id + "-common.mixins.json"
-        mixinConfig mod_id + ".mixins.json"
+        mixinConfig  "moonlight-common.mixins.json"
+        mixinConfig  "moonlight.mixins.json"
     }
 }
 

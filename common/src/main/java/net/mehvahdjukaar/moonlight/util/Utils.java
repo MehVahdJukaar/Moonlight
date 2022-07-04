@@ -4,10 +4,12 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import net.mehvahdjukaar.moonlight.math.MthUtils;
+import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -24,10 +26,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
@@ -126,7 +124,7 @@ public class Utils {
 
     //TODO: not sure if this is correct
     public static ResourceLocation getID(Biome object) {
-        return ForgeRegistries.BIOMES.getKey(object);
+        return BuiltinRegistries.BIOME.getKey(object);
     }
 
     public static ResourceLocation getID(Item object) {
@@ -162,11 +160,11 @@ public class Utils {
     }
 
     public static RegistryAccess hackyGetRegistryAccess() {
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (PlatformHelper.getEnv().isClient()) {
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
         }
-        return ServerLifecycleHooks.getCurrentServer().registryAccess();
+        return PlatformHelper.getCurrentServer().registryAccess();
     }
 
     /**

@@ -19,7 +19,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import javax.management.openmbean.InvalidOpenTypeException;
 import java.io.*;
@@ -176,7 +175,7 @@ public class RPUtils {
         var resource = manager.getResource(location);
         try (var stream = resource.get().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
-            return RecipeManager.fromJson(location, element, ICondition.IContext.EMPTY);
+            return RecipeManager.fromJson(location, element);
         } catch (Exception e) {
             throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));
         }

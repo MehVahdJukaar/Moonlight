@@ -8,7 +8,6 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraftforge.eventbus.api.IEventBus;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 

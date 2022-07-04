@@ -11,7 +11,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder.Result> {
 
-    private final List<ICondition> conditions = new ArrayList<>();
+    private final List<Object> conditions = new ArrayList<>();
 
     public final Item result;
     public final int count;
@@ -97,12 +96,12 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
     }
 
     @Override
-    public List<ICondition> getConditions() {
+    public List<Object> getConditions() {
         return conditions;
     }
 
     @Override
-    public void addCondition(ICondition condition) {
+    public void addCondition(Object condition) {
         this.conditions.add(condition);
     }
 

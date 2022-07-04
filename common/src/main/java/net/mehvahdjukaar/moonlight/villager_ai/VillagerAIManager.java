@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.mixins.accessor.VillagerAccessor;
+import net.mehvahdjukaar.moonlight.platform.event.EventHelper;
 import net.mehvahdjukaar.moonlight.platform.registry.RegHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.ai.Brain;
@@ -31,10 +32,11 @@ public class VillagerAIManager {
         throw new AssertionError();
     }
 
-    //on forge use SubscribeEvent annotations instead
-    @ExpectPlatform
+    /**
+     * Register an event listener for the villager brain event. On forge Use the event annotation instead
+     */
     public static void addListener(Consumer<IVillagerBrainEvent> eventConsumer){
-        throw new AssertionError();
+        EventHelper.addListener(eventConsumer, IVillagerBrainEvent.class);
     }
 
 

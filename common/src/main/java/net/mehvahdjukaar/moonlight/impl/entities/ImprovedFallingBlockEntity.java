@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.impl.entities;
 
+import net.mehvahdjukaar.moonlight.mixins.accessor.FallingBlockEntityAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -89,6 +90,6 @@ public class ImprovedFallingBlockEntity extends FallingBlockEntity {
     }
 
     public void setCancelDrop(boolean cancelDrop){
-        this.cancelDrop = cancelDrop;
+        ((FallingBlockEntityAccessor) this).setCancelDrop(cancelDrop);
     }
 }

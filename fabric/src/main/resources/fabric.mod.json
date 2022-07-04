@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "immersive_weathering",
+  "id": "moonlight",
   "version": "${version}",
-  "name": "Immersive Weathering",
+  "name": "Moonlight Library",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
     "Me!"
@@ -30,6 +30,6 @@
   ],
   "depends": {
     "fabric": "*",
-    "minecraft": ">=1.18.2"
+    "minecraft": ">=1.19"
   }
 }

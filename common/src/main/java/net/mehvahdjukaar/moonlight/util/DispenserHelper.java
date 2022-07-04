@@ -1,10 +1,14 @@
 package net.mehvahdjukaar.moonlight.util;
 
-
+/*
 import net.mehvahdjukaar.moonlight.fluids.FluidContainerList;
 import net.mehvahdjukaar.moonlight.fluids.ISoftFluidTank;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluidTank;
+
+ */
+import net.mehvahdjukaar.moonlight.mixins.accessor.DispenserBlockAccessor;
+import net.mehvahdjukaar.moonlight.mixins.accessor.DispenserBlockEntityAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
@@ -43,6 +47,7 @@ public class DispenserHelper {
 
     private static final Set<Item> REGISTERED_FLUID_ITEMS = new HashSet<>();
 
+    /*
     public static void registerFluidBehavior(SoftFluid f) {
         Collection<FluidContainerList.Category> categories = f.getContainerList().getCategories();
         for (FluidContainerList.Category c : categories) {
@@ -59,7 +64,7 @@ public class DispenserHelper {
                 }
             }
         }
-    }
+    }*/
 
     /**
      * implement this to add your own custom behaviors
@@ -72,7 +77,7 @@ public class DispenserHelper {
 
         protected AdditionalDispenserBehavior(Item item) {
             this.item = item;
-            fallback = DispenserBlock.DISPENSER_REGISTRY.get(item);
+            fallback = DispenserBlockAccessor.getDispenserRegistry().get(item);
         }
 
         @Override
@@ -144,6 +149,7 @@ public class DispenserHelper {
     }
 
 
+    /*
     public static class FillFluidHolderBehavior extends AdditionalDispenserBehavior {
 
         public FillFluidHolderBehavior(Item item) {
@@ -175,7 +181,7 @@ public class DispenserHelper {
             }
             return InteractionResultHolder.pass(stack);
         }
-    }
+    }*/
 
     public static class PlaceBlockDispenseBehavior extends OptionalDispenseItemBehavior {
 
@@ -209,7 +215,7 @@ public class DispenserHelper {
 
     //add item to dispenser and merges it if there's one already
     private static boolean MergeDispenserItem(DispenserBlockEntity te, ItemStack filled) {
-        NonNullList<ItemStack> stacks = te.items;
+        NonNullList<ItemStack> stacks =  ((DispenserBlockEntityAccessor)te).getItems();
         for (int i = 0; i < te.getContainerSize(); ++i) {
             ItemStack s = stacks.get(i);
             if (s.isEmpty() || (s.getItem() == filled.getItem() && s.getMaxStackSize() > s.getCount())) {
@@ -223,5 +229,6 @@ public class DispenserHelper {
 
     public static final DefaultDispenseItemBehavior PLACE_BLOCK_BEHAVIOR = new PlaceBlockDispenseBehavior();
     private static final DefaultDispenseItemBehavior SHOOT_BEHAVIOR = new DefaultDispenseItemBehavior();
+
 
 }

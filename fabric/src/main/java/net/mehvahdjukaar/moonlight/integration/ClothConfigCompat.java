@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.platform.configs.fabric.ConfigBuilderImpl;
 import net.mehvahdjukaar.moonlight.platform.configs.fabric.values.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 

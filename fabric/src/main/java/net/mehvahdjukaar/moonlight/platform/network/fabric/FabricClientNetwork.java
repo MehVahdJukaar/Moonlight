@@ -15,6 +15,6 @@ public class FabricClientNetwork {
 
         ClientPlayNetworking.registerGlobalReceiver(
                 res, (client, h, buf, r) -> client.execute(() -> decoder.apply(buf)
-                        .handle(new FabricChannelHandler.Wrapper(client.player, ChannelHandler.NetworkDir.PLAY_TO_CLIENT))));
+                        .handle(new ChannelHandlerImpl.Wrapper(client.player, ChannelHandler.NetworkDir.PLAY_TO_CLIENT))));
     }
 }
