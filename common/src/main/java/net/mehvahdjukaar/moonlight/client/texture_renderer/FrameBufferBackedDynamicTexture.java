@@ -41,7 +41,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
        // super(width, height, false);
         this.width = width;
         this.height = height;
-        //register this texture
+        //addListener this texture
         this.resourceLocation = resourceLocation;
         Minecraft.getInstance().getTextureManager().register(resourceLocation, this);
     }
@@ -116,7 +116,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
             this.cpuImage = null;
         }
         //destroy render buffer
-        //release register texture resource location and id. called just to be sure. releaseId should already do this
+        //release addListener texture resource location and id. called just to be sure. releaseId should already do this
         Minecraft.getInstance().getTextureManager().release(resourceLocation);
     }
 

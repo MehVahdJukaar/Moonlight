@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(CriteriaTriggers.class)
 public interface CriteriaTriggerAccessor {
 
-    @Invoker("register")
+    @Invoker("addListener")
     public static <T extends CriterionTrigger<?>> T invokeRegister(T criterion) {
         throw new AssertionError();
     }

@@ -36,7 +36,7 @@ public abstract class DynClientResourcesProvider extends DynResourceProvider<Dyn
                     .registerReloadListener(this);
         }
         //MinecraftForge.EVENT_BUS.addListener(this::temp);
-        DynamicLanguageHandler.register(this);
+        DynamicLanguageHandler.addListener(this);
     }
 
     @Override

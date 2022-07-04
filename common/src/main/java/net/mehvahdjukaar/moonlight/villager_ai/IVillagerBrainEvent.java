@@ -26,7 +26,7 @@ public interface IVillagerBrainEvent extends SimpleEvent {
 
     /**
      * access the brain memories to add new ones or remove existing ones
-     * Important: to register new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
+     * Important: to addListener new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
      *
      * @return brain memories
      */
@@ -47,7 +47,7 @@ public interface IVillagerBrainEvent extends SimpleEvent {
      * Note that subsequent call to this from other mods in later event execution might override your activity if the time window is the same
      * If it's not it might be shortened or cut in two
      *
-     * @param activity  activity to register
+     * @param activity  activity to addListener
      * @param startTime day time at which activity will start
      * @param endTime   day time at which activity will end. can also be less than start time
      */

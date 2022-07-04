@@ -10,6 +10,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.Container;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
@@ -60,6 +61,11 @@ public class RegHelper {
     public static <T extends Feature<?>> Supplier<T> registerFeature(ResourceLocation name, Supplier<T> feature) {
         return register(name, feature, Registry.FEATURE);
     }
+
+    public static <T extends SoundEvent> Supplier<T> registerSound(ResourceLocation name, Supplier<T> feature) {
+        return register(name, feature, Registry.SOUND_EVENT);
+    }
+
     public static <T extends PaintingVariant> Supplier<T> registerPainting(ResourceLocation name, Supplier<T> painting) {
         return register(name, painting, Registry.PAINTING_VARIANT);
     }
@@ -161,7 +167,7 @@ public class RegHelper {
     }
 
     /**
-     * Utility to register a full block set
+     * Utility to addListener a full block set
      * @return registry object map
      */
     public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,

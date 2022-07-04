@@ -10,13 +10,18 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.Consumer;
 
 public class DynamicLanguageHandler {
 
-    private static final ConcurrentLinkedDeque<DynClientResourcesProvider> PACKS = new ConcurrentLinkedDeque<>();
+    private static final ConcurrentLinkedDeque<Consumer<AfterLanguageLoadEvent>> LISTENERS = new ConcurrentLinkedDeque<>();
 
-    public static void register(DynClientResourcesProvider rpAwareDynamicTextureProvider) {
-        PACKS.add(rpAwareDynamicTextureProvider);
+    public static void addListener(DynClientResourcesProvider rpAwareDynamicTextureProvider) {
+        LISTENERS.add(rpAwareDynamicTextureProvider::addDynamicTranslations);
+    }
+
+    public static void addListener(Consumer<AfterLanguageLoadEvent> listener) {
+        LISTENERS.add(listener);
     }
     //TODO: figure out why event isnt working well
 
@@ -24,10 +29,12 @@ public class DynamicLanguageHandler {
     @ApiStatus.Internal
     public static void addDynamicEntries(ResourceManager cachedResourceManager, List<LanguageInfo> cachedLanguageInfo, Map<String, String> map) {
         AfterLanguageLoadEvent languageEvent = new AfterLanguageLoadEvent(map, cachedLanguageInfo);
-        BlockSetManager.getRegistries().forEach(r -> r.addTypeTranslations(languageEvent));
-        //MinecraftForge.EVENT_BUS.post(languageEvent);
-        // Selene.LOGGER.info("Dispatching AfterLanguageLoad Event");
-        PACKS.forEach(p -> p.addDynamicTranslations(languageEvent));
+        if(languageEvent.isDefault()) {
+            BlockSetManager.getRegistries().forEach(r -> r.addTypeTranslations(languageEvent));
+            //MinecraftForge.EVENT_BUS.post(languageEvent);
+            // Selene.LOGGER.info("Dispatching AfterLanguageLoad Event");
+            LISTENERS.forEach(p -> p.accept(languageEvent));
+        }
 
     }
 

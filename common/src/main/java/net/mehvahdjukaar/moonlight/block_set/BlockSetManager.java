@@ -32,13 +32,13 @@ public class BlockSetManager {
     public static <T extends BlockType> void registerBlockSetDefinition(BlockTypeRegistry<T> typeRegistry) {
         if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(
-                    String.format("Tried to register block set definition %s after registry events", typeRegistry));
+                    String.format("Tried to addListener block set definition %s after registry events", typeRegistry));
         }
         BLOCK_SET_CONTAINERS.put(typeRegistry.getType(), typeRegistry);
     }
 
     /**
-     * Use this function to register a (modded) block type finder manually.
+     * Use this function to addListener a (modded) block type finder manually.
      * This is handy for block types that are unique and which can't be detected by the detection system defined in their BlockSetContainer class
      * Call during mod startup (not mod setup as it will be too late for this to affect block registration)
      *
@@ -47,7 +47,7 @@ public class BlockSetManager {
     public static <T extends BlockType> void addBlockTypeFinder(Class<T> type, BlockType.SetFinder<T> blockFinder) {
         if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(
-                    String.format("Tried to register block %s finder %s after registry events", type, blockFinder));
+                    String.format("Tried to addListener block %s finder %s after registry events", type, blockFinder));
         }
         FINDER_ADDER.add(() -> {
             BlockTypeRegistry<T> container = getBlockSet(type);
@@ -83,7 +83,7 @@ public class BlockSetManager {
     }
 
     /**
-     * Add a registry function meant to register a set of blocks that use a specific wood type
+     * Add a registry function meant to addListener a set of blocks that use a specific wood type
      * Other entries like items can access the block types directly since it will be filled
      * Will be called (hopefully) after all other block registrations have been fired so the block set type is complete
      * Note that whatever gets registered here should in no way influence the block sets themselves (you shouldn't add new wood types here for example)

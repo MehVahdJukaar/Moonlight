@@ -22,7 +22,7 @@ public class VillagerAIManager {
 
     //schedule to which all the tasks are registered to
     public static final Supplier<Schedule> CUSTOM_VILLAGER_SCHEDULE =
-            RegHelper.register("custom_villager_schedule", Schedule::new, Registry.SCHEDULE);
+            RegHelper.register(Moonlight.res("custom_villager_schedule"), Schedule::new, Registry.SCHEDULE);
 
 
     //called by mixin. Do not call
@@ -40,7 +40,7 @@ public class VillagerAIManager {
     }
 
 
-    //just loads up the class to register the schedule
+    //just loads up the class to addListener the schedule
     @ApiStatus.Internal
     public static void init() {
     }
@@ -61,7 +61,7 @@ public class VillagerAIManager {
             VillagerAccessor.setMemoryTypes(builder.build());
 
         } catch (Exception e) {
-            Moonlight.LOGGER.warn("failed to register pumpkin sensor type for villagers: " + e);
+            Moonlight.LOGGER.warn("failed to addListener pumpkin sensor type for villagers: " + e);
         }
     }
 

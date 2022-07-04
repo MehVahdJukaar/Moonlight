@@ -71,6 +71,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var config = new BoolConfigValue(name, defaultValue);
         config.setDescriptionKey(this.tooltipKey(name));
         config.setTranslationKey(this.translationKey(name));
+        maybeAddComment(this.tooltipKey(name));
         this.currentCategoryBuilder.getSecond().add(config);
         return config;
     }
@@ -81,6 +82,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var config = new DoubleConfigValue(name, defaultValue, min, max);
         config.setDescriptionKey(this.tooltipKey(name));
         config.setTranslationKey(this.translationKey(name));
+        maybeAddComment(this.tooltipKey(name));
         this.currentCategoryBuilder.getSecond().add(config);
         return config;
     }
@@ -91,6 +93,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var config = new IntConfigValue(name, defaultValue, min, max);
         config.setDescriptionKey(this.tooltipKey(name));
         config.setTranslationKey(this.translationKey(name));
+        maybeAddComment(this.tooltipKey(name));
         this.currentCategoryBuilder.getSecond().add(config);
         return config;
     }
@@ -101,6 +104,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var config = new StringConfigValue(name, defaultValue);
         config.setDescriptionKey(this.tooltipKey(name));
         config.setTranslationKey(this.translationKey(name));
+        maybeAddComment(this.tooltipKey(name));
         this.currentCategoryBuilder.getSecond().add(config);
         return config;
     }
@@ -111,6 +115,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var config = new ListStringConfigValue<>(name,defaultValue, predicate);
         config.setDescriptionKey(this.tooltipKey(name));
         config.setTranslationKey(this.translationKey(name));
+        maybeAddComment(this.tooltipKey(name));
         this.currentCategoryBuilder.getSecond().add(config);
         return config;
     }
@@ -121,6 +126,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var config = new EnumConfigValue<>(name, defaultValue);
         config.setDescriptionKey(this.tooltipKey(name));
         config.setTranslationKey(this.translationKey(name));
+        maybeAddComment(this.tooltipKey(name));
         this.currentCategoryBuilder.getSecond().add(config);
         return config;
     }

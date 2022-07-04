@@ -1,14 +1,22 @@
 package net.mehvahdjukaar.moonlight.platform.configs;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.resources.DynamicLanguageHandler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public abstract class ConfigBuilder {
+
+    private final Map<String, String> comments = new HashMap<>();
+    private String currentComment;
+    private String currentKey;
 
     @ExpectPlatform
     public static ConfigBuilder create(ResourceLocation name, ConfigBuilder.ConfigType type) {
@@ -23,6 +31,9 @@ public abstract class ConfigBuilder {
         this.name = name.getPath();
         this.modId = name.getNamespace();
         this.type = type;
+        DynamicLanguageHandler.addListener(e->{
+            if(e.isDefault()) comments.forEach(e::addEntry);
+        });
     }
 
     public enum ConfigType {
@@ -86,5 +97,29 @@ public abstract class ConfigBuilder {
     }
     public String translationKey(String name){
         return "config." + this.modId + "." + currentCategory() + "." + name;
+    }
+
+
+    /**
+     * Try not to use this. Just here to make porting easier
+     * Will add entries manually to the english language file
+     */
+    public ConfigBuilder comment(String comment){
+        this.currentComment = comment;
+        if(this.currentComment != null && this.currentKey != null){
+            comments.put(currentKey, currentComment);
+            this.currentComment = null;
+            this.currentKey = null;
+        }
+        return this;
+    };
+
+    protected void maybeAddComment(String translationKey){
+                  this.currentKey = translationKey;
+        if(this.currentComment != null && this.currentKey != null){
+            comments.put(currentKey, currentComment);
+            this.currentComment = null;
+            this.currentKey = null;
+        }
     }
 }

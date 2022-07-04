@@ -87,7 +87,7 @@ public class MapDecorationRegistry extends SimpleJsonResourceReloadListener {
     //public static final IMapDecorationType<CustomMapDecoration, ?> GENERIC_STRUCTURE_TYPE = makeSimpleType(Selene.MOD_ID, "generic_structure");
 
     /**
-     * registers a decoration type. use register simple for decoration that doesn't need a world marker
+     * registers a decoration type. use addListener simple for decoration that doesn't need a world marker
      *
      * @param newType new decoration type
      */

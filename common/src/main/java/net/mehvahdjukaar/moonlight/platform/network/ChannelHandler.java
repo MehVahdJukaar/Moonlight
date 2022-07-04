@@ -34,7 +34,7 @@ public abstract class ChannelHandler {
         Player getSender();
     }
 
-    public static enum NetworkDir {
+    public enum NetworkDir {
         PLAY_TO_SERVER, PLAY_TO_CLIENT;
     }
 

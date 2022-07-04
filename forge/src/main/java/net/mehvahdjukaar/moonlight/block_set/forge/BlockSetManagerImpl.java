@@ -84,7 +84,7 @@ public class BlockSetManagerImpl {
         //get the queue corresponding to this certain mod
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         return LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {
-            //if absent we register its registration callback
+            //if absent we addListener its registration callback
             bus.addListener(EventPriority.HIGHEST, BlockSetManagerImpl::registerLateBlockAndItems);
             return Pair.of(new ArrayList<>(), new ArrayList<>());
         });
@@ -106,7 +106,7 @@ public class BlockSetManagerImpl {
 
         if (registrationQueues != null) {
             IForgeRegistry<Item> fr = event.getForgeRegistry();
-            //register blocks
+            //addListener blocks
             var blockQueue = registrationQueues.getFirst();
             blockQueue.forEach(Runnable::run);
             //registers items
