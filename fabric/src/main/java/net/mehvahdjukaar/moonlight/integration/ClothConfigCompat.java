@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.platform.configs.fabric.ConfigSpec;
 import net.mehvahdjukaar.moonlight.platform.configs.fabric.ConfigBuilderImpl;
 import net.mehvahdjukaar.moonlight.platform.configs.fabric.values.*;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -17,14 +18,14 @@ public class ClothConfigCompat {
 
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(new TranslatableComponent(spec.getName()));
+                .setTitle(Component.translatable(spec.getName()));
 
         if (background != null) builder.setDefaultBackgroundTexture(background);
 
         builder.setSavingRunnable(spec::saveConfig);
 
         for (var c : spec.getCategories()) {
-            ConfigCategory category = builder.getOrCreateCategory(new TranslatableComponent(c.getName()));
+            ConfigCategory category = builder.getOrCreateCategory(Component.translatable(c.getName()));
             for (var entry : c.getValues()) {
                 String name = entry.getName();
                 if (entry instanceof IntConfigValue ic) {

@@ -1,14 +1,12 @@
-package net.mehvahdjukaar.moonlight.client.language.fabric;
+package net.mehvahdjukaar.moonlight.client.language;
 
-import net.mehvahdjukaar.moonlight.client.language.IAfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.client.language.LangBuilder;
 import net.minecraft.client.resources.language.LanguageInfo;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class AfterLanguageLoadEvent implements IAfterLanguageLoadEvent {
+public class AfterLanguageLoadEvent {
 
     private final Map<String, String> languageLines;
     private final List<LanguageInfo> languageInfo;

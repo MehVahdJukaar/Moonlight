@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.block_set.wood;
 
 import net.mehvahdjukaar.moonlight.block_set.BlockTypeRegistry;
-import net.mehvahdjukaar.moonlight.client.language.IAfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.client.language.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.util.Utils;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -109,7 +109,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
 
     @Override
-    public void addTypeTranslations(IAfterLanguageLoadEvent language) {
+    public void addTypeTranslations(AfterLanguageLoadEvent language) {
         getValues().forEach((w) -> {
             if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
         });

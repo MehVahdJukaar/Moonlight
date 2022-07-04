@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.client.language.LangBuilder;
 import net.mehvahdjukaar.moonlight.client.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.resources.ResType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -27,24 +28,12 @@ public class DynamicTexturePack extends DynamicResourcePack {
     }
 
     void addPackLogo() {
-        ModList.get().getModContainerById(this.mainNamespace).ifPresent(m -> {
-
-            IModInfo mod = m.getModInfo();
-            IModFile file = mod.getOwningFile().getFile();
-
-            mod.getLogoFile().ifPresent(logo -> {
-                try {
-                    if (file != null) {
-                        Path logoPath = file.findResource(logo);
-                        if (Files.exists(logoPath)) {
-                            this.addRootResource("pack.png", Files.readAllBytes(logoPath));
-                        }
-                    }
-                } catch (Exception e) {
-                    Moonlight.LOGGER.error("Failed to add dynamic pack logo. Why?");
-                }
-            });
-        });
+        Path logoPath = ClientPlatformHelper.getModIcon(this.mainNamespace);
+        if(logoPath != null) {
+            try {
+                this.addRootResource("pack.png", Files.readAllBytes(logoPath));
+            }catch (Exception ignored){}
+        }
     }
 
     /**

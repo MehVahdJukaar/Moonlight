@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.block_set.leaves;
 
 import net.mehvahdjukaar.moonlight.block_set.BlockTypeRegistry;
-import net.mehvahdjukaar.moonlight.client.language.IAfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.client.language.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -21,7 +21,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     public static LeavesTypeRegistry INSTANCE;
 
-    public static Collection<LeavesType> getTypes(){
+    public static Collection<LeavesType> getTypes() {
         return INSTANCE.getValues();
     }
 
@@ -33,12 +33,12 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     public static LeavesType fromNBT(String name) {
         return INSTANCE.getFromNBT(name);
     }
-    
+
     public LeavesTypeRegistry() {
         super(LeavesType.class, "leaves_type");
         INSTANCE = this;
     }
-    
+
     @Override
     public LeavesType getDefaultType() {
         return OAK_TYPE;
@@ -73,7 +73,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     @Override
-    public void addTypeTranslations(IAfterLanguageLoadEvent language) {
+    public void addTypeTranslations(AfterLanguageLoadEvent language) {
         this.getValues().forEach((w) -> {
             if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
         });

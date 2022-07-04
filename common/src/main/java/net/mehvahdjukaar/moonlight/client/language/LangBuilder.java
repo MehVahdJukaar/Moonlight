@@ -7,8 +7,6 @@ import net.mehvahdjukaar.moonlight.block_set.BlockType;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -77,19 +75,19 @@ public class LangBuilder {
      * @return readable component
      */
     public static Component getReadableComponent(String key, String... arguments) {
-        Component translated = new TranslatableComponent(key, (Object[]) arguments);
+        Component translated = Component.translatable(key, (Object[]) arguments);
         if (translated.getString().equals(key)) {
             StringBuilder aa = new StringBuilder();
             for (String s : arguments) {
                 aa.append("_").append(s);
             }
-            return new TextComponent(LangBuilder.getReadableName(key + aa));
+            return Component.literal(LangBuilder.getReadableName(key + aa));
         }
         return translated;
     }
 
 
-    public static void addDynamicEntry(IAfterLanguageLoadEvent lang,
+    public static void addDynamicEntry(AfterLanguageLoadEvent lang,
                                        String key, BlockType type, Item item) {
         String base = lang.getEntry(key);
         if (base != null) {
@@ -100,7 +98,7 @@ public class LangBuilder {
         } else Moonlight.LOGGER.error("Could not find translation line {}", key);
     }
 
-    public static void addDynamicEntry(IAfterLanguageLoadEvent lang,
+    public static void addDynamicEntry(AfterLanguageLoadEvent lang,
                                        String key, BlockType type, Block block) {
         String base = lang.getEntry(key);
         if (base != null) {
@@ -111,7 +109,7 @@ public class LangBuilder {
         }
     }
 
-    public static void addDynamicEntry(IAfterLanguageLoadEvent lang,
+    public static void addDynamicEntry(AfterLanguageLoadEvent lang,
                                        String key, BlockType type, EntityType<?> entityType) {
         String base = lang.getEntry(key);
         if (base != null) {

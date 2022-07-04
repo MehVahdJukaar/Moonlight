@@ -7,7 +7,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
@@ -23,7 +22,7 @@ import java.util.Map;
 import static net.minecraft.world.item.alchemy.PotionUtils.*;
 
 public class PotionNBTHelper {
-    private static final MutableComponent EMPTY = (new TranslatableComponent("effect.none")).withStyle(ChatFormatting.GRAY);
+    private static final MutableComponent EMPTY = (Component.translatable("effect.none")).withStyle(ChatFormatting.GRAY);
 
     //I need this because I'm using block entity tag, so I can't give PotionUtil methods an itemStack directly
     public static void addPotionTooltip(@Nullable CompoundTag com, List<Component> tooltip, float durationFactor) {
@@ -32,12 +31,12 @@ public class PotionNBTHelper {
         if (list.isEmpty()) {
             tooltip.add(EMPTY);
         } else {
-            for(MobEffectInstance effectInstance : list) {
-                MutableComponent iformattabletextcomponent = new TranslatableComponent(effectInstance.getDescriptionId());
+            for (MobEffectInstance effectInstance : list) {
+                MutableComponent translatable = Component.translatable(effectInstance.getDescriptionId());
                 MobEffect effect = effectInstance.getEffect();
                 Map<Attribute, AttributeModifier> map = effect.getAttributeModifiers();
                 if (!map.isEmpty()) {
-                    for(Map.Entry<Attribute, AttributeModifier> entry : map.entrySet()) {
+                    for (Map.Entry<Attribute, AttributeModifier> entry : map.entrySet()) {
                         AttributeModifier attributemodifier = entry.getValue();
                         AttributeModifier modifier = new AttributeModifier(attributemodifier.getName(), effect.getAttributeModifierValue(effectInstance.getAmplifier(), attributemodifier), attributemodifier.getOperation());
                         list1.add(new Pair<>(entry.getKey(), modifier));
@@ -45,22 +44,22 @@ public class PotionNBTHelper {
                 }
 
                 if (effectInstance.getAmplifier() > 0) {
-                    iformattabletextcomponent = new TranslatableComponent("potion.withAmplifier", iformattabletextcomponent, new TranslatableComponent("potion.potency." + effectInstance.getAmplifier()));
+                    translatable = Component.translatable("potion.withAmplifier", translatable, Component.translatable("potion.potency." + effectInstance.getAmplifier()));
                 }
 
                 if (effectInstance.getDuration() > 20) {
-                    iformattabletextcomponent = new TranslatableComponent("potion.withDuration", iformattabletextcomponent, MobEffectUtil.formatDuration(effectInstance, durationFactor));
+                    translatable = Component.translatable("potion.withDuration", translatable, MobEffectUtil.formatDuration(effectInstance, durationFactor));
                 }
 
-                tooltip.add(iformattabletextcomponent.withStyle(effect.getCategory().getTooltipFormatting()));
+                tooltip.add(translatable.withStyle(effect.getCategory().getTooltipFormatting()));
             }
         }
 
         if (!list1.isEmpty()) {
             tooltip.add(CommonComponents.EMPTY);
-            tooltip.add(new TranslatableComponent("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
+            tooltip.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
 
-            for(Pair<Attribute, AttributeModifier> pair : list1) {
+            for (Pair<Attribute, AttributeModifier> pair : list1) {
                 AttributeModifier modifier = pair.getSecond();
                 double d0 = modifier.getAmount();
                 double d1;
@@ -71,10 +70,10 @@ public class PotionNBTHelper {
                 }
 
                 if (d0 > 0.0D) {
-                    tooltip.add(new TranslatableComponent("attribute.modifier.plus." + modifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), new TranslatableComponent(pair.getFirst().getDescriptionId())).withStyle(ChatFormatting.BLUE));
+                    tooltip.add(Component.translatable("attribute.modifier.plus." + modifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(pair.getFirst().getDescriptionId())).withStyle(ChatFormatting.BLUE));
                 } else if (d0 < 0.0D) {
                     d1 = d1 * -1.0D;
-                    tooltip.add(new TranslatableComponent("attribute.modifier.take." + modifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), new TranslatableComponent(pair.getFirst().getDescriptionId())).withStyle(ChatFormatting.RED));
+                    tooltip.add(Component.translatable("attribute.modifier.take." + modifier.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(pair.getFirst().getDescriptionId())).withStyle(ChatFormatting.RED));
                 }
             }
         }

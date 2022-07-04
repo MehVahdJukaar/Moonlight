@@ -11,6 +11,8 @@ import net.mehvahdjukaar.moonlight.platform.configs.fabric.ConfigBuilderImpl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -30,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 public class PlatformHelperImpl {
 
@@ -84,6 +87,12 @@ public class PlatformHelperImpl {
 
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
         return stack.getItem() == Items.MILK_BUCKET || stack.getItem() == Items.HONEY_BOTTLE;
+    }
+
+    public static boolean isDev() {
+    }
+
+    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
     }
 
 

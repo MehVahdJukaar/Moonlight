@@ -3,11 +3,10 @@ package net.mehvahdjukaar.moonlight.util;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
-import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
-import net.mehvahdjukaar.moonlight.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.math.MthUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -118,36 +117,37 @@ public class Utils {
     }
 
     public static ResourceLocation getID(Block object) {
-        return ForgeRegistries.BLOCKS.getKey(object);
+        return Registry.BLOCK.getKey(object);
     }
 
     public static ResourceLocation getID(EntityType<?> object) {
-        return ForgeRegistries.ENTITIES.getKey(object);
+        return Registry.ENTITY_TYPE.getKey(object);
     }
 
+    //TODO: not sure if this is correct
     public static ResourceLocation getID(Biome object) {
         return ForgeRegistries.BIOMES.getKey(object);
     }
 
     public static ResourceLocation getID(Item object) {
-        return ForgeRegistries.ITEMS.getKey(object);
+        return Registry.ITEM.getKey(object);
     }
 
     public static ResourceLocation getID(Fluid object) {
-        return ForgeRegistries.FLUIDS.getKey(object);
+        return Registry.FLUID.getKey(object);
     }
 
     public static ResourceLocation getID(BlockEntityType<?> object) {
-        return ForgeRegistries.BLOCK_ENTITIES.getKey(object);
+        return Registry.BLOCK_ENTITY_TYPE.getKey(object);
     }
 
     public static ResourceLocation getID(RecipeSerializer<?> object) {
-        return ForgeRegistries.RECIPE_SERIALIZERS.getKey(object);
+        return Registry.RECIPE_SERIALIZER.getKey(object);
     }
 
-    public static ResourceLocation getID(SoftFluid object) {
-        return SoftFluidRegistry.getID(object);
-    }
+   //  public static ResourceLocation getID(SoftFluid object) {
+   //     return SoftFluidRegistry.getID(object);
+   // }
 
     public static ResourceLocation getID(Object object) {
         if (object instanceof Block b) return getID(b);
@@ -157,7 +157,7 @@ public class Utils {
         if (object instanceof Fluid b) return getID(b);
         if (object instanceof BlockEntityType b) return getID(b);
         if (object instanceof RecipeSerializer b) return getID(b);
-        if(object instanceof SoftFluid s)return getID(s);
+       // if(object instanceof SoftFluid s)return getID(s);
         throw new UnsupportedOperationException("Unknown class type " + object.getClass());
     }
 
@@ -172,7 +172,7 @@ public class Utils {
     /**
      * Copies block properties without keeping stupid lambdas that could include references to the wrong blockstate properties
      */
-    public BlockBehaviour.Properties copySafe(BlockBehaviour blockBehaviour) {
+    public BlockBehaviour.Properties copyPropertySafe(BlockBehaviour blockBehaviour) {
         var p = BlockBehaviour.Properties.copy(blockBehaviour);
         p.lightLevel(s -> 0);
         p.offsetType(BlockBehaviour.OffsetType.NONE);

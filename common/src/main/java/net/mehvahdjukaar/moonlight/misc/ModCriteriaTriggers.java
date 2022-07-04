@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ModCriteriaTriggers {
 
-    public static void init(){}
+    public static void register(){}
 
     public static final GrindedItem GRIND = CriteriaTriggers.register(new GrindedItem());
     

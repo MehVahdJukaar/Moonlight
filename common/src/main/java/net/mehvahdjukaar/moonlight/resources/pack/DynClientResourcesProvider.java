@@ -28,8 +28,8 @@ public abstract class DynClientResourcesProvider extends DynResourceProvider<Dyn
      * Remember to call this during mod init
      */
     @Override
-    public void register(IEventBus bus) {
-        super.register(bus);
+    public void register() {
+        super.register();
         //run data could give a null minecraft here...
         if (!FMLLoader.getLaunchHandler().isData()) {
             Minecraft mc = Minecraft.getInstance();

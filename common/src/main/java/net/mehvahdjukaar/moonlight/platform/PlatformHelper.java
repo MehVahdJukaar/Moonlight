@@ -5,6 +5,8 @@ import net.mehvahdjukaar.moonlight.platform.configs.ConfigBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -22,8 +24,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 public class PlatformHelper {
+
+    @ExpectPlatform
+    public static boolean isDev() {
+        throw new AssertionError();
+    }
 
     public enum Platform {
         FORGE, FABRIC;
@@ -93,6 +101,13 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
+
+    @ExpectPlatform
+    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+        throw new AssertionError();
+    }
+
+
     @ExpectPlatform
     public static boolean isMobGriefingOn(Level level, Entity entity) {
         throw new AssertionError();
@@ -105,11 +120,6 @@ public class PlatformHelper {
 
     @ExpectPlatform
     public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction face) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static void addFeatureToBiome(GenerationStep.Decoration step, TagKey<Biome> tagKey, ResourceKey<PlacedFeature> feature) {
         throw new AssertionError();
     }
 

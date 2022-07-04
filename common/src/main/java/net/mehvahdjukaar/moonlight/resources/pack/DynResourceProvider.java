@@ -25,8 +25,11 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
         this.dynamicPack = pack;
     }
 
-    public void register(IEventBus bus) {
-        dynamicPack.registerPack(bus);
+    /**
+     * Called on Mod Init
+     */
+    public void register() {
+        dynamicPack.registerPack();
     }
 
     public abstract Logger getLogger();

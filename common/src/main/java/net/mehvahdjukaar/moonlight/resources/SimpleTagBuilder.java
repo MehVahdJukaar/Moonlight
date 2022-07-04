@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.util.Utils;
 import net.minecraft.resources.ResourceLocation;
@@ -18,7 +19,7 @@ public class SimpleTagBuilder extends TagBuilder {
 
     private final ResourceLocation id;
 
-    private SimpleTagBuilder(ResourceLocation location) {
+    protected SimpleTagBuilder(ResourceLocation location) {
         this.id = location;
     }
 
@@ -39,6 +40,8 @@ public class SimpleTagBuilder extends TagBuilder {
         return this;
     }
 
+    //Forge stuff. we arent using it
+    /*
     @Override
     public SimpleTagBuilder replace(boolean value) {
         super.replace(value);
@@ -49,7 +52,7 @@ public class SimpleTagBuilder extends TagBuilder {
     public SimpleTagBuilder replace() {
         super.replace();
         return this;
-    }
+    }*/
 
     public SimpleTagBuilder addTag(ResourceLocation pId) {
         super.addTag(pId);

@@ -20,8 +20,8 @@ public abstract class DynServerResourcesProvider extends DynResourceProvider<Dyn
      * Remember to call this during mod init
      */
     @Override
-    public void register(IEventBus bus) {
-        super.register(bus);
+    public void register() {
+        super.register();
         //MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListeners);
         MinecraftForge.EVENT_BUS.addListener(this::onEarlyReload);
     }

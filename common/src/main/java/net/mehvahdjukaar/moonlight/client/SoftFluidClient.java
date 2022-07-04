@@ -1,5 +1,5 @@
 package net.mehvahdjukaar.moonlight.client;
-
+/*
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluidRegistry;
@@ -111,3 +111,5 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
 
 
 }
+*/
+//TODO: disabled

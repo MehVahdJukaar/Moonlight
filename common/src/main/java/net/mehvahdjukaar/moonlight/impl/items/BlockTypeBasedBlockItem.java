@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.impl.items;
 
 import net.mehvahdjukaar.moonlight.block_set.BlockType;
+import net.mehvahdjukaar.moonlight.misc.Lazy;
+import net.mehvahdjukaar.moonlight.platform.registry.RegHelper;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -19,6 +21,7 @@ public class BlockTypeBasedBlockItem<T extends BlockType> extends BlockItem {
         this.blockType = blockType;
         this.burnTime = Lazy.of(() -> blockType.mainChild().asItem()
                 .getBurnTime(blockType.mainChild().asItem().getDefaultInstance(), null));
+        //RegHelper.registerItemBurnTime(this,);
     }
 
     @Override

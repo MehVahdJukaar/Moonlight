@@ -1,12 +1,11 @@
 package net.mehvahdjukaar.moonlight.platform.registry;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.impl.ModStairBlock;
+import net.mehvahdjukaar.moonlight.impl.blocks.ModStairBlock;
 import net.mehvahdjukaar.moonlight.impl.blocks.VerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;

@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.platform.configs;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.Moonlight;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.Locale;
@@ -65,11 +65,11 @@ public abstract class ConfigBuilder {
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
 
-    public static TranslatableComponent descriptionKey(String name) {
-        return new TranslatableComponent("text.immersive_weathering." + name);
+    public static Component descriptionKey(String name) {
+        return Component.translatable("text.immersive_weathering." + name);
     }
 
-    public static TranslatableComponent tooltipKey(String name) {
-        return new TranslatableComponent("text.immersive_weathering." + name + ".descriptionKey");
+    public static Component tooltipKey(String name) {
+        return Component.translatable("text.immersive_weathering." + name + ".descriptionKey");
     }
 }

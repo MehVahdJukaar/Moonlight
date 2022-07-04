@@ -1,12 +1,14 @@
 package net.mehvahdjukaar.moonlight.resources.pack;
 
 import com.google.gson.JsonElement;
+import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.client.language.LangBuilder;
+import net.mehvahdjukaar.moonlight.platform.ClientPlatformHelper;
+import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.resources.ResType;
 import net.mehvahdjukaar.moonlight.resources.StaticResource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -16,9 +18,6 @@ import net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
-import net.minecraftforge.event.AddPackFindersEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -64,20 +63,21 @@ public abstract class DynamicResourcePack implements PackResources {
 
     public DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
         this.packType = type;
-        var component = new TextComponent(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources"));
+        var component = Component.translatable(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources"));
         //new TranslatableComponent("%s.%s.description", name.getNamespace(), name.getPath());
         this.packInfo = new PackMetadataSection(component, 6);
         this.resourcePackName = name;
         this.mainNamespace = name.getNamespace();
         this.namespaces.add(name.getNamespace());
-        this.title = new TextComponent(LangBuilder.getReadableName(name.toString()));
+        this.title = Component.translatable(LangBuilder.getReadableName(name.toString()));
         ;//new TranslatableComponent("%s.%s.title", name.getNamespace(), name.getPath());
 
         this.position = position;
         this.fixed = fixed;
-        this.hidden = hidden;
+        this.hidden = hidden; //UNUSED. TODO: re add (forge)
 
-        this.generateDebugResources = !FMLLoader.isProduction();
+        this.generateDebugResources = PlatformHelper.isDev();
+        ;
     }
 
     /**
@@ -103,38 +103,25 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     /**
-     * registers this pack. Intern calls AddPackFinderEvent
-     *
-     * @param bus MOD event bus
+     * registers this pack. Call on mod init
      */
-    public void registerPack(IEventBus bus) {
-        bus.addListener(this::register);
+    public void registerPack() {
+
+        PlatformHelper.registerResourcePack(this.packType, () ->
+                new Pack(
+                        this.getName(),    // id
+                        true,    // required -- this MAY need to be true for the pack to be enabled by default
+                        () -> this, // pack supplier
+                        this.getTitle(), // title
+                        this.packInfo.getDescription(), // description
+                        PackCompatibility.COMPATIBLE,
+                        Pack.Position.TOP,
+                        this.fixed, // fixed position? no
+                        PackSource.BUILT_IN));
     }
 
-    /**
-     * same as register pack but takes the actual event. Use just one
-     *
-     * @param event AddPackFindersEvent
-     */
-    public void register(AddPackFindersEvent event) {
-        if (event.getPackType() == this.packType) {
-            event.addRepositorySource((infoConsumer, packFactory) ->
-                    infoConsumer.accept(new Pack(
-                            this.getName(),    // id
-                            true,    // required -- this MAY need to be true for the pack to be enabled by default
-                            () -> this, // pack supplier
-                            this.getTitle(), // title
-                            this.packInfo.getDescription(), // description
-                            PackCompatibility.COMPATIBLE,
-                            Pack.Position.TOP,
-                            this.fixed, // fixed position? no
-                            PackSource.BUILT_IN,
-                            this.hidden // hidden? no
-                    )));
-        }
-    }
-
-    @Override
+    //@Override
+    @PlatformOnly(PlatformOnly.FORGE)
     public boolean isHidden() {
         return this.hidden;
     }
@@ -266,6 +253,7 @@ public abstract class DynamicResourcePack implements PackResources {
     public void addSimilarJsonResource(StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException {
         addSimilarJsonResource(resource, s -> s.replace(keyword, replaceWith));
     }
+
     @Deprecated(forRemoval = true)
     public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform) throws NoSuchElementException {
         addSimilarJsonResource(resource, textTransform, textTransform);
