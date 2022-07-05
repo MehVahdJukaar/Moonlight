@@ -1,15 +1,29 @@
 package net.mehvahdjukaar.moonlight.platform.forge;
 
+import net.mehvahdjukaar.moonlight.platform.ClientPlatformHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ClientPlatformHelperImpl {
 
@@ -33,6 +47,40 @@ public class ClientPlatformHelperImpl {
             }
         }
         return null;
+    }
+
+
+    public static void onRegisterParticles(Consumer<ClientPlatformHelper.ParticleEvent> eventListener) {
+        Consumer<ParticleFactoryRegisterEvent> eventConsumer = event->
+                eventListener.accept(ClientPlatformHelperImpl::registerParticle);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+    private static <P extends ParticleType<T>, T extends ParticleOptions> void registerParticle(Supplier<P> type, ClientPlatformHelper.ParticleFactory<T> registration) {
+        ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+        particleEngine.register(type.get(), registration::create);
+    }
+
+    public static void onRegisterEntityRenderers(Consumer<ClientPlatformHelper.EntityRendererEvent> eventListener) {
+        Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event->
+                eventListener.accept(event::registerEntityRenderer);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+    public static void onRegisterBlockColors(Consumer<ClientPlatformHelper.BlockColorEvent> eventListener) {
+        Consumer<ColorHandlerEvent.Block> eventConsumer = event->{
+            var colors = event.getBlockColors();
+            eventListener.accept(colors::register);
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+    public static void onRegisterItemColors(Consumer<ClientPlatformHelper.ItemColorEvent> eventListener) {
+        Consumer<ColorHandlerEvent.Item> eventConsumer = event->{
+            var colors = event.getItemColors();
+            eventListener.accept(colors::register);
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
 
