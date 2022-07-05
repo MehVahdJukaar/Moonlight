@@ -9,16 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class ListStringConfigValue<T extends String>  extends ConfigValue<List<T>> {
+public class ListStringConfigValue<T extends String>  extends ConfigValue<List<String>> {
 
-    private final Predicate<T> predicate;
-    public  ListStringConfigValue(String name, List<T> defaultValue, Predicate<T> validator) {
+    private final Predicate<Object> predicate;
+    public  ListStringConfigValue(String name, List<String> defaultValue, Predicate<Object> validator) {
         super(name, defaultValue);
         this.predicate = validator;
     }
 
     @Override
-    public boolean isValid(List<T> value) {
+    public boolean isValid(List<String> value) {
         return true;
     }
 

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.math;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Random;
@@ -124,7 +125,7 @@ public class MthUtils {
      * @return a number between 0 and max
      * The bias parameters control how much the average is skewed toward 0 or max
      */
-    public static float nextWeighted(Random rand, float max, float bias) {
+    public static float nextWeighted(RandomSource rand, float max, float bias) {
         float r = rand.nextFloat();
         if (bias <= 0) {
             if (bias == 0) return r * max;
@@ -137,11 +138,11 @@ public class MthUtils {
     /**
      * Same as above but value is included between max and min
      */
-    public static float nextWeighted(Random rand, float max, float bias, float min) {
+    public static float nextWeighted(RandomSource rand, float max, float bias, float min) {
         return nextWeighted(rand, max, bias) + min;
     }
 
-    public static float nextWeighted(Random rand, float max) {
+    public static float nextWeighted(RandomSource rand, float max) {
         return nextWeighted(rand, max, 1);
     }
 

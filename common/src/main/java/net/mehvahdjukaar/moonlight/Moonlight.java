@@ -30,7 +30,7 @@ public class Moonlight {
 
     //mod setup
     public static void commonSetup() {
-
+//./gradlew build publishToMavenLocal
     }
 
 

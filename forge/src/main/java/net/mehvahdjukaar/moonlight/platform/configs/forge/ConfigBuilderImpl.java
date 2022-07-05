@@ -62,6 +62,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
         maybeAddComment(this.tooltipKey(name));
+
         return builder.translation(tooltipKey(name)).define(name, defaultValue);
     }
 
@@ -78,17 +79,16 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public Supplier<String> define(String name, String defaultValue) {
+    public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         maybeAddComment(this.tooltipKey(name));
-        return builder.translation(tooltipKey(name)).define(name, defaultValue);
+        return builder.translation(tooltipKey(name)).define(name, defaultValue, validator);
     }
 
     @Override
-    public <T extends String> Supplier<List<T>> define(String name, List<T> defaultValue, Predicate<T> predicate) {
+    public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
         maybeAddComment(this.tooltipKey(name));
-           var value = builder.translation(tooltipKey(name)).defineList(name, defaultValue,
-                   o -> predicate.test((T) o));
-            return ()-> (List<T>) value.get();
+           var value = builder.translation(tooltipKey(name)).defineList(name, defaultValue, predicate);
+            return ()-> (List<String>) value.get();
     }
 
 
@@ -96,5 +96,12 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
         maybeAddComment(this.tooltipKey(name));
         return builder.translation(tooltipKey(name)).defineEnum(name, defaultValue);
+    }
+
+    @Override
+    public ConfigBuilder comment(String comment) {
+        //builder.comment(comment);
+        //TODO: choose. either add a translation or a comment literal not both
+        return super.comment(comment);
     }
 }

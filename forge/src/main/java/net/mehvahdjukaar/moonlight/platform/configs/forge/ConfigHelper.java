@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.configs;
+package net.mehvahdjukaar.moonlight.platform.configs.forge;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
@@ -51,21 +51,4 @@ public class ConfigHelper {
     }
 
 
-    public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;
-
-    public static final Predicate<Object> LIST_STRING_CHECK = (s) -> {
-        if (s instanceof List<?>) {
-            return ((Collection<?>) s).stream().allMatch(o -> o instanceof String);
-        }
-        return false;
-    };
-
-    public static final Predicate<Object> COLOR_CHECK = s -> {
-        try {
-            Integer.parseUnsignedInt(((String) s).replace("0x", ""), 16);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    };
 }

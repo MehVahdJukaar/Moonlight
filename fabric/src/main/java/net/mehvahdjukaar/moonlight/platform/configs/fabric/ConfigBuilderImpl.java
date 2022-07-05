@@ -7,7 +7,9 @@ import net.mehvahdjukaar.moonlight.platform.configs.fabric.values.*;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -16,6 +18,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public static ConfigBuilder create(ResourceLocation name, ConfigBuilder.ConfigType type) {
         return new ConfigBuilderImpl(name, type);
     }
+
+    private final Map<String, String> comments = new HashMap<>();
+    private String currentComment;
+    private String currentKey;
 
     private final ImmutableList.Builder<ConfigCategory> categoriesBuilder = new ImmutableList.Builder<>();
     private Pair<String, ImmutableList.Builder<ConfigEntry>> currentCategoryBuilder;
@@ -99,9 +105,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public Supplier<String> define(String name, String defaultValue) {
+    public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         assert currentCategoryBuilder != null;
-        var config = new StringConfigValue(name, defaultValue);
+        var config = new StringConfigValue(name, defaultValue, validator);
         config.setDescriptionKey(this.tooltipKey(name));
         config.setTranslationKey(this.translationKey(name));
         maybeAddComment(this.tooltipKey(name));
@@ -110,9 +116,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public <T extends String> Supplier<List<T>> define(String name, List<T> defaultValue, Predicate<T> predicate) {
+    public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate){
         assert currentCategoryBuilder != null;
-        var config = new ListStringConfigValue<>(name,defaultValue, predicate);
+        var config = new ListStringConfigValue<>(name, (List<String>) defaultValue, predicate);
         config.setDescriptionKey(this.tooltipKey(name));
         config.setTranslationKey(this.translationKey(name));
         maybeAddComment(this.tooltipKey(name));

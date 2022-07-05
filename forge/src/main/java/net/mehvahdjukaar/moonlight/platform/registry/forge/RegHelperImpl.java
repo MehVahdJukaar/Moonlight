@@ -14,9 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
@@ -62,14 +60,18 @@ public class RegHelperImpl {
         return registry.register(name.getPath(), supplier);
     }
 
+    public static <T, E extends T> Supplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+        return register(name, supplier, reg);
+    }
+
     public static Supplier<SimpleParticleType> registerParticle(ResourceLocation name) {
-        return register(name, ()->new SimpleParticleType(true), Registry.PARTICLE_TYPE);
+        return register(name, () -> new SimpleParticleType(true), Registry.PARTICLE_TYPE);
     }
 
     public static <C extends AbstractContainerMenu> Supplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
-        return register(name, ()-> IForgeMenuType.create(containerFactory::apply), Registry.MENU);
+        return register(name, () -> IForgeMenuType.create(containerFactory::apply), Registry.MENU);
     }
 
     public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {
@@ -81,17 +83,11 @@ public class RegHelperImpl {
         return BlockEntityType.Builder.of(blockEntitySupplier::create, validBlocks).build(null);
     }
 
-    public static void registerCompostable(ItemLike item, float chance) {
-        ComposterBlock.COMPOSTABLES.put(item, chance);
-    }
-
     public static void registerItemBurnTime(Item item, int burnTime) {
     }
 
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
     }
-
-
 
 
 }

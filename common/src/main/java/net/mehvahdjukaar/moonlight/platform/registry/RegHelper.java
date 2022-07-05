@@ -26,10 +26,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -47,6 +44,14 @@ public class RegHelper {
 
     @ExpectPlatform
     public static <T, E extends T> Supplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+        throw new AssertionError();
+    }
+
+    /**
+     * Regiseters stuff immediately on fabric. Normal behavior for forge
+     */
+    @ExpectPlatform
+    public static <T, E extends T> Supplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
         throw new AssertionError();
     }
 
@@ -127,9 +132,9 @@ public class RegHelper {
     public interface BlockEntitySupplier<T extends BlockEntity> {
         @NotNull T create(BlockPos pos, BlockState state);
     }
-    @ExpectPlatform
+
     public static void registerCompostable(ItemLike name, float chance) {
-        throw new AssertionError();
+        ComposterBlock.COMPOSTABLES.put(name, chance);
     }
 
 

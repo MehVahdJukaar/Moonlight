@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.resources.DynamicLanguageHandler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,15 +72,19 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<Integer> define(String name, int defaultValue, int min, int max);
 
-    public abstract Supplier<String> define(String name, String defaultValue);
+    public abstract Supplier<String> define(String name, String defaultValue, Predicate<Object> validator);
 
-    public Supplier<List<String>> define(String name, List<String> defaultValue) {
+    public Supplier<String> define(String name, String defaultValue){
+        return define(name, defaultValue, s->true);
+    }
+
+    public <T extends String> Supplier<List<String>> define(String name,  List<? extends T> defaultValue) {
         return define(name, defaultValue, s -> true);
     }
 
     protected abstract String currentCategory();
 
-    public abstract <T extends String> Supplier<List<T>> define(String name, List<T> defaultValue, Predicate<T> predicate);
+    public abstract <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate);
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
@@ -122,4 +127,22 @@ public abstract class ConfigBuilder {
             this.currentKey = null;
         }
     }
+
+    public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;
+
+    public static final Predicate<Object> LIST_STRING_CHECK = (s) -> {
+        if (s instanceof List<?>) {
+            return ((Collection<?>) s).stream().allMatch(o -> o instanceof String);
+        }
+        return false;
+    };
+
+    public static final Predicate<Object> COLOR_CHECK = s -> {
+        try {
+            Integer.parseUnsignedInt(((String) s).replace("0x", ""), 16);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    };
 }

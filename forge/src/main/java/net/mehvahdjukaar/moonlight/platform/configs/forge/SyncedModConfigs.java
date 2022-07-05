@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.configs;
+package net.mehvahdjukaar.moonlight.platform.configs.forge;
 
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.network.ModMessages;

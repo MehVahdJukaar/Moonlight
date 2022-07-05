@@ -4,15 +4,20 @@ import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.platform.configs.fabric.values.ConfigValue;
 
+import java.util.function.Predicate;
+
 public class StringConfigValue extends ConfigValue<String> {
 
-    public StringConfigValue(String name, String defaultValue) {
+    private final Predicate<Object> validator;
+
+    public StringConfigValue(String name, String defaultValue, Predicate<Object> validator) {
         super(name, defaultValue);
+        this.validator = validator;
     }
 
     @Override
     public boolean isValid(String value) {
-        return true;
+        return validator.test(value);
     }
 
     @Override

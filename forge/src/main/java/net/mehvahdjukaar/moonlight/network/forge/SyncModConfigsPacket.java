@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.network.forge;
 
 import com.electronwill.nightconfig.toml.TomlFormat;
 import net.mehvahdjukaar.moonlight.Moonlight;
-import net.mehvahdjukaar.moonlight.configs.SyncedModConfigs;
+import net.mehvahdjukaar.moonlight.platform.configs.forge.SyncedModConfigs;
 import net.mehvahdjukaar.moonlight.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.platform.network.Message;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,14 +10,11 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
 
 import java.io.ByteArrayInputStream;
 import java.util.EnumMap;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public class SyncModConfigsPacket implements Message {
 
