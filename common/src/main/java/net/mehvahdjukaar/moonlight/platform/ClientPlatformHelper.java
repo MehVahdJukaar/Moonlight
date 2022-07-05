@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.platform;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -7,14 +8,19 @@ import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -30,7 +36,7 @@ public class ClientPlatformHelper {
     }
 
     @FunctionalInterface
-    public interface ParticleEvent{
+    public interface ParticleEvent {
         <P extends ParticleType<T>, T extends ParticleOptions> void register(Supplier<P> particleType, ParticleFactory<T> factory);
     }
 
@@ -80,5 +86,8 @@ public class ClientPlatformHelper {
         throw new AssertionError();
     }
 
-
+    @ExpectPlatform
+    public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate, Level world, BlockPos blockpos, BlockRenderDispatcher blockRenderer) {
+        throw new AssertionError();
+    }
 }

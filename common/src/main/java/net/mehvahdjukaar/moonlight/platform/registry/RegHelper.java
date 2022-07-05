@@ -109,6 +109,7 @@ public class RegHelper {
         return registerEntityType(name, factory, category, width, height, 5);
     }
 
+    //not needed?
     public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
                                                                                 MobCategory category, float width,
                                                                                 float height, int clientTrackingRange) {
@@ -120,6 +121,10 @@ public class RegHelper {
                                                                                 MobCategory category, float width, float height,
                                                                                 int clientTrackingRange, int updateInterval) {
         throw new AssertionError();
+    }
+
+    public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name,Supplier<EntityType<T>> type){
+        return register(name, type,Registry.ENTITY_TYPE);
     }
 
 
