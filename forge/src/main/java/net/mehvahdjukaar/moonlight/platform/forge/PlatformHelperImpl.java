@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableBiMap;
 import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
@@ -26,6 +27,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
@@ -116,6 +118,10 @@ public class PlatformHelperImpl {
     @Nullable
     public static MinecraftServer getCurrentServer() {
         return ServerLifecycleHooks.getCurrentServer();
+    }
+
+    public static Packet<?> getEntitySpawnPacket(Entity entity) {
+        return NetworkHooks.getEntitySpawningPacket(entity);
     }
 
 

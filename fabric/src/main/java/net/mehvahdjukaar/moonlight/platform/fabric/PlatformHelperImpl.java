@@ -1,19 +1,25 @@
 package net.mehvahdjukaar.moonlight.platform.fabric;
 
+import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
+import net.mehvahdjukaar.moonlight.network.ClientBoundSpawnCustomEntityPacket;
+import net.mehvahdjukaar.moonlight.network.ModMessages;
 import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.platform.configs.fabric.ConfigBuilderImpl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
@@ -108,6 +114,13 @@ public class PlatformHelperImpl {
     @Nullable
     public static MinecraftServer getCurrentServer() {
         return MoonlightFabric.currentServer;
+    }
+
+    public static Packet<?> getEntitySpawnPacket(Entity entity) {
+        var packet = new ClientBoundSpawnCustomEntityPacket(entity);
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        packet.writeToBuffer(buf);
+        return ServerPlayNetworking.createS2CPacket(ModMessages.SPAWN_PACKET_ID, buf);
     }
 
 

@@ -4,6 +4,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.platform.configs.ConfigBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
@@ -148,6 +149,11 @@ public class PlatformHelper {
 
     @ExpectPlatform
     public static int getBurnTime(ItemStack stack) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static Packet<?> getEntitySpawnPacket(Entity entity){
         throw new AssertionError();
     }
 }
