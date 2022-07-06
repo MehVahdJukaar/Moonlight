@@ -36,9 +36,9 @@
     "modmenu": {
       "links": {
         "modmenu.discord": "https://discord.com/invite/qdKRTDf8Cv",
-        "randomium.patreon": "https://www.patreon.com/user?u=53696377"
+        "moonlight.patreon": "https://www.patreon.com/user?u=53696377"
       },
-      "badges": [ "library"]
+      "badges": ["library"]
     }
   }
 }

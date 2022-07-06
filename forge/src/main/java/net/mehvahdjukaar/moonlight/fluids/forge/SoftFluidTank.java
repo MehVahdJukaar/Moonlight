@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.fluids.forge;
 
 import net.mehvahdjukaar.moonlight.client.SoftFluidClient;
+import net.mehvahdjukaar.moonlight.fluids.ISoftFluidTank;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.fluids.VanillaSoftFluids;
@@ -37,7 +38,7 @@ import java.util.List;
  * instance this fluid tank in your tile entity
  */
 @SuppressWarnings("unused")
-public class SoftFluidTank {
+public class SoftFluidTank implements ISoftFluidTank {
 
     private static final String POTION_TYPE_KEY = "Bottle";
     public static final int BOTTLE_COUNT = 1;
@@ -652,7 +653,7 @@ public class SoftFluidTank {
      *
      * @param other other tank
      */
-    public void copy(SoftFluidTank other) {
+    public void copy(ISoftFluidTank other) {
         this.setFluid(other.getFluid(), other.getNbt());
         this.setCount((int) Math.min(this.capacity, other.getCount()));
     }

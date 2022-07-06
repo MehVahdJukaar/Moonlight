@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.fluids.fabric;
 
 import net.mehvahdjukaar.moonlight.client.SoftFluidClient;
+import net.mehvahdjukaar.moonlight.fluids.ISoftFluidTank;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.fluids.VanillaSoftFluids;
@@ -23,10 +24,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.IFluidTypeRenderProperties;
-import net.minecraftforge.client.RenderProperties;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -37,7 +34,7 @@ import java.util.List;
  * instance this fluid tank in your tile entity
  */
 @SuppressWarnings("unused")
-public class SoftFluidTank {
+public class SoftFluidTank implements ISoftFluidTank {
 
     private static final String POTION_TYPE_KEY = "Bottle";
     public static final int BOTTLE_COUNT = 1;
@@ -285,27 +282,6 @@ public class SoftFluidTank {
         return tryFillingItem(Items.BOWL, world, pos, false);
     }
 
-    /**
-     * checks if current tank holds equivalent fluid as provided forge fluids stack & nbt
-     *
-     * @param fluidStack forge fluid stack
-     * @param com        fluid nbt
-     * @return is same
-     */
-    public boolean isSameFluidAs(FluidStack fluidStack, CompoundTag com) {
-        return this.fluid.isEquivalent(fluidStack.getFluid()) && areNbtEquals(com, this.nbt);
-    }
-
-    /**
-     * checks if current tank holds equivalent fluid as provided forge fluids stack
-     *
-     * @param fluidStack forge fluid stack
-     * @return is same
-     */
-    //might be wrong
-    public boolean isSameFluidAs(FluidStack fluidStack) {
-        return isSameFluidAs(fluidStack, fluidStack.getTag());
-    }
 
     private boolean areNbtEquals(CompoundTag nbt, CompoundTag nbt1) {
         if ((nbt == null || nbt.isEmpty()) && (nbt1 == null || nbt1.isEmpty())) return true;
@@ -342,18 +318,6 @@ public class SoftFluidTank {
      */
     public boolean isSameFluidAs(SoftFluid other, @Nullable CompoundTag com) {
         return this.fluid.equals(other) && areNbtEquals(this.nbt, com);
-    }
-
-    /**
-     * try adding provided forge fluid to the tank
-     *
-     * @param fluidStack forge fluid stack
-     * @return success
-     */
-    public boolean tryAddingFluid(FluidStack fluidStack) {
-        int count = fluidStack.getAmount();
-        SoftFluid s = SoftFluidRegistry.fromForgeFluid(fluid.getForgeFluid());
-        return tryAddingFluid(s, count, fluidStack.getTag());
     }
 
     /**
@@ -418,89 +382,6 @@ public class SoftFluidTank {
             }
         }
         return false;
-    }
-
-    /**
-     * empties n bottle of content into said forge fluid tank
-     *
-     * @param fluidDestination forge fluid tank handler
-     * @param bottles          number of bottles to empty (1blt = 250mb)
-     * @return success
-     */
-    public boolean tryTransferToFluidTank(IFluidHandler fluidDestination, int bottles) {
-        if (!this.canRemove(bottles)) return false;
-        int milliBuckets = bottles * 250;
-        FluidStack stack = this.toEquivalentForgeFluid(milliBuckets);
-        if (!stack.isEmpty()) {
-            int fillableAmount = fluidDestination.fill(stack, IFluidHandler.FluidAction.SIMULATE);
-            if (fillableAmount == milliBuckets) {
-                fluidDestination.fill(stack, IFluidHandler.FluidAction.EXECUTE);
-                this.shrink(bottles);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean tryTransferToFluidTank(IFluidHandler fluidDestination) {
-        return this.tryTransferToFluidTank(fluidDestination, BOTTLE_COUNT);
-    }
-
-    //drains said fluid tank of 250mb (1 bottle) of fluid
-    public boolean drainFluidTank(IFluidHandler fluidSource, int bottles) {
-        if (!this.canAdd(bottles)) return false;
-        int milliBuckets = bottles * 250;
-        FluidStack drainable = fluidSource.drain(milliBuckets, IFluidHandler.FluidAction.SIMULATE);
-        if (!drainable.isEmpty() && drainable.getAmount() == milliBuckets) {
-            boolean transfer = false;
-            CompoundTag fsTag = drainable.getTag();
-            if (this.fluid.isEmpty()) {
-                this.setFluid(SoftFluidRegistry.fromForgeFluid(drainable.getFluid()), fsTag);
-                transfer = true;
-            } else if (this.isSameFluidAs(drainable, fsTag)) {
-                transfer = true;
-            }
-            if (transfer) {
-                fluidSource.drain(milliBuckets, IFluidHandler.FluidAction.EXECUTE);
-                this.grow(bottles);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean drainFluidTank(IFluidHandler fluidSource) {
-        return this.drainFluidTank(fluidSource, BOTTLE_COUNT);
-    }
-
-    /**
-     * gets the equivalent forge fluid without draining the tank. returned stack might be empty
-     *
-     * @param mb forge minecraft buckets
-     * @return forge fluid stacks
-     */
-    public FluidStack toEquivalentForgeFluid(int mb) {
-        FluidStack stack = new FluidStack(this.fluid.getForgeFluid(), mb);
-        this.applyNBTtoFluidStack(stack);
-        return stack;
-    }
-
-    private void applyNBTtoFluidStack(FluidStack fluidStack) {
-        List<String> nbtKey = this.fluid.getNbtKeyFromItem();
-        if (this.nbt != null && !this.nbt.isEmpty() && !fluidStack.isEmpty() && nbtKey != null) {
-            CompoundTag newCom = new CompoundTag();
-            for (String k : nbtKey) {
-                //special case to convert to IE pot fluid
-                if (k.equals(POTION_TYPE_KEY) && Utils.getID(fluidStack.getFluid()).getNamespace().equals("immersiveengineering")) {
-                    continue;
-                }
-                Tag c = this.nbt.get(k);
-                if (c != null) {
-                    newCom.put(k, c);
-                }
-            }
-            if (!newCom.isEmpty()) fluidStack.setTag(newCom);
-        }
     }
 
     /**
@@ -652,32 +533,11 @@ public class SoftFluidTank {
      *
      * @param other other tank
      */
-    public void copy(SoftFluidTank other) {
+    public void copy(ISoftFluidTank other) {
         this.setFluid(other.getFluid(), other.getNbt());
         this.setCount((int) Math.min(this.capacity, other.getCount()));
     }
 
-    /**
-     * copies the content of a fluid tank into this
-     *
-     * @param other forge fluid tank
-     */
-    public void copy(IFluidHandler other) {
-        FluidStack drainable = other.getFluidInTank(0).copy();// 250, IFluidHandler.FluidAction.SIMULATE);
-        CompoundTag nbt = drainable.isEmpty() ? null : drainable.getTag();
-        this.setFluid(SoftFluidRegistry.fromForgeFluid(drainable.getFluid()), nbt);
-        this.setCount((int) Math.min(this.capacity, other.getTankCapacity(0)));
-    }
-
-    /**
-     * fills to max capacity with provided forge fluid
-     *
-     * @param fluidStack forge fluid
-     */
-    public void fill(FluidStack fluidStack) {
-        this.setFluid(fluidStack);
-        this.fillCount();
-    }
 
     /**
      * fills to max capacity with provided soft fluid
@@ -699,15 +559,6 @@ public class SoftFluidTank {
         this.fillCount();
     }
 
-    /**
-     * sets current fluid to provided forge fluid equivalent
-     *
-     * @param fluidStack forge fluid
-     */
-    public void setFluid(FluidStack fluidStack) {
-        SoftFluid s = SoftFluidRegistry.fromForgeFluid(fluidStack.getFluid());
-        this.setFluid(s, fluidStack.getTag());
-    }
 
     /**
      * sets current fluid to provided soft fluid equivalent
@@ -721,7 +572,7 @@ public class SoftFluidTank {
     //called when it goes from empty to full
     public void setFluid(@NotNull SoftFluid fluid, @Nullable CompoundTag nbt) {
         this.fluid = fluid;
-        if(fluid == null){
+        if (fluid == null) {
             int a = 1;
         }
         this.nbt = null;
@@ -779,14 +630,6 @@ public class SoftFluidTank {
         } else {
             Fluid f = this.fluid.getForgeFluid();
             if (f != Fluids.EMPTY) {
-                var prop = RenderProperties.get(f);
-                if (prop != IFluidTypeRenderProperties.DUMMY) {
-                    //world accessor
-                    int w;
-                    //stack accessor
-                    w = prop.getColorTint(this.toEquivalentForgeFluid(1));
-                    if (w != -1) this.specialColor = w;
-                }
             }
         }
 

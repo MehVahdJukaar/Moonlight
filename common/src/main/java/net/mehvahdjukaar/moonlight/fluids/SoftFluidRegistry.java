@@ -26,12 +26,12 @@ public class SoftFluidRegistry {
 
 
     @ExpectPlatform
-    public static HashMap<Fluid, SoftFluid> getFluidsMap() {
+    public static Map<Fluid, SoftFluid> getFluidsMap() {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static HashMap<Item, SoftFluid> getItemsMap() {
+    public static Map<Item, SoftFluid> getItemsMap() {
         throw new AssertionError();
     }
 
