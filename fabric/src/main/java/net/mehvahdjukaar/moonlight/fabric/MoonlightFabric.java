@@ -23,12 +23,13 @@ public class MoonlightFabric implements ModInitializer {
         Moonlight.commonRegistration();
 
         //TODO: fix this and move at a later stage
-        RegHelperImpl.registerEntries();
+
 
         ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStarting);
     }
 
     public static void onCommonSetup() {
+        RegHelperImpl.registerEntries();
         BlockSetManagerImpl.registerEntries();
         Moonlight.commonSetup();
     }

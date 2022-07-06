@@ -22,11 +22,12 @@ public class Moonlight {
     //called either on mod creation
     public static void commonInit() {
         ModMessages.registerMessages();
+        VillagerAIManager.init();
     }
 
     //mod registration
     public static void commonRegistration() {
-        VillagerAIManager.init();
+
     }
 
     //mod setup

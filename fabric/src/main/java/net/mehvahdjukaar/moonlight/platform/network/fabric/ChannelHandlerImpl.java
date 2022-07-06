@@ -1,10 +1,11 @@
 package net.mehvahdjukaar.moonlight.platform.network.fabric;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
-import net.mehvahdjukaar.moonlight.platform.network.Message;
 import net.mehvahdjukaar.moonlight.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.platform.network.Message;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,7 +43,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
                     res, (server, player, h, buf, r) -> server.execute(() ->
                             decoder.apply(buf).handle(new Wrapper(player, direction))));
         } else {
-            if(PlatformHelper.getEnv().isClient()) FabricClientNetwork.register(res, decoder);
+            if (PlatformHelper.getEnv().isClient()) FabricClientNetwork.register(res, decoder);
         }
     }
 
@@ -77,5 +78,10 @@ public class ChannelHandlerImpl extends ChannelHandler {
         // }
     }
 
-
+    @Override
+    public void sendToServer(Message message) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        message.writeToBuffer(buf);
+        ClientPlayNetworking.send(ID_MAP.get(message.getClass()), buf);
+    }
 }

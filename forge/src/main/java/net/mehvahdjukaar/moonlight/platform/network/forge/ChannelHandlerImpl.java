@@ -80,4 +80,8 @@ public class ChannelHandlerImpl extends ChannelHandler{
         channel.send(PacketDistributor.PLAYER.with(() -> serverPlayer),message);
     }
 
+    @Override
+    public void sendToServer(Message message) {
+        channel.sendToServer(message);
+    }
 }

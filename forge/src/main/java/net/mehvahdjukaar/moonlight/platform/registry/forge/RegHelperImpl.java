@@ -42,7 +42,8 @@ public class RegHelperImpl {
             Registry.RECIPE_SERIALIZER, ForgeRegistries.RECIPE_SERIALIZERS,
             Registry.MOB_EFFECT, ForgeRegistries.MOB_EFFECTS,
             Registry.ENCHANTMENT, ForgeRegistries.ENCHANTMENTS,
-            Registry.FEATURE, ForgeRegistries.FEATURES
+            Registry.FEATURE, ForgeRegistries.FEATURES,
+            Registry.SCHEDULE, ForgeRegistries.SCHEDULES
     );
 
     @SuppressWarnings("unchecked")
@@ -52,7 +53,9 @@ public class RegHelperImpl {
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
 
-            DeferredRegister<T> r = (DeferredRegister<T>) DeferredRegister.create(REG_TO_FR.get(reg), modId);
+            var forgeReg = REG_TO_FR.get(reg);
+            if(forgeReg == null)throw new UnsupportedOperationException("Registry "+reg+" not supported");
+            DeferredRegister<T> r = (DeferredRegister<T>) DeferredRegister.create(forgeReg, modId);
             var bus = FMLJavaModLoadingContext.get().getModEventBus();
             r.register(bus);
             return r;

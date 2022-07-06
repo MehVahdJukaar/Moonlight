@@ -61,32 +61,32 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
-        maybeAddComment(this.tooltipKey(name));
+        maybeAddComment(name);
 
         return builder.translation(translationKey(name)).define(name, defaultValue);
     }
 
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
-        maybeAddComment(this.tooltipKey(name));
+        maybeAddComment(name);
         return builder.translation(translationKey(name)).defineInRange(name, defaultValue, min, max);
     }
 
     @Override
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
-        maybeAddComment(this.tooltipKey(name));
+        maybeAddComment(name);
         return builder.translation(translationKey(name)).defineInRange(name, defaultValue, min, max);
     }
 
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
-        maybeAddComment(this.tooltipKey(name));
+        maybeAddComment(name);
         return builder.translation(translationKey(name)).define(name, defaultValue, validator);
     }
 
     @Override
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
-        maybeAddComment(this.tooltipKey(name));
+        maybeAddComment(name);
            var value = builder.translation(translationKey(name)).defineList(name, defaultValue, predicate);
             return ()-> (List<String>) value.get();
     }
@@ -94,7 +94,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
-        maybeAddComment(this.tooltipKey(name));
+        maybeAddComment(name);
         return builder.translation(translationKey(name)).defineEnum(name, defaultValue);
     }
 

@@ -113,7 +113,7 @@ public class BlockSetManagerImpl {
             var itemQueue = registrationQueues.getSecond();
             itemQueue.forEach(q -> q.accept(fr::register));
         }
-        //clears stuff that's been execured. not really needed but just to be safe its here
+        //clears stuff that's been executed. not really needed but just to be safe its here
         LATE_REGISTRATION_QUEUE.remove(modId);
     }
 

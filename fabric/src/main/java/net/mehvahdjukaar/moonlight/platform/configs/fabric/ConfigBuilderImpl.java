@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.platform.configs.fabric;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.mehvahdjukaar.moonlight.client.language.LangBuilder;
 import net.mehvahdjukaar.moonlight.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.platform.configs.fabric.values.*;
 import net.minecraft.resources.ResourceLocation;
@@ -19,9 +20,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return new ConfigBuilderImpl(name, type);
     }
 
-    private final Map<String, String> comments = new HashMap<>();
-    private String currentComment;
-    private String currentKey;
 
     private final ImmutableList.Builder<ConfigCategory> categoriesBuilder = new ImmutableList.Builder<>();
     private Pair<String, ImmutableList.Builder<ConfigEntry>> currentCategoryBuilder;
@@ -71,25 +69,28 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return this;
     }
 
+    private void doAddConfig(String name, ConfigValue<?> config) {
+        config.setDescriptionKey(this.tooltipKey(name));
+        config.setTranslationKey(this.translationKey(name));
+        maybeAddComment(name);
+        this.currentCategoryBuilder.getSecond().add(config);
+    }
+
+
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
         assert currentCategoryBuilder != null;
         var config = new BoolConfigValue(name, defaultValue);
-        config.setDescriptionKey(this.tooltipKey(name));
-        config.setTranslationKey(this.translationKey(name));
-        maybeAddComment(this.tooltipKey(name));
-        this.currentCategoryBuilder.getSecond().add(config);
+        doAddConfig(name, config);
         return config;
     }
+
 
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
         assert currentCategoryBuilder != null;
         var config = new DoubleConfigValue(name, defaultValue, min, max);
-        config.setDescriptionKey(this.tooltipKey(name));
-        config.setTranslationKey(this.translationKey(name));
-        maybeAddComment(this.tooltipKey(name));
-        this.currentCategoryBuilder.getSecond().add(config);
+        doAddConfig(name, config);
         return config;
     }
 
@@ -97,10 +98,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
         assert currentCategoryBuilder != null;
         var config = new IntConfigValue(name, defaultValue, min, max);
-        config.setDescriptionKey(this.tooltipKey(name));
-        config.setTranslationKey(this.translationKey(name));
-        maybeAddComment(this.tooltipKey(name));
-        this.currentCategoryBuilder.getSecond().add(config);
+        doAddConfig(name, config);
         return config;
     }
 
@@ -108,10 +106,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         assert currentCategoryBuilder != null;
         var config = new StringConfigValue(name, defaultValue, validator);
-        config.setDescriptionKey(this.tooltipKey(name));
-        config.setTranslationKey(this.translationKey(name));
-        maybeAddComment(this.tooltipKey(name));
-        this.currentCategoryBuilder.getSecond().add(config);
+        doAddConfig(name, config);
         return config;
     }
 
@@ -119,10 +114,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate){
         assert currentCategoryBuilder != null;
         var config = new ListStringConfigValue<>(name, (List<String>) defaultValue, predicate);
-        config.setDescriptionKey(this.tooltipKey(name));
-        config.setTranslationKey(this.translationKey(name));
-        maybeAddComment(this.tooltipKey(name));
-        this.currentCategoryBuilder.getSecond().add(config);
+        doAddConfig(name, config);
         return config;
     }
 
@@ -130,11 +122,13 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
         assert currentCategoryBuilder != null;
         var config = new EnumConfigValue<>(name, defaultValue);
-        config.setDescriptionKey(this.tooltipKey(name));
-        config.setTranslationKey(this.translationKey(name));
-        maybeAddComment(this.tooltipKey(name));
-        this.currentCategoryBuilder.getSecond().add(config);
+        doAddConfig(name, config);
         return config;
     }
 
+    @Override
+    protected void maybeAddComment(String name) {
+        comments.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        super.maybeAddComment(name);
+    }
 }

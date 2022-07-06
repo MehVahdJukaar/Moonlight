@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.platform.configs;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.client.language.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.resources.DynamicLanguageHandler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +14,7 @@ import java.util.function.Supplier;
 
 public abstract class ConfigBuilder {
 
-    private final Map<String, String> comments = new HashMap<>();
+    protected final Map<String, String> comments = new HashMap<>();
     private String currentComment;
     private String currentKey;
 
@@ -32,8 +31,8 @@ public abstract class ConfigBuilder {
         this.name = name.getPath();
         this.modId = name.getNamespace();
         this.type = type;
-        DynamicLanguageHandler.addListener(e->{
-            if(e.isDefault()) comments.forEach(e::addEntry);
+        DynamicLanguageHandler.addListener(e -> {
+            if (e.isDefault()) comments.forEach(e::addEntry);
         });
     }
 
@@ -74,11 +73,11 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<String> define(String name, String defaultValue, Predicate<Object> validator);
 
-    public Supplier<String> define(String name, String defaultValue){
-        return define(name, defaultValue, s->true);
+    public Supplier<String> define(String name, String defaultValue) {
+        return define(name, defaultValue, s -> true);
     }
 
-    public <T extends String> Supplier<List<String>> define(String name,  List<? extends T> defaultValue) {
+    public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue) {
         return define(name, defaultValue, s -> true);
     }
 
@@ -98,9 +97,10 @@ public abstract class ConfigBuilder {
     }
 
     public String tooltipKey(String name) {
-        return "config." + this.modId + "." + currentCategory() + "." + name+ ".description";
+        return "config." + this.modId + "." + currentCategory() + "." + name + ".description";
     }
-    public String translationKey(String name){
+
+    public String translationKey(String name) {
         return "config." + this.modId + "." + currentCategory() + "." + name;
     }
 
@@ -109,19 +109,22 @@ public abstract class ConfigBuilder {
      * Try not to use this. Just here to make porting easier
      * Will add entries manually to the english language file
      */
-    public ConfigBuilder comment(String comment){
+    public ConfigBuilder comment(String comment) {
         this.currentComment = comment;
-        if(this.currentComment != null && this.currentKey != null){
+        if (this.currentComment != null && this.currentKey != null) {
             comments.put(currentKey, currentComment);
             this.currentComment = null;
             this.currentKey = null;
         }
         return this;
-    };
+    }
 
-    protected void maybeAddComment(String translationKey){
-                  this.currentKey = translationKey;
-        if(this.currentComment != null && this.currentKey != null){
+    ;
+
+    protected void maybeAddComment(String name) {
+        var tooltipKey = this.tooltipKey(name);
+        this.currentKey = tooltipKey;
+        if (this.currentComment != null && this.currentKey != null) {
             comments.put(currentKey, currentComment);
             this.currentComment = null;
             this.currentKey = null;

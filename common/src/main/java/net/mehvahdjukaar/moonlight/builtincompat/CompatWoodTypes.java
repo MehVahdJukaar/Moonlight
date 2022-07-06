@@ -3,6 +3,8 @@ package net.mehvahdjukaar.moonlight.builtincompat;
 import net.mehvahdjukaar.moonlight.block_set.BlockSetManager;
 import net.mehvahdjukaar.moonlight.block_set.wood.WoodType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 public class CompatWoodTypes {
 
@@ -47,11 +49,25 @@ public class CompatWoodTypes {
         BlockSetManager.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "habitat", "fairy_ring_mushroom", "fairy_ring_mushroom_planks", "enhanced_fairy_ring_mushroom_stem"));
 
-        var azalea = WoodType.Finder.simple(
+        var floweringAzalea = WoodType.Finder.simple(
                 "ecologics", "flowering_azalea", "flowering_azalea_planks", "flowering_azalea_log");
-        azalea.addChild("stripped_log", "stripped_azalea_log");
+        floweringAzalea.addChild("stripped_log", "stripped_azalea_log");
+        floweringAzalea.addChild("leaves", new ResourceLocation("minecraft:flowering_azalea_leaves"));
+
+        BlockSetManager.addBlockTypeFinder(WoodType.class, floweringAzalea);
+
+
+        var azalea = WoodType.Finder.simple(
+                "ecologics", "azalea", "azalea_planks", "azalea_log");
+        azalea.addChild("leaves", new ResourceLocation("minecraft:azalea_leaves"));
+
         BlockSetManager.addBlockTypeFinder(WoodType.class, azalea);
 
+        var quarkAzalea = WoodType.Finder.simple(
+                "quark", "azalea", "azalea_planks", "azalea_log");
+        quarkAzalea.addChild("leaves", new ResourceLocation("minecraft:azalea_leaves"));
+
+        BlockSetManager.addBlockTypeFinder(WoodType.class, quarkAzalea);
 
     }
 }

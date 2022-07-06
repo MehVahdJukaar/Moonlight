@@ -30,11 +30,11 @@ dependencies {
 
 
     //implementation fg.deobf("curse.maven:cloth-config-348521:3782775")
-    modImplementation(include("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}")) {
+    modImplementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
         exclude group: 'net.fabricmc.fabric-api'
     }
     // modImplementation(include("curse.maven:modmenu-308702:3850113"))
-    modImplementation(include("com.terraformersmc:modmenu:${project.modmenu_version}"))
+    modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
 
 
 

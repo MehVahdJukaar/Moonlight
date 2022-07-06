@@ -39,4 +39,6 @@ public abstract class ChannelHandler {
     }
 
     public abstract void sendToPlayerClient(ServerPlayer serverPlayer, Message message);
+
+    public abstract void sendToServer(Message message);
 }

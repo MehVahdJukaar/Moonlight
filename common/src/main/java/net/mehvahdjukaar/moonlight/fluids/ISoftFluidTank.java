@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.fluids;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.client.SoftFluidClient;
 import net.mehvahdjukaar.moonlight.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.util.Utils;
@@ -31,6 +32,12 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public interface ISoftFluidTank {
+
+    @ExpectPlatform
+    public static ISoftFluidTank create(int capacity){
+        throw new AssertionError();
+    }
+
     //TODO: add default methods here
     /**
      * call this method from your block when player interacts. tries to fill or empty current held item in tank

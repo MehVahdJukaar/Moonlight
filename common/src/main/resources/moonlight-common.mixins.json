@@ -13,6 +13,7 @@
   "mixins": [
     "CreativeModeTabMixin",
     "GrindstoneMenuSlotMixin",
+    "LevelChunkMixin",
     "MapDataMixin",
     "MapExtendingRecipeMixin",
     "MapItemMixin",
