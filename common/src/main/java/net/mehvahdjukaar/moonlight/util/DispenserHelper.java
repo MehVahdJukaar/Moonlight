@@ -2,9 +2,9 @@ package net.mehvahdjukaar.moonlight.util;
 
 /*
 import net.mehvahdjukaar.moonlight.fluids.FluidContainerList;
-import net.mehvahdjukaar.moonlight.fluids.ISoftFluidTank;
+import net.mehvahdjukaar.moonlight.fluids.fabric.ISoftFluidTank;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
-import net.mehvahdjukaar.moonlight.fluids.SoftFluidTank;
+import net.mehvahdjukaar.moonlight.fluids.fabric.SoftFluidTank;
 
  */
 import net.mehvahdjukaar.moonlight.mixins.accessor.DispenserBlockAccessor;

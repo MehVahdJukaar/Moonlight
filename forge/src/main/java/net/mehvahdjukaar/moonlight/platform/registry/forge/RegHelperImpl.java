@@ -41,7 +41,8 @@ public class RegHelperImpl {
             Registry.BLOCK_ENTITY_TYPE, ForgeRegistries.BLOCK_ENTITIES,
             Registry.RECIPE_SERIALIZER, ForgeRegistries.RECIPE_SERIALIZERS,
             Registry.MOB_EFFECT, ForgeRegistries.MOB_EFFECTS,
-            Registry.ENCHANTMENT, ForgeRegistries.ENCHANTMENTS
+            Registry.ENCHANTMENT, ForgeRegistries.ENCHANTMENTS,
+            Registry.FEATURE, ForgeRegistries.FEATURES
     );
 
     @SuppressWarnings("unchecked")

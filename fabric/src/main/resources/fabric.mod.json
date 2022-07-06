@@ -3,15 +3,15 @@
   "id": "moonlight",
   "version": "${version}",
   "name": "Moonlight Library",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Custom Villagers AI and Map Markers, First and third person item animations, dynamic assets and registration & more",
   "authors": [
-    "Me!"
+    "MehVahdJukaar"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/selene",
+    "sources": "https://github.com/MehVahdJukaar/Moonlight"
   },
-  "license": "Insert License Here",
+  "license": "ARR",
   "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
@@ -31,5 +31,14 @@
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.19"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.com/invite/qdKRTDf8Cv",
+        "randomium.patreon": "https://www.patreon.com/user?u=53696377"
+      },
+      "badges": [ "library"]
+    }
   }
 }

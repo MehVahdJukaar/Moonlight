@@ -113,3 +113,14 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
 }
 */
 //TODO: disabled
+
+import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
+
+public  class SoftFluidClient{
+    public static int get(SoftFluid fluid) {
+        return 0;
+    }
+
+    public static void refresh() {
+    }
+}

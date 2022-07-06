@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[40,)"
 #issueTrackerURL = ""
-license = "Insert License Here"
+license = "ARR"
 
 
 [[mods]]

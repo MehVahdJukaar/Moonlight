@@ -11,6 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -68,7 +69,7 @@ public class Utils {
     }
 
     //xp bottle logic
-    public static int getXPinaBottle(int bottleCount, Random rand) {
+    public static int getXPinaBottle(int bottleCount, RandomSource rand) {
         int xp = 0;
         for (int i = 0; i < bottleCount; i++) xp += (3 + rand.nextInt(5) + rand.nextInt(5));
         return xp;

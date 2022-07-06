@@ -1,9 +1,11 @@
 package net.mehvahdjukaar.moonlight.misc;
 
+import com.google.common.base.Suppliers;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
+//why is this even needed. use Supplier.memorize
 public class Lazy<T> implements Supplier<T> {
 
     private Supplier<T> supplier;
