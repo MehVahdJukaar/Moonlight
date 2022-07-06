@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.moonlight.impl.items;
 
+import com.google.common.base.Suppliers;
 import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.block_set.BlockType;
-import net.mehvahdjukaar.moonlight.misc.Lazy;
 import net.mehvahdjukaar.moonlight.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.platform.registry.RegHelper;
 import net.minecraft.world.item.CreativeModeTab;
@@ -11,17 +11,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 public class BlockTypeBasedItem<T extends BlockType> extends Item {
 
     private final T blockType;
-    private final Lazy<Integer> burnTime;
+    private final Supplier<Integer> burnTime;
     private boolean init = false;
 
     public BlockTypeBasedItem(Properties pProperties, T blockType) {
         super(pProperties);
 
         this.blockType = blockType;
-        this.burnTime = Lazy.of(() -> PlatformHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance()));
+        this.burnTime = Suppliers.memoize(() -> PlatformHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance()));
     }
 
     // @Override

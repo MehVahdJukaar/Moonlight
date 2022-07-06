@@ -31,6 +31,7 @@ public class BlockSetManagerImpl {
 
     public static void registerEntries() {
         for(var e : BLOCK_QUEUE.entrySet()){
+
             registerQueue(e.getKey(), e.getValue(), Registry.BLOCK);
         }
         for(var e : ITEM_QUEUE.entrySet()){

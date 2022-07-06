@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.moonlight.fluids;
 
+import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.misc.Lazy;
 import net.mehvahdjukaar.moonlight.misc.Triplet;
 import net.mehvahdjukaar.moonlight.util.Utils;
 import net.minecraft.core.Registry;
@@ -20,6 +20,7 @@ import net.minecraft.world.level.material.Fluids;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -83,7 +84,7 @@ public class SoftFluid {
     }
 
     //better to call registry directly. Here we cache the name
-    private final Lazy<ResourceLocation> cachedID = Lazy.of(() -> SoftFluidRegistry.getID(this));
+    private final Supplier<ResourceLocation> cachedID = Suppliers.memoize(() -> SoftFluidRegistry.getID(this));
 
     @Deprecated
     public ResourceLocation getRegistryName() {
