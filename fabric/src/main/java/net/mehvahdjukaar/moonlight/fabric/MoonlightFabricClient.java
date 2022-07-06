@@ -20,14 +20,9 @@ public class MoonlightFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         MoonlightClient.initClient();
-        MoonlightClient.onRegisterEntityRenderTypes(EntityRendererRegistry::register);
-        MoonlightClient.onRegisterBlockColors(ColorProviderRegistry.BLOCK::register);
-        MoonlightClient.onRegisterItemColors(ColorProviderRegistry.ITEM::register);
-        MoonlightClient.onRegisterParticles(MoonlightFabricClient::registerParticle);
+
+
     }
 
-    private static <T extends ParticleOptions> void registerParticle(ParticleType<T> type, Function<SpriteSet,
-            ParticleProvider<T>> registration) {
-        ParticleFactoryRegistry.getInstance().register(type,registration::apply);
-    }
+
 }

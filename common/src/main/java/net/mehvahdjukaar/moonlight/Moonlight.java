@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight;
 
 import net.mehvahdjukaar.moonlight.network.ModMessages;
 import net.mehvahdjukaar.moonlight.platform.registry.RegHelper;
+import net.mehvahdjukaar.moonlight.villager_ai.VillagerAIManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -25,7 +26,7 @@ public class Moonlight {
 
     //mod registration
     public static void commonRegistration() {
-
+        VillagerAIManager.init();
     }
 
     //mod setup

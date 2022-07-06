@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "moonlight",
   "version": "${version}",
-  "name": "Moonlight Library",
+  "name": "Moonlight",
   "description": "Custom Villagers AI and Map Markers, First and third person item animations, dynamic assets and registration & more",
   "authors": [
     "MehVahdJukaar"
@@ -20,8 +20,6 @@
     ],
     "client": [
       "net.mehvahdjukaar.moonlight.fabric.MoonlightFabricClient"
-    ],
-    "modmenu": [
     ]
   },
   "mixins": [
@@ -34,10 +32,6 @@
   },
   "custom": {
     "modmenu": {
-      "links": {
-        "modmenu.discord": "https://discord.com/invite/qdKRTDf8Cv",
-        "moonlight.patreon": "https://www.patreon.com/user?u=53696377"
-      },
       "badges": ["library"]
     }
   }

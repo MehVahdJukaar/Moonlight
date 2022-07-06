@@ -26,33 +26,4 @@ public class MoonlightForgeClient {
         MoonlightClient.initClient();
     }
 
-    @SubscribeEvent
-    public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        MoonlightClient.onRegisterEntityRenderTypes(event::registerEntityRenderer);
-    }
-
-    @SubscribeEvent
-    public static void registerBlockColors(ColorHandlerEvent.Block event) {
-        var colors = event.getBlockColors();
-        MoonlightClient.onRegisterBlockColors(colors::register);
-    }
-
-    @SubscribeEvent
-    public static void registerItemColors(ColorHandlerEvent.Item event) {
-        var colors = event.getItemColors();
-        MoonlightClient.onRegisterItemColors(colors::register);
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void registerParticles(ParticleFactoryRegisterEvent event) {
-        MoonlightClient.onRegisterParticles(MoonlightForgeClient::registerParticle);
-    }
-
-    private static <T extends ParticleOptions> void registerParticle(ParticleType<T> type, Function<SpriteSet,
-            ParticleProvider<T>> registration) {
-        ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
-        particleEngine.register(type, registration::apply);
-    }
-
-
 }

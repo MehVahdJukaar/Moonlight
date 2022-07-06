@@ -19,6 +19,11 @@ import java.util.function.Supplier;
 
 public class VillagerAIManager {
 
+    //just loads up the class to addListener the schedule
+    @ApiStatus.Internal
+    public static void init() {
+    }
+
 
     //schedule to which all the tasks are registered to
     public static final Supplier<Schedule> CUSTOM_VILLAGER_SCHEDULE =
@@ -37,12 +42,6 @@ public class VillagerAIManager {
      */
     public static void addListener(Consumer<IVillagerBrainEvent> eventConsumer){
         EventHelper.addListener(eventConsumer, IVillagerBrainEvent.class);
-    }
-
-
-    //just loads up the class to addListener the schedule
-    @ApiStatus.Internal
-    public static void init() {
     }
 
 
