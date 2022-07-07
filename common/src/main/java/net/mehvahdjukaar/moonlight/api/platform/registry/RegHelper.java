@@ -176,7 +176,7 @@ public class RegHelper {
     }
 
     /**
-     * Utility to addListener a full block set
+     * Utility to register a full block set
      * @return registry object map
      */
     public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,

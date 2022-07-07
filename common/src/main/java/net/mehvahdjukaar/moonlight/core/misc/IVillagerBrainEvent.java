@@ -1,8 +1,9 @@
-package net.mehvahdjukaar.moonlight.api.util;
+package net.mehvahdjukaar.moonlight.core.misc;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.platform.event.SimpleEvent;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -26,7 +27,7 @@ public interface IVillagerBrainEvent extends SimpleEvent {
 
     /**
      * access the brain memories to add new ones or remove existing ones
-     * Important: to addListener new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
+     * Important: to register a new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
      *
      * @return brain memories
      */
@@ -47,7 +48,7 @@ public interface IVillagerBrainEvent extends SimpleEvent {
      * Note that subsequent call to this from other mods in later event execution might override your activity if the time window is the same
      * If it's not it might be shortened or cut in two
      *
-     * @param activity  activity to addListener
+     * @param activity  activity to register
      * @param startTime day time at which activity will start
      * @param endTime   day time at which activity will end. can also be less than start time
      */
@@ -70,6 +71,8 @@ public interface IVillagerBrainEvent extends SimpleEvent {
      */
     <P extends Pair<Integer, ? extends Behavior<Villager>>> boolean addTaskToActivity(Activity activity, P task);
 
+    //do not call
+    VillagerBrainEventInternal getInternal();
 
 }
 

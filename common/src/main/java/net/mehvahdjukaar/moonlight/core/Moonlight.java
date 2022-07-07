@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
-import net.mehvahdjukaar.moonlight.api.util.VillagerAIManager;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +19,7 @@ public class Moonlight {
     //called either on mod creation
     public static void commonInit() {
         ModMessages.registerMessages();
-        VillagerAIManager.init();
+        VillagerAIInternal.init();
     }
 
     //mod registration

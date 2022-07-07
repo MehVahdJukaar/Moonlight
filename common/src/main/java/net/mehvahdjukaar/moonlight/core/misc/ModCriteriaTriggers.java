@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.misc;
+package net.mehvahdjukaar.moonlight.core.misc;
 
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.CriteriaTriggerAccessor;

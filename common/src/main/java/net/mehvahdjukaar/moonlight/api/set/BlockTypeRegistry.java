@@ -60,7 +60,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     public void registerBlockType(T newType) {
         if (frozen) {
-            throw new UnsupportedOperationException("Tried to addListener wood types after registry events");
+            throw new UnsupportedOperationException("Tried to register a wood types after registry events");
         }
         builder.add(newType);
     }
@@ -71,7 +71,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     public void addFinder(BlockType.SetFinder<T> finder) {
         if (frozen) {
-            throw new UnsupportedOperationException("Tried to addListener block type finder after registry events");
+            throw new UnsupportedOperationException("Tried to register a block type finder after registry events");
         }
         finders.add(finder);
     }

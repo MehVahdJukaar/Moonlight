@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import com.google.common.collect.Maps;
 import net.mehvahdjukaar.moonlight.api.map.*;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.map.*;
 import net.mehvahdjukaar.moonlight.api.map.markers.GenericMapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.IMapDecorationType;

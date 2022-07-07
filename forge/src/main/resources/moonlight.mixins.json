@@ -1,11 +1,11 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.mehvahdjukaar.moonlight.mixins.forge",
+  "package": "net.mehvahdjukaar.moonlight.core.mixins.forge",
   "compatibilityLevel": "JAVA_16",
   "client": [
-    "net.mehvahdjukaar.moonlight.core.mixins.forge.SelfEntitySpawnDataMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.forge.SelfItemDisplayTIleMixin"
+    "SelfEntitySpawnDataMixin",
+    "SelfItemDisplayTIleMixin"
   ],
   "mixins": [
   ],

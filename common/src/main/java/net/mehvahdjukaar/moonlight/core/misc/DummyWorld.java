@@ -1,7 +1,8 @@
-package net.mehvahdjukaar.moonlight.core.client;
+package net.mehvahdjukaar.moonlight.core.misc;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.*;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -11,14 +12,21 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
@@ -27,6 +35,7 @@ import net.minecraft.world.ticks.LevelTickAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public class DummyWorld extends Level {
 
@@ -159,5 +168,44 @@ public class DummyWorld extends Level {
     @Override
     public Holder<Biome> getUncachedNoiseBiome(int p_204159_, int p_204160_, int p_204161_) {
         throw new IllegalStateException("not implemented");
+    }
+
+    private static class DummyChunkManager extends ChunkSource {
+
+        private final Level world;
+
+        public DummyChunkManager(Level world) {
+            this.world = world;
+        }
+
+        @Override
+        public ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
+            return new EmptyLevelChunk(this.world, new ChunkPos(x, z), BuiltinRegistries.BIOME.getHolderOrThrow(Biomes.FOREST));
+        }
+
+        @Override
+        public void tick(BooleanSupplier supplier, boolean b) {
+        }
+
+        @Override
+        public String gatherStats() {
+            return "";
+        }
+
+        @Override
+        public int getLoadedChunksCount() {
+            return 0;
+        }
+
+        @Override
+        public LevelLightEngine getLightEngine() {
+            throw new IllegalStateException("not implemented"); // TODO
+        }
+
+        @Override
+        public BlockGetter getLevel() {
+            return this.world;
+        }
+
     }
 }

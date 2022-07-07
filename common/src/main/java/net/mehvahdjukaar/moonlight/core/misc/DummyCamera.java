@@ -1,11 +1,10 @@
-package net.mehvahdjukaar.moonlight.core.client;
+package net.mehvahdjukaar.moonlight.core.misc;
 
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
 public class DummyCamera extends Camera {
-
 
     @Override
     public void setPosition(double pX, double pY, double pZ) {

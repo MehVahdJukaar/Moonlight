@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class BrainEventInternal {
+public class VillagerBrainEventInternal {
 
     private TreeMap<Integer, Activity> scheduleBuilder = null;
 
@@ -34,7 +34,7 @@ public class BrainEventInternal {
      * used to add activities, memories, sensor types and modify schedules in a compatible way
      * Main feature is easily adding scheduled activities without overriding the whole schedule and adding sensor types
      */
-    public BrainEventInternal(Brain<Villager> brain, Villager villager) {
+    public VillagerBrainEventInternal(Brain<Villager> brain, Villager villager) {
         this.brain = brain;
         this.villager = villager;
     }
@@ -51,7 +51,7 @@ public class BrainEventInternal {
 
     /**
      * access the brain memories to add new ones or remove existing ones
-     * Important: to addListener new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
+     * Important: to register a new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
      *
      * @return brain memories
      */
@@ -77,7 +77,7 @@ public class BrainEventInternal {
      * Note that subsequent call to this from other mods in later event execution might override your activity if the time window is the same
      * If it's not it might be shortened or cut in two
      *
-     * @param activity  activity to addListener
+     * @param activity  activity to register
      * @param startTime day time at which activity will start
      * @param endTime   day time at which activity will end. can also be less than start time
      */
@@ -137,7 +137,7 @@ public class BrainEventInternal {
                 memories.put(memoryModuleType, Optional.empty());
             }
         } catch (Exception e) {
-            Moonlight.LOGGER.warn("failed to addListener pumpkin sensor type for villagers: " + e);
+            Moonlight.LOGGER.warn("failed to register pumpkin sensor type for villagers: " + e);
         }
     }
 
@@ -150,7 +150,7 @@ public class BrainEventInternal {
      * @param task     task to add with its priority
      * @return if successfull
      */
-    public <P extends Pair<Integer, ? extends Behavior<Villager>>> boolean addTaskToActivity(Activity activity, P task) {
+    public   <P extends Pair<Integer, ? extends Behavior<Villager>>> boolean addTaskToActivity(Activity activity, P task) {
 
         try {
             Map<Integer, Map<Activity, Set<Behavior<Villager>>>> map =
@@ -191,15 +191,15 @@ public class BrainEventInternal {
         return map;
     }
 
-    public Schedule buildFinalizedSchedule() {
-        ScheduleBuilder builder = new ScheduleBuilder(VillagerAIManager.CUSTOM_VILLAGER_SCHEDULE.get());
+    Schedule buildFinalizedSchedule() {
+        ScheduleBuilder builder = new ScheduleBuilder(VillagerAIInternal.CUSTOM_VILLAGER_SCHEDULE.get());
         for (var e : this.scheduleBuilder.entrySet()) {
             builder.changeActivityAt(e.getKey(), e.getValue());
         }
         return builder.build();
     }
 
-    public boolean hasCustomSchedule() {
+    boolean hasCustomSchedule() {
         return this.scheduleBuilder != null;
     }
 

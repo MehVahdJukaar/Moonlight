@@ -5,7 +5,6 @@ import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.client.language.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;
-import net.mehvahdjukaar.moonlight.platform.configs.fabric.values.*;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 

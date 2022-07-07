@@ -1,12 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.client.language;
 
+import net.mehvahdjukaar.moonlight.api.platform.event.SimpleEvent;
 import net.minecraft.client.resources.language.LanguageInfo;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class AfterLanguageLoadEvent {
+public class AfterLanguageLoadEvent implements SimpleEvent {
 
     private final Map<String, String> languageLines;
     private final List<LanguageInfo> languageInfo;

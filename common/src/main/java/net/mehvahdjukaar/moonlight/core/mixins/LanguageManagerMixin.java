@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import net.mehvahdjukaar.moonlight.api.resources.DynamicLanguageHandler;
+import net.mehvahdjukaar.moonlight.api.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -34,7 +36,12 @@ public abstract class LanguageManagerMixin {
             at = @At(value = "INVOKE",
                     target = "Lcom/google/common/collect/ImmutableMap;copyOf(Ljava/util/Map;)Lcom/google/common/collect/ImmutableMap;"))
     private static Map<String, String> addEntries(Map<String, String> map) {
-        DynamicLanguageHandler.addDynamicEntries(cachedResourceManager, cachedLanguageInfo, map);
+        AfterLanguageLoadEvent event = new AfterLanguageLoadEvent(map, cachedLanguageInfo);
+        if (event.isDefault()) {
+            BlockSetAPI.getRegistries().forEach(r -> r.addTypeTranslations(event));
+            //dispatch event and calls listeners
+            EventHelper.postEvent(event, AfterLanguageLoadEvent.class);
+        }
         return map;
     }
 

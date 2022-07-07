@@ -1,9 +1,10 @@
-package net.mehvahdjukaar.moonlight.api.set.forge;
+package net.mehvahdjukaar.moonlight.core.set.forge;
 
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.api.set.BlockSetManager;
+import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
+import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -23,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 //spaghetti code. Do not touch, it just works
-public class BlockSetManagerImpl {
+public class BlockSetInternalImpl {
 
     //maps containing mod ids and block and items runnable. Block one is ready to run, items needs the bus supplied to it
     //they will be run each mod at a time block first then items
@@ -36,7 +37,7 @@ public class BlockSetManagerImpl {
     private static boolean hasFilledBlockSets = false;
 
     public static <T extends BlockType> void addDynamicBlockRegistration(
-            BlockSetManager.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
+            BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
 
         Consumer<RegisterEvent> eventConsumer;
 
@@ -52,7 +53,7 @@ public class BlockSetManagerImpl {
                     if (registry instanceof ForgeRegistry fr) {
                         boolean frozen = fr.isLocked();
                         fr.unfreeze();
-                        registrationFunction.accept(registry::register, BlockSetManager.getBlockSet(blockType).getValues());
+                        registrationFunction.accept(registry::register, BlockSetAPI.getBlockSet(blockType).getValues());
                         if (frozen) fr.freeze();
                     }
                 };
@@ -67,12 +68,12 @@ public class BlockSetManagerImpl {
     }
 
     public static <T extends BlockType> void addDynamicItemRegistration(
-            BlockSetManager.BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
+            BlockSetAPI.BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
 
         Pair<List<Runnable>, List<Consumer<Registrator<Item>>>> registrationQueues = getOrAddQueue();
         //items just get added to the queue. they will already be called with the correct event
         Consumer<Registrator<Item>> itemEvent = e ->
-                registrationFunction.accept(e, BlockSetManager.getBlockSet(blockType).getValues());
+                registrationFunction.accept(e, BlockSetAPI.getBlockSet(blockType).getValues());
 
         registrationQueues.getSecond().add(itemEvent);
     }
@@ -84,8 +85,8 @@ public class BlockSetManagerImpl {
         //get the queue corresponding to this certain mod
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         return LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {
-            //if absent we addListener its registration callback
-            bus.addListener(EventPriority.HIGHEST, BlockSetManagerImpl::registerLateBlockAndItems);
+            //if absent we register its registration callback
+            bus.addListener(EventPriority.HIGHEST, BlockSetInternalImpl::registerLateBlockAndItems);
             return Pair.of(new ArrayList<>(), new ArrayList<>());
         });
     }
@@ -97,7 +98,7 @@ public class BlockSetManagerImpl {
         if (!event.getRegistryKey().equals(ForgeRegistries.ITEMS.getRegistryKey())) return;
         //when the first registration function is called we find all block types
         if (!hasFilledBlockSets) {
-            BlockSetManager.initializeBlockSets();
+            BlockSetInternal.initializeBlockSets();
             hasFilledBlockSets = true;
         }
         //get the queue corresponding to this certain mod
@@ -106,7 +107,7 @@ public class BlockSetManagerImpl {
 
         if (registrationQueues != null) {
             IForgeRegistry<Item> fr = event.getForgeRegistry();
-            //addListener blocks
+            //register blocks
             var blockQueue = registrationQueues.getFirst();
             blockQueue.forEach(Runnable::run);
             //registers items

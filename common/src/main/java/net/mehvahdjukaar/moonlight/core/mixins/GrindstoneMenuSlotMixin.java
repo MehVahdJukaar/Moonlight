@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 
-import net.mehvahdjukaar.moonlight.api.misc.ModCriteriaTriggers;
+import net.mehvahdjukaar.moonlight.core.misc.ModCriteriaTriggers;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

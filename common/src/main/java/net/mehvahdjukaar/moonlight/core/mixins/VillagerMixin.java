@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.mojang.serialization.Dynamic;
 import net.mehvahdjukaar.moonlight.api.util.VillagerAIManager;
+import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -24,7 +25,7 @@ public abstract class VillagerMixin extends AbstractVillager {
 
     @Inject(method = ("registerBrainGoals"), at = @At("RETURN"))
     protected void reg(Brain<Villager> pVillagerBrain, CallbackInfo ci) {
-        VillagerAIManager.onRegisterBrainGoals(pVillagerBrain, this);
+        VillagerAIInternal.onRegisterBrainGoals(pVillagerBrain, this);
     }
 
 

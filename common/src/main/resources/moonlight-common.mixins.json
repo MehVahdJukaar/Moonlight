@@ -1,31 +1,31 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.mehvahdjukaar.moonlight.mixins",
+  "package": "net.mehvahdjukaar.moonlight.core.mixins",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "net.mehvahdjukaar.moonlight.core.mixins.FirstPersonRendererMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.LanguageManagerMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.MapItemRendererMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.PlayerItemInHandLayerMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.ThirdPersonRendererMixin"
+    "FirstPersonRendererMixin",
+    "LanguageManagerMixin",
+    "MapItemRendererMixin",
+    "PlayerItemInHandLayerMixin",
+    "ThirdPersonRendererMixin"
   ],
   "mixins": [
-    "net.mehvahdjukaar.moonlight.core.mixins.CreativeModeTabMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.GrindstoneMenuSlotMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.LevelChunkMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.MapDataMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.MapExtendingRecipeMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.MapItemMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.MultiPackResourceManagerMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.VillagerMixin",
-    "net.mehvahdjukaar.moonlight.core.mixins.accessor.BlockLootAccessor",
-    "net.mehvahdjukaar.moonlight.core.mixins.accessor.CriteriaTriggerAccessor",
-    "net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor",
-    "net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor",
-    "net.mehvahdjukaar.moonlight.core.mixins.accessor.FallingBlockEntityAccessor",
-    "net.mehvahdjukaar.moonlight.core.mixins.accessor.ProjectileAccessor",
-    "net.mehvahdjukaar.moonlight.core.mixins.accessor.VillagerAccessor"
+    "CreativeModeTabMixin",
+    "GrindstoneMenuSlotMixin",
+    "LevelChunkMixin",
+    "MapDataMixin",
+    "MapExtendingRecipeMixin",
+    "MapItemMixin",
+    "MultiPackResourceManagerMixin",
+    "VillagerMixin",
+    "accessor.BlockLootAccessor",
+    "accessor.CriteriaTriggerAccessor",
+    "accessor.DispenserBlockAccessor",
+    "accessor.DispenserBlockEntityAccessor",
+    "accessor.FallingBlockEntityAccessor",
+    "accessor.ProjectileAccessor",
+    "accessor.VillagerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

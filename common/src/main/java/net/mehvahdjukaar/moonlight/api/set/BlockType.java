@@ -133,7 +133,7 @@ public abstract class BlockType {
     }
 
     /**
-     * Should be called after you addListener a block that is made out of this wood type
+     * Should be called after you register a block that is made out of this wood type
      */
     public void addChild(String genericName, @Nullable ItemLike itemLike) {
         if (itemLike != null) {

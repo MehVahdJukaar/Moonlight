@@ -2,8 +2,8 @@ package net.mehvahdjukaar.moonlight.api.util.fabric;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.api.util.IVillagerBrainEvent;
-import net.mehvahdjukaar.moonlight.core.misc.BrainEventInternal;
+import net.mehvahdjukaar.moonlight.core.misc.IVillagerBrainEvent;
+import net.mehvahdjukaar.moonlight.core.misc.VillagerBrainEventInternal;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;
 import java.util.Optional;
@@ -20,14 +21,14 @@ import java.util.Optional;
 public class VillagerBrainEvent implements IVillagerBrainEvent {
 
     //hack so we can extend Event class
-    private final BrainEventInternal internal;
+    private final VillagerBrainEventInternal internal;
 
     /**
      * used to add activities, memories, sensor types and modify schedules in a compatible way
      * Main feature is easily adding scheduled activities without overriding the whole schedule and adding sensor types
      */
     public VillagerBrainEvent(Brain<Villager> brain, Villager villager) {
-        this.internal = new BrainEventInternal(brain, villager);
+        this.internal = new VillagerBrainEventInternal(brain, villager);
     }
 
     /**
@@ -42,7 +43,7 @@ public class VillagerBrainEvent implements IVillagerBrainEvent {
 
     /**
      * access the brain memories to add new ones or remove existing ones
-     * Important: to addListener new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
+     * Important: to register a new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
      *
      * @return brain memories
      */
@@ -67,7 +68,7 @@ public class VillagerBrainEvent implements IVillagerBrainEvent {
      * Note that subsequent call to this from other mods in later event execution might override your activity if the time window is the same
      * If it's not it might be shortened or cut in two
      *
-     * @param activity  activity to addListener
+     * @param activity  activity to register
      * @param startTime day time at which activity will start
      * @param endTime   day time at which activity will end. can also be less than start time
      */
@@ -99,13 +100,8 @@ public class VillagerBrainEvent implements IVillagerBrainEvent {
         return this.internal.addTaskToActivity(activity,task);
     }
 
-
-    protected Schedule buildFinalizedSchedule() {
-        return this.internal.buildFinalizedSchedule();
+    @ApiStatus.Internal
+    public VillagerBrainEventInternal getInternal() {
+        return internal;
     }
-
-    protected boolean hasCustomSchedule() {
-        return this.internal.hasCustomSchedule();
-    }
-
 }

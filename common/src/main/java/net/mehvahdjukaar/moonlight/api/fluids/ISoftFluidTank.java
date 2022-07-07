@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 public interface ISoftFluidTank {
 
     @ExpectPlatform
-    public static ISoftFluidTank create(int capacity){
+    static ISoftFluidTank create(int capacity){
         throw new AssertionError();
     }
 
@@ -32,7 +32,7 @@ public interface ISoftFluidTank {
      * @param hand   hand
      * @return interaction successful
      */
-    public boolean interactWithPlayer(Player player, InteractionHand hand, @Nullable Level world, @Nullable BlockPos pos);
+    boolean interactWithPlayer(Player player, InteractionHand hand, @Nullable Level world, @Nullable BlockPos pos);
 
     /**
      * makes current item interact with fluid tank. returns empty stack if

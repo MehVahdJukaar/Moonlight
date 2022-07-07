@@ -1,7 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.resources.DynamicLanguageHandler;
+import net.mehvahdjukaar.moonlight.api.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -31,9 +33,10 @@ public abstract class ConfigBuilder {
         this.name = name.getPath();
         this.modId = name.getNamespace();
         this.type = type;
-        DynamicLanguageHandler.addListener(e -> {
+        Consumer<AfterLanguageLoadEvent> consumer = e -> {
             if (e.isDefault()) comments.forEach(e::addEntry);
-        });
+        };
+        EventHelper.addListener(consumer, AfterLanguageLoadEvent.class);
     }
 
     public enum ConfigType {

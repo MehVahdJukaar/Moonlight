@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.fabric;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.api.set.fabric.BlockSetManagerImpl;
+import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.api.platform.registry.fabric.RegHelperImpl;
 import net.minecraft.server.MinecraftServer;
 
@@ -25,7 +25,7 @@ public class MoonlightFabric implements ModInitializer {
 
     public static void onCommonSetup() {
         RegHelperImpl.registerEntries();
-        BlockSetManagerImpl.registerEntries();
+        BlockSetInternalImpl.registerEntries();
         Moonlight.commonSetup();
     }
 
