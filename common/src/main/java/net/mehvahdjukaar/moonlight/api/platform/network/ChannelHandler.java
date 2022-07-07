@@ -38,7 +38,9 @@ public abstract class ChannelHandler {
         PLAY_TO_SERVER, PLAY_TO_CLIENT;
     }
 
-    public abstract void sendToPlayerClient(ServerPlayer serverPlayer, Message message);
+    public abstract void sendToClientPlayer(ServerPlayer serverPlayer, Message message);
+
+    public abstract void sendToAllClientPlayers(Message message);
 
     public abstract void sendToServer(Message message);
 }

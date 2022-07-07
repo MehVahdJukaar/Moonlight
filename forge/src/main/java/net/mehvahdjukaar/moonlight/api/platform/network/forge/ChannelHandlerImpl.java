@@ -76,8 +76,13 @@ public class ChannelHandlerImpl extends ChannelHandler{
     }
 
 
-    public void sendToPlayerClient(ServerPlayer serverPlayer, Message message){
+    public void sendToClientPlayer(ServerPlayer serverPlayer, Message message){
         channel.send(PacketDistributor.PLAYER.with(() -> serverPlayer),message);
+    }
+
+    @Override
+    public void sendToAllClientPlayers(Message message) {
+        channel.send(PacketDistributor.ALL.noArg(), message);
     }
 
     @Override

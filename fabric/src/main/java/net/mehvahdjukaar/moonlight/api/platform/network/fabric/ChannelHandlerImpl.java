@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.HashMap;
@@ -70,12 +71,19 @@ public class ChannelHandlerImpl extends ChannelHandler {
     }
 
     @Override
-    public void sendToPlayerClient(ServerPlayer serverPlayer, Message message) {
+    public void sendToClientPlayer(ServerPlayer serverPlayer, Message message) {
         //for (ServerPlayer player : PlayerLookup.tracking(entity)) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         message.writeToBuffer(buf);
         ServerPlayNetworking.send(serverPlayer, ID_MAP.get(message.getClass()), buf);
         // }
+    }
+
+    @Override
+    public void sendToAllClientPlayers(Message message) {
+        for(var p : PlatformHelper.getCurrentServer().getPlayerList().getPlayers()){
+            sendToClientPlayer(p,message);
+        }
     }
 
     @Override
