@@ -19,6 +19,7 @@ public abstract class ConfigBuilder {
     protected final Map<String, String> comments = new HashMap<>();
     private String currentComment;
     private String currentKey;
+    protected boolean synced;
 
     @ExpectPlatform
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
@@ -37,17 +38,13 @@ public abstract class ConfigBuilder {
         EventHelper.addListener(consumer, AfterLanguageLoadEvent.class);
     }
 
-    protected String getFileName() {
-        return this.name.getNamespace() + "-" + this.name.getPath() + ".json";
-    }
-
-    public IConfigSpec buildAndRegister(){
+    public ConfigSpec buildAndRegister(){
         var spec = this.build();
         spec.register();
         return spec;
     };
 
-    public abstract IConfigSpec build();
+    public abstract ConfigSpec build();
 
     public ResourceLocation getName() {
         return name;
@@ -116,11 +113,13 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    ;
+    public ConfigBuilder setSynced(){
+        this.synced = true;
+        return this;
+    }
 
     protected void maybeAddComment(String name) {
-        var tooltipKey = this.tooltipKey(name);
-        this.currentKey = tooltipKey;
+        this.currentKey = this.tooltipKey(name);
         if (this.currentComment != null && this.currentKey != null) {
             comments.put(currentKey, currentComment);
             this.currentComment = null;

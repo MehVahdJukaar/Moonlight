@@ -9,8 +9,8 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.integration.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
-import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigSpec;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 
@@ -20,21 +20,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfigSpec implements IConfigSpec {
+public class FabricConfigSpec extends ConfigSpec {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final Map<String, Map<ConfigType, ConfigSpec>> CONFIG_STORAGE = new HashMap<>();
-    private final ConfigType type;
+    private static final Map<String, Map<ConfigType, FabricConfigSpec>> CONFIG_STORAGE = new HashMap<>();
+    private final ResourceLocation res;
 
-    public static void saveSpec(ConfigSpec spec) {
-        String modId = spec.getName().getNamespace();
-        var map = CONFIG_STORAGE.computeIfAbsent(modId, n -> new HashMap<>());
+    public static void saveSpec(FabricConfigSpec spec) {
+        var map = CONFIG_STORAGE.computeIfAbsent(spec.getModId(), n -> new HashMap<>());
         map.put(spec.getConfigType(), spec);
     }
 
     @Nullable
-    public static ConfigSpec getSpec(String modId, ConfigType type) {
+    public static FabricConfigSpec getSpec(String modId, ConfigType type) {
         var map = CONFIG_STORAGE.get(modId);
         if (map != null) {
             return map.getOrDefault(type, null);
@@ -43,33 +42,26 @@ public class ConfigSpec implements IConfigSpec {
     }
 
     private final ConfigCategory mainEntry;
-
-    private final ResourceLocation name;
     private final File file;
 
-    public ConfigSpec(ResourceLocation name, ConfigCategory mainEntry, String filePath, ConfigType type) {
-        this.name = name;
-        this.mainEntry = mainEntry;
-        this.file = new File(FabricLoader.getInstance().getConfigDir().toFile(), filePath);
-        this.type = type;
+    public FabricConfigSpec(ResourceLocation name, ConfigCategory mainEntry, ConfigType type) {
+        this(name, mainEntry, type, false);
     }
 
-    @Override
-    public ConfigType getConfigType() {
-        return type;
+    public FabricConfigSpec(ResourceLocation name, ConfigCategory mainEntry, ConfigType type, boolean synced) {
+        super(name, FabricLoader.getInstance().getConfigDir(), type, synced);
+        this.file = this.getFullPath().toFile();
+        this.mainEntry = mainEntry;
+        this.res = name;
     }
 
     public ConfigCategory getMainEntry() {
         return mainEntry;
     }
 
-    public ResourceLocation getName() {
-        return name;
-    }
-
     @Override
     public void register() {
-        ConfigSpec.saveSpec(this);
+        FabricConfigSpec.saveSpec(this);
     }
 
     @Override
@@ -106,7 +98,7 @@ public class ConfigSpec implements IConfigSpec {
     }
 
     public String getTitleKey() {
-        return "config." + this.getName().toLanguageKey();
+        return "config." + this.res.toLanguageKey();
     }
 
 

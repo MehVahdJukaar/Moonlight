@@ -28,10 +28,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @NotNull
-    public ConfigSpec build() {
+    public FabricConfigSpec build() {
         assert categoryStack.size() == 1;
-        ConfigSpec spec = new ConfigSpec(this.getName(),
-                mainCategory, this.getFileName(), this.type);
+        FabricConfigSpec spec = new FabricConfigSpec(this.getName(),
+                mainCategory, this.type, this.synced);
         spec.loadFromFile();
         spec.saveConfig();
         return spec;
