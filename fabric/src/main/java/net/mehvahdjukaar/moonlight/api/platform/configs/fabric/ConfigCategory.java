@@ -1,23 +1,26 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConfigCategory extends ConfigEntry {
 
-    private final List<ConfigEntry> values;
+    private final List<ConfigEntry> entries = new ArrayList<>();
 
-    public ConfigCategory(String name, ImmutableList<ConfigEntry> values) {
+    public ConfigCategory(String name) {
         super(name);
-        this.values = values;
     }
 
-    public List<ConfigEntry> getValues() {
-        return values;
+    public void addEntry(ConfigEntry entry){
+        this.entries.add(entry);
+    }
+
+    public List<ConfigEntry> getEntries() {
+        return entries;
     }
 
     @Override
@@ -25,7 +28,7 @@ public class ConfigCategory extends ConfigEntry {
         if (object.has(this.name)) {
             JsonElement o = object.get(this.name);
             if (o instanceof JsonObject jo) {
-                values.forEach(l -> l.loadFromJson(jo));
+                entries.forEach(l -> l.loadFromJson(jo));
             }
             return;
         }
@@ -35,7 +38,7 @@ public class ConfigCategory extends ConfigEntry {
     @Override
     public void saveToJson(JsonObject object) {
         JsonObject category = new JsonObject();
-        values.forEach(l -> l.saveToJson(category));
+        entries.forEach(l -> l.saveToJson(category));
         object.add(this.name, category);
     }
 

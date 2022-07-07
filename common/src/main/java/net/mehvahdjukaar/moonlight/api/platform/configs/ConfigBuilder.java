@@ -21,7 +21,7 @@ public abstract class ConfigBuilder {
     private String currentKey;
 
     @ExpectPlatform
-    public static ConfigBuilder create(ResourceLocation name, ConfigBuilder.ConfigType type) {
+    public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         throw new AssertionError();
     }
 
@@ -37,10 +37,6 @@ public abstract class ConfigBuilder {
             if (e.isDefault()) comments.forEach(e::addEntry);
         };
         EventHelper.addListener(consumer, AfterLanguageLoadEvent.class);
-    }
-
-    public enum ConfigType {
-        CLIENT, COMMON;
     }
 
     protected String getFileName() {
@@ -60,16 +56,6 @@ public abstract class ConfigBuilder {
     }
 
     public abstract ConfigBuilder push(String category);
-
-    public ConfigBuilder pushForge(String category) {
-        push(category);
-        return this;
-    }
-
-    public ConfigBuilder popForge() {
-        pop();
-        return this;
-    }
 
     public abstract ConfigBuilder pop();
 
