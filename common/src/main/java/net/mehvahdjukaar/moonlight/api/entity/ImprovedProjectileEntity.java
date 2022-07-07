@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.entities;
+package net.mehvahdjukaar.moonlight.api.entity;
 
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.ProjectileAccessor;
 import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;

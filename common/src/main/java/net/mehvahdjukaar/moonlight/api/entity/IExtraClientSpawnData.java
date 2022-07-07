@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.entities;
+package net.mehvahdjukaar.moonlight.api.entity;
 
 import net.minecraft.network.FriendlyByteBuf;
 
