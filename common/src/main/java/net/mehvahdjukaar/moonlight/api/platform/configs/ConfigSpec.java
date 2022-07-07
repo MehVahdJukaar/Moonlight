@@ -98,7 +98,7 @@ public abstract class ConfigSpec {
         if (this.getConfigType() == ConfigType.COMMON && this.isSynced()) {
             try {
                 final byte[] configData = Files.readAllBytes(this.getFullPath());
-                ModMessages.CHANNEL.sendToPlayerClient(player, new ClientBoundSyncConfigsPacket(configData, this.getFileName(), this.getModId()));
+                ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundSyncConfigsPacket(configData, this.getFileName(), this.getModId()));
             } catch (IOException e) {
                 Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
             }

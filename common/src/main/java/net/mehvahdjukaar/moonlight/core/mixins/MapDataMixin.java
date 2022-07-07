@@ -213,7 +213,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             Integer mapId = MapHelper.getMapId(stack, player, this);
             if (player instanceof ServerPlayer serverPlayer && mapId != null) {
 
-                ModMessages.CHANNEL.sendToPlayerClient(serverPlayer,
+                ModMessages.CHANNEL.sendToClientPlayer(serverPlayer,
                         new ClientBoundSyncCustomMapDecorationMessage(mapId, this.scale, this.locked,
                                 this.customDecorations.values().toArray(new CustomMapDecoration[0]),
                                 this.customData.values().toArray(new CustomDataHolder.Instance[0])));
