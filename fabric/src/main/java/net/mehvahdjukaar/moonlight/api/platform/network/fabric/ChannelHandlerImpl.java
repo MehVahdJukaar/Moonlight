@@ -6,11 +6,17 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,8 +87,8 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
     @Override
     public void sendToAllClientPlayers(Message message) {
-        for(var p : PlatformHelper.getCurrentServer().getPlayerList().getPlayers()){
-            sendToClientPlayer(p,message);
+        for (var p : PlatformHelper.getCurrentServer().getPlayerList().getPlayers()) {
+            sendToClientPlayer(p, message);
         }
     }
 
@@ -91,5 +97,31 @@ public class ChannelHandlerImpl extends ChannelHandler {
         FriendlyByteBuf buf = PacketByteBufs.create();
         message.writeToBuffer(buf);
         ClientPlayNetworking.send(ID_MAP.get(message.getClass()), buf);
+    }
+
+    @Override
+    public void sendToAllClientPlayersInRange(Level level, BlockPos pos, int radius, Message message) {
+
+        MinecraftServer currentServer = PlatformHelper.getCurrentServer();
+        if (currentServer != null) {
+            PlayerList players = currentServer.getPlayerList();
+            var dimension = level.dimension();
+
+            players.broadcast(null, pos.getX(), pos.getY(), pos.getZ(),
+                    radius, dimension, toVanillaPacket(message));
+        }
+    }
+
+    @Override
+    public void sentToAllClientPlayersTrackingEntity(Entity target, Message message) {
+        if (target.level instanceof ServerLevel serverLevel) {
+            serverLevel.getChunkSource().broadcast(target, toVanillaPacket(message));
+        }
+    }
+
+    private Packet<?> toVanillaPacket(Message message){
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        message.writeToBuffer(buf);
+        return ServerPlayNetworking.createS2CPacket(ID_MAP.get(message.getClass()), buf);
     }
 }

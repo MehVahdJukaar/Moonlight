@@ -4,8 +4,8 @@ import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +25,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
 
@@ -39,11 +38,12 @@ public class ConfigSpecWrapper extends ConfigSpec {
     public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type) {
         this(name, spec, type, false);
     }
+
     public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced) {
-        super(name,FMLPaths.CONFIGDIR.get(), type, synced);
+        super(name, FMLPaths.CONFIGDIR.get(), type, synced);
         this.spec = spec;
 
-        if(this.isSynced()) {
+        if (this.isSynced()) {
             var bus = FMLJavaModLoadingContext.get().getModEventBus();
             bus.addListener(this::onConfigChange);
             MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
@@ -70,7 +70,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
         ModLoadingContext.get().registerConfig(t, spec);
 
         ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
-        this.modConfig = new ModConfig( t, spec, modContainer);
+        this.modConfig = new ModConfig(t, spec, modContainer);
         modContainer.addConfig(this.modConfig);
     }
 
@@ -110,7 +110,6 @@ public class ConfigSpecWrapper extends ConfigSpec {
     }
 
 
-
     @EventCalled
     protected void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getPlayer() instanceof ServerPlayer serverPlayer) {
@@ -138,7 +137,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
     private void onRefresh() {
     }
 
-    public void loadFromBytes(InputStream stream){
+    public void loadFromBytes(InputStream stream) {
         this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
         this.onRefresh();
     }

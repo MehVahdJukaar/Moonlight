@@ -2,15 +2,21 @@ package net.mehvahdjukaar.moonlight.api.platform.network.forge;
 
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,12 +24,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class ChannelHandlerImpl extends ChannelHandler{
+public class ChannelHandlerImpl extends ChannelHandler {
 
     static Map<ResourceLocation, ChannelHandler> CHANNELS = new HashMap<>();
 
     public static ChannelHandler createChannel(ResourceLocation channelMame) {
-        return CHANNELS.computeIfAbsent(channelMame, c->new ChannelHandlerImpl(channelMame));
+        return CHANNELS.computeIfAbsent(channelMame, c -> new ChannelHandlerImpl(channelMame));
     }
 
     public final SimpleChannel channel;
@@ -76,8 +82,8 @@ public class ChannelHandlerImpl extends ChannelHandler{
     }
 
 
-    public void sendToClientPlayer(ServerPlayer serverPlayer, Message message){
-        channel.send(PacketDistributor.PLAYER.with(() -> serverPlayer),message);
+    public void sendToClientPlayer(ServerPlayer serverPlayer, Message message) {
+        channel.send(PacketDistributor.PLAYER.with(() -> serverPlayer), message);
     }
 
     @Override
@@ -89,4 +95,24 @@ public class ChannelHandlerImpl extends ChannelHandler{
     public void sendToServer(Message message) {
         channel.sendToServer(message);
     }
+
+
+    @Override
+    public void sendToAllClientPlayersInRange(Level level, BlockPos pos, int radius, Message message) {
+        MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
+        if (currentServer != null) {
+            PlayerList players = currentServer.getPlayerList();
+            var distributor = PacketDistributor.NEAR.with(() ->
+                    new PacketDistributor.TargetPoint(pos.getX(), pos.getY(), pos.getZ(), radius, level.dimension()));
+            channel.send(distributor, message);
+        }
+    }
+
+    @Override
+    public void sentToAllClientPlayersTrackingEntity(Entity target, Message message) {
+        channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> target), message);
+    }
+
+
 }
+
