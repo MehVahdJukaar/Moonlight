@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.resources.ResourceLocation;
@@ -23,14 +24,16 @@ public class Moonlight {
         ModMessages.registerMessages();
         VillagerAIInternal.init();
 
-        ConfigBuilder cb = ConfigBuilder.create(res("aa"), ConfigBuilder.ConfigType.COMMON);
+        ConfigBuilder cb = ConfigBuilder.create(res("aa"), ConfigType.COMMON);
         cb.push("a");
-        cb.push("b");
+        cb.push("aaaaa");
+        cb.push("aaaaa2");
         cb.define("aaa",true);
-        cb.push("c");
+
         cb.define("bbb",true);
         cb.pop();
         cb.pop();
+
         cb.pop();
        COMMON_INSTANCE =  cb.buildAndRegister();
     }

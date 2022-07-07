@@ -65,6 +65,8 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<Integer> define(String name, int defaultValue, int min, int max);
 
+    public abstract Supplier<Integer> defineColor(String name, int defaultValue);
+
     public abstract Supplier<String> define(String name, String defaultValue, Predicate<Object> validator);
 
     public Supplier<String> define(String name, String defaultValue) {

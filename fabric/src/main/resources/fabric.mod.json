@@ -20,6 +20,9 @@
     ],
     "client": [
       "net.mehvahdjukaar.moonlight.fabric.MoonlightFabricClient"
+    ],
+    "modmenu":[
+      "net.mehvahdjukaar.moonlight.api.integration.ModMenu"
     ]
   },
   "mixins": [
@@ -30,7 +33,7 @@
     "fabric": "*",
     "minecraft": ">=1.19"
   },
-  "custom": {
+  "comment": {
     "modmenu": {
       "badges": ["library"]
     }

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -12,7 +13,7 @@ import java.util.function.Supplier;
 
 public class ConfigBuilderImpl extends ConfigBuilder {
 
-    public static ConfigBuilder create(ResourceLocation name, ConfigBuilder.ConfigType type) {
+    public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         return new ConfigBuilderImpl(name, type);
     }
 
@@ -76,6 +77,13 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
         maybeAddComment(name);
         return builder.translation(translationKey(name)).defineInRange(name, defaultValue, min, max);
+    }
+
+    @Override
+    public Supplier<Integer> defineColor(String name, int defaultValue) {
+        maybeAddComment(name);
+        var stringConfig = builder.translation(translationKey(name)).define(name, Integer.toHexString(defaultValue),ConfigBuilder.COLOR_CHECK);
+        return ()-> Integer.parseUnsignedInt(stringConfig.get());
     }
 
     @Override

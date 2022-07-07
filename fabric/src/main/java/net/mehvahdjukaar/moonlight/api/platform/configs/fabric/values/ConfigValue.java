@@ -15,6 +15,7 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
     public ConfigValue(String name, T defaultValue){
         super(name);
         this.defaultValue = defaultValue;
+        assert this.isValid(defaultValue): "default value is invalid";
     }
 
     public T getDefaultValue() {

@@ -40,10 +40,10 @@ public class ClothConfigCompat {
                 if(entry instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory subCat){
                     var subBuilder = builder.entryBuilder().startSubCategory(Component.translatable(subCat.getName()));
                     addEntriesRecursive(builder, subBuilder, subCat);
+
                     mainCat.addEntry(subBuilder.build());
                 }else{
-                    var b = buildEntry(builder, entry);
-                    mainCat.addEntry(b);
+                    mainCat.addEntry(buildEntry(builder, entry));
                 }
             }
 
@@ -59,13 +59,22 @@ public class ClothConfigCompat {
                 addEntriesRecursive(builder,scb, cc);
                 subCategoryBuilder.add(scb.build());
             }
-            subCategoryBuilder.add(buildEntry(builder, entry));
+            else subCategoryBuilder.add(buildEntry(builder, entry));
         }
     }
 
+    @javax.annotation.Nullable
     private static AbstractConfigListEntry<?> buildEntry(ConfigBuilder builder, ConfigEntry entry) {
 
-        if (entry instanceof IntConfigValue ic) {
+        if(entry instanceof ColorConfigValue col){
+            return builder.entryBuilder()
+                    .startColorField(col.getTranslation(), col.get())
+                    .setDefaultValue(col.getDefaultValue()) // Recommended: Used when user click "Reset"
+                    .setTooltip(col.getDescription()) // Optional: Shown when the user hover over this option
+                    .setSaveConsumer(col::set) // Recommended: Called when user save the config
+                    .build(); // Builds the option entry for cloth config
+        }
+        else if (entry instanceof IntConfigValue ic) {
             return builder.entryBuilder()
                     .startIntField(ic.getTranslation(), ic.get())
                     .setMax(ic.getMax())

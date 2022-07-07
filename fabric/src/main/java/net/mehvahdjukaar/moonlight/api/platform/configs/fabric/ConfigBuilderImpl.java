@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.client.language.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -61,7 +59,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigBuilderImpl pop() {
-        assert categoryStack.size()!=1;
+        assert categoryStack.size() != 1;
         categoryStack.pop();
         return this;
     }
@@ -97,6 +95,13 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
+    public Supplier<Integer> defineColor(String name, int defaultValue) {
+        var config = new ColorConfigValue(name, defaultValue);
+        doAddConfig(name, config);
+        return config;
+    }
+
+    @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         var config = new StringConfigValue(name, defaultValue, validator);
         doAddConfig(name, config);
@@ -104,7 +109,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate){
+    public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
         var config = new ListStringConfigValue<>(name, (List<String>) defaultValue, predicate);
         doAddConfig(name, config);
         return config;
@@ -119,7 +124,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator) {
-        return ()-> defaultValue;
+        return () -> defaultValue;
     }
 
     @Override
