@@ -2,15 +2,10 @@ package net.mehvahdjukaar.moonlight.fabric;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
-import net.fabricmc.fabric.impl.event.lifecycle.LifecycleEventsImpl;
-import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.Moonlight;
-import net.mehvahdjukaar.moonlight.block_set.fabric.BlockSetManagerImpl;
-import net.mehvahdjukaar.moonlight.platform.registry.fabric.RegHelperImpl;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.api.set.fabric.BlockSetManagerImpl;
+import net.mehvahdjukaar.moonlight.api.platform.registry.fabric.RegHelperImpl;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.packs.PackType;
 
 public class MoonlightFabric implements ModInitializer {
 

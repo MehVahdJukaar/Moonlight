@@ -4,8 +4,8 @@
   "package": "net.mehvahdjukaar.moonlight.mixins.forge",
   "compatibilityLevel": "JAVA_16",
   "client": [
-    "SelfEntitySpawnDataMixin",
-    "SelfItemDisplayTIleMixin"
+    "net.mehvahdjukaar.moonlight.core.mixins.forge.SelfEntitySpawnDataMixin",
+    "net.mehvahdjukaar.moonlight.core.mixins.forge.SelfItemDisplayTIleMixin"
   ],
   "mixins": [
   ],
