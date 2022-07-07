@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
-import net.mehvahdjukaar.moonlight.api.client.SoftFluidClient;
+import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
 import net.mehvahdjukaar.moonlight.api.fluids.ISoftFluidTank;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;

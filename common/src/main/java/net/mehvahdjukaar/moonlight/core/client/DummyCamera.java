@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.misc;
+package net.mehvahdjukaar.moonlight.core.client;
 
 import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;

@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.renderUtils;
+package net.mehvahdjukaar.moonlight.api.client.util;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;

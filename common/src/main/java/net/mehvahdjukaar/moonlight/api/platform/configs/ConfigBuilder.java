@@ -25,13 +25,11 @@ public abstract class ConfigBuilder {
         throw new AssertionError();
     }
 
-    private final String name;
-    private final String modId;
+    private final ResourceLocation name;
     protected final ConfigType type;
 
     public ConfigBuilder(ResourceLocation name, ConfigType type) {
-        this.name = name.getPath();
-        this.modId = name.getNamespace();
+        this.name = name;
         this.type = type;
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
             if (e.isDefault()) comments.forEach(e::addEntry);
@@ -40,20 +38,21 @@ public abstract class ConfigBuilder {
     }
 
     protected String getFileName() {
-        return this.modId + "-" + name + ".json";
+        return this.name.getNamespace() + "-" + this.name.getPath() + ".json";
     }
 
-    public abstract Object buildAndRegister();
+    public IConfigSpec buildAndRegister(){
+        var spec = this.build();
+        spec.register();
+        return spec;
+    };
 
-    public abstract Object build();
+    public abstract IConfigSpec build();
 
-    public String getName() {
+    public ResourceLocation getName() {
         return name;
     }
 
-    public String getModId() {
-        return modId;
-    }
 
     public abstract ConfigBuilder push(String category);
 
@@ -95,11 +94,11 @@ public abstract class ConfigBuilder {
     }
 
     public String tooltipKey(String name) {
-        return "config." + this.modId + "." + currentCategory() + "." + name + ".description";
+        return "config." + this.name.getNamespace() + "." + currentCategory() + "." + name + ".description";
     }
 
     public String translationKey(String name) {
-        return "config." + this.modId + "." + currentCategory() + "." + name;
+        return "config." + this.name.getNamespace() + "." + currentCategory() + "." + name;
     }
 
 

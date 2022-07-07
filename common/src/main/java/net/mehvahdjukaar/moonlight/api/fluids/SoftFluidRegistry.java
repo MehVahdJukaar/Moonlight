@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.api.client.SoftFluidClient;
+import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Registry;
@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.Nonnull;
 import java.util.*;
 
+//TODO: maybe split into api/core?
 public class SoftFluidRegistry {
 
 
@@ -125,6 +126,7 @@ public class SoftFluidRegistry {
 
     @ExpectPlatform
     private static void addExistingForgeFluids() {
+        throw new AssertionError();
     }
 }
 

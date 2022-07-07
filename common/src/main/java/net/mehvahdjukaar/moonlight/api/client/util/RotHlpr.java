@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.renderUtils;
+package net.mehvahdjukaar.moonlight.api.client.util;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.Maps;

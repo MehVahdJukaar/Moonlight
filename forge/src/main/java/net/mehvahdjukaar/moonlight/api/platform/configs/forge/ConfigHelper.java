@@ -26,7 +26,7 @@ public class ConfigHelper {
      * @return created mod config. Used for tracking and events
      */
     public static ModConfig addAndLoadConfigFile(ForgeConfigSpec targetSpec, String fileName, boolean addToMod) {
-        loadConfigFile(fileName, targetSpec);
+       // loadConfigFile(fileName, targetSpec);
 
         ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
         ModConfig config = new ModConfig(ModConfig.Type.COMMON, targetSpec, modContainer, fileName);
@@ -36,21 +36,10 @@ public class ConfigHelper {
         return config;
     }
 
-    public static void loadConfigFile(String fileName, ForgeConfigSpec targetSpec) {
-        CommentedFileConfig replacementConfig = CommentedFileConfig
-                .builder(FMLPaths.CONFIGDIR.get().resolve(fileName))
-                .sync()
-                .preserveInsertionOrder()
-                .writingMode(WritingMode.REPLACE)
-                .build();
-        replacementConfig.load();
-        replacementConfig.save();
 
-        targetSpec.setConfig(replacementConfig);
-    }
 
     public static void reloadConfigFile(ModConfig config) {
-        loadConfigFile(config.getFileName(), (ForgeConfigSpec) config.getSpec());
+       // loadConfigFile(config.getFileName(), (ForgeConfigSpec) config.getSpec());
     }
 
 

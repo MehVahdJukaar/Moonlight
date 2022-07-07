@@ -33,7 +33,7 @@
     "fabric": "*",
     "minecraft": ">=1.19"
   },
-  "comment": {
+  "custom": {
     "modmenu": {
       "badges": ["library"]
     }

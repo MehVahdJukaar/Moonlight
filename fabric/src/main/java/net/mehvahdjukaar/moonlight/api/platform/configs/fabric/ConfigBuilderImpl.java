@@ -18,7 +18,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return new ConfigBuilderImpl(name, type);
     }
 
-    private final ConfigCategory mainCategory = new ConfigCategory(this.getName());
+    private final ConfigCategory mainCategory = new ConfigCategory(this.getName().getNamespace());
 
     private final Stack<ConfigCategory> categoryStack = new Stack<>();
 
@@ -27,19 +27,12 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         categoryStack.push(mainCategory);
     }
 
-    @Override
-    public ConfigSpec buildAndRegister() {
-        ConfigSpec spec = build();
-        ConfigSpec.saveSpec(spec, type);
-        return spec;
-    }
-
     @NotNull
     public ConfigSpec build() {
         assert categoryStack.size() == 1;
-        ConfigSpec spec = new ConfigSpec(new ResourceLocation(this.getModId(), this.getName()),
-                mainCategory, this.getFileName());
-        spec.loadConfig();
+        ConfigSpec spec = new ConfigSpec(this.getName(),
+                mainCategory, this.getFileName(), this.type);
+        spec.loadFromFile();
         spec.saveConfig();
         return spec;
     }

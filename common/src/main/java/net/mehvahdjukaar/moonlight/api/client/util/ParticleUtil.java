@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client;
+package net.mehvahdjukaar.moonlight.api.client.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -9,8 +9,6 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.Random;
 
 public class ParticleUtil {
 

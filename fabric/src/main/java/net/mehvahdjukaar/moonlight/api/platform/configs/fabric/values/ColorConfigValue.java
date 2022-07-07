@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 public class ColorConfigValue extends IntConfigValue {
 
     public ColorConfigValue(String name, int defaultValue) {
-        super(name, defaultValue, 0, -1);
+        super(name, defaultValue, 0, 0xffffff);
     }
 
     @Override

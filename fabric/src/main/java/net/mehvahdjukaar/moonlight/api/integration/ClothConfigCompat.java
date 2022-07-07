@@ -21,7 +21,7 @@ public class ClothConfigCompat {
     }
 
     public static Screen makeScreen(Screen parent, ConfigSpec spec, @Nullable ResourceLocation background) {
-        spec.loadConfig();
+        spec.loadFromFile();
 
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)

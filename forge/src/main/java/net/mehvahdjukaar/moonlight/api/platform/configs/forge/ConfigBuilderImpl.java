@@ -31,17 +31,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return cat;
     }
 
-    @Override
-    public ForgeConfigSpec buildAndRegister() {
-        ModConfig.Type t = this.type == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
-        ForgeConfigSpec spec = build();
-        ModLoadingContext.get().registerConfig(t, spec);
-        return spec;
-    }
 
     @Override
-    public ForgeConfigSpec build() {
-        return this.builder.build();
+    public ConfigSpecWrapper build() {
+        return new ConfigSpecWrapper(this.getName(), this.builder.build(), this.type);
     }
 
     @Override

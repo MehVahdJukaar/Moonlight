@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client;
+package net.mehvahdjukaar.moonlight.core.client;
 /*
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
