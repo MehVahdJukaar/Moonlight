@@ -10,12 +10,12 @@ import net.minecraft.resources.ResourceLocation;
 /**
  * A soft reference to an object in a Datapack registry
  */
-public class ObjectReference<T> {
+public class DataObjectReference<T> {
 
     private final ResourceLocation location;
     private final ResourceKey<Registry<T>> registryKey;
 
-    public ObjectReference(ResourceLocation location, ResourceKey<Registry<T>> registry) {
+    public DataObjectReference(ResourceLocation location, ResourceKey<Registry<T>> registry) {
         this.location = location;
         this.registryKey = registry;
     }

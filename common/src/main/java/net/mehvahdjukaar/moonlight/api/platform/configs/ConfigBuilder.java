@@ -61,8 +61,13 @@ public abstract class ConfigBuilder {
 
     public abstract ConfigBuilder push(String category);
 
-    public ConfigBuilder pushPage(String category) {
+    public ConfigBuilder pushForge(String category) {
         push(category);
+        return this;
+    }
+
+    public ConfigBuilder popForge() {
+        pop();
         return this;
     }
 
@@ -89,6 +94,8 @@ public abstract class ConfigBuilder {
     public abstract <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate);
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
+
+    public abstract  <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator);
 
 
     public Component description(String name) {

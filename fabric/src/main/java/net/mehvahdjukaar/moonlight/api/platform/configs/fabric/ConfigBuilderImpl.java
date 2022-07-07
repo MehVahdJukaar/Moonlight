@@ -60,6 +60,16 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
+    public ConfigBuilder pushForge(String category) {
+        return this;
+    }
+
+    @Override
+    public ConfigBuilder popForge() {
+        return this;
+    }
+
+    @Override
     public ConfigBuilderImpl pop() {
         assert currentCategoryBuilder != null;
         categoriesBuilder.add(new ConfigCategory(currentCategoryBuilder.getFirst(), currentCategoryBuilder.getSecond().build()));
@@ -122,6 +132,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var config = new EnumConfigValue<>(name, defaultValue);
         doAddConfig(name, config);
         return config;
+    }
+
+    @Override
+    public <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator) {
+        return ()-> defaultValue;
     }
 
     @Override
