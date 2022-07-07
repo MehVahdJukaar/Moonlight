@@ -2,15 +2,14 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
+import com.electronwill.nightconfig.toml.TomlFormat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ConfigGuiHandler;
@@ -24,9 +23,10 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 public class ConfigSpecWrapper extends ConfigSpec {
@@ -65,6 +65,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
 
     @Override
     public void register() {
+        ConfigSpec.addTrackedSpec(this);
         ModConfig.Type t = this.getConfigType() == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
         ModLoadingContext.get().registerConfig(t, spec);
 
@@ -137,17 +138,10 @@ public class ConfigSpecWrapper extends ConfigSpec {
     private void onRefresh() {
     }
 
-    //called on server. sync server -> all clients
-    public void sendSyncedConfigsToAllPlayers() {
-        MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
-        if (currentServer != null) {
-            PlayerList playerList = currentServer.getPlayerList();
-            for (ServerPlayer player : playerList.getPlayers()) {
-                syncConfigsToPlayer(player);
-            }
-        }
+    public void loadFromBytes(InputStream stream){
+        this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
+        this.onRefresh();
     }
-
 
 
 }

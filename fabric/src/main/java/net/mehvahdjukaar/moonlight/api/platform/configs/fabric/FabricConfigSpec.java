@@ -14,33 +14,14 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FabricConfigSpec extends ConfigSpec {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final Map<String, Map<ConfigType, FabricConfigSpec>> CONFIG_STORAGE = new HashMap<>();
     private final ResourceLocation res;
-
-    public static void saveSpec(FabricConfigSpec spec) {
-        var map = CONFIG_STORAGE.computeIfAbsent(spec.getModId(), n -> new HashMap<>());
-        map.put(spec.getConfigType(), spec);
-    }
-
-    @Nullable
-    public static FabricConfigSpec getSpec(String modId, ConfigType type) {
-        var map = CONFIG_STORAGE.get(modId);
-        if (map != null) {
-            return map.getOrDefault(type, null);
-        }
-        return null;
-    }
-
     private final ConfigCategory mainEntry;
     private final File file;
 
@@ -61,7 +42,7 @@ public class FabricConfigSpec extends ConfigSpec {
 
     @Override
     public void register() {
-        FabricConfigSpec.saveSpec(this);
+        FabricConfigSpec.addTrackedSpec(this);
     }
 
     @Override
@@ -111,5 +92,16 @@ public class FabricConfigSpec extends ConfigSpec {
             return ClothConfigCompat.makeScreen(parent, this, background);
         }
         return null;
+    }
+
+    @Override
+    public void loadFromBytes(InputStream stream) {
+        InputStreamReader inputStreamReader = new InputStreamReader(stream, StandardCharsets.UTF_8);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        JsonElement  config = GSON.fromJson(bufferedReader, JsonElement.class);
+        if (config instanceof JsonObject jo) {
+            //dont call load directly so we skip the main category name
+            mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
+        }
     }
 }
