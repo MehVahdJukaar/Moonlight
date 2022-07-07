@@ -6,13 +6,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.integration.ClothConfigCompat;
+import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +39,9 @@ public class FabricConfigSpec extends ConfigSpec {
         this.file = this.getFullPath().toFile();
         this.mainEntry = mainEntry;
         this.res = name;
+        if (this.isSynced()) {
+            ServerPlayConnectionEvents.JOIN.register(this::onPlayerLoggedIn);
+        }
     }
 
     public ConfigCategory getMainEntry() {
@@ -98,10 +106,17 @@ public class FabricConfigSpec extends ConfigSpec {
     public void loadFromBytes(InputStream stream) {
         InputStreamReader inputStreamReader = new InputStreamReader(stream, StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        JsonElement  config = GSON.fromJson(bufferedReader, JsonElement.class);
+        JsonElement config = GSON.fromJson(bufferedReader, JsonElement.class);
         if (config instanceof JsonObject jo) {
             //dont call load directly so we skip the main category name
             mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
         }
     }
+
+    @EventCalled
+    private void onPlayerLoggedIn(ServerGamePacketListenerImpl listener, PacketSender sender, MinecraftServer minecraftServer) {
+        //send this configuration to connected clients
+        syncConfigsToPlayer(listener.player);
+    }
+
 }
