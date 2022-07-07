@@ -1,19 +1,19 @@
-package net.mehvahdjukaar.moonlight.api.utils.forge;
+package net.mehvahdjukaar.moonlight.api.util.fabric;
 
+import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
 import net.mehvahdjukaar.moonlight.api.util.IVillagerBrainEvent;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraftforge.common.MinecraftForge;
-
-import java.util.function.Consumer;
 
 public class VillagerAIManagerImpl {
+
+
     @org.jetbrains.annotations.ApiStatus.Internal
     public static void onRegisterBrainGoals(Brain<Villager> brain, AbstractVillager villager) {
         if (villager instanceof Villager v) {
             var event = new VillagerBrainEvent(brain, v);
-            MinecraftForge.EVENT_BUS.post(event);
+            EventHelper.postEvent(event, IVillagerBrainEvent.class);
             //dont waste time if it doesn't have a custom schedule
             if (event.hasCustomSchedule()) {
                 //finalize schedule
@@ -22,10 +22,4 @@ public class VillagerAIManagerImpl {
             }
         }
     }
-
-    public static void addListener(Consumer<IVillagerBrainEvent> eventConsumer) {
-        MinecraftForge.EVENT_BUS.addListener(e -> eventConsumer.accept((VillagerBrainEvent) e));
-    }
-
 }
-

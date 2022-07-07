@@ -1,14 +1,9 @@
-package net.mehvahdjukaar.moonlight.api.utils.forge;
+package net.mehvahdjukaar.moonlight.api.util.forge;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.BrainEventInternal;
-import net.mehvahdjukaar.moonlight.core.mixins.accessor.BrainAccessor;
 import net.mehvahdjukaar.moonlight.api.util.IVillagerBrainEvent;
-import net.mehvahdjukaar.moonlight.api.util.VillagerAIManager;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
@@ -18,13 +13,10 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
-import net.minecraft.world.entity.schedule.ScheduleBuilder;
 import net.minecraftforge.eventbus.api.Event;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
 
 public class VillagerBrainEvent extends Event implements IVillagerBrainEvent {
 

@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.utils.fabric;
+package net.mehvahdjukaar.moonlight.api.util.fabric;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
