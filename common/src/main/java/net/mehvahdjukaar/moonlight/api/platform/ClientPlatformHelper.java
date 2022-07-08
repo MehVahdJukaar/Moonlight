@@ -37,7 +37,7 @@ public class ClientPlatformHelper {
 
     @FunctionalInterface
     public interface ParticleEvent {
-        <P extends ParticleType<T>, T extends ParticleOptions> void register(Supplier<P> particleType, ParticleFactory<T> factory);
+        <P extends ParticleType<T>, T extends ParticleOptions> void register(P particleType, ParticleFactory<T> factory);
     }
 
     @ExpectPlatform

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
@@ -14,7 +15,8 @@ public interface DynamicBakedModel extends BakedModel {
     /**
      * Main implementation
      */
-    List<BakedQuad> getBlockQuads(BlockState state, Direction direction, RandomSource randomSource, ExtraModelData extraModelData);
+    List<BakedQuad> getBlockQuads(BlockState state, Direction direction, RandomSource randomSource,
+                                  RenderType renderType, ExtraModelData extraModelData);
 
 
     List<BakedQuad> getItemQuads(ItemStack stack, RandomSource randomSource);

@@ -27,7 +27,7 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
     @Override
     public ExtraModelData getExtraModelData() {
         return ExtraModelData.builder()
-                .withProperty(MIMIC, this.getHeldBlock())
+                .with(MIMIC, this.getHeldBlock())
                 .build();
     }
 

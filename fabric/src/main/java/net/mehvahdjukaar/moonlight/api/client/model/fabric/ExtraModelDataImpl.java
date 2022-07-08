@@ -37,7 +37,7 @@ public class ExtraModelDataImpl implements ExtraModelData {
         return Objects.hash(backingMap);
     }
 
-    public static class Builder implements ExtraModelData.Builder {
+    private static class Builder implements ExtraModelData.Builder {
 
         private final Map<ModelDataKey<?>, Object> map;
 
@@ -46,7 +46,7 @@ public class ExtraModelDataImpl implements ExtraModelData {
         }
 
         @Override
-        public <A> ExtraModelData.Builder withProperty(ModelDataKey<A> prop, A data) {
+        public <A> ExtraModelData.Builder with(ModelDataKey<A> prop, A data) {
             map.put(prop, data);
             return this;
         }

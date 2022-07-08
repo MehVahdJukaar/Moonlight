@@ -1,12 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
-import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
 import net.mehvahdjukaar.moonlight.api.fluids.ISoftFluidTank;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.fluids.VanillaSoftFluids;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -24,8 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.IFluidTypeRenderProperties;
-import net.minecraftforge.client.RenderProperties;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
@@ -722,7 +721,7 @@ public class SoftFluidTank implements ISoftFluidTank {
     //called when it goes from empty to full
     public void setFluid(@NotNull SoftFluid fluid, @Nullable CompoundTag nbt) {
         this.fluid = fluid;
-        if(fluid == null){
+        if (fluid == null) {
             int a = 1;
         }
         this.nbt = null;
@@ -780,12 +779,12 @@ public class SoftFluidTank implements ISoftFluidTank {
         } else {
             Fluid f = this.fluid.getForgeFluid();
             if (f != Fluids.EMPTY) {
-                var prop = RenderProperties.get(f);
-                if (prop != IFluidTypeRenderProperties.DUMMY) {
+                var prop = IClientFluidTypeExtensions.of(f);
+                if (prop != IClientFluidTypeExtensions.DEFAULT) {
                     //world accessor
                     int w;
                     //stack accessor
-                    w = prop.getColorTint(this.toEquivalentForgeFluid(1));
+                    w = prop.getTintColor(this.toEquivalentForgeFluid(1));
                     if (w != -1) this.specialColor = w;
                 }
             }

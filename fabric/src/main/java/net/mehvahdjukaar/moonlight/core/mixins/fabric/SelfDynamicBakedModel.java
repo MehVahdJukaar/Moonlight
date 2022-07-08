@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.mehvahdjukaar.moonlight.api.client.model.DynamicBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -26,7 +27,9 @@ public interface SelfDynamicBakedModel extends FabricBakedModel, DynamicBakedMod
     default void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
         var attachment = ((RenderAttachedBlockView) blockView).getBlockEntityRenderAttachment(pos);
         if(attachment instanceof ExtraModelData data){
-            var list = this.getBlockQuads(state, context.getEmitter().cullFace(),randomSupplier.get(), data);
+            //TODO: finish this
+            var list = this.getBlockQuads(state, context.getEmitter().cullFace(),randomSupplier.get(),
+                    RenderType.cutout(), data);
         }
     }
 

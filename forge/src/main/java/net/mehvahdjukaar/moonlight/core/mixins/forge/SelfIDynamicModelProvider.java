@@ -7,10 +7,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.ModelDataManager;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.extensions.IForgeBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -20,11 +17,11 @@ import java.util.Objects;
 public interface SelfIDynamicModelProvider extends IForgeBlockEntity, IExtraModelDataProvider {
 
     @Override
-    default IModelData getModelData() {
+    default ModelData getModelData() {
         if (this.getExtraModelData() instanceof ExtraModelDataImpl data) {
-            return data.getData();
+            return data.data();
         }
-        return EmptyModelData.INSTANCE;
+        return ModelData.EMPTY;
     }
 
     @Override
@@ -36,9 +33,10 @@ public interface SelfIDynamicModelProvider extends IForgeBlockEntity, IExtraMode
         //this calls load
         handleUpdateTag(tag);
         if (!Objects.equals(oldData, this.getExtraModelData())) {
-            BlockEntity be = (BlockEntity)this;
+            BlockEntity be = (BlockEntity) this;
+
             //not needed cause model data doesn't create new obj. updating old one instead
-            ModelDataManager.requestModelDataRefresh(be);
+            be.getLevel().getModelDataManager().requestRefresh(be);
             //this.data.setData(MIMIC, this.getHeldBlock());
             be.getLevel().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), Block.UPDATE_CLIENTS);
         }
