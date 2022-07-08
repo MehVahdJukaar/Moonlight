@@ -1,18 +1,7 @@
-package net.mehvahdjukaar.moonlight.api.client.asset_generators;
+package net.mehvahdjukaar.moonlight.api.resources.assets;
 
-import com.google.common.collect.Maps;
-import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
 //import net.minecraftforge.client.model.generators.VariantBlockStateBuilder;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
 /*
 public class BlockStateBuilder {
     private final Block block;

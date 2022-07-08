@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.textures;
+package net.mehvahdjukaar.moonlight.api.resources.textures;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;

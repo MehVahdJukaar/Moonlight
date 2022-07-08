@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.network.forge;
 
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -59,7 +60,6 @@ public class ChannelHandlerImpl extends ChannelHandler {
     }
 
     static class Wrapper implements Context {
-
 
         private final NetworkEvent.Context context;
 

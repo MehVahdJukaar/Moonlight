@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.util.fabric;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.core.misc.IVillagerBrainEvent;
+import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerBrainEventInternal;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -12,7 +12,6 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.entity.schedule.Schedule;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;

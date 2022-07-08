@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
+import net.mehvahdjukaar.moonlight.api.events.IEarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
 import net.minecraft.server.packs.repository.PackRepository;

@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

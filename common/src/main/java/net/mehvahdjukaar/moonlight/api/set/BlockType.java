@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
-import net.mehvahdjukaar.moonlight.api.client.language.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;

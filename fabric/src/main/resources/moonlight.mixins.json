@@ -6,6 +6,7 @@
   "client": [
   ],
   "mixins": [
+    "FireBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

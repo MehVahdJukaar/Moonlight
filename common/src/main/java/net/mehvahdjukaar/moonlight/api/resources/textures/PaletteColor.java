@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.textures;
+package net.mehvahdjukaar.moonlight.api.resources.textures;
 
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HCLColor;

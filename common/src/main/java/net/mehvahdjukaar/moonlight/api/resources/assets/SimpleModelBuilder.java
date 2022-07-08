@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.asset_generators;
+package net.mehvahdjukaar.moonlight.api.resources.assets;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

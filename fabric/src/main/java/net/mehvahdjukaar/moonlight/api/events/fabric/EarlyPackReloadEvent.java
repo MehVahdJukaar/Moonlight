@@ -1,6 +1,6 @@
-package net.mehvahdjukaar.moonlight.api.resources.pack.fabric;
+package net.mehvahdjukaar.moonlight.api.events.fabric;
 
-import net.mehvahdjukaar.moonlight.api.resources.pack.IEarlyPackReloadEvent;
+import net.mehvahdjukaar.moonlight.api.events.IEarlyPackReloadEvent;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 

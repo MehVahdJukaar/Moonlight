@@ -1,8 +1,9 @@
-package net.mehvahdjukaar.moonlight.core.misc;
+package net.mehvahdjukaar.moonlight.api.events;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.platform.event.SimpleEvent;
+import net.mehvahdjukaar.moonlight.core.misc.VillagerBrainEventInternal;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;

@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric;
 
-import net.mehvahdjukaar.moonlight.api.client.language.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;

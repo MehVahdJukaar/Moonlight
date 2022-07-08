@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.resources.pack;
+package net.mehvahdjukaar.moonlight.api.events;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.event.SimpleEvent;

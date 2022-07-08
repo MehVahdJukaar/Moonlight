@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.set.leaves;
 
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
-import net.mehvahdjukaar.moonlight.api.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;

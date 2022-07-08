@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
 import com.google.common.collect.ImmutableMap;
-import net.mehvahdjukaar.moonlight.api.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;

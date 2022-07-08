@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
-import net.mehvahdjukaar.moonlight.api.client.language.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.api.client.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;

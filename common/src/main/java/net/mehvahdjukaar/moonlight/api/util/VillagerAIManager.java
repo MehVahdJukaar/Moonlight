@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.util;
 
 import com.google.common.collect.ImmutableList;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.misc.IVillagerBrainEvent;
+import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.VillagerAccessor;
 import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;

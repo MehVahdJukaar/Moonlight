@@ -2,8 +2,8 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.api.client.language.LangBuilder;
-import net.mehvahdjukaar.moonlight.api.client.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.minecraft.resources.ResourceLocation;

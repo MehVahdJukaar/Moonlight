@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import net.mehvahdjukaar.moonlight.api.client.language.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.minecraft.client.resources.language.ClientLanguage;

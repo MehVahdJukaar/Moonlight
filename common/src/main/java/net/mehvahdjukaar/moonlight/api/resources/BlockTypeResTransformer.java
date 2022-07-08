@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.resources;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
-import net.mehvahdjukaar.moonlight.api.client.textures.SpriteUtils;
+import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;

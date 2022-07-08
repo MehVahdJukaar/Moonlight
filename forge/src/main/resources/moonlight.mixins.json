@@ -4,6 +4,7 @@
   "package": "net.mehvahdjukaar.moonlight.core.mixins.forge",
   "compatibilityLevel": "JAVA_16",
   "client": [
+    "FireBlockMixin",
     "SelfEntitySpawnDataMixin",
     "SelfItemDisplayTIleMixin"
   ],

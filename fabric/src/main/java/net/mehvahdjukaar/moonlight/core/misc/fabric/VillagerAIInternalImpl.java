@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.misc.fabric;
 
-import net.mehvahdjukaar.moonlight.core.misc.IVillagerBrainEvent;
+import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.util.fabric.VillagerBrainEvent;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.npc.Villager;

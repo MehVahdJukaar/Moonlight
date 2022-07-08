@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.textures;
+package net.mehvahdjukaar.moonlight.api.resources.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;

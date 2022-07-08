@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
-import net.mehvahdjukaar.moonlight.api.resources.pack.IEarlyPackReloadEvent;
+import net.mehvahdjukaar.moonlight.api.events.IEarlyPackReloadEvent;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.CloseableResourceManager;

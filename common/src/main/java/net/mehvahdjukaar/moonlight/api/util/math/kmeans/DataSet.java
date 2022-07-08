@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.util.math.kmeans;
 
 
-import net.mehvahdjukaar.moonlight.api.client.textures.Palette;
-import net.mehvahdjukaar.moonlight.api.client.textures.PaletteColor;
+import net.mehvahdjukaar.moonlight.api.resources.textures.Palette;
+import net.mehvahdjukaar.moonlight.api.resources.textures.PaletteColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.LABColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;

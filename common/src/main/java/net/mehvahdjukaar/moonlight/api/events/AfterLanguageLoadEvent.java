@@ -1,5 +1,6 @@
-package net.mehvahdjukaar.moonlight.api.client.language;
+package net.mehvahdjukaar.moonlight.api.events;
 
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.event.SimpleEvent;
 import net.minecraft.client.resources.language.LanguageInfo;
 

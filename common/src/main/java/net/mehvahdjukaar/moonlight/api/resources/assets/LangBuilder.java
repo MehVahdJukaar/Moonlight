@@ -1,7 +1,8 @@
-package net.mehvahdjukaar.moonlight.api.client.language;
+package net.mehvahdjukaar.moonlight.api.resources.assets;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.minecraft.Util;
