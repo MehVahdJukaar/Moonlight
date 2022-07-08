@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
@@ -23,6 +24,6 @@ public class FabricClientNetwork {
 
     public static <M extends Message> void handlePacket(Function<FriendlyByteBuf, M> decoder, Minecraft client, ClientPacketListener listener, FriendlyByteBuf buf, PacketSender sender) {
         var message = decoder.apply(buf);
-        client.execute(() -> message.handle(new ChannelHandlerImpl.Wrapper(client.player, ChannelHandler.NetworkDir.PLAY_TO_CLIENT)));
+        client.execute(() -> message.handle(new ChannelHandlerImpl.Wrapper(client.player, NetworkDir.PLAY_TO_CLIENT)));
     }
 }
