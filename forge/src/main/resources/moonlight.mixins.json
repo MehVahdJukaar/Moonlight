@@ -5,8 +5,9 @@
   "compatibilityLevel": "JAVA_16",
   "client": [
     "FireBlockMixin",
+    "SelfIDynamicModelProvider",
     "SelfEntitySpawnDataMixin",
-    "SelfItemDisplayTIleMixin"
+    "SelfItemDisplayTileMixin"
   ],
   "mixins": [
   ],

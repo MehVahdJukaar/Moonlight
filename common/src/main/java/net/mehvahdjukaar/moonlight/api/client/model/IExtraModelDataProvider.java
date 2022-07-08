@@ -7,4 +7,6 @@ public interface IExtraModelDataProvider {
     default void beforeModelUpdate(){
 
     };
+
+    default void requestModelReload(){};
 }

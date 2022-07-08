@@ -18,11 +18,11 @@ import javax.annotation.Nullable;
 
 //0.0
 @Mixin(ItemDisplayTile.class)
-public abstract class SelfItemDisplayTIleMixin extends RandomizableContainerBlockEntity {
+public abstract class SelfItemDisplayTileMixin extends RandomizableContainerBlockEntity {
 
     private final LazyOptional<? extends IItemHandler>[] handlers = SidedInvWrapper.create((WorldlyContainer) this, Direction.values());
 
-    protected SelfItemDisplayTIleMixin(BlockEntityType<?> entityType, BlockPos pos, BlockState state) {
+    protected SelfItemDisplayTileMixin(BlockEntityType<?> entityType, BlockPos pos, BlockState state) {
         super(entityType, pos, state);
     }
 

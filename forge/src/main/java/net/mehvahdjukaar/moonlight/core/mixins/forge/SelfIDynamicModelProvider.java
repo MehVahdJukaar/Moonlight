@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins.forge;
 
+import dev.architectury.patchedmixin.staticmixin.spongepowered.asm.mixin.Overwrite;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
 import net.mehvahdjukaar.moonlight.api.client.model.forge.ExtraModelDataImpl;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +16,13 @@ import java.util.Objects;
 
 @Mixin(IExtraModelDataProvider.class)
 public interface SelfIDynamicModelProvider extends IForgeBlockEntity, IExtraModelDataProvider {
+
+    //overwrite since it already has a default
+    @Overwrite
+    default void requestModelReload() {
+        BlockEntity be = (BlockEntity) this;
+        be.getLevel().getModelDataManager().requestRefresh(be);
+    }
 
     @Override
     default ModelData getModelData() {
