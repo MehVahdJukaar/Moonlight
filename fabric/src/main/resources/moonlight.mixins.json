@@ -6,7 +6,9 @@
   "client": [
   ],
   "mixins": [
-    "FireBlockMixin"
+    "FireBlockMixin",
+    "SelfDynamicBakedModel",
+    "SelfIDynamicModelProvider"
   ],
   "injectors": {
     "defaultRequire": 1
