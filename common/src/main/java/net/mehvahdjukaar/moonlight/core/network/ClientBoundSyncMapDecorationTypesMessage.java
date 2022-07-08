@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.SimpleDecorationType;
@@ -50,7 +51,7 @@ public class ClientBoundSyncMapDecorationTypesMessage implements Message {
 
     @Override
     public void handle(ChannelHandler.Context context) {
-        if (context.getDirection() == ChannelHandler.NetworkDir.PLAY_TO_CLIENT) {
+        if (context.getDirection() == NetworkDir.PLAY_TO_CLIENT) {
             MapDecorationRegistry.DATA_DRIVEN_REGISTRY.acceptClientTypes(this.simpleTypes);
 
             //TODO: remove from here

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.network;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.map.CustomDataHolder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
@@ -85,7 +86,7 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
 
     @Override
     public void handle(ChannelHandler.Context context) {
-        if (context.getDirection() == ChannelHandler.NetworkDir.PLAY_TO_CLIENT) {
+        if (context.getDirection() == NetworkDir.PLAY_TO_CLIENT) {
 
             MapRenderer mapRenderer = Minecraft.getInstance().gameRenderer.getMapRenderer();
 

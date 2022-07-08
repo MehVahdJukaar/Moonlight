@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.minecraft.resources.ResourceLocation;
@@ -13,10 +14,10 @@ public class ModMessages {
     public static void registerMessages() {
         CHANNEL = ChannelHandler.createChannel(Moonlight.res("channel"));
 
-        CHANNEL.register(ChannelHandler.NetworkDir.PLAY_TO_CLIENT, //id = "moonlight:0"
+        CHANNEL.register(NetworkDir.PLAY_TO_CLIENT, //id = "moonlight:0"
                 ClientBoundSpawnCustomEntityPacket.class, ClientBoundSpawnCustomEntityPacket::new);
 
-        CHANNEL.register(ChannelHandler.NetworkDir.PLAY_TO_CLIENT,
+        CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundSyncCustomMapDecorationMessage.class, ClientBoundSyncCustomMapDecorationMessage::new);
 
         /*
