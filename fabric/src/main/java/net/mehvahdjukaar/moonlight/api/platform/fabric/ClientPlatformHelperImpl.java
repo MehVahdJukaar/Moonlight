@@ -38,8 +38,8 @@ public class ClientPlatformHelperImpl {
         eventListener.accept(ClientPlatformHelperImpl::registerParticle);
     }
 
-    private static <P extends ParticleType<T>, T extends ParticleOptions> void registerParticle(Supplier<P> type, ClientPlatformHelper.ParticleFactory<T> registration) {
-        ParticleFactoryRegistry.getInstance().register(type.get(), registration::create);
+    private static <P extends ParticleType<T>, T extends ParticleOptions> void registerParticle(P type, ClientPlatformHelper.ParticleFactory<T> registration) {
+        ParticleFactoryRegistry.getInstance().register(type, registration::create);
     }
 
     public static void onRegisterEntityRenderers(Consumer<ClientPlatformHelper.EntityRendererEvent> eventListener) {
