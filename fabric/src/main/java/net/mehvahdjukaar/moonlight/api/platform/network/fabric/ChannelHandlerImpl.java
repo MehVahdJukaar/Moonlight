@@ -101,7 +101,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
     }
 
     @Override
-    public void sendToAllClientPlayersInRange(Level level, BlockPos pos, int radius, Message message) {
+    public void sendToAllClientPlayersInRange(Level level, BlockPos pos, double radius, Message message) {
 
         MinecraftServer currentServer = PlatformHelper.getCurrentServer();
         if (currentServer != null) {

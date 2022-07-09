@@ -25,7 +25,5 @@ public interface SelfDynamicBakedModel extends IForgeBakedModel, IDynamicBakedMo
         return this.getBlockQuads(state, side, rand, type, new ExtraModelDataImpl(modelData));
     }
 
-    ;
-
 
 }

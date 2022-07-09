@@ -253,74 +253,6 @@ public class SoftFluidTank implements ISoftFluidTank {
     }
 
     /**
-     * tries removing bottle amount and returns filled bottle
-     *
-     * @return filled bottle item. null if it failed
-     */
-    @Nullable
-    public ItemStack tryFillingBottle(Level world, BlockPos pos) {
-        return tryFillingItem(Items.GLASS_BOTTLE, world, pos, false);
-    }
-
-    /**
-     * tries removing bucket amount and returns filled bucket
-     *
-     * @return filled bucket item. null if it failed
-     */
-    @Nullable
-    public ItemStack tryFillingBucket(Level world, BlockPos pos) {
-        return tryFillingItem(Items.BUCKET, world, pos, false);
-    }
-
-    /**
-     * tries removing bowl amount and returns filled bowl
-     *
-     * @return filled bowl item. null if it failed
-     */
-    @Nullable
-    public ItemStack tryFillingBowl(Level world, BlockPos pos) {
-        return tryFillingItem(Items.BOWL, world, pos, false);
-    }
-
-
-    private boolean areNbtEquals(CompoundTag nbt, CompoundTag nbt1) {
-        if ((nbt == null || nbt.isEmpty()) && (nbt1 == null || nbt1.isEmpty())) return true;
-        if (nbt == null || nbt1 == null) return false;
-        if (nbt1.contains(POTION_TYPE_KEY) && !nbt.contains(POTION_TYPE_KEY)) {
-            var n1 = nbt1.copy();
-            n1.remove(POTION_TYPE_KEY);
-            return n1.equals(nbt);
-        }
-        if (nbt.contains(POTION_TYPE_KEY) && !nbt1.contains(POTION_TYPE_KEY)) {
-            var n = nbt.copy();
-            n.remove(POTION_TYPE_KEY);
-            return n.equals(nbt1);
-        }
-        return nbt1.equals(nbt);
-    }
-
-    /**
-     * checks if current tank holds equivalent fluid as provided soft fluid
-     *
-     * @param other soft fluid
-     * @return is same
-     */
-    public boolean isSameFluidAs(SoftFluid other) {
-        return isSameFluidAs(other, null);
-    }
-
-    /**
-     * checks if current tank holds equivalent fluid as provided soft fluid
-     *
-     * @param other soft fluid
-     * @param com   fluid nbt
-     * @return is same
-     */
-    public boolean isSameFluidAs(SoftFluid other, @Nullable CompoundTag com) {
-        return this.fluid.equals(other) && areNbtEquals(this.nbt, com);
-    }
-
-    /**
      * try adding provided soft fluid to the tank
      *
      * @param s     soft fluid to add
@@ -342,40 +274,15 @@ public class SoftFluidTank implements ISoftFluidTank {
         return false;
     }
 
-    /**
-     * try adding provided soft fluid to the tank
-     *
-     * @param s     soft fluid to add
-     * @param count count to add
-     * @return success
-     */
-    public boolean tryAddingFluid(SoftFluid s, int count) {
-        return tryAddingFluid(s, count, null);
-    }
-
-    /**
-     * try adding 1 bottle of provided soft fluid to the tank
-     *
-     * @param s soft fluid to add
-     * @return success
-     */
-    public boolean tryAddingFluid(SoftFluid s) {
-        return this.tryAddingFluid(s, 1);
-    }
-
-    public boolean tryTransferFluid(SoftFluidTank destination) {
-        return this.tryTransferFluid(destination, BOTTLE_COUNT);
-    }
-
     //transfers between two fluid holders
-    public boolean tryTransferFluid(SoftFluidTank destination, int amount) {
+    public boolean tryTransferFluid(ISoftFluidTank destination, int amount) {
         if (destination.canAdd(amount) && this.canRemove(amount)) {
             if (destination.isEmpty()) {
                 destination.setFluid(this.getFluid(), this.getNbt());
                 this.shrink(amount);
                 destination.grow(amount);
                 return true;
-            } else if (this.isSameFluidAs(destination.getFluid(), destination.nbt)) {
+            } else if (this.isSameFluidAs(destination.getFluid(), destination.getNbt())) {
                 this.shrink(amount);
                 destination.grow(amount);
                 return true;
@@ -402,29 +309,6 @@ public class SoftFluidTank implements ISoftFluidTank {
      */
     public boolean canAdd(int n) {
         return this.count + n <= this.capacity;
-    }
-
-    /**
-     * can provide soft fluid be added to tank
-     *
-     * @param s     soft fluid to add
-     * @param count bottles amount
-     * @return can add
-     */
-    public boolean canAddSoftFluid(SoftFluid s, int count) {
-        return canAddSoftFluid(s, count, null);
-    }
-
-    /**
-     * can provide soft fluid be added to tank
-     *
-     * @param s     soft fluid to add
-     * @param count bottles amount
-     * @param nbt   soft fluid nbt
-     * @return can add
-     */
-    public boolean canAddSoftFluid(SoftFluid s, int count, @Nullable CompoundTag nbt) {
-        return this.canAdd(count) && this.isSameFluidAs(s, nbt);
     }
 
     public boolean isFull() {
@@ -538,37 +422,6 @@ public class SoftFluidTank implements ISoftFluidTank {
         this.setCount((int) Math.min(this.capacity, other.getCount()));
     }
 
-
-    /**
-     * fills to max capacity with provided soft fluid
-     *
-     * @param fluid forge fluid
-     */
-    public void fill(SoftFluid fluid) {
-        this.fill(fluid, null);
-    }
-
-    /**
-     * fills to max capacity with provided soft fluid
-     *
-     * @param fluid soft fluid
-     * @param nbt   soft fluid nbt
-     */
-    public void fill(SoftFluid fluid, @Nullable CompoundTag nbt) {
-        this.setFluid(fluid, nbt);
-        this.fillCount();
-    }
-
-
-    /**
-     * sets current fluid to provided soft fluid equivalent
-     *
-     * @param fluid soft fluid
-     */
-    public void setFluid(@NotNull SoftFluid fluid) {
-        this.setFluid(fluid, null);
-    }
-
     //called when it goes from empty to full
     public void setFluid(@NotNull SoftFluid fluid, @Nullable CompoundTag nbt) {
         this.fluid = fluid;
@@ -633,13 +486,6 @@ public class SoftFluidTank implements ISoftFluidTank {
             }
         }
 
-    }
-
-    /**
-     * @return true if contained fluid has associated food
-     */
-    public boolean containsFood() {
-        return this.fluid.isFood();
     }
 
     /**

@@ -11,6 +11,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -56,7 +58,7 @@ public class ClientPlatformHelperImpl {
     }
 
 
-    public static void onRegisterParticles(Consumer<ClientPlatformHelper.ParticleEvent> eventListener) {
+    public static void addParticleRegistration(Consumer<ClientPlatformHelper.ParticleEvent> eventListener) {
         Consumer<RegisterParticleProvidersEvent> eventConsumer = event -> {
             W w = new W(event);
             eventListener.accept(w::register);
@@ -70,22 +72,35 @@ public class ClientPlatformHelperImpl {
         }
     }
 
-    public static void onRegisterEntityRenderers(Consumer<ClientPlatformHelper.EntityRendererEvent> eventListener) {
+    public static void addEntityRenderersRegistration(Consumer<ClientPlatformHelper.EntityRendererEvent> eventListener) {
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerEntityRenderer);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void onRegisterBlockColors(Consumer<ClientPlatformHelper.BlockColorEvent> eventListener) {
+    public static void addBlockEntityRenderersRegistration(Consumer<ClientPlatformHelper.BlockEntityRendererEvent> eventListener) {
+        Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
+                eventListener.accept(event::registerBlockEntityRenderer);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+    public static void addBlockColorsRegistration(Consumer<ClientPlatformHelper.BlockColorEvent> eventListener) {
         Consumer<RegisterColorHandlersEvent.Block> eventConsumer = event -> eventListener.accept(event::register);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void onRegisterItemColors(Consumer<ClientPlatformHelper.ItemColorEvent> eventListener) {
+    public static void addItemColorsRegistration(Consumer<ClientPlatformHelper.ItemColorEvent> eventListener) {
         Consumer<RegisterColorHandlersEvent.Item> eventConsumer = event -> eventListener.accept(event::register);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
+    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientPlatformHelper.AtlasTextureRegistration> eventListener) {
+        Consumer<TextureStitchEvent.Pre> eventConsumer = event ->{
+            if(event.getAtlas().location() == atlasLocation){
+                eventListener.accept(event::addSprite);
+            }
+        };
+    }
 
     public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate,
                                    Level level, BlockPos blockpos, BlockRenderDispatcher dispatcher) {
@@ -97,5 +112,8 @@ public class ClientPlatformHelperImpl {
         }
 
     }
+
+
+
 
 }

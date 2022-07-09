@@ -98,10 +98,9 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
 
     @Override
-    public void sendToAllClientPlayersInRange(Level level, BlockPos pos, int radius, Message message) {
+    public void sendToAllClientPlayersInRange(Level level, BlockPos pos, double radius, Message message) {
         MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
         if (currentServer != null) {
-            PlayerList players = currentServer.getPlayerList();
             var distributor = PacketDistributor.NEAR.with(() ->
                     new PacketDistributor.TargetPoint(pos.getX(), pos.getY(), pos.getZ(), radius, level.dimension()));
             channel.send(distributor, message);

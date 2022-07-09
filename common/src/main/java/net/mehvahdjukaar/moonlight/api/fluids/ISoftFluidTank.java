@@ -5,7 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import org.jetbrains.annotations.NotNull;
@@ -19,12 +21,18 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unused")
 public interface ISoftFluidTank {
 
+    String POTION_TYPE_KEY = "Bottle";
+    int BOTTLE_COUNT = 1;
+    int BOWL_COUNT = 2;
+    int BUCKET_COUNT = 4;
+
     @ExpectPlatform
-    static ISoftFluidTank create(int capacity){
+    static ISoftFluidTank create(int capacity) {
         throw new AssertionError();
     }
 
     //TODO: add default methods here
+
     /**
      * call this method from your block when player interacts. tries to fill or empty current held item in tank
      *
@@ -43,7 +51,7 @@ public interface ISoftFluidTank {
      * @return resulting ItemStack: empty for empty hand return, null if it failed
      */
     @Nullable
-    public ItemStack interactWithItem(ItemStack stack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate);
+    ItemStack interactWithItem(ItemStack stack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate);
 
     /**
      * tries pouring the content of provided item in the tank
@@ -52,7 +60,7 @@ public interface ISoftFluidTank {
      * @return empty container item, null if it failed
      */
     @Nullable
-    public ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate);
+    ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate);
 
     /**
      * tries removing said amount of fluid and returns filled item
@@ -61,14 +69,17 @@ public interface ISoftFluidTank {
      * @return filled bottle item. null if it failed or if simulated is true and failed
      */
     @Nullable
-    public ItemStack tryFillingItem(Item emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate);
+    ItemStack tryFillingItem(Item emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate);
+
     /**
      * tries removing bottle amount and returns filled bottle
      *
      * @return filled bottle item. null if it failed
      */
     @Nullable
-    public ItemStack tryFillingBottle(Level world, BlockPos pos);
+    default ItemStack tryFillingBottle(Level world, BlockPos pos) {
+        return tryFillingItem(Items.GLASS_BOTTLE, world, pos, false);
+    }
 
     /**
      * tries removing bucket amount and returns filled bucket
@@ -76,7 +87,9 @@ public interface ISoftFluidTank {
      * @return filled bucket item. null if it failed
      */
     @Nullable
-    public ItemStack tryFillingBucket(Level world, BlockPos pos);
+    default ItemStack tryFillingBucket(Level world, BlockPos pos) {
+        return tryFillingItem(Items.BUCKET, world, pos, false);
+    }
 
     /**
      * tries removing bowl amount and returns filled bowl
@@ -84,7 +97,9 @@ public interface ISoftFluidTank {
      * @return filled bowl item. null if it failed
      */
     @Nullable
-    public ItemStack tryFillingBowl(Level world, BlockPos pos);
+    default ItemStack tryFillingBowl(Level world, BlockPos pos) {
+        return tryFillingItem(Items.BOWL, world, pos, false);
+    }
 
     /**
      * checks if current tank holds equivalent fluid as provided soft fluid
@@ -92,7 +107,9 @@ public interface ISoftFluidTank {
      * @param other soft fluid
      * @return is same
      */
-    public boolean isSameFluidAs(SoftFluid other);
+    default boolean isSameFluidAs(SoftFluid other) {
+        return isSameFluidAs(other, null);
+    }
 
     /**
      * checks if current tank holds equivalent fluid as provided soft fluid
@@ -101,7 +118,9 @@ public interface ISoftFluidTank {
      * @param com   fluid nbt
      * @return is same
      */
-    public boolean isSameFluidAs(SoftFluid other, @Nullable CompoundTag com);
+    default boolean isSameFluidAs(SoftFluid other, @Nullable CompoundTag com) {
+        return this.getFluid().equals(other) && areNbtEquals(this.getNbt(), com);
+    }
 
     /**
      * try adding provided soft fluid to the tank
@@ -111,7 +130,7 @@ public interface ISoftFluidTank {
      * @param com   fluid nbt
      * @return success
      */
-    public boolean tryAddingFluid(SoftFluid s, int count, @Nullable CompoundTag com);
+    boolean tryAddingFluid(SoftFluid s, int count, @Nullable CompoundTag com);
 
     /**
      * try adding provided soft fluid to the tank
@@ -120,7 +139,9 @@ public interface ISoftFluidTank {
      * @param count count to add
      * @return success
      */
-    public boolean tryAddingFluid(SoftFluid s, int count);
+    default boolean tryAddingFluid(SoftFluid s, int count) {
+        return tryAddingFluid(s, count, null);
+    }
 
     /**
      * try adding 1 bottle of provided soft fluid to the tank
@@ -128,8 +149,19 @@ public interface ISoftFluidTank {
      * @param s soft fluid to add
      * @return success
      */
-    public boolean tryAddingFluid(SoftFluid s);
+    default boolean tryAddingFluid(SoftFluid s) {
+        return this.tryAddingFluid(s, 1);
+    }
 
+    /**
+     * Transfers between 2 soft fluid tanks
+     */
+    default boolean tryTransferFluid(ISoftFluidTank destination) {
+        return this.tryTransferFluid(destination, BOTTLE_COUNT);
+    }
+
+    //transfers between two fluid holders
+    boolean tryTransferFluid(ISoftFluidTank destination, int amount);
 
     /**
      * can I remove n bottles of fluid
@@ -137,7 +169,7 @@ public interface ISoftFluidTank {
      * @param n bottles amount
      * @return can remove
      */
-    public boolean canRemove(int n);
+    boolean canRemove(int n);
 
     /**
      * can I add n bottles of fluid
@@ -145,7 +177,7 @@ public interface ISoftFluidTank {
      * @param n bottles amount
      * @return can add
      */
-    public boolean canAdd(int n);
+    boolean canAdd(int n);
 
     /**
      * can provide soft fluid be added to tank
@@ -154,7 +186,9 @@ public interface ISoftFluidTank {
      * @param count bottles amount
      * @return can add
      */
-    public boolean canAddSoftFluid(SoftFluid s, int count);
+    default boolean canAddSoftFluid(SoftFluid s, int count) {
+        return canAddSoftFluid(s, count, null);
+    }
 
     /**
      * can provide soft fluid be added to tank
@@ -164,44 +198,46 @@ public interface ISoftFluidTank {
      * @param nbt   soft fluid nbt
      * @return can add
      */
-    public boolean canAddSoftFluid(SoftFluid s, int count, @Nullable CompoundTag nbt);
+    default boolean canAddSoftFluid(SoftFluid s, int count, @Nullable CompoundTag nbt) {
+        return this.canAdd(count) && this.isSameFluidAs(s, nbt);
+    }
 
-    public boolean isFull();
+    boolean isFull();
 
-    public boolean isEmpty() ;
+    boolean isEmpty();
 
     /**
      * grows contained fluid by at most inc bottles. doesn't need checking
      *
      * @param inc maximum increment
      */
-    public void lossyAdd(int inc);
+    void lossyAdd(int inc);
 
     /**
      * unchecked sets the tank fluid count
      *
      * @param count bottles count
      */
-    public void setCount(int count);
+    void setCount(int count);
 
     /**
      * fills out tank to the maximum capacity
      */
-    public void fillCount();
+    void fillCount();
 
     /**
      * unchecked grows the tank by inc bottles. Check with canAdd()
      *
      * @param inc bottles increment
      */
-    public void grow(int inc);
+    void grow(int inc);
 
     /**
      * unchecked shrinks the tank by inc bottles
      *
      * @param inc bottles increment
      */
-    public void shrink(int inc);
+    void shrink(int inc);
 
     /**
      * gets liquid height for renderer
@@ -209,34 +245,34 @@ public interface ISoftFluidTank {
      * @param maxHeight maximum height in blocks
      * @return fluid height
      */
-    public float getHeight(float maxHeight);
+    float getHeight(float maxHeight);
 
     /**
      * @return comparator block redstone power
      */
-    public int getComparatorOutput();
+    int getComparatorOutput();
 
-    public int getCount();
+    int getCount();
 
     @Nonnull
-    public SoftFluid getFluid();
+    SoftFluid getFluid();
 
     @Nullable
-    public CompoundTag getNbt();
+    CompoundTag getNbt();
 
-    public void setNbt(@Nullable CompoundTag nbt);
+    void setNbt(@Nullable CompoundTag nbt);
 
     /**
      * resets & clears the tank
      */
-    public void clear() ;
+    void clear();
 
     /**
      * copies the content of a fluid tank into this
      *
      * @param other other tank
      */
-    public void copy(ISoftFluidTank other);
+    void copy(ISoftFluidTank other);
 
 
     /**
@@ -244,7 +280,9 @@ public interface ISoftFluidTank {
      *
      * @param fluid forge fluid
      */
-    public void fill(SoftFluid fluid);
+    default void fill(SoftFluid fluid) {
+        this.fill(fluid, null);
+    }
 
     /**
      * fills to max capacity with provided soft fluid
@@ -252,46 +290,51 @@ public interface ISoftFluidTank {
      * @param fluid soft fluid
      * @param nbt   soft fluid nbt
      */
-    public void fill(SoftFluid fluid, @Nullable CompoundTag nbt);
-
+    default void fill(SoftFluid fluid, @Nullable CompoundTag nbt) {
+        this.setFluid(fluid, nbt);
+        this.fillCount();
+    }
 
     /**
      * sets current fluid to provided soft fluid equivalent
      *
      * @param fluid soft fluid
      */
-    public void setFluid(@NotNull SoftFluid fluid) ;
+    default void setFluid(@NotNull SoftFluid fluid) {
+        this.setFluid(fluid, null);
+    }
 
     //called when it goes from empty to full
-    public void setFluid(@NotNull SoftFluid fluid, @Nullable CompoundTag nbt);
+    void setFluid(@NotNull SoftFluid fluid, @Nullable CompoundTag nbt);
 
     /**
      * @return tint color to be applied on the fluid texture
      */
-    public int getTintColor(@Nullable LevelReader world, @Nullable BlockPos pos);
+    int getTintColor(@Nullable LevelReader world, @Nullable BlockPos pos);
 
     /**
      * @return tint color to be applied on the fluid texture
      */
-    public int getFlowingTint(@Nullable LevelReader world, @Nullable BlockPos pos) ;
+    int getFlowingTint(@Nullable LevelReader world, @Nullable BlockPos pos);
 
     /**
      * @return tint color to be used on particle. Differs from getTintColor since it returns an mixWith color extrapolated from their fluid textures
      */
-    public int getParticleColor(@Nullable LevelReader world, @Nullable BlockPos pos);
-
+    int getParticleColor(@Nullable LevelReader world, @Nullable BlockPos pos);
 
     /**
      * @return true if contained fluid has associated food
      */
-    public boolean containsFood();
+    default boolean containsFood() {
+        return this.getFluid().isFood();
+    }
 
     /**
      * call from tile entity. loads tank from nbt
      *
      * @param compound nbt
      */
-    public void load(CompoundTag compound);
+    void load(CompoundTag compound);
 
     /**
      * call from tile entity. saves to nbt
@@ -299,7 +342,7 @@ public interface ISoftFluidTank {
      * @param compound nbt
      * @return nbt
      */
-    public CompoundTag save(CompoundTag compound);
+    CompoundTag save(CompoundTag compound);
 
     /**
      * makes player drink 1 bottle and removes it from the tank
@@ -308,7 +351,23 @@ public interface ISoftFluidTank {
      * @param world  world
      * @return success
      */
-    public boolean tryDrinkUpFluid(Player player, Level world);
+    boolean tryDrinkUpFluid(Player player, Level world);
 
+
+    static boolean areNbtEquals(CompoundTag nbt, CompoundTag nbt1) {
+        if ((nbt == null || nbt.isEmpty()) && (nbt1 == null || nbt1.isEmpty())) return true;
+        if (nbt == null || nbt1 == null) return false;
+        if (nbt1.contains(POTION_TYPE_KEY) && !nbt.contains(POTION_TYPE_KEY)) {
+            var n1 = nbt1.copy();
+            n1.remove(POTION_TYPE_KEY);
+            return n1.equals(nbt);
+        }
+        if (nbt.contains(POTION_TYPE_KEY) && !nbt1.contains(POTION_TYPE_KEY)) {
+            var n = nbt.copy();
+            n.remove(POTION_TYPE_KEY);
+            return n.equals(nbt1);
+        }
+        return nbt1.equals(nbt);
+    }
 
 }
