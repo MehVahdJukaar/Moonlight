@@ -36,7 +36,6 @@ public class SoftFluidRegistry {
         throw new AssertionError();
     }
 
-
     //hackyyy
     public static Registry<SoftFluid> getDataPackRegistry() {
         return Utils.hackyGetRegistryAccess().registryOrThrow(REGISTRY_KEY);
@@ -123,6 +122,7 @@ public class SoftFluidRegistry {
         populateSlaveMaps();
         addExistingForgeFluids();
     }
+
 
     @ExpectPlatform
     private static void addExistingForgeFluids() {

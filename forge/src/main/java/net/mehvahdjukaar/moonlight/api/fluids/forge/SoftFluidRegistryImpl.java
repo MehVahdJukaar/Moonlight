@@ -12,10 +12,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.registries.*;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class SoftFluidRegistryImpl {
@@ -35,11 +37,11 @@ public class SoftFluidRegistryImpl {
                     .allowModification()
                     .disableSaving());
 
-    public static HashMap<Fluid, SoftFluid> getFluidsMap() {
+    public static Map<Fluid, SoftFluid> getFluidsMap() {
         return SOFT_FLUIDS.get().getSlaveMap(FLUIDS_MAP_KEY, HashMap.class);
     }
 
-    public static HashMap<Item, SoftFluid> getItemsMap() {
+    public static Map<Item, SoftFluid> getItemsMap() {
         return SOFT_FLUIDS.get().getSlaveMap(ITEMS_MAP_KEY, HashMap.class);
     }
 
@@ -82,5 +84,9 @@ public class SoftFluidRegistryImpl {
         reg.freeze();
     }
 
+
+    public static void init(IEventBus bus) {
+        DEFERRED_REGISTER.register(bus);
+    }
 
 }

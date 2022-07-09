@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
@@ -55,7 +56,7 @@ public class ClientBoundSyncMapDecorationTypesMessage implements Message {
             MapDecorationRegistry.DATA_DRIVEN_REGISTRY.acceptClientTypes(this.simpleTypes);
 
             //TODO: remove from here
-            //SoftFluidRegistry.postInitClient();
+            SoftFluidRegistry.postInitClient();
         }
     }
 

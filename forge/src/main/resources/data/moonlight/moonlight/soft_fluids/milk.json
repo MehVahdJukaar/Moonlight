@@ -1,0 +1,52 @@
+{
+  "containers": [
+    {
+      "filled": [
+        "frozenup:mug_of_milk"
+      ],
+      "empty": "frozenup:empty_mug",
+      "capacity": 4
+    },
+    {
+      "filled": [
+        "farmersdelight:milk_bottle",
+        "neapolitan:milk_bottle",
+        "fluffy_farmer:bottle_of_milk",
+        "vanillacookbook:milk_bottle",
+        "simplefarming:milk_bottle",
+        "farmersdelight:milk_bottle"
+      ],
+      "empty": "minetcraft:glass_bottle",
+      "capacity": 1
+    },
+    {
+      "filled": [
+        "xercamod:item_glass_of_milk"
+      ],
+      "empty": "xercamod:item_glass",
+      "capacity": 4
+    },
+    {
+      "filled": [
+        "minecraft:milk_bucket"
+      ],
+      "fill_sound": "minecraft:item.bucket.fill",
+      "empty_sound": "minecraft:item.bucket.empty",
+      "empty": "minecraft:bucket",
+      "capacity": 4
+    }
+  ],
+  "equivalent_fluids": [
+    "create:milk",
+    "inspirations:milk"
+  ],
+  "flowing_texture": "moonlight:soft_fluids/potion_flow",
+  "food": {
+    "divider": 3,
+    "item": "minecraft:milk_bucket"
+  },
+  "still_texture": "moonlight:soft_fluids/milk_liquid",
+  "tint_method": "no_tint",
+  "translation_key": "fluid.supplementaries.milk",
+  "use_texture_from": "create:milk"
+}

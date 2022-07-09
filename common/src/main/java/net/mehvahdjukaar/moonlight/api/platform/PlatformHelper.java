@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class PlatformHelper {
@@ -82,6 +83,11 @@ public class PlatformHelper {
 
     @ExpectPlatform
     public static Env getEnv() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static Path getGamePath(){
         throw new AssertionError();
     }
 

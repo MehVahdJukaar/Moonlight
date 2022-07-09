@@ -1,0 +1,24 @@
+{
+  "containers": [
+    {
+      "filled": [
+        "minecraft:experience_bottle"
+      ],
+      "empty": "minecraft:glass_bottle",
+      "capacity": 1
+    }
+  ],
+  "equivalent_fluids": [
+    "cyclic:xpjuice"
+  ],
+  "flowing_texture": "moonlight:soft_fluids/xp_flow",
+  "food": {
+    "divider": 1,
+    "item": "minecraft:experience_bottle"
+  },
+  "luminosity": 5,
+  "still_texture": "moonlight:soft_fluids/xp_still",
+  "tint_method": "no_tint",
+  "translation_key": "fluid.supplementaries.experience",
+  "use_texture_from": "cyclic:xpjuice"
+}

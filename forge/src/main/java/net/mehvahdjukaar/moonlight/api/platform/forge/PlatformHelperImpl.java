@@ -23,6 +23,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -118,6 +120,10 @@ public class PlatformHelperImpl {
 
     public static Packet<?> getEntitySpawnPacket(Entity entity) {
         return NetworkHooks.getEntitySpawningPacket(entity);
+    }
+
+    public static Path getGamePath() {
+        return FMLPaths.GAMEDIR.get();
     }
 
 

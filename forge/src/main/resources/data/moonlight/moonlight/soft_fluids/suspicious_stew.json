@@ -1,0 +1,23 @@
+{
+  "color": "#bae85f",
+  "containers": [
+    {
+      "filled": [
+        "minecraft:suspicious_stew"
+      ],
+      "empty": "minecraft:bowl",
+      "capacity": 2
+    }
+  ],
+  "flowing_texture": "moonlight:soft_fluids/potion_flow",
+  "food": {
+    "divider": 2,
+    "item": "minecraft:suspicious_stew"
+  },
+  "preserved_tags_from_item": [
+    "Effects"
+  ],
+  "still_texture": "moonlight:soft_fluids/soup_liquid",
+  "translation_key": "item.minecraft.suspicious_stew",
+  "use_texture_from": "inspirations:mushroom_stew"
+}

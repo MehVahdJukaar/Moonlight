@@ -20,4 +20,8 @@ public class SoftFluidRegistryImpl {
     public static Map<Item, SoftFluid> getItemsMap() {
         return Map.of();
     }
+
+    public static Map<Fluid, SoftFluid> aa() {
+        return null;
+    }
 }

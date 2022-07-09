@@ -39,6 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class PlatformHelperImpl {
@@ -117,6 +118,10 @@ public class PlatformHelperImpl {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeToBuffer(buf);
         return ServerPlayNetworking.createS2CPacket(ModMessages.SPAWN_PACKET_ID, buf);
+    }
+
+    public static Path getGamePath() {
+        return FabricLoader.getInstance().getGameDir();
     }
 
 

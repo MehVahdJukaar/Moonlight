@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.core.misc.ModCriteriaTriggers;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ public class Moonlight {
     public static void commonInit() {
         ModMessages.registerMessages();
         VillagerAIInternal.init();
+        ModCriteriaTriggers.register();
     }
 
 

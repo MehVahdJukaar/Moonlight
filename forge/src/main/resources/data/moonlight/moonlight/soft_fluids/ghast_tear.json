@@ -1,0 +1,15 @@
+{
+  "color": "#bff0f0",
+  "containers": [
+    {
+      "filled": [
+        "minecraft:ghast_tear"
+      ],
+      "empty": "minecraft:air",
+      "capacity": 1
+    }
+  ],
+  "flowing_texture": "moonlight:soft_fluids/potion_flow",
+  "still_texture": "moonlight:soft_fluids/milk_liquid",
+  "translation_key": "item.minecraft.ghast_tear"
+}

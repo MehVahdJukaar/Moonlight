@@ -1,7 +1,16 @@
 package net.mehvahdjukaar.moonlight.forge;
 
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.fluids.forge.SoftFluidRegistryImpl;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncMapDecorationTypesMessage;
+import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -19,10 +28,10 @@ public class MoonlightForge {
 
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
-
+        SoftFluidRegistryImpl.init(bus);
         Moonlight.commonInit();
 
-
+        MinecraftForge.EVENT_BUS.register(this);
         /**
          * Update stuff:
          * Configs
@@ -52,5 +61,14 @@ public class MoonlightForge {
         Moonlight.commonRegistration();
     }
 
+    @SubscribeEvent
+    public void onDataLoad(OnDatapackSyncEvent event) {
 
+        // if we're on the server, send syncing packets
+        SoftFluidRegistry.postInitServer();
+        ModMessages.CHANNEL.sendToAllClientPlayers(
+                new ClientBoundSyncMapDecorationTypesMessage(MapDecorationRegistry.DATA_DRIVEN_REGISTRY.getTypes()));
+
+    }
 }
+

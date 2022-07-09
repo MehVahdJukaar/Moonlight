@@ -20,15 +20,19 @@ public class ModMessages {
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundSyncCustomMapDecorationMessage.class, ClientBoundSyncCustomMapDecorationMessage::new);
 
+        CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
+                ClientBoundSyncMapDecorationTypesMessage.class,
+                ClientBoundSyncMapDecorationTypesMessage::new);
+
+        CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
+                ClientBoundSyncConfigsPacket.class, ClientBoundSyncConfigsPacket::new);
+
         /*
         INSTANCE.registerMessage(nextID(), ClientBoundSyncFluidsPacket.class, ClientBoundSyncFluidsPacket::buffer,
                 ClientBoundSyncFluidsPacket::new, ClientBoundSyncFluidsPacket::handler);
 
-        INSTANCE.registerMessage(nextID(), ClientBoundSyncMapDecorationTypesPacket.class, ClientBoundSyncMapDecorationTypesPacket::buffer,
-                ClientBoundSyncMapDecorationTypesPacket::new, ClientBoundSyncMapDecorationTypesPacket::handler);
 
-        INSTANCE.registerMessage(nextID(), SyncModConfigsPacket.class, SyncModConfigsPacket::buffer,
-                SyncModConfigsPacket::new, SyncModConfigsPacket::handler);
+
 
          */
     }
