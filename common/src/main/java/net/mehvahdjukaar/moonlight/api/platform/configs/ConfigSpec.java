@@ -92,6 +92,8 @@ public abstract class ConfigSpec {
     @Environment(EnvType.CLIENT)
     public abstract Screen makeScreen(Screen parent, @Nullable ResourceLocation background);
 
+    //serverside method
+    public abstract boolean hasConfigScreen();
 
     //send configs from server -> client
     public void syncConfigsToPlayer(ServerPlayer player) {

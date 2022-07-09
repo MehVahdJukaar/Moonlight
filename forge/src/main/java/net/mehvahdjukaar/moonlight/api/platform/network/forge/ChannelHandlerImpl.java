@@ -111,7 +111,10 @@ public class ChannelHandlerImpl extends ChannelHandler {
     public void sentToAllClientPlayersTrackingEntity(Entity target, Message message) {
         channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> target), message);
     }
-
+    @Override
+    public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
+        channel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target), message);
+    }
 
 }
 

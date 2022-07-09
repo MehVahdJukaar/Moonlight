@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Villager.class)
 public interface  VillagerAccessor {
 
+    //TODO: move to access wideners
     @Accessor("MEMORY_TYPES")
     static ImmutableList<MemoryModuleType<?>> getMemoryTypes() {
         throw new AssertionError();

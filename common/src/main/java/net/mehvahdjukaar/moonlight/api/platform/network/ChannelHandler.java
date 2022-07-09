@@ -47,6 +47,8 @@ public abstract class ChannelHandler {
 
     public abstract void sentToAllClientPlayersTrackingEntity(Entity target, Message message);
 
+    public abstract void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message);
+
     public abstract void sendToServer(Message message);
 
 }

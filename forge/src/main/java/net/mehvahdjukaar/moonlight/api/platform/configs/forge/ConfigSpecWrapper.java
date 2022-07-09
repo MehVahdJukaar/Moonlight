@@ -109,6 +109,12 @@ public class ConfigSpecWrapper extends ConfigSpec {
         return null;
     }
 
+    @Override
+    public boolean hasConfigScreen() {
+        return ModList.get().getModContainerById(this.getModId())
+                .map(container -> container.getCustomExtension(ConfigGuiHandler.ConfigGuiFactory.class)
+                        .isPresent()).orElse(false);
+    }
 
     @EventCalled
     protected void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {

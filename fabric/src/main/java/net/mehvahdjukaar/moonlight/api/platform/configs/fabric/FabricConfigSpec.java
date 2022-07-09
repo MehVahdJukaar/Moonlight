@@ -103,12 +103,17 @@ public class FabricConfigSpec extends ConfigSpec {
     }
 
     @Override
+    public boolean hasConfigScreen() {
+        return hasScreen;
+    }
+
+    @Override
     public void loadFromBytes(InputStream stream) {
         InputStreamReader inputStreamReader = new InputStreamReader(stream, StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         JsonElement config = GSON.fromJson(bufferedReader, JsonElement.class);
         if (config instanceof JsonObject jo) {
-            //dont call load directly so we skip the main category name
+            //don't call load directly, so we skip the main category name
             mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
         }
     }

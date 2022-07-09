@@ -120,6 +120,17 @@ public class ChannelHandlerImpl extends ChannelHandler {
         }
     }
 
+    @Override
+    public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
+        if (target.level instanceof ServerLevel serverLevel) {
+            var p = toVanillaPacket(message);
+            serverLevel.getChunkSource().broadcast(target,p );
+            if(target instanceof ServerPlayer player){
+                sendToClientPlayer(player,message);
+            }
+        }
+    }
+
     private Packet<?> toVanillaPacket(Message message){
         FriendlyByteBuf buf = PacketByteBufs.create();
         message.writeToBuffer(buf);
