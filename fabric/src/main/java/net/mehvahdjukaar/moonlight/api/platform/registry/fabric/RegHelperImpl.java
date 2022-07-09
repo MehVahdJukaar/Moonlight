@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.registry.fabric;
 
 import com.google.common.collect.ImmutableList;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
@@ -14,6 +15,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -23,6 +26,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RegHelperImpl {
@@ -51,7 +55,7 @@ public class RegHelperImpl {
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> Supplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
-        if(true)return registerAsync(name, supplier, reg); //TODO: figure out this
+        if (true) return registerAsync(name, supplier, reg); //TODO: figure out this
         String modId = name.getNamespace();
         var m = REGISTRIES.computeIfAbsent(reg, h -> new HashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId, c -> new RegistryQueue<>(reg));
@@ -91,6 +95,14 @@ public class RegHelperImpl {
 
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
         FlammableBlockRegistry.getDefaultInstance().add(item, fireSpread, flammability);
+    }
+
+    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
+        TradeOfferHelper.registerVillagerOffers(profession, level, factories);
+    }
+
+    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
+        TradeOfferHelper.registerWanderingTraderOffers(level, factories);
     }
 
 

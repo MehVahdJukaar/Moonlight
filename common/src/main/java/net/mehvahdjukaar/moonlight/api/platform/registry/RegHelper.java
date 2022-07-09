@@ -16,6 +16,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -34,8 +36,10 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -151,8 +155,14 @@ public class RegHelper {
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
         throw new AssertionError();
     }
-
-
+    @ExpectPlatform
+    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories){
+        throw new AssertionError();
+    }
+    @ExpectPlatform
+    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories){
+        throw new AssertionError();
+    }
 
     public enum VariantType {
         BLOCK(Block::new),
