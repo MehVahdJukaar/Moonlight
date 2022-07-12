@@ -76,7 +76,7 @@ public final class SpriteUtils {
         return newPalettes;
     }
 
-    //
+    //TODO: this still doesnot work with dark colors
 
     /**
      * Algorithm that approximates and generates a texture to be used on wooden item.

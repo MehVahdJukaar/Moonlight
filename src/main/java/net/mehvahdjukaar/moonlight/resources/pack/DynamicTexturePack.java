@@ -12,6 +12,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

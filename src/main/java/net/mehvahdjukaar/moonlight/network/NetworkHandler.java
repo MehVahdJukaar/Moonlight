@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.network;
 
 import net.mehvahdjukaar.moonlight.Moonlight;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
@@ -18,7 +19,7 @@ public class NetworkHandler {
     public static void registerMessages() {
         INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation(Moonlight.MOD_ID, "network"), () -> PROTOCOL_VERSION,
                 PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
-
+        IDynamicBakedModel
         INSTANCE.registerMessage(nextID(), ClientBoundSyncCustomMapDecorationPacket.class, ClientBoundSyncCustomMapDecorationPacket::buffer,
                 ClientBoundSyncCustomMapDecorationPacket::new, ClientBoundSyncCustomMapDecorationPacket::handler);
 

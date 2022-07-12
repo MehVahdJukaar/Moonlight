@@ -19,9 +19,12 @@ public class MapAtlasPlugin {
         return item instanceof MapAtlasItem;
     }
 
+
     @Nullable
     public static MapItemSavedData getSavedDataFromAtlas(ItemStack item, Level level, Player player) {
-        return MapAtlasesAccessUtils.getActiveAtlasMapState(level, item, player.getName().getString()).getValue();
+        var data = MapAtlasesAccessUtils.getActiveAtlasMapState(level, item, player.getName().getString());
+        if(data==null)return null;
+        return data.getValue();
     }
 
     @Nullable

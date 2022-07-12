@@ -8,6 +8,7 @@ import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -25,6 +26,7 @@ public class ClientSetup {
     public static void onResourcePackChanged(ModelBakeEvent event) {
         SoftFluidClient.refresh();
         TextureCache.refresh();
+        ForgeEventFactory
     }
 
     //textures
