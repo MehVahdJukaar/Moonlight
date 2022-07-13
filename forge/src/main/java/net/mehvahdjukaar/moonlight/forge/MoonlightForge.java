@@ -43,22 +43,12 @@ public class MoonlightForge {
         //TODO: fix layers texture generation
         //TODO: fix grass growth replacing double plants and add tag
 
-
-        bus.addListener(MoonlightForge::init);
         bus.addListener(MoonlightForge::registerAdditional);
-    }
-
-
-    public static void init(final FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> {
-            Moonlight.commonSetup();
-        });
     }
 
 
     public static void registerAdditional(RegisterEvent event) {
         if (!event.getRegistryKey().equals(ForgeRegistries.ITEMS.getRegistryKey())) return;
-        Moonlight.commonRegistration();
     }
 
     @SubscribeEvent

@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.village.VillagerTradesEvent;
+import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -36,7 +37,6 @@ import java.util.function.Supplier;
 
 
 public class RegHelperImpl {
-
 
     public static final Map<Registry<?>, Map<String, DeferredRegister<?>>> REGISTRIES = new HashMap<>();
 
@@ -109,9 +109,13 @@ public class RegHelperImpl {
         MinecraftForge.EVENT_BUS.register(eventConsumer);
     }
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        Consumer<VillagerTradesEvent> eventConsumer = event->{
-            var list = event.getTrades().get(level);
-            factories.accept(list);
+        //0 = common, 1 = rare
+        Consumer<WandererTradesEvent> eventConsumer = event->{
+            if(level == 0){
+                factories.accept(event.getGenericTrades());
+            }else{
+                factories.accept(event.getRareTrades());
+            }
         };
         MinecraftForge.EVENT_BUS.register(eventConsumer);
     }

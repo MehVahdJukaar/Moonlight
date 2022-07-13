@@ -31,20 +31,20 @@ public class BlockSetInternalImpl {
     }
 
     public static void registerEntries() {
-        for(var e : BLOCK_QUEUE.entrySet()){
+        for (var e : BLOCK_QUEUE.entrySet()) {
 
             registerQueue(e.getKey(), e.getValue(), Registry.BLOCK);
         }
-        for(var e : ITEM_QUEUE.entrySet()){
+        for (var e : ITEM_QUEUE.entrySet()) {
             registerQueue(e.getKey(), e.getValue(), Registry.ITEM);
         }
 
         BlockSetInternal.initializeBlockSets();
     }
 
-    private static <R,T extends BlockType> void registerQueue(Class<T> type, Queue<BlockSetAPI.BlockTypeRegistryCallback<R, ?>> callback,
-                                                              Registry<R> registry){
+    private static <R, T extends BlockType> void registerQueue(Class<T> type, Queue<BlockSetAPI.BlockTypeRegistryCallback<R, ?>> callback,
+                                                               Registry<R> registry) {
         var values = BlockSetAPI.getBlockSet(type).getValues();
-        callback.forEach(a->a.accept((n,i)->Registry.register(registry,n,i), (Collection) values));
+        callback.forEach(a -> a.accept((n, i) -> Registry.register(registry, n, i), (Collection) values));
     }
 }

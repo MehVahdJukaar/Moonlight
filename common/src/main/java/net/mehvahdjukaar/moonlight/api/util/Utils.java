@@ -170,7 +170,7 @@ public class Utils {
     /**
      * Copies block properties without keeping stupid lambdas that could include references to the wrong blockstate properties
      */
-    public BlockBehaviour.Properties copyPropertySafe(BlockBehaviour blockBehaviour) {
+    public static BlockBehaviour.Properties copyPropertySafe(BlockBehaviour blockBehaviour) {
         var p = BlockBehaviour.Properties.copy(blockBehaviour);
         p.lightLevel(s -> 0);
         p.offsetType(BlockBehaviour.OffsetType.NONE);

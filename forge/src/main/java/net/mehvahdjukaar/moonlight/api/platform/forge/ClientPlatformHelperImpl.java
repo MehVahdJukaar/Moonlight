@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -12,6 +13,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -95,8 +98,8 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientPlatformHelper.AtlasTextureRegistration> eventListener) {
-        Consumer<TextureStitchEvent.Pre> eventConsumer = event ->{
-            if(event.getAtlas().location() == atlasLocation){
+        Consumer<TextureStitchEvent.Pre> eventConsumer = event -> {
+            if (event.getAtlas().location() == atlasLocation) {
                 eventListener.accept(event::addSprite);
             }
         };
@@ -113,7 +116,10 @@ public class ClientPlatformHelperImpl {
 
     }
 
-
+    public static void registerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
+        ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager())
+                .registerReloadListener(listener);
+    }
 
 
 }

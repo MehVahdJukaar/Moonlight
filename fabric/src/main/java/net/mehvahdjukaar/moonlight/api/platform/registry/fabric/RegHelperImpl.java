@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.fabricmc.fabric.api.registry.VillagerPlantableRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.registry.RegHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -98,6 +99,7 @@ public class RegHelperImpl {
     }
 
     public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
+
         TradeOfferHelper.registerVillagerOffers(profession, level, factories);
     }
 

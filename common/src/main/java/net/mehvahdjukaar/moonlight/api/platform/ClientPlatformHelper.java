@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesProvider;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.particle.ParticleProvider;
@@ -17,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ItemLike;
@@ -41,6 +43,11 @@ public class ClientPlatformHelper {
 
     @ExpectPlatform
     public static void registerRenderType(Block block, RenderType type) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void registerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         throw new AssertionError();
     }
 

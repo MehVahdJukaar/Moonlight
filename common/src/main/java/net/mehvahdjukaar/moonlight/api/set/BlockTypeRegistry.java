@@ -45,13 +45,17 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     public abstract T getDefaultType();
 
-    public Collection<T> getValues(){
+    public Collection<T> getValues() {
         return Collections.unmodifiableCollection(types.values());
-    };
+    }
 
-    public String typeName(){
+    ;
+
+    public String typeName() {
         return name;
-    };
+    }
+
+    ;
 
     /**
      * Returns an optional block Type based on the given block. Pretty much defines the logic of how a block set is constructed
@@ -88,12 +92,22 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             throw new UnsupportedOperationException("Block types are already finalized");
         }
         LinkedHashMap<ResourceLocation, T> linkedHashMap = new LinkedHashMap<>();
+        List<String> modOrder = new ArrayList<>();
+        modOrder.add("minecraft");
         builder.forEach(e -> {
-            if (!linkedHashMap.containsKey(e.getId())) {
-                linkedHashMap.put(e.getId(), e);
-                //Selene.LOGGER.warn("Found wood type with duplicate id ({}), skipping",e.id);
-            }
+            String modId = e.getNamespace();
+            if (!modOrder.contains(modId)) modOrder.add(modId);
         });
+        //orders them by mod id
+        for (String modId : modOrder) {
+            builder.forEach(e -> {
+                if (Objects.equals(e.getNamespace(), modId)) {
+                    if (!linkedHashMap.containsKey(e.getId())) {
+                        linkedHashMap.put(e.getId(), e);
+                    }// else Selene.LOGGER.warn("Found wood type with duplicate id ({}), skipping",e.id);
+                }
+            });
+        }
         this.types = ImmutableMap.copyOf(linkedHashMap);
         builder.clear();
         this.frozen = true;

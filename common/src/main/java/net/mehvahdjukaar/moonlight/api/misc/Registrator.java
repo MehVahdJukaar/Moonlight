@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Supplier;
 
+@FunctionalInterface
 public interface Registrator<T> {
 
     void register(ResourceLocation name, T instance);

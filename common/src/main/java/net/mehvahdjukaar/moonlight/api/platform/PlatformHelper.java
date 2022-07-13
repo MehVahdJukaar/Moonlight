@@ -4,6 +4,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -11,6 +12,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -87,7 +89,7 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
-    public static Path getGamePath(){
+    public static Path getGamePath() {
         throw new AssertionError();
     }
 
@@ -105,7 +107,7 @@ public class PlatformHelper {
 
     @Nullable
     @ExpectPlatform
-    public static MinecraftServer getCurrentServer(){
+    public static MinecraftServer getCurrentServer() {
         throw new AssertionError();
     }
 
@@ -139,12 +141,12 @@ public class PlatformHelper {
     @ExpectPlatform
     @Nullable
     public static FoodProperties getFoodProperties(Item food, ItemStack stack, Player player) {
-        throw  new AssertionError();
+        throw new AssertionError();
     }
 
     @ExpectPlatform
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
-       throw new AssertionError();
+        throw new AssertionError();
     }
 
     @ExpectPlatform
@@ -153,7 +155,16 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
-    public static Packet<?> getEntitySpawnPacket(Entity entity){
+    public static Packet<?> getEntitySpawnPacket(Entity entity) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void registerCommonSetupEvent(Runnable runnable) {
+        throw new AssertionError();
+    }
+    @ExpectPlatform
+    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar){
         throw new AssertionError();
     }
 }

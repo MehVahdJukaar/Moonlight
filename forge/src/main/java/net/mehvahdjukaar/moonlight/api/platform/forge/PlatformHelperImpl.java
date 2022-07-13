@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -11,6 +12,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -20,6 +22,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -124,6 +127,25 @@ public class PlatformHelperImpl {
 
     public static Path getGamePath() {
         return FMLPaths.GAMEDIR.get();
+    }
+
+    public static void registerCommonSetupEvent(Runnable runnable) {
+        Consumer<FMLCommonSetupEvent> eventConsumer = event-> event.enqueueWork(runnable);
+        FMLJavaModLoadingContext.get().getModEventBus().register(eventConsumer);
+    }
+
+    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar) {
+        return new CreativeModeTab(name.getPath()) {
+            @Override
+            public ItemStack makeIcon() {
+                return icon.get();
+            }
+
+            @Override
+            public boolean hasSearchBar() {
+                return hasSearchBar;
+            }
+        };
     }
 
 
