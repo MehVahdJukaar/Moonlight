@@ -17,9 +17,9 @@ import java.util.Optional;
 
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
-    public static LeavesType OAK_TYPE = new LeavesType(new ResourceLocation("oak"), Blocks.OAK_LEAVES);
+    public static final LeavesTypeRegistry INSTANCE = new LeavesTypeRegistry();
 
-    public static LeavesTypeRegistry INSTANCE;
+    public static final LeavesType OAK_TYPE = new LeavesType(new ResourceLocation("oak"), Blocks.OAK_LEAVES);
 
     public static Collection<LeavesType> getTypes() {
         return INSTANCE.getValues();
@@ -36,7 +36,6 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     public LeavesTypeRegistry() {
         super(LeavesType.class, "leaves_type");
-        INSTANCE = this;
     }
 
     @Override

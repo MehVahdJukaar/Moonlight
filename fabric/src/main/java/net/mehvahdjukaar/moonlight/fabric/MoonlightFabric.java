@@ -1,51 +1,43 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.mehvahdjukaar.moonlight.api.platform.fabric.PlatformHelperImpl;
+import net.mehvahdjukaar.moonlight.api.platform.registry.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
-import net.mehvahdjukaar.moonlight.api.platform.registry.fabric.RegHelperImpl;
-import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.dedicated.DedicatedServer;
 
-public class MoonlightFabric implements ModInitializer {
+public class MoonlightFabric implements ModInitializer, ClientModInitializer, DedicatedServerModInitializer {
 
     public static final String MOD_ID = Moonlight.MOD_ID;
 
     @Override
     public void onInitialize() {
-
         Moonlight.commonInit();
-
-        ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStarting);
-        ClientLifecycleEvents.CLIENT_STARTED.register(this::onClientStarting);
-    }
-    //onCommon setup only runs once. either for dedicated server through server starting or on client starting
-    private void onClientStarting(Minecraft minecraft){
-        MoonlightFabric.onCommonSetup();
-
-
+        ServerLifecycleEvents.SERVER_STARTING.register(s -> currentServer = s);
     }
 
-    private void onServerStarting(MinecraftServer minecraftServer) {
-        currentServer = minecraftServer;
-        if(minecraftServer instanceof DedicatedServer) MoonlightFabric.onCommonSetup();
-    }
-
-    public static void onCommonSetup() {
+    //called after all other mod initialize have been called.
+    // we can register extra stuff here that depends on those before client and server common setup is fired
+    private void commonSetup() {
         RegHelperImpl.registerEntries();
         BlockSetInternalImpl.registerEntries();
 
-        PlatformHelperImpl.invokeCommonSetup();
+        FabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
     }
 
     public static MinecraftServer currentServer;
 
+    @Override
+    public void onInitializeClient() {
+        commonSetup();
+        FabricSetupCallbacks.CLIENT_SETUP.forEach(Runnable::run);
+    }
 
-
+    @Override
+    public void onInitializeServer() {
+        commonSetup();
+    }
 }

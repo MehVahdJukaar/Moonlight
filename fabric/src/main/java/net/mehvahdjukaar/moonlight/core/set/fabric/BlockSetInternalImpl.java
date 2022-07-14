@@ -17,8 +17,8 @@ public class BlockSetInternalImpl {
         return hasFilledBlockSets;
     }
 
-    public static final Map<Class<? extends BlockType>, Queue<BlockSetAPI.BlockTypeRegistryCallback<Block, ?>>> BLOCK_QUEUE = new HashMap<>();
-    public static final Map<Class<? extends BlockType>, Queue<BlockSetAPI.BlockTypeRegistryCallback<Item, ?>>> ITEM_QUEUE = new HashMap<>();
+    public static final Map<Class<? extends BlockType>, Queue<BlockSetAPI.BlockTypeRegistryCallback<Block, ?>>> BLOCK_QUEUE = new LinkedHashMap<>();
+    public static final Map<Class<? extends BlockType>, Queue<BlockSetAPI.BlockTypeRegistryCallback<Item, ?>>> ITEM_QUEUE = new LinkedHashMap<>();
 
     public static <T extends BlockType> void addDynamicBlockRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
@@ -31,6 +31,7 @@ public class BlockSetInternalImpl {
     }
 
     public static void registerEntries() {
+        BlockSetInternal.initializeBlockSets();
         for (var e : BLOCK_QUEUE.entrySet()) {
 
             registerQueue(e.getKey(), e.getValue(), Registry.BLOCK);
@@ -38,13 +39,11 @@ public class BlockSetInternalImpl {
         for (var e : ITEM_QUEUE.entrySet()) {
             registerQueue(e.getKey(), e.getValue(), Registry.ITEM);
         }
-
-        BlockSetInternal.initializeBlockSets();
     }
 
     private static <R, T extends BlockType> void registerQueue(Class<T> type, Queue<BlockSetAPI.BlockTypeRegistryCallback<R, ?>> callback,
                                                                Registry<R> registry) {
-        var values = BlockSetAPI.getBlockSet(type).getValues();
-        callback.forEach(a -> a.accept((n, i) -> Registry.register(registry, n, i), (Collection) values));
+
+        callback.forEach(a -> a.accept((n, i) -> Registry.register(registry, n, i), (Collection) BlockSetAPI.getBlockSet(type).getValues()));
     }
 }

@@ -17,9 +17,9 @@ import java.util.Optional;
 
 public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
-    public static WoodType OAK_TYPE = new WoodType(new ResourceLocation("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
+    public static final WoodType OAK_TYPE = new WoodType(new ResourceLocation("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
 
-    public static WoodTypeRegistry INSTANCE;
+    public static final WoodTypeRegistry INSTANCE = new WoodTypeRegistry();
 
     public static Collection<WoodType> getTypes() {
         return INSTANCE.getValues();
@@ -38,7 +38,6 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     public WoodTypeRegistry() {
         super(WoodType.class, "wood_type");
-        INSTANCE = this;
     }
 
     @Override

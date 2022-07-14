@@ -8,11 +8,14 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,6 +23,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.tags.TagKey;
@@ -43,8 +47,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class PlatformHelperImpl {
@@ -106,8 +109,6 @@ public class PlatformHelperImpl {
         return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
-    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
-    }
 
     public static int getBurnTime(ItemStack stack) {
         return FuelRegistry.INSTANCE.get(stack.getItem());
@@ -129,19 +130,32 @@ public class PlatformHelperImpl {
         return FabricLoader.getInstance().getGameDir();
     }
 
-    public static void registerCommonSetupEvent(Runnable runnable){
-        COMMON_SETUP.add(runnable);
-    }
-
-    public static void invokeCommonSetup(){
-        COMMON_SETUP.forEach(Runnable::run);
-    }
-
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar) {
         return FabricItemGroupBuilder.build(name, icon);
     }
 
-    private static final List<Runnable> COMMON_SETUP = new ArrayList<>();
+    private static final HashMap<PackType, List<Supplier<Pack>>> EXTRA_PACKS = new HashMap<>();
 
+    @SuppressWarnings("ConstantConditions")
+    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+        EXTRA_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
+        if(packType == PackType.CLIENT_RESOURCES && PlatformHelper.getEnv().isClient()){
+           if(Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep){
+               var newSources = new HashSet<>(rep.getSources());
+               getAdditionalPacks(packType).forEach(l -> {
+                   newSources.add((infoConsumer, b) -> infoConsumer.accept(l.get()));
+               });
+               rep.setSources(newSources);
+           }
+        }
+    }
 
+    public static Collection<Supplier<Pack>> getAdditionalPacks(PackType packType) {
+        List<Supplier<Pack>> list = new ArrayList<>();
+        var suppliers = EXTRA_PACKS.get(packType);
+        if (suppliers != null) {
+            list.addAll(suppliers);
+        }
+        return list;
+    }
 }

@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -24,7 +25,6 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,9 +41,9 @@ public class ClientPlatformHelperImpl {
     }
 
     public static Path getModIcon(String modId) {
-        return null;
+        var container = FabricLoader.getInstance().getModContainer(modId).get();
+        return container.getMetadata().getIconPath(512).flatMap(container::findPath).orElse(null);
     }
-
 
     public static void addParticleRegistration(Consumer<ClientPlatformHelper.ParticleEvent> eventListener) {
         eventListener.accept(ClientPlatformHelperImpl::registerParticle);
@@ -90,7 +90,7 @@ public class ClientPlatformHelperImpl {
 
             @Override
             public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-                return listener.reload(preparationBarrier,resourceManager,preparationsProfiler,reloadProfiler,backgroundExecutor,gameExecutor);
+                return listener.reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
             }
         });
     }

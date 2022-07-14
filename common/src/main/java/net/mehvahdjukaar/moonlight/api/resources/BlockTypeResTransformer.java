@@ -233,7 +233,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
     public static String replaceFullGenericType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace, String classType) {
 
         String prefix = "";
-        Pattern pattern = Pattern.compile("(.*(?=\\/))");
+        Pattern pattern = Pattern.compile("([^,]*(?=\\/))");
         Matcher matcher = pattern.matcher(blockId.getPath());
         if (matcher.find()) prefix = matcher.group(1); //c/merge/
 
@@ -251,11 +251,11 @@ public class BlockTypeResTransformer<T extends BlockType> {
         } else {
             Pattern p2;
             if (classType.isEmpty()) {
-                p2 = Pattern.compile(oldNamespace + ":" + "(.*?)" + oldTypeName); //merge:block(/a/b/cc_)oak //.*
+                p2 = Pattern.compile(oldNamespace + ":" + "([^,]*?)" + oldTypeName); //merge:block(/a/b/cc_)oak //.*
                 if (!prefix.isEmpty()) prefix = prefix + "/";
             } else {
                 prefix = "/" + prefix;
-                p2 = Pattern.compile(oldNamespace + ":" + classType + "(.*?\\/.*?)" + oldTypeName); //merge:block(/a/b/cc_)oak
+                p2 = Pattern.compile(oldNamespace + ":" + classType + "([^,]*?\\/[^,]*?)" + oldTypeName); //merge:block(/a/b/cc_)oak
             }
             Matcher m2 = p2.matcher(text);//->sup:block
             String finalPrefix = prefix;

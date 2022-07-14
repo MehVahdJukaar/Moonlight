@@ -19,7 +19,10 @@
       "net.mehvahdjukaar.moonlight.fabric.MoonlightFabric"
     ],
     "client": [
-      "net.mehvahdjukaar.moonlight.fabric.MoonlightFabricClient"
+      "net.mehvahdjukaar.moonlight.fabric.MoonlightFabric"
+    ],
+    "server": [
+      "net.mehvahdjukaar.moonlight.fabric.MoonlightFabric"
     ]
   },
   "mixins": [

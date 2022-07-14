@@ -160,10 +160,6 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
-    public static void registerCommonSetupEvent(Runnable runnable) {
-        throw new AssertionError();
-    }
-    @ExpectPlatform
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar){
         throw new AssertionError();
     }

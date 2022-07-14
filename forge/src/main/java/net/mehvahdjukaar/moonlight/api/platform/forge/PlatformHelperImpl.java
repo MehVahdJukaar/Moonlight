@@ -129,11 +129,6 @@ public class PlatformHelperImpl {
         return FMLPaths.GAMEDIR.get();
     }
 
-    public static void registerCommonSetupEvent(Runnable runnable) {
-        Consumer<FMLCommonSetupEvent> eventConsumer = event-> event.enqueueWork(runnable);
-        FMLJavaModLoadingContext.get().getModEventBus().register(eventConsumer);
-    }
-
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar) {
         return new CreativeModeTab(name.getPath()) {
             @Override
