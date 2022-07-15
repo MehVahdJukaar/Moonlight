@@ -21,6 +21,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -75,8 +76,8 @@ public class RenderedTexturesManager {
         return getRenderedTexture(res, size, t -> drawItem(t, stack), true);
     }
 
-    public static FrameBufferBackedDynamicTexture getFlatItemTexture(Item item, int size, String prefix) {
-        return getFlatItemTexture(item, size, prefix, null);
+    public static FrameBufferBackedDynamicTexture getFlatItemTexture(Item item, int size) {
+        return getFlatItemTexture(item, size, "", null);
     }
 
     public static FrameBufferBackedDynamicTexture getFlatItemTexture(Item item, int size, String prefix, @Nullable Consumer<NativeImage> postProcessing) {
@@ -84,39 +85,31 @@ public class RenderedTexturesManager {
         if (!prefix.isEmpty()) prefix = "/" + prefix;
         ResourceLocation res = Moonlight.res(Utils.getID(item).toString().replace(":", "/")
                 + "/" + size + prefix);
-
-        var texture = TEXTURE_CACHE.getIfPresent(res);
-        if (texture == null) {
-            texture = new FrameBufferBackedDynamicTexture(res, size);
-            TEXTURE_CACHE.put(res, texture);
-            //add to queue which will render them next rendering cycle. Returned texture will be blank
-            Consumer<FrameBufferBackedDynamicTexture> factory = t -> {
-                drawItem(t, item.getDefaultInstance());
-                //drawItem2(texture,new BlockPos(0,70,0),Direction.NORTH,1);
-                if (postProcessing != null) {
-                    t.download();
-                    NativeImage img = t.getPixels();
-                    postProcessing.accept(img);
-                    t.upload();
-                }
-            };
-            REQUESTED_FOR_RENDERING.add(new RenderingData(res, factory, false));
-        }
-        return texture;
+        return getFlatItemTexture(res, item, size, postProcessing);
     }
 
-    public static FrameBufferBackedDynamicTexture getFlatItemTexture(Item item, int size) {
-        return getFlatItemTexture(item, size, "");
+    public static FrameBufferBackedDynamicTexture getFlatItemTexture(ResourceLocation res, Item item, int size,  @Nullable Consumer<NativeImage> postProcessing) {
+        return getRenderedTexture(res, size, t -> {
+            drawItem(t, item.getDefaultInstance());
+            if (postProcessing != null) {
+                t.download();
+                NativeImage img = t.getPixels();
+                postProcessing.accept(img);
+                t.upload();
+            }
+        }, true);
     }
+
 
     //called each rendering tick
+    @ApiStatus.Internal
     public static void updateTextures() {
         ListIterator<RenderingData> iter = REQUESTED_FOR_RENDERING.listIterator();
         while (iter.hasNext()) {
             var data = iter.next();
             var texture = TEXTURE_CACHE.getIfPresent(data.id);
             if (texture != null) {
-                texture.initialized = true;
+                if (!texture.isInitialized()) texture.initialize();
                 data.textureDrawingFunction.accept(texture);
             }
             if (!data.animated || texture == null) {
@@ -125,7 +118,76 @@ public class RenderedTexturesManager {
         }
     }
 
-    public static void drawItem2(FrameBufferBackedDynamicTexture tex, BlockPos mirrorPos, Direction mirrorDir, float partialTicks) {
+
+    private static void drawItem(FrameBufferBackedDynamicTexture tex, ItemStack stack) {
+
+        Minecraft mc = Minecraft.getInstance();
+        RenderTarget frameBuffer = tex.getFrameBuffer();
+        frameBuffer.clear(Minecraft.ON_OSX);
+        //render to this one
+        frameBuffer.bindWrite(true);
+
+        int size = 16;
+        //gui setup code
+        //RenderSystem.clear(256, Minecraft.ON_OSX);
+        Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
+        Matrix4f matrix4f = Matrix4f.orthographic(0.0F,
+                size, 0, size, 1000.0F, 3000); //ForgeHooksClient.getGuiFarPlane()
+        RenderSystem.setProjectionMatrix(matrix4f);
+
+        //model view stuff
+        PoseStack posestack = RenderSystem.getModelViewStack();
+        posestack.pushPose();
+        posestack.setIdentity();
+
+        posestack.translate(0.0D, 0.0D, 1000F - 3000); //ForgeHooksClient.getGuiFarPlane()
+        //apply new model view transformation
+        RenderSystem.applyModelViewMatrix();
+        Lighting.setupFor3DItems();
+        //end gui setup code
+
+        //render stuff
+        ItemRenderer itemRenderer = mc.getItemRenderer();
+        //Minecraft.getInstance().gui.render(posestack,1);
+        itemRenderer.renderGuiItem(stack, 0, 0);
+
+        //reset stuff
+        posestack.popPose();
+        //reset model view
+        RenderSystem.applyModelViewMatrix();
+
+        //reset projection
+        RenderSystem.setProjectionMatrix(oldProjection);
+        //RenderSystem.clear(256, Minecraft.ON_OSX);
+        //returns render calls to main render target
+        mc.getMainRenderTarget().bindWrite(true);
+    }
+
+    /*
+        RenderSystem.setShaderTexture(0,
+                new ResourceLocation("textures/gui/container/villager2.png")
+       );
+        Gui.blit(posestack,0,0,1000,0,0,
+                256,256,16,16);
+*/
+
+
+    private static Matrix4f getProjectionMatrix(double pFov, int size, int renderDistance) {
+        PoseStack posestack = new PoseStack();
+        posestack.last().pose().setIdentity();
+        float zoom = 1;
+        float zoomX = 1;
+        float zoomY = 1;
+        if (zoom != 1.0F) {
+            posestack.translate((double) zoomX, (double) (-zoomY), 0.0D);
+            posestack.scale(zoom, zoom, 1.0F);
+        }
+
+        posestack.last().pose().multiply(Matrix4f.perspective(pFov, (float) size / size, 0.05F, renderDistance * 4f));
+        return posestack.last().pose();
+    }
+
+    private static void drawItem2(FrameBufferBackedDynamicTexture tex, BlockPos mirrorPos, Direction mirrorDir, float partialTicks) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
 
@@ -217,71 +279,4 @@ Camera camera = gameRenderer.getMainCamera();
         mc.getMainRenderTarget().bindWrite(true);
 
     }
-
-    public static Matrix4f getProjectionMatrix(double pFov, int size, int renderDistance) {
-        PoseStack posestack = new PoseStack();
-        posestack.last().pose().setIdentity();
-        float zoom = 1;
-        float zoomX = 1;
-        float zoomY = 1;
-        if (zoom != 1.0F) {
-            posestack.translate((double) zoomX, (double) (-zoomY), 0.0D);
-            posestack.scale(zoom, zoom, 1.0F);
-        }
-
-        posestack.last().pose().multiply(Matrix4f.perspective(pFov, (float) size / size, 0.05F, renderDistance * 4f));
-        return posestack.last().pose();
-    }
-
-    public static void drawItem(FrameBufferBackedDynamicTexture tex, ItemStack stack) {
-
-        Minecraft mc = Minecraft.getInstance();
-        RenderTarget frameBuffer = tex.getFrameBuffer();
-        frameBuffer.clear(Minecraft.ON_OSX);
-        //render to this one
-        frameBuffer.bindWrite(true);
-
-        int size = 16;
-        //gui setup code
-        //RenderSystem.clear(256, Minecraft.ON_OSX);
-        Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
-        Matrix4f matrix4f = Matrix4f.orthographic(0.0F,
-                size, 0, size, 1000.0F, 3000); //ForgeHooksClient.getGuiFarPlane()
-        RenderSystem.setProjectionMatrix(matrix4f);
-
-        //model view stuff
-        PoseStack posestack = RenderSystem.getModelViewStack();
-        posestack.pushPose();
-        posestack.setIdentity();
-
-        posestack.translate(0.0D, 0.0D, 1000F - 3000); //ForgeHooksClient.getGuiFarPlane()
-        //apply new model view transformation
-        RenderSystem.applyModelViewMatrix();
-        Lighting.setupFor3DItems();
-        //end gui setup code
-
-        //render stuff
-        ItemRenderer itemRenderer = mc.getItemRenderer();
-        //Minecraft.getInstance().gui.render(posestack,1);
-        itemRenderer.renderGuiItem(stack, 0, 0);
-
-        //reset stuff
-        posestack.popPose();
-        //reset model view
-        RenderSystem.applyModelViewMatrix();
-
-        //reset projection
-        RenderSystem.setProjectionMatrix(oldProjection);
-        //RenderSystem.clear(256, Minecraft.ON_OSX);
-        //returns render calls to main render target
-        mc.getMainRenderTarget().bindWrite(true);
-    }
-
-    /*
-        RenderSystem.setShaderTexture(0,
-                new ResourceLocation("textures/gui/container/villager2.png")
-       );
-        Gui.blit(posestack,0,0,1000,0,0,
-                256,256,16,16);
-*/
 }

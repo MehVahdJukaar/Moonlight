@@ -3,6 +3,9 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -16,6 +19,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -119,6 +124,18 @@ public class ClientPlatformHelperImpl {
     public static void registerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager())
                 .registerReloadListener(listener);
+    }
+
+    public static <M extends AbstractContainerMenu, U extends Screen & MenuAccess<M>> void
+    registerScreen(MenuType<? extends M> type, ClientPlatformHelper.ScreenConstructor<M, U> factory) {
+        MenuScreens.register(type, factory::create);
+    }
+
+    public static void addModelLayerRegistration(Consumer<ClientPlatformHelper.ModelLayerEvent> eventListener) {
+        Consumer<EntityRenderersEvent.RegisterLayerDefinitions> eventConsumer = event -> {
+            eventListener.accept(event::registerLayerDefinition);
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
 

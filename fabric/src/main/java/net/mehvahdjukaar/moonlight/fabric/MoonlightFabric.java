@@ -3,7 +3,9 @@ package net.mehvahdjukaar.moonlight.fabric;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.platform.registry.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
@@ -34,6 +36,7 @@ public class MoonlightFabric implements ModInitializer, ClientModInitializer, De
     public void onInitializeClient() {
         commonSetup();
         FabricSetupCallbacks.CLIENT_SETUP.forEach(Runnable::run);
+        WorldRenderEvents.START.register((c)-> RenderedTexturesManager.updateTextures());
     }
 
     @Override

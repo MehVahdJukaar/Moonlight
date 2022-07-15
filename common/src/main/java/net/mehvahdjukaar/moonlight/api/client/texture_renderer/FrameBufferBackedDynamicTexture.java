@@ -24,7 +24,7 @@ import java.util.List;
 
 public class FrameBufferBackedDynamicTexture extends AbstractTexture {
 
-    boolean initialized = false;
+    private boolean initialized = false;
 
     //thing where it renders stuff on
     private RenderTarget frameBuffer;
@@ -50,6 +50,14 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         this(resourceLocation, size, size);
     }
 
+    public void initialize(){
+        this.initialized = true;
+        Minecraft.getInstance().getTextureManager().register(resourceLocation, this);
+    }
+
+    /**
+     * Call to register this texture
+     */
     public boolean isInitialized() {
         return initialized;
     }
@@ -117,7 +125,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         }
         //destroy render buffer
         //release registered texture resource location and id. called just to be sure. releaseId should already do this
-        Minecraft.getInstance().getTextureManager().release(resourceLocation);
+        if(this.initialized) Minecraft.getInstance().getTextureManager().release(resourceLocation);
     }
 
     public NativeImage getPixels() {
