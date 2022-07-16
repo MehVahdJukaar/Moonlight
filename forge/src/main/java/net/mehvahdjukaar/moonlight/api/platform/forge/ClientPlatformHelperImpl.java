@@ -24,10 +24,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -134,6 +131,13 @@ public class ClientPlatformHelperImpl {
     public static void addModelLayerRegistration(Consumer<ClientPlatformHelper.ModelLayerEvent> eventListener) {
         Consumer<EntityRenderersEvent.RegisterLayerDefinitions> eventConsumer = event -> {
             eventListener.accept(event::registerLayerDefinition);
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+    public static void addSpecialModelRegistration(Consumer<ClientPlatformHelper.SpecialModelEvent> eventListener) {
+        Consumer<ModelEvent.RegisterAdditional> eventConsumer = event->{
+            eventListener.accept(event::register);
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }

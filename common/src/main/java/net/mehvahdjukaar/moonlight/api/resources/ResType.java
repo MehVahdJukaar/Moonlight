@@ -27,7 +27,7 @@ public enum ResType {
     PARTICLES("particles/%s.json"),
     MOB_EFFECT_TEXTURES("mob_effect/%s.json");
 
-    public final String loc;
+    private final String loc;
 
     ResType(String loc){
         this.loc = loc;

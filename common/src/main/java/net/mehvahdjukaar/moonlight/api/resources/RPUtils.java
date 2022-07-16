@@ -5,10 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
-import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
+import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 import javax.management.openmbean.InvalidOpenTypeException;
 import java.io.*;
@@ -63,7 +64,7 @@ public class RPUtils {
         }
         ResourceLocation res = Utils.getID(block);
         var blockState = manager.getResource(ResType.BLOCKSTATES.getPath(res));
-        try(var bsStream = blockState.get().open()) {
+        try (var bsStream = blockState.get().open()) {
 
 
             JsonElement bsElement = RPUtils.deserializeJson(bsStream);
@@ -71,14 +72,15 @@ public class RPUtils {
             //grabs the first resource location of a model
             String modelPath = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"))
                     .stream().findAny().get();
-            JsonElement modelElement;
-            var model = manager.getResource(ResType.MODELS.getPath(modelPath));
-            try(var modelStream = model.get().open()) {
-                modelElement = RPUtils.deserializeJson(modelStream);
-            } catch (Exception e) {
-                throw new Exception("Failed to parse model at " + modelPath);
+
+            List<String> textures = findAllTexturesInModelRecursive(manager, modelPath);
+
+            //if all fails randomly guess texture location
+            if (textures.isEmpty()) {
+                //TODO: test
+                textures.add(res.getNamespace()+":block/"+res.getPath());
             }
-            var textures = findAllResourcesInJsonRecursive(modelElement.getAsJsonObject().getAsJsonObject("textures"));
+
 
             for (var t : textures) {
                 TextureCache.add(block, t);
@@ -88,6 +90,24 @@ public class RPUtils {
         }
         throw new FileNotFoundException("Could not find any texture associated to the given block " + res);
 
+    }
+
+    @NotNull
+    private static List<String> findAllTexturesInModelRecursive(ResourceManager manager, String modelPath) throws Exception {
+        JsonObject modelElement;
+        try (var modelStream = manager.getResource(ResType.MODELS.getPath(modelPath)).get().open()) {
+            modelElement = RPUtils.deserializeJson(modelStream).getAsJsonObject();
+        } catch (Exception e) {
+            throw new Exception("Failed to parse model at " + modelPath);
+        }
+        var textures = new ArrayList<>(findAllResourcesInJsonRecursive(modelElement.getAsJsonObject("textures")));
+        if (textures.isEmpty()) {
+            if (modelElement.has("parent")) {
+                var parentPath = modelElement.get("parent").getAsString();
+                textures.addAll(findAllTexturesInModelRecursive(manager, parentPath));
+            }
+        }
+        return textures;
     }
 
     //TODO: account for parents

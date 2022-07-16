@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.impl.client.model.ModelLoadingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -108,6 +109,12 @@ public class ClientPlatformHelperImpl {
 
     public static void addModelLayerRegistration(Consumer<ClientPlatformHelper.ModelLayerEvent> eventListener) {
         eventListener.accept((a, b) -> EntityModelLayerRegistry.registerModelLayer(a, b::get));
+    }
+
+    public static void addSpecialModelRegistration(Consumer<ClientPlatformHelper.SpecialModelEvent> eventListener) {
+        eventListener.accept(r -> {
+            ModelLoadingRegistryImpl.INSTANCE.registerModelProvider((m, loader) -> loader.accept(r));
+        });
     }
 
 

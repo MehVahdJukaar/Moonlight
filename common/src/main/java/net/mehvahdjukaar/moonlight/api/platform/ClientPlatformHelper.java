@@ -145,6 +145,16 @@ public class ClientPlatformHelper {
     }
 
     @FunctionalInterface
+    public interface SpecialModelEvent {
+        void register(ResourceLocation modelLocation);
+    }
+
+    @ExpectPlatform
+    public static void addSpecialModelRegistration(Consumer<SpecialModelEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
     public interface AtlasTextureRegistration {
         void addSprite(ResourceLocation spriteLocation);
     }
