@@ -144,7 +144,7 @@ public class ClientPlatformHelperImpl {
 
     public static void addTooltipComponentRegistration(Consumer<ClientPlatformHelper.TooltipComponentEvent> eventListener) {
         Consumer<RegisterClientTooltipComponentFactoriesEvent> eventConsumer = event->{
-            event.register();
+            eventListener.accept(event::register);
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }

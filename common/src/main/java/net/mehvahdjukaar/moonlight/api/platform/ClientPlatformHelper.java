@@ -157,7 +157,7 @@ public class ClientPlatformHelper {
     }
 
     @FunctionalInterface
-    public  interface TooltipComponentEvent{
+    public interface TooltipComponentEvent{
         <T extends TooltipComponent> void register(Class<T> type, Function<? super T, ? extends ClientTooltipComponent> factory);
     }
 
