@@ -102,11 +102,6 @@ public class ClientPlatformHelperImpl {
         });
     }
 
-    public static <M extends AbstractContainerMenu, U extends Screen & MenuAccess<M>> void
-    registerScreen(MenuType<? extends M> type, ClientPlatformHelper.ScreenConstructor<M, U> factory) {
-        MenuScreens.register(type, factory::create);
-    }
-
     public static void addModelLayerRegistration(Consumer<ClientPlatformHelper.ModelLayerEvent> eventListener) {
         eventListener.accept((a, b) -> EntityModelLayerRegistry.registerModelLayer(a, b::get));
     }

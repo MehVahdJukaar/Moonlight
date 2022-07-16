@@ -123,11 +123,6 @@ public class ClientPlatformHelperImpl {
                 .registerReloadListener(listener);
     }
 
-    public static <M extends AbstractContainerMenu, U extends Screen & MenuAccess<M>> void
-    registerScreen(MenuType<? extends M> type, ClientPlatformHelper.ScreenConstructor<M, U> factory) {
-        MenuScreens.register(type, factory::create);
-    }
-
     public static void addModelLayerRegistration(Consumer<ClientPlatformHelper.ModelLayerEvent> eventListener) {
         Consumer<EntityRenderersEvent.RegisterLayerDefinitions> eventConsumer = event -> {
             eventListener.accept(event::registerLayerDefinition);

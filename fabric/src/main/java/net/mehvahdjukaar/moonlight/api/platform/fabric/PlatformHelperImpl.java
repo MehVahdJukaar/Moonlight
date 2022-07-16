@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
@@ -23,18 +22,16 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -139,14 +136,14 @@ public class PlatformHelperImpl {
     @SuppressWarnings("ConstantConditions")
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
         EXTRA_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
-        if(packType == PackType.CLIENT_RESOURCES && PlatformHelper.getEnv().isClient()){
-           if(Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep){
-               var newSources = new HashSet<>(rep.getSources());
-               getAdditionalPacks(packType).forEach(l -> {
-                   newSources.add((infoConsumer, b) -> infoConsumer.accept(l.get()));
-               });
-               rep.setSources(newSources);
-           }
+        if (packType == PackType.CLIENT_RESOURCES && PlatformHelper.getEnv().isClient()) {
+            if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
+                var newSources = new HashSet<>(rep.getSources());
+                getAdditionalPacks(packType).forEach(l -> {
+                    newSources.add((infoConsumer, b) -> infoConsumer.accept(l.get()));
+                });
+                rep.setSources(newSources);
+            }
         }
     }
 
@@ -157,5 +154,9 @@ public class PlatformHelperImpl {
             list.addAll(suppliers);
         }
         return list;
+    }
+
+    public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
+        return new SpawnEggItem(entityType.get(), color, outerColor, properties);
     }
 }

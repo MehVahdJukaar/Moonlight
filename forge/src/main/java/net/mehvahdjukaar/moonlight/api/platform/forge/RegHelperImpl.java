@@ -1,7 +1,10 @@
-package net.mehvahdjukaar.moonlight.api.platform.registry.forge;
+package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.common.collect.ImmutableMap;
-import net.mehvahdjukaar.moonlight.api.platform.registry.RegHelper;
+import com.mojang.brigadier.CommandDispatcher;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
@@ -21,6 +24,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.minecraftforge.event.CommandEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -28,6 +34,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegisterEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +67,7 @@ public class RegHelperImpl {
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
 
             var forgeReg = REG_TO_FR.get(reg);
-            if(forgeReg == null)throw new UnsupportedOperationException("Registry "+reg+" not supported");
+            if (forgeReg == null) throw new UnsupportedOperationException("Registry " + reg + " not supported");
             DeferredRegister<T> r = (DeferredRegister<T>) DeferredRegister.create(forgeReg, modId);
             var bus = FMLJavaModLoadingContext.get().getModEventBus();
             r.register(bus);
@@ -100,22 +107,46 @@ public class RegHelperImpl {
     }
 
     public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        Consumer<VillagerTradesEvent> eventConsumer = event->{
-            if(event.getType() == profession){
+        Consumer<VillagerTradesEvent> eventConsumer = event -> {
+            if (event.getType() == profession) {
                 var list = event.getTrades().get(level);
                 factories.accept(list);
             }
         };
         MinecraftForge.EVENT_BUS.register(eventConsumer);
     }
+
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         //0 = common, 1 = rare
-        Consumer<WandererTradesEvent> eventConsumer = event->{
-            if(level == 0){
+        Consumer<WandererTradesEvent> eventConsumer = event -> {
+            if (level == 0) {
                 factories.accept(event.getGenericTrades());
-            }else{
+            } else {
                 factories.accept(event.getRareTrades());
             }
+        };
+        MinecraftForge.EVENT_BUS.register(eventConsumer);
+    }
+
+    public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
+        Consumer<EntityAttributeCreationEvent> eventConsumer = event -> {
+            eventListener.accept((e, b) -> event.put(e, b.build()));
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().register(eventConsumer);
+    }
+
+    public static void addMiscRegistration(Runnable eventListener) {
+        Consumer<RegisterEvent> eventConsumer = event -> {
+            if (event.getRegistryKey() == Registry.ENTITY_TYPE_REGISTRY) {
+                eventListener.run();
+            }
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().register(eventConsumer);
+    }
+
+    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener){
+        Consumer<RegisterCommandsEvent> eventConsumer = event->{
+            eventListener.accept(event.getDispatcher());
         };
         MinecraftForge.EVENT_BUS.register(eventConsumer);
     }

@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.platform.registry.fabric;
+package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;

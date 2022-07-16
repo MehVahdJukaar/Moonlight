@@ -1,9 +1,11 @@
-package net.mehvahdjukaar.moonlight.api.platform.registry;
+package net.mehvahdjukaar.moonlight.api.platform;
 
+import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -14,7 +16,9 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -161,6 +165,24 @@ public class RegHelper {
     }
     @ExpectPlatform
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories){
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface AttributeEvent{
+        void register(EntityType<? extends LivingEntity> type, AttributeSupplier.Builder builder);
+    }
+    @ExpectPlatform
+    public static void addAttributeRegistration(Consumer<AttributeEvent> eventListener){
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void addMiscRegistration(Runnable eventListener){
+        throw new AssertionError();
+    }
+    @ExpectPlatform
+    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener){
         throw new AssertionError();
     }
 

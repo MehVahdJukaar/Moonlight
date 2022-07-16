@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -60,22 +61,6 @@ public class ClientPlatformHelper {
     @ExpectPlatform
     public static void registerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static <M extends AbstractContainerMenu, U extends Screen & MenuAccess<M>> void
-            registerScreen(MenuType<? extends M> type, ScreenConstructor<M, U> factory) {
-        throw new AssertionError();
-    }
-
-    public interface ScreenConstructor<T extends AbstractContainerMenu, U extends Screen & MenuAccess<T>> {
-        default void fromPacket(Component title, MenuType<T> type, Minecraft mc, int windowId) {
-            U screen = this.create(type.create(windowId, mc.player.getInventory()), mc.player.getInventory(), title);
-            mc.player.containerMenu = ((MenuAccess) screen).getMenu();
-            mc.setScreen(screen);
-        }
-
-        U create(T abstractContainerMenu, Inventory inventory, Component component);
     }
 
     @FunctionalInterface

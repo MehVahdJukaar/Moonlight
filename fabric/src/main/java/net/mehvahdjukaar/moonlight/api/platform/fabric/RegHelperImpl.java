@@ -1,13 +1,16 @@
-package net.mehvahdjukaar.moonlight.api.platform.registry.fabric;
+package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.CommandDispatcher;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
-import net.fabricmc.fabric.api.registry.VillagerPlantableRegistry;
-import net.mehvahdjukaar.moonlight.api.platform.registry.RegHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
@@ -51,12 +54,11 @@ public class RegHelperImpl {
             Registry.ENCHANTMENT
     );
 
-
     public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> Supplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
-        if (true) return registerAsync(name, supplier, reg); //TODO: figure out this
+        //if (true) return registerAsync(name, supplier, reg);
         String modId = name.getNamespace();
         var m = REGISTRIES.computeIfAbsent(reg, h -> new HashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId, c -> new RegistryQueue<>(reg));
@@ -84,11 +86,9 @@ public class RegHelperImpl {
         return register(name, s, Registry.ENTITY_TYPE);
     }
 
-
     public static <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(RegHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
         return FabricBlockEntityTypeBuilder.create(blockEntitySupplier::create, validBlocks).build();
     }
-
 
     public static void registerItemBurnTime(Item item, int burnTime) {
         FuelRegistry.INSTANCE.add(item, burnTime);
@@ -99,12 +99,23 @@ public class RegHelperImpl {
     }
 
     public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-
         TradeOfferHelper.registerVillagerOffers(profession, level, factories);
     }
 
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         TradeOfferHelper.registerWanderingTraderOffers(level, factories);
+    }
+
+    public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
+        eventListener.accept(FabricDefaultAttributeRegistry::register);
+    }
+
+    public static void addMiscRegistration(Runnable eventListener) {
+        eventListener.run();
+    }
+
+    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
+        CommandRegistrationCallback.EVENT.register((d, s, b) -> eventListener.accept(d));
     }
 
 
