@@ -99,7 +99,7 @@ public class ClientPlatformHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientPlatformHelper.AtlasTextureRegistration> eventListener) {
+    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientPlatformHelper.AtlasTextureEvent> eventListener) {
         Consumer<TextureStitchEvent.Pre> eventConsumer = event -> {
             if (event.getAtlas().location() == atlasLocation) {
                 eventListener.accept(event::addSprite);
@@ -141,6 +141,14 @@ public class ClientPlatformHelperImpl {
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
+
+    public static void addTooltipComponentRegistration(Consumer<ClientPlatformHelper.TooltipComponentEvent> eventListener) {
+        Consumer<RegisterClientTooltipComponentFactoriesEvent> eventConsumer = event->{
+            event.register();
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
 
 
 }

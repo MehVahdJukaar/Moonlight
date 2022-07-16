@@ -9,7 +9,7 @@ import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.model.geom.LayerDefinitions;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
@@ -30,6 +30,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -40,6 +41,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ClientPlatformHelper {
@@ -155,12 +157,22 @@ public class ClientPlatformHelper {
     }
 
     @FunctionalInterface
-    public interface AtlasTextureRegistration {
+    public  interface TooltipComponentEvent{
+        <T extends TooltipComponent> void register(Class<T> type, Function<? super T, ? extends ClientTooltipComponent> factory);
+    }
+
+    @ExpectPlatform
+    public static void addTooltipComponentRegistration(Consumer<TooltipComponentEvent> eventListener){
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface AtlasTextureEvent {
         void addSprite(ResourceLocation spriteLocation);
     }
 
     @ExpectPlatform
-    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<AtlasTextureRegistration> eventListener) {
+    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<AtlasTextureEvent> eventListener) {
         throw new AssertionError();
     }
 
