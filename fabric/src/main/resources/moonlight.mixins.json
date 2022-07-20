@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "SelfCustomItemRendererProvider",
-    "SelfItemStackRenderer"
+    "SelfItemStackRenderer",
+    "TextureAtlasSpriteMixin"
   ],
   "mixins": [
     "FireBlockMixin",

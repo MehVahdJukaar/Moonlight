@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.platform.event.fabric;
 
 import net.mehvahdjukaar.moonlight.api.platform.event.SimpleEvent;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +25,10 @@ public class EventHelperImpl {
         if (L != null) {
             ((List<Consumer<T>>) (Object) L).forEach(e -> e.accept(event));
         }
+    }
+
+    public static boolean onProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
+        return true;
     }
 
 }

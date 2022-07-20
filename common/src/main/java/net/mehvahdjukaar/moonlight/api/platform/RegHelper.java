@@ -134,21 +134,9 @@ public class RegHelper {
         return register(name, type,Registry.ENTITY_TYPE);
     }
 
-
-    @ExpectPlatform
-    public static <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
-        throw new AssertionError();
-    }
-
-    @FunctionalInterface
-    public interface BlockEntitySupplier<T extends BlockEntity> {
-        @NotNull T create(BlockPos pos, BlockState state);
-    }
-
     public static void registerCompostable(ItemLike name, float chance) {
         ComposterBlock.COMPOSTABLES.put(name, chance);
     }
-
 
     @ExpectPlatform //fabric
     public static void registerItemBurnTime(Item item, int burnTime) {

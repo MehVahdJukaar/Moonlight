@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
@@ -30,12 +31,8 @@ public class FabricConfigSpec extends ConfigSpec {
     private final ConfigCategory mainEntry;
     private final File file;
 
-    public FabricConfigSpec(ResourceLocation name, ConfigCategory mainEntry, ConfigType type) {
-        this(name, mainEntry, type, false);
-    }
-
-    public FabricConfigSpec(ResourceLocation name, ConfigCategory mainEntry, ConfigType type, boolean synced) {
-        super(name, FabricLoader.getInstance().getConfigDir(), type, synced);
+    public FabricConfigSpec(ResourceLocation name, ConfigCategory mainEntry, ConfigType type, boolean synced, Runnable changeCallback) {
+        super(name, FabricLoader.getInstance().getConfigDir(), type, synced, changeCallback);
         this.file = this.getFullPath().toFile();
         this.mainEntry = mainEntry;
         this.res = name;
@@ -84,6 +81,7 @@ public class FabricConfigSpec extends ConfigSpec {
             GSON.toJson(jo, writer);
         } catch (IOException ignored) {
         }
+        this.onRefresh();
     }
 
     public String getTitleKey() {
@@ -116,6 +114,7 @@ public class FabricConfigSpec extends ConfigSpec {
             //don't call load directly, so we skip the main category name
             mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
         }
+        this.onRefresh();
     }
 
     @EventCalled

@@ -96,7 +96,6 @@ public class ChannelHandlerImpl extends ChannelHandler {
         channel.sendToServer(message);
     }
 
-
     @Override
     public void sendToAllClientPlayersInRange(Level level, BlockPos pos, double radius, Message message) {
         MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();

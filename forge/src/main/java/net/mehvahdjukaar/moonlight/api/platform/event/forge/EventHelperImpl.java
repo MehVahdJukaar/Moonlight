@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.platform.event.forge;
 
 import net.mehvahdjukaar.moonlight.api.platform.event.SimpleEvent;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.eventbus.api.Event;
 
 import java.util.ArrayList;
@@ -33,6 +36,10 @@ public class EventHelperImpl {
                 ((List<Consumer<T>>) (Object) L).forEach(e -> e.accept(event));
             }
         }
+    }
+
+    public static boolean onProjectileImpact(Projectile projectile, HitResult blockHitResult) {
+        return ForgeEventFactory.onProjectileImpact(projectile, blockHitResult);
     }
 
 

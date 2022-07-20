@@ -34,7 +34,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigSpecWrapper build() {
-        return new ConfigSpecWrapper(this.getName(), this.builder.build(), this.type);
+        return new ConfigSpecWrapper(this.getName(), this.builder.build(), this.type, this.synced, this.changeCallback);
     }
 
     @Override

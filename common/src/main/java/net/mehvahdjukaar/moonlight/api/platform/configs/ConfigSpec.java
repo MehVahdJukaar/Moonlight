@@ -24,6 +24,7 @@ public abstract class ConfigSpec {
 
     private static final Map<String, Map<ConfigType, ConfigSpec>> CONFIG_STORAGE = new HashMap<>();
 
+
     public static void addTrackedSpec(ConfigSpec spec) {
         var map = CONFIG_STORAGE.computeIfAbsent(spec.getModId(), n -> new HashMap<>());
         map.put(spec.getConfigType(), spec);
@@ -43,17 +44,26 @@ public abstract class ConfigSpec {
     private final Path filePath;
     private final ConfigType type;
     private final boolean synced;
+    @Nullable
+    private final Runnable changeCallback;
 
     public ConfigSpec(ResourceLocation name, Path configDirectory, ConfigType type) {
-        this(name, configDirectory, type, false);
+        this(name, configDirectory, type, false,null);
     }
 
-    public ConfigSpec(ResourceLocation name, Path configDirectory, ConfigType type, boolean synced) {
+    public ConfigSpec(ResourceLocation name, Path configDirectory, ConfigType type, boolean synced, Runnable changeCallback) {
         this.fileName = name.getNamespace() + "-" + name.getPath() + ".json";
         this.modId = name.getNamespace();
         this.filePath = configDirectory.resolve(fileName);
         this.type = type;
         this.synced = synced;
+        this.changeCallback = changeCallback;
+    }
+
+    protected void onRefresh(){
+        if(this.changeCallback!= null){
+            this.changeCallback.run();
+        }
     }
 
     public abstract void loadFromFile();

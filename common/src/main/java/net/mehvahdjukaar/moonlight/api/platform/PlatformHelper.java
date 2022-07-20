@@ -8,24 +8,32 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class PlatformHelper {
@@ -96,6 +104,11 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
+    @ExpectPlatform
+    public static Path getModFilePath(String modId) {
+        throw new AssertionError();
+    }
+
     @Nullable
     @ExpectPlatform
     public static <T> Field findField(Class<? super T> clazz, String fieldName) {
@@ -162,13 +175,42 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar){
+        return createModTab(name ,icon, hasSearchBar, null);
+    }
+
+    @ExpectPlatform
+    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
+                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> itemSupplier){
         throw new AssertionError();
     }
 
     @ExpectPlatform
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties){
         throw new AssertionError();
-    };
+    }
+    @ExpectPlatform
+    public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {
+        throw new AssertionError();
+    }
+    @ExpectPlatform
+    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface BlockEntitySupplier<T extends BlockEntity> {
+        @NotNull T create(BlockPos pos, BlockState state);
+    }
+    @ExpectPlatform
+    public static <E extends Entity> EntityType<E> newEntityType(String name,
+            EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
+            int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
+        throw new AssertionError();
+    }
 }

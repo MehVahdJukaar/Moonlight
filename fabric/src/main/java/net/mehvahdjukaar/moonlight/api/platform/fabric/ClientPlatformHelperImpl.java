@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.impl.client.model.ModelLoadingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
+import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
@@ -19,6 +20,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -118,6 +120,10 @@ public class ClientPlatformHelperImpl {
 
     private static <T extends TooltipComponent> void tooltipReg(Class<T> tClass, Function<? super T,? extends ClientTooltipComponent> factory) {
         TooltipComponentCallback.EVENT.register(data -> tClass.isAssignableFrom(data.getClass()) ? factory.apply((T)data) : null);
+    }
+
+    public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
+        return ((ITextureAtlasSpriteExtension)sprite).getPixelRGBA(frameIndex,x,y);
     }
 
 

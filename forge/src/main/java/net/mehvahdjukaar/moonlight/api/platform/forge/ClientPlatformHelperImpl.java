@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -144,6 +145,9 @@ public class ClientPlatformHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
+    public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
+        return sprite.getPixelRGBA(frameIndex,x,y);
+    }
 
 
 }

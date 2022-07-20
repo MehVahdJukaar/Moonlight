@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.moonlight.core.client;
-/*
+
+import net.mehvahdjukaar.moonlight.api.client.GenericSimpleResourceReloadListener;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
-import net.mehvahdjukaar.moonlight.fluids.SoftFluidRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -10,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraftforge.client.event.TextureStitchEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
         super("textures/soft_fluids", ".png");
     }
 
+    //adds all textures in this folder
     @Override
     public void apply(List<ResourceLocation> locations, ResourceManager manager, ProfilerFiller filler) {
         TEXTURES_TO_STITCH.clear();
@@ -32,6 +34,10 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
 
     private static final HashMap<ResourceLocation, Integer> PARTICLE_COLORS = new HashMap<>();
 
+    public static int get(SoftFluid s) {
+        return PARTICLE_COLORS.getOrDefault(SoftFluidRegistry.getID(s), -1);
+    }
+    //TODO: add
     public static List<ResourceLocation> getTexturesToStitch() {
         //fluids aren't registered here, so we can't just iterate over them
         var list = new ArrayList<ResourceLocation>();
@@ -63,12 +69,11 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
         }
     }
 
-    public static int get(SoftFluid s) {
-        return PARTICLE_COLORS.getOrDefault(SoftFluidRegistry.getID(s), -1);
-    }
+
 
 
     //credits to Random832
+    @SuppressWarnings("ConstantConditions")
     private static int getColorFrom(TextureAtlasSprite sprite, int tint) {
         if (sprite == null || sprite.getFrameCount() == 0) return -1;
 
@@ -82,7 +87,7 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
                 for (int x = 0; x < sprite.getWidth(); x++) {
                     for (int y = 0; y < sprite.getHeight(); y++) {
 
-                        int pixel = sprite.getPixelRGBA(tryFrame, x, y);
+                        int pixel = ClientPlatformHelper.getPixelRGBA(sprite, tryFrame, x, y);
 
                         // this is in 0xAABBGGRR format, not the usual 0xAARRGGBB.
                         int pixelB = pixel >> 16 & 255;
@@ -110,17 +115,4 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
     }
 
 
-}
-*/
-//TODO: disabled, re add
-
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
-
-public  class SoftFluidClient{
-    public static int get(SoftFluid fluid) {
-        return 0;
-    }
-
-    public static void refresh() {
-    }
 }

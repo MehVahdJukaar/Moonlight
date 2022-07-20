@@ -6,3 +6,7 @@ transitive-accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenC
 
 transitive-accessible method net/minecraft/client/gui/screens/MenuScreens register (Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V
 
+transitive-accessible class net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture
+transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite getFrameCount ()I
+transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameX (I)I
+transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameY (I)I

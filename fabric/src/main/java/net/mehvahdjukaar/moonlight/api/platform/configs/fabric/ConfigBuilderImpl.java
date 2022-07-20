@@ -31,7 +31,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public FabricConfigSpec build() {
         assert categoryStack.size() == 1;
         FabricConfigSpec spec = new FabricConfigSpec(this.getName(),
-                mainCategory, this.type, this.synced);
+                mainCategory, this.type, this.synced, this.changeCallback);
         spec.loadFromFile();
         spec.saveConfig();
         return spec;

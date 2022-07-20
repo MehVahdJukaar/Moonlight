@@ -20,6 +20,7 @@ public abstract class ConfigBuilder {
     private String currentComment;
     private String currentKey;
     protected boolean synced;
+    protected Runnable changeCallback;
 
     @ExpectPlatform
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
@@ -115,6 +116,11 @@ public abstract class ConfigBuilder {
 
     public ConfigBuilder setSynced(){
         this.synced = true;
+        return this;
+    }
+
+    public ConfigBuilder onChange(Runnable callback){
+        this.changeCallback = callback;
         return this;
     }
 

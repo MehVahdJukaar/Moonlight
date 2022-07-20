@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.forge;
 
 
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

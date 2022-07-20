@@ -86,10 +86,6 @@ public class RegHelperImpl {
         return register(name, s, Registry.ENTITY_TYPE);
     }
 
-    public static <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(RegHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
-        return FabricBlockEntityTypeBuilder.create(blockEntitySupplier::create, validBlocks).build();
-    }
-
     public static void registerItemBurnTime(Item item, int burnTime) {
         FuelRegistry.INSTANCE.add(item, burnTime);
     }

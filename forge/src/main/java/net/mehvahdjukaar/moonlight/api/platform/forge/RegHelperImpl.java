@@ -96,10 +96,6 @@ public class RegHelperImpl {
                 .sized(width, height).build(name.toString()), Registry.ENTITY_TYPE);
     }
 
-    public static <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(RegHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
-        return BlockEntityType.Builder.of(blockEntitySupplier::create, validBlocks).build(null);
-    }
-
     public static void registerItemBurnTime(Item item, int burnTime) {
     }
 

@@ -35,12 +35,8 @@ public class ConfigSpecWrapper extends ConfigSpec {
     @Nullable
     private ModConfig modConfig;
 
-    public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type) {
-        this(name, spec, type, false);
-    }
-
-    public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced) {
-        super(name, FMLPaths.CONFIGDIR.get(), type, synced);
+    public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced, Runnable onChange) {
+        super(name, FMLPaths.CONFIGDIR.get(), type, synced, onChange);
         this.spec = spec;
 
         if (this.isSynced()) {
@@ -140,9 +136,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
         }
     }
 
-    private void onRefresh() {
-    }
-
+    @Override
     public void loadFromBytes(InputStream stream) {
         this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
         this.onRefresh();
