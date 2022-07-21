@@ -50,8 +50,8 @@ public class RegHelperImpl {
     private static final Map<Registry<?>, IForgeRegistry<?>> REG_TO_FR = ImmutableMap.of(
             Registry.BLOCK, ForgeRegistries.BLOCKS,
             Registry.ITEM, ForgeRegistries.ITEMS,
-            Registry.ENTITY_TYPE, ForgeRegistries.ENTITIES,
-            Registry.BLOCK_ENTITY_TYPE, ForgeRegistries.BLOCK_ENTITIES,
+            Registry.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES,
+            Registry.BLOCK_ENTITY_TYPE, ForgeRegistries.BLOCK_ENTITY_TYPES,
             Registry.RECIPE_SERIALIZER, ForgeRegistries.RECIPE_SERIALIZERS,
             Registry.MOB_EFFECT, ForgeRegistries.MOB_EFFECTS,
             Registry.ENCHANTMENT, ForgeRegistries.ENCHANTMENTS,

@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.ConfigGuiHandler;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -99,7 +99,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
     public Screen makeScreen(Screen parent, @Nullable ResourceLocation background) {
         var container = ModList.get().getModContainerById(this.getModId());
         if (container.isPresent()) {
-            var factory = container.get().getCustomExtension(ConfigGuiHandler.ConfigGuiFactory.class);
+            var factory = container.get().getCustomExtension(ConfigScreenHandler.ConfigScreenFactory.class);
             if (factory.isPresent()) return factory.get().screenFunction().apply(Minecraft.getInstance(), parent);
         }
         return null;
@@ -108,13 +108,13 @@ public class ConfigSpecWrapper extends ConfigSpec {
     @Override
     public boolean hasConfigScreen() {
         return ModList.get().getModContainerById(this.getModId())
-                .map(container -> container.getCustomExtension(ConfigGuiHandler.ConfigGuiFactory.class)
+                .map(container -> container.getCustomExtension(ConfigScreenHandler.ConfigScreenFactory.class)
                         .isPresent()).orElse(false);
     }
 
     @EventCalled
     protected void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getPlayer() instanceof ServerPlayer serverPlayer) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             //send this configuration to connected clients
             syncConfigsToPlayer(serverPlayer);
         }
@@ -122,7 +122,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
 
     @EventCalled
     protected void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getPlayer().level.isClientSide) {
+        if (event.getEntity().level.isClientSide) {
             onRefresh();
         }
     }

@@ -20,7 +20,7 @@ public interface IFireConsumeBlockEvent extends SimpleEvent {
 
     BlockState getState();
 
-    LevelAccessor getWorld();
+    LevelAccessor getLevel();
 
     Direction getFace();
 

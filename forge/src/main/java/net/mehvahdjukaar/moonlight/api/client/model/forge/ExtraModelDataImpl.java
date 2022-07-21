@@ -29,7 +29,7 @@ public record ExtraModelDataImpl(ModelData data) implements ExtraModelData {
 
     @Nullable
     @Override
-    public <T> T getData(ModelDataKey<T> key) {
+    public <T> T get(ModelDataKey<T> key) {
         ModelProperty<T> prop = (ModelProperty<T>) KEYS.get(key);
         if (prop == null) return null;
         return data.get(prop);

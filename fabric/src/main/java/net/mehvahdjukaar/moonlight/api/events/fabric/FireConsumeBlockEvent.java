@@ -38,7 +38,7 @@ public class FireConsumeBlockEvent implements IFireConsumeBlockEvent {
     }
 
     @Override
-    public LevelAccessor getWorld() {
+    public LevelAccessor getLevel() {
         return level;
     }
 

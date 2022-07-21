@@ -16,7 +16,7 @@ public class ExtraModelDataImpl implements ExtraModelData {
         this.backingMap = new IdentityHashMap<>(map);
     }
 
-    public <T> T getData(ModelDataKey<T> prop) {
+    public <T> T get(ModelDataKey<T> prop) {
         return (T) this.backingMap.get(prop);
     }
 

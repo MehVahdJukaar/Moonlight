@@ -12,7 +12,7 @@
     "FireBlockMixin",
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
-    "SelfDynamicBakedModel",
+    "SelfCustomBakedModel",
     "SelfIDynamicModelProvider"
   ],
   "injectors": {

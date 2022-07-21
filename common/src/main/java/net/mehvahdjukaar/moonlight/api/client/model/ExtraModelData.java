@@ -5,13 +5,15 @@ import org.jetbrains.annotations.Nullable;
 
 public interface ExtraModelData {
 
+    public static final ExtraModelData EMPTY = ExtraModelData.builder().build();
+
     @ExpectPlatform
     static Builder builder() {
         throw new AssertionError();
     }
 
     @Nullable
-    <T> T getData(ModelDataKey<T> key);
+    <T> T get(ModelDataKey<T> key);
 
     interface Builder {
         <A> Builder with(ModelDataKey<A> key, A data);
