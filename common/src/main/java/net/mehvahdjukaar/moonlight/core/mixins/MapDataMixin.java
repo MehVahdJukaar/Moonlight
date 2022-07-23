@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.map.*;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.map.markers.GenericMapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.map.type.IMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncCustomMapDecorationMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.BlockPos;
@@ -199,7 +199,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     if (!this.decorations.containsKey(com.getString("id"))) {
                         String name = com.getString("type");
 
-                        IMapDecorationType<? extends CustomMapDecoration, ?> type = MapDecorationRegistry.get(name);
+                        MapDecorationType<? extends CustomMapDecoration, ?> type = MapDecorationRegistry.get(name);
                         if (type != null) {
                             MapBlockMarker<CustomMapDecoration> dummy = new GenericMapBlockMarker(type, com.getInt("x"), com.getInt("z"));
                             this.addCustomDecoration(dummy);

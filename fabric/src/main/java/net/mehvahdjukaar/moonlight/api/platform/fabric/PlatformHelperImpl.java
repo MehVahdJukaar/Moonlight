@@ -2,8 +2,6 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -12,7 +10,6 @@ import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
@@ -20,16 +17,13 @@ import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
@@ -38,18 +32,14 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -114,7 +104,9 @@ public class PlatformHelperImpl {
 
 
     public static int getBurnTime(ItemStack stack) {
-        return FuelRegistry.INSTANCE.get(stack.getItem());
+        var v = FuelRegistry.INSTANCE.get(stack.getItem());
+        if (v == null) return 0;
+        return v;
     }
 
     @Nullable
@@ -134,10 +126,10 @@ public class PlatformHelperImpl {
     }
 
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
-                                               @Nullable BiConsumer<List<ItemStack>,CreativeModeTab> fillItemList) {
+                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> fillItemList) {
         var t = FabricItemGroupBuilder.create(name);
         t.appendItems(fillItemList).icon(icon);
-        return  t.build();
+        return t.build();
     }
 
     private static final HashMap<PackType, List<Supplier<Pack>>> EXTRA_PACKS = new HashMap<>();
@@ -170,7 +162,7 @@ public class PlatformHelperImpl {
     }
 
     public static Path getModFilePath(String modId) {
-       return FabricLoader.getInstance().getModContainer(modId).get().getRootPaths().get(0);
+        return FabricLoader.getInstance().getModContainer(modId).get().getRootPaths().get(0);
     }
 
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {
@@ -178,23 +170,23 @@ public class PlatformHelperImpl {
     }
 
     public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties) {
-        class ModRecord extends RecordItem{
+        class ModRecord extends RecordItem {
             protected ModRecord(int i, SoundEvent soundEvent, Properties properties) {
                 super(i, soundEvent, properties);
             }
         }
-        return new ModRecord(power,music.get(), properties);
+        return new ModRecord(power, music.get(), properties);
     }
 
     public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatformHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
         return FabricBlockEntityTypeBuilder.create(blockEntitySupplier::create, validBlocks).build();
     }
 
-    public static<E extends Entity> EntityType<E> newEntityType(String name,
-            EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
-            int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
+    public static <E extends Entity> EntityType<E> newEntityType(String name,
+                                                                 EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
+                                                                 int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
         return FabricEntityTypeBuilder.create(category, factory)
-                .dimensions(EntityDimensions.scalable(width,height))
+                .dimensions(EntityDimensions.scalable(width, height))
                 .trackedUpdateRate(updateInterval)
                 .trackRangeChunks(clientTrackingRange)
                 .forceTrackedVelocityUpdates(velocityUpdates).build();

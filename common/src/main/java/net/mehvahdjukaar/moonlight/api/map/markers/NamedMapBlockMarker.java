@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map.markers;
 
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.type.IMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -16,11 +16,11 @@ public abstract class NamedMapBlockMarker<D extends CustomMapDecoration> extends
     @Nullable
     public Component name;
 
-    public NamedMapBlockMarker(IMapDecorationType<D, ?> type) {
+    public NamedMapBlockMarker(MapDecorationType<D, ?> type) {
         super(type);
     }
 
-    public NamedMapBlockMarker(IMapDecorationType<D, ?> type, BlockPos pos) {
+    public NamedMapBlockMarker(MapDecorationType<D, ?> type, BlockPos pos) {
         super(type, pos);
     }
 

@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.core.mixins.accessor.CriteriaTriggerAccessor;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,7 +12,7 @@ public class ModCriteriaTriggers {
 
     public static void register(){}
 
-    public static final GrindedItem GRIND = CriteriaTriggerAccessor.invokeRegister(new GrindedItem());
+    public static final GrindedItem GRIND = CriteriaTriggers.register(new GrindedItem());
     
     public static class GrindedItem extends SimpleCriterionTrigger<GrindedItem.Instance> {
         private static final ResourceLocation ID = new ResourceLocation("grind_item");

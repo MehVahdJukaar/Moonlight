@@ -3,8 +3,12 @@ package net.mehvahdjukaar.moonlight.api.util;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
-import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
+import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -29,6 +33,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 
 public class Utils {
@@ -143,9 +148,13 @@ public class Utils {
         return Registry.RECIPE_SERIALIZER.getKey(object);
     }
 
-   //  public static ResourceLocation getID(SoftFluid object) {
-   //     return SoftFluidRegistry.getID(object);
-   // }
+    public static ResourceLocation getID(SoftFluid object) {
+        return SoftFluidRegistry.getID(object);
+    }
+
+    public static ResourceLocation getID(MapDecorationType<?, ?> object) {
+        return MapDecorationRegistry.getID(object);
+    }
 
     public static ResourceLocation getID(Object object) {
         if (object instanceof Block b) return getID(b);
@@ -155,10 +164,13 @@ public class Utils {
         if (object instanceof Fluid b) return getID(b);
         if (object instanceof BlockEntityType b) return getID(b);
         if (object instanceof RecipeSerializer b) return getID(b);
-       // if(object instanceof SoftFluid s)return getID(s);
+        if (object instanceof Supplier<?> s) return getID(s.get());
+        if (object instanceof SoftFluid s) return getID(s);
+        if (object instanceof MapDecorationType<?, ?> s) return getID(s);
         throw new UnsupportedOperationException("Unknown class type " + object.getClass());
     }
 
+    //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
         if (PlatformHelper.getEnv().isClient()) {
             var level = Minecraft.getInstance().level;

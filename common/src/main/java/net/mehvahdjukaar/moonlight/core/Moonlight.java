@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.builtincompat.CompatWoodTypes;
@@ -7,6 +9,7 @@ import net.mehvahdjukaar.moonlight.core.misc.ModCriteriaTriggers;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +32,8 @@ public class Moonlight {
         ModMessages.registerMessages();
         VillagerAIInternal.init();
         ModCriteriaTriggers.register();
-
+        SoftFluidRegistry.init();
+        MapDecorationRegistry.init();
     }
 
 }

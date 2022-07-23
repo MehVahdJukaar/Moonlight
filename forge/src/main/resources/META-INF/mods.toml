@@ -19,7 +19,7 @@ This is an example description! Tell everyone what your mod is about!
 [[dependencies.moonlight]]
 modId = "forge"
 mandatory = true
-versionRange = "[40,)"
+versionRange = "[40.0.100,)"
 ordering = "NONE"
 side = "BOTH"
 

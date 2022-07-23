@@ -1,9 +1,9 @@
-package net.mehvahdjukaar.moonlight.api.util.forge;
+package net.mehvahdjukaar.moonlight.api.events.fabric;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.core.misc.VillagerBrainEventInternal;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
+import net.mehvahdjukaar.moonlight.core.misc.VillagerBrainEventInternal;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
@@ -12,13 +12,12 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraftforge.eventbus.api.Event;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class VillagerBrainEvent extends Event implements IVillagerBrainEvent {
+public class VillagerBrainEvent implements IVillagerBrainEvent {
 
     //hack so we can extend Event class
     private final VillagerBrainEventInternal internal;
@@ -104,5 +103,4 @@ public class VillagerBrainEvent extends Event implements IVillagerBrainEvent {
     public VillagerBrainEventInternal getInternal() {
         return internal;
     }
-
 }

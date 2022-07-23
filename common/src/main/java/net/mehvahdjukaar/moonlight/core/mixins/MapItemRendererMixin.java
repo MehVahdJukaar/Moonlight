@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
-import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationRenderHandler;
+import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientHandler;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -22,7 +22,7 @@ public abstract class MapItemRendererMixin {
             int index = data.getVanillaDecorationSize();
             for (CustomMapDecoration decoration : data.getCustomDecorations().values()) {
 
-                if (MapDecorationRenderHandler.render(decoration, poseStack, buffer, mapData, isOnFrame, light, index))
+                if (MapDecorationClientHandler.render(decoration, poseStack, buffer, mapData, isOnFrame, light, index))
                     index++;
             }
         }

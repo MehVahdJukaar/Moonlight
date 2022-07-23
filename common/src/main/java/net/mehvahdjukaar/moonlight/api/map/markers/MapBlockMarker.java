@@ -1,7 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.map.markers;
 
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.type.IMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -16,15 +17,15 @@ import java.util.Objects;
  * @param <D> decoration
  */
 public abstract class MapBlockMarker<D extends CustomMapDecoration>  {
-    private final IMapDecorationType<D,?> type;
+    private final MapDecorationType<D,?> type;
     public BlockPos pos;
     //private final int rotation;
 
-    public MapBlockMarker(IMapDecorationType<D,?> type) {
+    public MapBlockMarker(MapDecorationType<D,?> type) {
         this.type = type;
     }
 
-    public MapBlockMarker(IMapDecorationType<D,?> type, BlockPos pos) {
+    public MapBlockMarker(MapDecorationType<D,?> type, BlockPos pos) {
         this(type);
         this.pos = pos;
     }
@@ -82,12 +83,12 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration>  {
         return pos.getX() + "," + pos.getY() + "," + pos.getZ();
     }
 
-    public IMapDecorationType<D,?> getType() {
+    public MapDecorationType<D,?> getType() {
         return type;
     }
 
     public String getTypeId(){
-        return this.type.getId().toString();
+        return Utils.getID(this.type).toString();
     }
 
     public String getMarkerId(){

@@ -21,8 +21,8 @@ public class ModMessages {
                 ClientBoundSyncCustomMapDecorationMessage.class, ClientBoundSyncCustomMapDecorationMessage::new);
 
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
-                ClientBoundSyncMapDecorationTypesMessage.class,
-                ClientBoundSyncMapDecorationTypesMessage::new);
+                ClientBoundFinalizeFluidsMessage.class,
+                ClientBoundFinalizeFluidsMessage::new);
 
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundSyncConfigsPacket.class, ClientBoundSyncConfigsPacket::new);

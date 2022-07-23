@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map.markers;
 
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.type.IMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.minecraft.core.BlockPos;
 
 /**
@@ -10,16 +10,16 @@ import net.minecraft.core.BlockPos;
  */
 public class GenericMapBlockMarker<T extends CustomMapDecoration> extends MapBlockMarker<T> {
 
-    public GenericMapBlockMarker(IMapDecorationType<T,?> type, int x, int z) {
+    public GenericMapBlockMarker(MapDecorationType<T,?> type, int x, int z) {
         this(type,new BlockPos(x,64,z));
     }
 
-    public GenericMapBlockMarker(IMapDecorationType<T,?> type, BlockPos pos) {
+    public GenericMapBlockMarker(MapDecorationType<T,?> type, BlockPos pos) {
         this(type);
         this.setPos(pos);
     }
 
-    public GenericMapBlockMarker(IMapDecorationType<T,?> type) {
+    public GenericMapBlockMarker(MapDecorationType<T,?> type) {
         super(type);
     }
 

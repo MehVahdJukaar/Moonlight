@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -14,6 +14,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.*;
 
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class SoftFluidRegistryImpl {
     private static final ResourceLocation FLUIDS_MAP_KEY = Moonlight.res("fluids_map");
     private static final ResourceLocation ITEMS_MAP_KEY = Moonlight.res("items_map");
 
-    public static final ResourceKey<Registry<SoftFluid>> KEY = SoftFluidRegistry.REGISTRY_KEY;
+    public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(Moonlight.res("soft_fluids"));
 
     public static final DeferredRegister<SoftFluid> DEFERRED_REGISTER = DeferredRegister.create(KEY, KEY.location().getNamespace());
     public static final Supplier<IForgeRegistry<SoftFluid>> SOFT_FLUIDS = DEFERRED_REGISTER.makeRegistry(() ->
@@ -36,6 +37,17 @@ public class SoftFluidRegistryImpl {
                     .onClear(SoftFluidRegistryImpl::onClear)
                     .allowModification()
                     .disableSaving());
+
+    private static final RegistryObject<SoftFluid> EMPTY = DEFERRED_REGISTER.register("empty", () -> SoftFluidRegistry.EMPTY);
+
+    public static void init() {
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        DEFERRED_REGISTER.register(bus);
+    }
+
+    public static ResourceKey<Registry<SoftFluid>> getRegistryKey() {
+        return KEY;
+    }
 
     public static Map<Fluid, SoftFluid> getFluidsMap() {
         return SOFT_FLUIDS.get().getSlaveMap(FLUIDS_MAP_KEY, HashMap.class);
@@ -55,7 +67,7 @@ public class SoftFluidRegistryImpl {
         owner.getSlaveMap(ITEMS_MAP_KEY, HashMap.class).clear();
     }
 
-    public static void addExistingForgeFluids() {
+    public static void addExistingVanillaFluids() {
         //only runs on the first object
         var fluidMap = getFluidsMap();
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.getDataPackRegistry();
@@ -68,25 +80,18 @@ public class SoftFluidRegistryImpl {
                 //if fluid map contains fluid it means that another equivalent fluid has already been registered
                 if (fluidMap.containsKey(f)) continue;
                 //is not equivalent: create new SoftFluid from forge fluid
-                if (Utils.getID(f) != null) {
-                    SoftFluid sf = (new SoftFluid.Builder(f)).build();
-                    //calling vanilla register function because calling that deferred register or forge registry now does nothing
-                    //cope
-                    //SOFT_FLUIDS.get().register(sf.getRegistryName(),sf);
-                    Registry.register(reg, Utils.getID(f), sf);
-                    fluidMap.put(f, sf);
-                }
+                Utils.getID(f);
+                SoftFluid sf = (new SoftFluid.Builder(f)).build();
+                //calling vanilla register function because calling that deferred register or forge registry now does nothing
+                //cope
+                //SOFT_FLUIDS.get().register(sf.getRegistryName(),sf);
+                Registry.register(reg, Utils.getID(f), sf);
+                fluidMap.put(f, sf);
             } catch (Exception ignored) {
             }
         }
-        //adds empty fluid
-        Registry.register(reg, Moonlight.res("empty"), SoftFluidRegistry.EMPTY);
         reg.freeze();
     }
 
-
-    public static void init(IEventBus bus) {
-        DEFERRED_REGISTER.register(bus);
-    }
 
 }

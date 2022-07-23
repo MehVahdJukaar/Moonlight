@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
-import net.mehvahdjukaar.moonlight.api.map.type.IMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.builtincompat.MapAtlasPlugin;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
@@ -47,7 +48,7 @@ public class MapHelper {
      * @param type     custom decorationType
      * @param mapColor map item tint color
      */
-    public static void addDecorationToMap(ItemStack stack, BlockPos pos, IMapDecorationType<?, ?> type, int mapColor) {
+    public static void addDecorationToMap(ItemStack stack, BlockPos pos, MapDecorationType<?, ?> type, int mapColor) {
 
         ListTag tags;
         if (stack.hasTag() && stack.getTag().contains("CustomDecorations", 9)) {
@@ -57,7 +58,7 @@ public class MapHelper {
             stack.addTagElement("CustomDecorations", tags);
         }
         CompoundTag tag = new CompoundTag();
-        tag.putString("type", type.getId().toString());
+        tag.putString("type", Utils.getID(type).toString());
         tag.putInt("x", pos.getX());
         tag.putInt("z", pos.getZ());
         tags.add(tag);
@@ -97,7 +98,7 @@ public class MapHelper {
                 return;
             }
         }
-        IMapDecorationType<?, ?> type = MapDecorationRegistry.get(id.toString());
+        MapDecorationType<?, ?> type = MapDecorationRegistry.get(id.toString());
         if (type != null) {
             addDecorationToMap(stack, pos, type, mapColor);
         } else {

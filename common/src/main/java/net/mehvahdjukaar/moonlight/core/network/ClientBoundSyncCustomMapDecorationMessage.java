@@ -3,12 +3,13 @@ package net.mehvahdjukaar.moonlight.core.network;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.map.CustomDataHolder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
-import net.mehvahdjukaar.moonlight.api.map.type.IMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.client.Minecraft;
@@ -48,7 +49,7 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
         buffer.writeVarInt(this.customDecoration.length);
 
         for (CustomMapDecoration decoration : this.customDecoration) {
-            buffer.writeResourceLocation(decoration.getType().getId());
+            buffer.writeResourceLocation(Utils.getID(decoration.getType()));
             decoration.saveToBuffer(buffer);
         }
 
@@ -69,7 +70,7 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
         this.customDecoration = new CustomMapDecoration[pBuffer.readVarInt()];
 
         for (int m = 0; m < this.customDecoration.length; ++m) {
-            IMapDecorationType<?, ?> type = MapDecorationRegistry.get(pBuffer.readResourceLocation());
+            MapDecorationType<?, ?> type = MapDecorationRegistry.get(pBuffer.readResourceLocation());
             if (type != null) {
                 this.customDecoration[m] = type.loadDecorationFromBuffer(pBuffer);
             }

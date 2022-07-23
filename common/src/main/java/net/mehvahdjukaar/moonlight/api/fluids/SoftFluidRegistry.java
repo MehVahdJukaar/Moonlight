@@ -1,10 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundFinalizeFluidsMessage;
+import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -14,17 +17,26 @@ import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 //TODO: maybe split into api/core?
 public class SoftFluidRegistry {
 
-
     public static final SoftFluid EMPTY = new SoftFluid.Builder(new ResourceLocation(""),
             new ResourceLocation("")).build();
 
-    public static final ResourceKey<Registry<SoftFluid>> REGISTRY_KEY = ResourceKey.createRegistryKey(Moonlight.res("soft_fluids"));
+    @ExpectPlatform
+    public static void init() {
+        throw new AssertionError();
+    }
 
+    @ExpectPlatform
+    public static ResourceKey<Registry<SoftFluid>> getRegistryKey() {
+        throw new AssertionError();
+    }
 
     @ExpectPlatform
     public static Map<Fluid, SoftFluid> getFluidsMap() {
@@ -36,9 +48,8 @@ public class SoftFluidRegistry {
         throw new AssertionError();
     }
 
-    //hackyyy
     public static Registry<SoftFluid> getDataPackRegistry() {
-        return Utils.hackyGetRegistryAccess().registryOrThrow(REGISTRY_KEY);
+        return Utils.hackyGetRegistryAccess().registryOrThrow(getRegistryKey());
     }
 
     public static Collection<SoftFluid> getValues() {
@@ -118,14 +129,16 @@ public class SoftFluidRegistry {
         SoftFluidClient.refresh();
     }
 
-    public static void postInitServer() {
+    //on data load
+    public static void onDataLoad() {
         populateSlaveMaps();
-        addExistingForgeFluids();
+        addExistingVanillaFluids();
+        ModMessages.CHANNEL.sendToAllClientPlayers(new ClientBoundFinalizeFluidsMessage());
     }
 
 
     @ExpectPlatform
-    private static void addExistingForgeFluids() {
+    private static void addExistingVanillaFluids() {
         throw new AssertionError();
     }
 }

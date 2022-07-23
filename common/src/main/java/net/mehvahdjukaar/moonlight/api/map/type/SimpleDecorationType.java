@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.map.type;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.markers.GenericMapBlockMarker;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.minecraft.core.BlockPos;
@@ -17,21 +18,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 //base type for simple data driven type. Basically a simple version of CustomDecorationType that can be serialized
-public class SimpleDecorationType implements IMapDecorationType<CustomMapDecoration, GenericMapBlockMarker<CustomMapDecoration>> {
+public class SimpleDecorationType extends MapDecorationType<CustomMapDecoration, GenericMapBlockMarker<CustomMapDecoration>> {
 
-    private final ResourceLocation id;
     //using this and not block predicate since it requires a worldLevelGen...
     @Nullable
     private final RuleTest target;
 
     public static final Codec<SimpleDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("id").forGetter(SimpleDecorationType::getId),
             RuleTest.CODEC.optionalFieldOf("target_block").forGetter(SimpleDecorationType::getTarget)
     ).apply(instance, SimpleDecorationType::new));
 
 
-    public SimpleDecorationType(ResourceLocation id, Optional<RuleTest> target) {
-        this.id = id;
+    public SimpleDecorationType(Optional<RuleTest> target) {
         this.target = target.orElse(null);
     }
 
@@ -45,9 +43,8 @@ public class SimpleDecorationType implements IMapDecorationType<CustomMapDecorat
         return target != null;
     }
 
-    @Override
     public ResourceLocation getId() {
-        return id;
+        return Utils.getID(this);
     }
 
     @Override

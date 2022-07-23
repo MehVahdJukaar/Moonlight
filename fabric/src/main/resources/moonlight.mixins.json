@@ -10,8 +10,11 @@
   ],
   "mixins": [
     "FireBlockMixin",
+    "BuiltinRegistryMixin",
+    "MappedRegistryAccessor",
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
+    "RegistryAccessMixin",
     "SelfCustomBakedModel",
     "SelfIDynamicModelProvider"
   ],

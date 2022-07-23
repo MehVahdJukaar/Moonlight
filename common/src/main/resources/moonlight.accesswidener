@@ -10,3 +10,14 @@ transitive-accessible class net/minecraft/client/renderer/texture/TextureAtlasSp
 transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite getFrameCount ()I
 transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameX (I)I
 transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameY (I)I
+
+#criteria trigger
+transitive-accessible method net/minecraft/advancements/CriteriaTriggers register (Lnet/minecraft/advancements/CriterionTrigger;)Lnet/minecraft/advancements/CriterionTrigger;
+#falling block
+transitive-accessible field net/minecraft/world/entity/item/FallingBlockEntity cancelDrop Z
+#arrow
+transitive-accessible field net/minecraft/world/entity/projectile/Projectile hasBeenShot Z
+
+#fabric datapack reg
+transitive-accessible class net/minecraft/data/BuiltinRegistries$RegistryBootstrap
+transitive-accessible method net/minecraft/data/BuiltinRegistries registerSimple (Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/data/BuiltinRegistries$RegistryBootstrap;)Lnet/minecraft/core/Registry;

@@ -32,8 +32,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
 
     private final ForgeConfigSpec spec;
 
-    @Nullable
-    private ModConfig modConfig;
+    private final ModConfig modConfig;
 
     public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced, Runnable onChange) {
         super(name, FMLPaths.CONFIGDIR.get(), type, synced, onChange);
@@ -45,28 +44,29 @@ public class ConfigSpecWrapper extends ConfigSpec {
             MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
             MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         }
+
+        ModConfig.Type t = this.getConfigType() == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
+
+        ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
+        this.modConfig = new ModConfig(t, spec, modContainer, name.getNamespace()+"-"+name.getPath()+".toml");
+        //for event
+        ConfigSpec.addTrackedSpec(this);
     }
 
     @Override
     public String getFileName() {
-        assert modConfig != null;
         return modConfig.getFileName();
     }
 
     @Override
     public Path getFullPath() {
-        assert modConfig != null : "This config must be registered";
-        return modConfig.getFullPath();
+        return FMLPaths.CONFIGDIR.get().resolve(this.getFileName());
+       // return modConfig.getFullPath();
     }
 
     @Override
     public void register() {
-        ConfigSpec.addTrackedSpec(this);
-        ModConfig.Type t = this.getConfigType() == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
-        ModLoadingContext.get().registerConfig(t, spec);
-
         ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
-        this.modConfig = new ModConfig(t, spec, modContainer);
         modContainer.addConfig(this.modConfig);
     }
 
@@ -138,6 +138,13 @@ public class ConfigSpecWrapper extends ConfigSpec {
 
     @Override
     public void loadFromBytes(InputStream stream) {
+       // try { //this should work the same as below
+       //      var b = stream.readAllBytes();
+       //     this.modConfig.acceptSyncedConfig(b);
+       // } catch (Exception ignored) {
+       // }
+
+        //using this isntead so we dont fire the config changes event otherwise this will loop
         this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
         this.onRefresh();
     }

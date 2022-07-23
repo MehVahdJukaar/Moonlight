@@ -56,7 +56,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
         maybeAddComment(name);
-
         return builder.translation(translationKey(name)).define(name, defaultValue);
     }
 
@@ -107,7 +106,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigBuilder comment(String comment) {
-        //builder.comment(comment);
+        builder.comment(comment);
         //TODO: choose. either add a translation or a comment literal not both
         return super.comment(comment);
     }

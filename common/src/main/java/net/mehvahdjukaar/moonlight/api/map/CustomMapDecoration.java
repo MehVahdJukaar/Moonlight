@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
-import net.mehvahdjukaar.moonlight.api.map.type.IMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
@@ -12,13 +13,13 @@ import java.util.Objects;
  * default base simple decoration. this will be instanced in a map. equivalent of a tile entity or decorations for maps themselves
  */
 public class CustomMapDecoration {
-    private final IMapDecorationType<?,?> type;
+    private final MapDecorationType<?,?> type;
     private Component displayName;
     private byte x;
     private byte y;
     private byte rot;
 
-    public CustomMapDecoration(IMapDecorationType<?,?> type, byte x, byte y, byte rot, @Nullable Component displayName) {
+    public CustomMapDecoration(MapDecorationType<?,?> type, byte x, byte y, byte rot, @Nullable Component displayName) {
         this.type = type;
         this.x = x;
         this.y = y;
@@ -26,7 +27,7 @@ public class CustomMapDecoration {
         this.displayName = displayName;
     }
 
-    public IMapDecorationType<?,?> getType() {
+    public MapDecorationType<?,?> getType() {
         return this.type;
     }
 
@@ -86,7 +87,7 @@ public class CustomMapDecoration {
 
     @Override
     public int hashCode() {
-        int i = this.type.getId().hashCode();
+        int i = Utils.getID(this.type).hashCode();
         i = 31 * i + this.x;
         i = 31 * i + this.y;
         i = 31 * i + this.rot;
@@ -115,7 +116,7 @@ public class CustomMapDecoration {
      * implement this if you are adding new data to this base decoration class
      * @param buffer packed buffer
      */
-    public CustomMapDecoration(IMapDecorationType<?,?> type, FriendlyByteBuf buffer){
+    public CustomMapDecoration(MapDecorationType<?,?> type, FriendlyByteBuf buffer){
         this(type, buffer.readByte(), buffer.readByte(), (byte)(buffer.readByte() & 15), buffer.readBoolean() ? buffer.readComponent() : null);
     }
 

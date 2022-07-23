@@ -513,7 +513,7 @@ public class SoftFluidTank implements ISoftFluidTank {
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
         cmp.putInt("Count", (int) this.count);
-        cmp.putString("Fluid", SoftFluidRegistry.getID(this.fluid).toString());
+        cmp.putString("Fluid", Utils.getID(this.fluid).toString());
         //for item render. needed for potion colors
         cmp.putInt("CachedColor", this.getTintColor(null, null));
         if (this.nbt != null && !this.nbt.isEmpty()) cmp.put("NBT", this.nbt);

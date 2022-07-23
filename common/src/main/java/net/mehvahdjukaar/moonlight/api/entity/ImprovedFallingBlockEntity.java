@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.entity;
 
-import net.mehvahdjukaar.moonlight.core.mixins.accessor.FallingBlockEntityAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -89,7 +88,7 @@ public class ImprovedFallingBlockEntity extends FallingBlockEntity {
         return super.causeFallDamage(pFallDistance, pMultiplier, pSource);
     }
 
-    public void setCancelDrop(boolean cancelDrop){
-        ((FallingBlockEntityAccessor) this).setCancelDrop(cancelDrop);
+    public void setCancelDrop(boolean cancelDrop) {
+        this.cancelDrop = cancelDrop;
     }
 }

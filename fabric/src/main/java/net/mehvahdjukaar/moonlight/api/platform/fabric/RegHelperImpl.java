@@ -1,15 +1,14 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -26,41 +25,41 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RegHelperImpl {
 
+    public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
+
+    static {
+        REGISTRIES.put(Registry.BLOCK, new LinkedHashMap<>());
+        REGISTRIES.put(Registry.ITEM, new LinkedHashMap<>());
+        REGISTRIES.put(Registry.BLOCK_ENTITY_TYPE, new LinkedHashMap<>());
+        REGISTRIES.put(Registry.ENTITY_TYPE, new LinkedHashMap<>());
+    }
+
     //call from mod setup
     public static void registerEntries() {
-        for (var m : REGISTRIES.values()) {
-            var list = new ArrayList<>(m.values());
-            list.sort(Comparator.comparingInt(a -> REG_PRIORITY.indexOf(a.getRegistry())));
-            list.forEach(RegistryQueue::initializeEntries);
+        for (var m : REGISTRIES.entrySet()) {
+            m.getValue().values().forEach(RegistryQueue::initializeEntries);
+            if (m.getKey() == Registry.BLOCK) {
+                //dynamic block registration after all blocks
+                BlockSetInternalImpl.registerEntries();
+            }
         }
     }
 
-    private static final List<Registry<?>> REG_PRIORITY = ImmutableList.of(
-            Registry.BLOCK,
-            Registry.ITEM,
-            Registry.ENTITY_TYPE,
-            Registry.BLOCK_ENTITY_TYPE,
-            Registry.RECIPE_SERIALIZER,
-            Registry.MOB_EFFECT,
-            Registry.ENCHANTMENT
-    );
-
-    public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> Supplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
         //if (true) return registerAsync(name, supplier, reg);
         String modId = name.getNamespace();
-        var m = REGISTRIES.computeIfAbsent(reg, h -> new HashMap<>());
+        var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId, c -> new RegistryQueue<>(reg));
         return registry.add(supplier, name);
     }
@@ -76,9 +75,8 @@ public class RegHelperImpl {
 
     public static <C extends AbstractContainerMenu> Supplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
-            PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
-
-        return null;
+            PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> factory) {
+        return register(name, () -> new MenuType<>((a, b) -> factory.apply(a, b, null)), Registry.MENU);
     }
 
     public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {

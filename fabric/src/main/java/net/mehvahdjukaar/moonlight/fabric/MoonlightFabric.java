@@ -6,9 +6,9 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.minecraft.server.MinecraftServer;
 
 public class MoonlightFabric implements ModInitializer, ClientModInitializer, DedicatedServerModInitializer {
@@ -19,14 +19,13 @@ public class MoonlightFabric implements ModInitializer, ClientModInitializer, De
     public void onInitialize() {
         Moonlight.commonInit();
         ServerLifecycleEvents.SERVER_STARTING.register(s -> currentServer = s);
+        ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((a,b)-> SoftFluidRegistry.onDataLoad());
     }
 
     //called after all other mod initialize have been called.
     // we can register extra stuff here that depends on those before client and server common setup is fired
     private void commonSetup() {
         RegHelperImpl.registerEntries();
-        BlockSetInternalImpl.registerEntries();
-
         FabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
     }
 
@@ -34,9 +33,10 @@ public class MoonlightFabric implements ModInitializer, ClientModInitializer, De
 
     @Override
     public void onInitializeClient() {
+        WorldRenderEvents.START.register((c)-> RenderedTexturesManager.updateTextures());
+
         commonSetup();
         FabricSetupCallbacks.CLIENT_SETUP.forEach(Runnable::run);
-        WorldRenderEvents.START.register((c)-> RenderedTexturesManager.updateTextures());
     }
 
     @Override

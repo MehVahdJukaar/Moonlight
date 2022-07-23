@@ -24,6 +24,6 @@ public class VanillaSoftFluids {
 
 
     private static DataObjectReference<SoftFluid> create(String name) {
-        return new DataObjectReference<>(Moonlight.res(name), SoftFluidRegistry.REGISTRY_KEY);
+        return new DataObjectReference<>(Moonlight.res(name), SoftFluidRegistry.getRegistryKey());
     }
 }

@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.entity;
 
-import net.mehvahdjukaar.moonlight.core.mixins.accessor.ProjectileAccessor;
 import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -89,9 +88,9 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         //base tick stuff
         this.baseTick();
 
-        if (! ((ProjectileAccessor) this).getHasBeenShot()) {
+        if (!this.hasBeenShot) {
             this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner());
-            ((ProjectileAccessor)this).setHasBeenShot(true);
+            this.hasBeenShot = true;
         }
 
         //fixed vanilla arrow code. You're welcome

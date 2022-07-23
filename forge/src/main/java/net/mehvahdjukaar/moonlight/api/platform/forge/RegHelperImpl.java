@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -20,22 +20,21 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegisterEvent;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,26 +46,30 @@ public class RegHelperImpl {
 
     public static final Map<Registry<?>, Map<String, DeferredRegister<?>>> REGISTRIES = new HashMap<>();
 
-    private static final Map<Registry<?>, IForgeRegistry<?>> REG_TO_FR = ImmutableMap.of(
-            Registry.BLOCK, ForgeRegistries.BLOCKS,
-            Registry.ITEM, ForgeRegistries.ITEMS,
-            Registry.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES,
-            Registry.BLOCK_ENTITY_TYPE, ForgeRegistries.BLOCK_ENTITY_TYPES,
-            Registry.RECIPE_SERIALIZER, ForgeRegistries.RECIPE_SERIALIZERS,
-            Registry.MOB_EFFECT, ForgeRegistries.MOB_EFFECTS,
-            Registry.ENCHANTMENT, ForgeRegistries.ENCHANTMENTS,
-            Registry.FEATURE, ForgeRegistries.FEATURES,
-            Registry.SCHEDULE, ForgeRegistries.SCHEDULES
-    );
+    private static final Map<ResourceKey<? extends Registry<?>>, IForgeRegistry<?>> REG_TO_FR;
+    static {
+        var builder = ImmutableMap.<ResourceKey<? extends Registry<?>>, IForgeRegistry<?>>builder();
+        for (Field f : ForgeRegistries.class.getDeclaredFields()) {
+            try {
+                if (IForgeRegistry.class.isAssignableFrom(f.getType())) {
+                    IForgeRegistry<?> reg = (IForgeRegistry<?>) f.get(null);
+                  builder.put(reg.getRegistryKey(), reg);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        REG_TO_FR = builder.build();
+    }
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends T> Supplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends
+            T> Supplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
 
         var m = REGISTRIES.computeIfAbsent(reg, h -> new HashMap<>());
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
 
-            var forgeReg = REG_TO_FR.get(reg);
+            var forgeReg = REG_TO_FR.get(reg.key());
             if (forgeReg == null) throw new UnsupportedOperationException("Registry " + reg + " not supported");
             DeferredRegister<T> r = (DeferredRegister<T>) DeferredRegister.create(forgeReg, modId);
             var bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -77,7 +80,8 @@ public class RegHelperImpl {
         return registry.register(name.getPath(), supplier);
     }
 
-    public static <T, E extends T> Supplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends
+            T> Supplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
         return register(name, supplier, reg);
     }
 
@@ -91,7 +95,9 @@ public class RegHelperImpl {
         return register(name, () -> IForgeMenuType.create(containerFactory::apply), Registry.MENU);
     }
 
-    public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {
+    public static <T extends
+            Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category,
+                                                               float width, float height, int clientTrackingRange, int updateInterval) {
         return register(name, () -> EntityType.Builder.of(factory, category)
                 .sized(width, height).build(name.toString()), Registry.ENTITY_TYPE);
     }
@@ -102,7 +108,8 @@ public class RegHelperImpl {
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
     }
 
-    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
+    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<
+            List<VillagerTrades.ItemListing>> factories) {
         Consumer<VillagerTradesEvent> eventConsumer = event -> {
             if (event.getType() == profession) {
                 var list = event.getTrades().get(level);
@@ -112,7 +119,8 @@ public class RegHelperImpl {
         MinecraftForge.EVENT_BUS.register(eventConsumer);
     }
 
-    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
+    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>>
+            factories) {
         //0 = common, 1 = rare
         Consumer<WandererTradesEvent> eventConsumer = event -> {
             if (level == 0) {
@@ -140,8 +148,8 @@ public class RegHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().register(eventConsumer);
     }
 
-    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener){
-        Consumer<RegisterCommandsEvent> eventConsumer = event->{
+    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
+        Consumer<RegisterCommandsEvent> eventConsumer = event -> {
             eventListener.accept(event.getDispatcher());
         };
         MinecraftForge.EVENT_BUS.register(eventConsumer);
