@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.forge;
 
 
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -18,7 +17,7 @@ public class MoonlightForgeClient {
 
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.RenderTickEvent event) {
+    public static void onRenderTick(TickEvent.RenderTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             RenderedTexturesManager.updateTextures();
         }

@@ -6,7 +6,8 @@
   "client": [
     "SelfCustomBakedModel",
     "SelfCustomItemRendererProvider",
-    "SelfIDynamicModelProvider"
+    "SelfExtraModelDataProvider",
+    "SelfCustomModelLoaderMixin"
   ],
   "mixins": [
     "FireBlockMixin",

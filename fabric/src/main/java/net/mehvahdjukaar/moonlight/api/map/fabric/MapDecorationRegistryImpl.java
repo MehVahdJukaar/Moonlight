@@ -26,13 +26,12 @@ public class MapDecorationRegistryImpl {
     }
 
     public static void registerInternal(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
+        BuiltinRegistries.register(REG, ResourceKey.create(KEY, id), markerType.get()); //hacky
     }
 
     //get value and bootstrap
     public static Holder<? extends MapDecorationType<?, ?>> getDefaultValue(Registry<MapDecorationType<?, ?>> reg) {
-        for(var e : MapDecorationRegistry.CODE_TYPES_FACTORIES.entrySet()){
-            return BuiltinRegistries.register(reg, ResourceKey.create(KEY, e.getKey()), e.getValue().get());
-        }
+        //called by mixin so its too early to register builtin stuff here
         return BuiltinRegistries.register(reg, ResourceKey.create(KEY, Moonlight.res("generic_structure")), MapDecorationRegistry.GENERIC_STRUCTURE_TYPE);
     }
 }

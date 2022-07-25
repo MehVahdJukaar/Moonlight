@@ -26,6 +26,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,8 @@ public class RegHelperImpl {
                 BlockSetInternalImpl.registerEntries();
             }
         }
+        //register entities attributes now
+        ATTRIBUTE_REGISTRATIONS.forEach(e -> e.accept(FabricDefaultAttributeRegistry::register));
     }
 
 
@@ -101,8 +104,10 @@ public class RegHelperImpl {
     }
 
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
-        eventListener.accept(FabricDefaultAttributeRegistry::register);
+        ATTRIBUTE_REGISTRATIONS.add(eventListener);
     }
+
+    private static final List<Consumer<RegHelper.AttributeEvent>> ATTRIBUTE_REGISTRATIONS = new ArrayList<>();
 
     public static void addMiscRegistration(Runnable eventListener) {
         eventListener.run();

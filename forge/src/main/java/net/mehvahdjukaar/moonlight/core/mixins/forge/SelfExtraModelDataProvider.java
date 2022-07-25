@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.util.Objects;
 
 @Mixin(IExtraModelDataProvider.class)
-public interface SelfIDynamicModelProvider extends IForgeBlockEntity, IExtraModelDataProvider {
+public interface SelfExtraModelDataProvider extends IForgeBlockEntity, IExtraModelDataProvider {
 
     //overwrite since it already has a default
     @Overwrite

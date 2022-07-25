@@ -5,7 +5,8 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
-import net.minecraft.client.renderer.RenderType;
+import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
+import net.mehvahdjukaar.moonlight.api.client.model.fabric.SlaveModel;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -20,23 +21,28 @@ import java.util.function.Supplier;
 public interface SelfCustomBakedModel extends FabricBakedModel, CustomBakedModel, BakedModel {
 
     @Override
-    public default boolean isVanillaAdapter() {
+    default boolean isVanillaAdapter() {
         return false;
     }
 
     @Override
     default void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        var attachment = ((RenderAttachedBlockView) blockView).getBlockEntityRenderAttachment(pos);
-        if(attachment instanceof ExtraModelData data){
-            //TODO: finish this
-            var list = this.getBlockQuads(state, context.getEmitter().cullFace(),randomSupplier.get(),
-                    RenderType.cutout(), data);
+        // Object attachment = ((RenderAttachedBlockView)blockView).getBlockEntityRenderAttachment(pos);
+        var tile = blockView.getBlockEntity(pos);
+        if (tile instanceof IExtraModelDataProvider provider) {
+            SlaveModel inner = SlaveModel.INSTANCE;
+            inner.prepare(this, provider.getExtraModelData());
+            context.fallbackConsumer().accept(inner);
         }
     }
 
     @Override
     default void emitItemQuads(ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context) {
-       // var list = this.getItemQuads(stack,randomSupplier.get());
+        // var list = this.getItemQuads(stack,randomSupplier.get());
         //TODO: now what?
     }
+
+
+
+
 }

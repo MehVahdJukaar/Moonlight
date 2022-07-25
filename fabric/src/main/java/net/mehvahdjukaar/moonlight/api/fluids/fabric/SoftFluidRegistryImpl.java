@@ -38,7 +38,6 @@ public class SoftFluidRegistryImpl {
     private static final Map<Fluid, SoftFluid> FLUID_MAP = new HashMap<>();
     private static final Map<Item,SoftFluid> ITEM_MAP = new HashMap<>();
 
-    //TODO: add
 
     public static void addExistingVanillaFluids() {
         //only runs on the first object
@@ -76,7 +75,6 @@ public class SoftFluidRegistryImpl {
     public static Map<Item, SoftFluid> getItemsMap() {
         return ITEM_MAP;
     }
-
 
 
     public static Holder<? extends SoftFluid> getDefaultValue(Registry<SoftFluid> reg) {

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
+import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
@@ -9,18 +10,20 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.impl.client.model.ModelLoadingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
+import net.mehvahdjukaar.moonlight.api.client.model.fabric.FabricModelLoaderRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.mehvahdjukaar.moonlight.core.mixins.fabric.ModelManagerAccessor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -30,8 +33,6 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -47,11 +48,6 @@ public class ClientPlatformHelperImpl {
 
     public static void registerRenderType(Block block, RenderType type) {
         BlockRenderLayerMap.INSTANCE.putBlock(block, type);
-    }
-
-    public static Path getModIcon(String modId) {
-        var container = FabricLoader.getInstance().getModContainer(modId).get();
-        return container.getMetadata().getIconPath(512).flatMap(container::findPath).orElse(null);
     }
 
     public static void addParticleRegistration(Consumer<ClientPlatformHelper.ParticleEvent> eventListener) {
@@ -84,12 +80,6 @@ public class ClientPlatformHelperImpl {
         }));
     }
 
-
-    public static void renderBlock(long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state, Level level, BlockPos pos, BlockRenderDispatcher blockRenderer) {
-        blockRenderer.getModelRenderer().tesselateBlock(level, blockRenderer.getBlockModel(state), state, pos, poseStack, buffer.getBuffer(ItemBlockRenderTypes.getMovingBlockRenderType(state)),
-                false, RandomSource.create(), seed, OverlayTexture.NO_OVERLAY);
-    }
-
     public static void registerReloadListener(PreparableReloadListener listener, ResourceLocation name) {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
             @Override
@@ -118,13 +108,36 @@ public class ClientPlatformHelperImpl {
         eventListener.accept(ClientPlatformHelperImpl::tooltipReg);
     }
 
-    private static <T extends TooltipComponent> void tooltipReg(Class<T> tClass, Function<? super T,? extends ClientTooltipComponent> factory) {
-        TooltipComponentCallback.EVENT.register(data -> tClass.isAssignableFrom(data.getClass()) ? factory.apply((T)data) : null);
+    private static <T extends TooltipComponent> void tooltipReg(Class<T> tClass, Function<? super T, ? extends ClientTooltipComponent> factory) {
+        TooltipComponentCallback.EVENT.register(data -> tClass.isAssignableFrom(data.getClass()) ? factory.apply((T) data) : null);
     }
+
+
+    public static void addModelLoaderRegistration(Consumer<ClientPlatformHelper.ModelLoaderEvent> eventListener) {
+        eventListener.accept(FabricModelLoaderRegistry::registerLoader);
+    }
+
 
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
-        return ((ITextureAtlasSpriteExtension)sprite).getPixelRGBA(frameIndex,x,y);
+        return ((ITextureAtlasSpriteExtension) sprite).getPixelRGBA(frameIndex, x, y);
+    }
+
+    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation) {
+        return ((ModelManagerAccessor) modelManager).getBakedRegistry().getOrDefault(modelLocation, modelManager.getMissingModel());
     }
 
 
+    public static void renderBlock(long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state, Level level, BlockPos pos, BlockRenderDispatcher blockRenderer) {
+        blockRenderer.getModelRenderer().tesselateBlock(level, blockRenderer.getBlockModel(state), state, pos, poseStack, buffer.getBuffer(ItemBlockRenderTypes.getMovingBlockRenderType(state)),
+                false, RandomSource.create(), seed, OverlayTexture.NO_OVERLAY);
+    }
+
+    public static Path getModIcon(String modId) {
+        var container = FabricLoader.getInstance().getModContainer(modId).get();
+        return container.getMetadata().getIconPath(512).flatMap(container::findPath).orElse(null);
+    }
+
+    public static BlockModel parseBlockModel(JsonElement json) {
+        return BlockModel.fromString(json.toString()); //sub optimal... too bad
+    }
 }

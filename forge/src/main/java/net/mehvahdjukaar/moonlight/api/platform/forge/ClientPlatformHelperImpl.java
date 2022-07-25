@@ -1,18 +1,18 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
+import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -20,13 +20,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.model.ExtendedBlockModelDeserializer;
 import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
@@ -44,25 +44,6 @@ public class ClientPlatformHelperImpl {
         //TODO: remove
         ItemBlockRenderTypes.setRenderLayer(block, type);
     }
-
-    @Nullable
-    public static Path getModIcon(String modId) {
-        var m = ModList.get().getModContainerById(modId);
-        if (m.isPresent()) {
-            IModInfo mod = m.get().getModInfo();
-            IModFile file = mod.getOwningFile().getFile();
-
-            var logo = mod.getLogoFile().orElse(null);
-            if (logo != null && file != null) {
-                Path logoPath = file.findResource(logo);
-                if (Files.exists(logoPath)) {
-                    return logoPath;
-                }
-            }
-        }
-        return null;
-    }
-
 
     public static void addParticleRegistration(Consumer<ClientPlatformHelper.ParticleEvent> eventListener) {
         Consumer<RegisterParticleProvidersEvent> eventConsumer = event -> {
@@ -108,17 +89,6 @@ public class ClientPlatformHelperImpl {
         };
     }
 
-    public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate,
-                                   Level level, BlockPos blockpos, BlockRenderDispatcher dispatcher) {
-
-        BakedModel model = dispatcher.getBlockModel(blockstate);
-        for (var renderType : model.getRenderTypes(blockstate, RandomSource.create(seed), ModelData.EMPTY)) {
-            dispatcher.getModelRenderer().tesselateBlock(level, model, blockstate, blockpos, matrixStack, buffer.getBuffer(renderType), false, RandomSource.create(), seed,
-                    OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
-        }
-
-    }
-
     public static void registerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager())
                 .registerReloadListener(listener);
@@ -132,21 +102,65 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addSpecialModelRegistration(Consumer<ClientPlatformHelper.SpecialModelEvent> eventListener) {
-        Consumer<ModelEvent.RegisterAdditional> eventConsumer = event->{
+        Consumer<ModelEvent.RegisterAdditional> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientPlatformHelper.TooltipComponentEvent> eventListener) {
-        Consumer<RegisterClientTooltipComponentFactoriesEvent> eventConsumer = event->{
+        Consumer<RegisterClientTooltipComponentFactoriesEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
+    public static void addModelLoaderRegistration(Consumer<ClientPlatformHelper.ModelLoaderEvent> eventListener) {
+        Consumer<ModelEvent.RegisterGeometryLoaders> eventConsumer = event -> {
+            eventListener.accept((i, l) -> event.register(i.getPath(), (IGeometryLoader<?>) l));
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
-        return sprite.getPixelRGBA(frameIndex,x,y);
+        return sprite.getPixelRGBA(frameIndex, x, y);
+    }
+
+    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation) {
+        return modelManager.getModel(modelLocation);
+    }
+
+    public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate,
+                                   Level level, BlockPos blockpos, BlockRenderDispatcher dispatcher) {
+
+        BakedModel model = dispatcher.getBlockModel(blockstate);
+        for (var renderType : model.getRenderTypes(blockstate, RandomSource.create(seed), ModelData.EMPTY)) {
+            dispatcher.getModelRenderer().tesselateBlock(level, model, blockstate, blockpos, matrixStack, buffer.getBuffer(renderType), false, RandomSource.create(), seed,
+                    OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
+        }
+    }
+
+    @Nullable
+    public static Path getModIcon(String modId) {
+        var m = ModList.get().getModContainerById(modId);
+        if (m.isPresent()) {
+            IModInfo mod = m.get().getModInfo();
+            IModFile file = mod.getOwningFile().getFile();
+
+            var logo = mod.getLogoFile().orElse(null);
+            if (logo != null && file != null) {
+                Path logoPath = file.findResource(logo);
+                if (Files.exists(logoPath)) {
+                    return logoPath;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static BlockModel parseBlockModel(JsonElement json) {
+        return ExtendedBlockModelDeserializer.INSTANCE.getAdapter(BlockModel.class).fromJsonTree(json);
     }
 
 

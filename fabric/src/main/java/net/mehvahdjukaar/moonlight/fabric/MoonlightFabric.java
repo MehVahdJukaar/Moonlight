@@ -19,7 +19,7 @@ public class MoonlightFabric implements ModInitializer, ClientModInitializer, De
     public void onInitialize() {
         Moonlight.commonInit();
         ServerLifecycleEvents.SERVER_STARTING.register(s -> currentServer = s);
-        ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((a,b)-> SoftFluidRegistry.onDataLoad());
+        ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((a, b) -> SoftFluidRegistry.onDataLoad());
     }
 
     //called after all other mod initialize have been called.
@@ -33,7 +33,7 @@ public class MoonlightFabric implements ModInitializer, ClientModInitializer, De
 
     @Override
     public void onInitializeClient() {
-        WorldRenderEvents.START.register((c)-> RenderedTexturesManager.updateTextures());
+        WorldRenderEvents.START.register((c) -> RenderedTexturesManager.updateTextures());
 
         commonSetup();
         FabricSetupCallbacks.CLIENT_SETUP.forEach(Runnable::run);
@@ -43,4 +43,5 @@ public class MoonlightFabric implements ModInitializer, ClientModInitializer, De
     public void onInitializeServer() {
         commonSetup();
     }
+
 }

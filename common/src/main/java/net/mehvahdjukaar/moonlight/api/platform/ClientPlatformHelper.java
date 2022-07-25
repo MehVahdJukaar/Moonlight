@@ -1,9 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
+import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -18,9 +20,12 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -48,12 +53,6 @@ import java.util.function.Supplier;
 
 public class ClientPlatformHelper {
 
-
-    @ExpectPlatform
-    public static Path getModIcon(String modId) {
-        throw new AssertionError();
-    }
-
     @ExpectPlatform
     public static void registerRenderType(Block block, RenderType type) {
         throw new AssertionError();
@@ -80,7 +79,6 @@ public class ClientPlatformHelper {
         throw new AssertionError();
     }
 
-
     @FunctionalInterface
     public interface EntityRendererEvent {
         <E extends Entity> void register(EntityType<? extends E> entity, EntityRendererProvider<E> renderer);
@@ -90,7 +88,6 @@ public class ClientPlatformHelper {
     public static void addEntityRenderersRegistration(Consumer<EntityRendererEvent> eventListener) {
         throw new AssertionError();
     }
-
 
     @FunctionalInterface
     public interface BlockEntityRendererEvent {
@@ -143,6 +140,21 @@ public class ClientPlatformHelper {
     }
 
     @FunctionalInterface
+    public interface ModelLoaderEvent {
+        void register(ResourceLocation id, CustomModelLoader loader);
+    }
+
+    @ExpectPlatform
+    public static void addModelLoaderRegistration(Consumer<ModelLoaderEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation){
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
     public interface TooltipComponentEvent{
         <T extends TooltipComponent> void register(Class<T> type, Function<? super T, ? extends ClientTooltipComponent> factory);
     }
@@ -173,4 +185,15 @@ public class ClientPlatformHelper {
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
         throw new AssertionError();
     }
+
+    @ExpectPlatform
+    public static BlockModel parseBlockModel(JsonElement json){
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static Path getModIcon(String modId) {
+        throw new AssertionError();
+    }
+
 }
