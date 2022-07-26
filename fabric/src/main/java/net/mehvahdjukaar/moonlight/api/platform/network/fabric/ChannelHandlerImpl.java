@@ -48,8 +48,10 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
         if (direction == NetworkDir.PLAY_TO_SERVER) {
             ServerPlayNetworking.registerGlobalReceiver(
-                    res, (server, player, h, buf, r) -> server.execute(() ->
-                            decoder.apply(buf).handle(new Wrapper(player, direction))));
+                    res, (server, player, h, buf, r) -> {
+                        M message = decoder.apply(buf);
+                        server.execute(() -> message.handle(new Wrapper(player, direction)));
+                    });
         } else {
             if (PlatformHelper.getEnv().isClient()) FabricClientNetwork.register(res, decoder);
         }
@@ -124,14 +126,14 @@ public class ChannelHandlerImpl extends ChannelHandler {
     public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         if (target.level instanceof ServerLevel serverLevel) {
             var p = toVanillaPacket(message);
-            serverLevel.getChunkSource().broadcast(target,p );
-            if(target instanceof ServerPlayer player){
-                sendToClientPlayer(player,message);
+            serverLevel.getChunkSource().broadcast(target, p);
+            if (target instanceof ServerPlayer player) {
+                sendToClientPlayer(player, message);
             }
         }
     }
 
-    private Packet<?> toVanillaPacket(Message message){
+    private Packet<?> toVanillaPacket(Message message) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         message.writeToBuffer(buf);
         return ServerPlayNetworking.createS2CPacket(ID_MAP.get(message.getClass()), buf);
