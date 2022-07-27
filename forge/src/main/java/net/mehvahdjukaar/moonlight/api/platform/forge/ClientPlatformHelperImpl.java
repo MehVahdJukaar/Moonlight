@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -89,7 +90,7 @@ public class ClientPlatformHelperImpl {
         };
     }
 
-    public static void registerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
+    public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager())
                 .registerReloadListener(listener);
     }

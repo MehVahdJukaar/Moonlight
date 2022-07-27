@@ -2,9 +2,8 @@ package net.mehvahdjukaar.moonlight.core;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
-import net.mehvahdjukaar.moonlight.api.map.type.SimpleDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.builtincompat.CompatWoodTypes;
@@ -14,13 +13,9 @@ import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.datafix.fixes.GoatHornIdFix;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Optional;
 
 public class Moonlight {
 
@@ -43,9 +38,17 @@ public class Moonlight {
         SoftFluidRegistry.init();
         MapDecorationRegistry.init();
 
-        ClientPlatformHelper.addAtlasTextureCallback(TextureAtlas.LOCATION_BLOCKS, e -> {
-            SoftFluidClient.getTexturesToStitch().forEach(e::addSprite);
-        });
+
+        //client init
+        if (PlatformHelper.getEnv().isClient()) {
+
+            ClientPlatformHelper.addAtlasTextureCallback(TextureAtlas.LOCATION_BLOCKS, e -> {
+                SoftFluidClient.getTexturesToStitch().forEach(e::addSprite);
+            });
+
+            ClientPlatformHelper.addClientReloadListener(new SoftFluidClient(), res("soft_fluids"));
+        }
+
     }
 
 

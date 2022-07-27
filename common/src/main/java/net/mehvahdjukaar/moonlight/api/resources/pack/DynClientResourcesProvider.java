@@ -9,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.function.Supplier;
@@ -32,7 +31,7 @@ public abstract class DynClientResourcesProvider extends DynResourceProvider<Dyn
         super.register();
         //run data could give a null minecraft here...
         if (!PlatformHelper.isData()) {
-            ClientPlatformHelper.registerReloadListener(this, this.dynamicPack.resourcePackName);
+            ClientPlatformHelper.addClientReloadListener(this, this.dynamicPack.resourcePackName);
         }
         EventHelper.addListener(this::addDynamicTranslations, AfterLanguageLoadEvent.class);
     }

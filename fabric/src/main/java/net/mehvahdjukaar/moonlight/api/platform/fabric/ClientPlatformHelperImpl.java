@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.impl.client.model.ModelLoadingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.FabricModelLoaderRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
@@ -37,8 +36,11 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -80,7 +82,7 @@ public class ClientPlatformHelperImpl {
         }));
     }
 
-    public static void registerReloadListener(PreparableReloadListener listener, ResourceLocation name) {
+    public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation name) {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
             @Override
             public ResourceLocation getFabricId() {
@@ -99,9 +101,16 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addSpecialModelRegistration(Consumer<ClientPlatformHelper.SpecialModelEvent> eventListener) {
-        eventListener.accept(r -> {
-            ModelLoadingRegistryImpl.INSTANCE.registerModelProvider((m, loader) -> loader.accept(r));
-        });
+        //this is shit and fires asynchronously on a random thread, usually worker main. unfit to use for dynamic dependand models
+        //ModelLoadingRegistryImpl.INSTANCE.registerModelProvider((m, loader) -> eventListener.accept(loader::accept));
+        MODEL_APPENDERS.add(eventListener);
+    }
+
+    private static final List<Consumer<ClientPlatformHelper.SpecialModelEvent>> MODEL_APPENDERS = new ArrayList<>();
+
+    @ApiStatus.Internal
+    public static void addSpecialModels(ClientPlatformHelper.SpecialModelEvent event) {
+        MODEL_APPENDERS.forEach(a -> a.accept(event));
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientPlatformHelper.TooltipComponentEvent> eventListener) {

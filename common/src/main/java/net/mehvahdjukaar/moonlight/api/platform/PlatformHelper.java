@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -211,6 +212,11 @@ public class PlatformHelper {
     public static <E extends Entity> EntityType<E> newEntityType(String name,
             EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
             int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void addServerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         throw new AssertionError();
     }
 }

@@ -11,7 +11,7 @@ import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.server.MinecraftServer;
 
-public class MoonlightFabric implements ModInitializer, ClientModInitializer, DedicatedServerModInitializer {
+public class MoonlightFabric implements ModInitializer, DedicatedServerModInitializer {
 
     public static final String MOD_ID = Moonlight.MOD_ID;
 
@@ -24,20 +24,13 @@ public class MoonlightFabric implements ModInitializer, ClientModInitializer, De
 
     //called after all other mod initialize have been called.
     // we can register extra stuff here that depends on those before client and server common setup is fired
-    private void commonSetup() {
+    static void commonSetup() {
         RegHelperImpl.registerEntries();
         FabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
     }
 
     public static MinecraftServer currentServer;
 
-    @Override
-    public void onInitializeClient() {
-        WorldRenderEvents.START.register((c) -> RenderedTexturesManager.updateTextures());
-
-        commonSetup();
-        FabricSetupCallbacks.CLIENT_SETUP.forEach(Runnable::run);
-    }
 
     @Override
     public void onInitializeServer() {
