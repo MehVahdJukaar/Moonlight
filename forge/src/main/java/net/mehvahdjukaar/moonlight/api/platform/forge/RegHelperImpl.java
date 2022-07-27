@@ -116,7 +116,7 @@ public class RegHelperImpl {
                 factories.accept(list);
             }
         };
-        MinecraftForge.EVENT_BUS.register(eventConsumer);
+        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
     }
 
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>>
@@ -129,14 +129,14 @@ public class RegHelperImpl {
                 factories.accept(event.getRareTrades());
             }
         };
-        MinecraftForge.EVENT_BUS.register(eventConsumer);
+        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
     }
 
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
         Consumer<EntityAttributeCreationEvent> eventConsumer = event -> {
             eventListener.accept((e, b) -> event.put(e, b.build()));
         };
-        FMLJavaModLoadingContext.get().getModEventBus().register(eventConsumer);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static void addMiscRegistration(Runnable eventListener) {
@@ -145,14 +145,14 @@ public class RegHelperImpl {
                 eventListener.run();
             }
         };
-        FMLJavaModLoadingContext.get().getModEventBus().register(eventConsumer);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
         Consumer<RegisterCommandsEvent> eventConsumer = event -> {
             eventListener.accept(event.getDispatcher());
         };
-        MinecraftForge.EVENT_BUS.register(eventConsumer);
+        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
     }
 
 }

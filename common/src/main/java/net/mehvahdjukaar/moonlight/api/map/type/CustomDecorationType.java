@@ -60,11 +60,6 @@ public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBl
     }
 
     @Override
-    public String toString() {
-        return Utils.getID(this).toString();
-    }
-
-    @Override
     @Nullable
     public D loadDecorationFromBuffer(FriendlyByteBuf buffer) {
         try {

@@ -21,7 +21,13 @@ public interface SelfExtraModelDataProvider extends IForgeBlockEntity, IExtraMod
     @Overwrite
     default void requestModelReload() {
         BlockEntity be = (BlockEntity) this;
-        be.getLevel().getModelDataManager().requestRefresh(be);
+        //marks model as dirty
+        be.requestModelDataUpdate();
+        var level = be.getLevel();
+        if (level != null && level.isClientSide) {
+            //request re-render immediately
+            level.sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), Block.UPDATE_CLIENTS);
+        }
     }
 
     @Override
@@ -34,19 +40,17 @@ public interface SelfExtraModelDataProvider extends IForgeBlockEntity, IExtraMod
 
     @Override
     default void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        //TODO:check
-
-        var oldData = this.getExtraModelData();
-        CompoundTag tag = pkt.getTag();
-        //this calls load
-        handleUpdateTag(tag);
-        if (!Objects.equals(oldData, this.getExtraModelData())) {
-            BlockEntity be = (BlockEntity) this;
-
-            //not needed cause model data doesn't create new obj. updating old one instead
-            be.getLevel().getModelDataManager().requestRefresh(be);
-            //this.data.setData(MIMIC, this.getHeldBlock());
-            be.getLevel().sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), Block.UPDATE_CLIENTS);
+        BlockEntity be = (BlockEntity) this;
+        var level = be.getLevel();
+        if (level != null && level.isClientSide) {
+            var oldData = this.getExtraModelData();
+            CompoundTag tag = pkt.getTag();
+            //this calls load
+            if (tag != null) {
+                be.load(tag);
+                afterDataPacket(oldData);
+            }
         }
     }
+
 }

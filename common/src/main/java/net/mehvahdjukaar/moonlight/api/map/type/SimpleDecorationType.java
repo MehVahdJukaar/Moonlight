@@ -47,11 +47,6 @@ public class SimpleDecorationType extends MapDecorationType<CustomMapDecoration,
         return Utils.getID(this);
     }
 
-    @Override
-    public String toString() {
-        return getId().toString();
-    }
-
     @Nullable
     @Override
     public CustomMapDecoration loadDecorationFromBuffer(FriendlyByteBuf buffer) {

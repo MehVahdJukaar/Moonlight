@@ -6,11 +6,12 @@
   "client": [
     "BlockModelAccessor",
     "BlockModelDeserializerMixin",
+    "ClientPacketListenerMixin",
     "ModelManagerAccessor",
+    "SelfCustomBakedModel",
     "SelfCustomItemRendererProvider",
     "SelfIExtraModelDataProvider",
     "SelfItemStackRenderer",
-    "SelfCustomBakedModel",
     "TextureAtlasSpriteMixin"
   ],
   "mixins": [
