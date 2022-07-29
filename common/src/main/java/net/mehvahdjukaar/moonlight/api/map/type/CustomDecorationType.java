@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.map.type;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -17,6 +19,12 @@ import java.util.function.Supplier;
 //equivalent of TileEntityType. Singleton which will be in charge of creating CustomDecoration and MapBlockMarker instances
 //used for custom implementations
 public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBlockMarker<D>> extends MapDecorationType<D, M> {
+
+
+    public static final Codec<CustomDecorationType<?, ?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf("custom").forGetter(MapDecorationType::getCustomFactoryID)
+    ).apply(instance, c -> MapDecorationRegistry.CODE_TYPES_FACTORIES.get(c).get()));
+
 
     protected final Supplier<M> markerFactory;
     protected final BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory;

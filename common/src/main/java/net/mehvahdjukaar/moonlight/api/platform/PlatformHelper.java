@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+/**
+ * Helper class dedicated to platform independent common utility methods
+ */
 public class PlatformHelper {
 
     @ExpectPlatform

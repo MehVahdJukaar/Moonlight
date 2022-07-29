@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.builtincompat.MapAtlasPlugin;
+import net.mehvahdjukaar.moonlight.core.builtincompat.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -26,15 +26,15 @@ public class MapHelper {
 
     @Nullable
     public static MapItemSavedData getMapData(ItemStack stack, Level level, @Nullable Player player) {
-        MapItemSavedData data = null;
-        if (stack.getItem() instanceof MapItem) data = MapItem.getSavedData(stack, level);
-        else if (mapAtlas && player != null) data = MapAtlasPlugin.getSavedDataFromAtlas(stack, level, player);
+        MapItemSavedData data;
+        data = MapItem.getSavedData(stack, level);
+        if (data != null && mapAtlas && player != null) data = MapAtlasCompat.getSavedDataFromAtlas(stack, level, player);
         return data;
     }
 
     public static Integer getMapId(ItemStack stack, Player player, Object data) {
         Integer i = MapItem.getMapId(stack);
-        if (i == null && mapAtlas) i = MapAtlasPlugin.getMapIdFromAtlas(stack, player.level, data);
+        if (i == null && mapAtlas) i = MapAtlasCompat.getMapIdFromAtlas(stack, player.level, data);
         return i;
     }
 
@@ -110,13 +110,7 @@ public class MapHelper {
      * Adds all the map markers that can originate from the block at a given position
      */
     public static boolean toggleMarkersAtPos(Level level, BlockPos pos, ItemStack stack, @Nullable Player player) {
-        Item item = stack.getItem();
         MapItemSavedData data = getMapData(stack, level, player);
-        if (stack.getItem() instanceof MapItem) {
-            data = MapItem.getSavedData(stack, level);
-        } else if (mapAtlas && MapAtlasPlugin.isAtlas(item) && player != null) {
-            data = MapAtlasPlugin.getSavedDataFromAtlas(stack, level, player);
-        }
         if (data instanceof ExpandedMapData expandedMapData) {
             return expandedMapData.toggleCustomDecoration(level, pos);
         }

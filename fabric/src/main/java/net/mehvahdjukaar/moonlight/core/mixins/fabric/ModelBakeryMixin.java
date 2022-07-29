@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
-import net.fabricmc.fabric.impl.client.model.ModelLoaderHooks;
-import net.fabricmc.fabric.impl.client.model.ModelLoadingRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.ClientPlatformHelperImpl;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -21,15 +19,20 @@ import java.util.Map;
 @Mixin(ModelBakery.class)
 public abstract class ModelBakeryMixin {
 
-    @Shadow public abstract UnbakedModel getModel(ResourceLocation modelLocation);
+    @Shadow
+    public abstract UnbakedModel getModel(ResourceLocation modelLocation);
 
-    @Shadow @Final private Map<ResourceLocation, UnbakedModel> unbakedCache;
+    @Shadow
+    @Final
+    private Map<ResourceLocation, UnbakedModel> unbakedCache;
 
-    @Shadow @Final private Map<ResourceLocation, UnbakedModel> topLevelModels;
+    @Shadow
+    @Final
+    private Map<ResourceLocation, UnbakedModel> topLevelModels;
 
-    @Inject(method = "<init>", at = @At("TAIL"))
-    public void init(ResourceManager resourceManager, BlockColors blockColors, ProfilerFiller profilerFiller, int i, CallbackInfo ci){
-        ClientPlatformHelperImpl.addSpecialModels(rl->{
+    @Inject(method = "<init>", at = @At(value = "CONSTANT", args = "stringValue=special", shift = At.Shift.AFTER))
+    public void init(ResourceManager resourceManager, BlockColors blockColors, ProfilerFiller profilerFiller, int i, CallbackInfo ci) {
+        ClientPlatformHelperImpl.addSpecialModels(rl -> {
             UnbakedModel unbakedmodel = this.getModel(rl);
             this.unbakedCache.put(rl, unbakedmodel);
             this.topLevelModels.put(rl, unbakedmodel);

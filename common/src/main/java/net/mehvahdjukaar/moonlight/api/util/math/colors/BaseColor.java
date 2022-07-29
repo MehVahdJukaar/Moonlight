@@ -1,12 +1,23 @@
 package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.List;
 
 @Immutable
 public abstract class BaseColor<T extends BaseColor<T>> {
+
+    //utility codec that serializes either a string or a integer
+    public static final Codec<Integer> CODEC = Codec.either(Codec.INT,
+            Codec.STRING.flatXmap(BaseColor::isValidString, BaseColor::isValidString)).xmap(either ->
+                    either.map(i -> i, s -> Integer.parseInt(s, 16)),
+            i -> Either.right(Integer.toHexString(i))
+    );
 
     protected final float v0;
     protected final float v1;
@@ -104,4 +115,17 @@ public abstract class BaseColor<T extends BaseColor<T>> {
 
     public abstract T fromRGB(RGBColor rgb);
 
+
+    @NotNull
+    private static DataResult<String> isValidString(String s) {
+        String st = s;
+        if (!s.startsWith("0x")) st = s.substring(2);
+        else if (s.startsWith("#")) st = s.substring(1);
+        try {
+            Integer.parseInt(st, 16);
+            return DataResult.success(st);
+        } catch (NumberFormatException e) {
+            return DataResult.error("Invalid color format. Must be in hex format (0xff00ff, #ff00ff, ff00ff) or integer value");
+        }
+    }
 }

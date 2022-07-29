@@ -23,7 +23,7 @@ public class MapDecorationRegistryImpl {
     public static final Supplier<IForgeRegistry<MapDecorationType<?, ?>>> MAP_MARKERS = DEFERRED_REGISTER.makeRegistry(() ->
             new RegistryBuilder<MapDecorationType<?, ?>>()
                     .setDefaultKey(Moonlight.res("generic_structure"))
-                    .dataPackRegistry(MapDecorationType.CODEC, MapDecorationType.CODEC)
+                    .dataPackRegistry(MapDecorationRegistry.TYPE_CODEC, MapDecorationRegistry.TYPE_CODEC)
                     .allowModification()
                     .disableSaving());
 

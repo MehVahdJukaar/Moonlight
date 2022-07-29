@@ -1,5 +1,8 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.events.IFireConsumeBlockEvent;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.events.SimpleEvent;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
@@ -49,6 +52,10 @@ public class Moonlight {
             ClientPlatformHelper.addClientReloadListener(new SoftFluidClient(), res("soft_fluids"));
         }
 
+        MoonlightEventsHelper.addListener(Moonlight::onFireConsume, IFireConsumeBlockEvent.class);
+    }
+
+    private static <T extends SimpleEvent> void onFireConsume(T t) {
     }
 
 

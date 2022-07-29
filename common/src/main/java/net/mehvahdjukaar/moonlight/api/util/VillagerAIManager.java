@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.VillagerAccessor;
-import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 import java.util.function.Consumer;
@@ -16,7 +16,7 @@ public class VillagerAIManager {
      * On forge Use the subscribe event annotation instead
      */
     public static void addListener(Consumer<IVillagerBrainEvent> eventConsumer){
-        EventHelper.addListener(eventConsumer, IVillagerBrainEvent.class);
+        MoonlightEventsHelper.addListener(eventConsumer, IVillagerBrainEvent.class);
     }
 
     /**

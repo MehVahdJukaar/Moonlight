@@ -1,12 +1,13 @@
-package net.mehvahdjukaar.moonlight.api.platform.event;
+package net.mehvahdjukaar.moonlight.api.events;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.phys.HitResult;
 
 import java.util.function.Consumer;
 
-public class EventHelper {
+/**
+ * Helps fire the few events that this library defines. needed to work on both loaders
+ */
+public class MoonlightEventsHelper {
 
     @ExpectPlatform
     public static <T extends SimpleEvent> void addListener(Consumer<T> listener, Class<T> eventClass){
@@ -19,8 +20,4 @@ public class EventHelper {
     }
 
 
-    @ExpectPlatform
-    public static boolean onProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
-        throw new AssertionError();
-    }
 }

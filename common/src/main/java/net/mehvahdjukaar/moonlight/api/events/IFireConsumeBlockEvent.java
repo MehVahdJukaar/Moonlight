@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.events;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.platform.event.SimpleEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;

@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +33,7 @@ public abstract class DynClientResourcesProvider extends DynResourceProvider<Dyn
         if (!PlatformHelper.isData()) {
             ClientPlatformHelper.addClientReloadListener(this, this.dynamicPack.resourcePackName);
         }
-        EventHelper.addListener(this::addDynamicTranslations, AfterLanguageLoadEvent.class);
+        MoonlightEventsHelper.addListener(this::addDynamicTranslations, AfterLanguageLoadEvent.class);
     }
 
     @Override

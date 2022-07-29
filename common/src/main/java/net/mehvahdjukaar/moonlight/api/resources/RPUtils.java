@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -210,7 +211,14 @@ public class RPUtils {
         var resource = manager.getResource(location);
         try (var stream = resource.get().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
-            return TemplateRecipeManager.read(element);
+            try {
+                var t = TemplateRecipeManager.read(element);
+                return t;
+            }catch (Exception e){
+                Moonlight.LOGGER.error(element);
+                Moonlight.LOGGER.error(location);
+                throw e;
+            }
 
         } catch (Exception e) {
             throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));

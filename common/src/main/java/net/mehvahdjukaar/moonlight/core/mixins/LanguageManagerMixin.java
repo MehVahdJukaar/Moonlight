@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.resources.language.LanguageInfo;
@@ -40,7 +40,7 @@ public abstract class LanguageManagerMixin {
         if (event.isDefault()) {
             BlockSetAPI.getRegistries().forEach(r -> r.addTypeTranslations(event));
             //dispatch event and calls listeners
-            EventHelper.postEvent(event, AfterLanguageLoadEvent.class);
+            MoonlightEventsHelper.postEvent(event, AfterLanguageLoadEvent.class);
         }
         return map;
     }

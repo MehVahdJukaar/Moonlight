@@ -2,10 +2,10 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe;
 
 import com.google.gson.JsonObject;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.recipe.ShapedRecipeTemplate;
 import net.mehvahdjukaar.moonlight.core.recipe.ShapelessRecipeTemplate;
 import net.mehvahdjukaar.moonlight.core.recipe.StoneCutterRecipeTemplate;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -36,7 +36,6 @@ public class TemplateRecipeManager {
 
     public static IRecipeTemplate<?> read(JsonObject recipe) throws UnsupportedOperationException {
         String type = GsonHelper.getAsString(recipe, "type");
-        //RecipeSerializer<?> s = ForgeRegistries.RECIPE_SERIALIZERS.getValue(new ResourceLocation(type));
 
         var templateFactory = DESERIALIZERS.get(new ResourceLocation(type));
 
@@ -49,7 +48,8 @@ public class TemplateRecipeManager {
             addRecipeConditions(recipe, template);
             return template;
         } else {
-            throw new UnsupportedOperationException(String.format("Invalid recipe serializer: %s. Must be either shaped, shapeless or stonecutting", type));
+            throw new UnsupportedOperationException(String.format("Invalid recipe serializer: %s. Supported deserializers: %s",
+                    type, DESERIALIZERS.keySet()));
         }
     }
 
@@ -63,6 +63,14 @@ public class TemplateRecipeManager {
         registerTemplate(RecipeSerializer.SHAPED_RECIPE, ShapedRecipeTemplate::new);
         registerTemplate(RecipeSerializer.SHAPELESS_RECIPE, ShapelessRecipeTemplate::new);
         registerTemplate(RecipeSerializer.STONECUTTER, StoneCutterRecipeTemplate::new);
+        registerTemplate(new ResourceLocation("forge:conditional"), TemplateRecipeManager::forgeConditional);
+    }
+
+    private static IRecipeTemplate<?> forgeConditional(JsonObject recipe) {
+        JsonObject object = GsonHelper.getAsJsonArray(recipe, "recipes").get(0).getAsJsonObject();
+        var template = read(object.getAsJsonObject("recipe"));
+        addRecipeConditions(object, template);
+        return template;
     }
 
 }

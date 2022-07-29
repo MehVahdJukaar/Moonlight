@@ -37,7 +37,7 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
     public static int get(SoftFluid s) {
         return PARTICLE_COLORS.getOrDefault(SoftFluidRegistry.getID(s), -1);
     }
-    //TODO: add
+
     public static List<ResourceLocation> getTexturesToStitch() {
         //fluids aren't registered here, so we can't just iterate over them
         var list = new ArrayList<ResourceLocation>();

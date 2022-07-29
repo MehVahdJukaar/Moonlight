@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins.forge;
 
 import net.mehvahdjukaar.moonlight.api.events.IFireConsumeBlockEvent;
-import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -31,7 +31,7 @@ public abstract class FireBlockMixin extends BaseFireBlock {
                     shift = At.Shift.AFTER))
     private void afterRemoveBlock(Level level, BlockPos pos, int chance, RandomSource pRandom, int age, Direction face, CallbackInfo ci) {
         var event = IFireConsumeBlockEvent.create(pos, level, bs, chance, age, face);
-        EventHelper.postEvent(event, IFireConsumeBlockEvent.class);
+        MoonlightEventsHelper.postEvent(event, IFireConsumeBlockEvent.class);
         BlockState newState = event.getFinalState();
         if (newState != null) level.setBlockAndUpdate(pos, newState);
     }

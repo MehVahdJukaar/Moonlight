@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
@@ -27,7 +29,18 @@ import java.util.function.Supplier;
 
 public class MapDecorationRegistry {
 
+    public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC =
+            Codec.either(SimpleDecorationType.CODEC, CustomDecorationType.CODEC).xmap(
+                    either -> either.map(s -> s, c -> c),
+                    type -> {
+                        if (type instanceof CustomDecorationType<?, ?> c) {
+                            return Either.right(c);
+                        }
+                        return Either.left((SimpleDecorationType) type);
+                    });
+
     //data holder
+
 
     public static final Map<ResourceLocation, CustomDataHolder<?>> CUSTOM_MAP_DATA_TYPES = new HashMap<>();
 
@@ -60,14 +73,14 @@ public class MapDecorationRegistry {
 
     public static final MapDecorationType<CustomMapDecoration, ?> GENERIC_STRUCTURE_TYPE = new SimpleDecorationType(Optional.empty());
 
-    public static final Map<ResourceLocation, Supplier<MapDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new HashMap<>();
+    public static final Map<ResourceLocation, Supplier<CustomDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new HashMap<>();
 
     /**
      * Call before mod setup. Register a code defined map marker
      */
-    public static void register(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
+    public static void register(ResourceLocation id, Supplier<CustomDecorationType<?, ?>> markerType) {
         CODE_TYPES_FACTORIES.put(id, markerType);
-        registerInternal(id, markerType);
+        registerInternal(id, markerType::get);
     }
 
     /**
@@ -126,7 +139,6 @@ public class MapDecorationRegistry {
     public static Optional<MapDecorationType<?, ?>> getOptional(ResourceLocation id) {
         return getDataPackRegistry().getOptional(id);
     }
-
 
 
     @Nullable

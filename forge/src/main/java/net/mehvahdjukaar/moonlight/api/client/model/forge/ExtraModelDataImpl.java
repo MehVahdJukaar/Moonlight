@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model.forge;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
 import net.minecraftforge.client.model.data.ModelData;
@@ -12,9 +11,8 @@ import java.util.Objects;
 
 public record ExtraModelDataImpl(ModelData data) implements ExtraModelData {
 
-    private static final BiMap<ModelDataKey<?>, ModelProperty<?>> KEYS = HashBiMap.create();
+    private static final Object2ObjectArrayMap<ModelDataKey<?>, ModelProperty<?>> KEYS_TO_PROP = new Object2ObjectArrayMap<>();
 
-    //TODO: check
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -30,7 +28,7 @@ public record ExtraModelDataImpl(ModelData data) implements ExtraModelData {
     @Nullable
     @Override
     public <T> T get(ModelDataKey<T> key) {
-        ModelProperty<T> prop = (ModelProperty<T>) KEYS.get(key);
+        ModelProperty<T> prop = (ModelProperty<T>) KEYS_TO_PROP.get(key);
         if (prop == null) return null;
         return data.get(prop);
     }
@@ -48,13 +46,9 @@ public record ExtraModelDataImpl(ModelData data) implements ExtraModelData {
 
         @Override
         public <A> ExtraModelData.Builder with(ModelDataKey<A> key, A data) {
-            ModelProperty<A> prop = (ModelProperty<A>) KEYS.computeIfAbsent(key, this::makeProp);
+            ModelProperty<A> prop = (ModelProperty<A>) KEYS_TO_PROP.computeIfAbsent(key, k -> new ModelProperty<>());
             map.with(prop, data);
             return this;
-        }
-
-        private <A> ModelProperty<A> makeProp(ModelDataKey<A> key) {
-            return new ModelProperty<>();
         }
 
         @Override

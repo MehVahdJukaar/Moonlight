@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.entity;
 
-import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -83,6 +84,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void tick() {
         //base tick stuff
@@ -218,7 +220,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                 }
 
                 if (!portalHit && blockHitResult != null && type != HitResult.Type.MISS && !noPhysics &&
-                        !EventHelper.onProjectileImpact(this, blockHitResult)) {
+                        !ForgeHelper.onProjectileImpact(this, blockHitResult)) {
                     this.onHit(blockHitResult);
                     this.hasImpulse = true; //idk what this does
                 }

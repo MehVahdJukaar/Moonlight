@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface ExtraModelData {
 
-    public static final ExtraModelData EMPTY = ExtraModelData.builder().build();
+    ExtraModelData EMPTY = ExtraModelData.builder().build();
 
     @ExpectPlatform
     static Builder builder() {

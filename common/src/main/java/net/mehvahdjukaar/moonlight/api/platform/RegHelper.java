@@ -47,6 +47,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Helper class dedicated to platform independent registration methods
+ */
 public class RegHelper {
 
     @ExpectPlatform

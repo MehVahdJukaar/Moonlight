@@ -6,6 +6,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
+import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -43,6 +44,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Helper class dedicated to platform independent client utility methods
+ */
 public class ClientPlatformHelper {
 
     @ExpectPlatform
@@ -165,7 +169,6 @@ public class ClientPlatformHelper {
     public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<AtlasTextureEvent> eventListener) {
         throw new AssertionError();
     }
-
 
 
     @ExpectPlatform

@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.builtincompat;
+package net.mehvahdjukaar.moonlight.core.builtincompat.forge;
 
 
 import net.minecraft.world.entity.player.Player;
@@ -6,6 +6,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraftforge.client.model.data.ModelData;
 
 /*
 import lilypuree.mapatlases.item.MapAtlasItem;
@@ -39,7 +40,8 @@ public class MapAtlasPlugin {
 }
 */
 
-public class MapAtlasPlugin {
+public class MapAtlasCompatImpl {
+
 
     public static MapItemSavedData getSavedDataFromAtlas(ItemStack stack, Level level, Player player) {
         return null;

@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.events.IEarlyPackReloadEvent;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -26,7 +26,7 @@ public abstract class MultiPackResourceManagerMixin implements CloseableResource
         //fires on world load or on /reload
         if (type == PackType.SERVER_DATA) {
             //reload dynamic packs before reloading data packs
-            EventHelper.postEvent(IEarlyPackReloadEvent.create(packs, this), IEarlyPackReloadEvent.class);
+            MoonlightEventsHelper.postEvent(IEarlyPackReloadEvent.create(packs, this), IEarlyPackReloadEvent.class);
             //ServerEarlyResourceManager.loadResources(packs, this);
         }
     }

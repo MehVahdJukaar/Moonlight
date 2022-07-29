@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.misc;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
-import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
@@ -28,7 +28,7 @@ public class VillagerAIInternal {
     public static void onRegisterBrainGoals(Brain<Villager> brain, AbstractVillager villager) {
         if (villager instanceof Villager v) {
             var event = createEvent(brain, v);
-            EventHelper.postEvent(event, IVillagerBrainEvent.class);
+            MoonlightEventsHelper.postEvent(event, IVillagerBrainEvent.class);
             //don't waste time if it doesn't have a custom schedule
             var internal = event.getInternal();
             if (internal.hasCustomSchedule()) {

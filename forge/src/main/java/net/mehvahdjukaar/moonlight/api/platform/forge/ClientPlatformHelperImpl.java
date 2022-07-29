@@ -28,6 +28,7 @@ import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ExtendedBlockModelDeserializer;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
@@ -88,6 +89,7 @@ public class ClientPlatformHelperImpl {
                 eventListener.accept(event::addSprite);
             }
         };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation location) {

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.fabric.SoftFluidRegistryImpl;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.fabric.MapDecorationRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.minecraft.core.Registry;
@@ -27,7 +28,7 @@ public interface RegistryAccessMixin {
                     SoftFluidRegistryImpl.KEY, SoftFluid.CODEC, SoftFluid.CODEC));
 
             builder.put(MapDecorationRegistryImpl.KEY, new RegistryAccess.RegistryData<>(
-                    MapDecorationRegistryImpl.KEY, MapDecorationType.CODEC, MapDecorationType.CODEC));
+                    MapDecorationRegistryImpl.KEY, MapDecorationRegistry.TYPE_CODEC, MapDecorationRegistry.TYPE_CODEC));
         }
 
     }

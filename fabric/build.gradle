@@ -36,6 +36,7 @@ dependencies {
     // modImplementation(include("curse.maven:modmenu-308702:3850113"))
     modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
 
+    modImplementation("curse.maven:map-atlases-436298:3872982")
 
 
 }

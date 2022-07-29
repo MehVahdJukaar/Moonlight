@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -36,7 +36,7 @@ public abstract class ConfigBuilder {
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
             if (e.isDefault()) comments.forEach(e::addEntry);
         };
-        EventHelper.addListener(consumer, AfterLanguageLoadEvent.class);
+        MoonlightEventsHelper.addListener(consumer, AfterLanguageLoadEvent.class);
     }
 
     public ConfigSpec buildAndRegister(){
@@ -80,8 +80,8 @@ public abstract class ConfigBuilder {
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
+    @Deprecated(forRemoval = true)
     public abstract  <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator);
-
 
     public Component description(String name) {
         return Component.translatable(translationKey(name));

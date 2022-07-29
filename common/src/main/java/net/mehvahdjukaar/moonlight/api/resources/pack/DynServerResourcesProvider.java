@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.events.IEarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.mehvahdjukaar.moonlight.api.platform.event.EventHelper;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.server.packs.repository.PackRepository;
 
 /**
@@ -22,7 +22,7 @@ public abstract class DynServerResourcesProvider extends DynResourceProvider<Dyn
     public void register() {
         super.register();
         //MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListeners);
-        EventHelper.addListener(this::onEarlyReload, IEarlyPackReloadEvent.class);
+        MoonlightEventsHelper.addListener(this::onEarlyReload, IEarlyPackReloadEvent.class);
     }
 
     @Override

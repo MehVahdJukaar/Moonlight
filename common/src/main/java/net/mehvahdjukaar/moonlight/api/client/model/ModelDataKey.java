@@ -1,19 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.client.model;
 
-import java.util.Objects;
+public class ModelDataKey<T> {
 
-public record ModelDataKey<T>(Class<T> type) {
+    private final Class<T> type;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ModelDataKey<?> that = (ModelDataKey<?>) o;
-        return Objects.equals(type, that.type);
+    public ModelDataKey(Class<T> type){
+       this.type = type;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(type);
+    public boolean equals(Object obj) {
+        return obj == this;
     }
 }
