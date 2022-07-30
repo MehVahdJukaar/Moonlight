@@ -38,10 +38,11 @@ public class RegHelperImpl {
     public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
 
     static {
+        REGISTRIES.put(Registry.SOUND_EVENT, new LinkedHashMap<>());
         REGISTRIES.put(Registry.BLOCK, new LinkedHashMap<>());
+        REGISTRIES.put(Registry.ENTITY_TYPE, new LinkedHashMap<>());
         REGISTRIES.put(Registry.ITEM, new LinkedHashMap<>());
         REGISTRIES.put(Registry.BLOCK_ENTITY_TYPE, new LinkedHashMap<>());
-        REGISTRIES.put(Registry.ENTITY_TYPE, new LinkedHashMap<>());
     }
 
     //call from mod setup

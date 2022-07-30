@@ -61,9 +61,10 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         } else if (path.startsWith("plank_")) {
             name = path.substring("plank_".length());
         }
-        if (name != null && !baseRes.getNamespace().equals("securitycraft")) {
+        if (name != null && !baseRes.getNamespace().equals("securitycraft") &&
+                !baseRes.getNamespace().equals("absentbydesign")) {
             BlockState state = baseBlock.defaultBlockState();
-            //cant check if the block is a full one so I do this. Adding some checks here
+            //can't check if the block is a full one, so I do this. Adding some checks here
             if (state.getProperties().size() <= 2 && !(baseBlock instanceof SlabBlock)) {
                 //needs to use wood sound type
                 //if (state.getSoundType() == SoundType.WOOD) { //wood from tcon has diff sounds

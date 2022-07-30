@@ -21,6 +21,7 @@
     "MappedRegistryAccessor",
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
+    "RecipeManagerMixin",
     "RegistryAccessMixin"
   ],
   "injectors": {
