@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.builtincompat;
+package net.mehvahdjukaar.moonlight.core.set;
 
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;

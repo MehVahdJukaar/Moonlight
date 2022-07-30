@@ -1,8 +1,9 @@
-package net.mehvahdjukaar.moonlight.api.integration;
+package net.mehvahdjukaar.moonlight.api.integration.fabric;
 
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
+import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigEntry;
@@ -25,7 +26,7 @@ public class ClothConfigCompat {
 
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(Component.translatable(spec.getTitleKey()));
+                .setTitle(spec.getName());
 
         if (background != null) builder.setDefaultBackgroundTexture(background);
 
@@ -34,15 +35,15 @@ public class ClothConfigCompat {
 
         for (var en : spec.getMainEntry().getEntries()) {
             //skips stray config values
-            if(!(en instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory c))continue;
+            if (!(en instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory c)) continue;
             ConfigCategory mainCat = builder.getOrCreateCategory(Component.translatable(c.getName()));
             for (var entry : c.getEntries()) {
-                if(entry instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory subCat){
+                if (entry instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory subCat) {
                     var subBuilder = builder.entryBuilder().startSubCategory(Component.translatable(subCat.getName()));
                     addEntriesRecursive(builder, subBuilder, subCat);
 
                     mainCat.addEntry(subBuilder.build());
-                }else{
+                } else {
                     mainCat.addEntry(buildEntry(builder, entry));
                 }
             }
@@ -54,27 +55,24 @@ public class ClothConfigCompat {
     private static void addEntriesRecursive(ConfigBuilder builder, SubCategoryBuilder subCategoryBuilder, net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory c) {
 
         for (var entry : c.getEntries()) {
-            if(entry instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory cc){
+            if (entry instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory cc) {
                 var scb = builder.entryBuilder().startSubCategory(Component.translatable(entry.getName()));
-                addEntriesRecursive(builder,scb, cc);
+                addEntriesRecursive(builder, scb, cc);
                 subCategoryBuilder.add(scb.build());
-            }
-            else subCategoryBuilder.add(buildEntry(builder, entry));
+            } else subCategoryBuilder.add(buildEntry(builder, entry));
         }
     }
 
-    @javax.annotation.Nullable
     private static AbstractConfigListEntry<?> buildEntry(ConfigBuilder builder, ConfigEntry entry) {
 
-        if(entry instanceof ColorConfigValue col){
+        if (entry instanceof ColorConfigValue col) {
             return builder.entryBuilder()
-                    .startColorField(col.getTranslation(), col.get())
+                    .startAlphaColorField(col.getTranslation(), col.get())
                     .setDefaultValue(col.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setTooltip(col.getDescription()) // Optional: Shown when the user hover over this option
                     .setSaveConsumer(col::set) // Recommended: Called when user save the config
                     .build(); // Builds the option entry for cloth config
-        }
-        else if (entry instanceof IntConfigValue ic) {
+        } else if (entry instanceof IntConfigValue ic) {
             return builder.entryBuilder()
                     .startIntField(ic.getTranslation(), ic.get())
                     .setMax(ic.getMax())
@@ -108,8 +106,15 @@ public class ClothConfigCompat {
                     .build(); // Builds the option entry for cloth config else if (entry instanceof EnumConfigValue<?> ec) {
         } else if (entry instanceof EnumConfigValue<?> ec) {
             return addEnum(builder, ec);
+        } else if (entry instanceof ListStringConfigValue<?> lc) {
+            return builder.entryBuilder()
+                    .startStrList(lc.getTranslation(), lc.get())
+                    .setDefaultValue(lc.getDefaultValue()) // Recommended: Used when user click "Reset"
+                    .setTooltip(lc.getDescription()) // Optional: Shown when the user hover over this option
+                    .setSaveConsumer(lc::set) // Recommended: Called when user save the config
+                    .build(); // Builds the option entry for cloth config
         }
-        return null;
+        throw new UnsupportedOperationException("unknown entry: " + entry.getClass().getName());
     }
 
     private static @NotNull <T extends Enum<T>> EnumListEntry<T> addEnum(ConfigBuilder builder, EnumConfigValue<T> ec) {

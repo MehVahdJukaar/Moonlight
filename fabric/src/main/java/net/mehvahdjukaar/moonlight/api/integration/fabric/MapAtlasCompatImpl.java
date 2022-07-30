@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.builtincompat.fabric;
+package net.mehvahdjukaar.moonlight.api.integration.fabric;
 
 
 import net.minecraft.server.level.ServerPlayer;

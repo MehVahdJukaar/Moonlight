@@ -9,7 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
-import net.mehvahdjukaar.moonlight.core.builtincompat.CompatWoodTypes;
+import net.mehvahdjukaar.moonlight.core.set.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
 import net.mehvahdjukaar.moonlight.core.misc.ModCriteriaTriggers;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;

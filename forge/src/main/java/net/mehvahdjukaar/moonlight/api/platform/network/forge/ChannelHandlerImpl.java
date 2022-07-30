@@ -8,7 +8,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -110,6 +109,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
     public void sentToAllClientPlayersTrackingEntity(Entity target, Message message) {
         channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> target), message);
     }
+
     @Override
     public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         channel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target), message);

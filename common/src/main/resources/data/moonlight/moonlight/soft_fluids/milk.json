@@ -13,10 +13,9 @@
         "neapolitan:milk_bottle",
         "fluffy_farmer:bottle_of_milk",
         "vanillacookbook:milk_bottle",
-        "simplefarming:milk_bottle",
-        "farmersdelight:milk_bottle"
+        "simplefarming:milk_bottle"
       ],
-      "empty": "minetcraft:glass_bottle",
+      "empty": "minecraft:glass_bottle",
       "capacity": 1
     },
     {

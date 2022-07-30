@@ -30,7 +30,8 @@ public abstract class ModelBakeryMixin {
     @Final
     private Map<ResourceLocation, UnbakedModel> topLevelModels;
 
-    @Inject(method = "<init>", at = @At(value = "CONSTANT", args = "stringValue=special", shift = At.Shift.AFTER))
+    @Inject(method = "<init>", at = @At(value = "CONSTANT", args = "stringValue=minecraft:trident_in_hand#inventory", shift = At.Shift.AFTER),
+            require = 1)
     public void init(ResourceManager resourceManager, BlockColors blockColors, ProfilerFiller profilerFiller, int i, CallbackInfo ci) {
         ClientPlatformHelperImpl.addSpecialModels(rl -> {
             UnbakedModel unbakedmodel = this.getModel(rl);

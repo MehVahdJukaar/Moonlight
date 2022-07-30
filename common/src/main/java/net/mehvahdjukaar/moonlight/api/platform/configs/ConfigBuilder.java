@@ -67,7 +67,7 @@ public abstract class ConfigBuilder {
     public abstract Supplier<String> define(String name, String defaultValue, Predicate<Object> validator);
 
     public Supplier<String> define(String name, String defaultValue) {
-        return define(name, defaultValue, s -> true);
+        return define(name, defaultValue, STRING_CHECK);
     }
 
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue) {

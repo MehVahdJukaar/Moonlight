@@ -20,6 +20,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -149,7 +150,7 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
-    public static boolean isAreaLoaded(Level level, BlockPos pos, int maxRange) {
+    public static boolean isAreaLoaded(LevelReader level, BlockPos pos, int maxRange) {
         throw new AssertionError();
     }
 

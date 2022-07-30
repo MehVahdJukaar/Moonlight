@@ -21,6 +21,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddPackFindersEvent;
@@ -93,7 +95,7 @@ public class PlatformHelperImpl {
         return ForgeEventFactory.getMobGriefingEvent(level, entity);
     }
 
-    public static boolean isAreaLoaded(Level level, BlockPos pos, int maxRange) {
+    public static boolean isAreaLoaded(LevelReader level, BlockPos pos, int maxRange) {
         return level.isAreaLoaded(pos, maxRange);
     }
 
@@ -127,7 +129,7 @@ public class PlatformHelperImpl {
     }
 
     public static int getBurnTime(ItemStack stack) {
-        return stack.getBurnTime(null);
+        return ForgeHooks.getBurnTime(stack, null);
     }
 
     @Nullable

@@ -37,6 +37,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -83,9 +84,8 @@ public class PlatformHelperImpl {
         return level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
     }
 
-    public static boolean isAreaLoaded(Level level, BlockPos pos, int maxRange) {
-        //crappy version for fabric :(
-        return level.isLoaded(pos);
+    public static boolean isAreaLoaded(LevelReader level, BlockPos pos, int maxRange) {
+        return level.hasChunksAt(pos.offset(-maxRange, -maxRange, -maxRange), pos.offset(maxRange, maxRange, maxRange));
     }
 
     public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction face) {

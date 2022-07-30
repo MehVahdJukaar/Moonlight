@@ -9,17 +9,18 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.api.integration.ClothConfigCompat;
+import net.mehvahdjukaar.moonlight.api.integration.fabric.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
@@ -84,8 +85,8 @@ public class FabricConfigSpec extends ConfigSpec {
         this.onRefresh();
     }
 
-    public String getTitleKey() {
-        return "config." + this.res.toLanguageKey();
+    public Component getName() {
+        return Component.literal(LangBuilder.getReadableName(this.res.getPath()+"_configs"));
     }
 
 

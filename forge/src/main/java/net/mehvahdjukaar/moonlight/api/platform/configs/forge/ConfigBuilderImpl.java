@@ -4,8 +4,6 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -74,21 +72,23 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public Supplier<Integer> defineColor(String name, int defaultValue) {
         maybeAddComment(name);
-        var stringConfig = builder.define(name, Integer.toHexString(defaultValue),ConfigBuilder.COLOR_CHECK);
-        return ()-> Integer.parseUnsignedInt(stringConfig.get());
+        var stringConfig = builder.define(name, Integer.toHexString(defaultValue), ConfigBuilder.COLOR_CHECK);
+        return () -> Integer.parseUnsignedInt(stringConfig.get().replace("0x", ""));
     }
 
+    @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         maybeAddComment(name);
-        return builder.define(name, defaultValue, validator);
+        ForgeConfigSpec.ConfigValue<String> stringConfig = builder.define(name, (String) defaultValue, validator);
+        return stringConfig;
     }
 
     @Override
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
         maybeAddComment(name);
-           var value = builder.defineList(name, defaultValue, predicate);
-            return ()-> (List<String>) value.get();
+        var value = builder.defineList(name, defaultValue, predicate);
+        return () -> (List<String>) value.get();
     }
 
     @Override

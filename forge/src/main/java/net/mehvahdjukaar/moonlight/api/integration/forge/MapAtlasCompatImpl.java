@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.builtincompat.forge;
+package net.mehvahdjukaar.moonlight.api.integration.forge;
 
 
 import net.minecraft.world.entity.player.Player;
