@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.map.forge;
 
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.platform.forge.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -41,7 +43,7 @@ public class MapDecorationRegistryImpl {
     }
 
     public static void registerInternal(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
-        var reg = DEFERRED_REGISTER.register(id.getPath(), markerType);
+        RegHelperImpl.register(id, markerType, KEY);
     }
 
 }

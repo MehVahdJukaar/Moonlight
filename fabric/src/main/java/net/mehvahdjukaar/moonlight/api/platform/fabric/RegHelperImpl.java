@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.minecraft.commands.CommandSourceStack;
@@ -60,7 +61,7 @@ public class RegHelperImpl {
 
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends T> Supplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
         //if (true) return registerAsync(name, supplier, reg);
         String modId = name.getNamespace();
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
@@ -68,22 +69,23 @@ public class RegHelperImpl {
         return registry.add(supplier, name);
     }
 
-    public static <T, E extends T> Supplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
-        var instance = Registry.register(reg, name, supplier.get());
-        return () -> instance;
+    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+        RegistryQueue.EntryWrapper<E, T> entry = new RegistryQueue.EntryWrapper<>(name, supplier, reg);
+        entry.initialize();
+        return entry;
     }
 
-    public static Supplier<SimpleParticleType> registerParticle(ResourceLocation name) {
+    public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
         return register(name, FabricParticleTypes::simple, Registry.PARTICLE_TYPE);
     }
 
-    public static <C extends AbstractContainerMenu> Supplier<MenuType<C>> registerMenuType(
+    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> factory) {
         return register(name, () -> new MenuType<>((a, b) -> factory.apply(a, b, null)), Registry.MENU);
     }
 
-    public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {
+    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {
         Supplier<EntityType<T>> s = () -> EntityType.Builder.of(factory, category).sized(width, height).build(name.toString());
         return register(name, s, Registry.ENTITY_TYPE);
     }
@@ -109,10 +111,6 @@ public class RegHelperImpl {
     }
 
     private static final List<Consumer<RegHelper.AttributeEvent>> ATTRIBUTE_REGISTRATIONS = new ArrayList<>();
-
-    public static void addMiscRegistration(Runnable eventListener) {
-        eventListener.run();
-    }
 
     public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
         CommandRegistrationCallback.EVENT.register((d, s, b) -> eventListener.accept(d));

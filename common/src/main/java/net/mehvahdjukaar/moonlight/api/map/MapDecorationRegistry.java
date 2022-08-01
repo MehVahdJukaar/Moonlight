@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.SimpleDecorationType;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -30,13 +31,13 @@ import java.util.function.Supplier;
 public class MapDecorationRegistry {
 
     public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC =
-            Codec.either(SimpleDecorationType.CODEC, CustomDecorationType.CODEC).xmap(
+            Codec.either(CustomDecorationType.CODEC, SimpleDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
                         if (type instanceof CustomDecorationType<?, ?> c) {
-                            return Either.right(c);
+                            return Either.left(c);
                         }
-                        return Either.left((SimpleDecorationType) type);
+                        return Either.right((SimpleDecorationType) type);
                     });
 
     //data holder

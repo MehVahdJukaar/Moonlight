@@ -1,9 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.CommandDispatcher;
+import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
@@ -28,13 +29,8 @@ import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegisterEvent;
+import net.minecraftforge.registries.*;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,40 +40,43 @@ import java.util.function.Supplier;
 
 public class RegHelperImpl {
 
-    public static final Map<Registry<?>, Map<String, DeferredRegister<?>>> REGISTRIES = new HashMap<>();
-
-    private static final Map<ResourceKey<? extends Registry<?>>, IForgeRegistry<?>> REG_TO_FR;
-    static {
-        var builder = ImmutableMap.<ResourceKey<? extends Registry<?>>, IForgeRegistry<?>>builder();
-        for (Field f : ForgeRegistries.class.getDeclaredFields()) {
-            try {
-                if (IForgeRegistry.class.isAssignableFrom(f.getType())) {
-                    IForgeRegistry<?> reg = (IForgeRegistry<?>) f.get(null);
-                  builder.put(reg.getRegistryKey(), reg);
-                }
-            } catch (Exception ignored) {
-            }
+    public record EntryWrapper<T>(RegistryObject<T> registryObject) implements RegSupplier<T> {
+        @Override
+        public T get() {
+            return registryObject.get();
         }
-        REG_TO_FR = builder.build();
+        @Override
+        public ResourceLocation getId() {
+            return registryObject.getId();
+        }
+        @Override
+        public Holder<T> getHolder() {
+            return registryObject.getHolder().get();
+        }
+    }
+
+    public static final Map<ResourceKey<? extends Registry<?>>, Map<String, DeferredRegister<?>>> REGISTRIES = new HashMap<>();
+
+    @SuppressWarnings("unchecked")
+    public static <T, E extends T> RegSupplier<E> register(
+            ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+        return register(name, supplier, reg.key());
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends
-            T> Supplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends T> RegSupplier<E> register(
+            ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
 
-        var m = REGISTRIES.computeIfAbsent(reg, h -> new HashMap<>());
+        var m = REGISTRIES.computeIfAbsent(regKey, h -> new HashMap<>());
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
-
-            var forgeReg = REG_TO_FR.get(reg.key());
-            if (forgeReg == null) throw new UnsupportedOperationException("Registry " + reg + " not supported");
-            DeferredRegister<T> r = (DeferredRegister<T>) DeferredRegister.create(forgeReg, modId);
+            DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
             var bus = FMLJavaModLoadingContext.get().getModEventBus();
             r.register(bus);
             return r;
         });
         //forge we don't care about mod id since it's always the active container one
-        return registry.register(name.getPath(), supplier);
+        return new EntryWrapper<>(registry.register(name.getPath(), supplier));
     }
 
     public static <T, E extends
@@ -85,18 +84,18 @@ public class RegHelperImpl {
         return register(name, supplier, reg);
     }
 
-    public static Supplier<SimpleParticleType> registerParticle(ResourceLocation name) {
+    public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
         return register(name, () -> new SimpleParticleType(true), Registry.PARTICLE_TYPE);
     }
 
-    public static <C extends AbstractContainerMenu> Supplier<MenuType<C>> registerMenuType(
+    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
         return register(name, () -> IForgeMenuType.create(containerFactory::apply), Registry.MENU);
     }
 
     public static <T extends
-            Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category,
+            Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category,
                                                                float width, float height, int clientTrackingRange, int updateInterval) {
         return register(name, () -> EntityType.Builder.of(factory, category)
                 .sized(width, height).build(name.toString()), Registry.ENTITY_TYPE);
@@ -135,15 +134,6 @@ public class RegHelperImpl {
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
         Consumer<EntityAttributeCreationEvent> eventConsumer = event -> {
             eventListener.accept((e, b) -> event.put(e, b.build()));
-        };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
-    }
-
-    public static void addMiscRegistration(Runnable eventListener) {
-        Consumer<RegisterEvent> eventConsumer = event -> {
-            if (event.getRegistryKey() == Registry.ENTITY_TYPE_REGISTRY) {
-                eventListener.run();
-            }
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }

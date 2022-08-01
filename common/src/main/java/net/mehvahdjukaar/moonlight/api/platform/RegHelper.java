@@ -4,11 +4,12 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -31,13 +32,19 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.structure.StructureType;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -53,88 +60,111 @@ import java.util.function.Supplier;
 public class RegHelper {
 
     @ExpectPlatform
-    public static <T, E extends T> Supplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
         throw new AssertionError();
     }
 
     /**
-     * Regiseters stuff immediately on fabric. Normal behavior for forge
+     * Registers stuff immediately on fabric. Normal behavior for forge
      */
     @ExpectPlatform
-    public static <T, E extends T> Supplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
         throw new AssertionError();
     }
 
-    public static <T extends Block> Supplier<T> registerBlock(ResourceLocation name, Supplier<T> block) {
+    public static <T extends Block> RegSupplier<T> registerBlock(ResourceLocation name, Supplier<T> block) {
         return register(name, block, Registry.BLOCK);
     }
 
-    public static <T extends Item> Supplier<T> registerItem(ResourceLocation name, Supplier<T> item) {
+    public static <T extends Item> RegSupplier<T> registerItem(ResourceLocation name, Supplier<T> item) {
         return register(name, item, Registry.ITEM);
     }
 
-    public static <T extends Feature<?>> Supplier<T> registerFeature(ResourceLocation name, Supplier<T> feature) {
+    public static <T extends Feature<?>> RegSupplier<T> registerFeature(ResourceLocation name, Supplier<T> feature) {
         return register(name, feature, Registry.FEATURE);
     }
 
-    public static <T extends SoundEvent> Supplier<T> registerSound(ResourceLocation name, Supplier<T> feature) {
+    public static <T extends StructureType<?>> RegSupplier<T> registerStructure(ResourceLocation name, Supplier<T> feature) {
+        return register(name, feature, Registry.STRUCTURE_TYPES);
+    }
+
+    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<PlacedFeature> registerPlacedFeature(
+            ResourceLocation name, RegSupplier<ConfiguredFeature<FC, F>> feature, Supplier<List<PlacementModifier>> modifiers) {
+        return registerPlacedFeature(name, () -> new PlacedFeature(Holder.hackyErase(feature.getHolder()), modifiers.get()));
+    }
+
+    public static RegSupplier<PlacedFeature> registerPlacedFeature(ResourceLocation name, Supplier<PlacedFeature> featureSupplier) {
+        return register(name, featureSupplier, BuiltinRegistries.PLACED_FEATURE);
+    }
+
+    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<ConfiguredFeature<FC, F>> registerConfiguredFeature(
+            ResourceLocation name, Supplier<F> feature, Supplier<FC> featureConfiguration) {
+        return registerConfiguredFeature(name, () -> new ConfiguredFeature<>(feature.get(), featureConfiguration.get()));
+    }
+
+    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<ConfiguredFeature<FC, F>> registerConfiguredFeature(
+            ResourceLocation name, Supplier<ConfiguredFeature<FC, F>> featureSupplier) {
+        return register(name, featureSupplier, BuiltinRegistries.CONFIGURED_FEATURE);
+    }
+
+    public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> feature) {
         return register(name, feature, Registry.SOUND_EVENT);
     }
 
-    public static <T extends PaintingVariant> Supplier<T> registerPainting(ResourceLocation name, Supplier<T> painting) {
+    public static <T extends PaintingVariant> RegSupplier<T> registerPainting(ResourceLocation name, Supplier<T> painting) {
         return register(name, painting, Registry.PAINTING_VARIANT);
     }
 
     @ExpectPlatform
-    public static <C extends AbstractContainerMenu> Supplier<MenuType<C>> registerMenuType(
+    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
         throw new AssertionError();
     }
 
-    public static <T extends MobEffect> Supplier<T> registerEffect(ResourceLocation name, Supplier<T> effect) {
+    public static <T extends MobEffect> RegSupplier<T> registerEffect(ResourceLocation name, Supplier<T> effect) {
         return register(name, effect, Registry.MOB_EFFECT);
     }
 
-    public static <T extends Enchantment> Supplier<T> registerEnchantment(ResourceLocation name, Supplier<T> enchantment) {
+    public static <T extends Enchantment> RegSupplier<T> registerEnchantment(ResourceLocation name, Supplier<T> enchantment) {
         return register(name, enchantment, Registry.ENCHANTMENT);
     }
 
 
-    public static <T extends RecipeSerializer<?>> Supplier<T> registerRecipeSerializer(ResourceLocation name, Supplier<T> recipe) {
+    public static <T extends RecipeSerializer<?>> RegSupplier<T> registerRecipeSerializer(ResourceLocation name, Supplier<T> recipe) {
         return register(name, recipe, Registry.RECIPE_SERIALIZER);
     }
 
-    public static <T extends BlockEntityType<E>, E extends BlockEntity> Supplier<T> registerBlockEntityType(ResourceLocation name, Supplier<T> blockEntity) {
+    public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(ResourceLocation name, Supplier<T> blockEntity) {
         return register(name, blockEntity, Registry.BLOCK_ENTITY_TYPE);
     }
 
     @ExpectPlatform
-    public static Supplier<SimpleParticleType> registerParticle(ResourceLocation name) {
+    public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
         throw new AssertionError();
     }
 
-    public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
-                                                                                MobCategory category, float width, float height) {
+    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
+                                                                                   MobCategory category, float width, float height) {
         return registerEntityType(name, factory, category, width, height, 5);
     }
 
     //not needed?
-    public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
-                                                                                MobCategory category, float width,
-                                                                                float height, int clientTrackingRange) {
+    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
+                                                                                   MobCategory category, float width,
+                                                                                   float height, int clientTrackingRange) {
         return registerEntityType(name, factory, category, width, height, clientTrackingRange, 3);
     }
 
     @ExpectPlatform
-    public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
-                                                                                MobCategory category, float width, float height,
-                                                                                int clientTrackingRange, int updateInterval) {
+    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
+                                                                                   MobCategory category, float width, float height,
+                                                                                   int clientTrackingRange, int updateInterval) {
         throw new AssertionError();
     }
 
-    public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(ResourceLocation name,Supplier<EntityType<T>> type){
-        return register(name, type,Registry.ENTITY_TYPE);
+    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
+        return register(name, type, Registry.ENTITY_TYPE);
     }
 
     public static void registerCompostable(ItemLike name, float chance) {
@@ -150,30 +180,29 @@ public class RegHelper {
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
         throw new AssertionError();
     }
+
     @ExpectPlatform
-    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories){
+    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         throw new AssertionError();
     }
+
     @ExpectPlatform
-    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories){
+    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         throw new AssertionError();
     }
 
     @FunctionalInterface
-    public interface AttributeEvent{
+    public interface AttributeEvent {
         void register(EntityType<? extends LivingEntity> type, AttributeSupplier.Builder builder);
     }
+
     @ExpectPlatform
-    public static void addAttributeRegistration(Consumer<AttributeEvent> eventListener){
+    public static void addAttributeRegistration(Consumer<AttributeEvent> eventListener) {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static void addMiscRegistration(Runnable eventListener){
-        throw new AssertionError();
-    }
-    @ExpectPlatform
-    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener){
+    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
         throw new AssertionError();
     }
 
@@ -194,16 +223,17 @@ public class RegHelper {
         }
 
         private Block create(Block parent) {
-            return this.constructor.apply(()->parent, BlockBehaviour.Properties.copy(parent));
+            return this.constructor.apply(() -> parent, BlockBehaviour.Properties.copy(parent));
         }
     }
 
     /**
      * Utility to register a full block set
+     *
      * @return registry object map
      */
     public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
-                                                                                   Block parentBlock, boolean isHidden) {
+                                                                             Block parentBlock, boolean isHidden) {
 
         EnumMap<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
         for (VariantType type : VariantType.values()) {
@@ -212,7 +242,8 @@ public class RegHelper {
             if (!type.equals(VariantType.BLOCK)) name += "_" + type.name().toLowerCase(Locale.ROOT);
             Supplier<Block> block = registerBlock(new ResourceLocation(modId, name), () -> type.create(parentBlock));
             CreativeModeTab tab = switch (type) {
-                case VERTICAL_SLAB -> !isHidden && PlatformHelper.isModLoaded("quark") ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
+                case VERTICAL_SLAB ->
+                        !isHidden && PlatformHelper.isModLoaded("quark") ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
                 case WALL -> !isHidden ? CreativeModeTab.TAB_DECORATIONS : null;
                 default -> !isHidden ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
             };

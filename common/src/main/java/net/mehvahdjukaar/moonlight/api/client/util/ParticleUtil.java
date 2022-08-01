@@ -1,5 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -7,8 +10,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ParticleUtil {
 
@@ -134,5 +139,35 @@ public class ParticleUtil {
             dz = (k == 0) ? maxSpeed * level.random.nextDouble() : 0.0D;
         }
         level.addParticle(particleOptions, d0, d1, d2, dx, dy, dz);
+    }
+
+
+
+    public static void spawnBreakParticles(VoxelShape shape, BlockPos pPos, BlockState pState, Level level) {
+
+        var particleEngine = Minecraft.getInstance().particleEngine;
+
+        shape.forAllBoxes((p_172273_, p_172274_, p_172275_, p_172276_, p_172277_, p_172278_) -> {
+            double d1 = Math.min(1.0D, p_172276_ - p_172273_);
+            double d2 = Math.min(1.0D, p_172277_ - p_172274_);
+            double d3 = Math.min(1.0D, p_172278_ - p_172275_);
+            int i = Math.max(2, Mth.ceil(d1 / 0.25D));
+            int j = Math.max(2, Mth.ceil(d2 / 0.25D));
+            int k = Math.max(2, Mth.ceil(d3 / 0.25D));
+
+            for (int l = 0; l < i; ++l) {
+                for (int i1 = 0; i1 < j; ++i1) {
+                    for (int j1 = 0; j1 < k; ++j1) {
+                        double d4 = ((double) l + 0.5D) / (double) i;
+                        double d5 = ((double) i1 + 0.5D) / (double) j;
+                        double d6 = ((double) j1 + 0.5D) / (double) k;
+                        double d7 = d4 * d1 + p_172273_;
+                        double d8 = d5 * d2 + p_172274_;
+                        double d9 = d6 * d3 + p_172275_;
+                        particleEngine.add(new TerrainParticle((ClientLevel) level, (double) pPos.getX() + d7, (double) pPos.getY() + d8, (double) pPos.getZ() + d9, d4 - 0.5D, d5 - 0.5D, d6 - 0.5D, pState, pPos));
+                    }
+                }
+            }
+        });
     }
 }

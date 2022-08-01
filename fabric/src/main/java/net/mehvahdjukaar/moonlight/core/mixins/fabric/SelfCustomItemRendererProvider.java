@@ -9,6 +9,6 @@ import org.spongepowered.asm.mixin.Mixin;
 public interface SelfCustomItemRendererProvider extends ICustomItemRendererProvider{
 
     default void registerFabricRenderer() {
-        BuiltinItemRendererRegistry.INSTANCE.register(this, (BuiltinItemRendererRegistry.DynamicItemRenderer) this.createRenderer());
+        BuiltinItemRendererRegistry.INSTANCE.register(this, (BuiltinItemRendererRegistry.DynamicItemRenderer) this.getRendererFactory().get());
     }
 }

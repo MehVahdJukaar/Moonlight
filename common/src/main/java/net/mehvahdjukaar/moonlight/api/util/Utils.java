@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.util;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
+import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -132,6 +134,10 @@ public class Utils {
         return BuiltinRegistries.BIOME.getKey(object);
     }
 
+    public static ResourceLocation getID(ConfiguredFeature<?,?> object) {
+        return BuiltinRegistries.CONFIGURED_FEATURE.getKey(object);
+    }
+
     public static ResourceLocation getID(Item object) {
         return Registry.ITEM.getKey(object);
     }
@@ -156,6 +162,7 @@ public class Utils {
         return MapDecorationRegistry.getID(object);
     }
 
+    @UnstableApi
     public static ResourceLocation getID(Object object) {
         if (object instanceof Block b) return getID(b);
         if (object instanceof Item b) return getID(b);
@@ -164,6 +171,7 @@ public class Utils {
         if (object instanceof Fluid b) return getID(b);
         if (object instanceof BlockEntityType b) return getID(b);
         if (object instanceof RecipeSerializer b) return getID(b);
+        if (object instanceof ConfiguredFeature c) return getID(c);
         if (object instanceof Supplier<?> s) return getID(s.get());
         if (object instanceof SoftFluid s) return getID(s);
         if (object instanceof MapDecorationType<?, ?> s) return getID(s);

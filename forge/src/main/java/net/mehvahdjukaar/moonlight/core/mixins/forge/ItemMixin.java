@@ -19,7 +19,7 @@ public abstract class ItemMixin {
     public void initializeClient(Consumer<IClientItemExtensions> consumer, CallbackInfo ci) {
         if(this instanceof ICustomItemRendererProvider provider) {
             consumer.accept(new IClientItemExtensions() {
-                final NonNullLazy<BlockEntityWithoutLevelRenderer> renderer = NonNullLazy.of(provider::createRenderer);
+                final NonNullLazy<BlockEntityWithoutLevelRenderer> renderer = NonNullLazy.of(provider.getRendererFactory()::get);
 
                 @Override
                 public BlockEntityWithoutLevelRenderer getCustomRenderer() {
