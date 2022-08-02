@@ -14,6 +14,10 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * A loader independent config builder
+ * Support common config syncing
+ */
 public abstract class ConfigBuilder {
 
     protected final Map<String, String> comments = new HashMap<>();
@@ -115,6 +119,9 @@ public abstract class ConfigBuilder {
     }
 
     public ConfigBuilder setSynced(){
+        if(this.type == ConfigType.CLIENT){
+            throw new UnsupportedOperationException("Config syncing cannot be used for client config as its not needed");
+        }
         this.synced = true;
         return this;
     }

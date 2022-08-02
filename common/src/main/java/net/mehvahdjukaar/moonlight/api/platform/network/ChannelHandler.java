@@ -11,6 +11,9 @@ import net.minecraft.world.level.Level;
 
 import java.util.function.Function;
 
+/**
+ * Your main network channel instance.
+ */
 public abstract class ChannelHandler {
 
     @ExpectPlatform

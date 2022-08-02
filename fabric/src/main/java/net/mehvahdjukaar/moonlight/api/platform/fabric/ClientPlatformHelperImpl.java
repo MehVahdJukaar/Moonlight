@@ -13,6 +13,8 @@ import net.mehvahdjukaar.moonlight.api.client.model.fabric.FabricModelLoaderRegi
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ModelManagerAccessor;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -33,6 +35,9 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -69,11 +74,33 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addBlockColorsRegistration(Consumer<ClientPlatformHelper.BlockColorEvent> eventListener) {
-        eventListener.accept(ColorProviderRegistry.BLOCK::register);
+        eventListener.accept(new ClientPlatformHelper.BlockColorEvent() {
+            @Override
+            public void register(BlockColor color, Block... block) {
+                ColorProviderRegistry.BLOCK.register(color, block);
+            }
+
+            @Override
+            public int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint) {
+                var c = ColorProviderRegistry.BLOCK.get(block.getBlock());
+                return c == null ? -1 : c.getColor(block, level, pos, tint);
+            }
+        });
     }
 
     public static void addItemColorsRegistration(Consumer<ClientPlatformHelper.ItemColorEvent> eventListener) {
-        eventListener.accept(ColorProviderRegistry.ITEM::register);
+        eventListener.accept(new ClientPlatformHelper.ItemColorEvent() {
+            @Override
+            public void register(ItemColor color, ItemLike... items) {
+                ColorProviderRegistry.ITEM.register(color, items);
+            }
+
+            @Override
+            public int getColor(ItemStack stack, int tint) {
+                var c = ColorProviderRegistry.ITEM.get(stack.getItem());
+                return c == null ? -1 : c.getColor(stack, tint);
+            }
+        });
     }
 
     public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientPlatformHelper.AtlasTextureEvent> eventListener) {

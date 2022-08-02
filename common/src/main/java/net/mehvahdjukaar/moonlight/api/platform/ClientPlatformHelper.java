@@ -6,7 +6,6 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
-import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -31,6 +30,8 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -95,9 +96,10 @@ public class ClientPlatformHelper {
         throw new AssertionError();
     }
 
-    @FunctionalInterface
     public interface BlockColorEvent {
         void register(BlockColor color, Block... block);
+
+        int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint);
     }
 
     @ExpectPlatform
@@ -105,9 +107,10 @@ public class ClientPlatformHelper {
         throw new AssertionError();
     }
 
-    @FunctionalInterface
     public interface ItemColorEvent {
-        void register(ItemColor color, ItemLike... block);
+        void register(ItemColor color, ItemLike... items);
+
+        int getColor(ItemStack stack, int tint);
     }
 
     @ExpectPlatform
@@ -146,17 +149,17 @@ public class ClientPlatformHelper {
     }
 
     @ExpectPlatform
-    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation){
+    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation) {
         throw new AssertionError();
     }
 
     @FunctionalInterface
-    public interface TooltipComponentEvent{
+    public interface TooltipComponentEvent {
         <T extends TooltipComponent> void register(Class<T> type, Function<? super T, ? extends ClientTooltipComponent> factory);
     }
 
     @ExpectPlatform
-    public static void addTooltipComponentRegistration(Consumer<TooltipComponentEvent> eventListener){
+    public static void addTooltipComponentRegistration(Consumer<TooltipComponentEvent> eventListener) {
         throw new AssertionError();
     }
 
@@ -182,7 +185,7 @@ public class ClientPlatformHelper {
     }
 
     @ExpectPlatform
-    public static BlockModel parseBlockModel(JsonElement json){
+    public static BlockModel parseBlockModel(JsonElement json) {
         throw new AssertionError();
     }
 

@@ -4,6 +4,8 @@ import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -21,6 +23,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -74,12 +80,34 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addBlockColorsRegistration(Consumer<ClientPlatformHelper.BlockColorEvent> eventListener) {
-        Consumer<RegisterColorHandlersEvent.Block> eventConsumer = event -> eventListener.accept(event::register);
+        Consumer<RegisterColorHandlersEvent.Block> eventConsumer = event -> {
+            eventListener.accept(new ClientPlatformHelper.BlockColorEvent() {
+                @Override
+                public void register(BlockColor color, Block... block) {
+                    event.register(color, block);
+                }
+                @Override
+                public int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint) {
+                    return event.getBlockColors().getColor(block, level, pos, tint);
+                }
+            });
+        };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static void addItemColorsRegistration(Consumer<ClientPlatformHelper.ItemColorEvent> eventListener) {
-        Consumer<RegisterColorHandlersEvent.Item> eventConsumer = event -> eventListener.accept(event::register);
+        Consumer<RegisterColorHandlersEvent.Item> eventConsumer = event -> {
+            eventListener.accept(new ClientPlatformHelper.ItemColorEvent() {
+                @Override
+                public void register(ItemColor color, ItemLike... items) {
+                    event.register(color, items);
+                }
+                @Override
+                public int getColor(ItemStack stack, int tint) {
+                    return event.getItemColors().getColor(stack, tint);
+                }
+            });
+        };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
