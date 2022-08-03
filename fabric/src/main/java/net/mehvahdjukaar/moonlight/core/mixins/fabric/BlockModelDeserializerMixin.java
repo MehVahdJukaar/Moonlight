@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.lang.reflect.Type;
 
 @Mixin(BlockModel.Deserializer.class)
-public class BlockModelDeserializerMixin {
+public abstract class BlockModelDeserializerMixin {
 
     @Inject(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/client/renderer/block/model/BlockModel;",
             at = @At("TAIL"), cancellable = true)

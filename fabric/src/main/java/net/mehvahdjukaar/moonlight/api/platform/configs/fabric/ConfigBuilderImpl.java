@@ -58,9 +58,13 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     private void doAddConfig(String name, ConfigValue<?> config) {
-        config.setDescriptionKey(this.tooltipKey(name));
         config.setTranslationKey(this.translationKey(name));
-        maybeAddComment(name);
+        maybeAddTranslationString(name);
+        var tooltipKey = this.tooltipKey(name);
+        if(this.comments.containsKey(tooltipKey)){
+            config.setDescriptionKey(tooltipKey);
+        }
+
         this.categoryStack.peek().addEntry(config);
     }
 
@@ -121,8 +125,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    protected void maybeAddComment(String name) {
+    protected void maybeAddTranslationString(String name) {
         comments.put(this.translationKey(name), LangBuilder.getReadableName(name));
-        super.maybeAddComment(name);
+        super.maybeAddTranslationString(name);
     }
 }

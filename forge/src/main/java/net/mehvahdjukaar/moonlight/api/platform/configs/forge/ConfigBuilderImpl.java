@@ -53,25 +53,25 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
-        maybeAddComment(name);
+        maybeAddTranslationString(name);
         return builder.define(name, defaultValue);
     }
 
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
-        maybeAddComment(name);
+        maybeAddTranslationString(name);
         return builder.defineInRange(name, defaultValue, min, max);
     }
 
     @Override
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
-        maybeAddComment(name);
+        maybeAddTranslationString(name);
         return builder.defineInRange(name, defaultValue, min, max);
     }
 
     @Override
     public Supplier<Integer> defineColor(String name, int defaultValue) {
-        maybeAddComment(name);
+        maybeAddTranslationString(name);
         var stringConfig = builder.define(name, Integer.toHexString(defaultValue), ConfigBuilder.COLOR_CHECK);
         return () -> Integer.parseUnsignedInt(stringConfig.get().replace("0x", ""));
     }
@@ -79,28 +79,28 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
-        maybeAddComment(name);
+        maybeAddTranslationString(name);
         ForgeConfigSpec.ConfigValue<String> stringConfig = builder.define(name, (String) defaultValue, validator);
         return stringConfig;
     }
 
     @Override
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
-        maybeAddComment(name);
+        maybeAddTranslationString(name);
         var value = builder.defineList(name, defaultValue, predicate);
         return () -> (List<String>) value.get();
     }
 
     @Override
     public <T> Supplier<List<? extends T>> defineForgeList(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
-        maybeAddComment(name);
+        maybeAddTranslationString(name);
         var value = builder.defineList(name, defaultValue, predicate);
         return (Supplier<List<? extends T>>) value;
     }
 
     @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
-        maybeAddComment(name);
+        maybeAddTranslationString(name);
         return builder.defineEnum(name, defaultValue);
     }
 

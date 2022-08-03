@@ -22,7 +22,8 @@
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
     "RecipeManagerMixin",
-    "RegistryAccessMixin"
+    "RegistryAccessMixin",
+    "ReloadableServerResourcesMixin"
   ],
   "injectors": {
     "defaultRequire": 1

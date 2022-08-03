@@ -5,11 +5,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.GsonHelper;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class FabricRecipeConditionManager {
@@ -20,7 +24,9 @@ public class FabricRecipeConditionManager {
         register(new ResourceLocation("forge:mod_loaded"), FabricRecipeConditionManager::forgeModLoaded);
         register(new ResourceLocation("forge:and"), FabricRecipeConditionManager::forgeAnd);
         register(new ResourceLocation("forge:not"), FabricRecipeConditionManager::forgeNot);
+        register(new ResourceLocation("forge:tag_empty"), FabricRecipeConditionManager::forgeTagEmpty);
     }
+
 
     public static void register(ResourceLocation id, Function<JsonObject, Boolean> function) {
         CONDITIONS.put(id, function);
@@ -77,6 +83,15 @@ public class FabricRecipeConditionManager {
 
     private static boolean forgeModLoaded(JsonObject jsonObject) {
         return PlatformHelper.isModLoaded(jsonObject.get("modid").getAsString());
+    }
+
+    private static Boolean forgeTagEmpty(JsonObject object) {
+        var key = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(GsonHelper.getAsString(object, "tag")));
+        var tagContext = FabricHooks.getTagContext();
+        if (tagContext != null) {
+            return tagContext.getAllTags(key.registry()).getOrDefault(key.location(), Set.of()).isEmpty();
+        }
+        return true;
     }
 
 }

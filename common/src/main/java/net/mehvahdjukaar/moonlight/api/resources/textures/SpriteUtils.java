@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public final class SpriteUtils {
 
@@ -142,14 +143,25 @@ public final class SpriteUtils {
     }
 
 
+    @Deprecated(forRemoval = true)
     @NotNull
     public static boolean looksLikeTopLogTexture(String s) {
         s = new ResourceLocation(s).getPath();
         return s.contains("_top") || s.contains("_end") || s.contains("_up");
     }
 
+    @Deprecated(forRemoval = true)
     @NotNull
     public static boolean looksLikeSideLogTexture(String s) {
         return !looksLikeTopLogTexture(s);
     }
+
+    @NotNull
+    public static final Predicate<String> LOOKS_LIKE_TOP_LOG_TEXTURE = s -> {
+        s = new ResourceLocation(s).getPath();
+        return s.contains("_top") || s.contains("_end") || s.contains("_up");
+    };
+
+    @NotNull
+    public static final Predicate<String> LOOKS_LIKE_SIDE_LOG_TEXTURE = s -> !LOOKS_LIKE_TOP_LOG_TEXTURE.test(s);
 }

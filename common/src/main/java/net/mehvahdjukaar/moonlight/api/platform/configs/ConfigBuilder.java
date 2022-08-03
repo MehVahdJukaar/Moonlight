@@ -131,7 +131,7 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    protected void maybeAddComment(String name) {
+    protected void maybeAddTranslationString(String name) {
         this.currentKey = this.tooltipKey(name);
         if (this.currentComment != null && this.currentKey != null) {
             comments.put(currentKey, currentComment);

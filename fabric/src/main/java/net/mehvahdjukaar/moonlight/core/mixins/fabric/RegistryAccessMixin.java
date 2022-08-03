@@ -6,7 +6,6 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.fabric.SoftFluidRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.fabric.MapDecorationRegistryImpl;
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -23,7 +22,7 @@ public interface RegistryAccessMixin {
     private static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder,
                                 ResourceKey<? extends Registry<E>> registryKey, Codec<E> elementCodec, CallbackInfo ci) {
 
-        if (registryKey.location()==Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY.location()) {
+        if (registryKey.location() == Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY.location()) {
             builder.put(SoftFluidRegistryImpl.KEY, new RegistryAccess.RegistryData<>(
                     SoftFluidRegistryImpl.KEY, SoftFluid.CODEC, SoftFluid.CODEC));
 
@@ -32,4 +31,6 @@ public interface RegistryAccessMixin {
         }
 
     }
+
+
 }
