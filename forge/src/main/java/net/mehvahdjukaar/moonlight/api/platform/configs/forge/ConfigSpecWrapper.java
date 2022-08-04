@@ -93,6 +93,11 @@ public class ConfigSpecWrapper extends ConfigSpec {
         return modConfig;
     }
 
+    @Override
+    public boolean isLoaded() {
+        return spec.isLoaded();
+    }
+
     @Nullable
     @Override
     @OnlyIn(Dist.CLIENT)

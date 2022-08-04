@@ -12,11 +12,11 @@ import java.util.List;
 @Immutable
 public abstract class BaseColor<T extends BaseColor<T>> {
 
-    //utility codec that serializes either a string or a integer
+    //utility codec that serializes either a string or an integer
     public static final Codec<Integer> CODEC = Codec.either(Codec.INT,
             Codec.STRING.flatXmap(BaseColor::isValidString, BaseColor::isValidString)).xmap(either ->
-                    either.map(i -> i, s -> Integer.parseInt(s, 16)),
-            i -> Either.right(Integer.toHexString(i))
+                    either.map(i -> i, s -> Integer.parseUnsignedInt(s, 16)),
+            i -> Either.right("#" + Integer.toHexString(i))
     );
 
     protected final float v0;
@@ -38,13 +38,14 @@ public abstract class BaseColor<T extends BaseColor<T>> {
     }
 
     public T mixWith(T color) {
-        return mixWith(color,0.5f);
+        return mixWith(color, 0.5f);
     }
 
     /**
      * Mix two color together. Result varies with respect to their colorspace
+     *
      * @param color second color
-     * @param bias how much of the second color should appear in the result
+     * @param bias  how much of the second color should appear in the result
      * @return mixed color
      */
     public T mixWith(T color, float bias) {
@@ -57,13 +58,13 @@ public abstract class BaseColor<T extends BaseColor<T>> {
     public static <C extends BaseColor<C>> C mixColors(List<C> colors) {
         int size = colors.size();
         C mixed = colors.get(0);
-        for(int i = 1; i<size; i++){
-            mixed = mixed.mixWith(colors.get(i),1/(i+1f));
+        for (int i = 1; i < size; i++) {
+            mixed = mixed.mixWith(colors.get(i), 1 / (i + 1f));
         }
         return mixed;
     }
 
-    public static <C extends BaseColor<C>> C mixColors(C ...colors) {
+    public static <C extends BaseColor<C>> C mixColors(C... colors) {
         return mixColors(List.of(colors));
     }
 
@@ -122,7 +123,7 @@ public abstract class BaseColor<T extends BaseColor<T>> {
         if (!s.startsWith("0x")) st = s.substring(2);
         else if (s.startsWith("#")) st = s.substring(1);
         try {
-            Integer.parseInt(st, 16);
+            Integer.parseUnsignedInt(st, 16);
             return DataResult.success(st);
         } catch (NumberFormatException e) {
             return DataResult.error("Invalid color format. Must be in hex format (0xff00ff, #ff00ff, ff00ff) or integer value");

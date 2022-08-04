@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -51,6 +53,10 @@ public class ClientPlatformHelperImpl {
         //from 0.64 we should register render types in out model jsons
         //TODO: remove
         ItemBlockRenderTypes.setRenderLayer(block, type);
+    }
+
+    public static void registerItemProperty(Item item, ResourceLocation name, ClampedItemPropertyFunction property) {
+        ItemProperties.register(item, name, property);
     }
 
     public static void addParticleRegistration(Consumer<ClientPlatformHelper.ParticleEvent> eventListener) {

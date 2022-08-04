@@ -21,6 +21,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -35,6 +37,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
@@ -55,6 +58,10 @@ public class ClientPlatformHelperImpl {
 
     public static void registerRenderType(Block block, RenderType type) {
         BlockRenderLayerMap.INSTANCE.putBlock(block, type);
+    }
+
+    public static void registerItemProperty(Item item, ResourceLocation name, ClampedItemPropertyFunction property) {
+        ItemProperties.register(item, name, property);
     }
 
     public static void addParticleRegistration(Consumer<ClientPlatformHelper.ParticleEvent> eventListener) {
@@ -176,4 +183,6 @@ public class ClientPlatformHelperImpl {
     public static BlockModel parseBlockModel(JsonElement json) {
         return BlockModel.fromString(json.toString()); //sub optimal... too bad
     }
+
+
 }

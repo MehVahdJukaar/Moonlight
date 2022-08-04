@@ -73,7 +73,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<Integer> defineColor(String name, int defaultValue) {
         maybeAddTranslationString(name);
         var stringConfig = builder.define(name, Integer.toHexString(defaultValue), ConfigBuilder.COLOR_CHECK);
-        return () -> Integer.parseUnsignedInt(stringConfig.get().replace("0x", ""));
+        return () -> Integer.parseUnsignedInt(stringConfig.get().replace("0x", ""), 16);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")

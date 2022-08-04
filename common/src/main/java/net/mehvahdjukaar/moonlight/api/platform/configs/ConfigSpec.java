@@ -66,6 +66,10 @@ public abstract class ConfigSpec {
         }
     }
 
+    public boolean isLoaded(){
+        return true;
+    };
+
     public abstract void loadFromFile();
 
     public abstract void register();

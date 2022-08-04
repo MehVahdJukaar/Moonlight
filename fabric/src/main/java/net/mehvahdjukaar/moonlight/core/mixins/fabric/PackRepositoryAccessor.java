@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.RepositorySource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Set;
@@ -11,8 +12,9 @@ import java.util.Set;
 public interface PackRepositoryAccessor {
 
     @Accessor("sources")
-    public Set<RepositorySource> getSources();
+    Set<RepositorySource> getSources();
 
+    @Mutable
     @Accessor("sources")
-    public void setSources(Set<RepositorySource> sources);
+    void setSources(Set<RepositorySource> sources);
 }

@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
+import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -80,32 +81,6 @@ public class Utils {
         for (int i = 0; i < bottleCount; i++) xp += (3 + rand.nextInt(5) + rand.nextInt(5));
         return xp;
     }
-
-    public static final PrimitiveCodec<Integer> HEX_CODEC = new PrimitiveCodec<>() {
-        @Override
-        public <T> DataResult<Integer> read(final DynamicOps<T> ops, final T input) {
-            return ops.getStringValue(input)
-                    .map(s -> {
-                                if (s.contains("0x") || s.contains("#")) {
-                                    return Integer.parseUnsignedInt(
-                                            s.replace("0x", "").replace("#", ""), 16);
-                                }
-                                return Integer.parseUnsignedInt(s, 10);
-                            }
-                    ).map(Number::intValue);
-        }
-
-        @Override
-        public <T> T write(final DynamicOps<T> ops, final Integer value) {
-            String hex = Integer.toHexString(value);
-            return ops.createString("#" + hex);
-        }
-
-        @Override
-        public String toString() {
-            return "Int";
-        }
-    };
 
     public static VoxelShape rotateVoxelShape(VoxelShape source, Direction direction) {
         AtomicReference<VoxelShape> newShape = new AtomicReference<>(Shapes.empty());

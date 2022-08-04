@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -534,7 +535,7 @@ public class SoftFluid {
             Codec.STRING.optionalFieldOf("from_mod").forGetter(getHackyOptional(SoftFluid::getFromMod)),
             Codec.STRING.optionalFieldOf("translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
             Codec.INT.optionalFieldOf("luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
-            Utils.HEX_CODEC.optionalFieldOf("color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
+            BaseColor.CODEC.optionalFieldOf("color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
             TintMethod.CODEC.optionalFieldOf("tint_method").forGetter(getHackyOptional(SoftFluid::getTintMethod)),
             FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
             Codec.STRING.listOf().optionalFieldOf("preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
