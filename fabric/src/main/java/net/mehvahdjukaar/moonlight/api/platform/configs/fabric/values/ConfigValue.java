@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigEntry;
 import net.minecraft.network.chat.Component;
-import org.apache.commons.lang3.function.TriFunction;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -14,11 +14,11 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
     private String translationKey;
     private String descriptionKey;
 
-    public ConfigValue(String name, T defaultValue){
+    public ConfigValue(String name, T defaultValue) {
         super(name);
         this.defaultValue = defaultValue;
         Objects.requireNonNull(defaultValue, "default value cant be null");
-        assert this.isValid(defaultValue): "default value is invalid";
+        assert this.isValid(defaultValue) : "default value is invalid";
     }
 
     public T getDefaultValue() {
@@ -48,7 +48,11 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
         return Component.translatable(translationKey);
     }
 
+    @Nullable
     public Component getDescription() {
+        if (this.descriptionKey == null) return null;
         return Component.translatable(descriptionKey);
     }
+
+
 }

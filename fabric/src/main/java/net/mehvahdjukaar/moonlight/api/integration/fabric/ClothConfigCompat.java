@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.integration.fabric;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
-import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigEntry;
@@ -66,64 +65,71 @@ public class ClothConfigCompat {
     private static AbstractConfigListEntry<?> buildEntry(ConfigBuilder builder, ConfigEntry entry) {
 
         if (entry instanceof ColorConfigValue col) {
-            return builder.entryBuilder()
+            var e = builder.entryBuilder()
                     .startAlphaColorField(col.getTranslation(), col.get())
                     .setDefaultValue(col.getDefaultValue()) // Recommended: Used when user click "Reset"
-                    .setTooltip(col.getDescription()) // Optional: Shown when the user hover over this option
-                    .setSaveConsumer(col::set) // Recommended: Called when user save the config
-                    .build(); // Builds the option entry for cloth config
+                    .setSaveConsumer(col::set);// Recommended: Called when user save the config
+            var description = col.getDescription();
+            if (description != null) e.setTooltip(description);// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof IntConfigValue ic) {
-            return builder.entryBuilder()
+            var e = builder.entryBuilder()
                     .startIntField(ic.getTranslation(), ic.get())
                     .setMax(ic.getMax())
                     .setMin(ic.getMin())
                     .setDefaultValue(ic.getDefaultValue()) // Recommended: Used when user click "Reset"
-                    .setTooltip(ic.getDescription()) // Optional: Shown when the user hover over this option
-                    .setSaveConsumer(ic::set) // Recommended: Called when user save the config
-                    .build(); // Builds the option entry for cloth config
+                    .setSaveConsumer(ic::set); // Recommended: Called when user save the config
+            var description = ic.getDescription();
+            if (description != null) e.setTooltip(description);// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof DoubleConfigValue dc) {
-            return builder.entryBuilder()
+            var e = builder.entryBuilder()
                     .startDoubleField(dc.getTranslation(), dc.get())
                     .setMax(dc.getMax())
                     .setMin(dc.getMin())
                     .setDefaultValue(dc.getDefaultValue()) // Recommended: Used when user click "Reset"
-                    .setTooltip(dc.getDescription()) // Optional: Shown when the user hover over this option
-                    .setSaveConsumer(dc::set) // Recommended: Called when user save the config
-                    .build(); // Builds the option entry for cloth config
+                    .setSaveConsumer(dc::set); // Recommended: Called when user save the config
+            var description = dc.getDescription();
+            if (description != null) e.setTooltip(description);// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof StringConfigValue sc) {
-            return builder.entryBuilder()
+            var e = builder.entryBuilder()
                     .startStrField(sc.getTranslation(), sc.get())
                     .setDefaultValue(sc.getDefaultValue()) // Recommended: Used when user click "Reset"
-                    .setTooltip(sc.getDescription()) // Optional: Shown when the user hover over this option
-                    .setSaveConsumer(sc::set) // Recommended: Called when user save the config
-                    .build(); // Builds the option entry for cloth config
+                    .setSaveConsumer(sc::set); // Recommended: Called when user save the config
+            var description = sc.getDescription();
+            if (description != null) e.setTooltip(description);// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof BoolConfigValue bc) {
-            return builder.entryBuilder()
+            var e = builder.entryBuilder()
                     .startBooleanToggle(bc.getTranslation(), bc.get())
                     .setDefaultValue(bc.getDefaultValue()) // Recommended: Used when user click "Reset"
-                    .setTooltip(bc.getDescription()) // Optional: Shown when the user hover over this option
-                    .setSaveConsumer(bc::set) // Recommended: Called when user save the config
-                    .build(); // Builds the option entry for cloth config else if (entry instanceof EnumConfigValue<?> ec) {
+                    .setSaveConsumer(bc::set); // Recommended: Called when user save the config
+            var description = bc.getDescription();
+            if (description != null) e.setTooltip(description);// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof EnumConfigValue<?> ec) {
             return addEnum(builder, ec);
         } else if (entry instanceof ListStringConfigValue<?> lc) {
-            return builder.entryBuilder()
+            var e =  builder.entryBuilder()
                     .startStrList(lc.getTranslation(), lc.get())
                     .setDefaultValue(lc.getDefaultValue()) // Recommended: Used when user click "Reset"
-                    .setTooltip(lc.getDescription()) // Optional: Shown when the user hover over this option
-                    .setSaveConsumer(lc::set) // Recommended: Called when user save the config
-                    .build(); // Builds the option entry for cloth config
+                    .setSaveConsumer(lc::set); // Recommended: Called when user save the config
+            var description = lc.getDescription();
+            if (description != null) e.setTooltip(description);// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
         }
         throw new UnsupportedOperationException("unknown entry: " + entry.getClass().getName());
     }
 
     private static @NotNull <T extends Enum<T>> EnumListEntry<T> addEnum(ConfigBuilder builder, EnumConfigValue<T> ec) {
-        return builder.entryBuilder()
+        var e = builder.entryBuilder()
                 .startEnumSelector(ec.getTranslation(), ec.getEnum(), ec.get())
                 .setDefaultValue(ec.getDefaultValue()) // Recommended: Used when user click "Reset"
-                .setTooltip(ec.getDescription()) // Optional: Shown when the user hover over this option
-                .setSaveConsumer(ec::set) // Recommended: Called when user save the config
-                .build(); // Builds the option entry for cloth config
+                .setSaveConsumer(ec::set); // Recommended: Called when user save the config
+        var description = ec.getDescription();
+        if (description != null) e.setTooltip(description);// Shown when the user hover over this option
+        return e.build(); // Builds the option entry for cloth config
     }
 
 }

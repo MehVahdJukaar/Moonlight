@@ -120,7 +120,7 @@ public abstract class BaseColor<T extends BaseColor<T>> {
     @NotNull
     private static DataResult<String> isValidString(String s) {
         String st = s;
-        if (!s.startsWith("0x")) st = s.substring(2);
+        if (s.startsWith("0x")) st = s.substring(2);
         else if (s.startsWith("#")) st = s.substring(1);
         try {
             Integer.parseUnsignedInt(st, 16);
