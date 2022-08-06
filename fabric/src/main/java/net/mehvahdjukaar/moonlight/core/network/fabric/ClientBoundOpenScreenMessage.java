@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.MenuScreensAccessor;
+import net.mehvahdjukaar.moonlight.core.mixins.fabric.MenuTypeAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ServerPlayerAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.ChatFormatting;
@@ -70,7 +71,9 @@ public class ClientBoundOpenScreenMessage implements Message {
 
             AbstractContainerMenu menu;
 
-            if (constructor instanceof IFabricMenuType.Factory customFactory) {
+            var containerConstructor = ((MenuTypeAccessor<?>)type).getConstructor();
+
+            if (containerConstructor instanceof IFabricMenuType.Factory customFactory) {
                 menu = customFactory.create(containerId, inventory, additionalData);
             } else {
                 menu = type.create(containerId, Minecraft.getInstance().player.getInventory());

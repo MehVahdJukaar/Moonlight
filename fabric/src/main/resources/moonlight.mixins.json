@@ -13,13 +13,14 @@
     "SelfCustomItemRendererProvider",
     "SelfIExtraModelDataProvider",
     "SelfItemStackRenderer",
+    "MenuScreensAccessor",
     "TextureAtlasSpriteMixin"
   ],
   "mixins": [
     "BuiltinRegistryMixin",
     "FireBlockMixin",
     "MappedRegistryAccessor",
-    "MenuScreensAccessor",
+    "MenuTypeAccessor",
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
     "RecipeManagerMixin",
