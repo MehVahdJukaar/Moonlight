@@ -15,25 +15,23 @@ public class ModMessages {
         CHANNEL = ChannelHandler.createChannel(Moonlight.res("channel"));
 
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT, //id = "moonlight:0"
-                ClientBoundSpawnCustomEntityPacket.class, ClientBoundSpawnCustomEntityPacket::new);
+                ClientBoundSpawnCustomEntityMessage.class, ClientBoundSpawnCustomEntityMessage::new);
 
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundSyncCustomMapDecorationMessage.class, ClientBoundSyncCustomMapDecorationMessage::new);
 
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
-                ClientBoundFinalizeFluidsMessage.class,
-                ClientBoundFinalizeFluidsMessage::new);
+                ClientBoundFinalizeFluidsMessage.class, ClientBoundFinalizeFluidsMessage::new);
 
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
-                ClientBoundSyncConfigsPacket.class, ClientBoundSyncConfigsPacket::new);
+                ClientBoundSyncConfigsMessage.class, ClientBoundSyncConfigsMessage::new);
 
         /*
         INSTANCE.registerMessage(nextID(), ClientBoundSyncFluidsPacket.class, ClientBoundSyncFluidsPacket::buffer,
                 ClientBoundSyncFluidsPacket::new, ClientBoundSyncFluidsPacket::handler);
 
 
-
-
          */
     }
+
 }

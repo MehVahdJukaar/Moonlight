@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ClientBoundSpawnCustomEntityPacket implements Message {
+public class ClientBoundSpawnCustomEntityMessage implements Message {
     private final Entity entity;
     private final int typeId;
     private final int entityId;
@@ -33,7 +33,7 @@ public class ClientBoundSpawnCustomEntityPacket implements Message {
     private final int velZ;
     private final FriendlyByteBuf buf;
 
-    public ClientBoundSpawnCustomEntityPacket(Entity e) {
+    public ClientBoundSpawnCustomEntityMessage(Entity e) {
         this.entity = e;
         this.typeId = Registry.ENTITY_TYPE.getId(e.getType());
         this.entityId = e.getId();
@@ -54,7 +54,7 @@ public class ClientBoundSpawnCustomEntityPacket implements Message {
         this.buf = null;
     }
 
-    public ClientBoundSpawnCustomEntityPacket(FriendlyByteBuf buf) {
+    public ClientBoundSpawnCustomEntityMessage(FriendlyByteBuf buf) {
         this.entity = null;
         this.typeId = buf.readVarInt();
         this.entityId = buf.readInt();

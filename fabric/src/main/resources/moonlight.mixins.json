@@ -19,11 +19,13 @@
     "BuiltinRegistryMixin",
     "FireBlockMixin",
     "MappedRegistryAccessor",
+    "MenuScreensAccessor",
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
     "RecipeManagerMixin",
     "RegistryAccessMixin",
-    "ReloadableServerResourcesMixin"
+    "ReloadableServerResourcesMixin",
+    "ServerPlayerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

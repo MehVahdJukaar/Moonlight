@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
@@ -10,19 +9,19 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.io.ByteArrayInputStream;
 
-public class ClientBoundSyncConfigsPacket implements Message {
+public class ClientBoundSyncConfigsMessage implements Message {
 
     public final String fineName;
     public final String modId;
     public final byte[] configData;
 
-    public ClientBoundSyncConfigsPacket(FriendlyByteBuf buf) {
+    public ClientBoundSyncConfigsMessage(FriendlyByteBuf buf) {
         this.modId = buf.readUtf();
         this.fineName = buf.readUtf();
         this.configData = buf.readByteArray();
     }
 
-    public ClientBoundSyncConfigsPacket(final byte[] configFileData, final String fileName, String modId) {
+    public ClientBoundSyncConfigsMessage(final byte[] configFileData, final String fileName, String modId) {
         this.modId = modId;
         this.fineName = fileName;
         this.configData = configFileData;

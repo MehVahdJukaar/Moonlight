@@ -3,13 +3,16 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -36,6 +39,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -223,4 +227,15 @@ public class PlatformHelper {
     public static void addServerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         throw new AssertionError();
     }
+
+    @ExpectPlatform
+    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataProvider) {
+        throw new AssertionError();
+    }
+
+    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, BlockPos pos) {
+        openCustomMenu(player, menuProvider, buf -> buf.writeBlockPos(pos));
+    }
+
+
 }

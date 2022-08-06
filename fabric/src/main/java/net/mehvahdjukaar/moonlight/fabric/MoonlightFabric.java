@@ -8,7 +8,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
+import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
 import net.minecraft.server.MinecraftServer;
 
 public class MoonlightFabric implements ModInitializer, DedicatedServerModInitializer {
@@ -18,6 +22,9 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     @Override
     public void onInitialize() {
         Moonlight.commonInit();
+        ModMessages.CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
+                ClientBoundOpenScreenMessage.class, ClientBoundOpenScreenMessage::new);
+
         ServerLifecycleEvents.SERVER_STARTING.register(s -> currentServer = s);
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((a, b) -> SoftFluidRegistry.onDataLoad());
     }

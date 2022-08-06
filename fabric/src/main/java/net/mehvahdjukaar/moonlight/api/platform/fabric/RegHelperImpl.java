@@ -7,7 +7,9 @@ import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
+import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.minecraft.commands.CommandSourceStack;
@@ -81,8 +83,8 @@ public class RegHelperImpl {
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
-            PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> factory) {
-        return register(name, () -> new MenuType<>((a, b) -> factory.apply(a, b, null)), Registry.MENU);
+            TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
+        return register(name, () -> IFabricMenuType.create(containerFactory::apply), Registry.MENU);
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {

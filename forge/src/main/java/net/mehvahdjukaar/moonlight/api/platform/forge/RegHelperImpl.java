@@ -2,7 +2,9 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
+import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -90,7 +92,7 @@ public class RegHelperImpl {
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
-            PropertyDispatch.TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
+            TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
         return register(name, () -> IForgeMenuType.create(containerFactory::apply), Registry.MENU);
     }
 

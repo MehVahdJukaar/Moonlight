@@ -13,8 +13,9 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityPacket;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -23,12 +24,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
@@ -53,6 +56,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class PlatformHelperImpl {
@@ -122,7 +126,7 @@ public class PlatformHelperImpl {
     }
 
     public static Packet<?> getEntitySpawnPacket(Entity entity) {
-        var packet = new ClientBoundSpawnCustomEntityPacket(entity);
+        var packet = new ClientBoundSpawnCustomEntityMessage(entity);
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeToBuffer(buf);
         return ServerPlayNetworking.createS2CPacket(ModMessages.SPAWN_PACKET_ID, buf);
@@ -211,6 +215,10 @@ public class PlatformHelperImpl {
                 return listener.reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
             }
         });
+    }
+
+    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataProvider) {
+        ClientBoundOpenScreenMessage.openMenu(player, menuProvider, extraDataProvider);
     }
 
 }
