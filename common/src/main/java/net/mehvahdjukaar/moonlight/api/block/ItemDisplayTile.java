@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
+import net.mehvahdjukaar.moonlight.api.block.IOwnerProtected;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -11,6 +13,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -23,9 +26,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
-public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity implements IOwnerProtected {
-
+public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity implements WorldlyContainer, IOwnerProtected {
     @Nullable
     private UUID owner = null;
     private NonNullList<ItemStack> stacks;
@@ -149,7 +152,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         ContainerHelper.loadAllItems(compound, this.stacks);
         if (this.level != null) {
             if (this.level.isClientSide) this.updateClientVisualsOnLoad();
-                //this doesnt work on first load cause world is null on server. You need to save stuff on nbt
+                //this doesn't work on first load cause world is null on server. You need to save stuff on nbt
             else this.updateTileOnInventoryChanged();
         }
         this.loadOwner(compound);
@@ -203,5 +206,23 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     public boolean canPlaceItem(int index, ItemStack stack) {
         return this.isEmpty();
     }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int index, ItemStack stack, @Nullable Direction direction) {
+        return false;
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int index, ItemStack stack, Direction direction) {
+        return false;
+    }
+
+    @Override
+    public int[] getSlotsForFace(Direction side) {
+        return IntStream.range(0, this.getContainerSize()).toArray();
+    }
+
+
+
 
 }

@@ -11,17 +11,16 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
 
-
+//0.0
 @Mixin(ItemDisplayTile.class)
 public abstract class SelfItemDisplayTileMixin extends RandomizableContainerBlockEntity {
 
-    private final LazyOptional<? extends IItemHandler> handler = LazyOptional.of(()->new InvWrapper(this));
+    private final LazyOptional<? extends IItemHandler>[] handlers = SidedInvWrapper.create((WorldlyContainer) this, Direction.values());
 
     protected SelfItemDisplayTileMixin(BlockEntityType<?> entityType, BlockPos pos, BlockState state) {
         super(entityType, pos, state);
@@ -30,13 +29,14 @@ public abstract class SelfItemDisplayTileMixin extends RandomizableContainerBloc
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
         if (!this.remove && facing != null && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-            return handler.cast();
+            return handlers[facing.ordinal()].cast();
         return super.getCapability(capability, facing);
     }
 
     @Override
     public void setRemoved() {
         super.setRemoved();
-        handler.invalidate();
+        for (LazyOptional<? extends IItemHandler> handler : handlers)
+            handler.invalidate();
     }
 }
