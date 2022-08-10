@@ -182,10 +182,6 @@ public class ClientPlatformHelper {
     }
 
 
-    @ExpectPlatform
-    public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate, Level world, BlockPos blockpos, BlockRenderDispatcher blockRenderer) {
-        throw new AssertionError();
-    }
 
     @ExpectPlatform
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {

@@ -7,13 +7,14 @@
     "BlockModelAccessor",
     "BlockModelDeserializerMixin",
     "ClientPacketListenerMixin",
+    "ItemRendererAccessor",
+    "MenuScreensAccessor",
     "ModelBakeryMixin",
     "ModelManagerAccessor",
     "SelfCustomBakedModel",
     "SelfCustomItemRendererProvider",
     "SelfIExtraModelDataProvider",
     "SelfItemStackRenderer",
-    "MenuScreensAccessor",
     "TextureAtlasSpriteMixin"
   ],
   "mixins": [

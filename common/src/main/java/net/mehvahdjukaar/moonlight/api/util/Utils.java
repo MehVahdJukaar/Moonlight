@@ -141,12 +141,12 @@ public class Utils {
     public static ResourceLocation getID(Object object) {
         if (object instanceof Block b) return getID(b);
         if (object instanceof Item b) return getID(b);
-        if (object instanceof EntityType b) return getID(b);
+        if (object instanceof EntityType<?> b) return getID(b);
         if (object instanceof Biome b) return getID(b);
         if (object instanceof Fluid b) return getID(b);
-        if (object instanceof BlockEntityType b) return getID(b);
-        if (object instanceof RecipeSerializer b) return getID(b);
-        if (object instanceof ConfiguredFeature c) return getID(c);
+        if (object instanceof BlockEntityType<?> b) return getID(b);
+        if (object instanceof RecipeSerializer<?> b) return getID(b);
+        if (object instanceof ConfiguredFeature<?,?> c) return getID(c);
         if (object instanceof Supplier<?> s) return getID(s.get());
         if (object instanceof SoftFluid s) return getID(s);
         if (object instanceof MapDecorationType<?, ?> s) return getID(s);

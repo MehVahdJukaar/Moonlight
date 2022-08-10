@@ -93,6 +93,10 @@ public class ConfigSpecWrapper extends ConfigSpec {
         return modConfig;
     }
 
+    public ModConfig.Type getModConfigType() {
+        return this.getConfigType() == ConfigType.CLIENT ? ModConfig.Type.CLIENT : ModConfig.Type.COMMON;
+    }
+
     @Override
     public boolean isLoaded() {
         return spec.isLoaded();
