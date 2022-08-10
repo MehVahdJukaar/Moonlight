@@ -161,7 +161,13 @@ public final class SpriteUtils {
         s = new ResourceLocation(s).getPath();
         return s.contains("_top") || s.contains("_end") || s.contains("_up");
     };
-
     @NotNull
     public static final Predicate<String> LOOKS_LIKE_SIDE_LOG_TEXTURE = s -> !LOOKS_LIKE_TOP_LOG_TEXTURE.test(s);
+
+    @NotNull
+    public static final Predicate<String> LOOKS_LIKE_LEAF_TEXTURE = s -> {
+        s = new ResourceLocation(s).getPath();
+        return !s.contains("_bushy") && !s.contains("_snow");
+    };
+
 }

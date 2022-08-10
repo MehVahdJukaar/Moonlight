@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.events.forge;
 
-import net.mehvahdjukaar.moonlight.api.events.IEarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.IFireConsumeBlockEvent;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.events.SimpleEvent;
@@ -26,10 +25,8 @@ public class MoonlightEventsHelperImpl {
         } else if (eventClass == IFireConsumeBlockEvent.class) {
             Consumer<FireConsumeBlockEvent> eventConsumer = e -> listener.accept((T) e);
             MinecraftForge.EVENT_BUS.addListener(eventConsumer);
-        } else if (eventClass == IEarlyPackReloadEvent.class) {
-            Consumer<EarlyPackReloadEvent> eventConsumer = e -> listener.accept((T) e);
-            MinecraftForge.EVENT_BUS.addListener(eventConsumer);
         } else {
+            //other 2 events dont work on forge bus for some reason... Randomly too
             LISTENERS.computeIfAbsent(eventClass, ev -> new ArrayList<>()).add(listener);
         }
     }
