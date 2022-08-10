@@ -6,11 +6,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -26,6 +28,7 @@ import javax.management.openmbean.InvalidOpenTypeException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class RPUtils {
@@ -79,7 +82,7 @@ public class RPUtils {
             //if all fails randomly guess texture location
             if (textures.isEmpty()) {
                 //TODO: test
-                textures.add(res.getNamespace()+":block/"+res.getPath());
+                textures.add(res.getNamespace() + ":block/" + res.getPath());
             }
 
 
@@ -212,9 +215,8 @@ public class RPUtils {
         try (var stream = resource.get().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
             try {
-                var t = TemplateRecipeManager.read(element);
-                return t;
-            }catch (Exception e){
+                return TemplateRecipeManager.read(element);
+            } catch (Exception e) {
                 Moonlight.LOGGER.error(element);
                 Moonlight.LOGGER.error(location);
                 throw e;
@@ -261,4 +263,39 @@ public class RPUtils {
         }
     }
 
+    /**
+     * Utility method to add crossbow models in a non-destructive way. Provided overrides will be added on top of whatever crossbow model is currently provided by vanilla or mod resources
+     */
+    public static void addCrossbowModel(ResourceManager manager, DynamicTexturePack pack, Consumer<CrossbowModelAdder> modelConsumer) {
+        var res = new ResourceLocation("crossbow");
+        var o = manager.getResource(ResType.ITEM_MODELS.getPath(res));
+        if (o.isPresent()) {
+            try (var model = o.get().open()) {
+                var json = RPUtils.deserializeJson(model);
+                var overrides = json.getAsJsonArray("overrides");
+
+                modelConsumer.accept(ov -> overrides.add(serializeOverride(ov)));
+
+                json.add("overrides", overrides);
+                pack.addItemModel(res, json);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private static JsonObject serializeOverride(ItemOverride override) {
+        JsonObject json = new JsonObject();
+        json.addProperty("model", override.getModel().toString());
+        JsonObject predicates = new JsonObject();
+        override.getPredicates().forEach(p -> {
+            predicates.addProperty(p.getProperty().toString(), p.getValue());
+        });
+        json.add("predicate", predicates);
+        return json;
+    }
+
+    @FunctionalInterface
+    public interface CrossbowModelAdder {
+        void add(ItemOverride override);
+    }
 }
