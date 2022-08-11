@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.integration.fabric;
+package net.mehvahdjukaar.moonlight.api.integration.cloth_config;
 
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;

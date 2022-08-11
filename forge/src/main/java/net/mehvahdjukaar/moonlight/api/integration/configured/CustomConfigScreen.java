@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.integration.configureed;
+package net.mehvahdjukaar.moonlight.api.integration.configured;
 
 
 import com.google.common.collect.ImmutableList;
@@ -46,10 +46,8 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     @Nullable
     private static final Field BOOLEAN_ITEM_BUTTON = findFieldOrNull(BooleanItem.class, "button");
 
-    private final ResourceLocation background;
-    private final String modId;
-
-    private final Map<String, ItemStack> icons = new HashMap<>();
+    protected final String modId;
+    protected final Map<String, ItemStack> icons = new HashMap<>();
     public final ItemStack mainIcon;
 
 
@@ -73,23 +71,15 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         return field;
     }
 
-    private CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
-                               Screen parent, ModConfig config,
-                               FolderEntry folderEntry) {
-        this(modId, mainIcon, background, title, parent, config);
-        //hax
-        try {
-            FOLDER_ENTRY.set(this, folderEntry);
-        } catch (Exception ignored) {
-        }
+    //shorthand
+    public CustomConfigScreen(CustomConfigSelectScreen parent, ModConfig config) {
+        this(parent.getModId(), parent.getMainIcon(), parent.getBackgroundTexture(), parent.getTitle(), parent, config);
     }
-
 
     //needed for custom title
     public CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
                               Screen parent, ModConfig config) {
         super(parent, title, config, background);
-        this.background = background;
         this.modId = modId;
         this.mainIcon = mainIcon;
     }
@@ -169,26 +159,12 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     public abstract void onSave();
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+        super.render(poseStack, mouseX, mouseY, partialTicks);
 
-        if (ScreenUtil.isMouseWithin((this.width / 2) - 90, 2, 180, 16, mouseX, mouseY)) {
-            this.renderTooltip(matrixStack, this.font.split(Component.translatable("supplementaries.gui.info"), 200), mouseX, mouseY);
-        }
         int titleWidth = this.font.width(this.title) + 35;
         this.itemRenderer.renderAndDecorateFakeItem(mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2);
         this.itemRenderer.renderAndDecorateFakeItem(mainIcon, (this.width / 2) - titleWidth / 2, 2);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (ScreenUtil.isMouseWithin((this.width / 2) - 90, 2, 180, 16, (int) mouseX, (int) mouseY)) {
-            Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.curseforge.com/minecraft/mc-mods/supplementaries"));
-            this.handleComponentClicked(style);
-            return true;
-        } else {
-            return super.mouseClicked(mouseX, mouseY, button);
-        }
     }
 
     private int ticks = 0;
@@ -237,7 +213,13 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             //make new button I can access
             this.button = new Button(10, 5, 44, 20, (Component.literal(label)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), (onPress) -> {
                 Component newTitle = CustomConfigScreen.this.title.plainCopy().append(" > " + label);
-                CustomConfigScreen.this.minecraft.setScreen(createSubScreen(title));
+                var sc = createSubScreen(newTitle);
+                //hax
+                try {
+                    FOLDER_ENTRY.set(sc, folderEntry);
+                } catch (Exception ignored) {
+                }
+                CustomConfigScreen.this.minecraft.setScreen(sc);
             });
             this.icon = getIcon(label.toLowerCase(Locale.ROOT));
         }

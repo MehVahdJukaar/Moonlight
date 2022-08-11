@@ -1,8 +1,9 @@
-package net.mehvahdjukaar.moonlight.api.integration.fabric;
+package net.mehvahdjukaar.moonlight.api.integration.cloth_config;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
 import net.minecraft.client.Minecraft;
@@ -13,10 +14,13 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -29,14 +33,22 @@ public class ClothConfigListScreen extends Screen {
     protected final Screen parent;
     protected final ConfigSpec[] configs;
     protected final ResourceLocation background;
+    private final ItemStack mainIcon;
+    private final String modId;
+    private final String modURL;
 
     protected ConfigList list;
 
-    public ClothConfigListScreen(Screen parent, Component title, @Nullable ResourceLocation background, ConfigSpec... specs) {
-        super(title);
+    public ClothConfigListScreen(String modId, ItemStack mainIcon, Component displayName, @Nullable ResourceLocation background,
+                                 Screen parent,
+                                 ConfigSpec... specs) {
+        super(displayName);
         this.parent = parent;
         this.configs = specs;
         this.background = background;
+        this.mainIcon = mainIcon;
+        this.modId = modId;
+        this.modURL = FabricLoader.getInstance().getModContainer(modId).get().getMetadata().getContact().get("homepage").orElse(null);
     }
 
     @Override
@@ -61,6 +73,27 @@ public class ClothConfigListScreen extends Screen {
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         super.render(poseStack, mouseX, mouseY, partialTick);
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
+
+        if (modURL != null && isMouseWithin((this.width / 2) - 90, 2 + 6, 180, 16 + 2, mouseX, mouseY)) {
+            this.renderTooltip(poseStack, this.font.split(Component.translatable("gui.moonlight.open_mod_page", this.modId), 200), mouseX, mouseY);
+        }
+        int titleWidth = this.font.width(this.title) + 35;
+        this.itemRenderer.renderAndDecorateFakeItem(this.mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2 + 8);
+        this.itemRenderer.renderAndDecorateFakeItem(this.mainIcon, (this.width / 2) - titleWidth / 2, 2 + 8);
+    }
+
+    private boolean isMouseWithin(int x, int y, int width, int height, int mouseX, int mouseY) {
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (modURL != null && isMouseWithin((this.width / 2) - 90, 2 + 6, 180, 16 + 2, (int) mouseX, (int) mouseY)) {
+            Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,  modURL));
+            this.handleComponentClicked(style);
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override

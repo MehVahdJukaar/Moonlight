@@ -6,6 +6,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
+import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -198,4 +199,9 @@ public class ClientPlatformHelper {
         throw new AssertionError();
     }
 
+
+    @Deprecated(forRemoval = true)
+    public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate, Level world, BlockPos blockpos, BlockRenderDispatcher blockRenderer) {
+        RenderUtil.renderBlock(seed, matrixStack, buffer, blockstate, world, blockpos, blockRenderer);
+    }
 }

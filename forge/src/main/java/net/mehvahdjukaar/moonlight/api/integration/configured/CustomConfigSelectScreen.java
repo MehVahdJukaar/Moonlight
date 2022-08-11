@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.integration.configureed;
+package net.mehvahdjukaar.moonlight.api.integration.configured;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -14,7 +14,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -28,6 +27,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
 
@@ -61,13 +61,26 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         this.modURL = container.getModInfo().getModURL().map(URL::getPath).orElse(null);
     }
 
+    public ItemStack getMainIcon() {
+        return mainIcon;
+    }
+
+    @Override
+    public ResourceLocation getBackgroundTexture() {
+        return super.getBackgroundTexture();
+    }
+
+    public String getModId() {
+        return modId;
+    }
+
     /**
      * Registers this custom config screen
      */
-    public static void registerConfigScreenScreen(String modId, BiFunction<Minecraft, Screen, Screen> screenSelectFactory) {
+    public static void registerConfigScreen(String modId, Function<Screen, CustomConfigSelectScreen> screenSelectFactory) {
         ModContainer container = ModList.get().getModContainerById(modId).get();
         container.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () ->
-                new ConfigScreenHandler.ConfigScreenFactory(screenSelectFactory));
+                new ConfigScreenHandler.ConfigScreenFactory((m, s) -> screenSelectFactory.apply(s)));
     }
 
     private static Map<ModConfig.Type, Set<ModConfig>> createConfigMap(ConfigSpec... specs) {
@@ -118,7 +131,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         this.itemRenderer.renderAndDecorateFakeItem(mainIcon, (this.width / 2) - titleWidth / 2, 2);
 
         if (this.modURL != null && ScreenUtil.isMouseWithin((this.width / 2) - 90, 2, 180, 16, mouseX, mouseY)) {
-            this.renderTooltip(poseStack, this.font.split(Component.translatable("gui.moonlight.configured", this.modId), 200), mouseX, mouseY);
+            this.renderTooltip(poseStack, this.font.split(Component.translatable("gui.moonlight.open_mod_page", this.modId), 200), mouseX, mouseY);
         }
     }
 
@@ -131,62 +144,6 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         } else {
             return super.mouseClicked(mouseX, mouseY, button);
         }
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-        Button found = null;
-        for (var c : this.children()) {
-            if (c instanceof Button button) {
-                if (button.getWidth() == 150) found = button;
-            }
-        }
-        if (found != null) this.removeWidget(found);
-
-        int y = this.height - 29;
-        int centerX = this.width / 2;
-
-        this.addRenderableWidget(new Button(centerX - 45, y, 90, 20, CommonComponents.GUI_BACK, (button) -> this.minecraft.setScreen(this.parent)));
-
-
-        /*
-        LinkButton patreon = LinkButton.create(ICONS_TEXTURES, this, centerX - 45 - 22, y, 3, 1,
-                "https://www.patreon.com/user?u=53696377", "Support me on Patreon :D");
-
-        LinkButton kofi = LinkButton.create(ICONS_TEXTURES, this, centerX - 45 - 22 * 2, y, 2, 2,
-                "https://ko-fi.com/mehvahdjukaar", "Donate a Coffe");
-
-        LinkButton curseforge = LinkButton.create(ICONS_TEXTURES, this, centerX - 45 - 22 * 3, y, 1, 2,
-                "https://www.curseforge.com/minecraft/mc-mods/supplementaries", "CurseForge Page");
-
-        LinkButton github = LinkButton.create(ICONS_TEXTURES, this, centerX - 45 - 22 * 4, y, 0, 2,
-                "https://github.com/MehVahdJukaar/Supplementaries/wiki", "Mod Wiki");
-
-
-        LinkButton discord = LinkButton.create(ICONS_TEXTURES, this, centerX + 45 + 2, y, 1, 1,
-                "https://discord.com/invite/qdKRTDf8Cv", "Mod Discord");
-
-        LinkButton youtube = LinkButton.create(ICONS_TEXTURES, this, centerX + 45 + 2 + 22, y, 0, 1,
-                "https://www.youtube.com/watch?v=LSPNAtAEn28&t=1s", "Youtube Channel");
-
-        LinkButton twitter = LinkButton.create(ICONS_TEXTURES, this, centerX + 45 + 2 + 22 * 2, y, 2, 1,
-                "https://twitter.com/Supplementariez?s=09", "Twitter Page");
-
-        LinkButton akliz = LinkButton.create(ICONS_TEXTURES, this, centerX + 45 + 2 + 22 * 3, y, 3, 2,
-                "https://www.akliz.net/supplementaries", "Need a server? Get one with Akliz");
-
-
-        this.addRenderableWidget(kofi);
-        this.addRenderableWidget(akliz);
-        this.addRenderableWidget(patreon);
-        this.addRenderableWidget(curseforge);
-        this.addRenderableWidget(discord);
-        this.addRenderableWidget(youtube);
-        this.addRenderableWidget(github);
-        this.addRenderableWidget(twitter);
-
-         */
     }
 
 }

@@ -170,11 +170,6 @@ public class ClientPlatformHelperImpl {
     }
 
 
-    public static void renderBlock(long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state, Level level, BlockPos pos, BlockRenderDispatcher blockRenderer) {
-        blockRenderer.getModelRenderer().tesselateBlock(level, blockRenderer.getBlockModel(state), state, pos, poseStack, buffer.getBuffer(ItemBlockRenderTypes.getMovingBlockRenderType(state)),
-                false, RandomSource.create(), seed, OverlayTexture.NO_OVERLAY);
-    }
-
     public static Path getModIcon(String modId) {
         var container = FabricLoader.getInstance().getModContainer(modId).get();
         return container.getMetadata().getIconPath(512).flatMap(container::findPath).orElse(null);

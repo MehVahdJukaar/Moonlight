@@ -1,12 +1,20 @@
 package net.mehvahdjukaar.moonlight.api.client.model.forge;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.UnmodifiableIterator;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.math.Matrix4f;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
+import net.minecraft.Util;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraftforge.client.model.IModelBuilder;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.map.fabric;
 
+import net.fabricmc.fabric.api.biome.v1.BiomeModification;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
