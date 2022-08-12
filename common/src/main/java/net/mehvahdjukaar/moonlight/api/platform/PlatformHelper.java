@@ -203,7 +203,7 @@ public class PlatformHelper {
         throw new AssertionError();
     }
     @ExpectPlatform
-    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties) {
+    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties, int duration) {
         throw new AssertionError();
     }
 

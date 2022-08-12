@@ -158,7 +158,7 @@ public class ClothConfigListScreen extends Screen {
             int l = this.y0 + 4 - (int) this.getScrollAmount();
 
 
-            this.renderList(poseStack, k, l, mouseX, mouseY, partialTick);
+            this.renderList(poseStack, k, l, partialTick);
 
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, background);

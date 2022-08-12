@@ -24,7 +24,7 @@ public class WoodBasedItem extends BlockTypeBasedItem<WoodType> {
     }
 
     @Override
-    public int getBurnTime(ItemStack itemStack, @Nullable RecipeType<?> recipeType) {
+    public final int getBurnTime(ItemStack itemStack, @Nullable RecipeType<?> recipeType) {
         return this.burnTime;
     }
 

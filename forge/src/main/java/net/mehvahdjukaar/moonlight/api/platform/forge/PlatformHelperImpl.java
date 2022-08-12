@@ -180,8 +180,8 @@ public class PlatformHelperImpl {
         return new FlowerPotBlock(emptyPot, supplier, properties);
     }
 
-    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> soundSupplier, Item.Properties properties) {
-        return new RecordItem(power, soundSupplier, properties);
+    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> soundSupplier, Item.Properties properties, int duration) {
+        return new RecordItem(power, soundSupplier, properties, duration);
     }
 
     public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatformHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {

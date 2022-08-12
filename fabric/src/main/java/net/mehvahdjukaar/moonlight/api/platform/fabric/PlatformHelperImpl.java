@@ -180,10 +180,10 @@ public class PlatformHelperImpl {
         return new FlowerPotBlock(supplier.get(), properties);
     }
 
-    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties) {
+    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties, int duration) {
         class ModRecord extends RecordItem {
             protected ModRecord(int i, SoundEvent soundEvent, Properties properties) {
-                super(i, soundEvent, properties);
+                super(i, soundEvent, properties, duration);
             }
         }
         return new ModRecord(power, music.get(), properties);

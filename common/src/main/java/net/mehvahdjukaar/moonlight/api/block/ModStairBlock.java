@@ -12,12 +12,12 @@ public class ModStairBlock extends StairBlock {
 
     private static final Field FORGE_BLOCK_SUPPLIER = PlatformHelper.findField(StairBlock.class, "stateSupplier");
 
-    public ModStairBlock(Supplier<Block> baseBlockState, Properties settings) {
-        super(FORGE_BLOCK_SUPPLIER == null ? baseBlockState.get().defaultBlockState() : Blocks.AIR.defaultBlockState(), settings);
+    public ModStairBlock(Supplier<Block> baseBlock, Properties settings) {
+        super(FORGE_BLOCK_SUPPLIER == null ? baseBlock.get().defaultBlockState() : Blocks.AIR.defaultBlockState(), settings);
         if (FORGE_BLOCK_SUPPLIER != null) {
             FORGE_BLOCK_SUPPLIER.setAccessible(true);
             try {
-                FORGE_BLOCK_SUPPLIER.set(this, baseBlockState);
+                FORGE_BLOCK_SUPPLIER.set(this, baseBlock.get().defaultBlockState());
             } catch (Exception ignored) {
             }
         }

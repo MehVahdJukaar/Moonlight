@@ -50,10 +50,7 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * Helper class dedicated to platform independent registration methods
@@ -189,6 +186,11 @@ public class RegHelper {
 
     @ExpectPlatform
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         throw new AssertionError();
     }
 

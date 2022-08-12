@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class FabricRecipeConditionManager {
 
@@ -32,8 +33,8 @@ public class FabricRecipeConditionManager {
         CONDITIONS.put(id, function);
     }
 
-    public static void registerSimple(ResourceLocation id, Function<String, Boolean> predicate) {
-        register(id, j -> predicate.apply(j.get(id.getPath()).getAsString()));
+    public static void registerSimple(ResourceLocation id, Predicate<String> predicate) {
+        register(id, j -> predicate.test(j.get(id.getPath()).getAsString()));
     }
 
     public static boolean isRecipeDisabled(@Nullable JsonElement conditions, ResourceLocation recipeId) {

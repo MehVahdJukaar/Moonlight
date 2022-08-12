@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
+import net.mehvahdjukaar.moonlight.fabric.FabricRecipeConditionManager;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
@@ -34,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class RegHelperImpl {
@@ -117,6 +119,10 @@ public class RegHelperImpl {
 
     public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
         CommandRegistrationCallback.EVENT.register((d, s, b) -> eventListener.accept(d));
+    }
+
+    public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
+        FabricRecipeConditionManager.registerSimple(id, predicate);
     }
 
 

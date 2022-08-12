@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.resource.recipe.forge.OptionalRecipeCondition;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
@@ -24,6 +25,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -37,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 
@@ -145,6 +148,10 @@ public class RegHelperImpl {
             eventListener.accept(event.getDispatcher());
         };
         MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+    }
+
+    public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
+        CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
     }
 
 }
