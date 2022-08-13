@@ -60,7 +60,7 @@ public class RegHelperImpl {
         }
     }
 
-    public static final Map<ResourceKey<? extends Registry<?>>, Map<String, DeferredRegister<?>>> REGISTRIES = new HashMap<>();
+    public static final Map<ResourceKey<? extends Registry<?>>, Map<String, DeferredRegister<?>>> REGISTRIES = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(
