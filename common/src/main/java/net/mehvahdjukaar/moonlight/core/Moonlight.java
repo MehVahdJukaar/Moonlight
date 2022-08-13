@@ -51,12 +51,8 @@ public class Moonlight {
 
             ClientPlatformHelper.addClientReloadListener(new SoftFluidClient(), res("soft_fluids"));
         }
-
-        MoonlightEventsHelper.addListener(Moonlight::onFireConsume, IFireConsumeBlockEvent.class);
     }
 
-    private static <T extends SimpleEvent> void onFireConsume(T t) {
-    }
 
 
 }

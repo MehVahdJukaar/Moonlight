@@ -119,7 +119,7 @@ public class ClientPlatformHelperImpl {
 
     public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientPlatformHelper.AtlasTextureEvent> eventListener) {
         Consumer<TextureStitchEvent.Pre> eventConsumer = event -> {
-            if (event.getAtlas().location() == atlasLocation) {
+            if (event.getAtlas().location().equals(atlasLocation)) {
                 eventListener.accept(event::addSprite);
             }
         };
