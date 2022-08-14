@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Registry;
@@ -103,7 +104,7 @@ public class FoodProvider {
             ItemStack stack = this.food.getDefaultInstance();
             if (nbtApplier != null) nbtApplier.accept(stack);
             for (MobEffectInstance effect : player.getActiveEffectsMap().values()) {
-                if ( PlatformHelper.isCurativeItem(stack,effect)) {
+                if ( ForgeHelper.isCurativeItem(stack,effect)) {
                     player.removeEffect(effect.getEffect());
                     break;
                 }

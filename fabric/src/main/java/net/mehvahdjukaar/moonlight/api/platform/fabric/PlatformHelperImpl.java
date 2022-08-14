@@ -105,10 +105,6 @@ public class PlatformHelperImpl {
         return food.getFoodProperties();
     }
 
-    public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
-        return stack.getItem() == Items.MILK_BUCKET || stack.getItem() == Items.HONEY_BOTTLE;
-    }
-
     public static boolean isDev() {
         return FabricLoader.getInstance().isDevelopmentEnvironment();
     }

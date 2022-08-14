@@ -23,7 +23,6 @@
     "accessor.BlockLootAccessor",
     "accessor.DispenserBlockAccessor",
     "accessor.DispenserBlockEntityAccessor",
-    "accessor.VillagerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

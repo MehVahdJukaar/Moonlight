@@ -3,9 +3,9 @@ package net.mehvahdjukaar.moonlight.api.util;
 import com.google.common.collect.ImmutableList;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
-import net.mehvahdjukaar.moonlight.core.mixins.accessor.VillagerAccessor;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.npc.Villager;
 
 import java.util.function.Consumer;
 
@@ -25,13 +25,10 @@ public class VillagerAIManager {
     public static void registerMemory(MemoryModuleType<?> memoryModuleType) {
 
         try {
-
-            var oldValue = VillagerAccessor.getMemoryTypes();
-
             ImmutableList.Builder<MemoryModuleType<?>> builder = ImmutableList.builder();
-            builder.addAll(oldValue);
+            builder.addAll( Villager.MEMORY_TYPES);
             builder.add(memoryModuleType);
-            VillagerAccessor.setMemoryTypes(builder.build());
+            Villager.MEMORY_TYPES = (builder.build());
 
         } catch (Exception e) {
             Moonlight.LOGGER.warn("failed to register pumpkin sensor type for villagers: " + e);

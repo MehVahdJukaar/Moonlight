@@ -169,10 +169,6 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
-    public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
-        throw new AssertionError();
-    }
 
     @ExpectPlatform
     public static int getBurnTime(ItemStack stack) {

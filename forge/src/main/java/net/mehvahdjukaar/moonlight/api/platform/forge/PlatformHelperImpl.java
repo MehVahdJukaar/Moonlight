@@ -114,10 +114,6 @@ public class PlatformHelperImpl {
         return food.getFoodProperties(stack, player);
     }
 
-    public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
-        return effect.isCurativeItem(stack);
-    }
-
 
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
