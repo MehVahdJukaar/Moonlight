@@ -21,8 +21,9 @@
     "ReloadableResourceManagerMixin",
     "VillagerMixin",
     "accessor.BlockLootAccessor",
+    "accessor.BrainAccessor",
     "accessor.DispenserBlockAccessor",
-    "accessor.DispenserBlockEntityAccessor",
+    "accessor.DispenserBlockEntityAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

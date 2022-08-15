@@ -51,7 +51,7 @@ public abstract class ConfigSpec {
         this(name, configDirectory, type, false,null);
     }
 
-    public ConfigSpec(ResourceLocation name, Path configDirectory, ConfigType type, boolean synced, Runnable changeCallback) {
+    public ConfigSpec(ResourceLocation name, Path configDirectory, ConfigType type, boolean synced, @Nullable Runnable changeCallback) {
         this.fileName = name.getNamespace() + "-" + name.getPath() + ".json";
         this.modId = name.getNamespace();
         this.filePath = configDirectory.resolve(fileName);

@@ -38,6 +38,7 @@ import net.minecraftforge.registries.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -60,9 +61,9 @@ public class RegHelperImpl {
         }
     }
 
+    //this might be accessed on multiple threads
     public static final Map<ResourceKey<? extends Registry<?>>, Map<String, DeferredRegister<?>>> REGISTRIES = new ConcurrentHashMap<>();
 
-    @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(
             ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
         return register(name, supplier, reg.key());
@@ -72,7 +73,7 @@ public class RegHelperImpl {
     public static <T, E extends T> RegSupplier<E> register(
             ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
 
-        var m = REGISTRIES.computeIfAbsent(regKey, h -> new HashMap<>());
+        var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);

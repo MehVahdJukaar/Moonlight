@@ -34,13 +34,14 @@ public class ConfigSpecWrapper extends ConfigSpec {
 
     private final ModConfig modConfig;
 
-    public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced, Runnable onChange) {
+    public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced, @javax.annotation.Nullable Runnable onChange) {
         super(name, FMLPaths.CONFIGDIR.get(), type, synced, onChange);
         this.spec = spec;
 
+        var bus = FMLJavaModLoadingContext.get().getModEventBus();
+        if (onChange != null || this.isSynced()) bus.addListener(this::onConfigChange);
         if (this.isSynced()) {
-            var bus = FMLJavaModLoadingContext.get().getModEventBus();
-            bus.addListener(this::onConfigChange);
+
             MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
             MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         }
@@ -48,7 +49,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
         ModConfig.Type t = this.getConfigType() == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
 
         ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
-        this.modConfig = new ModConfig(t, spec, modContainer, name.getNamespace()+"-"+name.getPath()+".toml");
+        this.modConfig = new ModConfig(t, spec, modContainer, name.getNamespace() + "-" + name.getPath() + ".toml");
         //for event
         ConfigSpec.addTrackedSpec(this);
     }
@@ -61,7 +62,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
     @Override
     public Path getFullPath() {
         return FMLPaths.CONFIGDIR.get().resolve(this.getFileName());
-       // return modConfig.getFullPath();
+        // return modConfig.getFullPath();
     }
 
     @Override
@@ -140,18 +141,18 @@ public class ConfigSpecWrapper extends ConfigSpec {
     protected void onConfigChange(ModConfigEvent event) {
         if (event.getConfig().getSpec() == this.getSpec()) {
             //send this configuration to connected clients
-            sendSyncedConfigsToAllPlayers();
+            if(this.isSynced()) sendSyncedConfigsToAllPlayers();
             onRefresh();
         }
     }
 
     @Override
     public void loadFromBytes(InputStream stream) {
-       // try { //this should work the same as below
-       //      var b = stream.readAllBytes();
-       //     this.modConfig.acceptSyncedConfig(b);
-       // } catch (Exception ignored) {
-       // }
+        // try { //this should work the same as below
+        //      var b = stream.readAllBytes();
+        //     this.modConfig.acceptSyncedConfig(b);
+        // } catch (Exception ignored) {
+        // }
 
         //using this isntead so we dont fire the config changes event otherwise this will loop
         this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
