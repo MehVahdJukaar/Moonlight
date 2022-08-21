@@ -28,8 +28,8 @@ public class MapDecorationRegistryImpl {
     }
 
     public static void registerInternal(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
-        RegHelper.register(id, markerType, REG);
-       // BuiltinRegistries.register(REG, ResourceKey.create(KEY, id), markerType.get()); //hacky
+        RegHelper.registerAsync(id, markerType, REG);
+        //BuiltinRegistries.register(REG, ResourceKey.create(KEY, id), markerType.get()); //hacky
     }
 
     //get value and bootstrap
