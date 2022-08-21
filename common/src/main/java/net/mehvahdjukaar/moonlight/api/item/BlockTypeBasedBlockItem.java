@@ -18,33 +18,23 @@ public class BlockTypeBasedBlockItem<T extends BlockType> extends BlockItem {
 
     private final T blockType;
     private final Supplier<Integer> burnTime;
-    private boolean init = false;
 
     public BlockTypeBasedBlockItem(Block pBlock, Properties pProperties, T blockType) {
         super(pBlock, pProperties);
         this.blockType = blockType;
 
         this.burnTime = Suppliers.memoize(() -> PlatformHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance()));
+        PlatformHelper.getPlatform().ifFabric(() -> {
+                int b = burnTime.get();
+                //this won't work for non-vanilla base items... too bad
+                if (b != 0) RegHelper.registerItemBurnTime(this, b);
+        });
     }
 
     // @Override
     @PlatformOnly(PlatformOnly.FORGE)
     public int getBurnTime(ItemStack itemStack, @Nullable RecipeType<?> recipeType) {
         return burnTime.get();
-    }
-
-    @Override
-    protected boolean allowedIn(CreativeModeTab tab) {
-        //hack
-        PlatformHelper.getPlatform().ifFabric(() -> {
-            if (!init) {
-                init = false;
-                int b = PlatformHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance());
-                if (b != 0) RegHelper.registerItemBurnTime(this, b);
-            }
-        });
-        if (blockType.mainChild().asItem().getItemCategory() == null) return false;
-        return super.allowedIn(tab);
     }
 
     public T getBlockType() {
