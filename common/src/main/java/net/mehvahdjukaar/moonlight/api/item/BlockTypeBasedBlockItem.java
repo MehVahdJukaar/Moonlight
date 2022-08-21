@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.item;
 
 import com.google.common.base.Suppliers;
 import dev.architectury.injectables.annotations.PlatformOnly;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
@@ -22,7 +23,6 @@ public class BlockTypeBasedBlockItem<T extends BlockType> extends BlockItem {
     public BlockTypeBasedBlockItem(Block pBlock, Properties pProperties, T blockType) {
         super(pBlock, pProperties);
         this.blockType = blockType;
-
         this.burnTime = Suppliers.memoize(() -> PlatformHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance()));
         PlatformHelper.getPlatform().ifFabric(() -> {
                 int b = burnTime.get();
