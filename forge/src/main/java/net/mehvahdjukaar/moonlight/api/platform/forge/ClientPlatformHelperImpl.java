@@ -50,7 +50,7 @@ import java.util.function.Consumer;
 public class ClientPlatformHelperImpl {
 
     public static void registerRenderType(Block block, RenderType type) {
-        //from 0.64 we should register render types in out model jsons
+        //from 0.64 we should register render types in out model json
         //TODO: remove
         ItemBlockRenderTypes.setRenderLayer(block, type);
     }
@@ -159,6 +159,13 @@ public class ClientPlatformHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
+    public static void addItemDecoratorsRegistration(Consumer<ClientPlatformHelper.ItemDecoratorEvent> eventListener) {
+        Consumer<RegisterItemDecorationsEvent> eventConsumer = event -> {
+            eventListener.accept((i, l) -> event.register(i, l::render));
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
 
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
         return sprite.getPixelRGBA(frameIndex, x, y);
@@ -189,6 +196,8 @@ public class ClientPlatformHelperImpl {
     public static BlockModel parseBlockModel(JsonElement json) {
         return ExtendedBlockModelDeserializer.INSTANCE.getAdapter(BlockModel.class).fromJsonTree(json);
     }
+
+
 
 
 }

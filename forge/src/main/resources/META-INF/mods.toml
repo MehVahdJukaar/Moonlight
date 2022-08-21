@@ -8,24 +8,24 @@ license = "ARR"
 modId = "moonlight"
 version = "${version}"
 displayName = "Moonlight Library"
-authors = "Me!"
+authors = "MehVahdJukaar"
 
 logoFile="icon.png" #optional
 description = '''
-This is an example description! Tell everyone what your mod is about!
+A small library with many cool unique features, from dynamic asset generation to dynamic villager schedules and multi loader utilities
 '''
 #logoFile = ""
 
 [[dependencies.moonlight]]
 modId = "forge"
 mandatory = true
-versionRange = "[40.0.100,)"
+versionRange = "[43.1.1,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.moonlight]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18.2,)"
+versionRange = "[1.19.1,)"
 ordering = "NONE"
 side = "BOTH"

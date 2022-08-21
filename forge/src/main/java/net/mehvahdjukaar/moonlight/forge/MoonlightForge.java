@@ -4,6 +4,8 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraftforge.client.ItemDecoratorHandler;
+import net.minecraftforge.client.event.RegisterItemDecorationsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ConditionContext;
 import net.minecraftforge.common.crafting.conditions.ICondition;

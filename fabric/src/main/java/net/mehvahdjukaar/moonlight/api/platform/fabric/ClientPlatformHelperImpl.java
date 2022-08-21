@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.FabricModelLoaderRegistry;
+import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ModelManagerAccessor;
@@ -48,7 +49,9 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -130,6 +133,13 @@ public class ClientPlatformHelperImpl {
         });
     }
 
+    public static Map<ItemLike, IItemDecoratorRenderer> ITEM_DECORATORS = new HashMap<>();
+
+    public static void addItemDecoratorsRegistration(Consumer<ClientPlatformHelper.ItemDecoratorEvent> eventListener) {
+        eventListener.accept(ITEM_DECORATORS::put);
+    }
+
+
     public static void addModelLayerRegistration(Consumer<ClientPlatformHelper.ModelLayerEvent> eventListener) {
         eventListener.accept((a, b) -> EntityModelLayerRegistry.registerModelLayer(a, b::get));
     }
@@ -178,6 +188,7 @@ public class ClientPlatformHelperImpl {
     public static BlockModel parseBlockModel(JsonElement json) {
         return BlockModel.fromString(json.toString()); //sub optimal... too bad
     }
+
 
 
 }

@@ -8,6 +8,7 @@
     "BlockModelDeserializerMixin",
     "ClientPacketListenerMixin",
     "ItemRendererAccessor",
+    "ItemRendererMixin",
     "MenuScreensAccessor",
     "ModelBakeryMixin",
     "ModelManagerAccessor",

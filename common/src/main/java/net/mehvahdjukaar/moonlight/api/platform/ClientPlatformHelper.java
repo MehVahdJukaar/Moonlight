@@ -7,8 +7,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
+import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -82,6 +84,16 @@ public class ClientPlatformHelper {
 
     @ExpectPlatform
     public static void addParticleRegistration(Consumer<ParticleEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface ItemDecoratorEvent {
+        void register(ItemLike itemLike, IItemDecoratorRenderer renderer);
+    }
+
+    @ExpectPlatform
+    public static void addItemDecoratorsRegistration(Consumer<ItemDecoratorEvent> eventListener) {
         throw new AssertionError();
     }
 

@@ -20,7 +20,7 @@ public interface IThirdPersonAnimationProvider {
      * @param model entity model. Can be cast to BipedModel
      * @param entity entity
      * @param mainHand hand side
-     * @param twoHanded set to true to skip off hand animation
+     * @param twoHanded set to true to skip offhand animation
      * @return True if default animation should be skipped
      */
      <T extends LivingEntity> boolean poseRightArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand, DualWeildState twoHanded);

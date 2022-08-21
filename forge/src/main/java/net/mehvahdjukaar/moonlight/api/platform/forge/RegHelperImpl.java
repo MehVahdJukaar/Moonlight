@@ -86,7 +86,7 @@ public class RegHelperImpl {
     }
 
     public static <T, E extends
-            T> Supplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+            T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
         return register(name, supplier, reg);
     }
 
