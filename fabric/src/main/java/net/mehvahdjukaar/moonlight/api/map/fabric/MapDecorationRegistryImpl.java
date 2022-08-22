@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.map.fabric;
 
-import net.fabricmc.fabric.api.biome.v1.BiomeModification;
+import net.mehvahdjukaar.moonlight.api.fluids.FluidContainerList;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
@@ -15,10 +15,10 @@ import java.util.function.Supplier;
 
 public class MapDecorationRegistryImpl {
     //rest done by mixin
-    public static final ResourceKey<Registry<MapDecorationType<?,?>>> KEY = ResourceKey.createRegistryKey(
+    public static final ResourceKey<Registry<MapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(
             Moonlight.res("moonlight/map_markers"));
 
-    public static Registry<MapDecorationType<?,?>> REG;
+    public static Registry<MapDecorationType<?, ?>> REG;
 
     public static void init() {
     }
@@ -28,13 +28,13 @@ public class MapDecorationRegistryImpl {
     }
 
     public static void registerInternal(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
-        RegHelper.registerAsync(id, markerType, REG);
+        RegHelper.registerAsync(id, markerType, REG); //register immediately
         //BuiltinRegistries.register(REG, ResourceKey.create(KEY, id), markerType.get()); //hacky
     }
 
     //get value and bootstrap
     public static Holder<? extends MapDecorationType<?, ?>> getDefaultValue(Registry<MapDecorationType<?, ?>> reg) {
-        //called by mixin so its too early to register builtin stuff here
+        //called by mixin, so It's too early to register builtin stuff here.tho I guess I could use registry queue
         return BuiltinRegistries.register(reg, ResourceKey.create(KEY, Moonlight.res("generic_structure")), MapDecorationRegistry.GENERIC_STRUCTURE_TYPE);
     }
 }
