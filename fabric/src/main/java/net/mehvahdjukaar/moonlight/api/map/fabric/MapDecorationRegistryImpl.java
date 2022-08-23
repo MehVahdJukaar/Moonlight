@@ -28,8 +28,10 @@ public class MapDecorationRegistryImpl {
     }
 
     public static void registerInternal(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
-        RegHelper.registerAsync(id, markerType, REG); //register immediately
-        //BuiltinRegistries.register(REG, ResourceKey.create(KEY, id), markerType.get()); //hacky
+        //TODO: this could be what causes issues? its currently disabled
+        //RegHelper.registerAsync(id, markerType, REG); //register immediately
+
+      //  BuiltinRegistries.register(REG, ResourceKey.create(KEY, id), markerType.get()); //hacky
     }
 
     //get value and bootstrap

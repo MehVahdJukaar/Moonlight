@@ -25,8 +25,11 @@ import java.util.Set;
 //TODO: maybe split into api/core?
 public class SoftFluidRegistry {
 
-    public static final SoftFluid EMPTY = new SoftFluid.Builder(new ResourceLocation(""),
-            new ResourceLocation("")).build();
+    public static final ResourceLocation EMPTY_ID = Moonlight.res("empty");
+
+    public static SoftFluid getEmpty(){
+        return get(EMPTY_ID);
+    }
 
     @ExpectPlatform
     public static void init() {
@@ -92,7 +95,7 @@ public class SoftFluidRegistry {
      * @return soft fluid. empty fluid if not found
      */
     public static SoftFluid fromForgeFluid(Fluid fluid) {
-        return getFluidsMap().getOrDefault(fluid, EMPTY);
+        return getFluidsMap().getOrDefault(fluid, getEmpty());
     }
 
     /**
@@ -103,7 +106,7 @@ public class SoftFluidRegistry {
      */
     @Nonnull
     public static SoftFluid fromItem(Item filledContainerItem) {
-        return getItemsMap().getOrDefault(filledContainerItem, EMPTY);
+        return getItemsMap().getOrDefault(filledContainerItem, getEmpty());
     }
 
 

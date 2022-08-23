@@ -15,7 +15,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import org.checkerframework.checker.units.qual.K;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,14 +35,14 @@ public class SoftFluidRegistryImpl {
     public static Registry<SoftFluid> REG;
 
     private static final Map<Fluid, SoftFluid> FLUID_MAP = new HashMap<>();
-    private static final Map<Item,SoftFluid> ITEM_MAP = new HashMap<>();
+    private static final Map<Item, SoftFluid> ITEM_MAP = new HashMap<>();
 
 
     public static void addExistingVanillaFluids() {
         //only runs on the first object
         var fluidMap = getFluidsMap();
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.getDataPackRegistry();
-        ((MappedRegistryAccessor)reg).setFrozen(false);
+        ((MappedRegistryAccessor) reg).setFrozen(false);
         for (Fluid f : Registry.FLUID) {
             try {
                 if (f == null) continue;
@@ -78,7 +77,9 @@ public class SoftFluidRegistryImpl {
 
 
     public static Holder<? extends SoftFluid> getDefaultValue(Registry<SoftFluid> reg) {
-        return BuiltinRegistries.register(reg, ResourceKey.create(KEY, Moonlight.res("empty")), SoftFluidRegistry.EMPTY);
+        //called my mixin. registers and get the default value
+        return BuiltinRegistries.register(reg, ResourceKey.create(KEY, SoftFluidRegistry.EMPTY_ID),
+                new SoftFluid.Builder(new ResourceLocation(""), new ResourceLocation("")).build());
     }
 
 

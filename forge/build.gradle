@@ -36,7 +36,7 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    modImplementation ("curse.maven:configured-457570:3872190")
+    modImplementation ("curse.maven:configured-457570:3946498")
 
 }
 

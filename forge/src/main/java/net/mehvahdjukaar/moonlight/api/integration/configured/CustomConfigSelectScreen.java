@@ -111,15 +111,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     private Button createModifyButton(ModConfig config) {
         String langKey = "configured.gui.modify";
         return new IconButton(0, 0, 33, 0, 60, Component.translatable(langKey),
-                (onPress) -> Minecraft.getInstance().setScreen(configScreenFactory.apply(CustomConfigSelectScreen.this, config)),
-                (button, matrixStack, mouseX, mouseY) -> {
-                    if (button.isHoveredOrFocused()) {
-                        if (ConfigScreen.isPlayingGame() && !ConfigHelper.isConfiguredInstalledOnServer()) {
-                            CustomConfigSelectScreen.this.renderTooltip(matrixStack, this.font.split(Component.translatable("configured.gui.not_installed"),
-                                    Math.max(CustomConfigSelectScreen.this.width / 2 - 43, 170)), mouseX, mouseY);
-                        }
-                    }
-                });
+                (onPress) -> Minecraft.getInstance().setScreen(configScreenFactory.apply(CustomConfigSelectScreen.this, config)));
     }
 
     @Override

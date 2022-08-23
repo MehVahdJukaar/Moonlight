@@ -2,13 +2,16 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.KeyDispatchCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.SimpleDecorationType;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
@@ -34,6 +37,9 @@ public class MapDecorationRegistry {
             Codec.either(CustomDecorationType.CODEC, SimpleDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
+                        if(type == null){
+                            Moonlight.LOGGER.error("map decoration type cant be null. how did this happen?");
+                        }
                         if (type instanceof CustomDecorationType<?, ?> c) {
                             return Either.left(c);
                         }
@@ -78,10 +84,13 @@ public class MapDecorationRegistry {
 
     /**
      * Call before mod setup. Register a code defined map marker
+     * For now only works for FORGE as fabric has some unknown bugs I cant figure out involving vanilla codecs
      */
     public static void register(ResourceLocation id, Supplier<CustomDecorationType<?, ?>> markerType) {
-        CODE_TYPES_FACTORIES.put(id, markerType);
-        registerInternal(id, markerType::get);
+        if(PlatformHelper.getPlatform().isForge()) {
+            CODE_TYPES_FACTORIES.put(id, markerType);
+            registerInternal(id, markerType::get);
+        }
     }
 
     /**

@@ -38,7 +38,10 @@ public class SoftFluidRegistryImpl {
                     .allowModification()
                     .disableSaving());
 
-    private static final RegistryObject<SoftFluid> EMPTY = DEFERRED_REGISTER.register("empty", () -> SoftFluidRegistry.EMPTY);
+    //do not reference. will cause problem on client
+    private static final RegistryObject<SoftFluid> EMPTY = DEFERRED_REGISTER.register(SoftFluidRegistry.EMPTY_ID.getPath(),
+            () ->  new SoftFluid.Builder(new ResourceLocation(""),
+                    new ResourceLocation("")).build());
 
     public static void init() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();

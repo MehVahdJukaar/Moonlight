@@ -133,6 +133,9 @@ public class FluidContainerList {
             this(emptyContainer, capacity, null, null);
         }
 
+        private static Category decode(ResourceLocation empty, int capacity, List<ResourceLocation> filled) {
+            return decode(empty, capacity, filled, Optional.empty(), Optional.empty());
+        }
         private static Category decode(ResourceLocation empty, int capacity, List<ResourceLocation> filled,
                                        Optional<SoundEvent> fillSound, Optional<SoundEvent> emptySound) {
             var opt = Registry.ITEM.getOptional(empty);
