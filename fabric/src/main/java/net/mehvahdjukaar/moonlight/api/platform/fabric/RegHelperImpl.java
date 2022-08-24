@@ -17,6 +17,7 @@ import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -42,12 +43,19 @@ public class RegHelperImpl {
 
     public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
 
+    //order is important here
     static {
         REGISTRIES.put(Registry.SOUND_EVENT, new LinkedHashMap<>());
         REGISTRIES.put(Registry.BLOCK, new LinkedHashMap<>());
         REGISTRIES.put(Registry.ENTITY_TYPE, new LinkedHashMap<>());
         REGISTRIES.put(Registry.ITEM, new LinkedHashMap<>());
         REGISTRIES.put(Registry.BLOCK_ENTITY_TYPE, new LinkedHashMap<>());
+        REGISTRIES.put(Registry.PLACEMENT_MODIFIERS, new LinkedHashMap<>());
+        REGISTRIES.put(Registry.STRUCTURE_TYPES, new LinkedHashMap<>());
+        REGISTRIES.put(Registry.STRUCTURE_PIECE, new LinkedHashMap<>());
+        REGISTRIES.put(Registry.FEATURE, new LinkedHashMap<>());
+        REGISTRIES.put(BuiltinRegistries.CONFIGURED_FEATURE, new LinkedHashMap<>());
+        REGISTRIES.put(BuiltinRegistries.PLACED_FEATURE, new LinkedHashMap<>());
     }
 
     //call from mod setup
