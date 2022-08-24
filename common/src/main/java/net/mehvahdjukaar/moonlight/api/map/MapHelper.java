@@ -27,7 +27,7 @@ public class MapHelper {
     public static MapItemSavedData getMapData(ItemStack stack, Level level, @Nullable Player player) {
         MapItemSavedData data;
         data = MapItem.getSavedData(stack, level);
-        if (data != null && mapAtlas && player != null) data = MapAtlasCompat.getSavedDataFromAtlas(stack, level, player);
+        if (data == null && mapAtlas && player != null) data = MapAtlasCompat.getSavedDataFromAtlas(stack, level, player);
         return data;
     }
 

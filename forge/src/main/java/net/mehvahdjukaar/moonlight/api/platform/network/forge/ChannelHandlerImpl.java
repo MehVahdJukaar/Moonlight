@@ -21,12 +21,14 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ChannelHandlerImpl extends ChannelHandler {
 
-    static Map<ResourceLocation, ChannelHandler> CHANNELS = new HashMap<>();
+    //needs to be concurrent as mod loading happens in parallel and these are created there
+    static Map<ResourceLocation, ChannelHandler> CHANNELS = new ConcurrentHashMap<>();
 
     public static ChannelHandler createChannel(ResourceLocation channelMame) {
         return CHANNELS.computeIfAbsent(channelMame, c -> new ChannelHandlerImpl(channelMame));

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.map.forge;
 
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.SimpleDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.forge.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -14,6 +15,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class MapDecorationRegistryImpl {
@@ -24,13 +26,13 @@ public class MapDecorationRegistryImpl {
     public static final DeferredRegister<MapDecorationType<?, ?>> DEFERRED_REGISTER = DeferredRegister.create(KEY, KEY.location().getNamespace());
     public static final Supplier<IForgeRegistry<MapDecorationType<?, ?>>> MAP_MARKERS = DEFERRED_REGISTER.makeRegistry(() ->
             new RegistryBuilder<MapDecorationType<?, ?>>()
-                    .setDefaultKey(Moonlight.res("generic_structure"))
+                    .setDefaultKey(MapDecorationRegistry.GENERIC_STRUCTURE_ID)
                     .dataPackRegistry(MapDecorationRegistry.TYPE_CODEC, MapDecorationRegistry.TYPE_CODEC)
                     .allowModification()
                     .disableSaving());
 
     private static final RegistryObject<MapDecorationType<?, ?>> GENERIC_STRUCTURE = DEFERRED_REGISTER
-            .register("generic_structure", () -> MapDecorationRegistry.GENERIC_STRUCTURE_TYPE);
+            .register(MapDecorationRegistry.GENERIC_STRUCTURE_ID.getPath(), () -> new SimpleDecorationType(Optional.empty()));
 
 
     public static void init() {

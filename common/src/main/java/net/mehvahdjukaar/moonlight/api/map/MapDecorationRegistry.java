@@ -1,15 +1,16 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.KeyDispatchCodec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.SimpleDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
@@ -33,11 +34,12 @@ import java.util.function.Supplier;
 
 public class MapDecorationRegistry {
 
+   //pain
     public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC =
             Codec.either(CustomDecorationType.CODEC, SimpleDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
-                        if(type == null){
+                        if (type == null) {
                             Moonlight.LOGGER.error("map decoration type cant be null. how did this happen?");
                         }
                         if (type instanceof CustomDecorationType<?, ?> c) {
@@ -45,6 +47,26 @@ public class MapDecorationRegistry {
                         }
                         return Either.right((SimpleDecorationType) type);
                     });
+
+    public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC_BUGGY_2 =MapDecorationType.GENERIC_CODEC;
+
+    public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC_2 = new Codec<>() {
+        @Override
+        public <T> DataResult<T> encode(MapDecorationType<?, ?> input, DynamicOps<T> ops, T prefix) {
+            if (input instanceof CustomDecorationType<?, ?> type) {
+                return CustomDecorationType.CODEC.encode(type, ops, prefix);
+            } else {
+                return SimpleDecorationType.CODEC.encode(((SimpleDecorationType) input), ops, prefix);
+            }
+        }
+
+        @Override
+        public <T> DataResult<Pair<MapDecorationType<?, ?>, T>> decode(DynamicOps<T> ops, T input) {
+            var first = CustomDecorationType.CODEC.decode(ops, input);
+            if(first.result().isPresent())return first.map(v -> v.mapFirst(a-> a));
+            return SimpleDecorationType.CODEC.decode(ops, input).map(v -> v.mapFirst(a-> a));
+        }
+    };
 
     //data holder
 
@@ -77,8 +99,11 @@ public class MapDecorationRegistry {
 
 
     //map markers
+    public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
 
-    public static final MapDecorationType<CustomMapDecoration, ?> GENERIC_STRUCTURE_TYPE = new SimpleDecorationType(Optional.empty());
+    public static MapDecorationType<?, ?> getGenericStructure(){
+        return get(GENERIC_STRUCTURE_ID);
+    };
 
     public static final Map<ResourceLocation, Supplier<CustomDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new HashMap<>();
 
@@ -87,10 +112,8 @@ public class MapDecorationRegistry {
      * For now only works for FORGE as fabric has some unknown bugs I cant figure out involving vanilla codecs
      */
     public static void register(ResourceLocation id, Supplier<CustomDecorationType<?, ?>> markerType) {
-        if(PlatformHelper.getPlatform().isForge()) {
-            CODE_TYPES_FACTORIES.put(id, markerType);
-            registerInternal(id, markerType::get);
-        }
+        CODE_TYPES_FACTORIES.put(id, markerType);
+        registerInternal(id, markerType::get);
     }
 
     /**

@@ -155,7 +155,7 @@ public class SoftFluid {
     }
 
     public boolean isEmpty() {
-        return this == SoftFluidRegistry.EMPTY;
+        return this == SoftFluidRegistry.getEmpty();
     }
 
     /**

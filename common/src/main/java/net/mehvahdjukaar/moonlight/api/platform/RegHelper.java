@@ -83,7 +83,9 @@ public class RegHelper {
     }
 
     public static <T extends StructureType<?>> RegSupplier<T> registerStructure(ResourceLocation name, Supplier<T> feature) {
-        return register(name, feature, Registry.STRUCTURE_TYPES);
+        //TODO: this causes issues on fabric and its very random as might be on only with some random unrelated mods. best to lave it like this
+       // return register(name, feature, Registry.STRUCTURE_TYPES);
+        return registerAsync(name, feature, Registry.STRUCTURE_TYPES);
     }
 
     public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<PlacedFeature> registerPlacedFeature(
