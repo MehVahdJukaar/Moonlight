@@ -16,7 +16,7 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class SoftFluidRegistryImpl {
@@ -34,11 +34,11 @@ public class SoftFluidRegistryImpl {
 
     public static Registry<SoftFluid> REG;
 
-    private static final Map<Fluid, SoftFluid> FLUID_MAP = new HashMap<>();
-    private static final Map<Item, SoftFluid> ITEM_MAP = new HashMap<>();
+    private static final Map<Fluid, SoftFluid> FLUID_MAP = new IdentityHashMap<>();
+    private static final Map<Item, SoftFluid> ITEM_MAP = new IdentityHashMap<>();
 
 
-    public static void addExistingVanillaFluids() {
+    public static void registerExistingVanillaFluids() {
         //only runs on the first object
         var fluidMap = getFluidsMap();
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.getDataPackRegistry();

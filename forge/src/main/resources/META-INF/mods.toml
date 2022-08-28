@@ -2,13 +2,15 @@ modLoader = "javafml"
 loaderVersion = "[40,)"
 #issueTrackerURL = ""
 license = "ARR"
-
+issueTrackerURL = "https://github.com/MehVahdJukaar/Moonlight/issues" #optional
 
 [[mods]]
 modId = "moonlight"
 version = "${version}"
 displayName = "Moonlight Library"
 authors = "MehVahdJukaar"
+modUrl = "https://www.curseforge.com/minecraft/mc-mods/selene" #optional
+updateJSONURL = "https://raw.githubusercontent.com/MehVahdJukaar/Moonlight/master/forge/update.json"
 
 logoFile="icon.png" #optional
 description = '''

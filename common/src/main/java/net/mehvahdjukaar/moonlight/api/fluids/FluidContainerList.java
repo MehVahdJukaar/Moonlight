@@ -24,7 +24,7 @@ public class FluidContainerList {
     ).apply(instance, FluidContainerList::new));
     */
 
-    private final Map<Item, Category> emptyToFilledMap = new HashMap<>();
+    private final Map<Item, Category> emptyToFilledMap = new IdentityHashMap<>();
 
     public FluidContainerList() {
 

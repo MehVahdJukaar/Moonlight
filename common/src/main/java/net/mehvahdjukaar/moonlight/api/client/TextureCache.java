@@ -6,10 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.security.Identity;
+import java.util.*;
 import java.util.function.Predicate;
 
 //used for quick access when recoloring textures
@@ -27,9 +25,9 @@ public class TextureCache {
         SPECIAL_TEXTURES.computeIfAbsent(block, b -> new HashSet<>()).add(new Pair<>(ID, ResType.TEXTURES.getPath(texturePath).toString()));
     }
 
-    private static final Map<ItemLike, Set<Pair<String, String>>> SPECIAL_TEXTURES = new HashMap<>();
+    private static final Map<ItemLike, Set<Pair<String, String>>> SPECIAL_TEXTURES = new IdentityHashMap<>();
 
-    private static final Map<ItemLike, Set<String>> CACHED_TEXTURES = new HashMap<>();
+    private static final Map<ItemLike, Set<String>> CACHED_TEXTURES = new IdentityHashMap<>();
 
     public static void refresh() {
         CACHED_TEXTURES.clear();

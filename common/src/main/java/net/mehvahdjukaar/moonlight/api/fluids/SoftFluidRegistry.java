@@ -112,7 +112,9 @@ public class SoftFluidRegistry {
 
     private static void populateSlaveMaps() {
         var itemMap = getItemsMap();
+        itemMap.clear();
         var fluidsMap = getFluidsMap();
+        fluidsMap.clear();
         for (var s : getValues()) {
             if (PlatformHelper.isModLoaded(s.getFromMod())) {
                 s.getEquivalentFluids().forEach(f -> fluidsMap.put(f, s));
@@ -126,6 +128,8 @@ public class SoftFluidRegistry {
         }
     }
 
+    //wtf is going on here
+
     //TODO: call these
     public static void postInitClient() {
         populateSlaveMaps();
@@ -135,13 +139,14 @@ public class SoftFluidRegistry {
     //on data load
     public static void onDataLoad() {
         populateSlaveMaps();
-        addExistingVanillaFluids();
+        //registers existing fluids. also update the salve maps
+        registerExistingVanillaFluids();
         ModMessages.CHANNEL.sendToAllClientPlayers(new ClientBoundFinalizeFluidsMessage());
     }
 
 
     @ExpectPlatform
-    private static void addExistingVanillaFluids() {
+    private static void registerExistingVanillaFluids() {
         throw new AssertionError();
     }
 }

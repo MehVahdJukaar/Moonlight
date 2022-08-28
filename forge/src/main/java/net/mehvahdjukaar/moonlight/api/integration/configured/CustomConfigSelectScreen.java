@@ -84,7 +84,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     }
 
     private static Map<ModConfig.Type, Set<ModConfig>> createConfigMap(ConfigSpec... specs) {
-        Map<ModConfig.Type, Set<ModConfig>> modConfigMap = new HashMap<>();
+        Map<ModConfig.Type, Set<ModConfig>> modConfigMap = new EnumMap<>(ModConfig.Type.class);
         for (var s : specs) {
             var set = modConfigMap.computeIfAbsent(((ConfigSpecWrapper) s).getModConfigType(), a -> new HashSet<>());
             set.add(((ConfigSpecWrapper) s).getModConfig());

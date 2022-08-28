@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -146,7 +147,7 @@ public class FoodProvider {
         }
     };
 
-    public static final Map<Item, FoodProvider> CUSTOM_PROVIDERS = new HashMap<>() {{
+    public static final Map<Item, FoodProvider> CUSTOM_PROVIDERS = new IdentityHashMap<>() {{
         put(Items.AIR, EMPTY);
         put(Items.SUSPICIOUS_STEW, SUS_STEW);
         put(Items.MILK_BUCKET, MILK);

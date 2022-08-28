@@ -48,10 +48,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -133,7 +130,7 @@ public class ClientPlatformHelperImpl {
         });
     }
 
-    public static Map<ItemLike, IItemDecoratorRenderer> ITEM_DECORATORS = new HashMap<>();
+    public static Map<ItemLike, IItemDecoratorRenderer> ITEM_DECORATORS = new IdentityHashMap<>();
 
     public static void addItemDecoratorsRegistration(Consumer<ClientPlatformHelper.ItemDecoratorEvent> eventListener) {
         eventListener.accept(ITEM_DECORATORS::put);

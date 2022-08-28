@@ -35,7 +35,7 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
 
     @Inject(method = "poseLeftArm", at = @At(value = "HEAD"), cancellable = true, require = 0)
     public void poseLeftArm(T entity, CallbackInfo ci) {
-        //cancel offhand animation if two handed so two-handed animation always happens last
+        //cancel offhand animation if two-handed so two-handed animation always happens last
         if (this.animationType.isTwoHanded()) ci.cancel();
         HumanoidArm handSide = entity.getMainArm();
         ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);

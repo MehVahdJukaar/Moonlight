@@ -4,15 +4,12 @@ import net.mehvahdjukaar.moonlight.api.events.SimpleEvent;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.HitResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class MoonlightEventsHelperImpl {
 
-    private static final Map<Class<? extends SimpleEvent>, List<Consumer<? extends SimpleEvent>>> LISTENERS = new HashMap<>();
+    private static final Map<Class<? extends SimpleEvent>, List<Consumer<? extends SimpleEvent>>> LISTENERS = new IdentityHashMap<>();
 
 
     public static <T extends SimpleEvent> void addListener(Consumer<T> listener, Class<T> eventClass) {

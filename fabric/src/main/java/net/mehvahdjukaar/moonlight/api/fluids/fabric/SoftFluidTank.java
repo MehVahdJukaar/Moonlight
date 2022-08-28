@@ -1,12 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.fluids.fabric;
 
-import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
 import net.mehvahdjukaar.moonlight.api.fluids.ISoftFluidTank;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.fluids.VanillaSoftFluids;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -513,7 +514,14 @@ public class SoftFluidTank implements ISoftFluidTank {
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
         cmp.putInt("Count", (int) this.count);
-        cmp.putString("Fluid", Utils.getID(this.fluid).toString());
+        //this shouldn't be needed, but I've been getting reports so...
+        var id = Utils.getID(this.fluid);
+        if (id == null) {
+            Moonlight.LOGGER.warn("Failed to save fluid in container: {} is not registered", this.fluid);
+            cmp.putString("Fluid", SoftFluidRegistry.EMPTY_ID.toString());
+        } else {
+            cmp.putString("Fluid", id.toString());
+        }
         //for item render. needed for potion colors
         cmp.putInt("CachedColor", this.getTintColor(null, null));
         if (this.nbt != null && !this.nbt.isEmpty()) cmp.put("NBT", this.nbt);

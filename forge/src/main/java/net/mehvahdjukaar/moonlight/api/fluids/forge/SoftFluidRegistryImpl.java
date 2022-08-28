@@ -18,6 +18,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.*;
 
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -61,16 +62,16 @@ public class SoftFluidRegistryImpl {
     }
 
     public static void onCreate(IForgeRegistryInternal<SoftFluid> owner, RegistryManager stage) {
-        owner.setSlaveMap(FLUIDS_MAP_KEY, new HashMap<>());
-        owner.setSlaveMap(ITEMS_MAP_KEY, new HashMap<>());
+        owner.setSlaveMap(FLUIDS_MAP_KEY, new IdentityHashMap<>());
+        owner.setSlaveMap(ITEMS_MAP_KEY, new IdentityHashMap<>());
     }
 
     public static void onClear(IForgeRegistryInternal<SoftFluid> owner, RegistryManager stage) {
-        owner.getSlaveMap(FLUIDS_MAP_KEY, HashMap.class).clear();
-        owner.getSlaveMap(ITEMS_MAP_KEY, HashMap.class).clear();
+        owner.getSlaveMap(FLUIDS_MAP_KEY, IdentityHashMap.class).clear();
+        owner.getSlaveMap(ITEMS_MAP_KEY, IdentityHashMap.class).clear();
     }
 
-    public static void addExistingVanillaFluids() {
+    public static void registerExistingVanillaFluids() {
         //only runs on the first object
         var fluidMap = getFluidsMap();
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.getDataPackRegistry();

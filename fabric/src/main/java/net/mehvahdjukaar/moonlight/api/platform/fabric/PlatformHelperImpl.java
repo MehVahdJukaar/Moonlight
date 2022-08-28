@@ -139,7 +139,7 @@ public class PlatformHelperImpl {
         return t.build();
     }
 
-    private static final HashMap<PackType, List<Supplier<Pack>>> EXTRA_PACKS = new HashMap<>();
+    private static final Map<PackType, List<Supplier<Pack>>> EXTRA_PACKS = new EnumMap<>(PackType.class);
 
     @SuppressWarnings("ConstantConditions")
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {

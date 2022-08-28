@@ -6,15 +6,12 @@ import net.mehvahdjukaar.moonlight.api.events.SimpleEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class MoonlightEventsHelperImpl {
 
-    private static final Map<Class<? extends SimpleEvent>, List<Consumer<? extends SimpleEvent>>> LISTENERS = new HashMap<>();
+    private static final Map<Class<? extends SimpleEvent>, List<Consumer<? extends SimpleEvent>>> LISTENERS = new IdentityHashMap<>();
 
     @SuppressWarnings("unchecked")
     public static <T extends SimpleEvent> void addListener(Consumer<T> listener, Class<T> eventClass) {

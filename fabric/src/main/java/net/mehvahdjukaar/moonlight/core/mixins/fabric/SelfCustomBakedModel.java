@@ -30,7 +30,9 @@ public interface SelfCustomBakedModel extends FabricBakedModel, CustomBakedModel
         // Object attachment = ((RenderAttachedBlockView)blockView).getBlockEntityRenderAttachment(pos);
         var tile = blockView.getBlockEntity(pos);
         if (tile instanceof IExtraModelDataProvider provider) {
-            SlaveModel inner = SlaveModel.INSTANCE;
+            //SlaveModel inner = SlaveModel.INSTANCE;
+            //creating a new instance because indium doesn't like it...
+            SlaveModel inner = new SlaveModel();
             inner.prepare(this, provider.getExtraModelData());
             context.fallbackConsumer().accept(inner);
         }
