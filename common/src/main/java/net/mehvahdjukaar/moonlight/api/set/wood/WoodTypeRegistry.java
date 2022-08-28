@@ -51,6 +51,18 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         ResourceLocation baseRes = Utils.getID(baseBlock);
         String name = null;
         String path = baseRes.getPath();
+        //stuff for tfc
+        if(baseRes.getNamespace().equals("tfc")){
+            if(path.contains("wood/planks/")){
+                var log = Registry.BLOCK.getOptional(
+                        new ResourceLocation(baseRes.getNamespace(),path.replace("planks","log")));
+                if(log.isPresent()){
+                    ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), path.replace("wood/planks/",""));
+                    return Optional.of(new WoodType(id, baseBlock, log.get()));
+                }
+            }
+            return Optional.empty();
+        }
         //needs to contain planks in its name
         if (path.endsWith("_planks")) {
             name = path.substring(0, path.length() - "_planks".length());

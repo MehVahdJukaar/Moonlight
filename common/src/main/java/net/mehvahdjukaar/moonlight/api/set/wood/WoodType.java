@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.set.wood;
 
-import net.mehvahdjukaar.moonlight.api.set.BlockType;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
@@ -40,6 +40,13 @@ public class WoodType extends BlockType {
 
     @Nullable
     protected Block findLogRelatedBlock(String append, String postpend) {
+        if (this.id.getNamespace().equals("tfc")) {
+            var o = Registry.BLOCK.getOptional(
+                    new ResourceLocation(id.getNamespace(),
+                            "wood/" + append + "_" + postpend+"/" + id.getPath()));
+            if (o.isPresent()) return o.get();
+        }
+
         String post = postpend.isEmpty() ? "" : "_" + postpend;
         var id = this.getId();
         String log = Utils.getID(this.log).getPath();

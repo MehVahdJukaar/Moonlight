@@ -86,6 +86,13 @@ public abstract class BlockType {
 
     @Nullable
     protected <V> V findRelatedEntry(String append, String postPend, Registry<V> reg) {
+        if (this.id.getNamespace().equals("tfc")) {
+            var o = reg.getOptional(
+                    new ResourceLocation(id.getNamespace(), "wood/" + postPend + "/" + id.getPath()));
+            if (o.isPresent()) return o.get();
+        }
+
+
         String post = postPend.isEmpty() ? "" : "_" + postPend;
         var id = this.getId();
         ResourceLocation[] targets = {
