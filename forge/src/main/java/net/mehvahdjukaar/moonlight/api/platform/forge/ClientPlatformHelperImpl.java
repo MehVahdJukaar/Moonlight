@@ -166,6 +166,13 @@ public class ClientPlatformHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
+    public static void addKeyBindRegistration(Consumer<ClientPlatformHelper.KeyBindEvent> eventListener) {
+        Consumer<RegisterKeyMappingsEvent> eventConsumer = event -> {
+            eventListener.accept(event::register);
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
 
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
         return sprite.getPixelRGBA(frameIndex, x, y);
@@ -196,7 +203,6 @@ public class ClientPlatformHelperImpl {
     public static BlockModel parseBlockModel(JsonElement json) {
         return ExtendedBlockModelDeserializer.INSTANCE.getAdapter(BlockModel.class).fromJsonTree(json);
     }
-
 
 
 

@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.Font;
@@ -194,7 +195,15 @@ public class ClientPlatformHelper {
         throw new AssertionError();
     }
 
+    @FunctionalInterface
+    public interface KeyBindEvent {
+        void register(KeyMapping keyMapping);
+    }
 
+    @ExpectPlatform
+    public static void addKeyBindRegistration(Consumer<KeyBindEvent> eventListener) {
+        throw new AssertionError();
+    }
 
     @ExpectPlatform
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
