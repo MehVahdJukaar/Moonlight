@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.lang.reflect.Field;
 import java.util.function.Supplier;
@@ -17,7 +18,7 @@ public class ModStairBlock extends StairBlock {
         if (FORGE_BLOCK_SUPPLIER != null) {
             FORGE_BLOCK_SUPPLIER.setAccessible(true);
             try {
-                FORGE_BLOCK_SUPPLIER.set(this, baseBlock.get().defaultBlockState());
+                FORGE_BLOCK_SUPPLIER.set(this, (Supplier<BlockState>) () -> baseBlock.get().defaultBlockState());
             } catch (Exception ignored) {
             }
         }
