@@ -124,7 +124,7 @@ public class WoodType extends BlockType {
         this.addChild("sign", this.findRelatedEntry("sign", Registry.ITEM));
     }
 
-    public static class Finder extends SetFinder<WoodType> {
+    public static class Finder implements SetFinder<WoodType> {
 
         private final Map<String, ResourceLocation> childNames = new HashMap<>();
         private final Supplier<Block> planksFinder;

@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Block;
 import javax.annotation.Nullable;
 import java.util.Collection;
 
-//idk if this is needed, this stuff here just calls stuff in BlockSetInternal...
+//Interface for Modders!
 public class BlockSetAPI {
 
     /**
@@ -25,10 +25,11 @@ public class BlockSetAPI {
     }
 
     /**
-     * Use this function to add a (modded) block type finder manually.
+     * Use this function to add a (modded) block type finder manually. (i.e. for your wood type)
      * This is handy for block types that are unique and which can't be detected by the detection system defined in their BlockSetContainer class
      * Call during mod startup (not mod setup as it will be too late for this to affect block registration)
      *
+     * @param type the block type class you are registering this for (WoodType.class, LeafType.class...)
      * @param blockFinder Finder object that will provide the modded block type when the time is right
      */
     public static <T extends BlockType> void addBlockTypeFinder(Class<T> type, BlockType.SetFinder<T> blockFinder) {

@@ -40,7 +40,7 @@ public class LeavesType extends BlockType {
 
     }
 
-    public static class Finder extends SetFinder<LeavesType> {
+    public static class Finder implements SetFinder<LeavesType> {
 
         private final Supplier<Block> leavesFinder;
         private final ResourceLocation id;

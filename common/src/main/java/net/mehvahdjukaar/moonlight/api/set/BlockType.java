@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public abstract class BlockType {
 
@@ -75,8 +76,9 @@ public abstract class BlockType {
         return this.getNamespace().equals("minecraft");
     }
 
-    public static abstract class SetFinder<T extends BlockType> {
-        public abstract Optional<T> get();
+    @FunctionalInterface
+    public interface SetFinder<T extends BlockType> extends Supplier<Optional<T>> {
+        Optional<T> get();
     }
 
     @Nullable
