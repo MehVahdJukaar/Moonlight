@@ -10,6 +10,8 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
+import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.renderer.block.model.ItemOverride;
@@ -79,21 +81,40 @@ public class RPUtils {
 
             List<String> textures = findAllTexturesInModelRecursive(manager, modelPath);
 
-            //if all fails randomly guess texture location
-            if (textures.isEmpty()) {
-                //TODO: test
-                textures.add(res.getNamespace() + ":block/" + res.getPath());
-            }
-
-
             for (var t : textures) {
                 TextureCache.add(block, t);
                 if (texturePredicate.test(t)) return new ResourceLocation(t);
             }
         } catch (Exception ignored) {
         }
-        throw new FileNotFoundException("Could not find any texture associated to the given block " + res);
+        //if texture is not there try to guess location. Hack for better end
+        var hack = betterEndTextureHackery(res, manager, block);
+        for (var t : hack) {
+            TextureCache.add(block, t);
+            if (texturePredicate.test(t)) return new ResourceLocation(t);
+        }
 
+        throw new FileNotFoundException("Could not find any texture associated to the given block " + res);
+    }
+
+    private static List<String> betterEndTextureHackery(ResourceLocation id, ResourceManager manager, Block block){
+        //if(!id.getNamespace().contains("better")) return List.of();
+        String name = id.getPath();
+        List<String> textures = new ArrayList<>();
+        for(var w :WoodTypeRegistry.getTypes()){
+            if(name.contains(w.id.getPath())){
+                for(var c : w.getChildren()){
+                    if(c.getValue() == block){
+                        if(Objects.equals(c.getKey(), "log") || c.getKey().equals("stripped_log")){
+                            textures.add(id.getNamespace() + ":block/" + name + "_top");
+                            textures.add(id.getNamespace() + ":block/" + name + "_side");
+                        }else textures.add(id.getNamespace() + ":block/" + name);
+                        return textures;
+                    }
+                }
+            }
+        }
+        return List.of();
     }
 
     @NotNull

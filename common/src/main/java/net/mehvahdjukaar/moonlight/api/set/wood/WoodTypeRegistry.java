@@ -75,9 +75,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         }
         String namespace = baseRes.getNamespace();
         if (name != null && !namespace.equals("securitycraft") &&
-                !namespace.equals("absentbydesign") ||
-        namespace.equals("betterend") || namespace.equals("better_nether")) {
-            //blacklisting this two mods entirely as they don't have json models for some reason... They don't seem to have dynamic registration like I do so why slow down the game by copy-pasting some generic jsons instead of generating them once with datagens???
+                !namespace.equals("absentbydesign")) {
 
             BlockState state = baseBlock.defaultBlockState();
             //can't check if the block is a full one, so I do this. Adding some checks here
@@ -96,7 +94,6 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                     }
                 }
             }
-            //}
         }
         return Optional.empty();
     }
