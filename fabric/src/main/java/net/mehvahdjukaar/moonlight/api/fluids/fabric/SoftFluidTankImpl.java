@@ -29,6 +29,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
     /**
      * @return tint color to be applied on the fluid texture
      */
+    //client only
     public int getTintColor(@Nullable LevelReader world, @Nullable BlockPos pos) {
         SoftFluid.TintMethod method = this.fluid.getTintMethod();
         if (method == SoftFluid.TintMethod.NO_TINT) return -1;

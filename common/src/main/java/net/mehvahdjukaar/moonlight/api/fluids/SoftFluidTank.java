@@ -40,8 +40,7 @@ public abstract class SoftFluidTank {
     protected final int capacity;
     @Nullable
     protected CompoundTag nbt = null;
-    @NotNull
-    protected SoftFluid fluid = VanillaSoftFluids.EMPTY.get();
+    protected SoftFluid fluid = VanillaSoftFluids.EMPTY.get(); //not null
     //special tint color. Used for dynamic tint fluids like water and potions
     protected int specialColor = 0;
     protected boolean needsColorRefresh = true;
@@ -97,6 +96,7 @@ public abstract class SoftFluidTank {
 
         return returnStack;
     }
+
     /**
      * tries pouring the content of provided item in the tank
      * also plays sound
@@ -495,7 +495,7 @@ public abstract class SoftFluidTank {
      *
      * @param other other tank
      */
-    public void copy(net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank other) {
+    public void copy(SoftFluidTank other) {
         this.setFluid(other.getFluid(), other.getNbt());
         this.setCount((int) Math.min(this.capacity, other.getCount()));
     }
@@ -551,6 +551,7 @@ public abstract class SoftFluidTank {
     /**
      * @return tint color to be applied on the fluid texture
      */
+    //works on both side
     public abstract int getTintColor(@Nullable LevelReader world, @Nullable BlockPos pos);
 
     /**
@@ -575,7 +576,7 @@ public abstract class SoftFluidTank {
      *
      * @param compound nbt
      */
-    public void load(CompoundTag compound){
+    public void load(CompoundTag compound) {
         if (compound.contains("FluidHolder")) {
             CompoundTag cmp = compound.getCompound("FluidHolder");
             this.setCount(cmp.getInt("Count"));
@@ -583,6 +584,8 @@ public abstract class SoftFluidTank {
             SoftFluid sf = SoftFluidRegistry.get(id);
             this.setFluid(sf, cmp.getCompound("NBT"));
         }
+        //failsafe
+        if (this.fluid == null) this.fluid = SoftFluidRegistry.getEmpty();
     }
 
     /**
@@ -591,9 +594,10 @@ public abstract class SoftFluidTank {
      * @param compound nbt
      * @return nbt
      */
-    public CompoundTag save(CompoundTag compound){
+    public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
         cmp.putInt("Count", (int) this.count);
+        if (this.fluid == null) this.fluid = SoftFluidRegistry.getEmpty();
         var id = Utils.getID(fluid);
         if (id == null) {
             Moonlight.LOGGER.warn("Failed to save fluid in container: {} is not registered", fluid);
@@ -602,7 +606,9 @@ public abstract class SoftFluidTank {
             cmp.putString("Fluid", id.toString());
         }
         //for item render. needed for potion colors
-        cmp.putInt("CachedColor", this.getTintColor(null, null));
+        if (this.specialColor != 0) {
+            cmp.putInt("CachedColor", this.getTintColor(null, null));
+        }
         var nbt = this.getNbt();
         if (nbt != null && !nbt.isEmpty()) cmp.put("NBT", nbt);
         compound.put("FluidHolder", cmp);
@@ -666,7 +672,6 @@ public abstract class SoftFluidTank {
         else if (i instanceof LingeringPotionItem) type = "LINGERING";
         com.putString(POTION_TYPE_KEY, type);
     }
-
 
 
     //util functions
