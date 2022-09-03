@@ -33,10 +33,14 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     // modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
 
+
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
     modImplementation ("curse.maven:configured-457570:3946498")
+    modImplementation("curse.maven:map-atlases-forge-519759:3949437")
+    modImplementation("curse.maven:kiwi-303657:3919782")
+    modImplementation("curse.maven:snow-real-magic-308663:3965123")
 
 }
 

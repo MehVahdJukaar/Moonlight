@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.VanillaResourceManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -48,7 +49,9 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
     final public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
                                                 ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
                                                 Executor workerExecutor, Executor mainExecutor) {
-        reloadResources(manager);
+        if(Moonlight.HAS_BEEN_INIT) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
+            reloadResources(manager);
+        }
 
         return CompletableFuture.supplyAsync(() -> null, workerExecutor)
                 .thenCompose(stage::wait)

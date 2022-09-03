@@ -1,28 +1,32 @@
 package net.mehvahdjukaar.moonlight.api.integration.forge;
 
 
+import lilypuree.mapatlases.item.MapAtlasItem;
+import lilypuree.mapatlases.util.MapAtlasesAccessUtils;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraftforge.client.model.data.ModelData;
+import org.jetbrains.annotations.Nullable;
 
-/*
-import lilypuree.mapatlases.item.MapAtlasItem;
-import lilypuree.mapatlases.util.MapAtlasesAccessUtils;
-public class MapAtlasPlugin {
+import java.util.Map;
+
+public class MapAtlasCompatImpl {
 
     public static boolean isAtlas(Item item) {
         return item instanceof MapAtlasItem;
     }
 
-
     @Nullable
     public static MapItemSavedData getSavedDataFromAtlas(ItemStack item, Level level, Player player) {
-        var data = MapAtlasesAccessUtils.getActiveAtlasMapState(level, item, player.getName().getString());
-        if(data==null)return null;
-        return data.getValue();
+        if (player instanceof ServerPlayer serverPlayer) {
+            var data = MapAtlasesAccessUtils.getActiveAtlasMapStateServer(level, item, serverPlayer);
+            if (data == null) return null;
+            return data.getValue();
+        }
+        return null;
     }
 
     @Nullable
@@ -37,21 +41,4 @@ public class MapAtlasPlugin {
         return null;
     }
 
-}
-*/
-
-public class MapAtlasCompatImpl {
-
-
-    public static MapItemSavedData getSavedDataFromAtlas(ItemStack stack, Level level, Player player) {
-        return null;
-    }
-
-    public static Integer getMapIdFromAtlas(ItemStack stack, Level level, Object data) {
-        return 1;
-    }
-
-    public static boolean isAtlas(Item item) {
-        return false;
-    }
 }
