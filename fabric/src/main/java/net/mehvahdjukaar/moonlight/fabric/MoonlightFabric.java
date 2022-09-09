@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
@@ -26,7 +27,9 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
                 ClientBoundOpenScreenMessage.class, ClientBoundOpenScreenMessage::new);
 
         ServerLifecycleEvents.SERVER_STARTING.register(s -> currentServer = s);
-        ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((a, b) -> SoftFluidRegistry.onDataLoad());
+        ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(SoftFluidRegistry::onDataSyncToPlayer);
+        ServerLifecycleEvents.SERVER_STARTED.register((s)->SoftFluidRegistry.onDataLoad()); //need this too because fabric is stupid
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((a,b,c)->SoftFluidRegistry.onDataLoad()); //only fire after reload command
     }
 
     //called after all other mod initialize have been called.

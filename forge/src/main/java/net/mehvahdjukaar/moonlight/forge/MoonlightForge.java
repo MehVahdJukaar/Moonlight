@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -22,7 +23,6 @@ public class MoonlightForge {
     public static final String MOD_ID = Moonlight.MOD_ID;
 
     public MoonlightForge() {
-
         Moonlight.commonInit();
 
         MinecraftForge.EVENT_BUS.register(this);
@@ -30,9 +30,16 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
-    public void onDataLoad(OnDatapackSyncEvent event) {
-        // if we're on the server, send syncing packets
+    public static void onDataSync(OnDatapackSyncEvent event) {
         SoftFluidRegistry.onDataLoad();
+        //send syncing packets
+        if (event.getPlayer() != null) {
+            SoftFluidRegistry.onDataSyncToPlayer(event.getPlayer(),true);
+        } else {
+            for (var p : event.getPlayerList().getPlayers()) {
+                SoftFluidRegistry.onDataSyncToPlayer(p,true);
+            }
+        }
     }
 }
 

@@ -18,10 +18,6 @@ import java.util.Set;
 @Mixin(PackRepository.class)
 public abstract class PackRepositoryMixin {
 
-    @Shadow
-    @Final
-    private Set<RepositorySource> sources;
-
     @Inject(method = "<init>(Lnet/minecraft/server/packs/PackType;[Lnet/minecraft/server/packs/repository/RepositorySource;)V",
             at = @At("TAIL"))
     private void init(PackType packType, RepositorySource[] repositorySources, CallbackInfo ci) {

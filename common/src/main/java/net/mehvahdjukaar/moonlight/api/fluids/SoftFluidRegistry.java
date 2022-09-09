@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
+import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -11,9 +11,11 @@ import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
@@ -27,7 +29,7 @@ public class SoftFluidRegistry {
 
     public static final ResourceLocation EMPTY_ID = Moonlight.res("empty");
 
-    public static SoftFluid getEmpty(){
+    public static SoftFluid getEmpty() {
         return get(EMPTY_ID);
     }
 
@@ -67,7 +69,6 @@ public class SoftFluidRegistry {
         return get(new ResourceLocation(id));
     }
 
-
     @Nullable
     public static ResourceLocation getID(SoftFluid s) {
         return getDataPackRegistry().getKey(s);
@@ -81,14 +82,16 @@ public class SoftFluidRegistry {
      */
     public static SoftFluid get(ResourceLocation id) {
         String namespace = id.getNamespace();
-        if (namespace.equals("selene") || namespace.equals("minecraft")) id = Moonlight.res(id.getPath()); //backwards compat
+        if (namespace.equals("selene") || namespace.equals("minecraft"))
+            id = Moonlight.res(id.getPath()); //backwards compat
         // mc stuff has my id //TODO: split into diff folders for each modded fluid
         return getDataPackRegistry().get(id);
     }
 
     public static Optional<SoftFluid> getOptional(ResourceLocation id) {
         String namespace = id.getNamespace();
-        if (namespace.equals("selene") || namespace.equals("minecraft")) id = Moonlight.res(id.getPath()); //backwards compat
+        if (namespace.equals("selene") || namespace.equals("minecraft"))
+            id = Moonlight.res(id.getPath()); //backwards compat
         return getDataPackRegistry().getOptional(id);
     }
 
@@ -113,7 +116,7 @@ public class SoftFluidRegistry {
         return getItemsMap().getOrDefault(filledContainerItem, getEmpty());
     }
 
-
+    //needs to be called on both sides
     private static void populateSlaveMaps() {
         var itemMap = getItemsMap();
         itemMap.clear();
@@ -132,20 +135,27 @@ public class SoftFluidRegistry {
         }
     }
 
+
     //wtf is going on here
 
-    //TODO: call these
+    //called by data sync to player
+    @ApiStatus.Internal
     public static void postInitClient() {
         populateSlaveMaps();
         SoftFluidClient.refresh();
     }
+    @ApiStatus.Internal
+    public static void onDataSyncToPlayer(ServerPlayer player, boolean o) {
+        ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundFinalizeFluidsMessage());
+    }
 
     //on data load
+    @ApiStatus.Internal
     public static void onDataLoad() {
         populateSlaveMaps();
         //registers existing fluids. also update the salve maps
+        //TODO: why not needed on the client?
         registerExistingVanillaFluids();
-        ModMessages.CHANNEL.sendToAllClientPlayers(new ClientBoundFinalizeFluidsMessage());
     }
 
 
@@ -153,5 +163,7 @@ public class SoftFluidRegistry {
     private static void registerExistingVanillaFluids() {
         throw new AssertionError();
     }
+
+
 }
 

@@ -21,7 +21,7 @@ A small library with many cool unique features, from dynamic asset generation to
 [[dependencies.moonlight]]
 modId = "forge"
 mandatory = true
-versionRange = "[43.1.1,)"
+versionRange = "[42.1.0,)"
 ordering = "NONE"
 side = "BOTH"
 

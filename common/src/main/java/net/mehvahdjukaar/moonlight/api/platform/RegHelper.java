@@ -11,7 +11,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -21,10 +20,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -46,6 +50,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import net.minecraft.world.level.levelgen.structure.StructureType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -84,7 +89,7 @@ public class RegHelper {
 
     public static <T extends StructureType<?>> RegSupplier<T> registerStructure(ResourceLocation name, Supplier<T> feature) {
         //TODO: this causes issues on fabric and its very random as might be on only with some random unrelated mods. best to lave it like this
-       // return register(name, feature, Registry.STRUCTURE_TYPES);
+        // return register(name, feature, Registry.STRUCTURE_TYPES);
         return registerAsync(name, feature, Registry.STRUCTURE_TYPES);
     }
 
@@ -130,6 +135,21 @@ public class RegHelper {
         return register(name, enchantment, Registry.ENCHANTMENT);
     }
 
+    public static <T extends SensorType<? extends Sensor<?>>> RegSupplier<T> registerSensor(ResourceLocation name, Supplier<T> sensorType) {
+        return register(name, sensorType, Registry.SENSOR_TYPE);
+    }
+
+    public static <T extends Activity> RegSupplier<T> registerActivity(ResourceLocation name, Supplier<T> activity) {
+        return register(name, activity, Registry.ACTIVITY);
+    }
+
+    public static <T extends Schedule> RegSupplier<T> registerSchedule(ResourceLocation name, Supplier<T> schedule) {
+        return register(name, schedule, Registry.SCHEDULE);
+    }
+
+    public static <T extends MemoryModuleType<?>> RegSupplier<T> registerMemoryModule(ResourceLocation name, Supplier<T> memory) {
+        return register(name, memory, Registry.MEMORY_MODULE_TYPE);
+    }
 
     public static <T extends RecipeSerializer<?>> RegSupplier<T> registerRecipeSerializer(ResourceLocation name, Supplier<T> recipe) {
         return register(name, recipe, Registry.RECIPE_SERIALIZER);
@@ -227,9 +247,14 @@ public class RegHelper {
             this.constructor = (b, p) -> constructor.apply(p);
         }
 
-        private Block create(Block parent) {
-            return this.constructor.apply(() -> parent, BlockBehaviour.Properties.copy(parent));
+        private Block create(BlockBehaviour.Properties properties, @Nullable Supplier<Block> parent) {
+            return this.constructor.apply(parent, properties);
         }
+    }
+
+    public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
+                                                                             Block parentBlock, boolean isHidden) {
+        return registerFullBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock), isHidden);
     }
 
     /**
@@ -237,15 +262,16 @@ public class RegHelper {
      *
      * @return registry object map
      */
-    public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
-                                                                             Block parentBlock, boolean isHidden) {
+    public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(
+            ResourceLocation baseName, BlockBehaviour.Properties properties, boolean isHidden) {
 
         EnumMap<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
         for (VariantType type : VariantType.values()) {
             String modId = baseName.getNamespace();
             String name = baseName.getPath();
             if (!type.equals(VariantType.BLOCK)) name += "_" + type.name().toLowerCase(Locale.ROOT);
-            Supplier<Block> block = registerBlock(new ResourceLocation(modId, name), () -> type.create(parentBlock));
+            Supplier<Block> base = type != VariantType.BLOCK ? map.get(VariantType.BLOCK) : null;
+            Supplier<Block> block = registerBlock(new ResourceLocation(modId, name), () -> type.create(properties, base));
             CreativeModeTab tab = switch (type) {
                 case VERTICAL_SLAB ->
                         !isHidden && PlatformHelper.isModLoaded("quark") ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;

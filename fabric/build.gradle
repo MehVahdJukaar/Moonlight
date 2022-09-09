@@ -34,7 +34,7 @@ dependencies {
         exclude group: 'net.fabricmc.fabric-api'
     }
     // modImplementation(include("curse.maven:modmenu-308702:3850113"))
-        modImplementation "com.terraformersmc:modmenu:4.0.6", {
+        modCompileOnly "com.terraformersmc:modmenu:4.0.6", {
             exclude module: "fabric-api"
         }
     modImplementation("curse.maven:map-atlases-436298:3872982")

@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

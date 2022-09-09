@@ -38,9 +38,7 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
     modImplementation ("curse.maven:configured-457570:3946498")
-    modImplementation("curse.maven:map-atlases-forge-519759:3949437")
-    modImplementation("curse.maven:kiwi-303657:3919782")
-    modImplementation("curse.maven:snow-real-magic-308663:3965123")
+    modImplementation ("curse.maven:map-atlases-forge-519759:3949437")
 
 }
 
