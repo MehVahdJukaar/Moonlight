@@ -30,7 +30,7 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
-    public static void onDataSync(OnDatapackSyncEvent event) {
+    public void onDataSync(OnDatapackSyncEvent event) {
         SoftFluidRegistry.onDataLoad();
         //send syncing packets
         if (event.getPlayer() != null) {

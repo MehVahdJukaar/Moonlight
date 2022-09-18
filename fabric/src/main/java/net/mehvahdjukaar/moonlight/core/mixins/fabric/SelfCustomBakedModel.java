@@ -32,8 +32,7 @@ public interface SelfCustomBakedModel extends FabricBakedModel, CustomBakedModel
         if (tile instanceof IExtraModelDataProvider provider) {
             //SlaveModel inner = SlaveModel.INSTANCE;
             //creating a new instance because indium doesn't like it...
-            SlaveModel inner = new SlaveModel();
-            inner.prepare(this, provider.getExtraModelData());
+            SlaveModel inner = new SlaveModel(this, provider.getExtraModelData());
             context.fallbackConsumer().accept(inner);
         }
     }

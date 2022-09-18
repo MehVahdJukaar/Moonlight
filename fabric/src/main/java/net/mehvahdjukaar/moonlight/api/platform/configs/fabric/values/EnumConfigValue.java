@@ -17,7 +17,7 @@ public class EnumConfigValue<T extends Enum<T>> extends ConfigValue<T> {
         return true;
     }
 
-    public Class<T> getEnum(){
+    public Class<T> getEnumClass(){
         return this.defaultValue.getDeclaringClass();
     }
 

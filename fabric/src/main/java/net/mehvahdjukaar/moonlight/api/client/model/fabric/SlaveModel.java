@@ -16,18 +16,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 //needed cause fabric
-public class SlaveModel implements BakedModel {
+public final class SlaveModel implements BakedModel {
 
-    public static final SlaveModel INSTANCE = new SlaveModel();
-
-    private CustomBakedModel father;
+    private final CustomBakedModel father;
 
     @Nullable
-    private ExtraModelData data;
-    public void prepare(CustomBakedModel father, @Nullable ExtraModelData data){
-        this.data = data;
+    private final ExtraModelData data;
+
+    public SlaveModel(CustomBakedModel father, @Nullable ExtraModelData data) {
         this.father = father;
+        this.data = data;
     }
+
 
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, RandomSource randomSource) {

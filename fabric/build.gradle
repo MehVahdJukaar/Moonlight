@@ -38,6 +38,7 @@ dependencies {
             exclude module: "fabric-api"
         }
     modImplementation("curse.maven:map-atlases-436298:3872982")
+    modImplementation("curse.maven:yacl-667299:3987709")
 
 
 }

@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import dev.isxander.yacl.api.YetAnotherConfigLib;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
+import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
@@ -20,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.entity.ai.sensing.SensorType;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -30,10 +31,10 @@ public class FabricConfigSpec extends ConfigSpec {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private final ResourceLocation res;
-    private final ConfigCategory mainEntry;
+    private final ConfigSubCategory mainEntry;
     private final File file;
 
-    public FabricConfigSpec(ResourceLocation name, ConfigCategory mainEntry, ConfigType type, boolean synced, Runnable changeCallback) {
+    public FabricConfigSpec(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, boolean synced, Runnable changeCallback) {
         super(name, FabricLoader.getInstance().getConfigDir(), type, synced, changeCallback);
         this.file = this.getFullPath().toFile();
         this.mainEntry = mainEntry;
@@ -43,7 +44,7 @@ public class FabricConfigSpec extends ConfigSpec {
         }
     }
 
-    public ConfigCategory getMainEntry() {
+    public ConfigSubCategory getMainEntry() {
         return mainEntry;
     }
 
@@ -90,21 +91,23 @@ public class FabricConfigSpec extends ConfigSpec {
         return Component.literal(LangBuilder.getReadableName(this.res.getPath()+"_configs"));
     }
 
-
-    private static final boolean hasScreen = PlatformHelper.isModLoaded("cloth_config");
+    private static final boolean YACL = PlatformHelper.isModLoaded("yet-another-config-lib");
+    private static final boolean clothConfig = PlatformHelper.isModLoaded("cloth_config");
 
     @Override
     @Environment(EnvType.CLIENT)
     public Screen makeScreen(Screen parent, ResourceLocation background) {
-        if (hasScreen) {
+        if (clothConfig) {
             return ClothConfigCompat.makeScreen(parent, this, background);
+        }else if(YACL){
+            return YACLCompat.makeScreen(parent, this, background);
         }
         return null;
     }
 
     @Override
     public boolean hasConfigScreen() {
-        return hasScreen;
+        return clothConfig || YACL;
     }
 
     @Override

@@ -6,11 +6,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
-import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -32,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class RPUtils {
 
@@ -88,7 +90,7 @@ public class RPUtils {
         } catch (Exception ignored) {
         }
         //if texture is not there try to guess location. Hack for better end
-        var hack = betterEndTextureHackery(res, manager, block);
+        var hack = guessTextureLocation(res, manager, block);
         for (var t : hack) {
             TextureCache.add(block, t);
             if (texturePredicate.test(t)) return new ResourceLocation(t);
@@ -97,7 +99,7 @@ public class RPUtils {
         throw new FileNotFoundException("Could not find any texture associated to the given block " + res);
     }
 
-    private static List<String> betterEndTextureHackery(ResourceLocation id, ResourceManager manager, Block block){
+    private static List<String> guessTextureLocation(ResourceLocation id, ResourceManager manager, Block block){
         //if(!id.getNamespace().contains("better")) return List.of();
         String name = id.getPath();
         List<String> textures = new ArrayList<>();
@@ -284,6 +286,11 @@ public class RPUtils {
         }
     }
 
+    @FunctionalInterface
+    public interface CrossbowModelAdder {
+        void add(ItemOverride override);
+    }
+
     /**
      * Utility method to add crossbow models in a non-destructive way. Provided overrides will be added on top of whatever crossbow model is currently provided by vanilla or mod resources
      */
@@ -315,8 +322,7 @@ public class RPUtils {
         return json;
     }
 
-    @FunctionalInterface
-    public interface CrossbowModelAdder {
-        void add(ItemOverride override);
-    }
+
+
+
 }

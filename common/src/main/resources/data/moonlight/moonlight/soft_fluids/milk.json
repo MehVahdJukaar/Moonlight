@@ -39,7 +39,7 @@
     "create:milk",
     "inspirations:milk"
   ],
-  "flowing_texture": "moonlight:soft_fluids/potion_flow",
+  "flowing_texture": "moonlight:soft_fluids/milk_liquid",
   "food": {
     "divider": 3,
     "item": "minecraft:milk_bucket"

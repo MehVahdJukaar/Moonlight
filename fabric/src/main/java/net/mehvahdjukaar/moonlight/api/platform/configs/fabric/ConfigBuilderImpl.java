@@ -18,9 +18,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return new ConfigBuilderImpl(name, type);
     }
 
-    private final ConfigCategory mainCategory = new ConfigCategory(this.getName().getNamespace());
+    private final ConfigSubCategory mainCategory = new ConfigSubCategory(this.getName().getNamespace());
 
-    private final Stack<ConfigCategory> categoryStack = new Stack<>();
+    private final Stack<ConfigSubCategory> categoryStack = new Stack<>();
 
     public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);
@@ -44,7 +44,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigBuilderImpl push(String translation) {
-        var cat = new ConfigCategory(translation);
+        var cat = new ConfigSubCategory(translation);
         categoryStack.peek().addEntry(cat);
         categoryStack.push(cat);
         return this;

@@ -6,38 +6,41 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigEntry;
+import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigSubCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ClothConfigCompat {
-
+    //call FabricConfigListScreen.makeScreen instead
+    @ApiStatus.Internal
     public static Screen makeScreen(Screen parent, FabricConfigSpec spec) {
         return makeScreen(parent, spec, null);
     }
-
+    @ApiStatus.Internal
     public static Screen makeScreen(Screen parent, FabricConfigSpec spec, @Nullable ResourceLocation background) {
         spec.loadFromFile();
 
-        ConfigBuilder builder = ConfigBuilder.create()
-                .setParentScreen(parent)
-                .setTitle(spec.getName());
+        ConfigBuilder builder = ConfigBuilder.create();
+
+        builder.setParentScreen(parent);
+        builder.setTitle(spec.getName());
+        builder.setSavingRunnable(spec::saveConfig);
 
         if (background != null) builder.setDefaultBackgroundTexture(background);
-
-        builder.setSavingRunnable(spec::saveConfig);
 
 
         for (var en : spec.getMainEntry().getEntries()) {
             //skips stray config values
-            if (!(en instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory c)) continue;
+            if (!(en instanceof ConfigSubCategory c)) continue;
             ConfigCategory mainCat = builder.getOrCreateCategory(Component.translatable(c.getName()));
             for (var entry : c.getEntries()) {
-                if (entry instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory subCat) {
+                if (entry instanceof ConfigSubCategory subCat) {
                     var subBuilder = builder.entryBuilder().startSubCategory(Component.translatable(subCat.getName()));
                     addEntriesRecursive(builder, subBuilder, subCat);
 
@@ -51,10 +54,10 @@ public class ClothConfigCompat {
         return builder.build();
     }
 
-    private static void addEntriesRecursive(ConfigBuilder builder, SubCategoryBuilder subCategoryBuilder, net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory c) {
+    private static void addEntriesRecursive(ConfigBuilder builder, SubCategoryBuilder subCategoryBuilder, ConfigSubCategory c) {
 
         for (var entry : c.getEntries()) {
-            if (entry instanceof net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigCategory cc) {
+            if (entry instanceof ConfigSubCategory cc) {
                 var scb = builder.entryBuilder().startSubCategory(Component.translatable(entry.getName()));
                 addEntriesRecursive(builder, scb, cc);
                 subCategoryBuilder.add(scb.build());
@@ -111,7 +114,7 @@ public class ClothConfigCompat {
         } else if (entry instanceof EnumConfigValue<?> ec) {
             return addEnum(builder, ec);
         } else if (entry instanceof ListStringConfigValue<?> lc) {
-            var e =  builder.entryBuilder()
+            var e = builder.entryBuilder()
                     .startStrList(lc.getTranslation(), lc.get())
                     .setDefaultValue(lc.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setSaveConsumer(lc::set); // Recommended: Called when user save the config
@@ -124,7 +127,7 @@ public class ClothConfigCompat {
 
     private static @NotNull <T extends Enum<T>> EnumListEntry<T> addEnum(ConfigBuilder builder, EnumConfigValue<T> ec) {
         var e = builder.entryBuilder()
-                .startEnumSelector(ec.getTranslation(), ec.getEnum(), ec.get())
+                .startEnumSelector(ec.getTranslation(), ec.getEnumClass(), ec.get())
                 .setDefaultValue(ec.getDefaultValue()) // Recommended: Used when user click "Reset"
                 .setSaveConsumer(ec::set); // Recommended: Called when user save the config
         var description = ec.getDescription();

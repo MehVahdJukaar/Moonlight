@@ -7,11 +7,11 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfigCategory extends ConfigEntry {
+public class ConfigSubCategory extends ConfigEntry {
 
     private final List<ConfigEntry> entries = new ArrayList<>();
 
-    public ConfigCategory(String name) {
+    public ConfigSubCategory(String name) {
         super(name);
     }
 

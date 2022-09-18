@@ -257,12 +257,10 @@ public abstract class DynamicResourcePack implements PackResources {
 
     @Deprecated(forRemoval = true)
     public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform, Function<String, String> pathTransform) throws NoSuchElementException {
+
+
         ResourceLocation fullPath = resource.location;
 
-        String fullText = new String(resource.data, StandardCharsets.UTF_8);
-
-
-        fullText = textTransform.apply(fullText);
         //calculates new path
         StringBuilder builder = new StringBuilder();
         String[] partial = fullPath.getPath().split("/");
@@ -274,6 +272,13 @@ public abstract class DynamicResourcePack implements PackResources {
         }
         //adds modified under my namespace
         ResourceLocation newRes = new ResourceLocation(resourcePackName.getNamespace(), builder.toString());
+
+
+        String fullText = new String(resource.data, StandardCharsets.UTF_8);
+
+
+        fullText = textTransform.apply(fullText);
+
         this.addBytes(newRes, fullText.getBytes());
     }
 
