@@ -37,7 +37,7 @@ dependencies {
         modCompileOnly "com.terraformersmc:modmenu:4.0.6", {
             exclude module: "fabric-api"
         }
-    modImplementation("curse.maven:map-atlases-436298:3872982")
+    modImplementation("curse.maven:map-atlases-436298:3953555")
     modImplementation("curse.maven:yacl-667299:3987709")
 
 

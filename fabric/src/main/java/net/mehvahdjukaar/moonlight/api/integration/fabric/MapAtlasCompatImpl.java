@@ -22,10 +22,13 @@ public class MapAtlasCompatImpl {
 
     @Nullable
     public static MapItemSavedData getSavedDataFromAtlas(ItemStack item, Level level, Player player) {
-        if (player instanceof ServerPlayer serverPlayer) {
-            var data = MapAtlasesAccessUtils.getActiveAtlasMapStateServer(level, item, serverPlayer);
-            if (data == null) return null;
-            return data.getValue();
+        try {
+            if (player instanceof ServerPlayer serverPlayer) {
+                var data = MapAtlasesAccessUtils.getActiveAtlasMapStateServer(MapAtlasesAccessUtils.getAllMapInfoFromAtlas(level, item), serverPlayer);
+                if (data == null) return null;
+                return data.getValue();
+            }
+        } catch (Exception ignored) {
         }
         return null;
     }
@@ -33,11 +36,14 @@ public class MapAtlasCompatImpl {
     @Nullable
     public static Integer getMapIdFromAtlas(ItemStack item, Level level, Object data) {
 
-        Map<String, MapItemSavedData> mapInfo = MapAtlasesAccessUtils.getAllMapInfoFromAtlas(level, item);
-        for (var e : mapInfo.entrySet()) {
-            if (e.getValue() == data) {
-                return MapAtlasesAccessUtils.getMapIntFromString(e.getKey());
+        try {
+            Map<String, MapItemSavedData> mapInfo = MapAtlasesAccessUtils.getAllMapInfoFromAtlas(level, item);
+            for (var e : mapInfo.entrySet()) {
+                if (e.getValue() == data) {
+                    return MapAtlasesAccessUtils.getMapIntFromString(e.getKey());
+                }
             }
+        } catch (Exception ignored) {
         }
         return null;
     }

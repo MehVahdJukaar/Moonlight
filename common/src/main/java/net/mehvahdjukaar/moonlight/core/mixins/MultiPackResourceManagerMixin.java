@@ -18,8 +18,6 @@ import java.util.List;
 @Mixin(MultiPackResourceManager.class)
 public abstract class MultiPackResourceManagerMixin implements CloseableResourceManager {
 
-    @Shadow @Final private List<PackResources> packs;
-
     //should fire right before add reload listener, before packs are reloaded and listeners called
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void dynamicPackEarlyReload(PackType type, List<PackResources> packs, CallbackInfo cir) {

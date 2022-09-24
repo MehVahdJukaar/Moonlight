@@ -1,5 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
+import net.fabricmc.fabric.impl.registry.sync.RegistryMapSerializer;
+import net.fabricmc.fabric.impl.registry.sync.RegistrySyncManager;
+import net.fabricmc.loader.impl.gui.FabricGuiEntry;
 import net.mehvahdjukaar.moonlight.api.fluids.fabric.SoftFluidRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.map.fabric.MapDecorationRegistryImpl;
 import net.minecraft.data.BuiltinRegistries;
