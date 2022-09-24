@@ -37,6 +37,21 @@ public class MapHelper {
         return i;
     }
 
+    /**
+     * adds a vanilla decoration
+     *
+     * @param stack    map item stack
+     * @param pos      decoration world pos
+     * @param type     vanilla decorationType
+     * @param mapColor map item tint color
+     */
+    public static void addVanillaDecorations(ItemStack stack, BlockPos pos, MapDecoration.Type type, int mapColor) {
+        MapItemSavedData.addTargetDecoration(stack, pos, "+", type);
+        if (mapColor != 0) {
+            CompoundTag com = stack.getOrCreateTagElement("display");
+            com.putInt("MapColor", mapColor);
+        }
+    }
 
     /**
      * Adds a static decoration tp a map itemstack NBT.<br>
@@ -69,23 +84,8 @@ public class MapHelper {
     }
 
     /**
-     * adds a vanilla decoration
-     *
-     * @param stack    map item stack
-     * @param pos      decoration world pos
-     * @param type     vanilla decorationType
-     * @param mapColor map item tint color
-     */
-    public static void addVanillaDecorations(ItemStack stack, BlockPos pos, MapDecoration.Type type, int mapColor) {
-        MapItemSavedData.addTargetDecoration(stack, pos, "+", type);
-        if (mapColor != 0) {
-            CompoundTag com = stack.getOrCreateTagElement("display");
-            com.putInt("MapColor", mapColor);
-        }
-    }
-
-    /**
      * see addDecorationToMap
+     * This is useful when you don't have a reference to a map decoration object as it couldbe one that has been added with datapack
      *
      * @param id decoration type id. if invalid will default to generic structure decoration
      */

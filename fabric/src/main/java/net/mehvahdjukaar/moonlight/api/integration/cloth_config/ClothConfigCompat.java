@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigEntry;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigSubCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -38,7 +39,7 @@ public class ClothConfigCompat {
         for (var en : spec.getMainEntry().getEntries()) {
             //skips stray config values
             if (!(en instanceof ConfigSubCategory c)) continue;
-            ConfigCategory mainCat = builder.getOrCreateCategory(Component.translatable(c.getName()));
+            ConfigCategory mainCat = builder.getOrCreateCategory(Component.translatable(LangBuilder.getReadableName(c.getName())));
             for (var entry : c.getEntries()) {
                 if (entry instanceof ConfigSubCategory subCat) {
                     var subBuilder = builder.entryBuilder().startSubCategory(Component.translatable(subCat.getName()));

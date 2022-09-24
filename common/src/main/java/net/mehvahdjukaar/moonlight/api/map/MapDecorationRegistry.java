@@ -32,6 +32,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+//TODO: split into api and core
 public class MapDecorationRegistry {
 
    //pain
@@ -48,7 +49,7 @@ public class MapDecorationRegistry {
                         return Either.right((SimpleDecorationType) type);
                     });
 
-    public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC_BUGGY_2 =MapDecorationType.GENERIC_CODEC;
+    public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC_BUGGY_2 = MapDecorationType.GENERIC_CODEC;
 
     public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC_2 = new Codec<>() {
         @Override

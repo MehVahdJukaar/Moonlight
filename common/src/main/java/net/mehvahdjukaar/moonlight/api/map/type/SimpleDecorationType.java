@@ -2,10 +2,10 @@ package net.mehvahdjukaar.moonlight.api.map.type;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.markers.GenericMapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -24,18 +24,38 @@ public class SimpleDecorationType extends MapDecorationType<CustomMapDecoration,
     @Nullable
     private final RuleTest target;
 
+    @Nullable
+    private final String name;
+    private final float rotation;
+
+
     public static final Codec<SimpleDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(SimpleDecorationType::getTarget)
+            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(SimpleDecorationType::getTarget),
+            Codec.STRING.optionalFieldOf("name").forGetter(SimpleDecorationType::getName),
+            Codec.FLOAT.optionalFieldOf("rotation").forGetter(SimpleDecorationType::getRotation)
     ).apply(instance, SimpleDecorationType::new));
 
 
+    //TODO: finish these 2
     public SimpleDecorationType(Optional<RuleTest> target) {
+        this(target, Optional.empty(), Optional.empty());
+    }
+    public SimpleDecorationType(Optional<RuleTest> target, Optional<String> name, Optional<Float> rotation) {
         this.target = target.orElse(null);
+        this.name = name.orElse(null);
+        this.rotation = rotation.orElse(0f);
     }
 
-    @Nullable
     public Optional<RuleTest> getTarget() {
         return Optional.ofNullable(target);
+    }
+
+    public Optional<String> getName() {
+        return Optional.ofNullable(name);
+    }
+
+    public Optional<Float> getRotation() {
+        return Optional.of(rotation);
     }
 
     @Override
