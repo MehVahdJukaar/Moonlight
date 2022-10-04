@@ -31,3 +31,10 @@ mandatory = true
 versionRange = "[1.19.1,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.moonlight]]
+modId = "configured"
+mandatory = false
+versionRange = "[2.0.0-1.19.2,)"
+ordering = "NONE"
+side = "BOTH"

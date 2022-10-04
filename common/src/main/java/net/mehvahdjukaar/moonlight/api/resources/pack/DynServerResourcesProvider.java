@@ -3,7 +3,9 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.server.packs.repository.PackRepository;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Class responsible to generate assets and manage your dynamic data pack (server)
@@ -32,8 +34,13 @@ public abstract class DynServerResourcesProvider extends DynResourceProvider<Dyn
         return null;
     }
 
-    public void onEarlyReload(final EarlyPackReloadEvent event) {
-        this.reloadResources(event.manager());
+    @ApiStatus.Internal
+    public final void onEarlyReload(final EarlyPackReloadEvent event) {
+        try {
+            this.reloadResources(event.manager());
+        }catch (Exception e){
+            Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}:", this.dynamicPack, e);
+        }
     }
 
     //public void onAddReloadListeners(final AddReloadListenerEvent event) {

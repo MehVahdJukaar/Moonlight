@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -53,8 +54,10 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
     final public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
                                                 ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
                                                 Executor workerExecutor, Executor mainExecutor) {
-        if(Moonlight.HAS_BEEN_INIT) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
+        if(Moonlight.HAS_BEEN_INIT && PlatformHelper.isModLoadingValid()) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
             reloadResources(manager);
+        }else{
+            Moonlight.  LOGGER.error("Cowardly refusing generate assets for a broken mod state");
         }
 
         return CompletableFuture.supplyAsync(() -> null, workerExecutor)

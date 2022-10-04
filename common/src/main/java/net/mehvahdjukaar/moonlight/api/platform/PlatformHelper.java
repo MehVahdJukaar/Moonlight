@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,6 +58,11 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
+    @ExpectPlatform
+    public static boolean isModLoadingValid() {
+        throw new AssertionError();
+    }
+
 
     public enum Platform {
         FORGE, FABRIC;
@@ -78,6 +84,7 @@ public class PlatformHelper {
         }
     }
 
+    @Contract
     @ExpectPlatform
     public static Platform getPlatform() {
         throw new AssertionError();
@@ -103,6 +110,7 @@ public class PlatformHelper {
         }
     }
 
+    @Contract
     @ExpectPlatform
     public static Env getEnv() {
         throw new AssertionError();

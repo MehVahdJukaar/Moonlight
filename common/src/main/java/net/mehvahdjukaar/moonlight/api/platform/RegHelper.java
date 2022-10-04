@@ -112,8 +112,8 @@ public class RegHelper {
         return register(name, featureSupplier, BuiltinRegistries.CONFIGURED_FEATURE);
     }
 
-    public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> feature) {
-        return register(name, feature, Registry.SOUND_EVENT);
+    public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> sound) {
+        return register(name, sound, Registry.SOUND_EVENT);
     }
 
     public static <T extends PaintingVariant> RegSupplier<T> registerPainting(ResourceLocation name, Supplier<T> painting) {

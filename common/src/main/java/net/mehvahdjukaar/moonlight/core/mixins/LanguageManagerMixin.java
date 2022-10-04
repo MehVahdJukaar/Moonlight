@@ -20,15 +20,12 @@ import java.util.Map;
 public abstract class LanguageManagerMixin {
 
     @Unique
-    private static ResourceManager cachedResourceManager;
-    @Unique
     private static List<LanguageInfo> cachedLanguageInfo;
 
 
     @Inject(method = "loadFrom", at = @At("HEAD"))
     private static void loadFrom(ResourceManager pResourceManager, List<LanguageInfo> pLanguageInfo,
                                  CallbackInfoReturnable<ClientLanguage> cir) {
-        cachedResourceManager = pResourceManager;
         cachedLanguageInfo = pLanguageInfo;
     }
 

@@ -162,7 +162,7 @@ public class FluidContainerList {
         }
 
         private void addItem(Item i) {
-            if (i != Items.AIR) filled.add(i);
+            if (i != Items.AIR && !filled.contains(i)) filled.add(i);
         }
 
         /**

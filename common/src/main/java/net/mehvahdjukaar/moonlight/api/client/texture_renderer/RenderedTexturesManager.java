@@ -9,6 +9,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import net.mehvahdjukaar.moonlight.api.fluids.FluidContainerList;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.client.Minecraft;
@@ -119,7 +120,7 @@ public class RenderedTexturesManager {
     }
 
 
-    private static void drawItem(FrameBufferBackedDynamicTexture tex, ItemStack stack) {
+    public static void drawItem(FrameBufferBackedDynamicTexture tex, ItemStack stack) {
 
         Minecraft mc = Minecraft.getInstance();
         RenderTarget frameBuffer = tex.getFrameBuffer();

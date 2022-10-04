@@ -7,6 +7,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Random;
+import java.util.function.UnaryOperator;
 
 public class MthUtils {
 
@@ -43,6 +44,12 @@ public class MthUtils {
 
     public static Vec3 V3itoV3(Vec3i v) {
         return new Vec3(v.getX(), v.getY(), v.getZ());
+    }
+
+    private static double isClockWise(UnaryOperator<Vec3> rot, Direction dir) {
+        Vec3 v = MthUtils.V3itoV3(dir.getNormal());
+        Vec3 v2 = rot.apply(v);
+        return v2.dot(new Vec3(0, 1, 0));
     }
 
     /**

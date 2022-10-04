@@ -6,9 +6,15 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import com.mrcrayfish.configured.api.IConfigEntry;
+import com.mrcrayfish.configured.api.IConfigValue;
+import com.mrcrayfish.configured.api.IModConfig;
+import com.mrcrayfish.configured.api.ValueEntry;
 import com.mrcrayfish.configured.client.screen.ConfigScreen;
-import com.mrcrayfish.configured.client.util.ScreenUtil;
+import com.mrcrayfish.configured.impl.forge.ForgeConfig;
+import com.mrcrayfish.configured.impl.forge.ForgeFolderEntry;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -18,9 +24,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +37,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 //credits to MrCrayfish's Configured Mod
+//this is just a more customized version of Configured default config screen with some extra icons and such
 public abstract class CustomConfigScreen extends ConfigScreen {
 
     @Nullable
@@ -72,13 +77,23 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     }
 
     //shorthand
+    public CustomConfigScreen(CustomConfigSelectScreen parent, IModConfig config) {
+        this(parent.getModId(), parent.getMainIcon(), parent.getBackgroundTexture(), parent.getTitle(), parent, config);
+    }
+
     public CustomConfigScreen(CustomConfigSelectScreen parent, ModConfig config) {
         this(parent.getModId(), parent.getMainIcon(), parent.getBackgroundTexture(), parent.getTitle(), parent, config);
     }
 
-    //needed for custom title
     public CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
                               Screen parent, ModConfig config) {
+        this(modId, mainIcon, background, title, parent, new ForgeConfig(config));
+
+    }
+
+    //needed for custom title
+    public CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
+                              Screen parent, IModConfig config) {
         super(parent, title, config, background);
         this.modId = modId;
         this.mainIcon = mainIcon;
@@ -177,15 +192,13 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
     @Nullable
     public FolderWrapper wrapFolderItem(FolderItem old) {
-        final FolderEntry folderEntry = CustomConfigScreen.this.folderEntry;
-
         try {
             String oldName = old.getLabel();
             //find correct folder
-            FolderEntry found = null;
-            for (IEntry e : folderEntry.getEntries()) {
-                if (e instanceof FolderEntry f) {
-                    String n = Component.literal(ConfigScreen.createLabel(f.getLabel())).getString();
+            ForgeFolderEntry found = null;
+            for (IConfigEntry e : folderEntry.getChildren()) {
+                if (e instanceof ForgeFolderEntry f) {
+                    String n = Component.literal(ConfigScreen.createLabel(f.getEntryName())).getString();
                     if (n.equals(oldName)) {
                         found = f;
                         break;
@@ -196,8 +209,9 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                 return new FolderWrapper(found, oldName);
             }
         } catch (Exception ignored) {
-            int aa = 1;
+            Moonlight.LOGGER.error("error",ignored);
         }
+
         return null;
     }
 
@@ -208,7 +222,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         private final ItemStack icon;
         protected final Button button;
 
-        private FolderWrapper(FolderEntry folderEntry, String label) {
+        private FolderWrapper(ForgeFolderEntry folderEntry, String label) {
             super(folderEntry);
             //make new button I can access
             this.button = new Button(10, 5, 44, 20, (Component.literal(label)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), (onPress) -> {
@@ -286,21 +300,21 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
     @Nullable
     public BooleanWrapper wrapBooleanItem(BooleanItem old, boolean displayItem) {
-        final FolderEntry folderEntry = CustomConfigScreen.this.folderEntry;
         try {
-            ValueHolder<Boolean> holder = (ValueHolder<Boolean>) CONFIG_VALUE_HOLDER.get(old);
+            IConfigValue<Boolean> holder = (IConfigValue<Boolean>) CONFIG_VALUE_HOLDER.get(old);
 
             //find correct folder
             ValueEntry found = null;
-            for (IEntry e : folderEntry.getEntries()) {
+            for (IConfigEntry e : folderEntry.getChildren()) {
                 if (e instanceof ValueEntry value) {
-                    if (holder == value.getHolder()) found = value;
+                    if (holder == value.getValue()) found = value;
                 }
             }
             if (found != null) {
                 return displayItem ? new BooleanWrapperItem(holder) : new BooleanWrapper(holder);
             }
         } catch (Exception ignored) {
+            Moonlight.LOGGER.error("error");
         }
         return null;
     }
@@ -309,7 +323,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
         private final ItemStack item;
 
-        public BooleanWrapperItem(ValueHolder<Boolean> holder) {
+        public BooleanWrapperItem(IConfigValue<Boolean> holder) {
             super(holder);
 
             this.item = getIcon(label.getString().toLowerCase(Locale.ROOT));
@@ -318,7 +332,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
         @Override
         public void render(PoseStack poseStack, int index, int top, int left, int width, int p_230432_6_, int mouseX, int mouseY, boolean hovered, float partialTicks) {
-            boolean on = this.holder.getValue();
+            boolean on = this.holder.get();
             super.render(poseStack, index, top, left, width, p_230432_6_, mouseX, mouseY, hovered, partialTicks);
 
             int light = LightTexture.FULL_BRIGHT;
@@ -347,7 +361,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         protected boolean active = false;
         protected int iconOffset = 0;
 
-        public BooleanWrapper(ValueHolder<Boolean> holder) {
+        public BooleanWrapper(IConfigValue<Boolean> holder) {
             super(holder);
             try {
                 button = (Button) BOOLEAN_ITEM_BUTTON.get(this);
@@ -374,7 +388,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             int iconX = iconOffset + (int) (this.button.x + Math.ceil((this.button.getWidth() - ICON_WIDTH) / 2f));
             int iconY = (int) (this.button.y + Math.ceil(((this.button.getHeight() - ICON_WIDTH) / 2f)));
 
-            int u = this.holder.getValue() ? ICON_WIDTH : 0;
+            int u = this.holder.get() ? ICON_WIDTH : 0;
 
             blit(poseStack, iconX, iconY, this.button.getBlitOffset(), (float) u, (float) 0, ICON_WIDTH, ICON_WIDTH, 64, 64);
 

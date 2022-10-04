@@ -5,18 +5,24 @@ import com.google.common.collect.UnmodifiableIterator;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Transformation;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraftforge.client.extensions.IForgeBakedModel;
 import net.minecraftforge.client.model.IModelBuilder;
+import net.minecraftforge.client.model.QuadTransformers;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
+
+    private int emissivity = 0;
 
     public static BakedQuadBuilder create() {
         return new BakedQuadBuilderImpl();
@@ -37,35 +43,44 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     }
 
     public BakedQuadBuilder setDirection(Direction direction) {
+        /*
         if (transform != null) {
             var normal = direction.getNormal();
             var v = BakedQuadBuilder.applyModelRotation(normal.getX(), normal.getY(), normal.getZ(), transform);
             inner.setDirection(Direction.getNearest(v.x(), v.y(), v.z()));
             return this;
-        }
+        }*/
         inner.setDirection(direction);
         return this;
     }
 
     @Override
     public BakedQuadBuilder pos(float x, float y, float z) {
+        /*
         if (transform != null) {
             var v = BakedQuadBuilder.applyModelRotation(x, y, z, transform);
             inner.vertex(v.x(), v.y(), v.z());
             return this;
-        }
+        }*/
         inner.vertex(x, y, z);
         return this;
     }
 
     @Override
     public BakedQuadBuilder normal(float x, float y, float z) {
+        /*
         if (transform != null) {
             var v = BakedQuadBuilder.applyModelRotation(x, y, z, transform);
             inner.normal(v.x(), v.y(), v.z());
             return this;
-        }
+        }*/
         inner.normal(x, y, z);
+        return this;
+    }
+
+    @Override
+    public BakedQuadBuilder lightEmission(int lightLevel) {
+        this.emissivity = lightLevel;
         return this;
     }
 
@@ -90,6 +105,12 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuad build() {
         Preconditions.checkNotNull(output, "vertex data has not been fully filled");
+        if(transform != null){
+            QuadTransformers.applying(new Transformation( transform)).processInPlace(output);
+        }
+        if(emissivity != 0) {
+         QuadTransformers.settingEmissivity(emissivity).processInPlace(output);
+        }
         return output;
     }
 

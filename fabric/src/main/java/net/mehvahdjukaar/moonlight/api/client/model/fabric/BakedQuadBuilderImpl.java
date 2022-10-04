@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
+import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -37,7 +38,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     public BakedQuadBuilder setDirection(Direction direction) {
         if (transform != null) {
             var normal = direction.getNormal();
-            var v = BakedQuadBuilder.applyModelRotation(normal.getX(), normal.getY(), normal.getZ(), transform);
+            var v = RotHlpr.rotateVertexOnCenterBy(normal.getX(), normal.getY(), normal.getZ(), transform);
             inner.nominalFace(Direction.getNearest(v.x(), v.y(), v.z()));
             return this;
         }
@@ -48,7 +49,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuadBuilder pos(float x, float y, float z) {
         if (transform != null) {
-            var v = BakedQuadBuilder.applyModelRotation(x, y, z, transform);
+            var v = RotHlpr.rotateVertexOnCenterBy(x, y, z, transform);
             inner.pos(vertexIndex, v.x(), v.y(), v.z());
             return this;
         }
@@ -59,7 +60,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuadBuilder normal(float x, float y, float z) {
         if (transform != null) {
-            var v = BakedQuadBuilder.applyModelRotation(x, y, z, transform);
+            var v = RotHlpr.rotateVertexOnCenterBy(x, y, z, transform);
             inner.normal(vertexIndex, v.x(), v.y(), v.z());
             return this;
         }
@@ -76,6 +77,12 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuadBuilder uv(float u, float v) {
         inner.sprite(vertexIndex, 0, u, v);
+        return this;
+    }
+
+    @Override
+    public BakedQuadBuilder lightEmission(int lightLevel) {
+        inner.material(RendererAccess.INSTANCE.getRenderer().materialFinder().emissive(0, true).find());
         return this;
     }
 

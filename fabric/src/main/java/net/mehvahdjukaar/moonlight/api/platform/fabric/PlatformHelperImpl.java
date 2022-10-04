@@ -217,4 +217,8 @@ public class PlatformHelperImpl {
         ClientBoundOpenScreenMessage.openMenu(player, menuProvider, extraDataProvider);
     }
 
+    public static boolean isModLoadingValid() {
+        return true;
+    }
+
 }

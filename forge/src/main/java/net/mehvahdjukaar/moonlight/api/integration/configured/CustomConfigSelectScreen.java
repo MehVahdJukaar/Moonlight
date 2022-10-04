@@ -2,10 +2,14 @@ package net.mehvahdjukaar.moonlight.api.integration.configured;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mrcrayfish.configured.Configured;
+import com.mrcrayfish.configured.api.ConfigType;
+import com.mrcrayfish.configured.api.IModConfig;
 import com.mrcrayfish.configured.client.screen.ConfigScreen;
 import com.mrcrayfish.configured.client.screen.ModConfigSelectionScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.client.util.ScreenUtil;
+import com.mrcrayfish.configured.impl.forge.ForgeConfig;
 import com.mrcrayfish.configured.util.ConfigHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
@@ -36,7 +40,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     private static final Field FILE_ITEM_BUTTON = CustomConfigScreen.findFieldOrNull(FileItem.class, "modifyButton");
     private static final Field FILE_ITEM_CONFIG = CustomConfigScreen.findFieldOrNull(FileItem.class, "config");
 
-    private final BiFunction<CustomConfigSelectScreen, ModConfig, CustomConfigScreen> configScreenFactory;
+    private final BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory;
     private final ItemStack mainIcon;
     private final String modId;
     private final String modURL;
@@ -44,16 +48,16 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
 
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
                                     Screen parent,
-                                    BiFunction<CustomConfigSelectScreen, ModConfig, CustomConfigScreen> configScreenFactory,
+                                    BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     ConfigSpec... specs) {
         this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap(specs));
     }
 
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
                                     Screen parent,
-                                    BiFunction<CustomConfigSelectScreen, ModConfig, CustomConfigScreen> configScreenFactory,
-                                    Map<ModConfig.Type, Set<ModConfig>> configMap) {
-        super(parent, displayName, background, configMap);
+                                    BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
+                                    Map<ConfigType, Set<IModConfig>> configMap) {
+        super(parent,Component.literal(displayName), background, configMap);
         this.configScreenFactory = configScreenFactory;
         this.mainIcon = mainIcon;
         this.modId = modId;
@@ -83,13 +87,23 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                 new ConfigScreenHandler.ConfigScreenFactory((m, s) -> screenSelectFactory.apply(s)));
     }
 
-    private static Map<ModConfig.Type, Set<ModConfig>> createConfigMap(ConfigSpec... specs) {
-        Map<ModConfig.Type, Set<ModConfig>> modConfigMap = new EnumMap<>(ModConfig.Type.class);
+    private static Map<ConfigType, Set<IModConfig>> createConfigMap(ConfigSpec... specs) {
+        Map<ConfigType, Set<IModConfig>> modConfigMap = new EnumMap<>(ConfigType.class);
         for (var s : specs) {
-            var set = modConfigMap.computeIfAbsent(((ConfigSpecWrapper) s).getModConfigType(), a -> new HashSet<>());
-            set.add(((ConfigSpecWrapper) s).getModConfig());
+            var c = new ForgeConfig(((ConfigSpecWrapper) s).getModConfig());
+            var set = modConfigMap.computeIfAbsent(
+                    c.getType(), a -> new HashSet<>());
+            set.add(c);
         }
         return modConfigMap;
+    }
+
+    private static ConfigType getType(ConfigSpecWrapper s) {
+      var t =  s.getConfigType();
+      if(t == net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType.CLIENT)return ConfigType.CLIENT;
+      if(t == net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType.COMMON)return ConfigType.UNIVERSAL;
+      //else if(t == net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType.COMMON)return s.isSynced() ? ConfigType.SERVER_SYNC : ConfigType.SERVER;
+      return ConfigType.UNIVERSAL;
     }
 
     @Override
@@ -101,17 +115,18 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                 try {
                     FILE_ITEM_BUTTON.setAccessible(true);
                     FILE_ITEM_CONFIG.setAccessible(true);
-                    FILE_ITEM_BUTTON.set(i, createModifyButton((ModConfig) FILE_ITEM_CONFIG.get(item)));
+                    FILE_ITEM_BUTTON.set(i, createModifyButton((IModConfig) FILE_ITEM_CONFIG.get(item)));
                 } catch (IllegalAccessException ignored) {
                 }
             }
         }
     }
 
-    private Button createModifyButton(ModConfig config) {
+    private Button createModifyButton(IModConfig config) {
         String langKey = "configured.gui.modify";
         return new IconButton(0, 0, 33, 0, 60, Component.translatable(langKey),
-                (onPress) -> Minecraft.getInstance().setScreen(configScreenFactory.apply(CustomConfigSelectScreen.this, config)));
+                (onPress) -> Minecraft.getInstance().setScreen(configScreenFactory.apply(CustomConfigSelectScreen.this,
+                        config)));
     }
 
     @Override

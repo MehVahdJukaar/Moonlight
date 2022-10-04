@@ -127,7 +127,7 @@ public class SoftFluidRegistry {
                 s.getEquivalentFluids().forEach(f -> fluidsMap.put(f, s));
                 s.getContainerList().getPossibleFilled().forEach(i -> {
                     //don't associate water to potion bottle
-                    if (i != Items.POTION || !(getID(s).toString().equals("minecraft:water"))) {
+                    if (i != Items.POTION || s != VanillaSoftFluids.WATER.get()) {
                         itemMap.put(i, s);
                     }
                 });

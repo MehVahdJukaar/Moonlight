@@ -55,20 +55,10 @@ public interface BakedQuadBuilder {
         return useTransform(transformation.getMatrix());
     }
 
+    BakedQuadBuilder lightEmission(int light);
 
     BakedQuadBuilder endVertex();
 
     BakedQuad build();
 
-    static Vector3f applyModelRotation(float x, float y, float z, Matrix4f pTransform) {
-        Vector3f v = new Vector3f(x, y, z);
-        rotateVertexBy(v, new Vector3f(0.5F, 0.5F, 0.5F), pTransform);
-        return v;
-    }
-
-    static void rotateVertexBy(Vector3f pPos, Vector3f pOrigin, Matrix4f pTransform) {
-        Vector4f vector4f = new Vector4f(pPos.x() - pOrigin.x(), pPos.y() - pOrigin.y(), pPos.z() - pOrigin.z(), 1.0F);
-        vector4f.transform(pTransform);
-        pPos.set(vector4f.x() + pOrigin.x(), vector4f.y() + pOrigin.y(), vector4f.z() + pOrigin.z());
-    }
 }
