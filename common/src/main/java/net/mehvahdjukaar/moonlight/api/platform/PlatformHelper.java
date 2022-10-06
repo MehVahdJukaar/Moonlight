@@ -156,6 +156,7 @@ public class PlatformHelper {
     }
 
 
+    @Contract
     @ExpectPlatform
     public static boolean isMobGriefingOn(Level level, Entity entity) {
         throw new AssertionError();

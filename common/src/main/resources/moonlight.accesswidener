@@ -26,6 +26,8 @@ transitive-accessible method net/minecraft/world/entity/animal/Fox trusts (Ljava
 mutable field net/minecraft/world/entity/npc/Villager MEMORY_TYPES Lcom/google/common/collect/ImmutableList;
 accessible field net/minecraft/world/entity/npc/Villager MEMORY_TYPES Lcom/google/common/collect/ImmutableList;
 
+#bee growable
+transitive-accessible method net/minecraft/world/entity/animal/Bee incrementNumCropsGrownSincePollination ()V
 
 #fabric datapack reg
 transitive-accessible class net/minecraft/data/BuiltinRegistries$RegistryBootstrap

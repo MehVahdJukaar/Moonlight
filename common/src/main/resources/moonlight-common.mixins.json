@@ -11,6 +11,7 @@
     "ThirdPersonRendererMixin"
   ],
   "mixins": [
+    "BeeGoalMixin",
     "CreativeModeTabMixin",
     "GrindstoneMenuSlotMixin",
     "LevelChunkMixin",
