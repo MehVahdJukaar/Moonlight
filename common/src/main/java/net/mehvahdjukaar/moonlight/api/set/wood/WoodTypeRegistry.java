@@ -108,7 +108,10 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_stem"),
                 new ResourceLocation(id.getNamespace(), "stem_" + id.getPath()),
                 new ResourceLocation(id.getPath() + "_stem"),
-                new ResourceLocation("stem_" + id.getPath())
+                new ResourceLocation("stem_" + id.getPath()),
+                new ResourceLocation(id.getNamespace(), "stalk_" + id.getPath()),
+                new ResourceLocation(id.getPath() + "_stalk"),
+                new ResourceLocation("stalk_" + id.getPath())
         };
         Block temp = null;
         for (var r : test) {

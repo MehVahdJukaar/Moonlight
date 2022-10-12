@@ -63,13 +63,14 @@ public class LangBuilder {
     //utils
 
     //helper to make lang strings
+    @Deprecated(forRemoval = true) //use textUtils
     public static String getReadableName(String name) {
         return Arrays.stream((name).replace(":", "_").split("_"))
                 .map(StringUtils::capitalize).collect(Collectors.joining(" "));
     }
 
     /**
-     * Attempts grabbig a translated component with the given key and arguments. If none is found it will make the key itself readable
+     * Attempts grabbing a translated component with the given key and arguments. If none is found it will make the key itself readable
      *
      * @param key       translation key
      * @param arguments optional arguments

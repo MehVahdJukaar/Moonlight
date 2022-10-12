@@ -9,9 +9,9 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
-import net.mehvahdjukaar.moonlight.api.fluids.FluidContainerList;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -40,57 +40,78 @@ public class RenderedTexturesManager {
     }
 
     private static final List<RenderingData> REQUESTED_FOR_RENDERING = new ArrayList<>();
+    private static final List<FrameBufferBackedDynamicTexture> REQUEST_FOR_CLOSING = new ArrayList<>();
 
-    private static final LoadingCache<ResourceLocation, FrameBufferBackedDynamicTexture> TEXTURE_CACHE = CacheBuilder.newBuilder()
-            .expireAfterAccess(2, TimeUnit.MINUTES)
-            .removalListener(i -> {
-                FrameBufferBackedDynamicTexture value = (FrameBufferBackedDynamicTexture) i.getValue();
-                if (value != null) value.close();
-            })
-            .build(new CacheLoader<>() {
-                @Override
-                public FrameBufferBackedDynamicTexture load(ResourceLocation key) {
-                    return null;
-                }
-            });
+    private static final LoadingCache<ResourceLocation, FrameBufferBackedDynamicTexture> TEXTURE_CACHE =
+            CacheBuilder.newBuilder()
+                    .removalListener(i -> REQUEST_FOR_CLOSING.add((FrameBufferBackedDynamicTexture) i.getValue()))
+                    .expireAfterAccess(2, TimeUnit.MINUTES)
+                    .build(new CacheLoader<>() {
+                        @Override
+                        public FrameBufferBackedDynamicTexture load(ResourceLocation key) {
+                            return null;
+                        }
+                    });
 
     //clears the texture cache and forge all to be re-rendered
     public static void clearCache() {
         TEXTURE_CACHE.invalidateAll();
     }
 
-    public static FrameBufferBackedDynamicTexture getRenderedTexture(
-            ResourceLocation res, int size,
+    /**
+     * Gets a texture object on which you'll be able to directly draw onto as its in essence a frame buffer
+     * Remember to call isInitialized() as the returned texture might be empty
+     * For practical purposes you are only interested to call something like buffer.getBuffer(RenderType.entityCutout(texture.getTextureLocation()));
+     *
+     * @param id                    id of this texture. must be unique
+     * @param textureSize                   dimension
+     * @param textureDrawingFunction this is the function responsible to draw things onto this texture
+     * @param updateEachFrame        if this texture should be redrawn each frame. Useful if you are drawing an entity or animated item
+     * @return texture instance
+     */
+    public static FrameBufferBackedDynamicTexture requestTexture(
+            ResourceLocation id, int textureSize,
             Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction,
             boolean updateEachFrame) {
-        var texture = TEXTURE_CACHE.getIfPresent(res);
+
+        var texture = TEXTURE_CACHE.getIfPresent(id);
         if (texture == null) {
-            texture = new FrameBufferBackedDynamicTexture(res, size);
-            TEXTURE_CACHE.put(res, texture);
+            texture = new FrameBufferBackedDynamicTexture(id, textureSize);
+            TEXTURE_CACHE.put(id, texture);
             //add to queue which will render them next rendering cycle. Returned texture will be blank
-            REQUESTED_FOR_RENDERING.add(new RenderingData(res, textureDrawingFunction, updateEachFrame));
+            REQUESTED_FOR_RENDERING.add(new RenderingData(id, textureDrawingFunction, updateEachFrame));
         }
         return texture;
     }
 
+
+    @Deprecated(forRemoval = true)
     public static FrameBufferBackedDynamicTexture getFlatItemStackTexture(ResourceLocation res, ItemStack stack, int size) {
-        return getRenderedTexture(res, size, t -> drawItem(t, stack), true);
+        return requestFlatItemStackTexture(res, stack, size);
     }
 
-    public static FrameBufferBackedDynamicTexture getFlatItemTexture(Item item, int size) {
-        return getFlatItemTexture(item, size, "", null);
+    public static FrameBufferBackedDynamicTexture requestFlatItemStackTexture(ResourceLocation res, ItemStack stack, int size) {
+        return requestTexture(res, size, t -> drawItem(t, stack), true);
     }
 
-    public static FrameBufferBackedDynamicTexture getFlatItemTexture(Item item, int size, String prefix, @Nullable Consumer<NativeImage> postProcessing) {
-        //texture id for item size pair
-        if (!prefix.isEmpty()) prefix = "/" + prefix;
-        ResourceLocation res = Moonlight.res(Utils.getID(item).toString().replace(":", "/")
-                + "/" + size + prefix);
-        return getFlatItemTexture(res, item, size, postProcessing);
+    public static FrameBufferBackedDynamicTexture requestFlatItemTexture(Item item, int size) {
+        return requestFlatItemTexture(item, size, null);
     }
 
-    public static FrameBufferBackedDynamicTexture getFlatItemTexture(ResourceLocation res, Item item, int size,  @Nullable Consumer<NativeImage> postProcessing) {
-        return getRenderedTexture(res, size, t -> {
+    public static FrameBufferBackedDynamicTexture requestFlatItemTexture(Item item, int size, @Nullable Consumer<NativeImage> postProcessing) {
+        ResourceLocation id = Moonlight.res(Utils.getID(item).toString().replace(":", "/") + "/" + size);
+        return requestFlatItemTexture(id, item, size, postProcessing);
+    }
+
+    /**
+     * Draws a flax GUI-like item onto this texture with the given size
+     * @param item item you want to draw
+     * @param size texture size
+     * @param id texture id. Needs to be unique
+     * @param postProcessing some extra drawing functions to be applied on the native image. Can be slow as its cpu sided
+     */
+    public static FrameBufferBackedDynamicTexture requestFlatItemTexture(ResourceLocation id, Item item, int size, @Nullable Consumer<NativeImage> postProcessing) {
+        return requestTexture(id, size, t -> {
             drawItem(t, item.getDefaultInstance());
             if (postProcessing != null) {
                 t.download();
@@ -103,24 +124,57 @@ public class RenderedTexturesManager {
 
 
     //called each rendering tick
+    //Needed since we can only register and unregister textures at a certain time without messing up rendering cycle
     @ApiStatus.Internal
     public static void updateTextures() {
-        ListIterator<RenderingData> iter = REQUESTED_FOR_RENDERING.listIterator();
-        while (iter.hasNext()) {
-            var data = iter.next();
+        ListIterator<FrameBufferBackedDynamicTexture> toClose = REQUEST_FOR_CLOSING.listIterator();
+        while (toClose.hasNext()) {
+            var data = toClose.next();
+            data.close();
+            toClose.remove();
+        }
+        ListIterator<RenderingData> toRender = REQUESTED_FOR_RENDERING.listIterator();
+        while (toRender.hasNext()) {
+            RenderingData data = toRender.next();
             var texture = TEXTURE_CACHE.getIfPresent(data.id);
             if (texture != null) {
                 if (!texture.isInitialized()) texture.initialize();
                 data.textureDrawingFunction.accept(texture);
             }
             if (!data.animated || texture == null) {
-                iter.remove();
+                toRender.remove();
             }
         }
     }
 
 
+    //Utility methods
+
     public static void drawItem(FrameBufferBackedDynamicTexture tex, ItemStack stack) {
+        drawAsInGUI(tex, s -> {
+            //render stuff
+            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+            //Minecraft.getInstance().gui.render(s,1);
+            itemRenderer.renderGuiItem(stack, 0, 0);
+        });
+    }
+
+    /**
+     * Coordinates here are from 0 to 1
+     */
+    public static void drawAsInWorld(FrameBufferBackedDynamicTexture tex, Consumer<PoseStack> drawFunction) {
+        drawAsInGUI(tex, s -> {
+            float scale = 1f / 16f;
+            s.scale(scale, scale, scale);
+            drawFunction.accept(s);
+        });
+    }
+
+    /**
+     * Utility method that sets up an environment akin to gui rendering with a box from 0 t0 16.
+     * If you render an item at 0,0 it will be centered
+     */
+    public static void drawAsInGUI(FrameBufferBackedDynamicTexture tex, Consumer<PoseStack> drawFunction) {
 
         Minecraft mc = Minecraft.getInstance();
         RenderTarget frameBuffer = tex.getFrameBuffer();
@@ -147,10 +201,7 @@ public class RenderedTexturesManager {
         Lighting.setupFor3DItems();
         //end gui setup code
 
-        //render stuff
-        ItemRenderer itemRenderer = mc.getItemRenderer();
-        //Minecraft.getInstance().gui.render(posestack,1);
-        itemRenderer.renderGuiItem(stack, 0, 0);
+        drawFunction.accept(posestack);
 
         //reset stuff
         posestack.popPose();
@@ -164,14 +215,16 @@ public class RenderedTexturesManager {
         mc.getMainRenderTarget().bindWrite(true);
     }
 
+
+    //TODO: Stitch on an atlas
+    //unused
+
     /*
         RenderSystem.setShaderTexture(0,
                 new ResourceLocation("textures/gui/container/villager2.png")
        );
-        Gui.blit(posestack,0,0,1000,0,0,
-                256,256,16,16);
-*/
-
+        Gui.blit(posestack,0,0,1000,0,0,  256,256,16,16);
+    */
 
     private static Matrix4f getProjectionMatrix(double pFov, int size, int renderDistance) {
         PoseStack posestack = new PoseStack();

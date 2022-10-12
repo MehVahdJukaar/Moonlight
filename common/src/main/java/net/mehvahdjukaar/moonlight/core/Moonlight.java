@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
@@ -42,6 +43,7 @@ public class Moonlight {
         SoftFluidRegistry.init();
         MapDecorationRegistry.init();
 
+        RenderedTexturesManager.updateTextures();
 
         //client init
         if (PlatformHelper.getEnv().isClient()) {

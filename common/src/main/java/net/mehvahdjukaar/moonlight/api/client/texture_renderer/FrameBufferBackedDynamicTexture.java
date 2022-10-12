@@ -38,12 +38,9 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
     private NativeImage cpuImage;
 
     public FrameBufferBackedDynamicTexture(ResourceLocation resourceLocation, int width, int height){
-       // super(width, height, false);
         this.width = width;
         this.height = height;
-        //register this texture
         this.resourceLocation = resourceLocation;
-        Minecraft.getInstance().getTextureManager().register(resourceLocation, this);
     }
 
     public FrameBufferBackedDynamicTexture(ResourceLocation resourceLocation , int size){
@@ -52,6 +49,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
 
     public void initialize(){
         this.initialized = true;
+        //register this texture. Call at the right time or stuff will get messed up
         Minecraft.getInstance().getTextureManager().register(resourceLocation, this);
     }
 

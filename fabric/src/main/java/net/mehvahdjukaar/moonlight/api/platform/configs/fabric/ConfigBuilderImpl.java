@@ -12,6 +12,9 @@ import java.util.Stack;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * Author: MehVhadJukaar
+ */
 public class ConfigBuilderImpl extends ConfigBuilder {
 
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {

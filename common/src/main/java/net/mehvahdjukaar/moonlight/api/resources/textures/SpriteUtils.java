@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 public final class SpriteUtils {
 
@@ -111,7 +112,7 @@ public final class SpriteUtils {
     }
 
 
-    public static void reduceColors(NativeImage image, Function<Integer, Integer> sizeFn) {
+    public static void reduceColors(NativeImage image, UnaryOperator<Integer> sizeFn) {
 
         // read data
         Palette p = Palette.fromImage(TextureImage.of(image, null), null, 0);
