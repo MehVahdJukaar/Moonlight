@@ -8,11 +8,11 @@ import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -25,7 +25,7 @@ public class BlockSetInternal {
     private static final ConcurrentLinkedDeque<Runnable> REMOVER_ADDER = new ConcurrentLinkedDeque<>();
 
     public static void initializeBlockSets() {
-        if(hasFilledBlockSets())throw new UnsupportedOperationException("block sets have already bee initialized");
+        if (hasFilledBlockSets()) throw new UnsupportedOperationException("block sets have already bee initialized");
         FINDER_ADDER.forEach(Runnable::run);
         FINDER_ADDER.clear();
 
@@ -91,12 +91,13 @@ public class BlockSetInternal {
     @Deprecated(forRemoval = true)
     public static <T extends BlockType> void addDynamicBlockRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction,blockType, Registry.BLOCK);
+        addDynamicRegistration(registrationFunction, blockType, Registry.BLOCK);
     }
+
     @Deprecated(forRemoval = true)
     public static <T extends BlockType> void addDynamicItemRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction,blockType, Registry.ITEM);
+        addDynamicRegistration(registrationFunction, blockType, Registry.ITEM);
     }
 
 
@@ -105,7 +106,16 @@ public class BlockSetInternal {
     }
 
     @Nullable
-    public static BlockTypeRegistry<?> getRegistry(Class<? extends BlockType> typeClass) {
-        return BLOCK_SET_CONTAINERS.get(typeClass);
+    public static <T extends BlockType> BlockTypeRegistry<T> getRegistry(Class<T> typeClass) {
+        return (BlockTypeRegistry<T>) BLOCK_SET_CONTAINERS.get(typeClass);
+    }
+
+    @Nullable
+    public static <T extends BlockType> T getBlockTypeOf(ItemLike itemLike, Class<T> typeClass) {
+        BlockTypeRegistry<T> r = getRegistry(typeClass);
+        if (r != null) {
+            return r.getBlockTypeOf(itemLike);
+        }
+        return null;
     }
 }

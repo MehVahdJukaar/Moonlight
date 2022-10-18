@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
-import net.mehvahdjukaar.moonlight.api.client.util.TextUtil;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -148,6 +148,10 @@ public abstract class BlockType {
     public void addChild(String genericName, @Nullable ItemLike itemLike) {
         if (itemLike != null) {
             this.children.put(genericName, itemLike);
+            var v = BlockSetInternal.getRegistry(this.getClass());
+            if(v != null) {
+                v.mapBlockToType(itemLike, this);
+            }
         }
     }
 

@@ -46,7 +46,8 @@ public class RegHelperImpl {
     public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
 
     public static final List<Registry<?>> REG_PRIORITY = List.of(
-            Registry.SOUND_EVENT, Registry.BLOCK, Registry.ENTITY_TYPE, Registry.ITEM,
+            Registry.SOUND_EVENT, Registry.BLOCK, Registry.FLUID, Registry.PARTICLE_TYPE,
+            Registry.ENTITY_TYPE, Registry.ITEM,
             Registry.BLOCK_ENTITY_TYPE, Registry.PLACEMENT_MODIFIERS, Registry.STRUCTURE_TYPES,
             Registry.STRUCTURE_PIECE, Registry.FEATURE, BuiltinRegistries.CONFIGURED_FEATURE,
             BuiltinRegistries.PLACED_FEATURE

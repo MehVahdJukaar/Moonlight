@@ -31,22 +31,18 @@ public class BlockSetInternalImpl {
 
     //maps containing mod ids and block and items runnable. Block one is ready to run, items needs the bus supplied to it
     //they will be run each mod at a time block first then items
-    private static final Map<String, Pair<
-            List<Runnable>, //block registration function
-            List<Consumer<Registrator<Item>>> //item registration function
-            >>
-            LATE_REGISTRATION_QUEUE = new ConcurrentHashMap<>();
+    private static final Map<String, List<Runnable>> LATE_REGISTRATION_QUEUE = new ConcurrentHashMap<>();
 
     private static boolean hasFilledBlockSets = false;
 
     //aaaa
     public static  <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
-        if(registry == Registry.BLOCK){
-            addDynamicBlockRegistration((BlockSetAPI.BlockTypeRegistryCallback<Block, T>)registrationFunction, blockType);
-        }else if(registry == Registry.ITEM){
-            addDynamicItemRegistration((BlockSetAPI.BlockTypeRegistryCallback<Item, T>)registrationFunction, blockType);
-        }else{
+        if(registry == Registry.BLOCK) {
+            addDynamicBlockRegistration((BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
+        }else if(registry == Registry.FLUID){
+            throw new IllegalArgumentException("Fluid registry not supported here");
+        } else{
             //other entries
             Consumer<RegisterEvent> eventConsumer = e->{
                 if(e.getVanillaRegistry() == registry){
@@ -64,7 +60,7 @@ public class BlockSetInternalImpl {
 
         Consumer<RegisterEvent> eventConsumer;
 
-        Pair<List<Runnable>, List<Consumer<Registrator<Item>>>> registrationQueues = getOrAddQueue();
+        List<Runnable> registrationQueues = getOrAddQueue();
 
         //if block makes a function that just adds the bus and runnable to the queue whenever reg block is fired
         eventConsumer = e -> {
@@ -81,7 +77,7 @@ public class BlockSetInternalImpl {
                     }
                 };
                 //when this reg block event fires we only add a runnable to the queue
-                registrationQueues.getFirst().add(lateRegistration);
+                registrationQueues.add(lateRegistration);
             }
         };
         //registering block event to the bus
@@ -89,19 +85,8 @@ public class BlockSetInternalImpl {
         bus.addListener(EventPriority.HIGHEST, eventConsumer);
     }
 
-    public static <T extends BlockType> void addDynamicItemRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
-
-        Pair<List<Runnable>, List<Consumer<Registrator<Item>>>> registrationQueues = getOrAddQueue();
-        //items just get added to the queue. they will already be called with the correct event
-        Consumer<Registrator<Item>> itemEvent = e ->
-                registrationFunction.accept(e, BlockSetAPI.getBlockSet(blockType).getValues());
-
-        registrationQueues.getSecond().add(itemEvent);
-    }
-
     @NotNull
-    private static Pair<List<Runnable>, List<Consumer<Registrator<Item>>>> getOrAddQueue() {
+    private static List<Runnable> getOrAddQueue() {
         //this is horrible. worst shit ever
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         //get the queue corresponding to this certain mod
@@ -109,15 +94,15 @@ public class BlockSetInternalImpl {
         return LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {
             //if absent we register its registration callback
             bus.addListener(EventPriority.HIGHEST, BlockSetInternalImpl::registerLateBlockAndItems);
-            return Pair.of(new ArrayList<>(), new ArrayList<>());
+            return new ArrayList<>();
         });
     }
 
 
     //shittiest code ever lol
     protected static void registerLateBlockAndItems(RegisterEvent event) {
-        //fires for items
-        if (!event.getRegistryKey().equals(ForgeRegistries.ITEMS.getRegistryKey())) return;
+        //fires right after blocks
+        if (!event.getRegistryKey().equals(ForgeRegistries.FLUIDS.getRegistryKey())) return;
         //when the first registration function is called we find all block types
         if (!hasFilledBlockSets) {
             BlockSetInternal.initializeBlockSets();
@@ -128,13 +113,8 @@ public class BlockSetInternalImpl {
         var registrationQueues = LATE_REGISTRATION_QUEUE.get(modId);
 
         if (registrationQueues != null) {
-            IForgeRegistry<Item> fr = event.getForgeRegistry();
             //register blocks
-            var blockQueue = registrationQueues.getFirst();
-            blockQueue.forEach(Runnable::run);
-            //registers items
-            var itemQueue = registrationQueues.getSecond();
-            itemQueue.forEach(q -> q.accept(fr::register));
+            registrationQueues.forEach(Runnable::run);
         }
         //clears stuff that's been executed. not really needed but just to be safe its here
         LATE_REGISTRATION_QUEUE.remove(modId);

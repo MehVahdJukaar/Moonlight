@@ -5,7 +5,9 @@ import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -88,5 +90,13 @@ public class BlockSetAPI {
     @Nullable
     public static BlockTypeRegistry<?> getTypeRegistry(Class<? extends BlockType> typeClass) {
         return BlockSetInternal.getRegistry(typeClass);
+    }
+
+    /**
+     * @return BlockType of the provided block
+     */
+    @Nullable
+    public static <T extends BlockType> T getBlockTypeOf(ItemLike itemLike, Class<T> typeClass){
+        return BlockSetInternal.getBlockTypeOf(itemLike, typeClass);
     }
 }

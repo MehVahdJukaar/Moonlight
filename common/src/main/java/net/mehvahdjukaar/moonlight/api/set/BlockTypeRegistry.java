@@ -1,9 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
 import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +20,8 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     private final List<T> builder = new ArrayList<>();
     private final Class<T> typeClass;
     private Map<ResourceLocation, T> types = new LinkedHashMap<>();
+    private final Object2ObjectOpenHashMap<ItemLike, T> childrenToType = new Object2ObjectOpenHashMap<>();
+
 
     public BlockTypeRegistry(Class<T> typeClass, String name) {
         this.typeClass = typeClass;
@@ -138,4 +142,12 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     }
 
+    @Nullable
+    public T getBlockTypeOf(ItemLike itemLike) {
+        return childrenToType.getOrDefault(itemLike, null);
+    }
+
+    protected void mapBlockToType(ItemLike itemLike, BlockType type) {
+        this.childrenToType.put(itemLike, (T) type);
+    }
 }

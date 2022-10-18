@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client;
 
 import net.mehvahdjukaar.moonlight.api.client.GenericSimpleResourceReloadListener;
+import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
@@ -29,6 +30,9 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
     public void apply(List<ResourceLocation> locations, ResourceManager manager, ProfilerFiller filler) {
         TEXTURES_TO_STITCH.clear();
         TEXTURES_TO_STITCH.addAll(locations);
+
+        //also using this to reset texture cache
+        RenderedTexturesManager.clearCache();
     }
 
     private static final List<ResourceLocation> TEXTURES_TO_STITCH = new ArrayList<>();
@@ -47,6 +51,7 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
     }
 
     //TODO: possibly do it for ALL fluids, not only non grayscale ones
+    //TODO: call after pack reload
     public static void refresh() {
         if (Minecraft.getInstance().level == null) return;
         var v = SoftFluidRegistry.getEntries();

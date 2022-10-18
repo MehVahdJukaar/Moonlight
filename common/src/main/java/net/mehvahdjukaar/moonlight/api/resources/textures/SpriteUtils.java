@@ -209,13 +209,13 @@ public final class SpriteUtils {
     };
 
     /**
-     * @param manager             resource manager
-     * @param relativeTexturePath texture location
-     * @param expectColors        expected amount of colors. Will stop reading once the amount is reached
+     * @param manager         resource manager
+     * @param fullTexturePath texture location
+     * @param expectColors    expected amount of colors. Will stop reading once the amount is reached
      * @return an ordered color list obtained by reading the provided image pixels one by one from left to right then up to bottom (like a book)
      */
-    public static List<Integer> parsePaletteStrip(ResourceManager manager, ResourceLocation relativeTexturePath, int expectColors) {
-        try (NativeImage image = readImage(manager, relativeTexturePath)) {
+    public static List<Integer> parsePaletteStrip(ResourceManager manager, ResourceLocation fullTexturePath, int expectColors) {
+        try (NativeImage image = readImage(manager, fullTexturePath)) {
             List<Integer> list = new ArrayList<>();
             forEachPixel(image, (x, y) -> {
                 int i = image.getPixelRGBA(x, y);
@@ -223,11 +223,11 @@ public final class SpriteUtils {
                 list.add(i);
             });
             if (list.size() < expectColors) {
-                throw new RuntimeException("Image at " + relativeTexturePath + " has too few colors! Expected at least " + expectColors + " and got " + list.size());
+                throw new RuntimeException("Image at " + fullTexturePath + " has too few colors! Expected at least " + expectColors + " and got " + list.size());
             }
             return list;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to find image at location " + relativeTexturePath);
+            throw new RuntimeException("Failed to find image at location " + fullTexturePath);
         }
     }
 
