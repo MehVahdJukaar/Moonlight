@@ -18,8 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(targets = {"net.minecraft.world.entity.animal.Bee$BeeGrowCropGoal"})
 public abstract class BeeGoalMixin {
 
-    @Shadow
-    @Final
+
+    @Shadow @Final
     Bee field_20373;
 
     @Inject(method = "tick",

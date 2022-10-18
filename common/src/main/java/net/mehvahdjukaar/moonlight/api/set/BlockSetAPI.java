@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.set;
 
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -29,7 +30,7 @@ public class BlockSetAPI {
      * This is handy for block types that are unique and which can't be detected by the detection system defined in their BlockSetContainer class
      * Call during mod startup (not mod setup as it will be too late for this to affect block registration)
      *
-     * @param type the block type class you are registering this for (WoodType.class, LeafType.class...)
+     * @param type        the block type class you are registering this for (WoodType.class, LeafType.class...)
      * @param blockFinder Finder object that will provide the modded block type when the time is right
      */
     public static <T extends BlockType> void addBlockTypeFinder(Class<T> type, BlockType.SetFinder<T> blockFinder) {
@@ -65,13 +66,20 @@ public class BlockSetAPI {
      */
     public static <T extends BlockType> void addDynamicBlockRegistration(
             BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
-        BlockSetInternal.addDynamicBlockRegistration(registrationFunction, blockType);
+        addDynamicRegistration(registrationFunction, blockType, Registry.BLOCK);
     }
 
     public static <T extends BlockType> void addDynamicItemRegistration(
             BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
-        BlockSetInternal.addDynamicItemRegistration(registrationFunction, blockType);
+        addDynamicRegistration(registrationFunction, blockType, Registry.ITEM);
     }
+
+    public static <T extends BlockType, E> void addDynamicRegistration(
+            BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType,
+            Registry<E> registry) {
+        BlockSetInternal.addDynamicRegistration(registrationFunction, blockType, registry);
+    }
+
 
     public static Collection<BlockTypeRegistry<?>> getRegistries() {
         return BlockSetInternal.getRegistries();

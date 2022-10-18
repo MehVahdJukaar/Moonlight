@@ -31,7 +31,8 @@ import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.*;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 import java.util.Map;
@@ -48,10 +49,12 @@ public class RegHelperImpl {
         public T get() {
             return registryObject.get();
         }
+
         @Override
         public ResourceLocation getId() {
             return registryObject.getId();
         }
+
         @Override
         public Holder<T> getHolder() {
             return registryObject.getHolder().get();
@@ -69,6 +72,7 @@ public class RegHelperImpl {
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(
             ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
+        assert supplier != null : "Registry entry Supplier for " + name + " can't be null";
 
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
@@ -87,10 +91,6 @@ public class RegHelperImpl {
         return register(name, supplier, reg);
     }
 
-    public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
-        return register(name, () -> new SimpleParticleType(true), Registry.PARTICLE_TYPE);
-    }
-
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
@@ -99,7 +99,7 @@ public class RegHelperImpl {
 
     public static <T extends
             Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category,
-                                                               float width, float height, int clientTrackingRange, int updateInterval) {
+                                                                  float width, float height, int clientTrackingRange, int updateInterval) {
         return register(name, () -> EntityType.Builder.of(factory, category)
                 .sized(width, height).build(name.toString()), Registry.ENTITY_TYPE);
     }

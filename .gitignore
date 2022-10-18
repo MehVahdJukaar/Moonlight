@@ -19,3 +19,7 @@ classes/
 *.launch
 /forge/mods/
 mods/
+
+logs/
+.architectury-transformer/
+

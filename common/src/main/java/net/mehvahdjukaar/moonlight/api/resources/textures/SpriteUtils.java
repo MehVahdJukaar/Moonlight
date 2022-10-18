@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -31,8 +30,8 @@ public final class SpriteUtils {
     }
 
     public static void forEachPixel(NativeImage image, BiConsumer<Integer, Integer> function) {
-        for (int x = 0; x < image.getWidth(); x++) {
-            for (int y = 0; y < image.getHeight(); y++) {
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
                 function.accept(x, y);
             }
         }
@@ -112,6 +111,12 @@ public final class SpriteUtils {
     }
 
 
+    /**
+     * Given an image, reduce its color palette using k-means algorithm
+     *
+     * @param image  original image
+     * @param sizeFn target size function. Goes from original size to target size
+     */
     public static void reduceColors(NativeImage image, UnaryOperator<Integer> sizeFn) {
 
         // read data
@@ -144,6 +149,38 @@ public final class SpriteUtils {
     }
 
 
+    /**
+     * Similar to reduceColors, this takes an image and tries to reduce its colors by grouping together similar ones
+     * In other words gets rid of colors very close to each other. Useful to clean up textures before recoloring as having many similar colors could skew the retexturing process
+     *
+     * @param image     original image
+     * @param tolerance tolerance for two colors to be merged
+     */
+    public static void mergeSimilarColors(NativeImage image, float tolerance) {
+        TextureImage texture = TextureImage.of(image, null);
+        Palette originalPalette = Palette.fromImage(texture, null, 0);
+        Palette targetPalette = originalPalette.copy();
+        targetPalette.updateTolerance(tolerance);
+        //gets removed colors
+        originalPalette.removeAll(targetPalette);
+
+        //colors to replace
+        Map<Integer, Integer> removedColors = new HashMap<>();
+
+        for (var i : originalPalette) {
+            var replacement = targetPalette.getColorClosestTo(i);
+            removedColors.put(i.value(), replacement.value());
+        }
+
+        SpriteUtils.forEachPixel(image, (x, y) -> {
+            int i = image.getPixelRGBA(x, y);
+            Integer replacement = removedColors.get(i);
+            if (replacement != null)
+                image.setPixelRGBA(x, y, replacement);
+        });
+    }
+
+
     @Deprecated(forRemoval = true)
     @NotNull
     public static boolean looksLikeTopLogTexture(String s) {
@@ -170,5 +207,28 @@ public final class SpriteUtils {
         s = new ResourceLocation(s).getPath();
         return !s.contains("_bushy") && !s.contains("_snow");
     };
+
+    /**
+     * @param manager             resource manager
+     * @param relativeTexturePath texture location
+     * @param expectColors        expected amount of colors. Will stop reading once the amount is reached
+     * @return an ordered color list obtained by reading the provided image pixels one by one from left to right then up to bottom (like a book)
+     */
+    public static List<Integer> parsePaletteStrip(ResourceManager manager, ResourceLocation relativeTexturePath, int expectColors) {
+        try (NativeImage image = readImage(manager, relativeTexturePath)) {
+            List<Integer> list = new ArrayList<>();
+            forEachPixel(image, (x, y) -> {
+                int i = image.getPixelRGBA(x, y);
+                if (i == 0 || list.size() >= expectColors) return;
+                list.add(i);
+            });
+            if (list.size() < expectColors) {
+                throw new RuntimeException("Image at " + relativeTexturePath + " has too few colors! Expected at least " + expectColors + " and got " + list.size());
+            }
+            return list;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to find image at location " + relativeTexturePath);
+        }
+    }
 
 }

@@ -1,9 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
+import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -178,6 +181,10 @@ public class PlatformHelperImpl {
 
     public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> soundSupplier, Item.Properties properties, int duration) {
         return new RecordItem(power, soundSupplier, properties, duration);
+    }
+
+    public static SimpleParticleType newParticle() {
+        return new SimpleParticleType(true);
     }
 
     public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatformHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {

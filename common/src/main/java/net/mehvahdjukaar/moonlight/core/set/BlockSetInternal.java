@@ -5,19 +5,21 @@ import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class BlockSetInternal {
 
-    //Frick mod loading is multi-threaded, so we need to beware of concurrent access
+    //Frick mod loading is multithreaded, so we need to beware of concurrent access
     private static final Map<Class<? extends BlockType>, BlockTypeRegistry<?>> BLOCK_SET_CONTAINERS = new ConcurrentHashMap<>();
     private static final ConcurrentLinkedDeque<Runnable> FINDER_ADDER = new ConcurrentLinkedDeque<>();
     private static final ConcurrentLinkedDeque<Runnable> REMOVER_ADDER = new ConcurrentLinkedDeque<>();
@@ -80,16 +82,23 @@ public class BlockSetInternal {
     }
 
     @ExpectPlatform
-    public static <T extends BlockType> void addDynamicBlockRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
+    public static <T extends BlockType, E> void addDynamicRegistration(
+            BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType,
+            Registry<E> registry) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
-    public static <T extends BlockType> void addDynamicItemRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<Item,T> registrationFunction, Class<T> blockType) {
-        throw new AssertionError();
+    @Deprecated(forRemoval = true)
+    public static <T extends BlockType> void addDynamicBlockRegistration(
+            BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
+        addDynamicRegistration(registrationFunction,blockType, Registry.BLOCK);
     }
+    @Deprecated(forRemoval = true)
+    public static <T extends BlockType> void addDynamicItemRegistration(
+            BlockSetAPI.BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
+        addDynamicRegistration(registrationFunction,blockType, Registry.ITEM);
+    }
+
 
     public static Collection<BlockTypeRegistry<?>> getRegistries() {
         return BLOCK_SET_CONTAINERS.values();

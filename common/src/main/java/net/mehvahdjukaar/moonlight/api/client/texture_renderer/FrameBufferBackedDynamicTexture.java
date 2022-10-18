@@ -21,9 +21,12 @@ import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class FrameBufferBackedDynamicTexture extends AbstractTexture {
 
+    //runs when texture is initialized and populates it. Runs each tick if its tickable
+    protected final Consumer<FrameBufferBackedDynamicTexture> drawingFunction;
     private boolean initialized = false;
 
     //thing where it renders stuff on
@@ -37,20 +40,28 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
     @Nullable
     private NativeImage cpuImage;
 
-    public FrameBufferBackedDynamicTexture(ResourceLocation resourceLocation, int width, int height){
+    public FrameBufferBackedDynamicTexture(ResourceLocation resourceLocation, int width, int height,
+                                           @Nullable Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction) {
         this.width = width;
         this.height = height;
         this.resourceLocation = resourceLocation;
+        this.drawingFunction = textureDrawingFunction;
     }
 
-    public FrameBufferBackedDynamicTexture(ResourceLocation resourceLocation , int size){
-        this(resourceLocation, size, size);
+    public FrameBufferBackedDynamicTexture(ResourceLocation resourceLocation, int size,
+                                           @Nullable Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction) {
+        this(resourceLocation, size, size, textureDrawingFunction);
     }
 
-    public void initialize(){
+    public void initialize() {
         this.initialized = true;
+        //this.bind(); // assign gpu texture id
         //register this texture. Call at the right time or stuff will get messed up
         Minecraft.getInstance().getTextureManager().register(resourceLocation, this);
+        bind();
+        if(drawingFunction != null){
+            drawingFunction.accept(this);
+        }
     }
 
     /**
@@ -66,19 +77,19 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
 
     public RenderTarget getFrameBuffer() {
         //initAfterSetup the frame buffer (do not touch, magic code)
-        if(this.frameBuffer == null){
+        if (this.frameBuffer == null) {
             this.frameBuffer = new MainTarget(width, height);
             this.id = this.frameBuffer.getColorTextureId(); // just in case
         }
         return this.frameBuffer;
     }
 
-    //sets current frame buffer to this. Further render calls will draw here
-    public void bindWrite(){
+    //sets current frame buffer to this. Further, render calls will draw here
+    public void bindWrite() {
         getFrameBuffer().bindWrite(true);
     }
 
-    public int getWidth(){
+    public int getWidth() {
         return width;
     }
 
@@ -117,18 +128,18 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         //releases texture id
         this.releaseId();
         //closes native image and texture
-        if(this.cpuImage != null) {
+        if (this.cpuImage != null) {
             this.cpuImage.close();
             this.cpuImage = null;
         }
         //destroy render buffer
-        //release registered texture resource location and id. called just to be sure. releaseId should already do this
-        if(this.initialized) Minecraft.getInstance().getTextureManager().release(resourceLocation);
+        //dont do this, it causes many issues
+        // if (this.initialized) Minecraft.getInstance().getTextureManager().release(resourceLocation);
     }
 
     public NativeImage getPixels() {
-        if(this.cpuImage == null){
-            this.cpuImage = new NativeImage(width,height, false);
+        if (this.cpuImage == null) {
+            this.cpuImage = new NativeImage(width, height, false);
         }
         return cpuImage;
     }
@@ -136,7 +147,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
     /**
      * Downloads the GPU texture to CPU for edit
      */
-    public void download(){
+    public void download() {
         this.bind();
         getPixels().downloadTexture(0, false);
         //cpuImage.flipY();
@@ -152,12 +163,12 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
             this.cpuImage.close();
             this.cpuImage = null;
         } else {
-            Moonlight.LOGGER.warn("Trying to upload disposed texture {}", (int)this.getId());
+            Moonlight.LOGGER.warn("Trying to upload disposed texture {}", (int) this.getId());
         }
     }
 
     public List<Path> saveTextureToFile(Path texturesDir) throws IOException {
-        return saveTextureToFile(texturesDir,  this.resourceLocation.getPath().replace("/","_"));
+        return saveTextureToFile(texturesDir, this.resourceLocation.getPath().replace("/", "_"));
     }
 
     public List<Path> saveTextureToFile(Path texturesDir, String name) throws IOException {

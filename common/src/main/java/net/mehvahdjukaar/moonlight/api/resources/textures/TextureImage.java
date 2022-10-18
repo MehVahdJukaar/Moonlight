@@ -78,7 +78,6 @@ public class TextureImage implements AutoCloseable {
 
     @FunctionalInterface
     public interface FramePixelConsumer extends TriConsumer<Integer, Integer, Integer> {
-
         @Override
         void accept(Integer frameIndex, Integer globalX, Integer globalY);
     }

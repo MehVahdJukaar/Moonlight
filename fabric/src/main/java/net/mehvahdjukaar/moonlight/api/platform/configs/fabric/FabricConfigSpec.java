@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.isxander.yacl.api.YetAnotherConfigLib;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -69,7 +68,7 @@ public class FabricConfigSpec extends ConfigSpec {
         }
 
         if (config instanceof JsonObject jo) {
-            //dont call load directly so we skip the main category name
+            //don't call load directly so we skip the main category name
             mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
         }
     }

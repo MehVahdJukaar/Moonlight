@@ -16,6 +16,7 @@ import net.mehvahdjukaar.moonlight.fabric.FabricRecipeConditionManager;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -30,6 +31,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -43,22 +45,20 @@ public class RegHelperImpl {
 
     public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
 
+    public static final List<Registry<?>> REG_PRIORITY = List.of(
+            Registry.SOUND_EVENT, Registry.BLOCK, Registry.ENTITY_TYPE, Registry.ITEM,
+            Registry.BLOCK_ENTITY_TYPE, Registry.PLACEMENT_MODIFIERS, Registry.STRUCTURE_TYPES,
+            Registry.STRUCTURE_PIECE, Registry.FEATURE, BuiltinRegistries.CONFIGURED_FEATURE,
+            BuiltinRegistries.PLACED_FEATURE
+    );
+
     //order is important here
     static {
-        REGISTRIES.put(Registry.SOUND_EVENT, new LinkedHashMap<>());
-        REGISTRIES.put(Registry.BLOCK, new LinkedHashMap<>());
-        REGISTRIES.put(Registry.ENTITY_TYPE, new LinkedHashMap<>());
-        REGISTRIES.put(Registry.ITEM, new LinkedHashMap<>());
-        REGISTRIES.put(Registry.BLOCK_ENTITY_TYPE, new LinkedHashMap<>());
-        REGISTRIES.put(Registry.PLACEMENT_MODIFIERS, new LinkedHashMap<>());
-        REGISTRIES.put(Registry.STRUCTURE_TYPES, new LinkedHashMap<>());
-        REGISTRIES.put(Registry.STRUCTURE_PIECE, new LinkedHashMap<>());
-        REGISTRIES.put(Registry.FEATURE, new LinkedHashMap<>());
-        REGISTRIES.put(BuiltinRegistries.CONFIGURED_FEATURE, new LinkedHashMap<>());
-        REGISTRIES.put(BuiltinRegistries.PLACED_FEATURE, new LinkedHashMap<>());
+        REG_PRIORITY.forEach(e -> REGISTRIES.put(e, new LinkedHashMap<>()));
     }
 
     //call from mod setup
+    @ApiStatus.Internal
     public static void registerEntries() {
         for (var m : REGISTRIES.entrySet()) {
             m.getValue().values().forEach(RegistryQueue::initializeEntries);
@@ -74,6 +74,7 @@ public class RegHelperImpl {
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+        assert supplier != null : "Registry entry Supplier for " + name + " can't be null";
         //if (true) return registerAsync(name, supplier, reg);
         String modId = name.getNamespace();
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
@@ -85,10 +86,6 @@ public class RegHelperImpl {
         RegistryQueue.EntryWrapper<E, T> entry = new RegistryQueue.EntryWrapper<>(name, supplier, reg);
         entry.initialize();
         return entry;
-    }
-
-    public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
-        return register(name, FabricParticleTypes::simple, Registry.PARTICLE_TYPE);
     }
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(

@@ -159,9 +159,8 @@ public class RegHelper {
         return register(name, blockEntity, Registry.BLOCK_ENTITY_TYPE);
     }
 
-    @ExpectPlatform
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
-        throw new AssertionError();
+        return register(name,PlatformHelper::newParticle, Registry.PARTICLE_TYPE);
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,

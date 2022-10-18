@@ -25,6 +25,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
@@ -73,16 +74,21 @@ public class ConfigSpecWrapper extends ConfigSpec {
 
     @Override
     public void loadFromFile() {
-        CommentedFileConfig replacementConfig = CommentedFileConfig
-                .builder(this.getFullPath())
-                .sync()
-                .preserveInsertionOrder()
-                .writingMode(WritingMode.REPLACE)
-                .build();
-        replacementConfig.load();
-        replacementConfig.save();
+        try {
+            CommentedFileConfig replacementConfig = CommentedFileConfig
+                    .builder(this.getFullPath())
+                    .sync()
+                    .preserveInsertionOrder()
+                    .writingMode(WritingMode.REPLACE)
+                    .build();
+            replacementConfig.load();
+            replacementConfig.save();
 
-        spec.setConfig(replacementConfig);
+            spec.setConfig(replacementConfig);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    new IOException("Failed to load " + this.getFileName() + " config. Try deleting it: " + e));
+        }
     }
 
     public ForgeConfigSpec getSpec() {
@@ -141,7 +147,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
     protected void onConfigChange(ModConfigEvent event) {
         if (event.getConfig().getSpec() == this.getSpec()) {
             //send this configuration to connected clients
-            if(this.isSynced()) sendSyncedConfigsToAllPlayers();
+            if (this.isSynced()) sendSyncedConfigsToAllPlayers();
             onRefresh();
         }
     }

@@ -3,6 +3,8 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -209,6 +211,11 @@ public class PlatformHelper {
     }
     @ExpectPlatform
     public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties, int duration) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static SimpleParticleType newParticle(){
         throw new AssertionError();
     }
 

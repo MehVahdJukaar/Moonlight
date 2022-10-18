@@ -1,10 +1,13 @@
 package net.mehvahdjukaar.moonlight.core.set.forge;
 
 import com.mojang.datafixers.util.Pair;
+import net.mehvahdjukaar.moonlight.api.platform.forge.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
+import net.minecraft.core.Registry;
+import net.minecraft.world.item.Instruments;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -36,6 +39,26 @@ public class BlockSetInternalImpl {
 
     private static boolean hasFilledBlockSets = false;
 
+    //aaaa
+    public static  <T extends BlockType, E> void addDynamicRegistration(
+            BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
+        if(registry == Registry.BLOCK){
+            addDynamicBlockRegistration((BlockSetAPI.BlockTypeRegistryCallback<Block, T>)registrationFunction, blockType);
+        }else if(registry == Registry.ITEM){
+            addDynamicItemRegistration((BlockSetAPI.BlockTypeRegistryCallback<Item, T>)registrationFunction, blockType);
+        }else{
+            //other entries
+            Consumer<RegisterEvent> eventConsumer = e->{
+                if(e.getVanillaRegistry() == registry){
+                    registrationFunction.accept(e.getForgeRegistry()::register, BlockSetAPI.getBlockSet(blockType).getValues());
+                }
+            };
+            FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        }
+
+    }
+
+
     public static <T extends BlockType> void addDynamicBlockRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
 
@@ -50,7 +73,7 @@ public class BlockSetInternalImpl {
                 Runnable lateRegistration = () -> {
 
                     IForgeRegistry<Block> registry = e.getForgeRegistry();
-                    if (registry instanceof ForgeRegistry fr) {
+                    if (registry instanceof ForgeRegistry<?> fr) {
                         boolean frozen = fr.isLocked();
                         fr.unfreeze();
                         registrationFunction.accept(registry::register, BlockSetAPI.getBlockSet(blockType).getValues());
@@ -60,7 +83,6 @@ public class BlockSetInternalImpl {
                 //when this reg block event fires we only add a runnable to the queue
                 registrationQueues.getFirst().add(lateRegistration);
             }
-            ;
         };
         //registering block event to the bus
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -121,6 +143,7 @@ public class BlockSetInternalImpl {
     public static boolean hasFilledBlockSets() {
         return hasFilledBlockSets;
     }
+
 
 
 }

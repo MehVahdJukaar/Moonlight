@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.set.fabric;
 
+import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
@@ -17,33 +18,53 @@ public class BlockSetInternalImpl {
         return hasFilledBlockSets;
     }
 
-    public static final Map<Class<? extends BlockType>, Queue<BlockSetAPI.BlockTypeRegistryCallback<Block, ?>>> BLOCK_QUEUE = new LinkedHashMap<>();
-    public static final Map<Class<? extends BlockType>, Queue<BlockSetAPI.BlockTypeRegistryCallback<Item, ?>>> ITEM_QUEUE = new LinkedHashMap<>();
+    public static final Map<Registry<?>,
+            Map<Class<? extends BlockType>, LateRegQueue<?, ?>>> QUEUES = new HashMap<>();
 
-    public static <T extends BlockType> void addDynamicBlockRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
-        BLOCK_QUEUE.computeIfAbsent(blockType, b -> new ArrayDeque<>()).add(registrationFunction);
-    }
-
-    public static <T extends BlockType> void addDynamicItemRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
-        ITEM_QUEUE.computeIfAbsent(blockType, b -> new ArrayDeque<>()).add(registrationFunction);
+    @SuppressWarnings("unchecked")
+    public static <T extends BlockType, E> void addDynamicRegistration(
+            BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType,
+            Registry<E> registry) {
+        LateRegQueue<T, E> r = (LateRegQueue<T, E>) QUEUES.computeIfAbsent(registry, b -> new LinkedHashMap<>())
+                .computeIfAbsent(blockType, b -> new LateRegQueue<>(blockType, registry));
+        r.add(registrationFunction);
     }
 
     public static void registerEntries() {
         BlockSetInternal.initializeBlockSets();
-        for (var e : BLOCK_QUEUE.entrySet()) {
 
-            registerQueue(e.getKey(), e.getValue(), Registry.BLOCK);
-        }
-        for (var e : ITEM_QUEUE.entrySet()) {
-            registerQueue(e.getKey(), e.getValue(), Registry.ITEM);
+        List<Registry<?>> priority = new ArrayList<>(QUEUES.keySet().stream().toList());
+        priority.sort(Comparator.comparingInt(
+                RegHelperImpl.REG_PRIORITY::indexOf));
+        for(var r : priority) {
+            var blockQueue = QUEUES.get(r);
+            if (blockQueue != null) {
+                for (var e : blockQueue.entrySet()) {
+                    e.getValue().registerEntries();
+                }
+                QUEUES.remove(r);
+            }
         }
     }
 
-    private static <R, T extends BlockType> void registerQueue(Class<T> type, Queue<BlockSetAPI.BlockTypeRegistryCallback<R, ?>> callback,
-                                                               Registry<R> registry) {
+    private static class LateRegQueue<T extends BlockType, E> {
+        final Class<T> blockType;
+        final Queue<BlockSetAPI.BlockTypeRegistryCallback<E, T>> queue = new ArrayDeque<>();
+        final Registry<E> registry;
 
-        callback.forEach(a -> a.accept((n, i) -> Registry.register(registry, n, i), (Collection) BlockSetAPI.getBlockSet(type).getValues()));
+        public LateRegQueue(Class<T> blockType, Registry<E> registry) {
+            this.blockType = blockType;
+            this.registry = registry;
+        }
+
+        public void add(BlockSetAPI.BlockTypeRegistryCallback<E, T> callback) {
+            queue.add(callback);
+        }
+
+        public void registerEntries(){
+            queue.forEach(a -> a.accept((n, i) ->
+                    Registry.register(registry, n, i), BlockSetAPI.getBlockSet(blockType).getValues()));
+        }
     }
+
 }

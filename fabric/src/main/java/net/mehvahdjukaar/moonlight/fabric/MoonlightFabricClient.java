@@ -7,8 +7,8 @@ import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesM
 public class MoonlightFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        WorldRenderEvents.START.register((c) -> RenderedTexturesManager.updateTextures());
-
+        //WorldRenderEvents.START.register((c) -> RenderedTexturesManager.updateTextures());
+        //dont remove
         MoonlightFabric.commonSetup();
         FabricSetupCallbacks.CLIENT_SETUP.forEach(Runnable::run);
     }

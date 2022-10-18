@@ -36,6 +36,9 @@ public class PaletteColor implements Comparable<PaletteColor> {
         this.hcl = lab.asHCL();
     }
 
+    /**
+     * @return integer color value
+     */
     public int value() {
         return value;
     }

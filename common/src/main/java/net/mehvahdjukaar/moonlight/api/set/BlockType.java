@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
+import net.mehvahdjukaar.moonlight.api.client.util.TextUtil;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;

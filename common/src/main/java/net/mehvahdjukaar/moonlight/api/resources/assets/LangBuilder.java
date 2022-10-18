@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources.assets;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.moonlight.api.client.util.TextUtil;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
@@ -63,7 +64,6 @@ public class LangBuilder {
     //utils
 
     //helper to make lang strings
-    @Deprecated(forRemoval = true) //use textUtils
     public static String getReadableName(String name) {
         return Arrays.stream((name).replace(":", "_").split("_"))
                 .map(StringUtils::capitalize).collect(Collectors.joining(" "));

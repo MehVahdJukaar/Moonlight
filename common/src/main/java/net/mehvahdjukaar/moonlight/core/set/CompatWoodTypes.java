@@ -23,6 +23,11 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "terraqueous", "dense_cloud", "dense_cloud", "dense_cloud_column"));
 
+        //mcreator mod with typos...
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "nethers_exoticism", "jabuticaba", "jaboticaba_planks", "jabuticaba_log"));
+
+
         var verdant = WoodType.Finder.simple(
                 "nourished_end", "verdant", "verdant_planks", "verdant_stalk");
         verdant.addChild("wood", "verdant_hyphae");

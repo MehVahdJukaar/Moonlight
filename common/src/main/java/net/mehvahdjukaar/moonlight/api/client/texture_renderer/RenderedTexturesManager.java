@@ -9,7 +9,6 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
-import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
@@ -33,18 +32,12 @@ import java.util.function.Consumer;
 
 public class RenderedTexturesManager {
 
-    private record RenderingData(
-            ResourceLocation id,
-            Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction,
-            boolean animated) {
-    }
-
-    private static final List<RenderingData> REQUESTED_FOR_RENDERING = new ArrayList<>();
-    private static final List<FrameBufferBackedDynamicTexture> REQUEST_FOR_CLOSING = new ArrayList<>();
-
     private static final LoadingCache<ResourceLocation, FrameBufferBackedDynamicTexture> TEXTURE_CACHE =
             CacheBuilder.newBuilder()
-                    .removalListener(i -> REQUEST_FOR_CLOSING.add((FrameBufferBackedDynamicTexture) i.getValue()))
+                    .removalListener(i -> {
+                        //REQUEST_FOR_CLOSING.add((FrameBufferBackedDynamicTexture) i.getValue())
+                        RenderSystem.recordRenderCall(((FrameBufferBackedDynamicTexture) i.getValue())::close);
+                    })
                     .expireAfterAccess(2, TimeUnit.MINUTES)
                     .build(new CacheLoader<>() {
                         @Override
@@ -63,8 +56,8 @@ public class RenderedTexturesManager {
      * Remember to call isInitialized() as the returned texture might be empty
      * For practical purposes you are only interested to call something like buffer.getBuffer(RenderType.entityCutout(texture.getTextureLocation()));
      *
-     * @param id                    id of this texture. must be unique
-     * @param textureSize                   dimension
+     * @param id                     id of this texture. must be unique
+     * @param textureSize            dimension
      * @param textureDrawingFunction this is the function responsible to draw things onto this texture
      * @param updateEachFrame        if this texture should be redrawn each frame. Useful if you are drawing an entity or animated item
      * @return texture instance
@@ -76,10 +69,14 @@ public class RenderedTexturesManager {
 
         var texture = TEXTURE_CACHE.getIfPresent(id);
         if (texture == null) {
-            texture = new FrameBufferBackedDynamicTexture(id, textureSize);
+            texture = updateEachFrame ?
+                    new TickableFrameBufferBackedDynamicTexture(id, textureSize, textureDrawingFunction) :
+                    new FrameBufferBackedDynamicTexture(id, textureSize, textureDrawingFunction);
             TEXTURE_CACHE.put(id, texture);
             //add to queue which will render them next rendering cycle. Returned texture will be blank
-            REQUESTED_FOR_RENDERING.add(new RenderingData(id, textureDrawingFunction, updateEachFrame));
+            //REQUESTED_FOR_RENDERING.add(texture);
+
+            RenderSystem.recordRenderCall(texture::initialize);
         }
         return texture;
     }
@@ -100,17 +97,25 @@ public class RenderedTexturesManager {
 
     public static FrameBufferBackedDynamicTexture requestFlatItemTexture(Item item, int size, @Nullable Consumer<NativeImage> postProcessing) {
         ResourceLocation id = Moonlight.res(Utils.getID(item).toString().replace(":", "/") + "/" + size);
-        return requestFlatItemTexture(id, item, size, postProcessing);
+        return requestFlatItemTexture(id, item, size, postProcessing, false);
+    }
+
+    public static FrameBufferBackedDynamicTexture requestFlatItemTexture(
+            ResourceLocation id, Item item, int size, @Nullable Consumer<NativeImage> postProcessing) {
+        return requestFlatItemTexture(id, item, size, postProcessing, false);
     }
 
     /**
      * Draws a flax GUI-like item onto this texture with the given size
-     * @param item item you want to draw
-     * @param size texture size
-     * @param id texture id. Needs to be unique
+     *
+     * @param item           item you want to draw
+     * @param size           texture size
+     * @param id             texture id. Needs to be unique
      * @param postProcessing some extra drawing functions to be applied on the native image. Can be slow as its cpu sided
      */
-    public static FrameBufferBackedDynamicTexture requestFlatItemTexture(ResourceLocation id, Item item, int size, @Nullable Consumer<NativeImage> postProcessing) {
+    public static FrameBufferBackedDynamicTexture requestFlatItemTexture(
+            ResourceLocation id, Item item, int size,
+            @Nullable Consumer<NativeImage> postProcessing, boolean updateEachFrame) {
         return requestTexture(id, size, t -> {
             drawItem(t, item.getDefaultInstance());
             if (postProcessing != null) {
@@ -119,32 +124,7 @@ public class RenderedTexturesManager {
                 postProcessing.accept(img);
                 t.upload();
             }
-        }, true);
-    }
-
-
-    //called each rendering tick
-    //Needed since we can only register and unregister textures at a certain time without messing up rendering cycle
-    @ApiStatus.Internal
-    public static void updateTextures() {
-        ListIterator<FrameBufferBackedDynamicTexture> toClose = REQUEST_FOR_CLOSING.listIterator();
-        while (toClose.hasNext()) {
-            var data = toClose.next();
-            data.close();
-            toClose.remove();
-        }
-        ListIterator<RenderingData> toRender = REQUESTED_FOR_RENDERING.listIterator();
-        while (toRender.hasNext()) {
-            RenderingData data = toRender.next();
-            var texture = TEXTURE_CACHE.getIfPresent(data.id);
-            if (texture != null) {
-                if (!texture.isInitialized()) texture.initialize();
-                data.textureDrawingFunction.accept(texture);
-            }
-            if (!data.animated || texture == null) {
-                toRender.remove();
-            }
-        }
+        }, updateEachFrame);
     }
 
 

@@ -6,12 +6,13 @@ import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HCLColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.LABColor;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Palette {
+public class Palette implements Set<PaletteColor> {
 
     public static final float BASE_TOLERANCE = 1 / 180f;
     private static final Palette EMPTY = new Palette(List.of());
@@ -31,8 +32,9 @@ public class Palette {
         this.updateTolerance(tolerance);
     }
 
+    @Override
     public boolean isEmpty() {
-        return this == EMPTY;
+        return this == EMPTY || internal.isEmpty();
     }
 
     /**
@@ -91,12 +93,31 @@ public class Palette {
         this.sort();
     }
 
-    public void add(PaletteColor color) {
-        if (color.rgb().alpha() == 0) return;
+    @Override
+    public boolean add(PaletteColor color) {
+        if (color.rgb().alpha() == 0) return false;
         if (!hasColor(color)) {
             internal.add(color);
             this.sort();
+            return true;
         }
+        return false;
+    }
+
+    @Override
+    public boolean addAll(@NotNull Collection<? extends PaletteColor> colors) {
+        boolean added = false;
+        for (var c : colors) {
+            if (!hasColor(c)) {
+                internal.add(c);
+                added = true;
+            }
+        }
+        if (added) {
+            sort();
+            return true;
+        }
+        return false;
     }
 
     public void set(int index, PaletteColor color) {
@@ -119,8 +140,12 @@ public class Palette {
     public boolean hasColor(PaletteColor color, float tolerance) {
         if (color.rgb().alpha() != 0) {
             for (PaletteColor c : this.getValues()) {
-                if (c.distanceTo(color) <= tolerance) {
-                    return true;
+                if (tolerance == 0) {
+                    if (c.value() == color.value()) return true;
+                } else {
+                    if (c.distanceTo(color) <= tolerance) {
+                        return true;
+                    }
                 }
             }
         }
@@ -140,15 +165,24 @@ public class Palette {
      * @return removed color
      */
     public PaletteColor remove(int index) {
-        var r = internal.remove(index);
-        this.sort();
-        return r;
+        return internal.remove(index);
     }
 
-    public void remove(PaletteColor color) {
-        if (internal.remove(color)) {
+    public boolean remove(PaletteColor color) {
+        return this.internal.remove(color);
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        return this.internal.remove(o);
+    }
+
+    public boolean removeAll(Collection<?> colors) {
+        if (this.internal.removeAll(colors)) {
             this.sort();
+            return true;
         }
+        return false;
     }
 
     public PaletteColor calculateAverage() {
@@ -176,7 +210,7 @@ public class Palette {
     /**
      * Gets the color within this palette that most closely matches the given color
      */
-    private PaletteColor getColorClosestTo(PaletteColor target) {
+    public PaletteColor getColorClosestTo(PaletteColor target) {
         PaletteColor bestMatch = target;
         float lastDist = Float.MAX_VALUE;
         for (var c : this.getValues()) {
@@ -261,10 +295,11 @@ public class Palette {
 
     /**
      * Removes one color, the one that is least used
+     *
      * @return removed color
      */
     public PaletteColor removeLeastUsed() {
-        //remove the one with least occurrence
+        //remove the one with the least occurrence
         PaletteColor toRemove = internal.get(0);
         for (var p : internal) {
             if (p.occurrence < toRemove.occurrence) {
@@ -296,6 +331,7 @@ public class Palette {
 
     /**
      * Same as before but merges these 2 colors
+     *
      * @return newly added color
      */
     public PaletteColor reduceAndAverage() {
@@ -579,5 +615,76 @@ public class Palette {
         }
 
         return palettes;
+    }
+
+
+    //set stuff
+
+    @NotNull
+    @Override
+    public Iterator<PaletteColor> iterator() {
+        return new ItrWrapper();
+    }
+
+    private class ItrWrapper implements Iterator<PaletteColor> {
+
+        private final Iterator<PaletteColor> itr;
+
+        private ItrWrapper() {
+            this.itr = internal.iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return itr.hasNext();
+        }
+
+        @Override
+        public PaletteColor next() {
+            return itr.next();
+        }
+
+        @Override
+        public void remove() {
+            itr.remove();
+            Palette.this.sort();
+        }
+    }
+
+    @NotNull
+    @Override
+    public Object[] toArray() {
+        return internal.toArray();
+    }
+
+    @NotNull
+    @Override
+    public <T> T[] toArray(@NotNull T[] a) {
+        return internal.toArray(a);
+    }
+
+    @Override
+    public boolean containsAll(@NotNull Collection<?> c) {
+        return internal.containsAll(c);
+    }
+
+    @Deprecated
+    @Override
+    public boolean contains(Object o) {
+        return this.internal.contains(o);
+    }
+
+    @Override
+    public boolean retainAll(@NotNull Collection<?> c) {
+        if (this.internal.retainAll(c)) {
+            this.sort();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void clear() {
+        this.internal.clear();
     }
 }

@@ -168,7 +168,7 @@ public class Respriter {
     /**
      * Does not modify any of the given palettes
      */
-    private record ColorToColorMap(Map<Integer, Integer> map) {
+    public record ColorToColorMap(Map<Integer, Integer> map) {
 
         @Nullable
         public Integer mapColor(Integer color) {
@@ -177,7 +177,7 @@ public class Respriter {
 
         @Nullable
         public static ColorToColorMap create(Palette originalPalette, Palette toPalette) {
-            //we dont want to modify original palette for later use here so we make a copy
+            //we don't want to modify original palette for later use here, so we make a copy
             Palette copy = toPalette.copy();
             copy.matchSize(originalPalette.size(), originalPalette.getAverageLuminanceStep());
             if (copy.size() != originalPalette.size()) {
