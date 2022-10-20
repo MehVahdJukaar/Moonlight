@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
@@ -9,7 +11,6 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -18,12 +19,12 @@ import java.util.function.Supplier;
 public abstract class BlockType {
 
     //stuff made out of this type
-    private final Map<String, ItemLike> children = new HashMap<>();
-    boolean needsInit = true;
+    private final BiMap<String, Object> children = HashBiMap.create();
     public final ResourceLocation id;
 
     public BlockType(ResourceLocation resourceLocation) {
         this.id = resourceLocation;
+        this.initializeVanillaChildren();
     }
 
     public ResourceLocation getId() {
@@ -116,8 +117,7 @@ public abstract class BlockType {
     /**
      * @return set of objects made out of this block type marked by their generic name
      */
-    public Set<Map.Entry<String, ItemLike>> getChildren() {
-        if (needsInit) this.initAfterSetup();
+    public Set<Map.Entry<String, Object>> getChildren() {
         return this.children.entrySet();
     }
 
@@ -127,7 +127,7 @@ public abstract class BlockType {
     @Nullable
     public Item getItemOfThis(String key) {
         var v = this.getChild(key);
-        return v == null ? null : v.asItem();
+        return v instanceof Item i ? i : null;
     }
 
     @Nullable
@@ -137,35 +137,46 @@ public abstract class BlockType {
     }
 
     @Nullable
-    public ItemLike getChild(String key) {
-        if (needsInit) this.initAfterSetup();
+    public Object getChild(String key) {
         return this.children.get(key);
+    }
+
+    @Deprecated(forRemoval = true)
+    public void addChild(String genericName, @Nullable ItemLike itemLike) {
+        addChild(genericName, (Object) itemLike);
     }
 
     /**
      * Should be called after you register a block that is made out of this wood type
      */
-    public void addChild(String genericName, @Nullable ItemLike itemLike) {
+    public void addChild(String genericName, @Nullable Object itemLike) {
         if (itemLike != null) {
             this.children.put(genericName, itemLike);
             var v = BlockSetInternal.getRegistry(this.getClass());
-            if(v != null) {
+            if (v != null) {
                 v.mapBlockToType(itemLike, this);
             }
         }
     }
 
+    /**
+     * Just adds children from vanilla.
+     * Modded ones should be added later. Asset and generation itself should not depend on modded children
+     */
     protected abstract void initializeVanillaChildren();
-
-    protected void initAfterSetup() {
-        this.needsInit = false;
-        this.initializeVanillaChildren();
-    }
 
     /**
      * base block that this type originates from
      */
     public abstract ItemLike mainChild();
+
+    /**
+     * Returns the given child string key. Null if this type does not have such child
+     */
+    @Nullable
+    public String getChildKey(ItemLike child) {
+        return children.inverse().get(child);
+    }
 
     /**
      * Tries changing an item block type. returns null if it fails
@@ -177,19 +188,10 @@ public abstract class BlockType {
     @Nullable
     public static ItemLike changeItemBlockType(ItemLike current, BlockType originalMat, BlockType destinationMat) {
         if (destinationMat == originalMat) return current;
-        for (var c : originalMat.getChildren()) {
-            var child = c.getValue();
-            ItemLike replacement = null;
-            if (current instanceof Block && child instanceof Block) {
-                if (current == child) {
-                    replacement = destinationMat.getChild(c.getKey());
-                }
-            } else if (current.asItem() == c.getValue().asItem()) {
-                replacement = destinationMat.getChild(c.getKey());
-            }
-            if (replacement != null) {
-                return replacement;
-            }
+        String key = originalMat.getChildKey(current);
+        if (key != null) {
+            Object i = destinationMat.getChild(key);
+            if (i instanceof ItemLike il) return il;
         }
         return null;
     }

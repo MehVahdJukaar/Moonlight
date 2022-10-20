@@ -75,16 +75,16 @@ public class ConfigSpecWrapper extends ConfigSpec {
     @Override
     public void loadFromFile() {
         try {
-            CommentedFileConfig replacementConfig = CommentedFileConfig
+            CommentedFileConfig configFile = CommentedFileConfig
                     .builder(this.getFullPath())
                     .sync()
                     .preserveInsertionOrder()
                     .writingMode(WritingMode.REPLACE)
                     .build();
-            replacementConfig.load();
-            replacementConfig.save();
+            configFile.load();
+            configFile.save();
 
-            spec.setConfig(replacementConfig);
+            spec.setConfig(configFile);
         } catch (Exception e) {
             throw new RuntimeException(
                     new IOException("Failed to load " + this.getFileName() + " config. Try deleting it: " + e));

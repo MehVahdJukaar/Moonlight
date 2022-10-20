@@ -20,8 +20,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     private final List<T> builder = new ArrayList<>();
     private final Class<T> typeClass;
     private Map<ResourceLocation, T> types = new LinkedHashMap<>();
-    private final Object2ObjectOpenHashMap<ItemLike, T> childrenToType = new Object2ObjectOpenHashMap<>();
-
+    private final Object2ObjectOpenHashMap<Object, T> childrenToType = new Object2ObjectOpenHashMap<>();
 
     public BlockTypeRegistry(Class<T> typeClass, String name) {
         this.typeClass = typeClass;
@@ -113,6 +112,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             });
         }
         this.types = ImmutableMap.copyOf(linkedHashMap);
+        //initialize their childrens
         builder.clear();
         this.frozen = true;
     }
@@ -147,7 +147,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         return childrenToType.getOrDefault(itemLike, null);
     }
 
-    protected void mapBlockToType(ItemLike itemLike, BlockType type) {
+    protected void mapBlockToType(Object itemLike, BlockType type) {
         this.childrenToType.put(itemLike, (T) type);
     }
 }
