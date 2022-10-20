@@ -4,7 +4,9 @@ import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -83,6 +85,9 @@ public class BlockSetAPI {
     }
 
 
+    /**
+     * Grabs all blockTypes registries
+     */
     public static Collection<BlockTypeRegistry<?>> getRegistries() {
         return BlockSetInternal.getRegistries();
     }
@@ -98,5 +103,30 @@ public class BlockSetAPI {
     @Nullable
     public static <T extends BlockType> T getBlockTypeOf(ItemLike itemLike, Class<T> typeClass){
         return BlockSetInternal.getBlockTypeOf(itemLike, typeClass);
+    }
+
+
+    /**
+     * Tries changing object block type. returns null if it fails
+     *
+     * @param current        target item
+     * @param originalMat    material from which the target item is made of
+     * @param destinationMat desired block type
+     */
+    @Nullable
+    public static Object changeType(Object current, BlockType originalMat, BlockType destinationMat) {
+        return BlockType.changeType(current, originalMat, destinationMat);
+    }
+
+    //for items
+    @Nullable
+    public static Item changeItemType(Item current, BlockType originalMat, BlockType destinationMat) {
+        return BlockType.changeItemType(current, originalMat, destinationMat);
+    }
+
+    //for blocks
+    @Nullable
+    public static Block changeBlockType(Block current, BlockType originalMat, BlockType destinationMat) {
+        return BlockType.changeBlockType(current, originalMat, destinationMat);
     }
 }

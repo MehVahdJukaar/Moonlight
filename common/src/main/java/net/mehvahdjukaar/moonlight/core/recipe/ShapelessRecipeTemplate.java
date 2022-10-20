@@ -58,7 +58,7 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
     @Override
     public <T extends BlockType> ShapelessRecipeBuilder.Result createSimilar(
             T originalMat, T destinationMat, Item unlockItem, String id) {
-        ItemLike newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
+        ItemLike newRes = BlockType.changeItemType(this.result, originalMat, destinationMat);
         if (newRes == null) {
             throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
                     this.result, originalMat, destinationMat));
@@ -75,7 +75,7 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
             for (var in : ing.getItems()) {
                 Item it = in.getItem();
                 if (it != Items.BARRIER) {
-                    ItemLike i = BlockType.changeItemBlockType(it, originalMat, destinationMat);
+                    ItemLike i = BlockType.changeItemType(it, originalMat, destinationMat);
                     if (i != null) {
                         atLeastOneChanged = true;
                         //converts first ingredient it finds

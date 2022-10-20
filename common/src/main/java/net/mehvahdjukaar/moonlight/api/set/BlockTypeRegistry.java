@@ -112,7 +112,8 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             });
         }
         this.types = ImmutableMap.copyOf(linkedHashMap);
-        //initialize their childrens
+        //initialize their children
+        this.types.values().forEach(BlockType::initializeVanillaChildren);
         builder.clear();
         this.frozen = true;
     }

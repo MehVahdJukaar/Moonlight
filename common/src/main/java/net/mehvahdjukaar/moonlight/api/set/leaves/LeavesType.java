@@ -1,10 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.set.leaves;
 
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
@@ -34,10 +34,9 @@ public class LeavesType extends BlockType {
     }
 
     @Override
-    protected void initializeVanillaChildren() {
-        this.addChild("leaves", leaves);
+    public void initializeVanillaChildren() {
+        this.addChild("leaves", (Object) leaves);
         this.woodType = WoodTypeRegistry.getValue(id);
-
     }
 
     public static class Finder implements SetFinder<LeavesType> {

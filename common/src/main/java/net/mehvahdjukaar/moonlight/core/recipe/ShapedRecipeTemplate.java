@@ -56,7 +56,7 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
     }
 
     public <T extends BlockType> ShapedRecipeBuilder.Result createSimilar(T originalMat, T destinationMat, Item unlockItem, String id) {
-        ItemLike newRes = BlockType.changeItemBlockType(this.result, originalMat, destinationMat);
+        ItemLike newRes = BlockType.changeItemType(this.result, originalMat, destinationMat);
         if (newRes == null) {
             throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
                     this.result, originalMat, destinationMat));
@@ -73,7 +73,7 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
             for (var in : ing.getItems()) {
                 Item it = in.getItem();
                 if (it != Items.BARRIER) {
-                    ItemLike i = BlockType.changeItemBlockType(it, originalMat, destinationMat);
+                    ItemLike i = BlockType.changeItemType(it, originalMat, destinationMat);
                     if (i != null) {
                         atLeastOneChanged = true;
                         //converts first ingredient it finds

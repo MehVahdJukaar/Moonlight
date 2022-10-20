@@ -6,8 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
@@ -33,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class RPUtils {
 
@@ -255,12 +252,12 @@ public class RPUtils {
             List<Ingredient> newList = new ArrayList<>();
             for (var ingredient : or.getIngredients()) {
                 if (ingredient != null && ingredient.getItems().length > 0) {
-                    ItemLike i = BlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
+                    ItemLike i = BlockType.changeItemType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
                     if (i != null) newList.add(Ingredient.of(i));
                 }
             }
             Item originalRes = or.getResultItem().getItem();
-            ItemLike newRes = BlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
+            ItemLike newRes = BlockType.changeItemType(originalRes, originalMat, destinationMat);
             if (newRes == null) throw new UnsupportedOperationException("Failed to convert recipe");
             ItemStack result = newRes.asItem().getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
@@ -270,12 +267,12 @@ public class RPUtils {
             List<Ingredient> newList = new ArrayList<>();
             for (var ingredient : or.getIngredients()) {
                 if (ingredient != null && ingredient.getItems().length > 0) {
-                    ItemLike i = BlockType.changeItemBlockType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
+                    ItemLike i = BlockType.changeItemType(ingredient.getItems()[0].getItem(), originalMat, destinationMat);
                     if (i != null) newList.add(Ingredient.of(i));
                 }
             }
             Item originalRes = or.getResultItem().getItem();
-            ItemLike newRes = BlockType.changeItemBlockType(originalRes, originalMat, destinationMat);
+            ItemLike newRes = BlockType.changeItemType(originalRes, originalMat, destinationMat);
             if (newRes == null) throw new UnsupportedOperationException("Failed to convert recipe");
             ItemStack result = newRes.asItem().getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());

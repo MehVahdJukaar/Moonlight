@@ -1,10 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.resources;
 
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
-import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
@@ -145,14 +145,17 @@ public class BlockTypeResTransformer<T extends BlockType> {
         String n = woodType.getTypeName();
         return this.replaceWithTextureFromChild("minecraft:block/" + n + "_leaves", "leaves", SpriteUtils.LOOKS_LIKE_LEAF_TEXTURE)
                 .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log", l -> wfl(l, "stripped_log"), SpriteUtils.LOOKS_LIKE_SIDE_LOG_TEXTURE)
-                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", l -> wfl(l, "stripped_log"),SpriteUtils.LOOKS_LIKE_TOP_LOG_TEXTURE)
+                .replaceWithTextureFromChild("minecraft:block/stripped_" + n + "_log_top", l -> wfl(l, "stripped_log"), SpriteUtils.LOOKS_LIKE_TOP_LOG_TEXTURE)
                 .replaceWithTextureFromChild("minecraft:block/" + n + "_log", l -> wfl(l, "log"), SpriteUtils.LOOKS_LIKE_SIDE_LOG_TEXTURE)
                 .replaceWithTextureFromChild("minecraft:block/" + n + "_log_top", l -> wfl(l, "log"), SpriteUtils.LOOKS_LIKE_TOP_LOG_TEXTURE);
 
     }
 
     private @Nullable ItemLike wfl(T t, String s) {
-        if (t instanceof LeavesType l && l.woodType != null) return l.woodType.getChild(s);
+        if (t instanceof LeavesType l && l.woodType != null) {
+            var c = l.woodType.getChild(s);
+            return c instanceof ItemLike il ? il : null;
+        }
         return null;
     }
 
@@ -162,7 +165,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
     public BlockTypeResTransformer<T> replaceWithTextureFromChild(String target, String textureFromChild,
                                                                   Predicate<String> texturePredicate) {
-        return replaceWithTextureFromChild(target, w -> w.getChild(textureFromChild), texturePredicate);
+        return replaceWithTextureFromChild(target, w -> (ItemLike) w.getChild(textureFromChild), texturePredicate);
     }
 
     public BlockTypeResTransformer<T> replaceWithTextureFromChild(String target, Function<T, ItemLike> childProvider,

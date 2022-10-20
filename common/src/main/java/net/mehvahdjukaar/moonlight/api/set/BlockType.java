@@ -6,9 +6,12 @@ import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -24,7 +27,6 @@ public abstract class BlockType {
 
     public BlockType(ResourceLocation resourceLocation) {
         this.id = resourceLocation;
-        this.initializeVanillaChildren();
     }
 
     public ResourceLocation getId() {
@@ -163,10 +165,11 @@ public abstract class BlockType {
      * Just adds children from vanilla.
      * Modded ones should be added later. Asset and generation itself should not depend on modded children
      */
-    protected abstract void initializeVanillaChildren();
+    @ApiStatus.Internal
+    public abstract void initializeVanillaChildren();
 
     /**
-     * base block that this type originates from
+     * base block that this type originates from. Has to be an ItemLike
      */
     public abstract ItemLike mainChild();
 
@@ -174,9 +177,10 @@ public abstract class BlockType {
      * Returns the given child string key. Null if this type does not have such child
      */
     @Nullable
-    public String getChildKey(ItemLike child) {
+    public String getChildKey(Object child) {
         return children.inverse().get(child);
     }
+
 
     /**
      * Tries changing an item block type. returns null if it fails
@@ -186,13 +190,56 @@ public abstract class BlockType {
      * @param destinationMat desired block type
      */
     @Nullable
-    public static ItemLike changeItemBlockType(ItemLike current, BlockType originalMat, BlockType destinationMat) {
+    public static Object changeType(Object current, BlockType originalMat, BlockType destinationMat) {
         if (destinationMat == originalMat) return current;
         String key = originalMat.getChildKey(current);
         if (key != null) {
-            Object i = destinationMat.getChild(key);
-            if (i instanceof ItemLike il) return il;
+            return destinationMat.getChild(key);
         }
+        return null;
+    }
+
+    //for items
+    @Nullable
+    public static Item changeItemType(Item current, BlockType originalMat, BlockType destinationMat) {
+        Object changed = changeType(current, originalMat, destinationMat);
+        //if item swap fails try to swap blocks instead
+        if (changed == null) {
+            if (current instanceof BlockItem bi) {
+                var blockChanged = changeType(bi.getBlock(), originalMat, destinationMat);
+                if (blockChanged instanceof Block il) {
+                    Item i = il.asItem();
+                    if (i != Items.AIR) changed = i;
+                }
+            }
+        }
+        if (changed instanceof ItemLike il) return il.asItem();
+        return null;
+    }
+
+    //for blocks
+    @Nullable
+    public static Block changeBlockType(Block current, BlockType originalMat, BlockType destinationMat) {
+        Object changed = changeType(current, originalMat, destinationMat);
+        //if block swap fails try to swap items instead
+        if (changed == null) {
+            if (current.asItem() != Items.AIR) {
+                var itemChanged = changeType(current.asItem(), originalMat, destinationMat);
+                if (itemChanged instanceof BlockItem bi) {
+                    Item i = bi.asItem();
+                    if (i != Items.AIR) changed = i;
+                }
+            }
+        }
+        if (changed instanceof Block b) return b;
+        return null;
+    }
+
+    @Deprecated(forRemoval = true)
+    @Nullable
+    public static ItemLike changeItemBlockType(ItemLike current, BlockType originalMat, BlockType destinationMat) {
+        var v = changeType(current, originalMat, destinationMat);
+        if (v instanceof ItemLike il) return il;
         return null;
     }
 

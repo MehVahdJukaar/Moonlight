@@ -105,23 +105,23 @@ public class WoodType extends BlockType {
     }
 
     @Override
-    protected void initializeVanillaChildren() {
-        this.addChild("planks", this.planks);
-        this.addChild("log", this.log);
-        this.addChild("leaves", this.findRelatedEntry("leaves", Registry.BLOCK));
-        this.addChild("stripped_log", this.findLogRelatedBlock("stripped", "log"));
-        this.addChild("stripped_wood", this.findLogRelatedBlock("stripped", "wood"));
-        this.addChild("wood", this.findRelatedEntry("wood", Registry.BLOCK));
-        this.addChild("slab", this.findRelatedEntry("slab", Registry.BLOCK));
-        this.addChild("stairs", this.findRelatedEntry("stairs", Registry.BLOCK));
-        this.addChild("fence", this.findRelatedEntry("fence", Registry.BLOCK));
-        this.addChild("fence_gate", this.findRelatedEntry("fence_gate", Registry.BLOCK));
-        this.addChild("door", this.findRelatedEntry("door", Registry.BLOCK));
-        this.addChild("trapdoor", this.findRelatedEntry("trapdoor", Registry.BLOCK));
-        this.addChild("button", this.findRelatedEntry("button", Registry.BLOCK));
-        this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", Registry.BLOCK));
-        this.addChild("boat", this.findRelatedEntry("boat", Registry.ITEM));
-        this.addChild("sign", this.findRelatedEntry("sign", Registry.ITEM));
+    public void initializeVanillaChildren() {
+        this.addChild("planks",(Object) this.planks);
+        this.addChild("log",(Object) this.log);
+        this.addChild("leaves", (Object)this.findRelatedEntry("leaves", Registry.BLOCK));
+        this.addChild("stripped_log",(Object) this.findLogRelatedBlock("stripped", "log"));
+        this.addChild("stripped_wood",(Object) this.findLogRelatedBlock("stripped", "wood"));
+        this.addChild("wood",(Object) this.findRelatedEntry("wood", Registry.BLOCK));
+        this.addChild("slab",(Object) this.findRelatedEntry("slab", Registry.BLOCK));
+        this.addChild("stairs",(Object) this.findRelatedEntry("stairs", Registry.BLOCK));
+        this.addChild("fence",(Object) this.findRelatedEntry("fence", Registry.BLOCK));
+        this.addChild("fence_gate",(Object) this.findRelatedEntry("fence_gate", Registry.BLOCK));
+        this.addChild("door",(Object) this.findRelatedEntry("door", Registry.BLOCK));
+        this.addChild("trapdoor",(Object) this.findRelatedEntry("trapdoor", Registry.BLOCK));
+        this.addChild("button",(Object) this.findRelatedEntry("button", Registry.BLOCK));
+        this.addChild("pressure_plate",(Object) this.findRelatedEntry("pressure_plate", Registry.BLOCK));
+        this.addChild("boat",(Object) this.findRelatedEntry("boat", Registry.ITEM));
+        this.addChild("sign",(Object) this.findRelatedEntry("sign", Registry.ITEM));
     }
 
     public static class Finder implements SetFinder<WoodType> {
@@ -165,7 +165,7 @@ public class WoodType extends BlockType {
                     var d = Registry.BLOCK.get(Registry.BLOCK.getDefaultKey());
                     if (plank != d && log != d && plank != null && log != null) {
                         var w = new WoodType(id, plank, log);
-                        childNames.forEach((key, value) -> w.addChild(key, Registry.BLOCK.get(value)));
+                        childNames.forEach((key, value) -> w.addChild(key,(Object) Registry.BLOCK.get(value)));
                         return Optional.of(w);
                     }
                 } catch (Exception ignored) {
