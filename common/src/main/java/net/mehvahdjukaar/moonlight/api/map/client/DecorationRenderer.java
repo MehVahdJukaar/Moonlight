@@ -60,20 +60,20 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             int g = NativeImage.getG(color);
             int r = NativeImage.getB(color);
 
-            vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F, (float) index * -0.001F).color(r, g, b, 255).uv(0, 1).uv2(light).endVertex();
-            vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F, (float) index * -0.001F).color(r, g, b, 255).uv(1, 1).uv2(light).endVertex();
-            vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F, (float) index * -0.001F).color(r, g, b, 255).uv(1, 0).uv2(light).endVertex();
-            vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, (float) index * -0.001F).color(r, g, b, 255).uv(0, 0).uv2(light).endVertex();
+            vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F,  index * -0.001F).color(r, g, b, 255).uv(0, 1).uv2(light).endVertex();
+            vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F,  index * -0.001F).color(r, g, b, 255).uv(1, 1).uv2(light).endVertex();
+            vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F,  index * -0.001F).color(r, g, b, 255).uv(1, 0).uv2(light).endVertex();
+            vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F,  index * -0.001F).color(r, g, b, 255).uv(0, 0).uv2(light).endVertex();
             matrixStack.popPose();
             if (decoration.getDisplayName() != null) {
                 Font fontrenderer = Minecraft.getInstance().font;
                 Component itextcomponent = decoration.getDisplayName();
-                float f6 = (float) fontrenderer.width(itextcomponent);
+                float f6 =  fontrenderer.width(itextcomponent);
                 float f7 = Mth.clamp(25.0F / f6, 0.0F, 6.0F / 9.0F);
                 matrixStack.pushPose();
-                matrixStack.translate((double) (0.0F + (float) decoration.getX() / 2.0F + 64.0F - f6 * f7 / 2.0F), (double) (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
+                matrixStack.translate( (0.0F + (float) decoration.getX() / 2.0F + 64.0F - f6 * f7 / 2.0F),  (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
                 matrixStack.scale(f7, f7, 1.0F);
-                matrixStack.translate(0.0D, 0.0D, (double) -0.1F);
+                matrixStack.translate(0.0D, 0.0D,  -0.1F);
                 fontrenderer.drawInBatch(itextcomponent, 0.0F, 0.0F, -1, false, matrixStack.last().pose(), buffer, false, Integer.MIN_VALUE, light);
                 matrixStack.popPose();
             }

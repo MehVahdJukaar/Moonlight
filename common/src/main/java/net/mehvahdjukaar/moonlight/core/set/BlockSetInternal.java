@@ -30,6 +30,7 @@ public class BlockSetInternal {
         FINDER_ADDER.clear();
 
         BLOCK_SET_CONTAINERS.values().forEach(BlockTypeRegistry::buildAll);
+        BLOCK_SET_CONTAINERS.values().forEach(BlockTypeRegistry::onBlockInit);
 
         //remove not wanted ones
         REMOVER_ADDER.forEach(Runnable::run);

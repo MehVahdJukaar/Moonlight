@@ -27,18 +27,18 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
     private final byte scale;
     private final boolean locked;
 
-    private final CustomMapDecoration[] customDecoration;
+    private final CustomMapDecoration[] customDecorations;
     private final CustomDataHolder.Instance<?>[] customData;
 
     public ClientBoundSyncCustomMapDecorationMessage(
             int mapId, byte pScale, boolean pLocked,
-            CustomMapDecoration[] customDecoration, CustomDataHolder.Instance<?>[] customData) {
+            CustomMapDecoration[] customDecorations, CustomDataHolder.Instance<?>[] customData) {
         this.mapId = mapId;
         this.scale = pScale;
         this.locked = pLocked;
 
         this.customData = customData;
-        this.customDecoration = customDecoration;
+        this.customDecorations = customDecorations;
     }
 
     public void writeToBuffer(FriendlyByteBuf buffer) {
@@ -46,9 +46,9 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
         buffer.writeByte(this.scale);
         buffer.writeBoolean(this.locked);
 
-        buffer.writeVarInt(this.customDecoration.length);
+        buffer.writeVarInt(this.customDecorations.length);
 
-        for (CustomMapDecoration decoration : this.customDecoration) {
+        for (CustomMapDecoration decoration : this.customDecorations) {
             buffer.writeResourceLocation(Utils.getID(decoration.getType()));
             decoration.saveToBuffer(buffer);
         }
@@ -67,12 +67,12 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
         this.scale = pBuffer.readByte();
         this.locked = pBuffer.readBoolean();
 
-        this.customDecoration = new CustomMapDecoration[pBuffer.readVarInt()];
+        this.customDecorations = new CustomMapDecoration[pBuffer.readVarInt()];
 
-        for (int m = 0; m < this.customDecoration.length; ++m) {
+        for (int m = 0; m < this.customDecorations.length; ++m) {
             MapDecorationType<?, ?> type = MapDecorationRegistry.get(pBuffer.readResourceLocation());
             if (type != null) {
-                this.customDecoration[m] = type.loadDecorationFromBuffer(pBuffer);
+                this.customDecorations[m] = type.loadDecorationFromBuffer(pBuffer);
             }
         }
         //TODO: I really could have merged the 2 systems
@@ -114,8 +114,8 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
         if (data instanceof ExpandedMapData mapData) {
             Map<String, CustomMapDecoration> decorations = mapData.getCustomDecorations();
             decorations.clear();
-            for (int i = 0; i < this.customDecoration.length; ++i) {
-                CustomMapDecoration customDecoration = this.customDecoration[i];
+            for (int i = 0; i < this.customDecorations.length; ++i) {
+                CustomMapDecoration customDecoration = this.customDecorations[i];
                 if (customDecoration != null) decorations.put("icon-" + i, customDecoration);
                 else {
                     Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");

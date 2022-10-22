@@ -101,16 +101,16 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
             Entity e = type.create(world);
             if (e != null) {
                 e.syncPacketPositionCodec(this.posX, this.posY, this.posZ);
-                e.absMoveTo(this.posX, this.posY, this.posZ, (float) (this.yaw * 360) / 256.0F, (float) (this.pitch * 360) / 256.0F);
-                e.setYHeadRot((float) (this.headYaw * 360) / 256.0F);
-                e.setYBodyRot((float) (this.headYaw * 360) / 256.0F);
+                e.absMoveTo(this.posX, this.posY, this.posZ,  (this.yaw * 360) / 256.0F,  (this.pitch * 360) / 256.0F);
+                e.setYHeadRot( (this.headYaw * 360) / 256.0F);
+                e.setYBodyRot( (this.headYaw * 360) / 256.0F);
                 e.setId(this.entityId);
                 e.setUUID(this.uuid);
                 Objects.requireNonNull(ClientLevel.class);
 
                 clientSideStuff(world, e);
 
-                e.lerpMotion((double) this.velX / 8000.0, (double) this.velY / 8000.0, (double) this.velZ / 8000.0);
+                e.lerpMotion( this.velX / 8000.0,  this.velY / 8000.0,  this.velZ / 8000.0);
                 if (e instanceof IExtraClientSpawnData spawnData) {
                     spawnData.readSpawnData(this.buf);
                 }

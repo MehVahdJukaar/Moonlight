@@ -104,7 +104,8 @@ public abstract class BaseColor<T extends BaseColor<T>> {
     }
 
     protected static float averageAngles(Float... angles) {
-        float x = 0, y = 0;
+        float x = 0;
+        float y = 0;
         for (float a : angles) {
             assert a >= 0 && a <= 1;
             x += Math.cos((float) (a * Math.PI * 2));

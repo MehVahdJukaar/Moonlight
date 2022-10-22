@@ -23,7 +23,7 @@ public abstract class ChannelHandler {
 
     protected final ResourceLocation channelName;
 
-    public ChannelHandler(ResourceLocation channelName) {
+    protected ChannelHandler(ResourceLocation channelName) {
         this.channelName = channelName;
     }
 

@@ -3,12 +3,10 @@ package net.mehvahdjukaar.moonlight.api.client.model;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.world.phys.Vec3;
 
 public interface BakedQuadBuilder {
 
@@ -35,7 +33,6 @@ public interface BakedQuadBuilder {
     }
 
     BakedQuadBuilder color(int rgba);
-
 
 
     BakedQuadBuilder uv(float u, float v);

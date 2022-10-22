@@ -49,10 +49,10 @@ public class WoodType extends BlockType {
 
         String post = postpend.isEmpty() ? "" : "_" + postpend;
         var id = this.getId();
-        String log = Utils.getID(this.log).getPath();
+        String logN = Utils.getID(this.log).getPath();
         ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), log + "_" + append + post),
-                new ResourceLocation(id.getNamespace(), append + "_" + log + post),
+                new ResourceLocation(id.getNamespace(), logN + "_" + append + post),
+                new ResourceLocation(id.getNamespace(), append + "_" + logN + post),
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post)
         };
@@ -105,7 +105,7 @@ public class WoodType extends BlockType {
     }
 
     @Override
-    public void initializeVanillaChildren() {
+    public void initializeChildrenBlocks() {
         this.addChild("planks",(Object) this.planks);
         this.addChild("log",(Object) this.log);
         this.addChild("leaves", (Object)this.findRelatedEntry("leaves", Registry.BLOCK));
@@ -120,6 +120,10 @@ public class WoodType extends BlockType {
         this.addChild("trapdoor",(Object) this.findRelatedEntry("trapdoor", Registry.BLOCK));
         this.addChild("button",(Object) this.findRelatedEntry("button", Registry.BLOCK));
         this.addChild("pressure_plate",(Object) this.findRelatedEntry("pressure_plate", Registry.BLOCK));
+    }
+
+    @Override
+    public void initializeChildrenItems() {
         this.addChild("boat",(Object) this.findRelatedEntry("boat", Registry.ITEM));
         this.addChild("sign",(Object) this.findRelatedEntry("sign", Registry.ITEM));
     }

@@ -1,14 +1,10 @@
 package net.mehvahdjukaar.moonlight.core.set.forge;
 
-import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.api.platform.forge.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
-import net.mehvahdjukaar.moonlight.api.misc.Registrator;
+import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
-import net.minecraft.world.item.Instruments;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -34,6 +30,16 @@ public class BlockSetInternalImpl {
     private static final Map<String, List<Runnable>> LATE_REGISTRATION_QUEUE = new ConcurrentHashMap<>();
 
     private static boolean hasFilledBlockSets = false;
+
+    static{
+        //if loaded registers post item init
+        Consumer<RegisterEvent> eventConsumer = e->{
+            if(e.getRegistryKey().equals(ForgeRegistries.ENCHANTMENTS.getRegistryKey())){
+                BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
+            }
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
 
     //aaaa
     public static  <T extends BlockType, E> void addDynamicRegistration(

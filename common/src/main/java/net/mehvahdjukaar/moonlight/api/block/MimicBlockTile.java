@@ -20,7 +20,7 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
 
     public BlockState mimic = Blocks.AIR.defaultBlockState();
 
-    public MimicBlockTile(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    protected MimicBlockTile(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 

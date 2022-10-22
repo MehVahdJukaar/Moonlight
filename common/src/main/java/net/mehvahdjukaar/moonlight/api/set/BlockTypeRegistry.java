@@ -3,10 +3,12 @@ package net.mehvahdjukaar.moonlight.api.set;
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -22,7 +24,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     private Map<ResourceLocation, T> types = new LinkedHashMap<>();
     private final Object2ObjectOpenHashMap<Object, T> childrenToType = new Object2ObjectOpenHashMap<>();
 
-    public BlockTypeRegistry(Class<T> typeClass, String name) {
+    protected BlockTypeRegistry(Class<T> typeClass, String name) {
         this.typeClass = typeClass;
         this.name = name;
     }
@@ -52,13 +54,9 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         return Collections.unmodifiableCollection(types.values());
     }
 
-    ;
-
     public String typeName() {
         return name;
     }
-
-    ;
 
     /**
      * Returns an optional block Type based on the given block. Pretty much defines the logic of how a block set is constructed
@@ -107,23 +105,30 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
                 if (Objects.equals(e.getNamespace(), modId)) {
                     if (!linkedHashMap.containsKey(e.getId())) {
                         linkedHashMap.put(e.getId(), e);
-                    }// else Selene.LOGGER.warn("Found wood type with duplicate id ({}), skipping",e.id);
+                    }else Moonlight.LOGGER.warn("Found block type with duplicate id ({}), skipping",e.id);
                 }
             });
         }
         this.types = ImmutableMap.copyOf(linkedHashMap);
-        //initialize their children
-        this.types.values().forEach(BlockType::initializeVanillaChildren);
         builder.clear();
         this.frozen = true;
     }
 
+    @ApiStatus.Internal
+    public void onBlockInit(){
+        this.types.values().forEach(BlockType::initializeChildrenBlocks);
+    }
 
+    @ApiStatus.Internal
+    public void onItemInit(){
+        this.types.values().forEach(BlockType::initializeChildrenItems);
+    }
+
+    @ApiStatus.Internal
     public void buildAll() {
         if (!frozen) {
             //adds default
             this.registerBlockType(this.getDefaultType());
-            var finders = this.getFinders();
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
             for (Block b : Registry.BLOCK) {

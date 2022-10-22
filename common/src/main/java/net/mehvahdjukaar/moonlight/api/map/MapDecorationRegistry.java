@@ -104,7 +104,7 @@ public class MapDecorationRegistry {
 
     public static MapDecorationType<?, ?> getGenericStructure(){
         return get(GENERIC_STRUCTURE_ID);
-    };
+    }
 
     public static final Map<ResourceLocation, Supplier<CustomDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new HashMap<>();
 

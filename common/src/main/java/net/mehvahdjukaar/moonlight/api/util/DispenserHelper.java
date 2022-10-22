@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.fluids.fabric.SoftFluidTank;
 
  */
+
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
 import net.minecraft.core.BlockPos;
@@ -97,6 +98,8 @@ public class DispenserHelper {
             } catch (Exception ignored) {
             }
             return fallback.dispense(source, stack);
+
+
         }
 
         /**
@@ -115,6 +118,33 @@ public class DispenserHelper {
 
         protected void playAnimation(BlockSource source, Direction direction) {
             source.getLevel().levelEvent(2000, source.getPos(), direction.get3DDataValue());
+        }
+
+        //returns full bottle to dispenser. same function that's in IDispenserItemBehavior
+        private ItemStack fillItemInDispenser(BlockSource source, ItemStack empty, ItemStack filled) {
+            empty.shrink(1);
+            if (empty.isEmpty()) {
+                return filled.copy();
+            } else {
+                if (!mergeDispenserItem(source.getEntity(), filled)) {
+                    SHOOT_BEHAVIOR.dispense(source, filled.copy());
+                }
+                return empty;
+            }
+        }
+
+        //add item to dispenser and merges it if there's one already
+        private boolean mergeDispenserItem(DispenserBlockEntity te, ItemStack filled) {
+            NonNullList<ItemStack> stacks = ((DispenserBlockEntityAccessor) te).getItems();
+            for (int i = 0; i < te.getContainerSize(); ++i) {
+                ItemStack s = stacks.get(i);
+                if (s.isEmpty() || (s.getItem() == filled.getItem() && s.getMaxStackSize() > s.getCount())) {
+                    filled.grow(s.getCount());
+                    te.setItem(i, filled);
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -187,43 +217,17 @@ public class DispenserHelper {
         public ItemStack execute(BlockSource source, ItemStack stack) {
             this.setSuccess(false);
             Item item = stack.getItem();
-            if (item instanceof BlockItem) {
+            if (item instanceof BlockItem bi) {
                 Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
                 BlockPos blockpos = source.getPos().relative(direction);
                 Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
-                InteractionResult result = ((BlockItem) item).place(new DirectionalPlaceContext(source.getLevel(), blockpos, direction, stack, direction1));
+                InteractionResult result = bi.place(new DirectionalPlaceContext(source.getLevel(), blockpos, direction, stack, direction1));
                 this.setSuccess(result.consumesAction());
             }
             return stack;
         }
     }
 
-    //returns full bottle to dispenser. same function that's in IDispenserItemBehavior
-    private static ItemStack fillItemInDispenser(BlockSource source, ItemStack empty, ItemStack filled) {
-        empty.shrink(1);
-        if (empty.isEmpty()) {
-            return filled.copy();
-        } else {
-            if (!MergeDispenserItem(source.getEntity(), filled)) {
-                SHOOT_BEHAVIOR.dispense(source, filled.copy());
-            }
-            return empty;
-        }
-    }
-
-    //add item to dispenser and merges it if there's one already
-    private static boolean MergeDispenserItem(DispenserBlockEntity te, ItemStack filled) {
-        NonNullList<ItemStack> stacks =  ((DispenserBlockEntityAccessor)te).getItems();
-        for (int i = 0; i < te.getContainerSize(); ++i) {
-            ItemStack s = stacks.get(i);
-            if (s.isEmpty() || (s.getItem() == filled.getItem() && s.getMaxStackSize() > s.getCount())) {
-                filled.grow(s.getCount());
-                te.setItem(i, filled);
-                return true;
-            }
-        }
-        return false;
-    }
 
     public static final DefaultDispenseItemBehavior PLACE_BLOCK_BEHAVIOR = new PlaceBlockDispenseBehavior();
     private static final DefaultDispenseItemBehavior SHOOT_BEHAVIOR = new DefaultDispenseItemBehavior();

@@ -2,8 +2,6 @@ package net.mehvahdjukaar.moonlight.api.misc;
 
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
-
 @FunctionalInterface
 public interface Registrator<T> {
 

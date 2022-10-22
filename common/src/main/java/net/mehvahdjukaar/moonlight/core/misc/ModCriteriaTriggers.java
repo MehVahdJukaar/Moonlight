@@ -35,8 +35,8 @@ public class ModCriteriaTriggers {
         public static class Instance extends AbstractCriterionTriggerInstance {
             private final ItemPredicate item;
 
-            public Instance(EntityPredicate.Composite p_i231585_1_, ItemPredicate item) {
-                super(GrindedItem.ID, p_i231585_1_);
+            public Instance(EntityPredicate.Composite composite, ItemPredicate item) {
+                super(GrindedItem.ID, composite);
                 this.item = item;
             }
 

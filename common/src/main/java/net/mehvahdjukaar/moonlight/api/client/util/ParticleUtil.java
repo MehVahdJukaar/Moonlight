@@ -20,7 +20,7 @@ public class ParticleUtil {
     //call with packet
 
     public static void spawnParticleOnBlockShape(Level level, BlockPos pos, ParticleOptions particleOptions,
-                                                  UniformInt uniformInt, float maxSpeed) {
+                                                 UniformInt uniformInt, float maxSpeed) {
         spawnParticleOnBoundingBox(level.getBlockState(pos).getShape(level, pos).bounds(), level, pos,
                 particleOptions, uniformInt, maxSpeed);
     }
@@ -40,7 +40,7 @@ public class ParticleUtil {
                 double dx = maxSpeed * level.random.nextDouble();
                 double dy = maxSpeed * level.random.nextDouble();
                 double dz = 0;
-                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + y, pos.getZ() + bb.minZ-offset, dx, dy, dz);
+                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + y, pos.getZ() + bb.minZ - offset, dx, dy, dz);
             }
         }
         //south
@@ -52,7 +52,7 @@ public class ParticleUtil {
                 double dx = maxSpeed * level.random.nextDouble();
                 double dy = maxSpeed * level.random.nextDouble();
                 double dz = 0;
-                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + y, pos.getZ() + bb.maxZ+offset, dx, dy, dz);
+                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + y, pos.getZ() + bb.maxZ + offset, dx, dy, dz);
             }
         }
         //west
@@ -64,7 +64,7 @@ public class ParticleUtil {
                 double dx = 0;
                 double dy = maxSpeed * level.random.nextDouble();
                 double dz = maxSpeed * level.random.nextDouble();
-                level.addParticle(particleOptions, pos.getX() + bb.minX-offset, pos.getY() + y, pos.getZ() + z, dx, dy, dz);
+                level.addParticle(particleOptions, pos.getX() + bb.minX - offset, pos.getY() + y, pos.getZ() + z, dx, dy, dz);
             }
         }
         //east
@@ -76,7 +76,7 @@ public class ParticleUtil {
                 double dx = 0;
                 double dy = maxSpeed * level.random.nextDouble();
                 double dz = maxSpeed * level.random.nextDouble();
-                level.addParticle(particleOptions, pos.getX() + bb.maxX+offset, pos.getY() + y, pos.getZ() + z, dx, dy, dz);
+                level.addParticle(particleOptions, pos.getX() + bb.maxX + offset, pos.getY() + y, pos.getZ() + z, dx, dy, dz);
             }
         }
         //down
@@ -88,7 +88,7 @@ public class ParticleUtil {
                 double dx = maxSpeed * level.random.nextDouble();
                 double dy = 0;
                 double dz = maxSpeed * level.random.nextDouble();
-                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + bb.minY-offset, pos.getZ() + z, dx, dy, dz);
+                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + bb.minY - offset, pos.getZ() + z, dx, dy, dz);
             }
         }
         //up
@@ -100,7 +100,7 @@ public class ParticleUtil {
                 double dx = maxSpeed * level.random.nextDouble();
                 double dy = 0;
                 double dz = maxSpeed * level.random.nextDouble();
-                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + bb.maxY+offset, pos.getZ() + z, dx, dy, dz);
+                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + bb.maxY + offset, pos.getZ() + z, dx, dy, dz);
             }
         }
     }
@@ -123,9 +123,9 @@ public class ParticleUtil {
         int i = direction.getStepX();
         int j = direction.getStepY();
         int k = direction.getStepZ();
-        double d0 = vec3.x + (i == 0 ? Mth.nextDouble(level.random, -0.5D, 0.5D) : (double) i * 0.6D);
-        double d1 = vec3.y + (j == 0 ? Mth.nextDouble(level.random, -0.5D, 0.5D) : (double) j * 0.6D);
-        double d2 = vec3.z + (k == 0 ? Mth.nextDouble(level.random, -0.5D, 0.5D) : (double) k * 0.6D);
+        double d0 = vec3.x + (i == 0 ? Mth.nextDouble(level.random, -0.5D, 0.5D) : i * 0.6D);
+        double d1 = vec3.y + (j == 0 ? Mth.nextDouble(level.random, -0.5D, 0.5D) : j * 0.6D);
+        double d2 = vec3.z + (k == 0 ? Mth.nextDouble(level.random, -0.5D, 0.5D) : k * 0.6D);
         double dx;
         double dy;
         double dz;
@@ -142,15 +142,14 @@ public class ParticleUtil {
     }
 
 
-
     public static void spawnBreakParticles(VoxelShape shape, BlockPos pPos, BlockState pState, Level level) {
 
         var particleEngine = Minecraft.getInstance().particleEngine;
 
-        shape.forAllBoxes((p_172273_, p_172274_, p_172275_, p_172276_, p_172277_, p_172278_) -> {
-            double d1 = Math.min(1.0D, p_172276_ - p_172273_);
-            double d2 = Math.min(1.0D, p_172277_ - p_172274_);
-            double d3 = Math.min(1.0D, p_172278_ - p_172275_);
+        shape.forAllBoxes((x0, y0, z0, x1, y1, z1) -> {
+            double d1 = Math.min(1.0D, x1 - x0);
+            double d2 = Math.min(1.0D, y1 - y0);
+            double d3 = Math.min(1.0D, z1 - z0);
             int i = Math.max(2, Mth.ceil(d1 / 0.25D));
             int j = Math.max(2, Mth.ceil(d2 / 0.25D));
             int k = Math.max(2, Mth.ceil(d3 / 0.25D));
@@ -158,13 +157,14 @@ public class ParticleUtil {
             for (int l = 0; l < i; ++l) {
                 for (int i1 = 0; i1 < j; ++i1) {
                     for (int j1 = 0; j1 < k; ++j1) {
-                        double d4 = ((double) l + 0.5D) / (double) i;
-                        double d5 = ((double) i1 + 0.5D) / (double) j;
-                        double d6 = ((double) j1 + 0.5D) / (double) k;
-                        double d7 = d4 * d1 + p_172273_;
-                        double d8 = d5 * d2 + p_172274_;
-                        double d9 = d6 * d3 + p_172275_;
-                        particleEngine.add(new TerrainParticle((ClientLevel) level, (double) pPos.getX() + d7, (double) pPos.getY() + d8, (double) pPos.getZ() + d9, d4 - 0.5D, d5 - 0.5D, d6 - 0.5D, pState, pPos));
+                        double d4 = (l + 0.5D) / i;
+                        double d5 = (i1 + 0.5D) / j;
+                        double d6 = (j1 + 0.5D) / k;
+                        double d7 = d4 * d1 + x0;
+                        double d8 = d5 * d2 + y0;
+                        double d9 = d6 * d3 + z0;
+                        particleEngine.add(new TerrainParticle((ClientLevel) level, pPos.getX() + d7, pPos.getY() + d8,
+                                pPos.getZ() + d9, d4 - 0.5D, d5 - 0.5D, d6 - 0.5D, pState, pPos));
                     }
                 }
             }

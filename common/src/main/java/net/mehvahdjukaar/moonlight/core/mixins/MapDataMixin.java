@@ -138,11 +138,11 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             return !markers.isEmpty();
         }
 
-        double d0 = (double) pos.getX() + 0.5D;
-        double d1 = (double) pos.getZ() + 0.5D;
+        double d0 =  pos.getX() + 0.5D;
+        double d1 =  pos.getZ() + 0.5D;
         int i = 1 << this.scale;
-        double d2 = (d0 - (double) this.x) / (double) i;
-        double d3 = (d1 - (double) this.z) / (double) i;
+        double d2 = (d0 -  this.x) /  i;
+        double d3 = (d1 -  this.z) /  i;
         if (d2 >= -63.0D && d3 >= -63.0D && d2 <= 63.0D && d3 <= 63.0D) {
             List<MapBlockMarker<?>> markers = MapDecorationRegistry.getMarkersFromWorld(world, pos);
 

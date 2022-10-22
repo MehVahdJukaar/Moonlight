@@ -30,10 +30,10 @@ import java.util.List;
 @SuppressWarnings("unused")
 public abstract class SoftFluidTank {
 
-    public static String POTION_TYPE_KEY = "Bottle";
-    public static int BOTTLE_COUNT = 1;
-    public static int BOWL_COUNT = 2;
-    public static int BUCKET_COUNT = 4;
+    public static final String POTION_TYPE_KEY = "Bottle";
+    public static final int BOTTLE_COUNT = 1;
+    public static final int BOWL_COUNT = 2;
+    public static final int BUCKET_COUNT = 4;
 
     //count in bottles
     protected int count = 0;
@@ -420,7 +420,7 @@ public abstract class SoftFluidTank {
      * fills out tank to the maximum capacity
      */
     public void fillCount() {
-        this.setCount((int) capacity);
+        this.setCount(capacity);
     }
 
     /**
@@ -429,7 +429,7 @@ public abstract class SoftFluidTank {
      * @param inc bottles increment
      */
     public void grow(int inc) {
-        this.setCount((int) (this.count + inc));
+        this.setCount((this.count + inc));
     }
 
     /**
@@ -451,7 +451,7 @@ public abstract class SoftFluidTank {
      * @return fluid height
      */
     public float getHeight(float maxHeight) {
-        return maxHeight * (float) this.count / (float) this.capacity;
+        return maxHeight * this.count / this.capacity;
     }
 
     /**
@@ -463,7 +463,7 @@ public abstract class SoftFluidTank {
     }
 
     public int getCount() {
-        return (int) count;
+        return count;
     }
 
     @Nonnull
@@ -497,7 +497,7 @@ public abstract class SoftFluidTank {
      */
     public void copy(SoftFluidTank other) {
         this.setFluid(other.getFluid(), other.getNbt());
-        this.setCount((int) Math.min(this.capacity, other.getCount()));
+        this.setCount(Math.min(this.capacity, other.getCount()));
     }
 
     /**
@@ -609,7 +609,6 @@ public abstract class SoftFluidTank {
         if (this.specialColor != 0) {
             cmp.putInt("CachedColor", this.getTintColor(null, null));
         }
-        var nbt = this.getNbt();
         if (nbt != null && !nbt.isEmpty()) cmp.put("NBT", nbt);
         compound.put("FluidHolder", cmp);
         return compound;

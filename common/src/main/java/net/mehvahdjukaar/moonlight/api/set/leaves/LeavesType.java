@@ -16,11 +16,16 @@ import java.util.function.Supplier;
 public class LeavesType extends BlockType {
 
     public final Block leaves;
+    @Deprecated(forRemoval = true)
     public WoodType woodType;
 
     protected LeavesType(ResourceLocation id, Block leaves) {
         super(id);
         this.leaves = leaves;
+    }
+
+    public WoodType getWoodType() {
+        return woodType;
     }
 
     @Override
@@ -34,9 +39,13 @@ public class LeavesType extends BlockType {
     }
 
     @Override
-    public void initializeVanillaChildren() {
+    public void initializeChildrenBlocks() {
         this.addChild("leaves", (Object) leaves);
         this.woodType = WoodTypeRegistry.getValue(id);
+    }
+
+    @Override
+    public void initializeChildrenItems() {
     }
 
     public static class Finder implements SetFinder<LeavesType> {

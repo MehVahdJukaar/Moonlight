@@ -23,7 +23,7 @@ public class RGBColor extends BaseColor<RGBColor> {
     }
 
     public static int getR(int abgr) {
-        return abgr >> 0 & 0xFF;
+        return abgr & 0xFF;
     }
 
     public static int getG(int agbgr) {
@@ -35,7 +35,7 @@ public class RGBColor extends BaseColor<RGBColor> {
     }
 
     public static int combine(int alpha, int blue, int green, int red) {
-        return (alpha & 255) << 24 | (blue & 255) << 16 | (green & 255) << 8 | (red & 255) << 0;
+        return (alpha & 255) << 24 | (blue & 255) << 16 | (green & 255) << 8 | (red & 255);
     }
 
     @Override

@@ -3,10 +3,9 @@ package net.mehvahdjukaar.moonlight.core.set.fabric;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 
 import java.util.*;
 
@@ -32,6 +31,9 @@ public class BlockSetInternalImpl {
 
     public static void registerEntries() {
         BlockSetInternal.initializeBlockSets();
+        //init items immediately as this happens after all registries have fired
+        BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
+
 
         List<Registry<?>> priority = new ArrayList<>(QUEUES.keySet().stream().toList());
         priority.sort(Comparator.comparingInt(

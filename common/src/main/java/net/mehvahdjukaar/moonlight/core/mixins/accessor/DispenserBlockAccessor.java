@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins.accessor;
 
 import net.minecraft.core.dispenser.DispenseItemBehavior;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.DispenserBlock;
 import org.spongepowered.asm.mixin.Mixin;

@@ -12,6 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -25,7 +26,7 @@ public abstract class BlockType {
     private final BiMap<String, Object> children = HashBiMap.create();
     public final ResourceLocation id;
 
-    public BlockType(ResourceLocation resourceLocation) {
+    protected BlockType(ResourceLocation resourceLocation) {
         this.id = resourceLocation;
     }
 
@@ -100,7 +101,6 @@ public abstract class BlockType {
 
 
         String post = postPend.isEmpty() ? "" : "_" + postPend;
-        var id = this.getId();
         ResourceLocation[] targets = {
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post),
@@ -162,11 +162,18 @@ public abstract class BlockType {
     }
 
     /**
-     * Just adds children from vanilla.
-     * Modded ones should be added later. Asset and generation itself should not depend on modded children
+     * Runs right after all blocks registration has run but before any dynamic block registration is run.
+     * Use to add existing vanilla or modded blocks
      */
     @ApiStatus.Internal
-    public abstract void initializeVanillaChildren();
+    public abstract void initializeChildrenBlocks();
+
+    /**
+     * Runs right after all items registration has run but before any dynamic block registration is run.
+     * Use to add existing vanilla or modded blocks
+     */
+    @ApiStatus.Internal
+    public abstract void initializeChildrenItems();
 
     /**
      * base block that this type originates from. Has to be an ItemLike
@@ -180,7 +187,6 @@ public abstract class BlockType {
     public String getChildKey(Object child) {
         return children.inverse().get(child);
     }
-
 
     /**
      * Tries changing an item block type. returns null if it fails
@@ -219,7 +225,7 @@ public abstract class BlockType {
 
     //for blocks
     @Nullable
-    public static Block changeBlockType(Block current, BlockType originalMat, BlockType destinationMat) {
+    public static Block changeBlockType(@NotNull Block current, BlockType originalMat, BlockType destinationMat) {
         Object changed = changeType(current, originalMat, destinationMat);
         //if block swap fails try to swap items instead
         if (changed == null) {
@@ -242,5 +248,7 @@ public abstract class BlockType {
         if (v instanceof ItemLike il) return il;
         return null;
     }
+
+
 
 }

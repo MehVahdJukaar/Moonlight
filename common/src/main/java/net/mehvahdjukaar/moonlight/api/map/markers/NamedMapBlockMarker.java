@@ -16,11 +16,11 @@ public abstract class NamedMapBlockMarker<D extends CustomMapDecoration> extends
     @Nullable
     public Component name;
 
-    public NamedMapBlockMarker(MapDecorationType<D, ?> type) {
+    protected NamedMapBlockMarker(MapDecorationType<D, ?> type) {
         super(type);
     }
 
-    public NamedMapBlockMarker(MapDecorationType<D, ?> type, BlockPos pos) {
+    protected NamedMapBlockMarker(MapDecorationType<D, ?> type, BlockPos pos) {
         super(type, pos);
     }
 

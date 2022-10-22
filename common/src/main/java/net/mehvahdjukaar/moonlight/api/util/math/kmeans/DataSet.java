@@ -87,7 +87,6 @@ public class DataSet<A> {
             }
         }
         if(colorsInCluster.size() == 0){
-            int aaa = 1;
             return (IDataEntry<A>) new ColorPoint(new PaletteColor(new RGBColor(0)));
         }
         return colorsInCluster.get(0).average(colorsInCluster);
