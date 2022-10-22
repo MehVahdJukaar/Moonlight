@@ -111,7 +111,7 @@ public interface ILightable {
 
     default boolean canBeExtinguishedBy(ItemStack item){
         return item.getItem() instanceof ShovelItem;
-    };
+    }
 
     default void playLightUpSound(LevelAccessor world, BlockPos pos, FireSourceType type){
         type.play(world, pos);

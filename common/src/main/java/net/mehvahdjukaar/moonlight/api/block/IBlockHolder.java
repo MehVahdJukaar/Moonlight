@@ -10,7 +10,7 @@ public interface IBlockHolder {
 
     default BlockState getHeldBlock(){
         return getHeldBlock(0);
-    };
+    }
 
     default boolean setHeldBlock(BlockState state){
         return setHeldBlock(state, 0);

@@ -76,7 +76,9 @@ public class HSLColor extends BaseColor<HSLColor> {
     @Override
     public HSLColor mixWith(HSLColor color, float bias) {
         float i = 1 - bias;
-        assert bias>=0 && bias<=1;
+        if(!(bias>=0 && bias<=1)){
+            throw new IllegalArgumentException("bias must be between 0 and one");
+        }
         float h = weightedAverageAngles(this.hue(), color.hue(), bias);
         while(h<0)++h;
         float s = this.saturation() * i + color.saturation() * bias;

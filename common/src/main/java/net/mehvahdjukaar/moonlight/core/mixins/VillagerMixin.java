@@ -17,10 +17,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Villager.class)
 public abstract class VillagerMixin extends AbstractVillager {
 
-    @Shadow protected abstract Brain<?> makeBrain(Dynamic<?> p_35445_);
+    @Override
+    @Shadow protected abstract Brain<?> makeBrain(Dynamic<?> dynamic);
 
-    public VillagerMixin(EntityType<? extends AbstractVillager> p_35267_, Level p_35268_) {
-        super(p_35267_, p_35268_);
+    protected VillagerMixin(EntityType<? extends AbstractVillager> entityType, Level level) {
+        super(entityType, level);
     }
 
     @Inject(method = ("registerBrainGoals"), at = @At("RETURN"))

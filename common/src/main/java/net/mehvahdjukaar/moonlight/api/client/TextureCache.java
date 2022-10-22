@@ -18,11 +18,11 @@ public class TextureCache {
      * Useful for block sets to specify exactly which texture to use for their needs
      *
      * @param block       target block
-     * @param ID          id that will be used to identify this texture. needs to match the criteria that are used to normally identify textures inside a model
+     * @param id          id that will be used to identify this texture. needs to match the criteria that are used to normally identify textures inside a model
      * @param texturePath actual texture location. It is not its absolute path so no :textures/
      */
-    public static void registerSpecialTextureForBlock(ItemLike block, String ID, ResourceLocation texturePath) {
-        SPECIAL_TEXTURES.computeIfAbsent(block, b -> new HashSet<>()).add(new Pair<>(ID, ResType.TEXTURES.getPath(texturePath).toString()));
+    public static void registerSpecialTextureForBlock(ItemLike block, String id, ResourceLocation texturePath) {
+        SPECIAL_TEXTURES.computeIfAbsent(block, b -> new HashSet<>()).add(new Pair<>(id, ResType.TEXTURES.getPath(texturePath).toString()));
     }
 
     private static final Map<ItemLike, Set<Pair<String, String>>> SPECIAL_TEXTURES = new IdentityHashMap<>();

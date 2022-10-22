@@ -127,10 +127,10 @@ public class TextUtil {
                     RenderSystem.enableColorLogicOp();
                     RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
                     bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                    bufferbuilder.vertex(matrix4f, (float) k2, (float) (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-                    bufferbuilder.vertex(matrix4f, (float) l2, (float) (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-                    bufferbuilder.vertex(matrix4f, (float) l2, (float) yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
-                    bufferbuilder.vertex(matrix4f, (float) k2, (float) yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
+                    bufferbuilder.vertex(matrix4f,  k2, (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
+                    bufferbuilder.vertex(matrix4f,  l2, (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
+                    bufferbuilder.vertex(matrix4f,  l2, yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
+                    bufferbuilder.vertex(matrix4f,  k2, yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
                     BufferUploader.drawWithShader(bufferbuilder.end());
                     RenderSystem.disableColorLogicOp();
                     RenderSystem.enableTexture();

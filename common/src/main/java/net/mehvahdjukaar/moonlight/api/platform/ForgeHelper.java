@@ -18,7 +18,6 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -42,7 +41,7 @@ import java.util.function.Consumer;
 public class ForgeHelper {
 
     @ExpectPlatform
-    public static FinishedRecipe addRecipeConditions(FinishedRecipe originalRecipe, List<Object> conditions){
+    public static FinishedRecipe addRecipeConditions(FinishedRecipe originalRecipe, List<Object> conditions) {
         throw new AssertionError();
     }
 
@@ -60,6 +59,7 @@ public class ForgeHelper {
     public static boolean canHarvestBlock(BlockState state, ServerLevel level, BlockPos pos, ServerPlayer player) {
         throw new AssertionError();
     }
+
     @ExpectPlatform
     public static float getFriction(BlockState state, LevelReader level, BlockPos pos, @Nullable Entity entity) {
         throw new AssertionError();
@@ -180,6 +180,7 @@ public class ForgeHelper {
     public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
         throw new AssertionError();
     }
+
     @ExpectPlatform
     public static boolean canItemStack(ItemStack selected, ItemStack item) {
         throw new AssertionError();

@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(HumanoidModel.class)
 public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends AgeableListModel<T> {
 
-    public DualWeildState animationType = new DualWeildState();
+    private final DualWeildState animationType = new DualWeildState();
 
     @Inject(method = "poseRightArm", at = @At(value = "HEAD"), cancellable = true, require = 0)
     public void poseRightArm(T entity, CallbackInfo ci) {
@@ -27,7 +27,7 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
         ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
         Item item = stack.getItem();
         if (item instanceof IThirdPersonAnimationProvider thirdPersonAnimationProvider) {
-            if (thirdPersonAnimationProvider.poseRightArm(stack, (HumanoidModel<T>)(Object) this, entity, handSide, this.animationType)) {
+            if (thirdPersonAnimationProvider.poseRightArm(stack, (HumanoidModel<T>) (Object) this, entity, handSide, this.animationType)) {
                 ci.cancel();
             }
         }
@@ -41,15 +41,14 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
         ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         Item item = stack.getItem();
         if (item instanceof IThirdPersonAnimationProvider thirdPersonAnimationProvider) {
-            if (thirdPersonAnimationProvider.poseLeftArm(stack, (HumanoidModel<T>)(Object) this, entity, handSide, this.animationType)) {
+            if (thirdPersonAnimationProvider.poseLeftArm(stack, (HumanoidModel<T>) (Object) this, entity, handSide, this.animationType)) {
                 ci.cancel();
             }
         }
     }
 
     @Inject(method = "setupAnim*", at = @At(value = "RETURN"), require = 0)
-    public void setupAnim(T t, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_, CallbackInfo ci) {
+    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci) {
         this.animationType.setTwoHanded(false);
     }
-
 }

@@ -52,18 +52,18 @@ public class VanillaResourceManager implements ResourceManager, Closeable {
 
     //old getResources
     @Override
-    public List<Resource> getResourceStack(ResourceLocation p_215562_) {
+    public List<Resource> getResourceStack(ResourceLocation resourceLocation) {
         return List.of();
     }
 
     @Override
-    public Map<ResourceLocation, Resource> listResources(String p_215563_, Predicate<ResourceLocation> p_215564_) {
+    public Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
         return Collections.emptyMap();
     }
 
     //old listResources
     @Override
-    public Map<ResourceLocation, List<Resource>> listResourceStacks(String p_215565_, Predicate<ResourceLocation> p_215566_) {
+    public Map<ResourceLocation, List<Resource>> listResourceStacks(String string, Predicate<ResourceLocation> filter) {
         return Collections.emptyMap();
     }
 }

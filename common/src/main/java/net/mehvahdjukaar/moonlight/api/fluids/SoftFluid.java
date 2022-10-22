@@ -247,7 +247,7 @@ public class SoftFluid {
         private final List<Fluid> equivalentFluids = new ArrayList<>();
 
         //used to indicate automatically generated fluids
-        public boolean custom = true;
+        public final boolean custom = true;
         private ResourceLocation useTexturesFrom;
 
         /**

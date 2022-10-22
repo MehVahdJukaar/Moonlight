@@ -46,7 +46,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     }
 
     protected ImprovedProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, LivingEntity thrower, Level world) {
-        this(type, thrower.getX(), thrower.getEyeY() - (double) 0.1F, thrower.getZ(), world);
+        this(type, thrower.getX(), thrower.getEyeY() -  0.1F, thrower.getZ(), world);
         this.setOwner(thrower);
     }
 
@@ -64,11 +64,6 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
             this.entityData.set(ID_FLAGS, (byte) (b0 & ~id));
         }
 
-    }
-
-    @Override
-    public void lerpMotion(double pX, double pY, double pZ) {
-        super.lerpMotion(pX, pY, pZ);
     }
 
     public void setNoPhysics(boolean noPhysics) {

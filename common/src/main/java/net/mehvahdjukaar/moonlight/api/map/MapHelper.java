@@ -21,19 +21,19 @@ import java.util.Optional;
 
 public class MapHelper {
 
-    public static final boolean mapAtlas = PlatformHelper.isModLoaded("map_atlases");
+    public static final boolean MAP_ATLASES = PlatformHelper.isModLoaded("map_atlases");
 
     @Nullable
     public static MapItemSavedData getMapData(ItemStack stack, Level level, @Nullable Player player) {
         MapItemSavedData data;
         data = MapItem.getSavedData(stack, level);
-        if (data == null && mapAtlas && player != null) data = MapAtlasCompat.getSavedDataFromAtlas(stack, level, player);
+        if (data == null && MAP_ATLASES && player != null) data = MapAtlasCompat.getSavedDataFromAtlas(stack, level, player);
         return data;
     }
 
     public static Integer getMapId(ItemStack stack, Player player, Object data) {
         Integer i = MapItem.getMapId(stack);
-        if (i == null && mapAtlas) i = MapAtlasCompat.getMapIdFromAtlas(stack, player.level, data);
+        if (i == null && MAP_ATLASES) i = MapAtlasCompat.getMapIdFromAtlas(stack, player.level, data);
         return i;
     }
 

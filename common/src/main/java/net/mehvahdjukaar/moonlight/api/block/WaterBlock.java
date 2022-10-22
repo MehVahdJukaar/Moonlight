@@ -18,7 +18,7 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 
 public abstract class WaterBlock extends Block implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-    public WaterBlock(Properties properties) {
+    protected WaterBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(WATERLOGGED, Boolean.FALSE));
     }

@@ -53,6 +53,7 @@ public class SimpleTagBuilder extends TagBuilder {
         return this;
     }*/
 
+    @Override
     public SimpleTagBuilder addTag(ResourceLocation pId) {
         super.addTag(pId);
         return this;
@@ -62,6 +63,7 @@ public class SimpleTagBuilder extends TagBuilder {
         return this.addTag(tagKey.location());
     }
 
+    @Override
     public SimpleTagBuilder addOptionalTag(ResourceLocation pId) {
         super.addOptionalTag(pId);
         return this;
