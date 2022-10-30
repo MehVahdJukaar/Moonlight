@@ -29,7 +29,7 @@ public class TextureCache {
 
     private static final Map<ItemLike, Set<String>> CACHED_TEXTURES = new IdentityHashMap<>();
 
-    public static void refresh() {
+    public static void clear() {
         CACHED_TEXTURES.clear();
     }
 

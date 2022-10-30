@@ -15,7 +15,7 @@ import java.util.Set;
 
 //can be statically stored and persists across world loads
 /**
- * A soft reference to an object in a Datapack registry
+ * A soft reference to an object in a Data pack registry
  */
 public class DataObjectReference<T> {
 

@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.mojang.serialization.Lifecycle;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
+import net.mehvahdjukaar.moonlight.api.misc.Registrator;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
@@ -10,11 +12,13 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RegistryQueue<T> {
     private final Registry<T> registry;
     private final List<EntryWrapper<? extends T, T>> entries = new ArrayList<>();
+    private final List<Consumer<Registrator<T>>> batchRegistration = new ArrayList<>();
 
     public RegistryQueue(Registry<T> registry) {
         this.registry = registry;
@@ -30,8 +34,13 @@ public class RegistryQueue<T> {
         return wrapper;
     }
 
+    public void add(Consumer<Registrator<T>> eventListener) {
+        batchRegistration.add(eventListener);
+    }
+
     void initializeEntries() {
         entries.forEach(EntryWrapper::initialize);
+        batchRegistration.forEach(e -> e.accept((n, s) -> RegHelper.registerAsync(n, () -> s, registry)));
     }
 
 

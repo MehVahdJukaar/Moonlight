@@ -5,6 +5,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
+import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
@@ -64,6 +65,11 @@ public class RegHelper {
 
     @ExpectPlatform
     public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {
         throw new AssertionError();
     }
 
@@ -160,7 +166,7 @@ public class RegHelper {
     }
 
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
-        return register(name,PlatformHelper::newParticle, Registry.PARTICLE_TYPE);
+        return register(name, PlatformHelper::newParticle, Registry.PARTICLE_TYPE);
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,

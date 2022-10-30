@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
+/**
+ * Lazy sound type like forge one
+ */
 public class ModSoundType extends SoundType {
     private final Supplier<SoundEvent> breakSound;
     private final Supplier<SoundEvent> stepSound;
@@ -22,23 +25,28 @@ public class ModSoundType extends SoundType {
         this.fallSound = fallSoundIn;
     }
 
+    @Override
     public @NotNull SoundEvent getBreakSound() {
-        return (SoundEvent)this.breakSound.get();
+        return this.breakSound.get();
     }
 
+    @Override
     public @NotNull SoundEvent getStepSound() {
-        return (SoundEvent)this.stepSound.get();
+        return this.stepSound.get();
     }
 
+    @Override
     public @NotNull SoundEvent getPlaceSound() {
-        return (SoundEvent)this.placeSound.get();
+        return this.placeSound.get();
     }
 
+    @Override
     public @NotNull SoundEvent getHitSound() {
-        return (SoundEvent)this.hitSound.get();
+        return this.hitSound.get();
     }
 
+    @Override
     public @NotNull SoundEvent getFallSound() {
-        return (SoundEvent)this.fallSound.get();
+        return this.fallSound.get();
     }
 }

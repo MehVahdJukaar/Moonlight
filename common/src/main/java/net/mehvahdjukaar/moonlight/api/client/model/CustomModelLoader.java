@@ -6,6 +6,6 @@ import com.google.gson.JsonParseException;
 
 public interface CustomModelLoader {
 
-    public CustomGeometry deserialize(JsonObject json, JsonDeserializationContext context) throws JsonParseException;
+    CustomGeometry deserialize(JsonObject json, JsonDeserializationContext context) throws JsonParseException;
 
 }

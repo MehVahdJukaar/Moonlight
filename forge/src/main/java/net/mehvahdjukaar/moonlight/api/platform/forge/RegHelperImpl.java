@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
+import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
@@ -32,6 +33,7 @@ import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
@@ -89,6 +91,15 @@ public class RegHelperImpl {
     public static <T, E extends
             T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
         return register(name, supplier, reg);
+    }
+
+    public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {
+        Consumer<RegisterEvent> eventConsumer = event -> {
+            if(event.getVanillaRegistry() == reg){
+                eventListener.accept(event.getForgeRegistry()::register);
+            }
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
@@ -151,5 +162,7 @@ public class RegHelperImpl {
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
     }
+
+
 
 }

@@ -8,6 +8,9 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 
+/**
+ * Cross loader utility to create baked quad
+ */
 public interface BakedQuadBuilder {
 
     @ExpectPlatform

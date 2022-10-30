@@ -8,6 +8,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Simple item listing implementation
+ */
 public class ModItemListing implements VillagerTrades.ItemListing {
 
     protected final ItemStack price;

@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
+import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
@@ -89,6 +90,12 @@ public class RegHelperImpl {
         return entry;
     }
 
+    public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {
+        var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
+        RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent("a", c -> new RegistryQueue<>(reg));
+        registry.add(eventListener);
+    }
+
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
@@ -130,6 +137,8 @@ public class RegHelperImpl {
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         FabricRecipeConditionManager.registerSimple(id, predicate);
     }
+
+
 
 
 }

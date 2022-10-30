@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.set.forge;
 
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
@@ -50,14 +51,8 @@ public class BlockSetInternalImpl {
             throw new IllegalArgumentException("Fluid registry not supported here");
         } else{
             //other entries
-            Consumer<RegisterEvent> eventConsumer = e->{
-                if(e.getVanillaRegistry() == registry){
-                    registrationFunction.accept(e.getForgeRegistry()::register, BlockSetAPI.getBlockSet(blockType).getValues());
-                }
-            };
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+            RegHelper.registerInBatch(registry, e-> registrationFunction.accept(e, BlockSetAPI.getBlockSet(blockType).getValues()));
         }
-
     }
 
 

@@ -10,7 +10,7 @@ public class DualWeildState {
     }
 
     /**
-     * @param twoHanded true if off hand animation should be skipped and handled by main hand method only instead
+     * @param twoHanded true if offhand animation should be skipped and handled by main hand method only instead
      */
     public void setTwoHanded(boolean twoHanded) {
         this.twoHanded = twoHanded;
