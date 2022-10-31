@@ -51,6 +51,11 @@ import java.util.function.Supplier;
 public class PlatformHelper {
 
     @ExpectPlatform
+    public static void addCommonSetup(Runnable commonSetup) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static boolean isDev() {
         throw new AssertionError();
     }

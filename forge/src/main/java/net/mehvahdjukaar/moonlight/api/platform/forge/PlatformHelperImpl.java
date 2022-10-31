@@ -42,6 +42,8 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -210,6 +212,11 @@ public class PlatformHelperImpl {
 
     public static boolean isModLoadingValid() {
         return ModLoader.isLoadingStateValid();
+    }
+
+    public static void addCommonSetup(Runnable commonSetup) {
+        Consumer<FMLCommonSetupEvent> eventConsumer = event -> event.enqueueWork(commonSetup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
 

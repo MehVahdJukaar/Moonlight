@@ -58,6 +58,11 @@ import java.util.function.Supplier;
 public class ClientPlatformHelper {
 
     @ExpectPlatform
+    public static void addClientSetup(Runnable clientSetup) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static void registerRenderType(Block block, RenderType type) {
         throw new AssertionError();
     }

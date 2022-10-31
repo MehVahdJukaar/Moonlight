@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
 import com.google.common.base.Preconditions;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Transformation;
+import com.mojang.math.Vector3f;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
@@ -11,21 +13,23 @@ import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import org.jetbrains.annotations.Nullable;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
-    public static BakedQuadBuilder create() {
-        return new BakedQuadBuilderImpl();
+    public static BakedQuadBuilder create(@Nullable Transformation transformation) {
+        return new BakedQuadBuilderImpl(transformation == null ? null : transformation.getMatrix());
     }
 
     private final QuadEmitter inner;
     private int vertexIndex = 0;
-    private Matrix4f transform = null;
+    private Matrix4f transform;
     TextureAtlasSprite sprite = null;
 
-    private BakedQuadBuilderImpl() {
+    private BakedQuadBuilderImpl(@Nullable Matrix4f transform) {
         MeshBuilder meshBuilder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
         this.inner = meshBuilder.getEmitter();
+        this.transform = transform;
     }
 
     @Override
@@ -35,16 +39,24 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         return null;
     }
 
+    @Override
+    public BakedQuadBuilder setShade(boolean shade) {
+        return this;
+    }
+
+    @Override
+    public BakedQuadBuilder setAmbientOcclusion(boolean ambientOcclusion) {
+        return this;
+    }
+
     public BakedQuadBuilder setDirection(Direction direction) {
         if (transform != null) {
-            var normal = direction.getNormal();
-            var v = RotHlpr.rotateVertexOnCenterBy(normal.getX(), normal.getY(), normal.getZ(), transform);
-            inner.nominalFace(Direction.getNearest(v.x(), v.y(), v.z()));
-            return this;
+            direction = RotHlpr.rotateDirection(direction, transform);
         }
         inner.nominalFace(direction);
         return this;
     }
+
 
     @Override
     public BakedQuadBuilder pos(float x, float y, float z) {
@@ -60,8 +72,9 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuadBuilder normal(float x, float y, float z) {
         if (transform != null) {
-            var v = RotHlpr.rotateVertexOnCenterBy(x, y, z, transform);
-            inner.normal(vertexIndex, v.x(), v.y(), v.z());
+            Vector3f normal = new Vector3f(x, y, z);
+            RotHlpr.rotateVertexBy(normal, Vector3f.ZERO, transform);
+            inner.normal(vertexIndex, normal.x(), normal.y(), normal.z());
             return this;
         }
         inner.normal(vertexIndex, x, y, z);
@@ -98,9 +111,11 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         return inner.toBakedQuad(0, sprite, false);
     }
 
+    @Deprecated(forRemoval = true)
     public BakedQuadBuilder useTransform(Matrix4f matrix4f) {
         this.transform = matrix4f;
         return this;
     }
+
 }
 

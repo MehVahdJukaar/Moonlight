@@ -62,4 +62,11 @@ public class RotHlpr {
         pPos.set(vector4f.x() + pOrigin.x(), vector4f.y() + pOrigin.y(), vector4f.z() + pOrigin.z());
     }
 
+    public static Direction rotateDirection(Direction direction, Matrix4f transform) {
+        var d = direction.getNormal();
+        var normal = new Vector3f(d.getX(), d.getY(), d.getZ());
+        RotHlpr.rotateVertexBy(normal, Vector3f.ZERO, transform);
+        return  Direction.getNearest(normal.x(), normal.y(), normal.z());
+    }
+
 }

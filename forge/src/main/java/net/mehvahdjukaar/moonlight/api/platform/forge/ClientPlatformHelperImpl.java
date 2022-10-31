@@ -1,22 +1,17 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.gson.JsonElement;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -24,20 +19,17 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ExtendedBlockModelDeserializer;
-import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
@@ -92,6 +84,7 @@ public class ClientPlatformHelperImpl {
                 public void register(BlockColor color, Block... block) {
                     event.register(color, block);
                 }
+
                 @Override
                 public int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint) {
                     return event.getBlockColors().getColor(block, level, pos, tint);
@@ -108,6 +101,7 @@ public class ClientPlatformHelperImpl {
                 public void register(ItemColor color, ItemLike... items) {
                     event.register(color, items);
                 }
+
                 @Override
                 public int getColor(ItemStack stack, int tint) {
                     return event.getItemColors().getColor(stack, tint);
@@ -204,6 +198,10 @@ public class ClientPlatformHelperImpl {
         return ExtendedBlockModelDeserializer.INSTANCE.getAdapter(BlockModel.class).fromJsonTree(json);
     }
 
+    public static void addClientSetup(Runnable clientSetup) {
+        Consumer<FMLClientSetupEvent> eventConsumer = event -> event.enqueueWork(clientSetup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
 
 
 }

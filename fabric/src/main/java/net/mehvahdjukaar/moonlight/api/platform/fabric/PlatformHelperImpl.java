@@ -17,6 +17,7 @@ import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
+import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -226,6 +227,10 @@ public class PlatformHelperImpl {
 
     public static boolean isModLoadingValid() {
         return true;
+    }
+
+    public static void addCommonSetup(Runnable clientSetup) {
+        FabricSetupCallbacks.COMMON_SETUP.add(clientSetup);
     }
 
 }
