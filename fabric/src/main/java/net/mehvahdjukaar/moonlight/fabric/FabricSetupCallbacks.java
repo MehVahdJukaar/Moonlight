@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.fabric;
 import java.util.ArrayList;
 import java.util.List;
 
+//fix concurrency
 public interface FabricSetupCallbacks {
 
     /**

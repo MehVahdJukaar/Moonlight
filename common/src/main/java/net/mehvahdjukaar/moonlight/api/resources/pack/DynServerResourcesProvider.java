@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -17,33 +18,10 @@ public abstract class DynServerResourcesProvider extends DynResourceProvider<Dyn
         super(pack);
     }
 
-    /**
-     * Remember to call this during mod init
-     */
-    @Override
-    public void register() {
-        super.register();
-        //MinecraftForge.EVENT_BUS.addListener(this::onAddReloadListeners);
-        MoonlightEventsHelper.addListener(this::onEarlyReload, EarlyPackReloadEvent.class);
-    }
-
     @Override
     protected PackRepository getRepository() {
         var s = PlatformHelper.getCurrentServer();
         if (s != null) return s.getPackRepository();
         return null;
     }
-
-    @ApiStatus.Internal
-    public final void onEarlyReload(final EarlyPackReloadEvent event) {
-        try {
-            this.reloadResources(event.manager());
-        }catch (Exception e){
-            Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}:", this.dynamicPack, e);
-        }
-    }
-
-    //public void onAddReloadListeners(final AddReloadListenerEvent event) {
-    //event.addListener(this);
-    // }
 }

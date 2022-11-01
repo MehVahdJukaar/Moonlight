@@ -23,6 +23,14 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "terraqueous", "dense_cloud", "dense_cloud", "dense_cloud_column"));
 
+        var embur = WoodType.Finder.simple(
+                "byg", "embur", "embur_planks", "embur_pedu");
+        embur.addChild("stripped_log", "stripped_embur_pedu" );
+        embur.addChild("wood", "embur_pedu_top" );
+        embur.addChild("stripped_wood", "stripped_embur_pedu_top" );
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, embur);
+
+
         //mcreator mod with typos...
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "nethers_exoticism", "jabuticaba", "jaboticaba_planks", "jabuticaba_log"));

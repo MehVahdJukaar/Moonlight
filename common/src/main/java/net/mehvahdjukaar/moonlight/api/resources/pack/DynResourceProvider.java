@@ -1,17 +1,21 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
+import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.VanillaResourceManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
@@ -35,7 +39,10 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
      */
     public void register() {
         dynamicPack.registerPack();
+
+        MoonlightEventsHelper.addListener(this::onEarlyReload, EarlyPackReloadEvent.class);
     }
+
 
     public abstract Logger getLogger();
 
@@ -51,13 +58,14 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
     }
 
     @Override
-    final public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
+    public final CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
                                                 ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
                                                 Executor workerExecutor, Executor mainExecutor) {
-        if(Moonlight.HAS_BEEN_INIT && PlatformHelper.isModLoadingValid()) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
-            reloadResources(manager);
-        }else{
-            Moonlight.  LOGGER.error("Cowardly refusing generate assets for a broken mod state");
+        //not used anymore. Loading early instead
+        if (Moonlight.HAS_BEEN_INIT && PlatformHelper.isModLoadingValid()) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
+            onNormalReload(manager);
+        } else {
+            Moonlight.LOGGER.error("Cowardly refusing generate assets for a broken mod state");
         }
 
         return CompletableFuture.supplyAsync(() -> null, workerExecutor)
@@ -66,11 +74,24 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
                 }, mainExecutor);
     }
 
-    protected void reloadResources(ResourceManager manager) {
+    protected void onNormalReload(ResourceManager manager) {
+    }
+
+    protected void onEarlyReload(EarlyPackReloadEvent event) {
+        if(event.type() == dynamicPack.packType) {
+            try {
+                this.reloadResources(event.manager());
+            } catch (Exception e) {
+                Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}:", this.dynamicPack, e);
+            }
+        }
+    }
+
+    protected final void reloadResources(ResourceManager manager) {
         Stopwatch watch = Stopwatch.createStarted();
 
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
-        //TODO: cleanup this logic
+
         if (!this.hasBeenInitialized) {
             this.hasBeenInitialized = true;
             generateStaticAssetsOnStartup(manager);
@@ -122,11 +143,11 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
      * @param replaceWith word to replace the keyword with
      */
     public void addSimilarJsonResource(ResourceManager manager, StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException {
-        addSimilarJsonResource(manager,resource, s -> s.replace(keyword, replaceWith));
+        addSimilarJsonResource(manager, resource, s -> s.replace(keyword, replaceWith));
     }
 
     public void addSimilarJsonResource(ResourceManager manager, StaticResource resource, Function<String, String> textTransform) throws NoSuchElementException {
-        addSimilarJsonResource(manager,resource, textTransform, textTransform);
+        addSimilarJsonResource(manager, resource, textTransform, textTransform);
     }
 
     public void addSimilarJsonResource(ResourceManager manager, StaticResource resource, Function<String, String> textTransform, Function<String, String> pathTransform) throws NoSuchElementException {
@@ -143,7 +164,7 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
         }
         //adds modified under my namespace
         ResourceLocation newRes = new ResourceLocation(this.dynamicPack.resourcePackName.getNamespace(), builder.toString());
-        if(!alreadyHasAssetAtLocation(manager, newRes)) {
+        if (!alreadyHasAssetAtLocation(manager, newRes)) {
 
             String fullText = new String(resource.data, StandardCharsets.UTF_8);
 

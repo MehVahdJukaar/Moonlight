@@ -19,7 +19,6 @@
     "MapExtendingRecipeMixin",
     "MapItemMixin",
     "MultiPackResourceManagerMixin",
-    "ReloadableResourceManagerMixin",
     "VillagerMixin",
     "accessor.BlockLootAccessor",
     "accessor.BrainAccessor",

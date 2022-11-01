@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class CreativeModeTabMixin {
 
     //freaking Mojang. If a mod sets a tab name using a ":" character the game will crash
-    @Inject(method = "getRecipeFolderName", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getRecipeFolderName", require = 0, at = @At("RETURN"), cancellable = true)
     public void fixId(CallbackInfoReturnable<String> cir){
         if(cir.getReturnValue().contains(":"))cir.setReturnValue("extra");
     }
