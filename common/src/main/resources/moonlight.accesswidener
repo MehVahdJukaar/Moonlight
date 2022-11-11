@@ -42,4 +42,5 @@ transitive-accessible method net/minecraft/world/entity/ai/sensing/SensorType <i
 #trunk placer fabric
 transitive-accessible method net/minecraft/world/level/levelgen/feature/treedecorators/TreeDecoratorType <init> (Lcom/mojang/serialization/Codec;)V
 transitive-accessible method net/minecraft/world/level/levelgen/feature/foliageplacers/FoliagePlacerType <init> (Lcom/mojang/serialization/Codec;)V
+transitive-accessible method net/minecraft/world/level/levelgen/feature/rootplacers/RootPlacerType <init> (Lcom/mojang/serialization/Codec;)V
 transitive-accessible method net/minecraft/world/level/levelgen/feature/trunkplacers/TrunkPlacerType <init> (Lcom/mojang/serialization/Codec;)V

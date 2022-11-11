@@ -9,13 +9,11 @@ import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.VanillaResourceManager;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
@@ -78,7 +76,7 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
     }
 
     protected void onEarlyReload(EarlyPackReloadEvent event) {
-        if(event.type() == dynamicPack.packType) {
+        if (event.type() == dynamicPack.packType) {
             try {
                 this.reloadResources(event.manager());
             } catch (Exception e) {
@@ -112,7 +110,6 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
         if (resourcePackSupport) {
             this.regenerateDynamicAssets(manager);
         }
-
         getLogger().info("Generated runtime {} for pack {} in: {} ms",
                 this.dynamicPack.getPackType(),
                 this.dynamicPack.getName(),

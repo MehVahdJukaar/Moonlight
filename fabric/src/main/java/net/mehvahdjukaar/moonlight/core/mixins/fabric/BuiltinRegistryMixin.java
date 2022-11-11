@@ -5,6 +5,8 @@ import net.fabricmc.fabric.impl.registry.sync.RegistrySyncManager;
 import net.fabricmc.loader.impl.gui.FabricGuiEntry;
 import net.mehvahdjukaar.moonlight.api.fluids.fabric.SoftFluidRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.map.fabric.MapDecorationRegistryImpl;
+import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

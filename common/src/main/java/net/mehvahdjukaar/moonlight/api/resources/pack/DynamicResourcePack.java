@@ -56,11 +56,11 @@ public abstract class DynamicResourcePack implements PackResources {
     //for debug or to generate assets
     public boolean generateDebugResources = false;
 
-    public DynamicResourcePack(ResourceLocation name, PackType type) {
+    protected DynamicResourcePack(ResourceLocation name, PackType type) {
         this(name, type, Pack.Position.TOP, false, false);
     }
 
-    public DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
+    protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
         this.packType = type;
         var component = Component.translatable(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources"));
         this.packInfo = new PackMetadataSection(component, 6);

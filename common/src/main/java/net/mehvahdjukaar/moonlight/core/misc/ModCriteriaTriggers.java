@@ -12,9 +12,9 @@ public class ModCriteriaTriggers {
 
     public static void register(){}
 
-    public static final GrindedItem GRIND = CriteriaTriggers.register(new GrindedItem());
+    public static final GrindItem GRIND = CriteriaTriggers.register(new GrindItem());
     
-    public static class GrindedItem extends SimpleCriterionTrigger<GrindedItem.Instance> {
+    public static class GrindItem extends SimpleCriterionTrigger<GrindItem.Instance> {
         private static final ResourceLocation ID = new ResourceLocation("grind_item");
 
         @Override
@@ -36,7 +36,7 @@ public class ModCriteriaTriggers {
             private final ItemPredicate item;
 
             public Instance(EntityPredicate.Composite composite, ItemPredicate item) {
-                super(GrindedItem.ID, composite);
+                super(GrindItem.ID, composite);
                 this.item = item;
             }
 
@@ -52,6 +52,5 @@ public class ModCriteriaTriggers {
             }
         }
     }
-
 
 }

@@ -21,13 +21,14 @@ public interface RegistryAccessMixin {
             at = @At("TAIL"))
     private static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder,
                                 ResourceKey<? extends Registry<E>> registryKey, Codec<E> elementCodec, CallbackInfo ci) {
-
+        //who needs an event, nobody will use this but me anyway
         if (registryKey.location() == Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY.location()) {
+            builder.put(MapDecorationRegistryImpl.KEY, new RegistryAccess.RegistryData<>(
+                    MapDecorationRegistryImpl.KEY, MapDecorationRegistry.TYPE_CODEC, MapDecorationRegistry.TYPE_CODEC));
+
             builder.put(SoftFluidRegistryImpl.KEY, new RegistryAccess.RegistryData<>(
                     SoftFluidRegistryImpl.KEY, SoftFluid.CODEC, SoftFluid.CODEC));
 
-            builder.put(MapDecorationRegistryImpl.KEY, new RegistryAccess.RegistryData<>(
-                    MapDecorationRegistryImpl.KEY, MapDecorationRegistry.TYPE_CODEC, MapDecorationRegistry.TYPE_CODEC));
         }
 
     }

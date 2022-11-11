@@ -1,10 +1,12 @@
 package net.mehvahdjukaar.moonlight.core.set;
 
+import com.google.common.base.Stopwatch;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -25,6 +27,7 @@ public class BlockSetInternal {
     private static final ConcurrentLinkedDeque<Runnable> REMOVER_ADDER = new ConcurrentLinkedDeque<>();
 
     public static void initializeBlockSets() {
+        Stopwatch sw = Stopwatch.createStarted();
         if (hasFilledBlockSets()) throw new UnsupportedOperationException("block sets have already bee initialized");
         FINDER_ADDER.forEach(Runnable::run);
         FINDER_ADDER.clear();
@@ -35,6 +38,8 @@ public class BlockSetInternal {
         //remove not wanted ones
         REMOVER_ADDER.forEach(Runnable::run);
         REMOVER_ADDER.clear();
+
+        Moonlight.LOGGER.info("Initialized block sets in {}ms", sw.elapsed().toMillis());
     }
 
     @ExpectPlatform

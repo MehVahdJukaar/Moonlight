@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
+import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -8,12 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 public class FluidContainerList {
@@ -105,7 +105,8 @@ public class FluidContainerList {
 
     public static class Category {
 
-        private static final Category EMPTY = new Category(Items.AIR, 1);
+        private static final Supplier<Category> EMPTY = Suppliers.memoize(() ->
+                new Category(Registry.ITEM.get(Registry.ITEM.getDefaultKey()), 1));
 
         public static final Codec<Category> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
                 ResourceLocation.CODEC.fieldOf("empty").forGetter(c -> Utils.getID(c.emptyContainer)),
@@ -136,20 +137,18 @@ public class FluidContainerList {
         private static Category decode(ResourceLocation empty, int capacity, List<ResourceLocation> filled) {
             return decode(empty, capacity, filled, Optional.empty(), Optional.empty());
         }
+
         private static Category decode(ResourceLocation empty, int capacity, List<ResourceLocation> filled,
                                        Optional<SoundEvent> fillSound, Optional<SoundEvent> emptySound) {
             var opt = Registry.ITEM.getOptional(empty);
-            if (opt.isEmpty()) return EMPTY;
+            if (opt.isEmpty()) return EMPTY.get();
             var category = new Category(opt.get(), capacity, fillSound.orElse(null), emptySound.orElse(null));
 
             filled.forEach(f -> {
-                if (f.getNamespace().contains("immersiveengineering")) {
-                    int aa = 1;
-                }
                 var opt2 = Registry.ITEM.getOptional(f);
                 opt2.ifPresent(category::addItem);
             });
-            if (category.isEmpty()) return EMPTY;
+            if (category.isEmpty()) return EMPTY.get();
             return category;
         }
 
@@ -162,7 +161,7 @@ public class FluidContainerList {
         }
 
         private void addItem(Item i) {
-            if (i != Items.AIR && !filled.contains(i)) filled.add(i);
+            if (!i.getDefaultInstance().isEmpty() && !filled.contains(i)) filled.add(i);
         }
 
         /**
@@ -197,7 +196,7 @@ public class FluidContainerList {
     private static <T> Function<Category, Optional<T>> getHackyOptional(final Function<Category, T> getter) {
         return f -> {
             var value = getter.apply(f);
-            var def = getter.apply(Category.EMPTY);
+            var def = getter.apply(Category.EMPTY.get());
             return value.equals(def) ? Optional.empty() : Optional.of(value);
         };
     }

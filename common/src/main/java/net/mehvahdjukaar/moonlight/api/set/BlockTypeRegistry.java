@@ -19,7 +19,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     private final String name;
     private final List<BlockType.SetFinder<T>> finders = new ArrayList<>();
     private final List<ResourceLocation> notInclude = new ArrayList<>();
-    private final List<T> builder = new ArrayList<>();
+    protected final List<T> builder = new ArrayList<>();
     private final Class<T> typeClass;
     private Map<ResourceLocation, T> types = new LinkedHashMap<>();
     private final Object2ObjectOpenHashMap<Object, T> childrenToType = new Object2ObjectOpenHashMap<>();
@@ -88,7 +88,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         notInclude.add(id);
     }
 
-    private void finalizeAndFreeze() {
+    protected void finalizeAndFreeze() {
         if (frozen) {
             throw new UnsupportedOperationException("Block types are already finalized");
         }
