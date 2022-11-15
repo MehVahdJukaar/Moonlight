@@ -15,9 +15,10 @@ import java.util.*;
 
 public class BlocksColorInternal {
     public static final List<DyeColor> VANILLA_COLORS = List.of(Arrays.copyOfRange(DyeColor.values(), 0, 16));
-    public static final List<DyeColor> MODDED_COLORS = Arrays.stream(DyeColor.values()).filter(v->!VANILLA_COLORS.contains(v)).toList();
+    public static final List<DyeColor> MODDED_COLORS = Arrays.stream(DyeColor.values()).filter(v -> !VANILLA_COLORS.contains(v)).toList();
 
-    private static final Map<String, ColorSet<?>> COLOR_SETS = new HashMap<>();
+    private static final Map<String, ColorSet<Block>> BLOCK_COLOR_SETS = new HashMap<>();
+    private static final Map<String, ColorSet<Item>> ITEM_COLOR_SETS = new HashMap<>();
 
     private static final Object2ObjectOpenHashMap<Object, DyeColor> BLOCK_TO_COLORS = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectOpenHashMap<Object, String> BLOCK_TO_TYPE = new Object2ObjectOpenHashMap<>();
@@ -26,17 +27,24 @@ public class BlocksColorInternal {
     public static void setup() {
         Stopwatch sw = Stopwatch.createStarted();
 
-
         Map<String, DyeColor> colors = new HashMap<>();
         VANILLA_COLORS.forEach(d -> colors.put(d.getName(), d));
         List<String> colorPriority = new ArrayList<>(colors.keySet().stream().toList());
 
+        scanRegistry(colors, colorPriority, Registry.BLOCK, BLOCK_COLOR_SETS);
+        scanRegistry(colors, colorPriority, Registry.ITEM, ITEM_COLOR_SETS);
 
-        Map<ResourceLocation, Map<DyeColor, Block>> groupedByType = new HashMap<>();
+        Moonlight.LOGGER.info("Initialized color sets in {}ms", sw.elapsed().toMillis());
+    }
+
+    private static <T> void scanRegistry(Map<String, DyeColor> colors, List<String> colorPriority,
+                                         Registry<T> registry, Map<String, ColorSet<T>> colorSetMap) {
+        Map<ResourceLocation, Map<DyeColor, T>> groupedByType = new HashMap<>();
         colorPriority.sort(Comparator.comparingInt(String::length));
+        Collections.reverse(colorPriority);
         //group by color
         loop1:
-        for (Block b : Registry.BLOCK) {
+        for (var b : registry) {
             ResourceLocation id = Utils.getID(b);
             String name = id.getPath();
             if (!name.contains("_")) continue;
@@ -62,43 +70,41 @@ public class BlocksColorInternal {
             var map = j.getValue();
             ResourceLocation id = j.getKey();
             if (map.keySet().containsAll(VANILLA_COLORS)) {
-                var set = new ColorSet<>(id, map, Registry.BLOCK);
-                COLOR_SETS.put(id.toString(), set);
+                var set = new ColorSet<>(id, map, registry);
+                colorSetMap.put(id.toString(), set);
 
-                for(var v : set.colorsToBlock.entrySet()){
+                for (var v : set.colorsToBlock.entrySet()) {
                     BLOCK_TO_COLORS.put(v.getValue(), v.getKey());
                     BLOCK_TO_TYPE.put(v.getValue(), id.toString());
                 }
             }
         }
-
-        Moonlight.LOGGER.info("Initialized color sets in {}ms", sw.elapsed().toMillis());
     }
 
     @Nullable
-    public static DyeColor getColor(Block block){
+    public static DyeColor getColor(Block block) {
         return BLOCK_TO_COLORS.get(block);
     }
 
     @Nullable
-    public static DyeColor getColor(Item item){
+    public static DyeColor getColor(Item item) {
         return BLOCK_TO_COLORS.get(item);
     }
 
     @Nullable
     public static Item getColoredItem(String key, @Nullable DyeColor color) {
-        var set = getSet(key);
-        if (set != null && !set.isBlock) {
-            return (Item) set.with(color);
+        var set = getItemSet(key);
+        if (set != null) {
+            return set.with(color);
         }
         return null;
     }
 
     @Nullable
     public static Block getColoredBlock(String key, @Nullable DyeColor color) {
-        var set = getSet(key);
-        if (set != null && set.isBlock) {
-            return (Block) set.with(color);
+        var set = getBlockSet(key);
+        if (set != null) {
+            return set.with(color);
         }
         return null;
     }
@@ -112,9 +118,10 @@ public class BlocksColorInternal {
     public static Block changeColor(Block old, @Nullable DyeColor newColor) {
         String key = getKey(old);
         if (key != null) {
-            var set = getSet(key);
-            if (set != null && set.isBlock) {
-                return (Block) set.with(newColor);
+            var set = getBlockSet(key);
+            if (set != null) {
+                var b = set.with(newColor);
+                if (b != old) return b;
             }
         }
         return null;
@@ -129,9 +136,10 @@ public class BlocksColorInternal {
     public static Item changeColor(Item old, @Nullable DyeColor newColor) {
         String key = getKey(old);
         if (key != null) {
-            var set = getSet(key);
-            if (set != null && !set.isBlock) {
-                return (Item) set.with(newColor);
+            var set = getItemSet(key);
+            if (set != null) {
+                var i = set.with(newColor);
+                if (i != old) return i;
             }
         }
         return null;
@@ -148,20 +156,24 @@ public class BlocksColorInternal {
     }
 
     @Nullable
-    private static ColorSet<?> getSet(String key) {
+    private static ColorSet<Block> getBlockSet(String key) {
         key = new ResourceLocation(key).toString();
-        return COLOR_SETS.get(key);
+        return BLOCK_COLOR_SETS.get(key);
+    }
+
+    @Nullable
+    private static ColorSet<Item> getItemSet(String key) {
+        key = new ResourceLocation(key).toString();
+        return ITEM_COLOR_SETS.get(key);
     }
 
     private static class ColorSet<T> {
 
         private final Map<DyeColor, T> colorsToBlock;
         private final T defaultBlock;
-        private final boolean isBlock;
 
         public ColorSet(ResourceLocation id, Map<DyeColor, T> map, Registry<T> registry) {
             this.colorsToBlock = map;
-            this.isBlock = registry == Registry.BLOCK;
 
             //fill default
             this.defaultBlock = registry.getOptional(id).orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));

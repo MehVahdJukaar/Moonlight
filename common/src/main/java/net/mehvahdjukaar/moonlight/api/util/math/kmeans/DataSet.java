@@ -26,12 +26,12 @@ public class DataSet<A> {
         @Override
         public IDataEntry<ColorPoint> average(List<IDataEntry<ColorPoint>> others) {
             List<LABColor> pixels = new ArrayList<>();
-            for(int i = 0; i<weight; i++){
+            for (int i = 0; i < weight; i++) {
                 pixels.add(this.color.lab());
             }
-            for(var c : others){
-                if(c == this)continue;
-                for(int i = 0; i<c.cast().weight; i++){
+            for (var c : others) {
+                if (c == this) continue;
+                for (int i = 0; i < c.cast().weight; i++) {
                     pixels.add(c.cast().color.lab());
                 }
             }
@@ -86,7 +86,7 @@ public class DataSet<A> {
                 colorsInCluster.add(colorPoint);
             }
         }
-        if(colorsInCluster.size() == 0){
+        if (colorsInCluster.size() == 0) {
             return (IDataEntry<A>) new ColorPoint(new PaletteColor(new RGBColor(0)));
         }
         return colorsInCluster.get(0).average(colorsInCluster);

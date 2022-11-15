@@ -2,9 +2,9 @@ package net.mehvahdjukaar.moonlight.api.item;
 
 import com.google.common.base.Suppliers;
 import dev.architectury.injectables.annotations.PlatformOnly;
-import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -34,12 +34,13 @@ public class BlockTypeBasedItem<T extends BlockType> extends Item {
 
     @Override
     protected boolean allowedIn(CreativeModeTab tab) {
-        PlatformHelper.getPlatform().ifFabric(() -> {
-            if (!init) {
-                init = false;
+        if (!init) {
+            PlatformHelper.getPlatform().ifFabric(() -> {
                 RegHelper.registerItemBurnTime(this, PlatformHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance()));
-            }
-        });
+            });
+            init = true;
+        }
+
         if (blockType.mainChild().asItem().getItemCategory() == null) return false;
         return super.allowedIn(tab);
     }

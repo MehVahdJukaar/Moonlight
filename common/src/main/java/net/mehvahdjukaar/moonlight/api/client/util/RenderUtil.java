@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -15,6 +16,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
@@ -126,6 +128,27 @@ public class RenderUtil {
     public static void renderGuiItem(BakedModel model, ItemStack stack, ItemRenderer renderer, int combinedLight, int pCombinedOverlay,
                                      PoseStack poseStack, MultiBufferSource.BufferSource buffer, boolean flatItem) {
         throw new ArrayStoreException();
+    }
+
+    /**
+     * Renders the given sprite or sprite section. Meant for GUI
+     *
+     * @param x      x position
+     * @param y      y position
+     * @param w      width
+     * @param h      height
+     * @param u      sprite local u
+     * @param v      sprite local v
+     * @param uW     sprite section width
+     * @param vH     sprite section height
+     * @param sprite can be grabbed from a material
+     */
+    public static void blitSprite(PoseStack matrixStack, int x, int y, int w, int h,
+                                  float u, float v, int uW, int vH, TextureAtlasSprite sprite) {
+        RenderSystem.setShaderTexture(0, sprite.atlas().location());
+        int width = (int) (sprite.getWidth() / (sprite.getU1() - sprite.getU0()));
+        int height = (int) (sprite.getHeight() / (sprite.getV1() - sprite.getV0()));
+        GuiComponent.blit(matrixStack, x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
     }
 
 

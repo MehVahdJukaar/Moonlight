@@ -4,7 +4,6 @@ import net.mehvahdjukaar.moonlight.api.client.GenericSimpleResourceReloadListene
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
@@ -53,7 +52,8 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
     //TODO: possibly do it for ALL fluids, not only non grayscale ones
     //TODO: call after pack reload
     public static void refresh() {
-        if (Minecraft.getInstance().level == null) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc == null || mc.level == null) return;
         var v = SoftFluidRegistry.getEntries();
         PARTICLE_COLORS.clear();
         for (var entry : v) {
@@ -74,7 +74,6 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
             }
         }
     }
-
 
     //credits to Random832
     @SuppressWarnings("ConstantConditions")

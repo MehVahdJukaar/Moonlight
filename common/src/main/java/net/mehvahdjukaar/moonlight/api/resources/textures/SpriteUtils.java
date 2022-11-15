@@ -42,6 +42,19 @@ public final class SpriteUtils {
                 new RGBColor(image.getPixelRGBA(x, y)).asHCL().withChroma(0).asRGB().toInt()));
     }
 
+    public static RGBColor averageColor(NativeImage image) {
+        //could be faster. whatever
+        // read data
+        Palette p = Palette.fromImage(TextureImage.of(image, null), null, 0);
+
+        if (p.size() == 0) return new RGBColor(-1);
+        DataSet<DataSet.ColorPoint> data = DataSet.fromPalette(p);
+
+        // cluster
+        KMeans.kMeans(data, 1);
+
+        return data.getLastCentroids().get(0).cast().getColor().rgb();
+    }
 
     //TODO: maybe use HCL here
 
@@ -113,6 +126,7 @@ public final class SpriteUtils {
 
     /**
      * Given an image, reduce its color palette using k-means algorithm
+     * Note that this also accounts for color occurrence
      *
      * @param image  original image
      * @param sizeFn target size function. Goes from original size to target size
@@ -180,20 +194,6 @@ public final class SpriteUtils {
         });
     }
 
-
-    @Deprecated(forRemoval = true)
-    @NotNull
-    public static boolean looksLikeTopLogTexture(String s) {
-        s = new ResourceLocation(s).getPath();
-        return s.contains("_top") || s.contains("_end") || s.contains("_up");
-    }
-
-    @Deprecated(forRemoval = true)
-    @NotNull
-    public static boolean looksLikeSideLogTexture(String s) {
-        return !looksLikeTopLogTexture(s);
-    }
-
     @NotNull
     public static final Predicate<String> LOOKS_LIKE_TOP_LOG_TEXTURE = s -> {
         s = new ResourceLocation(s).getPath();
@@ -230,5 +230,6 @@ public final class SpriteUtils {
             throw new RuntimeException("Failed to find image at location " + fullTexturePath);
         }
     }
+
 
 }

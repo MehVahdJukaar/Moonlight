@@ -1,10 +1,11 @@
 package net.mehvahdjukaar.moonlight.core.set;
 
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
+import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.minecraft.resources.ResourceLocation;
 
-public class CompatWoodTypes {
+public class CompatTypes {
 
     public static void init() {
 
@@ -78,6 +79,23 @@ public class CompatWoodTypes {
         quarkAzalea.addChild("leaves", new ResourceLocation("minecraft:azalea_leaves"));
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, quarkAzalea);
+
+
+        //leaves
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "biomesoplenty", "origin", "origin_leaves", "oak"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "biomesoplenty", "flowering_oak", "flowering_oak_leaves", "oak"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "biomesoplenty", "maple", "maple_leaves", "oak"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "biomesoplenty", "orange_autumn", "orange_autumn_leaves", "oak"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "biomesoplenty", "yellow_autumn", "yellow_autumn_leaves", "oak"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "biomesoplenty", "rainbow_birch", "rainbow_birch_leaves", "birch"));
 
     }
 }

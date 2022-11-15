@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
+import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.resources.ResourceLocation;
@@ -67,6 +68,11 @@ public class TextureImage implements AutoCloseable {
     public void toGrayscale(){
         SpriteUtils.grayscaleImage(this.image);
     }
+
+    public RGBColor getAverageColor(){
+        return SpriteUtils.averageColor(this.image);
+    }
+
 
     public int frameWidth() {
         return frameW;
@@ -178,7 +184,7 @@ public class TextureImage implements AutoCloseable {
     }
 
 
-    private ImmutableList<NativeImage> splitFrames() {
+    public ImmutableList<NativeImage> splitFrames() {
         var builder = ImmutableList.<NativeImage>builder();
         if (metadata == null) {
             builder.add(image);

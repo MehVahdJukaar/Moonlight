@@ -152,8 +152,8 @@ public class BlockTypeResTransformer<T extends BlockType> {
     }
 
     private @Nullable ItemLike wfl(T t, String s) {
-        if (t instanceof LeavesType l && l.woodType != null) {
-            var c = l.woodType.getChild(s);
+        if (t instanceof LeavesType l && l.getWoodType() != null) {
+            var c = l.getWoodType().getChild(s);
             return c instanceof ItemLike il ? il : null;
         }
         return null;

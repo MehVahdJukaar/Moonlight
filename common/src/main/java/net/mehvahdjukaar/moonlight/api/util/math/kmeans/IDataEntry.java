@@ -7,10 +7,11 @@ public interface IDataEntry<T> {
 
     IDataEntry<T> average(List<IDataEntry<T>> others);
 
-    public void setClusterNo(int no);
-    public int getClusterNo();
+    void setClusterNo(int no);
 
-     float distTo(IDataEntry<T> a);
+    int getClusterNo();
 
-     T cast();
+    float distTo(IDataEntry<T> a);
+
+    T cast();
 }

@@ -110,7 +110,8 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
         if (resourcePackSupport) {
             this.regenerateDynamicAssets(manager);
         }
-        getLogger().info("Generated runtime {} for pack {} in: {} ms",
+        getLogger().info("Generated runtime {} for pack {} in: {} ms" +
+                        (this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : ""),
                 this.dynamicPack.getPackType(),
                 this.dynamicPack.getName(),
                 watch.elapsed().toMillis());

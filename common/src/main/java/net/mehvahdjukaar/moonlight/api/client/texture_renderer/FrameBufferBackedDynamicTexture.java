@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -53,14 +54,31 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         this(resourceLocation, size, size, textureDrawingFunction);
     }
 
+    @ApiStatus.Internal
     public void initialize() {
         this.initialized = true;
         //this.bind(); // assign gpu texture id
         //register this texture. Call at the right time or stuff will get messed up
         Minecraft.getInstance().getTextureManager().register(resourceLocation, this);
-        bind();
-        if(drawingFunction != null){
-            drawingFunction.accept(this);
+        redraw();
+    }
+
+    /**
+     * Force redraw using provided render function. You can also redraw manually
+     */
+    public void redraw() {
+        if (!RenderSystem.isOnRenderThreadOrInit()) {
+            RenderSystem.recordRenderCall(() -> {
+                bind();
+                if (drawingFunction != null) {
+                    drawingFunction.accept(this);
+                }
+            });
+        } else {
+            bind();
+            if (drawingFunction != null) {
+                drawingFunction.accept(this);
+            }
         }
     }
 
@@ -163,7 +181,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
             this.cpuImage.close();
             this.cpuImage = null;
         } else {
-            Moonlight.LOGGER.warn("Trying to upload disposed texture {}", (int) this.getId());
+            Moonlight.LOGGER.warn("Trying to upload disposed texture {}", this.getId());
         }
     }
 

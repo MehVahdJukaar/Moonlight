@@ -33,6 +33,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -43,7 +44,6 @@ public class ClientPlatformHelperImpl {
 
     public static void registerRenderType(Block block, RenderType type) {
         //from 0.64 we should register render types in out model json
-        //TODO: remove
         ItemBlockRenderTypes.setRenderLayer(block, type);
     }
 
@@ -120,9 +120,13 @@ public class ClientPlatformHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation location) {
-        ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager())
-                .registerReloadListener(listener);
+        Minecraft mc = Minecraft.getInstance();
+        if(mc != null) { // datagens
+            ((ReloadableResourceManager) mc.getResourceManager())
+                    .registerReloadListener(listener);
+        }
     }
 
     public static void addModelLayerRegistration(Consumer<ClientPlatformHelper.ModelLayerEvent> eventListener) {
