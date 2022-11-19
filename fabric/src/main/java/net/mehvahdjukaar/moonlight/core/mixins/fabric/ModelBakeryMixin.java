@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
 
+@Deprecated(forRemoval = true)
 @Mixin(ModelBakery.class)
 public abstract class ModelBakeryMixin {
 

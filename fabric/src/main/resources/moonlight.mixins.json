@@ -10,7 +10,6 @@
     "ItemRendererAccessor",
     "ItemRendererMixin",
     "MenuScreensAccessor",
-    "ModelBakeryMixin",
     "ModelManagerAccessor",
     "SelfCustomBakedModel",
     "SelfCustomItemRendererProvider",

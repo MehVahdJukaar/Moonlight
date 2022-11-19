@@ -18,9 +18,9 @@ public class MoonlightEventsHelperImpl {
 
     @SuppressWarnings("unchecked")
     public static <T extends SimpleEvent> void postEvent(T event, Class<T> eventClass) {
-        var L = LISTENERS.get(eventClass);
-        if (L != null) {
-            ((List<Consumer<T>>) (Object) L).forEach(e -> e.accept(event));
+        var consumers = LISTENERS.get(eventClass);
+        if (consumers != null) {
+            ((List<Consumer<T>>) (Object) consumers).forEach(e -> e.accept(event));
         }
     }
 

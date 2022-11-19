@@ -15,6 +15,7 @@
     "CreativeModeTabMixin",
     "GrindstoneMenuSlotMixin",
     "LevelChunkMixin",
+    "LightningEntityMixin",
     "MapDataMixin",
     "MapExtendingRecipeMixin",
     "MapItemMixin",

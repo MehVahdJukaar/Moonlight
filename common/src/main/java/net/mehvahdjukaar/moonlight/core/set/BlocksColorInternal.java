@@ -2,10 +2,13 @@ package net.mehvahdjukaar.moonlight.core.set;
 
 import com.google.common.base.Stopwatch;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -17,8 +20,8 @@ public class BlocksColorInternal {
     public static final List<DyeColor> VANILLA_COLORS = List.of(Arrays.copyOfRange(DyeColor.values(), 0, 16));
     public static final List<DyeColor> MODDED_COLORS = Arrays.stream(DyeColor.values()).filter(v -> !VANILLA_COLORS.contains(v)).toList();
 
-    private static final Map<String, ColorSet<Block>> BLOCK_COLOR_SETS = new HashMap<>();
-    private static final Map<String, ColorSet<Item>> ITEM_COLOR_SETS = new HashMap<>();
+    private static final Map<String, ColoredSet<Block>> BLOCK_COLOR_SETS = new HashMap<>();
+    private static final Map<String, ColoredSet<Item>> ITEM_COLOR_SETS = new HashMap<>();
 
     private static final Object2ObjectOpenHashMap<Object, DyeColor> BLOCK_TO_COLORS = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectOpenHashMap<Object, String> BLOCK_TO_TYPE = new Object2ObjectOpenHashMap<>();
@@ -38,8 +41,8 @@ public class BlocksColorInternal {
     }
 
     private static <T> void scanRegistry(Map<String, DyeColor> colors, List<String> colorPriority,
-                                         Registry<T> registry, Map<String, ColorSet<T>> colorSetMap) {
-        Map<ResourceLocation, Map<DyeColor, T>> groupedByType = new HashMap<>();
+                                         Registry<T> registry, Map<String, ColoredSet<T>> colorSetMap) {
+        Map<ResourceLocation, EnumMap<DyeColor, T>> groupedByType = new HashMap<>();
         colorPriority.sort(Comparator.comparingInt(String::length));
         Collections.reverse(colorPriority);
         //group by color
@@ -69,8 +72,9 @@ public class BlocksColorInternal {
         for (var j : groupedByType.entrySet()) {
             var map = j.getValue();
             ResourceLocation id = j.getKey();
+            if (id.getNamespace().equals("energeticsheep")) continue;
             if (map.keySet().containsAll(VANILLA_COLORS)) {
-                var set = new ColorSet<>(id, map, registry);
+                var set = new ColoredSet<>(id, map, registry);
                 colorSetMap.put(id.toString(), set);
 
                 for (var v : set.colorsToBlock.entrySet()) {
@@ -107,6 +111,14 @@ public class BlocksColorInternal {
             return set.with(color);
         }
         return null;
+    }
+
+    public static Set<String> getBlockKeys() {
+        return BLOCK_COLOR_SETS.keySet();
+    }
+
+    public static Set<String> getItemKeys() {
+        return ITEM_COLOR_SETS.keySet();
     }
 
     /**
@@ -156,24 +168,47 @@ public class BlocksColorInternal {
     }
 
     @Nullable
-    private static ColorSet<Block> getBlockSet(String key) {
+    private static ColoredSet<Block> getBlockSet(String key) {
         key = new ResourceLocation(key).toString();
         return BLOCK_COLOR_SETS.get(key);
     }
 
     @Nullable
-    private static ColorSet<Item> getItemSet(String key) {
+    private static ColoredSet<Item> getItemSet(String key) {
         key = new ResourceLocation(key).toString();
         return ITEM_COLOR_SETS.get(key);
     }
 
-    private static class ColorSet<T> {
+    @Nullable
+    public static HolderSet<Block> getBlockHolderSet(String key) {
+        var set = getBlockSet(key);
+        if (set != null) {
+            return set.makeHolderSet(Registry.BLOCK);
+        }
+        return null;
+    }
 
+    @Nullable
+    public static HolderSet<Item> getItemHolderSet(String key) {
+        var set = getItemSet(key);
+        if (set != null) {
+            return set.makeHolderSet(Registry.ITEM);
+        }
+        return null;
+    }
+
+    /**
+     * A collection of blocks or items that come in all colors
+     */
+    private static class ColoredSet<T> {
+
+        private final ResourceLocation id;
         private final Map<DyeColor, T> colorsToBlock;
         private final T defaultBlock;
 
-        public ColorSet(ResourceLocation id, Map<DyeColor, T> map, Registry<T> registry) {
+        private ColoredSet(ResourceLocation id, EnumMap<DyeColor, T> map, Registry<T> registry) {
             this.colorsToBlock = map;
+            this.id = id;
 
             //fill default
             this.defaultBlock = registry.getOptional(id).orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
@@ -195,11 +230,37 @@ public class BlocksColorInternal {
         }
 
         /**
+         * Kind of expensive. don't call too often
+         */
+        private HolderSet<T> makeHolderSet(Registry<T> registry) {
+            //standard tag location
+            var v = registry.getTag(TagKey.create(registry.key(),
+                    new ResourceLocation(id.getNamespace(), id.getPath() + "s")));
+            if (v.isEmpty()) {
+                v = registry.getTag(TagKey.create(registry.key(),
+                        new ResourceLocation(PlatformHelper.getPlatform().isForge() ? "forge" : "c", id.getPath() + "s")));
+            }
+            if (v.isPresent()) {
+                var tag = v.get();
+                boolean success = true;
+                for (var t : colorsToBlock.values()) {
+                    if (!tag.contains(registry.getHolderOrThrow(registry.getResourceKey(t).get()))) {
+                        success = false;
+                        break;
+                    }
+                }
+                if (success) return tag;
+            }
+            return HolderSet.direct(t -> registry.getHolderOrThrow(registry.getResourceKey(t).get()),
+                    new ArrayList<>(colorsToBlock.values()));
+        }
+
+        /**
          * Null if no color is available.
          * If null dye is provided will give the default color
          */
         @Nullable
-        public T with(@Nullable DyeColor newColor) {
+        private T with(@Nullable DyeColor newColor) {
             if (newColor != null && !colorsToBlock.containsKey(newColor)) return null;
             return colorsToBlock.getOrDefault(newColor, defaultBlock);
         }

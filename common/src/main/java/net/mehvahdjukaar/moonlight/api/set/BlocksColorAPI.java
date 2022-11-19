@@ -1,11 +1,14 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
+import net.minecraft.core.HolderSet;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
+import java.util.Set;
 
 public class BlocksColorAPI {
 
@@ -57,6 +60,42 @@ public class BlocksColorAPI {
     @Nullable
     public static String getKey(Item item) {
         return BlocksColorInternal.getKey(item);
+    }
+
+    /**
+     * @return all the possible keys which can be used to access the colored block groups
+     */
+    public static Set<String> getBlockKeys(){
+        return BlocksColorInternal.getBlockKeys();
+    }
+
+    /**
+     * @return all the possible keys which can be used to access the colored item groups
+     */
+    public static Set<String> getItemKeys(){
+        return BlocksColorInternal.getItemKeys();
+    }
+
+    /**
+     * This might be expensive so don't call often
+     * Tag only works after world load of course
+     * @param key set key
+     * @return a HolderSet containing oll the values of this colored group. If available a tagged set will be returned (use unwrap().getLeft())
+     */
+    @Nullable
+    public static HolderSet<Block> getBlockHolderSet(String key){
+        return BlocksColorInternal.getBlockHolderSet(key);
+    }
+
+    /**
+     * This might be expensive so don't call often
+     * Tag only works after world load of course
+     * @param key set key
+     * @return a HolderSet containing oll the values of this colored group. If available a tagged set will be returned (use unwrap().getLeft())
+     */
+    @Nullable
+    public static HolderSet<Item> getItemHolderSet(String key){
+        return BlocksColorInternal.getItemHolderSet(key);
     }
 
 }

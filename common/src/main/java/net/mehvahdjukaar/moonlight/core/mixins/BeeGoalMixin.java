@@ -19,7 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public abstract class BeeGoalMixin {
 
 
-    @Shadow @Final
+    @Shadow
+    @Final
     Bee field_20373;
 
     @Inject(method = "tick",
