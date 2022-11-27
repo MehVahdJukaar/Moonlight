@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.set;
 
 import com.google.common.base.Stopwatch;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -210,8 +211,6 @@ public class BlocksColorInternal {
             this.colorsToBlock = map;
             this.id = id;
 
-            //fill default
-            this.defaultBlock = registry.getOptional(id).orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
             //fill optional
             //only supports tinted mod
             colors:
@@ -227,6 +226,20 @@ public class BlocksColorInternal {
                     }
                 }
             }
+
+            //fill default
+            if (id.getNamespace().equals("minecraft") && id.getPath().contains("stained_glass")) {
+                id = new ResourceLocation(id.getPath().replace("stained_", ""));
+            }
+            else if (id.getNamespace().equals("quark")){
+                if(id.getPath().equals("rune")) {
+                    id = new ResourceLocation("quark", "blank_rune");
+                }else if(id.getPath().equals("shard")) {
+                    id = new ResourceLocation("quark", "clear_shard");
+                }
+            }
+            this.defaultBlock = registry.getOptional(id).orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
+
         }
 
         /**

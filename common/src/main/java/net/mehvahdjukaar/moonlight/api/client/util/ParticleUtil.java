@@ -21,16 +21,17 @@ public class ParticleUtil {
 
     public static void spawnParticleOnBlockShape(Level level, BlockPos pos, ParticleOptions particleOptions,
                                                  UniformInt uniformInt, float maxSpeed) {
-        spawnParticleOnBoundingBox(level.getBlockState(pos).getShape(level, pos).bounds(), level, pos,
+        spawnParticleOnBoundingBox(level.getBlockState(pos).getShape(level, pos).bounds().move(pos), level,
                 particleOptions, uniformInt, maxSpeed);
     }
 
-    public static void spawnParticleOnBoundingBox(AABB bb, Level level, BlockPos pos, ParticleOptions particleOptions,
+    public static void spawnParticleOnBoundingBox(AABB bb, Level level, ParticleOptions particleOptions,
                                                   UniformInt uniformInt, float maxSpeed) {
 
         RandomSource random = level.random;
         float offset = 0.1f;
-
+        Vec3 blockCenter = new Vec3(-0.5 + (bb.maxX - bb.minX) / 2f, -0.5 + (bb.maxY - bb.minY) / 2f, -0.5 + (bb.maxZ - bb.minZ) / 2f);
+        bb = bb.move(-blockCenter.x, -blockCenter.y, -blockCenter.z);
         //north
         int i = uniformInt.sample(random);
         for (int j = 0; j < i; ++j) {
@@ -40,7 +41,7 @@ public class ParticleUtil {
                 double dx = maxSpeed * level.random.nextDouble();
                 double dy = maxSpeed * level.random.nextDouble();
                 double dz = 0;
-                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + y, pos.getZ() + bb.minZ - offset, dx, dy, dz);
+                level.addParticle(particleOptions, blockCenter.x + x, blockCenter.y + y, blockCenter.z + bb.minZ - offset, dx, dy, dz);
             }
         }
         //south
@@ -52,7 +53,7 @@ public class ParticleUtil {
                 double dx = maxSpeed * level.random.nextDouble();
                 double dy = maxSpeed * level.random.nextDouble();
                 double dz = 0;
-                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + y, pos.getZ() + bb.maxZ + offset, dx, dy, dz);
+                level.addParticle(particleOptions, blockCenter.x() + x, blockCenter.y() + y, blockCenter.z() + bb.maxZ + offset, dx, dy, dz);
             }
         }
         //west
@@ -64,7 +65,7 @@ public class ParticleUtil {
                 double dx = 0;
                 double dy = maxSpeed * level.random.nextDouble();
                 double dz = maxSpeed * level.random.nextDouble();
-                level.addParticle(particleOptions, pos.getX() + bb.minX - offset, pos.getY() + y, pos.getZ() + z, dx, dy, dz);
+                level.addParticle(particleOptions, blockCenter.x() + bb.minX - offset, blockCenter.y() + y, blockCenter.z() + z, dx, dy, dz);
             }
         }
         //east
@@ -76,7 +77,7 @@ public class ParticleUtil {
                 double dx = 0;
                 double dy = maxSpeed * level.random.nextDouble();
                 double dz = maxSpeed * level.random.nextDouble();
-                level.addParticle(particleOptions, pos.getX() + bb.maxX + offset, pos.getY() + y, pos.getZ() + z, dx, dy, dz);
+                level.addParticle(particleOptions, blockCenter.x() + bb.maxX + offset, blockCenter.y() + y, blockCenter.z() + z, dx, dy, dz);
             }
         }
         //down
@@ -88,7 +89,7 @@ public class ParticleUtil {
                 double dx = maxSpeed * level.random.nextDouble();
                 double dy = 0;
                 double dz = maxSpeed * level.random.nextDouble();
-                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + bb.minY - offset, pos.getZ() + z, dx, dy, dz);
+                level.addParticle(particleOptions, blockCenter.x() + x, blockCenter.y() + bb.minY - offset, blockCenter.z() + z, dx, dy, dz);
             }
         }
         //up
@@ -100,7 +101,7 @@ public class ParticleUtil {
                 double dx = maxSpeed * level.random.nextDouble();
                 double dy = 0;
                 double dz = maxSpeed * level.random.nextDouble();
-                level.addParticle(particleOptions, pos.getX() + x, pos.getY() + bb.maxY + offset, pos.getZ() + z, dx, dy, dz);
+                level.addParticle(particleOptions, blockCenter.x() + x, blockCenter.y() + bb.maxY + offset, blockCenter.z() + z, dx, dy, dz);
             }
         }
     }

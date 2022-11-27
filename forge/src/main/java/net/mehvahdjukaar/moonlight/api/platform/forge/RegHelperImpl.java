@@ -4,8 +4,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
+import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -64,7 +66,7 @@ public class RegHelperImpl {
     }
 
     //this might be accessed on multiple threads
-    public static final Map<ResourceKey<? extends Registry<?>>, Map<String, DeferredRegister<?>>> REGISTRIES = new ConcurrentHashMap<>();
+    private static final Map<ResourceKey<? extends Registry<?>>, Map<String, DeferredRegister<?>>> REGISTRIES = new ConcurrentHashMap<>();
 
     public static <T, E extends T> RegSupplier<E> register(
             ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
@@ -74,11 +76,15 @@ public class RegHelperImpl {
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(
             ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
-        assert supplier != null : "Registry entry Supplier for " + name + " can't be null";
+        if(supplier == null) {
+            throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
+        }
 
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
+            if(PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
             var bus = FMLJavaModLoadingContext.get().getModEventBus();
             r.register(bus);

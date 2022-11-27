@@ -4,21 +4,20 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
-import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.FabricRecipeConditionManager;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -76,11 +75,17 @@ public class RegHelperImpl {
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
-        assert supplier != null : "Registry entry Supplier for " + name + " can't be null";
-        //if (true) return registerAsync(name, supplier, reg);
+        if (supplier == null) {
+            throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
+        }
         String modId = name.getNamespace();
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
-        RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId, c -> new RegistryQueue<>(reg));
+        RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId,
+                c -> {
+                    if(PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+
+                    return new RegistryQueue<>(reg);
+                });
         return registry.add(supplier, name);
     }
 
@@ -137,8 +142,6 @@ public class RegHelperImpl {
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         FabricRecipeConditionManager.registerSimple(id, predicate);
     }
-
-
 
 
 }
