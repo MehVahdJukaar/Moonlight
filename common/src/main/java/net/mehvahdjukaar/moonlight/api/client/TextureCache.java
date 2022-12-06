@@ -22,7 +22,7 @@ public class TextureCache {
      * @param texturePath actual texture location. It is not its absolute path so no :textures/
      */
     public static void registerSpecialTextureForBlock(ItemLike block, String id, ResourceLocation texturePath) {
-        SPECIAL_TEXTURES.computeIfAbsent(block, b -> new HashSet<>()).add(new Pair<>(id, ResType.TEXTURES.getPath(texturePath).toString()));
+        SPECIAL_TEXTURES.computeIfAbsent(block, b -> new HashSet<>()).add(new Pair<>(id, texturePath.toString()));
     }
 
     private static final Map<ItemLike, Set<Pair<String, String>>> SPECIAL_TEXTURES = new IdentityHashMap<>();

@@ -56,22 +56,10 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
             Moonlight.LOGGER.error("Failed to generate recipe for {} in block type {}: Output item {} cannot have empty creative tab, skipping", this.result, destinationMat, newRes);
             return null;
         }
-        boolean atLeastOneChanged = false;
-        Ingredient ing = ingredient;
-        for (var in : ing.getItems()) {
-            Item it = in.getItem();
-            if (it != Items.BARRIER) {
-                ItemLike i = BlockType.changeItemType(it, originalMat, destinationMat);
-                if (i != null) {
-                    atLeastOneChanged = true;
-                    //converts first ingredient it finds
-                    ing = Ingredient.of(i);
-                    break;
-                }
-            }
-        }
+        Ingredient ing = IRecipeTemplate.convertIngredients(originalMat, destinationMat, ingredient);
+
         //if recipe fails
-        if (!atLeastOneChanged) return null;
+        if (ing == null) return null;
 
         SingleItemRecipeBuilder builder = SingleItemRecipeBuilder.stonecutting(ing, newRes);
         builder.group(group);

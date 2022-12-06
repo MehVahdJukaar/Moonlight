@@ -10,7 +10,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 
@@ -61,7 +60,7 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
             throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
                     this.result, originalMat, destinationMat));
         }
-        if(newRes.asItem().getItemCategory() == null){
+        if (newRes.asItem().getItemCategory() == null) {
             Moonlight.LOGGER.error("Failed to generate recipe for {} in block type {}: Output item {} cannot have empty creative tab, skipping", this.result, destinationMat, newRes);
             return null;
         }
@@ -70,19 +69,11 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
         boolean atLeastOneChanged = false;
         for (var e : this.keys.entrySet()) {
             Ingredient ing = e.getValue();
-            for (var in : ing.getItems()) {
-                Item it = in.getItem();
-                if (it != Items.BARRIER) {
-                    ItemLike i = BlockType.changeItemType(it, originalMat, destinationMat);
-                    if (i != null) {
-                        atLeastOneChanged = true;
-                        //converts first ingredient it finds
-                        ing = Ingredient.of(i);
-                        break;
-                    }
-                }
+            var newIng = IRecipeTemplate.convertIngredients(originalMat, destinationMat, ing);
+            if (newIng != null) {
+                atLeastOneChanged = true;
+                builder.define(e.getKey(), newIng);
             }
-            builder.define(e.getKey(), ing);
         }
         //if recipe fails
         if (!atLeastOneChanged) return null;

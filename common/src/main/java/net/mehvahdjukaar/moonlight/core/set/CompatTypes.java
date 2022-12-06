@@ -10,9 +10,10 @@ public class CompatTypes {
     public static void init() {
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus"),
-                new ResourceLocation("domum_ornamentum:green_cactus_extra"),new ResourceLocation("cactus")));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus"),
-                new ResourceLocation("domum_ornamentum:cactus_extra"),new ResourceLocation("cactus")));
+                new ResourceLocation("domum_ornamentum:green_cactus_extra"), new ResourceLocation("cactus")));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus_extra"),
+                new ResourceLocation("domum_ornamentum:cactus_extra"), new ResourceLocation("cactus")));
+
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "darkerdepths", "petrified", "petrified_planks", "petrified_log"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
@@ -26,9 +27,9 @@ public class CompatTypes {
 
         var embur = WoodType.Finder.simple(
                 "byg", "embur", "embur_planks", "embur_pedu");
-        embur.addChild("stripped_log", "stripped_embur_pedu" );
-        embur.addChild("wood", "embur_pedu_top" );
-        embur.addChild("stripped_wood", "stripped_embur_pedu_top" );
+        embur.addChild("stripped_log", "stripped_embur_pedu");
+        embur.addChild("wood", "embur_pedu_top");
+        embur.addChild("stripped_wood", "stripped_embur_pedu_top");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, embur);
 
 
@@ -44,11 +45,20 @@ public class CompatTypes {
         verdant.addChild("stripped_log", "stripped_verdant_stem");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, verdant);
 
+
         var cerulean = WoodType.Finder.simple(
                 "nourished_end", "cerulean", "cerulean_planks", "cerulean_stem_thick");
         cerulean.addChild("stripped_wood", "stripped_cerulean_hyphae");
         cerulean.addChild("stripped_log", "cerulean_stem_stripped");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, cerulean);
+
+        var soulblight = WoodType.Finder.simple(
+                "gardens_of_the_dead", "soulblight", "soulblight_planks", "soulblight_stem");
+        cerulean.addChild("stripped_wood", "stripped_soulblight_hyphae");
+        cerulean.addChild("wood", "soulblight_hyphae");
+        cerulean.addChild("stripped_log", "stripped_soulblight_stem");
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, soulblight);
+
 
         var bamboo = WoodType.Finder.simple(
                 "twigs", "bamboo", "stripped_bamboo_planks", "bundled_bamboo");

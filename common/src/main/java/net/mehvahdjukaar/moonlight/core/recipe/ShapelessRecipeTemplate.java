@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeBuilder.Result> {
 
-
     private final List<Object> conditions = new ArrayList<>();
 
     public final Item result;
@@ -72,19 +71,11 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
 
         boolean atLeastOneChanged = false;
         for (var ing : this.ingredients) {
-            for (var in : ing.getItems()) {
-                Item it = in.getItem();
-                if (it != Items.BARRIER) {
-                    ItemLike i = BlockType.changeItemType(it, originalMat, destinationMat);
-                    if (i != null) {
-                        atLeastOneChanged = true;
-                        //converts first ingredient it finds
-                        ing = Ingredient.of(i);
-                        break;
-                    }
-                }
+            var newIng = IRecipeTemplate.convertIngredients(originalMat, destinationMat, ing);
+            if(newIng != null){
+                atLeastOneChanged = true;
+                builder.requires(newIng);
             }
-            builder.requires(ing);
         }
         //if recipe fails
         if (!atLeastOneChanged) return null;
@@ -101,6 +92,8 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
         }
         return newRecipe.get();
     }
+
+
 
     @Override
     public void addCondition(Object condition) {
