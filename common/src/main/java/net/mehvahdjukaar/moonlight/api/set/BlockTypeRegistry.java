@@ -3,7 +3,9 @@ package net.mehvahdjukaar.moonlight.api.set;
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
@@ -61,7 +63,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     /**
      * Returns an optional block Type based on the given block. Pretty much defines the logic of how a block set is constructed
      */
-    public abstract Optional<T> detectTypeFromBlock(Block block);
+    public abstract Optional<T> detectTypeFromBlock(Block block, ResourceLocation blockId);
 
     public void registerBlockType(T newType) {
         if (frozen) {
@@ -132,7 +134,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
             for (Block b : Registry.BLOCK) {
-                this.detectTypeFromBlock(b).ifPresent(t -> {
+                this.detectTypeFromBlock(b, Utils.getID(b)).ifPresent(t -> {
                     if (!notInclude.contains(t.getId())) this.registerBlockType(t);
                 });
             }

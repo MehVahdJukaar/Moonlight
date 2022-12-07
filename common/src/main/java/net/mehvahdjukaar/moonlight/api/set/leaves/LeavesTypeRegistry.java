@@ -45,8 +45,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     //returns if this block is the base plank block
     @Override
-    public Optional<LeavesType> detectTypeFromBlock(@NotNull Block baseBlock) {
-        ResourceLocation baseRes = Utils.getID(baseBlock);
+    public Optional<LeavesType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseRes) {
         String name = null;
         String path = baseRes.getPath();
         //needs to contain planks in its name

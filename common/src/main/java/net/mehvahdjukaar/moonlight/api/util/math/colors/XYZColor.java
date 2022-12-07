@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
+import net.minecraft.util.Mth;
+
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
@@ -45,7 +47,13 @@ public class XYZColor extends BaseColor<XYZColor> {
     public XYZColor withAlpha(float alpha) {
         return new XYZColor(x(), y(), z(), alpha);
     }
-
+    @Override
+    public XYZColor multiply(XYZColor color, float x, float y, float z, float alpha) {
+        return new XYZColor(Mth.clamp(x*this.x(), 0,1),
+                Mth.clamp(y*this.y(), 0,1),
+                Mth.clamp(z*this.z(), 0,1),
+                Mth.clamp(alpha*this.alpha(), 0,1));
+    }
     @Override
     public RGBColor asRGB() {
         return ColorSpaces.XYZtoRGB(this);

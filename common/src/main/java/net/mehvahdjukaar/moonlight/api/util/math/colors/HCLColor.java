@@ -1,5 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
+import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.mehvahdjukaar.moonlight.core.set.CompatTypes;
+import net.minecraft.util.Mth;
+
 import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
 
@@ -71,6 +75,7 @@ public class HCLColor extends BaseColor<HCLColor> {
         return new HCLColor(averageAngles(hues), cr / size, l / size, a / size);
     }
 
+
     @Override
     public HCLColor mixWith(HCLColor color, float bias) {
         float i = 1 - bias;
@@ -81,6 +86,14 @@ public class HCLColor extends BaseColor<HCLColor> {
         float a = this.alpha() * i + color.alpha() * bias;
 
         return new HCLColor(h, c, b, a);
+    }
+
+    @Override
+    public HCLColor multiply(HCLColor color, float hue, float chroma, float luminance, float alpha) {
+        return new HCLColor(Mth.clamp(hue*this.hue(), 0,1),
+                Mth.clamp(chroma*this.chroma(), 0,1),
+                Mth.clamp(luminance*this.luminance(), 0,1),
+                Mth.clamp(alpha*this.alpha(), 0,1));
     }
 
     @Override

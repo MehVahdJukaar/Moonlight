@@ -52,6 +52,8 @@ public abstract class BaseColor<T extends BaseColor<T>> {
         return color;
     }
 
+    public abstract T multiply(T color, float v0, float v1, float v2, float v3);
+
     /**
      * Utility to mixe multiple colors at once in equal parts
      */
