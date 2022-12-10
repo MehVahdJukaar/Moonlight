@@ -47,7 +47,7 @@ public class RenderUtilImpl {
                     if (stack.is(Items.COMPASS) && stack.hasFoil()) {
                         poseStack.pushPose();
                         PoseStack.Pose pose = poseStack.last();
-                        pose.pose().multiply(0.5F);
+                        pose.pose().scale(0.5F);
 
                         vertexconsumer = ItemRenderer.getCompassFoilBufferDirect(buffer, renderType, pose);
 

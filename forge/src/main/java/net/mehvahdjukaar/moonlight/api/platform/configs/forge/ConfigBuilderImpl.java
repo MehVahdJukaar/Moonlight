@@ -92,13 +92,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public <T> Supplier<List<? extends T>> defineForgeList(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
-        maybeAddTranslationString(name);
-        var value = builder.defineList(name, defaultValue, predicate);
-        return (Supplier<List<? extends T>>) value;
-    }
-
-    @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
         maybeAddTranslationString(name);
         return builder.defineEnum(name, defaultValue);

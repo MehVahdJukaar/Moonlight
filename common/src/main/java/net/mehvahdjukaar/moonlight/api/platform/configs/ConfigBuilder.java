@@ -84,9 +84,6 @@ public abstract class ConfigBuilder {
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
-    @Deprecated(forRemoval = true)
-    public abstract  <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator);
-
     public Component description(String name) {
         return Component.translatable(translationKey(name));
     }

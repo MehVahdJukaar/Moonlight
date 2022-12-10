@@ -18,6 +18,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
+import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPresets;
 import org.apache.logging.log4j.LogManager;
@@ -156,7 +157,7 @@ public abstract class DynamicResourcePack implements PackResources {
             return this.resources.keySet().stream()
                     .filter(r -> (r.getNamespace().equals(namespace) && r.getPath().startsWith(id)))
                     .filter(filter)
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return NO_RESOURCES;
     }

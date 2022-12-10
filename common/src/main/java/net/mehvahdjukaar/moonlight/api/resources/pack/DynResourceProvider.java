@@ -113,7 +113,7 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
         getLogger().info("Generated runtime {} for pack {} in: {} ms" +
                         (this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : ""),
                 this.dynamicPack.getPackType(),
-                this.dynamicPack.getName(),
+                this.dynamicPack.packId(),
                 watch.elapsed().toMillis());
     }
 
@@ -126,7 +126,7 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
 
     public boolean alreadyHasAssetAtLocation(ResourceManager manager, ResourceLocation res) {
         var resource = manager.getResource(res);
-        return resource.filter(value -> !value.sourcePackId().equals(this.dynamicPack.getName())).isPresent();
+        return resource.filter(value -> !value.sourcePackId().equals(this.dynamicPack.packId())).isPresent();
     }
 
     /**

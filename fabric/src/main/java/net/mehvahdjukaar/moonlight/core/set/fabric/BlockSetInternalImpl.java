@@ -11,7 +11,7 @@ import java.util.*;
 
 public class BlockSetInternalImpl {
 
-    public static boolean hasFilledBlockSets = false;
+    private static boolean hasFilledBlockSets = false;
 
     public static boolean hasFilledBlockSets() {
         return hasFilledBlockSets;
@@ -47,6 +47,7 @@ public class BlockSetInternalImpl {
                 QUEUES.remove(r);
             }
         }
+        hasFilledBlockSets =true;
     }
 
     private static class LateRegQueue<T extends BlockType, E> {

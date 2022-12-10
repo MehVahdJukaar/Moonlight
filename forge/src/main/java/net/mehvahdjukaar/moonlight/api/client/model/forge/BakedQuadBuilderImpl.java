@@ -1,17 +1,16 @@
 package net.mehvahdjukaar.moonlight.api.client.model.forge;
 
 import com.google.common.base.Preconditions;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraftforge.client.model.IQuadTransformer;
 import net.minecraftforge.client.model.QuadTransformers;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 

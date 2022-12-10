@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.MappedRegistry;
@@ -33,7 +34,6 @@ public class SoftFluidRegistryImpl {
     public static final Supplier<IForgeRegistry<SoftFluid>> SOFT_FLUIDS = DEFERRED_REGISTER.makeRegistry(() ->
             new RegistryBuilder<SoftFluid>()
                     .setDefaultKey(Moonlight.res("empty"))
-                    .dataPackRegistry(SoftFluid.CODEC, SoftFluid.CODEC)
                     .onCreate(SoftFluidRegistryImpl::onCreate)
                     .onClear(SoftFluidRegistryImpl::onClear)
                     .allowModification()
@@ -41,7 +41,7 @@ public class SoftFluidRegistryImpl {
 
     //do not reference. will cause problem on client
     private static final RegistryObject<SoftFluid> EMPTY = DEFERRED_REGISTER.register(SoftFluidRegistry.EMPTY_ID.getPath(),
-            () ->  new SoftFluid.Builder(new ResourceLocation(""),
+            () -> new SoftFluid.Builder(new ResourceLocation(""),
                     new ResourceLocation("")).build());
 
     public static void init() {
@@ -97,5 +97,8 @@ public class SoftFluidRegistryImpl {
         reg.freeze();
     }
 
-
+    @EventCalled
+    public static void registerDataPackRegistry(DataPackRegistryEvent.NewRegistry event) {
+        event.dataPackRegistry(KEY, SoftFluid.CODEC, SoftFluid.CODEC);
+    }
 }

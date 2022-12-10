@@ -18,8 +18,10 @@ import net.mehvahdjukaar.moonlight.fabric.FabricRecipeConditionManager;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -43,14 +45,14 @@ import java.util.function.Supplier;
 
 public class RegHelperImpl {
 
-    public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
+    public static final Map<ResourceKey<? extends Registry<?>>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
 
     public static final List<Registry<?>> REG_PRIORITY = List.of(
-            Registry.SOUND_EVENT, Registry.BLOCK, Registry.FLUID, Registry.PARTICLE_TYPE,
-            Registry.ENTITY_TYPE, Registry.ITEM,
-            Registry.BLOCK_ENTITY_TYPE, Registry.PLACEMENT_MODIFIERS, Registry.STRUCTURE_TYPES,
-            Registry.STRUCTURE_PIECE, Registry.FEATURE, BuiltinRegistries.CONFIGURED_FEATURE,
-            BuiltinRegistries.PLACED_FEATURE
+            Registries.SOUND_EVENT, Registries.BLOCK, Registries.FLUID, Registries.PARTICLE_TYPE,
+            Registries.ENTITY_TYPE, Registries.ITEM,
+            Registries.BLOCK_ENTITY_TYPE, Registries.PLACEMENT_MODIFIERS, Registries.STRUCTURE_TYPES,
+            Registries.STRUCTURE_PIECE, Registries.FEATURE, Registries.CONFIGURED_FEATURE,
+            Registries.PLACED_FEATURE
     );
 
     //order is important here
@@ -63,7 +65,7 @@ public class RegHelperImpl {
     public static void registerEntries() {
         for (var m : REGISTRIES.entrySet()) {
             m.getValue().values().forEach(RegistryQueue::initializeEntries);
-            if (m.getKey() == Registry.BLOCK) {
+            if (m.getKey() == Registries.BLOCK) {
                 //dynamic block registration after all blocks
                 BlockSetInternalImpl.registerEntries();
             }
@@ -74,7 +76,7 @@ public class RegHelperImpl {
 
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier,ResourceKey<? extends Registry<T>> reg) {
         if (supplier == null) {
             throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
         }

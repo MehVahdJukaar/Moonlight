@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 

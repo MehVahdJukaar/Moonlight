@@ -1,19 +1,20 @@
 package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
 import com.google.common.base.Preconditions;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector3f;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
@@ -73,7 +74,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     public BakedQuadBuilder normal(float x, float y, float z) {
         if (transform != null) {
             Vector3f normal = new Vector3f(x, y, z);
-            RotHlpr.rotateVertexBy(normal, Vector3f.ZERO, transform);
+            RotHlpr.rotateVertexBy(normal, new Vector3f(), transform);
             inner.normal(vertexIndex, normal.x(), normal.y(), normal.z());
             return this;
         }

@@ -46,7 +46,7 @@ public class BlockSetInternalImpl {
     //aaaa
     public static  <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
-        if(registry == Registry.BLOCK) {
+        if(registry == REgisy.BLOCK) {
             addDynamicBlockRegistration((BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
         }else if(registry == Registry.FLUID){
             throw new IllegalArgumentException("Fluid registry not supported here");

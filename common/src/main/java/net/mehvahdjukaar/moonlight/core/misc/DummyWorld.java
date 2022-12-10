@@ -198,7 +198,8 @@ public class DummyWorld extends Level {
 
         @Override
         public ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
-            return new EmptyLevelChunk(this.world, new ChunkPos(x, z), BuiltinRegistries.BIOME.getHolderOrThrow(Biomes.FOREST));
+            return new EmptyLevelChunk(this.world, new ChunkPos(x, z), Utils.hackyGetRegistryAccess().registryOrThrow(Registries.BIOME)
+                    .getHolderOrThrow(Biomes.FOREST));
         }
 
         @Override

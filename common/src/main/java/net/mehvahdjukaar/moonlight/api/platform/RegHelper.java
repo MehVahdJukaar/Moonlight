@@ -65,12 +65,6 @@ import java.util.function.*;
  */
 public class RegHelper {
 
-    @Deprecated(forRemoval = true)
-    @ExpectPlatform
-    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
-        throw new AssertionError();
-    }
-
     @ExpectPlatform
     public static <T, E extends T> RegSupplier<E> register(
             ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
@@ -110,11 +104,14 @@ public class RegHelper {
 
     public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<PlacedFeature> registerPlacedFeature(
             ResourceLocation name, RegSupplier<ConfiguredFeature<FC, F>> feature, Supplier<List<PlacementModifier>> modifiers) {
-        return registerPlacedFeature(name, () -> new PlacedFeature(Holder.hackyErase(feature.getHolder()), modifiers.get()));
+        return registerPlacedFeature(name, () -> new PlacedFeature(hackyErase(feature.getHolder()), modifiers.get()));
+    }
+    static <T> Holder<T> hackyErase(Holder<? extends T> holder) {
+        return (Holder<T>) holder;
     }
 
     public static RegSupplier<PlacedFeature> registerPlacedFeature(ResourceLocation name, Supplier<PlacedFeature> featureSupplier) {
-        return register(name, featureSupplier, BuiltinRegistries.PLACED_FEATURE);
+        return register(name, featureSupplier, Registries.PLACED_FEATURE);
     }
 
     public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<ConfiguredFeature<FC, F>> registerConfiguredFeature(
@@ -124,7 +121,7 @@ public class RegHelper {
 
     public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<ConfiguredFeature<FC, F>> registerConfiguredFeature(
             ResourceLocation name, Supplier<ConfiguredFeature<FC, F>> featureSupplier) {
-        return register(name, featureSupplier, BuiltinRegistries.CONFIGURED_FEATURE);
+        return register(name, featureSupplier, Registries.CONFIGURED_FEATURE);
     }
 
     public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> sound) {
