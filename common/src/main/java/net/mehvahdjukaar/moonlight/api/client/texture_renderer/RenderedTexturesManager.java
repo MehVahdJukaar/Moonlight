@@ -8,7 +8,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
@@ -21,12 +20,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -79,12 +75,6 @@ public class RenderedTexturesManager {
             RenderSystem.recordRenderCall(texture::initialize);
         }
         return texture;
-    }
-
-
-    @Deprecated(forRemoval = true)
-    public static FrameBufferBackedDynamicTexture getFlatItemStackTexture(ResourceLocation res, ItemStack stack, int size) {
-        return requestFlatItemStackTexture(res, stack, size);
     }
 
     public static FrameBufferBackedDynamicTexture requestFlatItemStackTexture(ResourceLocation res, ItemStack stack, int size) {

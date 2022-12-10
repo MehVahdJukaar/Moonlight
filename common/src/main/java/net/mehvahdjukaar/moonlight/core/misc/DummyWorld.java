@@ -1,16 +1,19 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.*;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.profiling.InactiveProfiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -24,11 +27,13 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
@@ -36,6 +41,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 public class DummyWorld extends Level {
 
@@ -46,10 +52,11 @@ public class DummyWorld extends Level {
 
     private DummyWorld() {
         super(new ClientLevel.ClientLevelData(Difficulty.NORMAL, false, false),
-                ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("dummy")),
-                RegistryAccess.BUILTIN.get().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
+                ResourceKey.create(Registries.DIMENSION, new ResourceLocation("dummy")),
+                Utils.hackyGetRegistryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
                 () -> InactiveProfiler.INSTANCE, true, false, 0, 0);
     }
+
 
     @Override
     public Scoreboard getScoreboard() {
@@ -71,13 +78,19 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public void playSeededSound(@Nullable Player p_220363_, double p_220364_, double p_220365_, double p_220366_, SoundEvent p_220367_, SoundSource p_220368_, float p_220369_, float p_220370_, long p_220371_) {
+    public void playSeededSound(@Nullable Player player, double d, double e, double f, Holder<SoundEvent> holder, SoundSource soundSource, float g, float h, long l) {
+
+    }
+
+    @Override
+    public void playSeededSound(@Nullable Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float p_220369_, float p_220370_, long p_220371_) {
         throw new IllegalStateException("not implemented");
     }
 
     @Override
-    public void playSeededSound(@Nullable Player p_220372_, Entity p_220373_, SoundEvent p_220374_, SoundSource p_220375_, float p_220376_, float p_220377_, long p_220378_) {
+    public void playSeededSound(@Nullable Player player, Entity entity, Holder<SoundEvent> holder, SoundSource soundSource, float f, float g, long l) {
         throw new IllegalStateException("not implemented");
+
     }
 
     @Override
@@ -166,7 +179,12 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public Holder<Biome> getUncachedNoiseBiome(int p_204159_, int p_204160_, int p_204161_) {
+    public FeatureFlagSet enabledFeatures() {
+        return null;
+    }
+
+    @Override
+    public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
         throw new IllegalStateException("not implemented");
     }
 

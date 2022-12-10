@@ -2,15 +2,13 @@ package net.mehvahdjukaar.moonlight.api.client.util;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
-import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
-import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Rotation;
+import org.joml.Matrix3f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +48,7 @@ public class VertexUtil {
             float originalY = Float.intBitsToFloat(v[i * formatLength + 1]) - 0.5f;
             float originalZ = Float.intBitsToFloat(v[i * formatLength + 2]) - 0.5f;
             Vector3f vector3f = new Vector3f(originalX, originalY, originalZ);
-            vector3f.transform(transform);
+            vector3f.mul(transform);
             v[i * formatLength] = Float.floatToIntBits(vector3f.x() + 0.5f);
             v[i * formatLength + 1] = Float.floatToIntBits(vector3f.y() + 0.5f);
             v[i * formatLength + 2] = Float.floatToIntBits(vector3f.z() + 0.5f);
@@ -59,7 +57,7 @@ public class VertexUtil {
 
     public static void transformVertices(int[] v, PoseStack stack, TextureAtlasSprite sprite) {
         Vector4f vector4f = new Vector4f(0, 0, 0, 1.0F);
-        vector4f.transform(stack.last().pose());
+        vector4f.mul(stack.last().pose());
         moveVertices(v, vector4f.x(), vector4f.y(), vector4f.z());
     }
 

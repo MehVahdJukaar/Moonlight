@@ -50,12 +50,13 @@ public class LinkButton extends Button {
             }
         };
         return new LinkButton(texture, textureW, textureH, iconW, iconH, x, y, uInd * iconW, vInd * iconH,
-                iconW + 6, iconH + 6, CommonComponents.EMPTY, onPress, onTooltip);
+                iconW + 6, iconH + 6, CommonComponents.EMPTY, onPress);
     }
 
+    //TODO: use builder
     public LinkButton(ResourceLocation texture, int textureW, int textureH, int iconW, int iconH,
-                      int x, int y, int u, int v, int width, int height, Component label, OnPress onPress, OnTooltip onTooltip) {
-        super(x, y, width, height, CommonComponents.EMPTY, onPress, onTooltip);
+                      int x, int y, int u, int v, int width, int height, Component label, OnPress onPress) {
+        super(x, y, width, height, CommonComponents.EMPTY, onPress, (c) -> Component.empty());
         this.label = label;
         this.u = u;
         this.v = v;
@@ -78,11 +79,11 @@ public class LinkButton extends Button {
         RenderSystem.defaultBlendFunc();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         int contentWidth = iconW + mc.font.width(this.label);
-        int iconX = (int) (this.x + Math.ceil((this.width - contentWidth) / 2f));
-        int iconY = (int) (this.y + Math.ceil((this.width - iconH) / 2f));
+        int iconX = (int) (this.getX() + Math.ceil((this.width - contentWidth) / 2f));
+        int iconY = (int) (this.getY() + Math.ceil((this.width - iconH) / 2f));
         float brightness = this.active ? 1.0F : 0.5F;
         RenderSystem.setShaderColor(brightness, brightness, brightness, this.alpha);
-        blit(poseStack, iconX, iconY, this.getBlitOffset(), (float) this.u, (float) this.v, iconW, iconW, textureH, textureW);
+        blit(poseStack, iconX, iconY, this.getBlitOffset(), this.u, this.v, iconW, iconW, textureH, textureW);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
         int textColor = this.getFGColor() | Mth.ceil(this.alpha * 255.0F) << 24;
         drawString(poseStack, mc.font, this.label, iconX + 14, iconY + 1, textColor);

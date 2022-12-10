@@ -17,6 +17,9 @@ import net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.resources.IoSupplier;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPresets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -89,13 +92,13 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     @Override
-    public String getName() {
+    public String packId() {
         return title.getString();
     }
 
     @Override
     public String toString() {
-        return getName();
+        return packId();
     }
 
     /**
@@ -105,7 +108,7 @@ public abstract class DynamicResourcePack implements PackResources {
 
         PlatformHelper.registerResourcePack(this.packType, () ->
                 new Pack(
-                        this.getName(),    // id
+                        this.packId(),    // id
                         true,    // required -- this MAY need to be true for the pack to be enabled by default
                         () -> this, // pack supplier
                         this.getTitle(), // title
@@ -159,13 +162,13 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     @Override
-    public InputStream getResource(PackType type, ResourceLocation id) throws IOException {
+    public IoSupplier<InputStream> getResource(PackType type, ResourceLocation id) {
         if (type != this.packType) {
             throw new IOException(String.format("Tried to access wrong type of resource on %s.", this.resourcePackName));
         }
         if (this.resources.containsKey(id)) {
             try {
-                return new ByteArrayInputStream(this.resources.get(id));
+                return ()->new ByteArrayInputStream(this.resources.get(id));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -212,7 +215,6 @@ public abstract class DynamicResourcePack implements PackResources {
 
     private void addJson(ResourceLocation path, JsonElement json) {
         try {
-            //json.toString().getBytes();
             this.addBytes(path, RPUtils.serializeJson(json).getBytes());
         } catch (IOException e) {
             LOGGER.error("Failed to write JSON {} to resource pack {}.", path, this.resourcePackName, e);
@@ -230,56 +232,6 @@ public abstract class DynamicResourcePack implements PackResources {
 
     public PackType getPackType() {
         return packType;
-    }
-
-    //TODO: move to RP utils and merge with BlockResTypeTransform
-
-    /**
-     * This is a handy method for dynamic resource pack since it allows to specify the name of an existing resource
-     * that will then be copied and modified replacing a certain keyword in it with another.
-     * This is useful when adding new woodtypes as one can simply manually add a default wood json and provide the method with the
-     * default woodtype name and the target name
-     * The target location will the one of this pack while its path will be the original one modified following the same principle as the json itself
-     *
-     * @param resource    target resource that will be copied, modified and saved back
-     * @param keyword     keyword to replace
-     * @param replaceWith word to replace the keyword with
-     */
-    @Deprecated(forRemoval = true)
-    public void addSimilarJsonResource(StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException {
-        addSimilarJsonResource(resource, s -> s.replace(keyword, replaceWith));
-    }
-
-    @Deprecated(forRemoval = true)
-    public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform) throws NoSuchElementException {
-        addSimilarJsonResource(resource, textTransform, textTransform);
-    }
-
-    @Deprecated(forRemoval = true)
-    public void addSimilarJsonResource(StaticResource resource, Function<String, String> textTransform, Function<String, String> pathTransform) throws NoSuchElementException {
-
-
-        ResourceLocation fullPath = resource.location;
-
-        //calculates new path
-        StringBuilder builder = new StringBuilder();
-        String[] partial = fullPath.getPath().split("/");
-        for (int i = 0; i < partial.length; i++) {
-            if (i != 0) builder.append("/");
-            if (i == partial.length - 1) {
-                builder.append(pathTransform.apply(partial[i]));
-            } else builder.append(partial[i]);
-        }
-        //adds modified under my namespace
-        ResourceLocation newRes = new ResourceLocation(resourcePackName.getNamespace(), builder.toString());
-
-
-        String fullText = new String(resource.data, StandardCharsets.UTF_8);
-
-
-        fullText = textTransform.apply(fullText);
-
-        this.addBytes(newRes, fullText.getBytes());
     }
 
 }

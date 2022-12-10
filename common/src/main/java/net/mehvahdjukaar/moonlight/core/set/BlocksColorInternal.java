@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
@@ -35,8 +36,8 @@ public class BlocksColorInternal {
         VANILLA_COLORS.forEach(d -> colors.put(d.getName(), d));
         List<String> colorPriority = new ArrayList<>(colors.keySet().stream().toList());
 
-        scanRegistry(colors, colorPriority, Registry.BLOCK, BLOCK_COLOR_SETS);
-        scanRegistry(colors, colorPriority, Registry.ITEM, ITEM_COLOR_SETS);
+        scanRegistry(colors, colorPriority, BuiltInRegistries.BLOCK, BLOCK_COLOR_SETS);
+        scanRegistry(colors, colorPriority, BuiltInRegistries.ITEM, ITEM_COLOR_SETS);
 
         Moonlight.LOGGER.info("Initialized color sets in {}ms", sw.elapsed().toMillis());
     }
@@ -184,7 +185,7 @@ public class BlocksColorInternal {
     public static HolderSet<Block> getBlockHolderSet(String key) {
         var set = getBlockSet(key);
         if (set != null) {
-            return set.makeHolderSet(Registry.BLOCK);
+            return set.makeHolderSet(BuiltInRegistries.BLOCK);
         }
         return null;
     }
@@ -193,7 +194,7 @@ public class BlocksColorInternal {
     public static HolderSet<Item> getItemHolderSet(String key) {
         var set = getItemSet(key);
         if (set != null) {
-            return set.makeHolderSet(Registry.ITEM);
+            return set.makeHolderSet(BuiltInRegistries.ITEM);
         }
         return null;
     }

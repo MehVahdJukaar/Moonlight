@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.ItemModelGenerator;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -53,6 +54,8 @@ public class RenderUtil {
         renderGuiItemRelative(stack, x, y, renderer, movement, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
     }
 
+     static final ModelResourceLocation TRIDENT_MODEL = ModelResourceLocation.vanilla("trident", "inventory");
+     static final ModelResourceLocation SPYGLASS_MODEL = ModelResourceLocation.vanilla("spyglass", "inventory");
 
     //im not even using this on fabric...
     public static void renderGuiItemRelative(ItemStack stack, int x, int y, ItemRenderer renderer,
@@ -90,9 +93,9 @@ public class RenderUtil {
         matrixStack.pushPose();
 
         if (stack.is(Items.TRIDENT)) {
-            model = renderer.getItemModelShaper().getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
+            model = renderer.getItemModelShaper().getModelManager().getModel(TRIDENT_MODEL);
         } else if (stack.is(Items.SPYGLASS)) {
-            model = renderer.getItemModelShaper().getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass#inventory"));
+            model = renderer.getItemModelShaper().getModelManager().getModel(SPYGLASS_MODEL);
         }
 
 
@@ -145,9 +148,10 @@ public class RenderUtil {
      */
     public static void blitSprite(PoseStack matrixStack, int x, int y, int w, int h,
                                   float u, float v, int uW, int vH, TextureAtlasSprite sprite) {
-        RenderSystem.setShaderTexture(0, sprite.atlas().location());
-        int width = (int) (sprite.getWidth() / (sprite.getU1() - sprite.getU0()));
-        int height = (int) (sprite.getHeight() / (sprite.getV1() - sprite.getV0()));
+        RenderSystem.setShaderTexture(0, sprite.atlasLocation());
+        var c = sprite.contents();
+        int width = (int) (c.width() / (sprite.getU1() - sprite.getU0()));
+        int height = (int) (c.height() / (sprite.getV1() - sprite.getV0()));
         GuiComponent.blit(matrixStack, x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
     }
 

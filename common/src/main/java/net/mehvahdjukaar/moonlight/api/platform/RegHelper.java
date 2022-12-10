@@ -11,8 +11,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
@@ -56,6 +57,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.*;
 
 /**
@@ -63,8 +65,15 @@ import java.util.function.*;
  */
 public class RegHelper {
 
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static <T, E extends T> RegSupplier<E> register(
+            ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
         throw new AssertionError();
     }
 
@@ -77,26 +86,26 @@ public class RegHelper {
      * Registers stuff immediately on fabric. Normal behavior for forge
      */
     @ExpectPlatform
-    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
         throw new AssertionError();
     }
 
     public static <T extends Block> RegSupplier<T> registerBlock(ResourceLocation name, Supplier<T> block) {
-        return register(name, block, Registry.BLOCK);
+        return register(name, block, Registries.BLOCK);
     }
 
     public static <T extends Item> RegSupplier<T> registerItem(ResourceLocation name, Supplier<T> item) {
-        return register(name, item, Registry.ITEM);
+        return register(name, item, Registries.ITEM);
     }
 
     public static <T extends Feature<?>> RegSupplier<T> registerFeature(ResourceLocation name, Supplier<T> feature) {
-        return register(name, feature, Registry.FEATURE);
+        return register(name, feature, Registries.FEATURE);
     }
 
     public static <T extends StructureType<?>> RegSupplier<T> registerStructure(ResourceLocation name, Supplier<T> feature) {
         //TODO: this causes issues on fabric and its very random as might be on only with some random unrelated mods. best to lave it like this
         // return register(name, feature, Registry.STRUCTURE_TYPES);
-        return registerAsync(name, feature, Registry.STRUCTURE_TYPES);
+        return registerAsync(name, feature, Registries.STRUCTURE_TYPE);
     }
 
     public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<PlacedFeature> registerPlacedFeature(
@@ -119,11 +128,11 @@ public class RegHelper {
     }
 
     public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> sound) {
-        return register(name, sound, Registry.SOUND_EVENT);
+        return register(name, sound, Registries.SOUND_EVENT);
     }
 
     public static <T extends PaintingVariant> RegSupplier<T> registerPainting(ResourceLocation name, Supplier<T> painting) {
-        return register(name, painting, Registry.PAINTING_VARIANT);
+        return register(name, painting, Registries.PAINTING_VARIANT);
     }
 
     @ExpectPlatform
@@ -134,39 +143,39 @@ public class RegHelper {
     }
 
     public static <T extends MobEffect> RegSupplier<T> registerEffect(ResourceLocation name, Supplier<T> effect) {
-        return register(name, effect, Registry.MOB_EFFECT);
+        return register(name, effect, Registries.MOB_EFFECT);
     }
 
     public static <T extends Enchantment> RegSupplier<T> registerEnchantment(ResourceLocation name, Supplier<T> enchantment) {
-        return register(name, enchantment, Registry.ENCHANTMENT);
+        return register(name, enchantment, Registries.ENCHANTMENT);
     }
 
     public static <T extends SensorType<? extends Sensor<?>>> RegSupplier<T> registerSensor(ResourceLocation name, Supplier<T> sensorType) {
-        return register(name, sensorType, Registry.SENSOR_TYPE);
+        return register(name, sensorType, Registries.SENSOR_TYPE);
     }
 
     public static <T extends Activity> RegSupplier<T> registerActivity(ResourceLocation name, Supplier<T> activity) {
-        return register(name, activity, Registry.ACTIVITY);
+        return register(name, activity, Registries.ACTIVITY);
     }
 
     public static <T extends Schedule> RegSupplier<T> registerSchedule(ResourceLocation name, Supplier<T> schedule) {
-        return register(name, schedule, Registry.SCHEDULE);
+        return register(name, schedule, Registries.SCHEDULE);
     }
 
     public static <T extends MemoryModuleType<?>> RegSupplier<T> registerMemoryModule(ResourceLocation name, Supplier<T> memory) {
-        return register(name, memory, Registry.MEMORY_MODULE_TYPE);
+        return register(name, memory, Registries.MEMORY_MODULE_TYPE);
     }
 
     public static <T extends RecipeSerializer<?>> RegSupplier<T> registerRecipeSerializer(ResourceLocation name, Supplier<T> recipe) {
-        return register(name, recipe, Registry.RECIPE_SERIALIZER);
+        return register(name, recipe, Registries.RECIPE_SERIALIZER);
     }
 
     public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(ResourceLocation name, Supplier<T> blockEntity) {
-        return register(name, blockEntity, Registry.BLOCK_ENTITY_TYPE);
+        return register(name, blockEntity, Registries.BLOCK_ENTITY_TYPE);
     }
 
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
-        return register(name, PlatformHelper::newParticle, Registry.PARTICLE_TYPE);
+        return register(name, PlatformHelper::newParticle, Registries.PARTICLE_TYPE);
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
@@ -189,7 +198,7 @@ public class RegHelper {
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
-        return register(name, type, Registry.ENTITY_TYPE);
+        return register(name, type, Registries.ENTITY_TYPE);
     }
 
     public static void registerCompostable(ItemLike name, float chance) {
@@ -257,8 +266,8 @@ public class RegHelper {
         }
     }
 
-    public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
-                                                                             Block parentBlock, boolean isHidden) {
+    public static Map<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
+                                                                         Block parentBlock, boolean isHidden) {
         return registerFullBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock), isHidden);
     }
 
@@ -267,7 +276,7 @@ public class RegHelper {
      *
      * @return registry object map
      */
-    public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(
+    public static Map<VariantType, Supplier<Block>> registerFullBlockSet(
             ResourceLocation baseName, BlockBehaviour.Properties properties, boolean isHidden) {
 
         EnumMap<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);

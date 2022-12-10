@@ -9,6 +9,8 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -545,7 +547,7 @@ public class SoftFluid {
             FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
             Codec.STRING.listOf().optionalFieldOf("preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
             FluidContainerList.Category.CODEC.listOf().optionalFieldOf("containers").forGetter(f -> f.getContainerList().encodeList()),
-            Registry.FLUID.byNameCodec().listOf().optionalFieldOf("equivalent_fluids")
+            BuiltInRegistries.FLUID.byNameCodec().listOf().optionalFieldOf("equivalent_fluids")
                     .forGetter(getHackyOptional(s -> s.getEquivalentFluids().stream().toList())),
             ResourceLocation.CODEC.optionalFieldOf("use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
     ).apply(instance, SoftFluid::create));

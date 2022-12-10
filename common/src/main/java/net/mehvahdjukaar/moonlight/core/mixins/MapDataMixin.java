@@ -37,15 +37,6 @@ import java.util.*;
 @Mixin(MapItemSavedData.class)
 public abstract class MapDataMixin extends SavedData implements ExpandedMapData {
 
-
-    @Final
-    @Shadow
-    public int x;
-
-    @Final
-    @Shadow
-    public int z;
-
     @Final
     @Shadow
     public byte scale;
@@ -66,6 +57,8 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Final
     private Map<String, MapBanner> bannerMarkers;
 
+    @Shadow @Final public int centerX;
+    @Shadow @Final public int centerZ;
     //new decorations (stuff that gets rendered)
     @Unique
     public Map<String, CustomMapDecoration> customDecorations = Maps.newLinkedHashMap();
@@ -100,7 +93,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Override
     public <D extends CustomMapDecoration> void addCustomDecoration(MapBlockMarker<D> marker) {
-        D decoration = marker.createDecorationFromMarker(scale, x, z, dimension, locked);
+        D decoration = marker.createDecorationFromMarker(scale,  centerX, centerZ, dimension, locked);
         if (decoration != null) {
             this.customDecorations.put(marker.getMarkerId(), decoration);
         }
@@ -141,8 +134,8 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         double d0 =  pos.getX() + 0.5D;
         double d1 =  pos.getZ() + 0.5D;
         int i = 1 << this.scale;
-        double d2 = (d0 -  this.x) /  i;
-        double d3 = (d1 -  this.z) /  i;
+        double d2 = (d0 -  this.centerX) /  i;
+        double d3 = (d1 -  this.centerZ) /  i;
         if (d2 >= -63.0D && d3 >= -63.0D && d2 <= 63.0D && d3 <= 63.0D) {
             List<MapBlockMarker<?>> markers = MapDecorationRegistry.getMarkersFromWorld(world, pos);
 

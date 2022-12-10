@@ -12,6 +12,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -95,7 +97,7 @@ public class RegHelperImpl {
     }
 
     public static <T, E extends
-            T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+            T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
         return register(name, supplier, reg);
     }
 
@@ -111,14 +113,14 @@ public class RegHelperImpl {
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
-        return register(name, () -> IForgeMenuType.create(containerFactory::apply), Registry.MENU);
+        return register(name, () -> IForgeMenuType.create(containerFactory::apply), Registries.MENU);
     }
 
     public static <T extends
             Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category,
                                                                   float width, float height, int clientTrackingRange, int updateInterval) {
         return register(name, () -> EntityType.Builder.of(factory, category)
-                .sized(width, height).build(name.toString()), Registry.ENTITY_TYPE);
+                .sized(width, height).build(name.toString()), Registries.ENTITY_TYPE);
     }
 
     public static void registerItemBurnTime(Item item, int burnTime) {

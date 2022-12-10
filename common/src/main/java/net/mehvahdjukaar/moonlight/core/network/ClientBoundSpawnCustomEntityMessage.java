@@ -7,6 +7,8 @@ import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -35,7 +37,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
 
     public ClientBoundSpawnCustomEntityMessage(Entity e) {
         this.entity = e;
-        this.typeId = Registry.ENTITY_TYPE.getId(e.getType());
+        this.typeId = BuiltInRegistries.ENTITY_TYPE.getId(e.getType());
         this.entityId = e.getId();
         this.uuid = e.getUUID();
         this.posX = e.getX();
@@ -94,7 +96,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
 
     @Override
     public void handle(ChannelHandler.Context context) {
-        EntityType<?> type = Registry.ENTITY_TYPE.byId(this.typeId);
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.byId(this.typeId);
         if (type != null) {
 
             Level world = context.getSender().getLevel();

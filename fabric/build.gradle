@@ -22,23 +22,19 @@ configurations {
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
-    // Remove the next line if you don't want to depend on the API
-    //modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
 
-    //implementation fg.deobf("curse.maven:cloth-config-348521:3782775")
-    modImplementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
-        exclude group: 'net.fabricmc.fabric-api'
-    }
-    // modImplementation(include("curse.maven:modmenu-308702:3850113"))
-        modCompileOnly "com.terraformersmc:modmenu:4.0.6", {
-            exclude module: "fabric-api"
-        }
-    modImplementation("curse.maven:map-atlases-436298:3953555")
-    modImplementation("curse.maven:yacl-667299:3987709")
+//    modImplementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
+  //      exclude group: 'net.fabricmc.fabric-api'
+    //}
+//        modCompileOnly "com.terraformersmc:modmenu:4.0.6", {
+  //          exclude module: "fabric-api"
+    //    }
+    //modImplementation("curse.maven:map-atlases-436298:3953555")
+    //modImplementation("curse.maven:yacl-667299:3987709")
 
 
 }

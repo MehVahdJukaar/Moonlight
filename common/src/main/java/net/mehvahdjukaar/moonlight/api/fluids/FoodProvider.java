@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundEvents;
@@ -26,7 +27,7 @@ import java.util.function.Consumer;
 public class FoodProvider {
 
     public static final Codec<FoodProvider> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            Registry.ITEM.byNameCodec().fieldOf("item").forGetter(f -> f.food),
+            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(f -> f.food),
             Codec.INT.fieldOf("divider").forGetter(f -> f.divider)
     ).apply(instance, FoodProvider::create));
 
@@ -146,10 +147,10 @@ public class FoodProvider {
         }
     };
 
-    public static final Map<Item, FoodProvider> CUSTOM_PROVIDERS = new IdentityHashMap<>() {{
-        put(Items.AIR, EMPTY);
-        put(Items.SUSPICIOUS_STEW, SUS_STEW);
-        put(Items.MILK_BUCKET, MILK);
-        put(Items.EXPERIENCE_BOTTLE, XP);
-    }};
+    private static final Map<Item, FoodProvider> CUSTOM_PROVIDERS = Map.of(
+        Items.AIR, EMPTY,
+        Items.SUSPICIOUS_STEW, SUS_STEW,
+        Items.MILK_BUCKET, MILK,
+        Items.EXPERIENCE_BOTTLE, XP
+    );
 }

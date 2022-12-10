@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -53,7 +54,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         //stuff for tfc
         if(baseRes.getNamespace().equals("tfc")){
             if(path.contains("wood/planks/")){
-                var log = Registry.BLOCK.getOptional(
+                var log = BuiltInRegistries.BLOCK.getOptional(
                         new ResourceLocation(baseRes.getNamespace(),path.replace("planks","log")));
                 if(log.isPresent()){
                     ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), path.replace("wood/planks/",""));
@@ -114,8 +115,8 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         };
         Block temp = null;
         for (var r : test) {
-            if (Registry.BLOCK.containsKey(r)) {
-                temp = Registry.BLOCK.get(r);
+            if (BuiltInRegistries.BLOCK.containsKey(r)) {
+                temp = BuiltInRegistries.BLOCK.get(r);
                 break;
             }
         }

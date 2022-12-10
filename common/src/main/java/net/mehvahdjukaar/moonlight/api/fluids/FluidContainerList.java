@@ -5,6 +5,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -106,14 +108,14 @@ public class FluidContainerList {
     public static class Category {
 
         private static final Supplier<Category> EMPTY = Suppliers.memoize(() ->
-                new Category(Registry.ITEM.get(Registry.ITEM.getDefaultKey()), 1));
+                new Category(BuiltInRegistries.ITEM.get(BuiltInRegistries.ITEM.getDefaultKey()), 1));
 
         public static final Codec<Category> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
                 ResourceLocation.CODEC.fieldOf("empty").forGetter(c -> Utils.getID(c.emptyContainer)),
                 Codec.INT.fieldOf("capacity").forGetter(Category::getCapacity),
                 ResourceLocation.CODEC.listOf().fieldOf("filled").forGetter(c -> c.filled.stream().map(Utils::getID).toList()),
-                Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
-                Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
+                BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
+                BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
         ).apply(instance, Category::decode));
 
         private final Item emptyContainer;
@@ -140,12 +142,12 @@ public class FluidContainerList {
 
         private static Category decode(ResourceLocation empty, int capacity, List<ResourceLocation> filled,
                                        Optional<SoundEvent> fillSound, Optional<SoundEvent> emptySound) {
-            var opt = Registry.ITEM.getOptional(empty);
+            var opt = BuiltInRegistries.ITEM.getOptional(empty);
             if (opt.isEmpty()) return EMPTY.get();
             var category = new Category(opt.get(), capacity, fillSound.orElse(null), emptySound.orElse(null));
 
             filled.forEach(f -> {
-                var opt2 = Registry.ITEM.getOptional(f);
+                var opt2 = BuiltInRegistries.ITEM.getOptional(f);
                 opt2.ifPresent(category::addItem);
             });
             if (category.isEmpty()) return EMPTY.get();

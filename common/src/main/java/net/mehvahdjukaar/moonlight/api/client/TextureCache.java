@@ -6,7 +6,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
-import java.security.Identity;
 import java.util.*;
 import java.util.function.Predicate;
 

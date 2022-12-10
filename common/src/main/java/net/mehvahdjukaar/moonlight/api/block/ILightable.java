@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -30,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface ILightable {
 
-    TagKey<Item> FLINT_AND_STEELS = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("forge", "tools/flint_and_steel"));
+    TagKey<Item> FLINT_AND_STEELS = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "tools/flint_and_steel"));
 
     boolean isLitUp(BlockState state);
 

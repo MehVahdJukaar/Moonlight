@@ -30,21 +30,14 @@ configurations {
 
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
-    // Remove the next line if you don't want to depend on the API
-    // modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
-
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    modImplementation ("curse.maven:configured-457570:4011355")
+    //   modImplementation ("curse.maven:configured-457570:4011355")
 
-    modImplementation ("curse.maven:map-atlases-forge-519759:3949437")
-   // modRuntimeOnly("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
-   //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
+    //    modImplementation ("curse.maven:map-atlases-forge-519759:3949437")
 
-
-   // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
 
 
 }

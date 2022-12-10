@@ -5,7 +5,6 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
@@ -18,10 +17,11 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import org.apache.commons.lang3.StringUtils;
+import org.joml.Matrix4f;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 public class TextUtil {
@@ -93,7 +93,7 @@ public class TextUtil {
             //int centerX = (-font.width(string) / 2);
 
             FormattedCharSequence charSequence = FormattedCharSequence.forward(string, properties.style);
-            float centerX = (float) (-font.width(charSequence) / 2);
+            float centerX = (-font.width(charSequence) / 2f);
             renderLineInternal(charSequence, font, centerX, yOffset, matrix4f, buffer, properties);
 
             String substring = string.substring(0, Math.min(cursorPos, string.length()));
@@ -127,10 +127,10 @@ public class TextUtil {
                     RenderSystem.enableColorLogicOp();
                     RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
                     bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                    bufferbuilder.vertex(matrix4f,  k2, (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-                    bufferbuilder.vertex(matrix4f,  l2, (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-                    bufferbuilder.vertex(matrix4f,  l2, yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
-                    bufferbuilder.vertex(matrix4f,  k2, yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
+                    bufferbuilder.vertex(matrix4f, k2, (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
+                    bufferbuilder.vertex(matrix4f, l2, (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
+                    bufferbuilder.vertex(matrix4f, l2, yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
+                    bufferbuilder.vertex(matrix4f, k2, yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
                     BufferUploader.drawWithShader(bufferbuilder.end());
                     RenderSystem.disableColorLogicOp();
                     RenderSystem.enableTexture();
@@ -164,7 +164,7 @@ public class TextUtil {
     public static void renderLine(FormattedCharSequence formattedCharSequences, Font font, float yOffset, PoseStack poseStack,
                                   MultiBufferSource buffer, RenderTextProperties properties) {
         if (formattedCharSequences == null) return;
-        float x = (float) (-font.width(formattedCharSequences) / 2);
+        float x = (-font.width(formattedCharSequences) / 2f);
         renderLineInternal(formattedCharSequences, font, x, yOffset, poseStack.last().pose(), buffer, properties);
     }
 
@@ -174,7 +174,7 @@ public class TextUtil {
     public static void renderAllLines(FormattedCharSequence[] charSequences, int ySeparation, Font font, PoseStack poseStack,
                                       MultiBufferSource buffer, RenderTextProperties properties) {
         for (int i = 0; i < charSequences.length; i++) {
-            renderLine(charSequences[i], font, ySeparation * i, poseStack, buffer, properties);
+            renderLine(charSequences[i], font, ySeparation * (float) i, poseStack, buffer, properties);
         }
     }
 
@@ -207,10 +207,10 @@ public class TextUtil {
      */
     public record RenderTextProperties(int textColor, int darkenedColor, boolean glowing, int light, Style style) {
 
-        public RenderTextProperties(DyeColor color, boolean glowing, int combinedLight, Style style, Supplier<Boolean> isVeryNear) {
+        public RenderTextProperties(DyeColor color, boolean glowing, int combinedLight, Style style, BooleanSupplier isVeryNear) {
             this(color.getTextColor(),
                     getDarkenedColor(color.getTextColor(), glowing),
-                    glowing && (isVeryNear.get() || color == DyeColor.BLACK),
+                    glowing && (isVeryNear.getAsBoolean() || color == DyeColor.BLACK),
                     glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
 
         }

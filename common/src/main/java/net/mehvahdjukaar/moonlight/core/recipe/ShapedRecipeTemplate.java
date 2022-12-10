@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -36,7 +37,7 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
         var c = result.get("count");
         if (c != null) count = c.getAsInt();
 
-        this.result = Registry.ITEM.get(item);
+        this.result = BuiltInRegistries.ITEM.get(item);
         this.count = count;
 
         var g = json.get("group");

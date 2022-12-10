@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
@@ -93,19 +94,6 @@ public class BlockSetInternal {
             Registry<E> registry) {
         throw new AssertionError();
     }
-
-    @Deprecated(forRemoval = true)
-    public static <T extends BlockType> void addDynamicBlockRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, Registry.BLOCK);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T extends BlockType> void addDynamicItemRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, Registry.ITEM);
-    }
-
 
     public static Collection<BlockTypeRegistry<?>> getRegistries() {
         return BLOCK_SET_CONTAINERS.values();

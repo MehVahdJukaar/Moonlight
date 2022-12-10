@@ -1,8 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.codecs.PrimitiveCodec;
 import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
@@ -10,12 +7,13 @@ import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
-import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.features.FeatureUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -97,36 +95,36 @@ public class Utils {
     }
 
     public static ResourceLocation getID(Block object) {
-        return Registry.BLOCK.getKey(object);
+        return BuiltInRegistries.BLOCK.getKey(object);
     }
 
     public static ResourceLocation getID(EntityType<?> object) {
-        return Registry.ENTITY_TYPE.getKey(object);
+        return BuiltInRegistries.ENTITY_TYPE.getKey(object);
     }
 
     //TODO: not sure if this is correct
     public static ResourceLocation getID(Biome object) {
-        return BuiltinRegistries.BIOME.getKey(object);
+      return hackyGetRegistryAccess().registryOrThrow(Registries.BIOME).getKey(object);
     }
 
-    public static ResourceLocation getID(ConfiguredFeature<?,?> object) {
-        return BuiltinRegistries.CONFIGURED_FEATURE.getKey(object);
+    public static ResourceLocation getID(ConfiguredFeature<?, ?> object) {
+        return  hackyGetRegistryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getKey(object);
     }
 
     public static ResourceLocation getID(Item object) {
-        return Registry.ITEM.getKey(object);
+        return BuiltInRegistries.ITEM.getKey(object);
     }
 
     public static ResourceLocation getID(Fluid object) {
-        return Registry.FLUID.getKey(object);
+        return BuiltInRegistries.FLUID.getKey(object);
     }
 
     public static ResourceLocation getID(BlockEntityType<?> object) {
-        return Registry.BLOCK_ENTITY_TYPE.getKey(object);
+        return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(object);
     }
 
     public static ResourceLocation getID(RecipeSerializer<?> object) {
-        return Registry.RECIPE_SERIALIZER.getKey(object);
+        return BuiltInRegistries.RECIPE_SERIALIZER.getKey(object);
     }
 
     public static ResourceLocation getID(SoftFluid object) {
@@ -146,7 +144,7 @@ public class Utils {
         if (object instanceof Fluid b) return getID(b);
         if (object instanceof BlockEntityType<?> b) return getID(b);
         if (object instanceof RecipeSerializer<?> b) return getID(b);
-        if (object instanceof ConfiguredFeature<?,?> c) return getID(c);
+        if (object instanceof ConfiguredFeature<?, ?> c) return getID(c);
         if (object instanceof Supplier<?> s) return getID(s.get());
         if (object instanceof SoftFluid s) return getID(s);
         if (object instanceof MapDecorationType<?, ?> s) return getID(s);

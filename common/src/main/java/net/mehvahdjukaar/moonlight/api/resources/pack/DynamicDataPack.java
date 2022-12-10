@@ -4,15 +4,23 @@ import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
-import net.mehvahdjukaar.moonlight.core.mixins.accessor.BlockLootAccessor;
+import net.minecraft.data.loot.packs.VanillaBlockLoot;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTables;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay;
+import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 import java.io.ByteArrayInputStream;
 
@@ -51,10 +59,20 @@ public class DynamicDataPack extends DynamicResourcePack {
      */
     public void addSimpleBlockLootTable(Block block) {
         this.addJson(block.getLootTable(),
-                LootTables.serialize(BlockLootAccessor.invokeCreateSingleItemTable(block)
+                LootTables.serialize(createSingleItemTable(block)
                         .setParamSet(LootContextParamSets.BLOCK).build()),
                 ResType.LOOT_TABLES);
     }
+
+
+    protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {
+        return LootTable.lootTable()
+                .withPool(
+                        LootPool.lootPool()
+                                .setRolls(ConstantValue.exactly(1.0F))
+                                .add(LootItem.lootTableItem(itemLike)).unwrap());
+    }
+
 
     public void addRecipe(FinishedRecipe recipe) {
         this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
@@ -67,16 +85,6 @@ public class DynamicDataPack extends DynamicResourcePack {
     public void addRecipeNoAdvancement(FinishedRecipe recipe) {
         this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
     }
-
-    @Deprecated
-    public void addRecipeWithAdvancement(FinishedRecipe recipe) {
-        this.addRecipe(recipe);
-        ResourceLocation advancementId = recipe.getAdvancementId();
-        if (advancementId != null) {
-            //this.addJson(advancementId, recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
-        }
-    }
-
 
 
 }

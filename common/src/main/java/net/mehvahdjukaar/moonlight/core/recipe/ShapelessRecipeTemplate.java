@@ -7,6 +7,8 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -41,7 +43,7 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
         var c = result.get("count");
         if (c != null) count = c.getAsInt();
 
-        this.result = Registry.ITEM.get(item);
+        this.result = BuiltInRegistries.ITEM.get(item);
         this.count = count;
 
         var g = json.get("group");
