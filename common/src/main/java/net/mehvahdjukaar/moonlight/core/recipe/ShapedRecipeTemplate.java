@@ -72,8 +72,9 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
             var newIng = IRecipeTemplate.convertIngredients(originalMat, destinationMat, ing);
             if (newIng != null) {
                 atLeastOneChanged = true;
-                builder.define(e.getKey(), newIng);
-            }
+            }else newIng = ing;
+
+            builder.define(e.getKey(), newIng);
         }
         //if recipe fails
         if (!atLeastOneChanged) return null;
