@@ -88,14 +88,6 @@ public class SoftFluid {
         this.isGenerated = builder.custom;
     }
 
-    //better to call registry directly. Here we cache the name
-    private final Supplier<ResourceLocation> cachedID = Suppliers.memoize(() -> SoftFluidRegistry.getID(this));
-
-    @Deprecated
-    public ResourceLocation getRegistryName() {
-        return cachedID.get();
-    }
-
     @Nullable
     public ResourceLocation getTextureOverride() {
         return useTexturesFrom;

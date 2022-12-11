@@ -1,5 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.integration.cloth_config;
-
+/*
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -136,4 +136,4 @@ public class ClothConfigCompat {
         return e.build(); // Builds the option entry for cloth config
     }
 
-}
+}*/

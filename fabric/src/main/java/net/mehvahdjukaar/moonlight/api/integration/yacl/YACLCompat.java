@@ -1,5 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.integration.yacl;
-
+/*
 import dev.isxander.yacl.api.*;
 import dev.isxander.yacl.gui.controllers.ColorController;
 import dev.isxander.yacl.gui.controllers.EnumController;
@@ -143,4 +143,4 @@ public class YACLCompat {
         return e.build(); // Builds the option entry for cloth config
     }
 
-}
+}*/ //TODO:

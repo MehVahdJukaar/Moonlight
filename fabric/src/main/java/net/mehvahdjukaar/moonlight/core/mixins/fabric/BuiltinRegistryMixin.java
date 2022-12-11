@@ -1,5 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
-
+/*
 import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
 import net.fabricmc.fabric.impl.registry.sync.RegistryMapSerializer;
 import net.fabricmc.fabric.impl.registry.sync.RegistrySyncManager;
@@ -24,8 +24,7 @@ public abstract class BuiltinRegistryMixin {
     private static void registerAdditional(CallbackInfo ci){
         SoftFluidRegistryImpl.REG = BuiltinRegistries
                 .registerSimple(SoftFluidRegistryImpl.KEY,SoftFluidRegistryImpl::getDefaultValue);
-        RegistryDataLoader
         MapDecorationRegistryImpl.REG = BuiltinRegistries
                 .registerSimple(MapDecorationRegistryImpl.KEY,MapDecorationRegistryImpl::getDefaultValue);
     }
-}
+}*///TODO

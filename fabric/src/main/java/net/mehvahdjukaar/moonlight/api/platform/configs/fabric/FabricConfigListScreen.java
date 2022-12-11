@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -61,8 +60,9 @@ public class FabricConfigListScreen extends Screen {
     }
 
     protected void addExtraButtons() {
-        this.addRenderableWidget(new Button(this.width / 2 - 155 + 160, this.height - 29, 150, 20,
-                CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.parent)));
+        this.addRenderableWidget(Button.builder(
+                        CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.parent))
+                .bounds(this.width / 2 - 155 + 160, this.height - 29, 150, 20).build());
     }
 
     @Override
@@ -89,7 +89,7 @@ public class FabricConfigListScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (modURL != null && isMouseWithin((this.width / 2) - 90, 2 + 6, 180, 16 + 2, (int) mouseX, (int) mouseY)) {
-            Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,  modURL));
+            Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, modURL));
             this.handleComponentClicked(style);
             return true;
         }
@@ -237,14 +237,15 @@ public class FabricConfigListScreen extends Screen {
         }
 
         protected ConfigButton(ConfigSpec spec, int width, int buttonWidth) {
-            this(new Button(width / 2 - buttonWidth / 2, 0, buttonWidth, 20, Component.literal(spec.getFileName()), (b) ->
-                    Minecraft.getInstance().setScreen(spec.makeScreen(FabricConfigListScreen.this, FabricConfigListScreen.this.background))));
+            this(Button.builder(Component.literal(spec.getFileName()), b ->
+                    Minecraft.getInstance().setScreen(spec.makeScreen(FabricConfigListScreen.this, FabricConfigListScreen.this.background))
+            ).bounds(width / 2 - buttonWidth / 2, 0, buttonWidth, 20).build());
         }
 
         @Override
         public void render(PoseStack poseStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
             this.children.forEach((button) -> {
-                button.y = top;
+                button.setY(top);
                 button.render(poseStack, mouseX, mouseY, partialTick);
             });
         }

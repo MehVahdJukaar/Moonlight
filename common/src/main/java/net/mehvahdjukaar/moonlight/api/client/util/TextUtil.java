@@ -58,13 +58,6 @@ public class TextUtil {
         return Pair.of(splitLines, 1f / scalingFactor);
     }
 
-    //not server safe don't use
-    @Deprecated(forRemoval = true)
-    public static String getReadableName(String name) {
-        return Arrays.stream((name).replace(":", "_").split("_"))
-                .map(StringUtils::capitalize).collect(Collectors.joining(" "));
-    }
-
     public static FormattedText parseText(String s) {
         try {
             FormattedText mutableComponent = Component.Serializer.fromJson(s);

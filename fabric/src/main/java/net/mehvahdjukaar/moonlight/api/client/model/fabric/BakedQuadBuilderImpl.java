@@ -24,7 +24,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     private final QuadEmitter inner;
     private int vertexIndex = 0;
-    private Matrix4f transform;
+    private final Matrix4f transform;
     TextureAtlasSprite sprite = null;
 
     private BakedQuadBuilderImpl(@Nullable Matrix4f transform) {
@@ -110,12 +110,6 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     public BakedQuad build() {
         Preconditions.checkNotNull(sprite, "sprite cannot be null");
         return inner.toBakedQuad(0, sprite, false);
-    }
-
-    @Deprecated(forRemoval = true)
-    public BakedQuadBuilder useTransform(Matrix4f matrix4f) {
-        this.transform = matrix4f;
-        return this;
     }
 
 }

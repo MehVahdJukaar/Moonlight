@@ -45,7 +45,7 @@ public class RenderUtilImpl {
                 poseStack.pushPose();
                 PoseStack.Pose pose = poseStack.last();
 
-                pose.pose().multiply(0.5f);
+                pose.pose().scale(0.5f);
 
                 vertexConsumer = ItemRenderer.getCompassFoilBufferDirect(buffer, renderType, pose);
                 poseStack.popPose();

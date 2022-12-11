@@ -19,7 +19,6 @@ import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -47,10 +46,10 @@ public class RegHelperImpl {
 
     public static final Map<ResourceKey<? extends Registry<?>>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
 
-    public static final List<Registry<?>> REG_PRIORITY = List.of(
+    public static final List<ResourceKey<? extends Registry<?>>> REG_PRIORITY = List.of(
             Registries.SOUND_EVENT, Registries.BLOCK, Registries.FLUID, Registries.PARTICLE_TYPE,
             Registries.ENTITY_TYPE, Registries.ITEM,
-            Registries.BLOCK_ENTITY_TYPE, Registries.PLACEMENT_MODIFIERS, Registries.STRUCTURE_TYPES,
+            Registries.BLOCK_ENTITY_TYPE, Registries.PLACEMENT_MODIFIER_TYPE, Registries.STRUCTURE_TYPE,
             Registries.STRUCTURE_PIECE, Registries.FEATURE, Registries.CONFIGURED_FEATURE,
             Registries.PLACED_FEATURE
     );
@@ -91,13 +90,13 @@ public class RegHelperImpl {
         return registry.add(supplier, name);
     }
 
-    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
-        RegistryQueue.EntryWrapper<E, T> entry = new RegistryQueue.EntryWrapper<>(name, supplier, reg);
+    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
+        RegistryQueue.EntryWrapper<E, T> entry = new RegistryQueue.EntryWrapper<>(name, supplier, regKey);
         entry.initialize();
         return entry;
     }
 
-    public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {
+    public static <T> void registerInBatch(ResourceKey<? extends Registry<T>> reg, Consumer<Registrator<T>> eventListener) {
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent("a", c -> new RegistryQueue<>(reg));
         registry.add(eventListener);
@@ -106,12 +105,12 @@ public class RegHelperImpl {
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
-        return register(name, () -> IFabricMenuType.create(containerFactory::apply), Registry.MENU);
+        return register(name, () -> IFabricMenuType.create(containerFactory::apply), Registries.MENU);
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {
         Supplier<EntityType<T>> s = () -> EntityType.Builder.of(factory, category).sized(width, height).build(name.toString());
-        return register(name, s, Registry.ENTITY_TYPE);
+        return register(name, s, Registries.ENTITY_TYPE);
     }
 
     public static void registerItemBurnTime(Item item, int burnTime) {

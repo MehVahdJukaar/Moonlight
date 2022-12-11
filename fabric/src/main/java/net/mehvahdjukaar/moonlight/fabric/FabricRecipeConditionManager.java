@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -87,7 +88,7 @@ public class FabricRecipeConditionManager {
     }
 
     private static Boolean forgeTagEmpty(JsonObject object) {
-        var key = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(GsonHelper.getAsString(object, "tag")));
+        var key = TagKey.create(Registries.ITEM, new ResourceLocation(GsonHelper.getAsString(object, "tag")));
         var tagContext = FabricHooks.getTagContext();
         if (tagContext != null) {
             return tagContext.getAllTags(key.registry()).getOrDefault(key.location(), Set.of()).isEmpty();

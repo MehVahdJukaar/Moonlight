@@ -123,11 +123,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator) {
-        return () -> defaultValue;
-    }
-
-    @Override
     protected void maybeAddTranslationString(String name) {
         comments.put(this.translationKey(name), LangBuilder.getReadableName(name));
         super.maybeAddTranslationString(name);

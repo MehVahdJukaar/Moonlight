@@ -152,6 +152,6 @@ public class ForgeHelperImpl {
     }
 
     public static boolean canItemStack(ItemStack selected, ItemStack item) {
-        return ItemStack.isSameIgnoreDurability(selected, item);
+        return ItemStack.isSameItemSameTags(selected, item);
     }
 }

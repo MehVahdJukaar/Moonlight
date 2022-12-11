@@ -112,9 +112,9 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientPlatformHelper.AtlasTextureEvent> eventListener) {
-        ClientSpriteRegistryCallback.event(atlasLocation).register(((atlasTexture, registry) -> {
-            eventListener.accept(registry::register);
-        }));
+        //ClientSpriteRegistryCallback.event(atlasLocation).register(((atlasTexture, registry) -> {
+       //     eventListener.accept(registry::register);
+       // }));
     }
 
     public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation name) {

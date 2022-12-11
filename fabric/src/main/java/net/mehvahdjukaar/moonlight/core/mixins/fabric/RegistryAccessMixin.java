@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(RegistryAccess.class)
 public interface RegistryAccessMixin {
 
+    /*
     @Inject(method = "put(Lcom/google/common/collect/ImmutableMap$Builder;Lnet/minecraft/resources/ResourceKey;Lcom/mojang/serialization/Codec;)V",
             at = @At("TAIL"))
     private static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder,
@@ -31,7 +32,7 @@ public interface RegistryAccessMixin {
 
         }
 
-    }
+    }*/ //TODO:
 
 
 }

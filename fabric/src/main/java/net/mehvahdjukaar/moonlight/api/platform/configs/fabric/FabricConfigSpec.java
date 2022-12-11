@@ -9,8 +9,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
-import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
@@ -97,9 +95,9 @@ public class FabricConfigSpec extends ConfigSpec {
     @Environment(EnvType.CLIENT)
     public Screen makeScreen(Screen parent, ResourceLocation background) {
         if (clothConfig) {
-            return ClothConfigCompat.makeScreen(parent, this, background);
-        }else if(YACL){
-            return YACLCompat.makeScreen(parent, this, background);
+          //  return ClothConfigCompat.makeScreen(parent, this, background);
+        }else if(YACL){ //TODO:
+           // return YACLCompat.makeScreen(parent, this, background);
         }
         return null;
     }

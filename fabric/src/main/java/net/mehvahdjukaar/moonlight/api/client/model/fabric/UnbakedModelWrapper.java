@@ -29,18 +29,11 @@ public class UnbakedModelWrapper extends BlockModel {
         this.geometry = geometry;
     }
 
-    @Override
-    public Collection<Material> getMaterials(Function<ResourceLocation, UnbakedModel> modelGetter,
-                                             Set<Pair<String, String>> missingTextureErrors) {
-        Set<Material> old = new HashSet<>(super.getMaterials(modelGetter, missingTextureErrors));
-        old.addAll(geometry.getMaterials(modelGetter, missingTextureErrors));
-        return old;
-    }
 
     @Override
-    public BakedModel bake(ModelBakery modelBakery, Function<Material, TextureAtlasSprite> spriteGetter,
+    public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter,
                            ModelState transform, ResourceLocation location) {
-        return geometry.bake(modelBakery, spriteGetter, transform, location);
+        return geometry.bake(modelBaker, spriteGetter, transform, location);
     }
 
 

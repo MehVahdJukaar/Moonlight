@@ -31,7 +31,6 @@ public class FabricHooks {
 
     @ApiStatus.Internal
     public static void setRegistryAccess(RegistryAccess registryAccess) {
-        CreativeModeTabs.
         REGISTRY_ACCESS = new WeakReference<>(registryAccess);
     }
 
