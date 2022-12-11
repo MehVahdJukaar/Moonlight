@@ -1,19 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ResourceManager;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Supplier;
 
@@ -21,9 +17,9 @@ import java.util.function.Supplier;
  * Class responsible to generate assets and manage your dynamic resource texture pack (client)
  * Handles and registers your dynamic pack instance which needs to be provides
  */
-public abstract class DynClientResourcesProvider extends DynResourceProvider<DynamicTexturePack> {
+public abstract class DynClientResourcesGenerator extends DynResourceGenerator<DynamicTexturePack> {
 
-    protected DynClientResourcesProvider(DynamicTexturePack pack) {
+    protected DynClientResourcesGenerator(DynamicTexturePack pack) {
         super(pack);
     }
 

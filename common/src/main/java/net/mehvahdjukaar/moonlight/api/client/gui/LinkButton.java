@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.ClickEvent;
@@ -43,14 +44,11 @@ public class LinkButton extends Button {
             Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, finalUrl));
             parent.handleComponentClicked(style);
         };
-        OnTooltip onTooltip = (button, poseStack, mouseX, mouseY) -> {
-            if (button.isHoveredOrFocused()) {
-                parent.renderTooltip(poseStack, Minecraft.getInstance().font.split(
-                        Component.literal(tooltip), Math.max(parent.width / 2 - 43, 170)), mouseX, mouseY);
-            }
-        };
-        return new LinkButton(texture, textureW, textureH, iconW, iconH, x, y, uInd * iconW, vInd * iconH,
+
+        var button = new LinkButton(texture, textureW, textureH, iconW, iconH, x, y, uInd * iconW, vInd * iconH,
                 iconW + 6, iconH + 6, CommonComponents.EMPTY, onPress);
+        button.setTooltip(Tooltip.create(Component.literal(tooltip)));
+        return button;
     }
 
     //TODO: use builder

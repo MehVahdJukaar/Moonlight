@@ -1,20 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
-import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
-import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Class responsible to generate assets and manage your dynamic data pack (server)
  * Handles and registers your dynamic pack instance which needs to be provides
  */
-public abstract class DynServerResourcesProvider extends DynResourceProvider<DynamicDataPack> {
+public abstract class DynServerResourcesGenerator extends DynResourceGenerator<DynamicDataPack> {
 
-    protected DynServerResourcesProvider(DynamicDataPack pack) {
+    protected DynServerResourcesGenerator(DynamicDataPack pack) {
         super(pack);
     }
 

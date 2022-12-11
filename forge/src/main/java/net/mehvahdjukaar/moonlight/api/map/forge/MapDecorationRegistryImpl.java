@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.forge.SoftFluidRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.SimpleDecorationType;
@@ -35,6 +36,7 @@ public class MapDecorationRegistryImpl {
 
     public static void init() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(MapDecorationRegistryImpl::registerDataPackRegistry);
         DEFERRED_REGISTER.register(bus);
     }
 

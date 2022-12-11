@@ -35,6 +35,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -276,7 +277,7 @@ public class RegHelper {
     public static Map<VariantType, Supplier<Block>> registerFullBlockSet(
             ResourceLocation baseName, BlockBehaviour.Properties properties, boolean isHidden) {
 
-        EnumMap<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
+        Map<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
         for (VariantType type : VariantType.values()) {
             String modId = baseName.getNamespace();
             String name = baseName.getPath();

@@ -38,14 +38,14 @@ public class VanillaResourceManager implements ResourceManager, Closeable {
     @Override
     public Optional<Resource> getResource(ResourceLocation location) {
         for (var p : packs.values()) {
-            if (p.hasResource(TYPE, location)) {
-                return Optional.of(new Resource(p.getName(), () -> p.getResource(TYPE, location)));
-            }
+            var res = p.getResource(TYPE, location);
+            if (res != null) return Optional.of(new Resource(p, res));
         }
         return Optional.empty();
     }
+
     @Override
-    public void close(){
+    public void close() {
         this.packs.values().forEach(PackResources::close);
     }
 

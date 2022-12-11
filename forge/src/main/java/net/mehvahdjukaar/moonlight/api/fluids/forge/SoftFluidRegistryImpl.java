@@ -46,6 +46,7 @@ public class SoftFluidRegistryImpl {
 
     public static void init() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(SoftFluidRegistryImpl::registerDataPackRegistry);
         DEFERRED_REGISTER.register(bus);
     }
 

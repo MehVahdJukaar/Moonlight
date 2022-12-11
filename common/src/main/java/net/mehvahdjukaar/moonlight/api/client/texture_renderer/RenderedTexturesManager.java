@@ -156,7 +156,7 @@ public class RenderedTexturesManager {
         //gui setup code
         //RenderSystem.clear(256, Minecraft.ON_OSX);
         Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
-        Matrix4f matrix4f = Matrix4f.orthographic(0.0F,
+        Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F,
                 size, 0, size, 1000.0F, 3000); //ForgeHooksClient.getGuiFarPlane()
         RenderSystem.setProjectionMatrix(matrix4f);
 
@@ -196,20 +196,6 @@ public class RenderedTexturesManager {
         Gui.blit(posestack,0,0,1000,0,0,  256,256,16,16);
     */
 
-    private static Matrix4f getProjectionMatrix(double pFov, int size, int renderDistance) {
-        PoseStack posestack = new PoseStack();
-        posestack.last().pose().setIdentity();
-        float zoom = 1;
-        float zoomX = 1;
-        float zoomY = 1;
-        if (zoom != 1.0F) {
-            posestack.translate((double) zoomX, (double) (-zoomY), 0.0D);
-            posestack.scale(zoom, zoom, 1.0F);
-        }
-
-        posestack.last().pose().multiply(Matrix4f.perspective(pFov, (float) size / size, 0.05F, renderDistance * 4f));
-        return posestack.last().pose();
-    }
 
     private static void drawItem2(FrameBufferBackedDynamicTexture tex, BlockPos mirrorPos, Direction mirrorDir, float partialTicks) {
         Minecraft mc = Minecraft.getInstance();

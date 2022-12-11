@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,10 +27,7 @@ public class MoonlightForge {
         Moonlight.commonInit();
 
         MinecraftForge.EVENT_BUS.register(this);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(SoftFluidRegistryImpl::registerDataPackRegistry);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(MapDecorationRegistryImpl::registerDataPackRegistry);
     }
-
 
     @SubscribeEvent
     public void onDataSync(OnDatapackSyncEvent event) {

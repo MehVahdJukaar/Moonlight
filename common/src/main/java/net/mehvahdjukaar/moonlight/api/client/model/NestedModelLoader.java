@@ -41,11 +41,6 @@ public class NestedModelLoader implements CustomModelLoader{
         }
 
         @Override
-        public Collection<Material> getMaterials(Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
-            return model.getMaterials(modelGetter, missingTextureErrors);
-        }
-
-        @Override
         public CustomBakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
             BakedModel bakedModel = this.model.bake(modelBaker, model, spriteGetter, transform, location, true);
             return NestedModelLoader.this.factory.apply(bakedModel);
