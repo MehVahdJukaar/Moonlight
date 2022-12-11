@@ -11,8 +11,6 @@ import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -85,7 +83,7 @@ public class RegHelperImpl {
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
-            if(PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+            if(PlatformHelper.getPhysicalSide().isClient()) AntiRepostWarning.addMod(modId);
 
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
             var bus = FMLJavaModLoadingContext.get().getModEventBus();

@@ -29,6 +29,20 @@ transitive-accessible method net/minecraft/client/renderer/texture/SpriteContent
 transitive-accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameWidth I
 transitive-accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameHeight I
 transitive-accessible method net/minecraft/client/renderer/texture/SpriteContents getFrameCount() I
+
+#for common...
+transitive-accessible field net/minecraft/world/item/CreativeModeTabs COLORED_BLOCKS Lnet/minecraft/world/item/CreativeModeTab;
+transitive-accessible field net/minecraft/world/item/CreativeModeTabs BUILDING_BLOCKS Lnet/minecraft/world/item/CreativeModeTab;
+transitive-accessible field net/minecraft/world/item/CreativeModeTabs REDSTONE_BLOCKS Lnet/minecraft/world/item/CreativeModeTab;
+transitive-accessible field net/minecraft/world/item/CreativeModeTabs COMBAT Lnet/minecraft/world/item/CreativeModeTab;
+transitive-accessible field net/minecraft/world/item/CreativeModeTabs FOOD_AND_DRINKS Lnet/minecraft/world/item/CreativeModeTab;
+transitive-accessible field net/minecraft/world/item/CreativeModeTabs INGREDIENTS Lnet/minecraft/world/item/CreativeModeTab;
+transitive-accessible field net/minecraft/world/item/CreativeModeTabs FUNCTIONAL_BLOCKS Lnet/minecraft/world/item/CreativeModeTab;
+transitive-accessible field net/minecraft/world/item/CreativeModeTabs SPAWN_EGGS Lnet/minecraft/world/item/CreativeModeTab;
+transitive-accessible field net/minecraft/world/item/CreativeModeTabs NATURAL_BLOCKS Lnet/minecraft/world/item/CreativeModeTab;
+transitive-accessible method net/minecraft/data/recipes/CraftingRecipeBuilder determineBookCategory (Lnet/minecraft/data/recipes/RecipeCategory;)Lnet/minecraft/world/item/crafting/CraftingBookCategory;
+
+
 #flute renderer fabric
 transitive-accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V
 

@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.integration.forge;
 
-
+/*
 import lilypuree.mapatlases.item.MapAtlasItem;
 import lilypuree.mapatlases.util.MapAtlasesAccessUtils;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,4 +41,4 @@ public class MapAtlasCompatImpl {
         return null;
     }
 
-}
+}*/

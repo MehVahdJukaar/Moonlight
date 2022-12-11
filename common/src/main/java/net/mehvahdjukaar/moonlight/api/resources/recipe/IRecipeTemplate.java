@@ -1,9 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.resources.recipe;
 
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.minecraft.data.recipes.CraftingRecipeBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 
@@ -38,6 +41,13 @@ public interface IRecipeTemplate<R extends FinishedRecipe> {
             }
         }
         return null;
+    }
+
+    default RecipeCategory determineBookCategory(CraftingBookCategory recipeCategory) {
+        for(var v : RecipeCategory.values()){
+            if(recipeCategory == CraftingRecipeBuilder.determineBookCategory(v))return v;
+        }
+        return RecipeCategory.MISC;
     }
 
 }

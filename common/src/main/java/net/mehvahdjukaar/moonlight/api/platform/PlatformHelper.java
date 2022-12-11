@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -15,7 +14,6 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -36,7 +34,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -70,6 +67,11 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
+    @ExpectPlatform
+    public static List<CreativeModeTab> getItemTabs(Item asItem) {
+        throw new AssertionError();
+    }
+
 
     public enum Platform {
         FORGE, FABRIC;
@@ -97,7 +99,7 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
-    public enum Env {
+    public enum Side {
         CLIENT, SERVER;
 
         public boolean isClient() {
@@ -119,7 +121,7 @@ public class PlatformHelper {
 
     @Contract
     @ExpectPlatform
-    public static Env getEnv() {
+    public static Side getPhysicalSide() {
         throw new AssertionError();
     }
 
@@ -207,10 +209,12 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
+    @Deprecated(forRemoval = true)
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar){
         return createModTab(name ,icon, hasSearchBar, null);
     }
 
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
                                                @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> itemSupplier){

@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.*;
 
@@ -30,6 +31,11 @@ public class MapDecorationRegistryImpl {
                     .allowModification()
                     .disableSaving());
 
+    @SubscribeEvent
+    public static void registerDataPackRegistry(DataPackRegistryEvent.NewRegistry event) {
+        event.dataPackRegistry(KEY, MapDecorationRegistry.TYPE_CODEC, MapDecorationRegistry.TYPE_CODEC);
+    }
+
     private static final RegistryObject<MapDecorationType<?, ?>> GENERIC_STRUCTURE = DEFERRED_REGISTER
             .register(MapDecorationRegistry.GENERIC_STRUCTURE_ID.getPath(), () -> new SimpleDecorationType(Optional.empty()));
 
@@ -46,9 +52,5 @@ public class MapDecorationRegistryImpl {
 
     public static void registerInternal(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
         RegHelperImpl.register(id, markerType, KEY);
-    }
-    @EventCalled
-    public static void registerDataPackRegistry(DataPackRegistryEvent.NewRegistry event) {
-        event.dataPackRegistry(KEY, MapDecorationRegistry.TYPE_CODEC, MapDecorationRegistry.TYPE_CODEC);
     }
 }

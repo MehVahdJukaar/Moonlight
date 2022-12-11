@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -54,8 +53,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -108,8 +105,8 @@ public class PlatformHelperImpl {
         return state.getFlammability(level, pos, face);
     }
 
-    public static PlatformHelper.Env getEnv() {
-        return FMLEnvironment.dist == Dist.CLIENT ? PlatformHelper.Env.CLIENT : PlatformHelper.Env.SERVER;
+    public static PlatformHelper.Side getPhysicalSide() {
+        return FMLEnvironment.dist == Dist.CLIENT ? PlatformHelper.Side.CLIENT : PlatformHelper.Side.SERVER;
     }
 
     @Nullable
@@ -122,7 +119,7 @@ public class PlatformHelperImpl {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         Consumer<AddPackFindersEvent> consumer = event -> {
             if (event.getPackType() == packType) {
-                event.addRepositorySource((infoConsumer, packFactory) ->
+                event.addRepositorySource(infoConsumer ->
                         infoConsumer.accept(packSupplier.get()));
             }
         };
@@ -154,26 +151,6 @@ public class PlatformHelperImpl {
         return ModList.get().getModContainerById(modId).get().getModInfo().getDisplayName();
     }
 
-    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
-                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> fillItemList) {
-        return new CreativeModeTab(name.getPath()) {
-            @Override
-            public ItemStack makeIcon() {
-                return icon.get();
-            }
-
-            @Override
-            public boolean hasSearchBar() {
-                return hasSearchBar;
-            }
-
-            @Override
-            public void fillItemList(NonNullList<ItemStack> items) {
-                if (fillItemList != null) fillItemList.accept(items, this);
-                else super.fillItemList(items);
-            }
-        };
-    }
 
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
         return new ForgeSpawnEggItem(entityType, color, outerColor, properties);

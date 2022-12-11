@@ -112,9 +112,9 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientPlatformHelper.AtlasTextureEvent> eventListener) {
-        Consumer<TextureStitchEvent.Pre> eventConsumer = event -> {
+        Consumer<TextureStitchEvent.Post> eventConsumer = event -> {
             if (event.getAtlas().location().equals(atlasLocation)) {
-                eventListener.accept(event::addSprite);
+               // eventListener.accept(event::addSprite);
             }
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);

@@ -28,10 +28,4 @@ public class GeometryWrapper implements IUnbakedGeometry<GeometryWrapper> {
         return owner.bake(baker, spriteGetter, modelState, modelLocation);
     }
 
-    @Override
-    public Collection<Material> getMaterials(IGeometryBakingContext context,
-                                             Function<ResourceLocation, UnbakedModel> spriteGetter,
-                                             Set<Pair<String, String>> missingTextureErrors) {
-        return owner.getMaterials(spriteGetter,missingTextureErrors);
-    }
 }

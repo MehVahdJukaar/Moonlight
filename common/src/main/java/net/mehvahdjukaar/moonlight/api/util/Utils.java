@@ -9,11 +9,9 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.features.FeatureUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -104,11 +102,11 @@ public class Utils {
 
     //TODO: not sure if this is correct
     public static ResourceLocation getID(Biome object) {
-      return hackyGetRegistryAccess().registryOrThrow(Registries.BIOME).getKey(object);
+        return hackyGetRegistryAccess().registryOrThrow(Registries.BIOME).getKey(object);
     }
 
     public static ResourceLocation getID(ConfiguredFeature<?, ?> object) {
-        return  hackyGetRegistryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getKey(object);
+        return hackyGetRegistryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getKey(object);
     }
 
     public static ResourceLocation getID(Item object) {
@@ -153,11 +151,15 @@ public class Utils {
 
     //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
-        if (PlatformHelper.getEnv().isClient()) {
-            var level = Minecraft.getInstance().level;
-            if (level != null) return level.registryAccess();
+        var s = PlatformHelper.getCurrentServer();
+        if (s != null) return s.registryAccess();
+        else {
+            if (!PlatformHelper.getPhysicalSide().isServer()) {
+                var level = Minecraft.getInstance().level;
+                if (level != null) return level.registryAccess();
+            }
         }
-        return PlatformHelper.getCurrentServer().registryAccess();
+        throw new UnsupportedOperationException("Failed to get registry access. This is a bug");
     }
 
     /**

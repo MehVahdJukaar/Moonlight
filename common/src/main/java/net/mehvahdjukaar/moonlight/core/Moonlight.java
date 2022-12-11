@@ -39,7 +39,7 @@ public class Moonlight {
         MapDecorationRegistry.init();
 
         //client init
-        if (PlatformHelper.getEnv().isClient()) {
+        if (PlatformHelper.getPhysicalSide().isClient()) {
             MoonlightClient.initClient();
         }
 

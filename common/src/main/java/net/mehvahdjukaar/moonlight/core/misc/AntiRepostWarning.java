@@ -16,6 +16,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Purpose of this is to throw a warning when jars with weird file names are detected, usually signaling being downloaded from 9Minecraft and alike
+ */
 public class AntiRepostWarning {
 
     private static final Set<String> MODS = new HashSet<>();
@@ -52,6 +55,7 @@ public class AntiRepostWarning {
     }
 
     private static boolean isFileNameSus(String mod) {
+        //Take that 9Minecraft
         String fileName = PlatformHelper.getModFilePath(mod).getFileName().toString();
         if (fileName.contains(".jar")) {
             return fileName.contains("-Mod-") || fileName.endsWith("-tw");

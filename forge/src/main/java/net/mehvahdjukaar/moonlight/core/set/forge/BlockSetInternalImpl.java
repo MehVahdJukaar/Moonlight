@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -46,9 +47,9 @@ public class BlockSetInternalImpl {
     //aaaa
     public static  <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
-        if(registry == REgisy.BLOCK) {
+        if(registry == BuiltInRegistries.BLOCK) {
             addDynamicBlockRegistration((BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
-        }else if(registry == Registry.FLUID){
+        }else if(registry == BuiltInRegistries.FLUID){
             throw new IllegalArgumentException("Fluid registry not supported here");
         } else{
             //other entries

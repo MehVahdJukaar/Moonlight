@@ -7,6 +7,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagManager;
+import net.minecraft.world.item.CreativeModeTabs;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +31,7 @@ public class FabricHooks {
 
     @ApiStatus.Internal
     public static void setRegistryAccess(RegistryAccess registryAccess) {
+        CreativeModeTabs.
         REGISTRY_ACCESS = new WeakReference<>(registryAccess);
     }
 

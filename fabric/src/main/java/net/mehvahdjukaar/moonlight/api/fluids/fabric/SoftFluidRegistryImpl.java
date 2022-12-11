@@ -8,6 +8,8 @@ import net.mehvahdjukaar.moonlight.core.mixins.fabric.MappedRegistryAccessor;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -43,7 +45,7 @@ public class SoftFluidRegistryImpl {
         var fluidMap = getFluidsMap();
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.getDataPackRegistry();
         ((MappedRegistryAccessor) reg).setFrozen(false);
-        for (Fluid f : Registry.FLUID) {
+        for (Fluid f : BuiltInRegistries.FLUID) {
             try {
                 if (f == null) continue;
                 if (f instanceof FlowingFluid flowingFluid && flowingFluid.getSource() != f) continue;

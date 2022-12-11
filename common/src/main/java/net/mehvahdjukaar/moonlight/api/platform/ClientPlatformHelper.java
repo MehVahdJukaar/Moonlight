@@ -195,6 +195,7 @@ public class ClientPlatformHelper {
         void addSprite(ResourceLocation spriteLocation);
     }
 
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<AtlasTextureEvent> eventListener) {
         throw new AssertionError();

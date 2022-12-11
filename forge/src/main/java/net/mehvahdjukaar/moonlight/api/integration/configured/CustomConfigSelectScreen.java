@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.integration.configured;
 
-
+/*
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.configured.Configured;
 import com.mrcrayfish.configured.api.ConfigType;
@@ -78,9 +78,8 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         return modId;
     }
 
-    /**
-     * Registers this custom config screen
-     */
+
+     // Registers this custom config screen
     public static void registerConfigScreen(String modId, Function<Screen, CustomConfigSelectScreen> screenSelectFactory) {
         ModContainer container = ModList.get().getModContainerById(modId).get();
         container.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () ->
@@ -153,4 +152,4 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         }
     }
 
-}
+}*/

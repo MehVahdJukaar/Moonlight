@@ -84,7 +84,7 @@ public class RegHelperImpl {
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId,
                 c -> {
-                    if(PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+                    if(PlatformHelper.getPhysicalSide().isClient()) AntiRepostWarning.addMod(modId);
 
                     return new RegistryQueue<>(reg);
                 });

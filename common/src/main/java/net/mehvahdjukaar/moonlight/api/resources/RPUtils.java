@@ -262,7 +262,7 @@ public class RPUtils {
             ItemStack result = newRes.asItem().getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
             NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
-            return new ShapedRecipe(newId, or.getGroup(), or.getWidth(), or.getHeight(), ingredients, result);
+            return new ShapedRecipe(newId, or.getGroup(),or.category(), or.getWidth(), or.getHeight(), ingredients, result);
         } else if (original instanceof ShapelessRecipe or) {
             List<Ingredient> newList = new ArrayList<>();
             for (var ingredient : or.getIngredients()) {
@@ -277,7 +277,7 @@ public class RPUtils {
             ItemStack result = newRes.asItem().getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
             NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
-            return new ShapelessRecipe(newId, or.getGroup(), result, ingredients);
+            return new ShapelessRecipe(newId, or.getGroup(),or.category(), result, ingredients);
         } else {
             throw new UnsupportedOperationException(String.format("Original recipe %s must be Shaped or Shapeless", original));
         }

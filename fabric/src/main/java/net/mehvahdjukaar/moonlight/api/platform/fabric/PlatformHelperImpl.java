@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -22,7 +21,6 @@ import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -36,7 +34,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -100,8 +97,8 @@ public class PlatformHelperImpl {
         return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnChance();
     }
 
-    public static PlatformHelper.Env getEnv() {
-        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatformHelper.Env.CLIENT : PlatformHelper.Env.SERVER;
+    public static PlatformHelper.Side getPhysicalSide() {
+        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatformHelper.Side.CLIENT : PlatformHelper.Side.SERVER;
     }
 
     @Nullable
@@ -136,22 +133,15 @@ public class PlatformHelperImpl {
         return FabricLoader.getInstance().getGameDir();
     }
 
-    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
-                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> fillItemList) {
-        var t = FabricItemGroupBuilder.create(name);
-        t.appendItems(fillItemList).icon(icon);
-        return t.build();
-    }
-
     private static final Map<PackType, List<Supplier<Pack>>> EXTRA_PACKS = new EnumMap<>(PackType.class);
 
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
         EXTRA_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
-        if (packType == PackType.CLIENT_RESOURCES && PlatformHelper.getEnv().isClient()) {
+        if (packType == PackType.CLIENT_RESOURCES && PlatformHelper.getPhysicalSide().isClient()) {
             if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
                 var newSources = new HashSet<>(rep.getSources());
                 getAdditionalPacks(packType).forEach(l -> {
-                    newSources.add((infoConsumer, b) -> infoConsumer.accept(l.get()));
+                    newSources.add(infoConsumer -> infoConsumer.accept(l.get()));
                 });
                 rep.setSources(newSources);
             }

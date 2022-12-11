@@ -265,8 +265,8 @@ public class RegHelper {
     }
 
     public static Map<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
-                                                                         Block parentBlock, boolean isHidden) {
-        return registerFullBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock), isHidden);
+                                                                         Block parentBlock) {
+        return registerFullBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock));
     }
 
     /**
@@ -275,7 +275,7 @@ public class RegHelper {
      * @return registry object map
      */
     public static Map<VariantType, Supplier<Block>> registerFullBlockSet(
-            ResourceLocation baseName, BlockBehaviour.Properties properties, boolean isHidden) {
+            ResourceLocation baseName, BlockBehaviour.Properties properties) {
 
         Map<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
         for (VariantType type : VariantType.values()) {
@@ -284,17 +284,13 @@ public class RegHelper {
             if (!type.equals(VariantType.BLOCK)) name += "_" + type.name().toLowerCase(Locale.ROOT);
             Supplier<Block> base = type != VariantType.BLOCK ? map.get(VariantType.BLOCK) : null;
             Supplier<Block> block = registerBlock(new ResourceLocation(modId, name), () -> type.create(properties, base));
-            CreativeModeTab tab = switch (type) {
-                case VERTICAL_SLAB ->
-                        !isHidden && PlatformHelper.isModLoaded("quark") ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
-                case WALL -> !isHidden ? CreativeModeTab.TAB_DECORATIONS : null;
-                default -> !isHidden ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
-            };
-            registerItem(new ResourceLocation(modId, name), () -> new BlockItem(block.get(), (new Item.Properties()).tab(tab)));
+            registerItem(new ResourceLocation(modId, name), () -> new BlockItem(block.get(), (new Item.Properties())));
             map.put(type, block);
         }
         return map;
     }
+
+
 
 }
 
