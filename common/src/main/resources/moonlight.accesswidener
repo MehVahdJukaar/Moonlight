@@ -1,4 +1,4 @@
-accessWidener   v2  named
+accessWidener v2  named
 
 transitive-accessible class net/minecraft/data/recipes/ShapedRecipeBuilder$Result
 
@@ -28,7 +28,6 @@ transitive-accessible method net/minecraft/world/entity/animal/Bee incrementNumC
 transitive-accessible method net/minecraft/client/renderer/texture/SpriteContents getFrameCount ()I
 transitive-accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameWidth I
 transitive-accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameHeight I
-transitive-accessible method net/minecraft/client/renderer/texture/SpriteContents getFrameCount() I
 
 #for common...
 transitive-accessible field net/minecraft/world/item/CreativeModeTabs COLORED_BLOCKS Lnet/minecraft/world/item/CreativeModeTab;
