@@ -56,7 +56,7 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
-    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             try {
                 ModMessages.CHANNEL.sendToClientPlayer(player,

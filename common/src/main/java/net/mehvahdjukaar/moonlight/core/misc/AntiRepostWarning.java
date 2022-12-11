@@ -8,7 +8,6 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.HashSet;
@@ -21,7 +20,7 @@ public class AntiRepostWarning {
     private static final Set<String> MODS = new HashSet<>();
 
     public static void addMod(String id) {
-        if(!Objects.equals(id, "minecraft")) {
+        if (!Objects.equals(id, "minecraft")) {
             MODS.add(id);
         }
     }
@@ -44,7 +43,7 @@ public class AntiRepostWarning {
                     link.setStyle(link.getStyle().withClickEvent(click).withUnderlined(true)
                             .withColor(TextColor.fromLegacyFormat(ChatFormatting.GOLD)));
 
-                    player.displayClientMessage(Component.translatable("message.moonlight.anti_repost",name, link), false);
+                    player.displayClientMessage(Component.translatable("message.moonlight.anti_repost", name, link), false);
                 }
             }
         } catch (Exception ignored) {
@@ -52,9 +51,14 @@ public class AntiRepostWarning {
     }
 
     private static boolean isFileNameSus(String mod) {
-        String fileName = PlatformHelper.getModFilePath(mod).getFileName().toString();
-        if (fileName.contains(".jar")) {
-            return fileName.contains("-Mod-") || fileName.endsWith("-tw");
+        var path = PlatformHelper.getModFilePath(mod);
+        if (path == null || path.getFileName() == null) {
+            Moonlight.LOGGER.warn("Failed to get file path of mod {}", mod);
+        } else {
+            String fileName = path.getFileName().toString();
+            if (fileName.contains(".jar")) {
+                return fileName.contains("-Mod-") || fileName.endsWith("-tw");
+            }
         }
         return false;
     }
