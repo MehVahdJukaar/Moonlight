@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.set.forge;
 
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
@@ -49,7 +50,7 @@ public class BlockSetInternalImpl {
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
         if(registry == BuiltInRegistries.BLOCK) {
             addDynamicBlockRegistration((BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
-        }else if(registry == BuiltInRegistries.FLUID){
+        }else if(registry == BuiltInRegistries.ATTRIBUTE){
             throw new IllegalArgumentException("Fluid registry not supported here");
         } else{
             //other entries
@@ -105,7 +106,7 @@ public class BlockSetInternalImpl {
     //shittiest code ever lol
     protected static void registerLateBlockAndItems(RegisterEvent event) {
         //fires right after blocks
-        if (!event.getRegistryKey().equals(ForgeRegistries.FLUIDS.getRegistryKey())) return;
+        if (!event.getRegistryKey().equals(ForgeRegistries.ATTRIBUTES.getRegistryKey())) return;
         //when the first registration function is called we find all block types
         if (!hasFilledBlockSets) {
             BlockSetInternal.initializeBlockSets();

@@ -31,7 +31,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class DynamicResourcePack implements PackResources {
@@ -161,20 +164,17 @@ public abstract class DynamicResourcePack implements PackResources {
 
     @Override
     public IoSupplier<InputStream> getResource(PackType type, ResourceLocation id) {
-        return () -> {
-            if (type != this.packType) {
-                throw new IOException(String.format("Tried to access wrong type of resource on %s.", this.resourcePackName));
-            }
-            var res = this.resources.get(id);
-            if (res != null) {
-                try {
-                    return new ByteArrayInputStream(res);
-                } catch (Exception e) {
-                    e.printStackTrace();
+
+        var res = this.resources.get(id);
+        if (res != null) {
+            return () -> {
+                if (type != this.packType) {
+                    throw new IOException(String.format("Tried to access wrong type of resource on %s.", this.resourcePackName));
                 }
-            }
-            throw makeFileNotFoundException(String.format("%s/%s/%s", type.getDirectory(), id.getNamespace(), id.getPath()));
-        };
+                return new ByteArrayInputStream(res);
+            };
+        }
+        return null;
     }
 
     @Override
