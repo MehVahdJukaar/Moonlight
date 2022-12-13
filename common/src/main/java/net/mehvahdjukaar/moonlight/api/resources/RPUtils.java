@@ -35,17 +35,21 @@ import java.util.function.Predicate;
 public class RPUtils {
 
     public static String serializeJson(JsonElement json) throws IOException {
-        StringWriter stringWriter = new StringWriter();
+        try (StringWriter stringWriter = new StringWriter();
+             JsonWriter jsonWriter = new JsonWriter(stringWriter)) {
 
-        JsonWriter jsonWriter = new JsonWriter(stringWriter);
-        jsonWriter.setLenient(true);
-        jsonWriter.setIndent("  ");
+            jsonWriter.setLenient(true);
+            jsonWriter.setIndent("  ");
 
-        Streams.write(json, jsonWriter);
+            Streams.write(json, jsonWriter);
 
-        return stringWriter.toString();
+            return stringWriter.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
+    //remember to close this stream
     public static JsonObject deserializeJson(InputStream stream) {
         return GsonHelper.parse(new InputStreamReader(stream, StandardCharsets.UTF_8));
     }
@@ -69,7 +73,7 @@ public class RPUtils {
         }
         ResourceLocation res = Utils.getID(block);
         var blockState = manager.getResource(ResType.BLOCKSTATES.getPath(res));
-        try (var bsStream = blockState.get().open()) {
+        try (var bsStream = blockState.orElseThrow().open()) {
 
 
             JsonElement bsElement = RPUtils.deserializeJson(bsStream);
@@ -96,18 +100,18 @@ public class RPUtils {
         throw new FileNotFoundException("Could not find any texture associated to the given block " + res);
     }
 
-    private static List<String> guessTextureLocation(ResourceLocation id, ResourceManager manager, Block block){
+    private static List<String> guessTextureLocation(ResourceLocation id, ResourceManager manager, Block block) {
         //if(!id.getNamespace().contains("better")) return List.of();
         String name = id.getPath();
         List<String> textures = new ArrayList<>();
-        for(var w :WoodTypeRegistry.getTypes()){
-            if(name.contains(w.id.getPath())){
-                for(var c : w.getChildren()){
-                    if(c.getValue() == block){
-                        if(Objects.equals(c.getKey(), "log") || c.getKey().equals("stripped_log")){
+        for (var w : WoodTypeRegistry.getTypes()) {
+            if (name.contains(w.id.getPath())) {
+                for (var c : w.getChildren()) {
+                    if (c.getValue() == block) {
+                        if (Objects.equals(c.getKey(), "log") || c.getKey().equals("stripped_log")) {
                             textures.add(id.getNamespace() + ":block/" + name + "_top");
                             textures.add(id.getNamespace() + ":block/" + name + "_side");
-                        }else textures.add(id.getNamespace() + ":block/" + name);
+                        } else textures.add(id.getNamespace() + ":block/" + name);
                         return textures;
                     }
                 }
@@ -217,7 +221,7 @@ public class RPUtils {
 
     public static Recipe<?> readRecipe(ResourceManager manager, ResourceLocation location) {
         var resource = manager.getResource(location);
-        try (var stream = resource.get().open()) {
+        try (var stream = resource.orElseThrow().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
             return RecipeManager.fromJson(location, element);
         } catch (Exception e) {
@@ -232,7 +236,7 @@ public class RPUtils {
 
     public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, ResourceLocation location) {
         var resource = manager.getResource(location);
-        try (var stream = resource.get().open()) {
+        try (var stream = resource.orElseThrow().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
             try {
                 return TemplateRecipeManager.read(element);
@@ -318,8 +322,6 @@ public class RPUtils {
         json.add("predicate", predicates);
         return json;
     }
-
-
 
 
 }

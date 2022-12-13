@@ -153,7 +153,7 @@ public abstract class DynamicResourcePack implements PackResources {
             return this.resources.keySet().stream()
                     .filter(r -> (r.getNamespace().equals(namespace) && r.getPath().startsWith(id)))
                     .filter(filter)
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return NO_RESOURCES;
     }

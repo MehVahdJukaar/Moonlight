@@ -25,6 +25,7 @@ public class StaticResource {
         this.sourceName = sourceName;
     }
 
+    @Deprecated(forRemoval = true)
     public InputStream getInputStream() {
         return new ByteArrayInputStream(data);
     }
