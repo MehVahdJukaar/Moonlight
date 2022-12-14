@@ -8,14 +8,18 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
+import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagFile;
 import net.minecraft.tags.TagKey;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 //wrapped tag builder for easier use
 public class SimpleTagBuilder extends TagBuilder {
 
+    private final Set<String> uniqueKeys = new HashSet<>();
     private final ResourceLocation id;
 
     protected SimpleTagBuilder(ResourceLocation location) {
@@ -34,9 +38,23 @@ public class SimpleTagBuilder extends TagBuilder {
         return new SimpleTagBuilder(key.location());
     }
 
+    @Override
+    public TagBuilder add(TagEntry entry) {
+        if(validateEntry(entry)) {
+            return super.add(entry);
+        }return this;
+    }
+
     public SimpleTagBuilder add(ResourceLocation entry) {
         super.addElement(entry);
         return this;
+    }
+
+    //assure entry is unique
+    private boolean validateEntry(TagEntry entry){
+        if(uniqueKeys.contains(entry.toString()))return false;
+        else uniqueKeys.add(entry.toString());
+        return true;
     }
 
     //Forge stuff. we arent using it
@@ -46,7 +64,6 @@ public class SimpleTagBuilder extends TagBuilder {
         super.replace(value);
         return this;
     }
-
     @Override
     public SimpleTagBuilder replace() {
         super.replace();

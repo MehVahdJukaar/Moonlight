@@ -38,8 +38,10 @@ public class ClientBoundSyncConfigsMessage implements Message {
     public void handle(ChannelHandler.Context context) {
         var config = ConfigSpec.getSpec(this.modId, ConfigType.COMMON);
         if (config != null) {
-            config.loadFromBytes( new ByteArrayInputStream(this.configData));
-            Moonlight.LOGGER.info("Synced {} configs", this.fineName);
+            try(var stream =  new ByteArrayInputStream(this.configData)) {
+                config.loadFromBytes(stream);
+                Moonlight.LOGGER.info("Synced {} configs", this.fineName);
+            }catch (Exception ignored){}
         } else {
             Moonlight.LOGGER.error("Failed to find config file with name {}", this.fineName);
         }

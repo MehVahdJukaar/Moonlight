@@ -13,6 +13,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
@@ -35,16 +36,20 @@ import java.util.function.Predicate;
 public class RPUtils {
 
     public static String serializeJson(JsonElement json) throws IOException {
-        StringWriter stringWriter = new StringWriter();
+        try (StringWriter stringWriter = new StringWriter();
+             JsonWriter jsonWriter = new JsonWriter(stringWriter)) {
 
-        JsonWriter jsonWriter = new JsonWriter(stringWriter);
-        jsonWriter.setLenient(true);
-        jsonWriter.setIndent("  ");
+            jsonWriter.setLenient(true);
+            jsonWriter.setIndent("  ");
 
-        Streams.write(json, jsonWriter);
+            Streams.write(json, jsonWriter);
 
-        return stringWriter.toString();
+            return stringWriter.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
 
     public static JsonObject deserializeJson(InputStream stream) {
         return GsonHelper.parse(new InputStreamReader(stream, StandardCharsets.UTF_8));
@@ -76,7 +81,7 @@ public class RPUtils {
 
             //grabs the first resource location of a model
             String modelPath = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"))
-                    .stream().findAny().get();
+                    .stream().findAny().orElseThrow();
 
             List<String> textures = findAllTexturesInModelRecursive(manager, modelPath);
 
@@ -119,7 +124,7 @@ public class RPUtils {
     @NotNull
     private static List<String> findAllTexturesInModelRecursive(ResourceManager manager, String modelPath) throws Exception {
         JsonObject modelElement;
-        try (var modelStream = manager.getResource(ResType.MODELS.getPath(modelPath)).get().open()) {
+        try (var modelStream = manager.getResource(ResType.MODELS.getPath(modelPath)).orElseThrow().open()) {
             modelElement = RPUtils.deserializeJson(modelStream).getAsJsonObject();
         } catch (Exception e) {
             throw new Exception("Failed to parse model at " + modelPath);
@@ -153,7 +158,7 @@ public class RPUtils {
         if (cached != null) return new ResourceLocation(cached);
         ResourceLocation res = Utils.getID(item);
         var itemModel = manager.getResource(ResType.ITEM_MODELS.getPath(res));
-        try (var stream = itemModel.get().open()) {
+        try (var stream = itemModel.orElseThrow().open()) {
 
             JsonElement bsElement = RPUtils.deserializeJson(stream);
 
@@ -173,7 +178,7 @@ public class RPUtils {
             return findFirstResourceInJsonRecursive(array.get(0));
         } else if (element instanceof JsonObject) {
             var entries = element.getAsJsonObject().entrySet();
-            JsonElement child = entries.stream().findAny().get().getValue();
+            JsonElement child = entries.stream().findAny().orElseThrow().getValue();
             return findFirstResourceInJsonRecursive(child);
         } else return element.getAsString();
     }
@@ -217,7 +222,7 @@ public class RPUtils {
 
     public static Recipe<?> readRecipe(ResourceManager manager, ResourceLocation location) {
         var resource = manager.getResource(location);
-        try (var stream = resource.get().open()) {
+        try (var stream = resource.orElseThrow().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
             return RecipeManager.fromJson(location, element);
         } catch (Exception e) {
@@ -232,7 +237,7 @@ public class RPUtils {
 
     public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, ResourceLocation location) {
         var resource = manager.getResource(location);
-        try (var stream = resource.get().open()) {
+        try (var stream = resource.orElseThrow().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
             try {
                 return TemplateRecipeManager.read(element);

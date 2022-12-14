@@ -45,8 +45,10 @@ public class DynamicDataPack extends DynamicResourcePack {
         //merge tags
         if (this.resources.containsKey(loc)) {
             var r = resources.get(loc);
-            var oldTag = RPUtils.deserializeJson(new ByteArrayInputStream(r));
-            builder.addFromJson(oldTag);
+            try(var stream = new ByteArrayInputStream(r)) {
+                var oldTag = RPUtils.deserializeJson(stream);
+                builder.addFromJson(oldTag);
+            }catch (Exception ignored){}
         }
         JsonElement json = builder.serializeToJson();
         this.addJson(loc, json, ResType.GENERIC);
