@@ -36,6 +36,9 @@ public abstract class LanguageManagerMixin {
         AfterLanguageLoadEvent event = new AfterLanguageLoadEvent(map, cachedLanguageInfo);
         if (event.isDefault()) {
             //dispatch event and calls listeners
+            //highest priority
+            BlockSetAPI.getRegistries().forEach(r -> r.addTypeTranslations(event));
+
             MoonlightEventsHelper.postEvent(event, AfterLanguageLoadEvent.class);
         }
         return map;

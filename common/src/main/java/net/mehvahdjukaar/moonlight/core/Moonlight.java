@@ -34,7 +34,7 @@ public class Moonlight {
 
         BlockSetInternal.registerBlockSetDefinition(WoodTypeRegistry.INSTANCE);
         BlockSetInternal.registerBlockSetDefinition(LeavesTypeRegistry.INSTANCE);
-      MoonlightEventsHelper.addListener( BlockSetInternal::addTranslations, AfterLanguageLoadEvent.class);
+        //MoonlightEventsHelper.addListener( BlockSetInternal::addTranslations, AfterLanguageLoadEvent.class);
         CompatTypes.init();
         ModMessages.registerMessages();
         VillagerAIInternal.init();

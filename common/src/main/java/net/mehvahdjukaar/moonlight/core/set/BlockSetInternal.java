@@ -90,11 +90,6 @@ public class BlockSetInternal {
         BlockSetAPI.getRegistries().forEach(r -> r.addTypeTranslations(event));
     }
 
-    @FunctionalInterface
-    public interface BlockTypeRegistryCallback<E, T extends BlockType> {
-        void accept(Registrator<E> reg, Collection<T> wood);
-    }
-
     @ExpectPlatform
     public static <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType,
