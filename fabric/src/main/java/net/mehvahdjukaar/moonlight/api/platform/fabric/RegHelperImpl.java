@@ -44,6 +44,7 @@ import java.util.function.Supplier;
 public class RegHelperImpl {
 
     public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
+    private static final List<Consumer<RegHelper.AttributeEvent>> ATTRIBUTE_REGISTRATIONS = new ArrayList<>();
 
     public static final List<Registry<?>> REG_PRIORITY = List.of(
             Registry.SOUND_EVENT, Registry.BLOCK, Registry.FLUID, Registry.PARTICLE_TYPE,
@@ -60,7 +61,7 @@ public class RegHelperImpl {
 
     //call from mod setup
     @ApiStatus.Internal
-    public static void registerEntries() {
+    public static void lateRegisterEntries() {
         for (var m : REGISTRIES.entrySet()) {
             m.getValue().values().forEach(RegistryQueue::initializeEntries);
             if (m.getKey() == Registry.BLOCK) {
@@ -72,6 +73,16 @@ public class RegHelperImpl {
         ATTRIBUTE_REGISTRATIONS.forEach(e -> e.accept(FabricDefaultAttributeRegistry::register));
     }
 
+    public static void finishRegistration(String modId) {
+        for (var r : REGISTRIES.entrySet()) {
+            var m = r.getValue();
+            var v = m.get(modId);
+            if (v != null) {
+                v.initializeEntries();
+                m.remove(modId);
+            }
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
@@ -82,7 +93,7 @@ public class RegHelperImpl {
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId,
                 c -> {
-                    if(PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+                    if (PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
 
                     return new RegistryQueue<>(reg);
                 });
@@ -133,7 +144,6 @@ public class RegHelperImpl {
         ATTRIBUTE_REGISTRATIONS.add(eventListener);
     }
 
-    private static final List<Consumer<RegHelper.AttributeEvent>> ATTRIBUTE_REGISTRATIONS = new ArrayList<>();
 
     public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
         CommandRegistrationCallback.EVENT.register((d, s, b) -> eventListener.accept(d));

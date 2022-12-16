@@ -1,19 +1,14 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
 import net.minecraft.server.MinecraftServer;
@@ -37,7 +32,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     //called after all other mod initialize have been called.
     // we can register extra stuff here that depends on those before client and server common setup is fired
     static void commonSetup() {
-        RegHelperImpl.registerEntries();
+        RegHelperImpl.lateRegisterEntries();
         FabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
     }
 
