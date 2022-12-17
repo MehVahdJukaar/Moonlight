@@ -34,8 +34,6 @@ import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -103,10 +101,11 @@ public class RegHelper {
         return registerAsync(name, feature, Registries.STRUCTURE_TYPE);
     }
 
-    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<PlacedFeature> registerPlacedFeature(
-            ResourceLocation name, RegSupplier<ConfiguredFeature<FC, F>> feature, Supplier<List<PlacementModifier>> modifiers) {
+    public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<PlacedFeature> registerPlacedFeature(
+            ResourceLocation name, RegSupplier<ConfiguredFeature<C, F>> feature, Supplier<List<PlacementModifier>> modifiers) {
         return registerPlacedFeature(name, () -> new PlacedFeature(hackyErase(feature.getHolder()), modifiers.get()));
     }
+
     static <T> Holder<T> hackyErase(Holder<? extends T> holder) {
         return (Holder<T>) holder;
     }
@@ -115,13 +114,13 @@ public class RegHelper {
         return register(name, featureSupplier, Registries.PLACED_FEATURE);
     }
 
-    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<ConfiguredFeature<FC, F>> registerConfiguredFeature(
-            ResourceLocation name, Supplier<F> feature, Supplier<FC> featureConfiguration) {
+    public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<ConfiguredFeature<C, F>> registerConfiguredFeature(
+            ResourceLocation name, Supplier<F> feature, Supplier<C> featureConfiguration) {
         return registerConfiguredFeature(name, () -> new ConfiguredFeature<>(feature.get(), featureConfiguration.get()));
     }
 
-    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<ConfiguredFeature<FC, F>> registerConfiguredFeature(
-            ResourceLocation name, Supplier<ConfiguredFeature<FC, F>> featureSupplier) {
+    public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<ConfiguredFeature<C, F>> registerConfiguredFeature(
+            ResourceLocation name, Supplier<ConfiguredFeature<C, F>> featureSupplier) {
         return register(name, featureSupplier, Registries.CONFIGURED_FEATURE);
     }
 

@@ -47,7 +47,7 @@ public class RegHelperImpl {
     public static final Map<ResourceKey<? extends Registry<?>>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
 
     public static final List<ResourceKey<? extends Registry<?>>> REG_PRIORITY = List.of(
-            Registries.SOUND_EVENT, Registries.BLOCK, Registries.FLUID, Registries.PARTICLE_TYPE,
+            Registries.SOUND_EVENT, Registries.FLUID, Registries.BLOCK, Registries.PARTICLE_TYPE,
             Registries.ENTITY_TYPE, Registries.ITEM,
             Registries.BLOCK_ENTITY_TYPE, Registries.PLACEMENT_MODIFIER_TYPE, Registries.STRUCTURE_TYPE,
             Registries.STRUCTURE_PIECE, Registries.FEATURE, Registries.CONFIGURED_FEATURE,
@@ -72,7 +72,16 @@ public class RegHelperImpl {
         //register entities attributes now
         ATTRIBUTE_REGISTRATIONS.forEach(e -> e.accept(FabricDefaultAttributeRegistry::register));
     }
-
+    public static void finishRegistration(String modId) {
+        for (var r : REGISTRIES.entrySet()) {
+            var m = r.getValue();
+            var v = m.get(modId);
+            if (v != null) {
+                v.initializeEntries();
+                m.remove(modId);
+            }
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier,ResourceKey<? extends Registry<T>> reg) {
@@ -96,9 +105,9 @@ public class RegHelperImpl {
         return entry;
     }
 
-    public static <T> void registerInBatch(ResourceKey<? extends Registry<T>> reg, Consumer<Registrator<T>> eventListener) {
-        var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
-        RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent("a", c -> new RegistryQueue<>(reg));
+    public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {
+        var m = REGISTRIES.computeIfAbsent(reg.key(), h -> new LinkedHashMap<>());
+        RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent("a", c -> new RegistryQueue<>(reg.key()));
         registry.add(eventListener);
     }
 

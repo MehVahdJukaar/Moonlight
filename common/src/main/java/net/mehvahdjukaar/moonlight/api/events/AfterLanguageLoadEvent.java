@@ -23,7 +23,7 @@ public class AfterLanguageLoadEvent implements SimpleEvent {
     }
 
     public void addEntry(String key, String translation) {
-        if (!languageLines.containsKey(key)) languageLines.put(key, translation);
+        languageLines.computeIfAbsent(key, s->translation);
     }
 
     public void addEntries(LangBuilder builder) {

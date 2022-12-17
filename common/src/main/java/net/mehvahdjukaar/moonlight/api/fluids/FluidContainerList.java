@@ -20,16 +20,10 @@ import java.util.function.Supplier;
 
 public class FluidContainerList {
 
-    /*
-    public static final Codec<FluidContainerList> CODEC = RecordCodecBuilder.merge((instance) -> instance.group(
-            Category.CODEC.listOf().fieldOf("containers").forGetter(FluidContainerList::encodeList)
-    ).apply(instance, FluidContainerList::new));
-    */
 
     private final Map<Item, Category> emptyToFilledMap = new IdentityHashMap<>();
 
     public FluidContainerList() {
-
     }
 
     public FluidContainerList(List<Category> categoryList) {
@@ -112,7 +106,7 @@ public class FluidContainerList {
 
         public static final Codec<Category> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
                 ResourceLocation.CODEC.fieldOf("empty").forGetter(c -> Utils.getID(c.emptyContainer)),
-                Codec.INT.fieldOf("capacity").forGetter(Category::getCapacity),
+                Codec.INT.fieldOf("capacity").forGetter(Category::getAmount),
                 ResourceLocation.CODEC.listOf().fieldOf("filled").forGetter(c -> c.filled.stream().map(Utils::getID).toList()),
                 BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
                 BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
@@ -156,10 +150,6 @@ public class FluidContainerList {
 
         public Item getEmptyContainer() {
             return emptyContainer;
-        }
-
-        public int getCapacity() {
-            return containerCapacity;
         }
 
         private void addItem(Item i) {

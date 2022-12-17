@@ -220,8 +220,6 @@ public class SoftFluid {
         return !this.food.isEmpty();
     }
 
-
-    //TODO: builder isn't needed anymore. maybe remove
     @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
         private ResourceLocation stillTexture;
@@ -527,40 +525,43 @@ public class SoftFluid {
 
     public static final Codec<Holder<SoftFluid>> HOLDER_CODEC = RegistryFileCodec.create(SoftFluidRegistry.getRegistryKey(), SoftFluid.CODEC);
 
+    private static final SoftFluid DEFAULT_DUMMY = new SoftFluid(new Builder(new ResourceLocation(""), new ResourceLocation("")));
+
     //Direct codec
     public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
             ResourceLocation.CODEC.fieldOf("flowing_texture").forGetter(SoftFluid::getFlowingTexture),
-            Codec.STRING.optionalFieldOf("from_mod").forGetter(getHackyOptional(SoftFluid::getFromMod)),
-            Codec.STRING.optionalFieldOf("translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
-            Codec.intRange(0, 15).optionalFieldOf("luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
-            BaseColor.CODEC.optionalFieldOf("color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
-            TintMethod.CODEC.optionalFieldOf("tint_method").forGetter(getHackyOptional(SoftFluid::getTintMethod)),
-            FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
-            Codec.STRING.listOf().optionalFieldOf("preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
+            Codec.STRING.optionalFieldOf("from_mod",DEFAULT_DUMMY.fromMod).forGetter(SoftFluid::getFromMod),
+            Codec.STRING.optionalFieldOf("translation_key",DEFAULT_DUMMY.translationKey).forGetter(SoftFluid::getTranslationKey),
+            Codec.intRange(0, 15).optionalFieldOf("luminosity",DEFAULT_DUMMY.luminosity).forGetter(SoftFluid::getLuminosity),
+            BaseColor.CODEC.optionalFieldOf("color",DEFAULT_DUMMY.tintColor).forGetter(SoftFluid::getTintColor),
+            TintMethod.CODEC.optionalFieldOf("tint_method",DEFAULT_DUMMY.tintMethod).forGetter(SoftFluid::getTintMethod),
+            FoodProvider.CODEC.optionalFieldOf("food",DEFAULT_DUMMY.getFoodProvider()).forGetter(SoftFluid::getFoodProvider),
+            Codec.STRING.listOf().optionalFieldOf("preserved_tags_from_item",DEFAULT_DUMMY.NBTFromItem).forGetter(SoftFluid::getNbtKeyFromItem),
             FluidContainerList.Category.CODEC.listOf().optionalFieldOf("containers").forGetter(f -> f.getContainerList().encodeList()),
-            BuiltInRegistries.FLUID.byNameCodec().listOf().optionalFieldOf("equivalent_fluids")
-                    .forGetter(getHackyOptional(s -> s.getEquivalentFluids().stream().toList())),
+            BuiltInRegistries.FLUID.byNameCodec().listOf().optionalFieldOf("equivalent_fluids",DEFAULT_DUMMY.equivalentFluids)
+                    .forGetter(s -> s.getEquivalentFluids().stream().toList()),
             ResourceLocation.CODEC.optionalFieldOf("use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
     ).apply(instance, SoftFluid::create));
 
 
-    protected static SoftFluid create(ResourceLocation still, ResourceLocation flowing, Optional<String> fromMod,
-                                      Optional<String> translation, Optional<Integer> luminosity, Optional<Integer> color,
-                                      Optional<TintMethod> tint, Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
-                                      Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,
+
+    protected static SoftFluid create(ResourceLocation still, ResourceLocation flowing, String fromMod,
+                                      String translation, Integer luminosity, Integer color,
+                                      TintMethod tint, FoodProvider food, List<String> nbtKeys,
+                                      Optional<List<FluidContainerList.Category>> containers, List<Fluid> equivalent,
                                       Optional<ResourceLocation> textureFrom) {
 
         Builder builder = new Builder(still, flowing);
-        fromMod.ifPresent(builder::fromMod);
-        translation.ifPresent(builder::translationKey);
-        luminosity.ifPresent(builder::luminosity);
-        color.ifPresent(builder::color);
-        tint.ifPresent(builder::tintMethod);
-        food.ifPresent(builder::food);
-        nbtKeys.ifPresent(k -> k.forEach(builder::keepNBTFromItem));
-        containers.ifPresent(b -> builder.containers(new FluidContainerList(b)));
-        equivalent.ifPresent(e -> e.forEach(builder::addEqFluid));
+        builder.fromMod(fromMod);
+        builder.translationKey(translation);
+        builder.luminosity(luminosity);
+        builder.tintMethod(tint);
+        builder.color(color);
+        builder.food(food);
+        nbtKeys.forEach(builder::keepNBTFromItem);
+        containers.ifPresent(c-> builder.containers(new FluidContainerList(c)));
+        equivalent.forEach(builder::addEqFluid);
         textureFrom.ifPresent(builder::copyTexturesFrom);
         return builder.build();
     }
@@ -582,17 +583,6 @@ public class SoftFluid {
         if (originalFluid.useTexturesFrom != null) builder.copyTexturesFrom(originalFluid.useTexturesFrom);
         if (newFluid.useTexturesFrom != null) builder.copyTexturesFrom(newFluid.useTexturesFrom);
         return builder.build();
-    }
-
-    private static final SoftFluid DEFAULT_DUMMY = new SoftFluid(new Builder(new ResourceLocation(""), new ResourceLocation("")));
-
-    //hacky. gets an optional if the fluid value is its default one
-    private static <T> Function<SoftFluid, Optional<T>> getHackyOptional(final Function<SoftFluid, T> getter) {
-        return f -> {
-            var value = getter.apply(f);
-            var def = getter.apply(DEFAULT_DUMMY);
-            return value == null || value.equals(def) ? Optional.empty() : Optional.of(value);
-        };
     }
 
     @ExpectPlatform
