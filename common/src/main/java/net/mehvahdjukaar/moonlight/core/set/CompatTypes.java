@@ -13,6 +13,16 @@ public class CompatTypes {
                 new ResourceLocation("domum_ornamentum:green_cactus_extra"),new ResourceLocation("cactus")));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus"),
                 new ResourceLocation("domum_ornamentum:cactus_extra"),new ResourceLocation("cactus")));
+
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "ars_nouveau", "archwood", "archwood_planks", "blue_archwood_log"));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "ars_nouveau", "archwood", "archwood_planks", "green_archwood_log"));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "ars_nouveau", "archwood", "archwood_planks", "purple_archwood_log"));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "ars_nouveau", "archwood", "archwood_planks", "red_archwood_log"));
+
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "darkerdepths", "petrified", "petrified_planks", "petrified_log"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
