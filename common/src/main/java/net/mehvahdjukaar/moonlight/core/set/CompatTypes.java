@@ -123,5 +123,8 @@ public class CompatTypes {
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "pokecube_legends", "dyna_red", "dyna_leaves_red", "aged"));
 
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "ulterlands", "souldrained", "souldrained_leaves", "oak"));
+
     }
 }
