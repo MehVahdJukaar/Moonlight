@@ -24,6 +24,9 @@ public class CompatTypes {
                 "ars_nouveau", "red_archwood", "archwood_planks", "red_archwood_log"));
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "blue_skies", "crystallized", "crystallized_planks", "crystallized_log"));
+
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "darkerdepths", "petrified", "petrified_planks", "petrified_log"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "pokecube_legends", "concrete", "concrete_planks", "concrete_log"));
@@ -106,6 +109,11 @@ public class CompatTypes {
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "biomesoplenty", "rainbow_birch", "rainbow_birch_leaves", "birch"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "blue_skies", "crystallized", "crystallized_leaves", "crystallized"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "blue_skies", "crescent_fruit", "crescent_fruit_leaves", "dusk"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ars_nouveau", "blue_archwood", "blue_archwood_leaves", "blue_archwood"));
