@@ -15,13 +15,13 @@ public class CompatTypes {
                 new ResourceLocation("domum_ornamentum:cactus_extra"),new ResourceLocation("cactus")));
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
-                "ars_nouveau", "archwood", "archwood_planks", "blue_archwood_log"));
+                "ars_nouveau", "blue_archwood", "archwood_planks", "blue_archwood_log"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
-                "ars_nouveau", "archwood", "archwood_planks", "green_archwood_log"));
+                "ars_nouveau", "green_archwood", "archwood_planks", "green_archwood_log"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
-                "ars_nouveau", "archwood", "archwood_planks", "purple_archwood_log"));
+                "ars_nouveau", "purple_archwood", "archwood_planks", "purple_archwood_log"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
-                "ars_nouveau", "archwood", "archwood_planks", "red_archwood_log"));
+                "ars_nouveau", "red_archwood", "archwood_planks", "red_archwood_log"));
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "darkerdepths", "petrified", "petrified_planks", "petrified_log"));
@@ -106,6 +106,15 @@ public class CompatTypes {
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "biomesoplenty", "rainbow_birch", "rainbow_birch_leaves", "birch"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "ars_nouveau", "blue_archwood", "blue_archwood_leaves", "blue_archwood"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "ars_nouveau", "green_archwood", "green_archwood_leaves", "green_archwood"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "ars_nouveau", "purple_archwood", "purple_archwood_leaves", "purple_archwood"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "ars_nouveau", "red_archwood", "red_archwood_leaves", "red_archwood"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "pokecube_legends", "dyna_pastel_pink", "dyna_leaves_pastel_pink", "aged"));
