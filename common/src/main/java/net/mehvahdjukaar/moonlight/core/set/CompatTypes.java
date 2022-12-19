@@ -124,6 +124,29 @@ public class CompatTypes {
                 "pokecube_legends", "dyna_red", "dyna_leaves_red", "aged"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "apple", "apple_leaves", "apple"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "banana", "banana_leaves", "banana"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "cherry", "cherry_leaves", "cherry"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "coconut", "coconut_leaves", "coconut"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "lemon", "lemon_leaves", "lemon"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "mango", "mango_leaves", "mango"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "mulberry", "mulberry_leaves", "mulberry"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "orange", "orange_leaves", "orange"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "peach", "peach_leaves", "peach"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "pear", "pear_leaves", "pear"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "plum", "plum_leaves", "plum"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ulterlands", "souldrained", "souldrained_leaves", "oak"));
 
     }
