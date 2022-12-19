@@ -107,5 +107,12 @@ public class CompatTypes {
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "biomesoplenty", "rainbow_birch", "rainbow_birch_leaves", "birch"));
 
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "pokecube_legends", "dyna_pastel_pink", "dyna_leaves_pastel_pink", "aged"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "pokecube_legends", "dyna_pink", "dyna_leaves_pink", "aged"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "pokecube_legends", "dyna_red", "dyna_leaves_red", "aged"));
+
     }
 }
