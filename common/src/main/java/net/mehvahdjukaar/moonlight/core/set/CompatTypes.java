@@ -95,9 +95,6 @@ public class CompatTypes {
 
 
         //leaves
-        var beanstalk = WoodType.Finder.simple(
-                "twilightforest", "huge_stalk", null, "huge_stalk");
-        beanstalk.addChild("leaves", new ResourceLocation("twilightforest:beanstalk_leaves"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ars_nouveau", "blue_archwood", "blue_archwood_leaves", "blue_archwood"));
@@ -156,6 +153,9 @@ public class CompatTypes {
                 "terraqueous", "pear", "pear_leaves", "pear"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "terraqueous", "plum", "plum_leaves", "plum"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "twilightforest", "beanstalk", "beanstalk_leaves", "huge_stalk"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ulterlands", "souldrained", "souldrained_leaves", "oak"));
