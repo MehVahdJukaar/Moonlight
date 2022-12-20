@@ -146,19 +146,7 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addSpecialModelRegistration(Consumer<ClientPlatformHelper.SpecialModelEvent> eventListener) {
-        //this is shit and fires asynchronously on a random thread, usually worker main. unfit to use for dynamic dependent models
         ModelLoadingRegistryImpl.INSTANCE.registerModelProvider((m, loader) -> eventListener.accept(loader::accept));
-        //... using both as some mods rely on it
-      //  MODEL_APPENDERS.add(eventListener);
-    }
-
-    @Deprecated(forRemoval = true)
-    private static final List<Consumer<ClientPlatformHelper.SpecialModelEvent>> MODEL_APPENDERS = new ArrayList<>();
-
-    @Deprecated(forRemoval = true)
-    @ApiStatus.Internal
-    public static void addSpecialModels(ClientPlatformHelper.SpecialModelEvent event) {
-        MODEL_APPENDERS.forEach(a -> a.accept(event));
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientPlatformHelper.TooltipComponentEvent> eventListener) {

@@ -34,14 +34,14 @@ public class BlocksColorInternal {
         VANILLA_COLORS.forEach(d -> colors.put(d.getName(), d));
         List<String> colorPriority = new ArrayList<>(colors.keySet().stream().toList());
 
-        scanRegistry(colors, colorPriority, Registry.BLOCK, BLOCK_COLOR_SETS);
-        scanRegistry(colors, colorPriority, Registry.ITEM, ITEM_COLOR_SETS);
+        addColoredFromRegistry(colors, colorPriority, Registry.BLOCK, BLOCK_COLOR_SETS);
+        addColoredFromRegistry(colors, colorPriority, Registry.ITEM, ITEM_COLOR_SETS);
 
         Moonlight.LOGGER.info("Initialized color sets in {}ms", sw.elapsed().toMillis());
     }
 
-    private static <T> void scanRegistry(Map<String, DyeColor> colors, List<String> colorPriority,
-                                         Registry<T> registry, Map<String, ColoredSet<T>> colorSetMap) {
+    private static <T> void addColoredFromRegistry(Map<String, DyeColor> colors, List<String> colorPriority,
+                                                   Registry<T> registry, Map<String, ColoredSet<T>> colorSetMap) {
         Map<ResourceLocation, EnumMap<DyeColor, T>> groupedByType = new HashMap<>();
         colorPriority.sort(Comparator.comparingInt(String::length));
         Collections.reverse(colorPriority);
@@ -210,8 +210,6 @@ public class BlocksColorInternal {
             this.colorsToBlock = map;
             this.id = id;
 
-            //fill default
-            this.defaultBlock = registry.getOptional(id).orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
             //fill optional
             //only supports tinted mod
             colors:
@@ -227,6 +225,20 @@ public class BlocksColorInternal {
                     }
                 }
             }
+
+            //fill default
+            if (id.getNamespace().equals("minecraft") && id.getPath().contains("stained_glass")) {
+                id = new ResourceLocation(id.getPath().replace("stained_", ""));
+            }
+            else if (id.getNamespace().equals("quark")){
+                if(id.getPath().equals("rune")) {
+                    id = new ResourceLocation("quark", "blank_rune");
+                }else if(id.getPath().equals("shard")) {
+                    id = new ResourceLocation("quark", "clear_shard");
+                }
+            }
+            this.defaultBlock = registry.getOptional(id).orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
+
         }
 
         /**

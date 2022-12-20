@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
+import net.minecraft.util.Mth;
+
 import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
 
@@ -69,6 +71,14 @@ public class HCLVColor extends BaseColor<HCLVColor> {
             a += c.alpha();
         }
         return new HCLVColor(averageAngles(hues), s / size, v / size, a / size);
+    }
+
+    @Override
+    public HCLVColor multiply(HCLVColor color, float hue, float chroma, float luminance, float alpha) {
+        return new HCLVColor(Mth.clamp(hue*this.hue(), 0,1),
+                Mth.clamp(chroma*this.chroma(), 0,1),
+                Mth.clamp(luminance*this.luminance(), 0,1),
+                Mth.clamp(alpha*this.alpha(), 0,1));
     }
 
     @Override

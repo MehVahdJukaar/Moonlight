@@ -1,8 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.codecs.PrimitiveCodec;
 import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
@@ -10,7 +7,6 @@ import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
-import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -109,7 +105,7 @@ public class Utils {
         return BuiltinRegistries.BIOME.getKey(object);
     }
 
-    public static ResourceLocation getID(ConfiguredFeature<?,?> object) {
+    public static ResourceLocation getID(ConfiguredFeature<?, ?> object) {
         return BuiltinRegistries.CONFIGURED_FEATURE.getKey(object);
     }
 
@@ -146,7 +142,7 @@ public class Utils {
         if (object instanceof Fluid b) return getID(b);
         if (object instanceof BlockEntityType<?> b) return getID(b);
         if (object instanceof RecipeSerializer<?> b) return getID(b);
-        if (object instanceof ConfiguredFeature<?,?> c) return getID(c);
+        if (object instanceof ConfiguredFeature<?, ?> c) return getID(c);
         if (object instanceof Supplier<?> s) return getID(s.get());
         if (object instanceof SoftFluid s) return getID(s);
         if (object instanceof MapDecorationType<?, ?> s) return getID(s);
@@ -155,11 +151,13 @@ public class Utils {
 
     //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
-        if (PlatformHelper.getEnv().isClient()) {
+        var s = PlatformHelper.getCurrentServer();
+        if (s != null) return s.registryAccess();
+        if (!PlatformHelper.getEnv().isServer()) {
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
         }
-        return PlatformHelper.getCurrentServer().registryAccess();
+        throw new UnsupportedOperationException("Failed to get registry access. This is a bug");
     }
 
     /**

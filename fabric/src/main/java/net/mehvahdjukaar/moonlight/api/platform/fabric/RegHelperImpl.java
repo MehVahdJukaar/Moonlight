@@ -4,21 +4,20 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
-import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.FabricRecipeConditionManager;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -45,6 +44,7 @@ import java.util.function.Supplier;
 public class RegHelperImpl {
 
     public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
+    private static final List<Consumer<RegHelper.AttributeEvent>> ATTRIBUTE_REGISTRATIONS = new ArrayList<>();
 
     public static final List<Registry<?>> REG_PRIORITY = List.of(
             Registry.SOUND_EVENT, Registry.BLOCK, Registry.FLUID, Registry.PARTICLE_TYPE,
@@ -61,7 +61,7 @@ public class RegHelperImpl {
 
     //call from mod setup
     @ApiStatus.Internal
-    public static void registerEntries() {
+    public static void lateRegisterEntries() {
         for (var m : REGISTRIES.entrySet()) {
             m.getValue().values().forEach(RegistryQueue::initializeEntries);
             if (m.getKey() == Registry.BLOCK) {
@@ -73,14 +73,30 @@ public class RegHelperImpl {
         ATTRIBUTE_REGISTRATIONS.forEach(e -> e.accept(FabricDefaultAttributeRegistry::register));
     }
 
+    public static void finishRegistration(String modId) {
+        for (var r : REGISTRIES.entrySet()) {
+            var m = r.getValue();
+            var v = m.get(modId);
+            if (v != null) {
+                v.initializeEntries();
+                m.remove(modId);
+            }
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
-        assert supplier != null : "Registry entry Supplier for " + name + " can't be null";
-        //if (true) return registerAsync(name, supplier, reg);
+        if (supplier == null) {
+            throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
+        }
         String modId = name.getNamespace();
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
-        RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId, c -> new RegistryQueue<>(reg));
+        RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId,
+                c -> {
+                    if (PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+
+                    return new RegistryQueue<>(reg);
+                });
         return registry.add(supplier, name);
     }
 
@@ -128,7 +144,6 @@ public class RegHelperImpl {
         ATTRIBUTE_REGISTRATIONS.add(eventListener);
     }
 
-    private static final List<Consumer<RegHelper.AttributeEvent>> ATTRIBUTE_REGISTRATIONS = new ArrayList<>();
 
     public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
         CommandRegistrationCallback.EVENT.register((d, s, b) -> eventListener.accept(d));
@@ -137,8 +152,6 @@ public class RegHelperImpl {
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         FabricRecipeConditionManager.registerSimple(id, predicate);
     }
-
-
 
 
 }

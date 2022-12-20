@@ -29,6 +29,9 @@ public class ModMessages {
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundOpenScreenPacket.class, ClientBoundOpenScreenPacket::new);
 
+        CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
+                ClientBoundSendLoginPacket.class, ClientBoundSendLoginPacket::new);
+
         /*
         INSTANCE.registerMessage(nextID(), ClientBoundSyncFluidsPacket.class, ClientBoundSyncFluidsPacket::buffer,
                 ClientBoundSyncFluidsPacket::new, ClientBoundSyncFluidsPacket::handler);

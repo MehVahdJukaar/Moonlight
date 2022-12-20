@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
+import net.minecraft.util.Mth;
 import oshi.annotation.concurrent.Immutable;
 
 import java.util.Arrays;
@@ -72,7 +73,13 @@ public class HSLColor extends BaseColor<HSLColor> {
         }
         return new HSLColor(averageAngles(hues), s / size, l / size, a / size);
     }
-
+    @Override
+    public HSLColor multiply(HSLColor color, float hue, float saturation, float lightness, float alpha) {
+        return new HSLColor(Mth.clamp(hue*this.hue(), 0,1),
+                Mth.clamp(saturation*this.saturation(), 0,1),
+                Mth.clamp(lightness*this.lightness(), 0,1),
+                Mth.clamp(alpha*this.alpha(), 0,1));
+    }
     @Override
     public HSLColor mixWith(HSLColor color, float bias) {
         float i = 1 - bias;

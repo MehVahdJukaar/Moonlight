@@ -3,6 +3,9 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -21,5 +24,20 @@ public interface IRecipeTemplate<R extends FinishedRecipe> {
     void addCondition(Object condition);
 
     List<Object> getConditions();
+
+    @Nullable
+     static <T extends BlockType> Ingredient convertIngredients(T originalMat, T destinationMat, Ingredient ing) {
+        for (var in : ing.getItems()) {
+            Item it = in.getItem();
+            if (it != Items.BARRIER) {
+                ItemLike i = BlockType.changeItemType(it, originalMat, destinationMat);
+                if (i != null) {
+                    //converts first ingredient it finds
+                    return Ingredient.of(i);
+                }
+            }
+        }
+        return null;
+    }
 
 }

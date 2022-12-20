@@ -145,7 +145,6 @@ public class PlatformHelperImpl {
 
     private static final Map<PackType, List<Supplier<Pack>>> EXTRA_PACKS = new EnumMap<>(PackType.class);
 
-    @SuppressWarnings("ConstantConditions")
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
         EXTRA_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
         if (packType == PackType.CLIENT_RESOURCES && PlatformHelper.getEnv().isClient()) {
@@ -174,6 +173,14 @@ public class PlatformHelperImpl {
 
     public static Path getModFilePath(String modId) {
         return FabricLoader.getInstance().getModContainer(modId).get().getRootPaths().get(0);
+    }
+
+    public static String getModPageUrl(String modId) {
+       return FabricLoader.getInstance().getModContainer(modId).get().getMetadata().getContact().get("homepage").orElse(null);
+    }
+
+    public static String getModName(String modId) {
+        return FabricLoader.getInstance().getModContainer(modId).get().getMetadata().getName();
     }
 
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {
@@ -232,5 +239,6 @@ public class PlatformHelperImpl {
     public static void addCommonSetup(Runnable clientSetup) {
         FabricSetupCallbacks.COMMON_SETUP.add(clientSetup);
     }
+
 
 }

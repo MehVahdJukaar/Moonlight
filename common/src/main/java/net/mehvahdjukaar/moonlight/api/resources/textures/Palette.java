@@ -504,7 +504,7 @@ public class Palette implements Set<PaletteColor> {
         return new Palette(map.values());
     }
 
-    public static Palette ofColors(Collection<BaseColor<?>> colors) {
+    public static <C extends BaseColor<C>> Palette ofColors(Collection<C> colors) {
         return new Palette(colors.stream().map(PaletteColor::new).collect(Collectors.toSet()));
     }
 

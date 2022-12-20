@@ -135,6 +135,17 @@ public class PlatformHelper {
 
     @Nullable
     @ExpectPlatform
+    public static String getModPageUrl(String modId) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static String getModName(String modId) {
+        throw new AssertionError();
+    }
+
+    @Nullable
+    @ExpectPlatform
     public static <T> Field findField(Class<? super T> clazz, String fieldName) {
         throw new AssertionError();
     }

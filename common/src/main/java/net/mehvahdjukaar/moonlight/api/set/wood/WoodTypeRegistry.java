@@ -47,8 +47,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     //returns if this block is the base plank block
     @Override
-    public Optional<WoodType> detectTypeFromBlock(Block baseBlock) {
-        ResourceLocation baseRes = Utils.getID(baseBlock);
+    public Optional<WoodType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseRes) {
         String name = null;
         String path = baseRes.getPath();
         //stuff for tfc

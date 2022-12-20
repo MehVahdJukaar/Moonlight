@@ -1,11 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
-import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -42,7 +40,6 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -55,6 +52,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -146,6 +144,14 @@ public class PlatformHelperImpl {
 
     public static Path getGamePath() {
         return FMLPaths.GAMEDIR.get();
+    }
+
+    public static String getModPageUrl(String modId) {
+        return ModList.get().getModContainerById(modId).get().getModInfo().getModURL().map(URL::toString).orElse(null);
+    }
+
+    public static String getModName(String modId) {
+        return ModList.get().getModContainerById(modId).get().getModInfo().getDisplayName();
     }
 
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,

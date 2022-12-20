@@ -92,7 +92,13 @@ public class RGBColor extends BaseColor<RGBColor> {
         }
         return new RGBColor(r / size, g / size, b / size, a / size);
     }
-
+    @Override
+    public RGBColor multiply(RGBColor color, float red, float green, float blue, float alpha) {
+        return new RGBColor(Mth.clamp(red*this.red(), 0,1),
+                Mth.clamp(green*this.green(), 0,1),
+                Mth.clamp(blue*this.blue(), 0,1),
+                Mth.clamp(alpha*this.alpha(), 0,1));
+    }
     @Override
     public RGBColor mixWith(RGBColor color, float bias) {
         float i = 1 - bias;

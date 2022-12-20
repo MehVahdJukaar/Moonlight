@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe;
 
 import com.google.gson.JsonObject;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.block.MimicBlockTile;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.recipe.ShapedRecipeTemplate;
 import net.mehvahdjukaar.moonlight.core.recipe.ShapelessRecipeTemplate;
@@ -57,7 +58,6 @@ public class TemplateRecipeManager {
     private static void addRecipeConditions(JsonObject recipe, IRecipeTemplate<?> template) {
         throw new AssertionError();
     }
-
 
     static {
         registerTemplate(RecipeSerializer.SHAPED_RECIPE, ShapedRecipeTemplate::new);

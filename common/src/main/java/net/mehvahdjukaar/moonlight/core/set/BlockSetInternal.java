@@ -2,6 +2,9 @@ package net.mehvahdjukaar.moonlight.core.set;
 
 import com.google.common.base.Stopwatch;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.events.SimpleEvent;
+import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
@@ -82,9 +85,9 @@ public class BlockSetInternal {
         return (BlockTypeRegistry<T>) BLOCK_SET_CONTAINERS.get(type);
     }
 
-    @FunctionalInterface
-    public interface BlockTypeRegistryCallback<E, T extends BlockType> {
-        void accept(Registrator<E> reg, Collection<T> wood);
+    @EventCalled
+    public static void addTranslations(AfterLanguageLoadEvent event) {
+        BlockSetAPI.getRegistries().forEach(r -> r.addTypeTranslations(event));
     }
 
     @ExpectPlatform

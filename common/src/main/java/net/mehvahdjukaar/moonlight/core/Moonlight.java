@@ -1,8 +1,11 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
@@ -31,6 +34,7 @@ public class Moonlight {
 
         BlockSetInternal.registerBlockSetDefinition(WoodTypeRegistry.INSTANCE);
         BlockSetInternal.registerBlockSetDefinition(LeavesTypeRegistry.INSTANCE);
+        //MoonlightEventsHelper.addListener( BlockSetInternal::addTranslations, AfterLanguageLoadEvent.class);
         CompatTypes.init();
         ModMessages.registerMessages();
         VillagerAIInternal.init();
