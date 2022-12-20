@@ -156,6 +156,9 @@ public class CompatTypes {
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "twilightforest", "beanstalk", "beanstalk_leaves", "huge_stalk"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "twilightforest", "thorn", "thorn_leaves", "huge_stalk"));
+
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ulterlands", "souldrained", "souldrained_leaves", "oak"));
