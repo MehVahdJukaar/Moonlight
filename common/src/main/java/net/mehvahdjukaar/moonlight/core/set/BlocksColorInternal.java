@@ -54,10 +54,10 @@ public class BlocksColorInternal {
 
             for (var c : colorPriority) {
                 ResourceLocation newId = null;
-                if (name.startsWith(c)) {
+                if (name.startsWith(c + "_")) {
                     newId = new ResourceLocation(id.getNamespace(), name.substring((c + "_").length()));
                 }
-                if (name.endsWith(c)) {
+                if (name.endsWith("_" + c)) {
                     newId = new ResourceLocation(id.getNamespace(), name.substring(0, name.length() - ("_" + c).length()));
                 }
                 if (newId != null) {
@@ -229,11 +229,10 @@ public class BlocksColorInternal {
             //fill default
             if (id.getNamespace().equals("minecraft") && id.getPath().contains("stained_glass")) {
                 id = new ResourceLocation(id.getPath().replace("stained_", ""));
-            }
-            else if (id.getNamespace().equals("quark")){
-                if(id.getPath().equals("rune")) {
+            } else if (id.getNamespace().equals("quark")) {
+                if (id.getPath().equals("rune")) {
                     id = new ResourceLocation("quark", "blank_rune");
-                }else if(id.getPath().equals("shard")) {
+                } else if (id.getPath().equals("shard")) {
                     id = new ResourceLocation("quark", "clear_shard");
                 }
             }
