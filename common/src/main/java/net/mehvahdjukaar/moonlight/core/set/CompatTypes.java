@@ -100,13 +100,13 @@ public class CompatTypes {
         //leaves
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "ars_nouveau", "blue_archwood", "blue_archwood_leaves", "blue_archwood"));
+                "ars_nouveau", "blue_archwood", "blue_archwood_leaves", "ars_nouveau:archwood"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "ars_nouveau", "green_archwood", "green_archwood_leaves", "green_archwood"));
+                "ars_nouveau", "green_archwood", "green_archwood_leaves", "ars_nouveau:archwood"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "ars_nouveau", "purple_archwood", "purple_archwood_leaves", "purple_archwood"));
+                "ars_nouveau", "purple_archwood", "purple_archwood_leaves", "ars_nouveau:archwood"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "ars_nouveau", "red_archwood", "red_archwood_leaves", "red_archwood"));
+                "ars_nouveau", "red_archwood", "red_archwood_leaves", "ars_nouveau:archwood"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "biomesoplenty", "origin", "origin_leaves", "oak"));
@@ -123,48 +123,53 @@ public class CompatTypes {
                 "biomesoplenty", "rainbow_birch", "rainbow_birch_leaves", "birch"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "blue_skies", "crystallized", "crystallized_leaves", "crystallized"));
+                "blue_skies", "crystallized", "crystallized_leaves", "blue_skies:crystallized"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "blue_skies", "crescent_fruit", "crescent_fruit_leaves", "dusk"));
+                "blue_skies", "crescent_fruit", "crescent_fruit_leaves", "blue_skies:dusk"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "pokecube_legends", "dyna_pastel_pink", "dyna_leaves_pastel_pink", "aged"));
+                "pokecube_legends", "dyna_pastel_pink", "dyna_leaves_pastel_pink", "pokecube_legends:aged"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "pokecube_legends", "dyna_pink", "dyna_leaves_pink", "aged"));
+                "pokecube_legends", "dyna_pink", "dyna_leaves_pink", "pokecube_legends:aged"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "pokecube_legends", "dyna_red", "dyna_leaves_red", "aged"));
+                "pokecube_legends", "dyna_red", "dyna_leaves_red", "pokecube_legends:aged"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "apple", "apple_leaves", "apple"));
+                "regions_unexlpored", "bamboo", "bamboo_leaves", "twigs:bamboo"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "banana", "banana_leaves", "banana"));
+                "regions_unexlpored", "golden_larch", "golden_larch_leaves", "regions_unexlpored:larch"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "cherry", "cherry_leaves", "cherry"));
+                "regions_unexlpored", "dead_pine", "dead_pine_leaves", "regions_unexlpored:pine"));
+
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "coconut", "coconut_leaves", "coconut"));
+                "terraqueous", "apple", "apple_leaves", "terraqueous:apple"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "lemon", "lemon_leaves", "lemon"));
+                "terraqueous", "banana", "banana_leaves", "terraqueous:banana"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "mango", "mango_leaves", "mango"));
+                "terraqueous", "cherry", "cherry_leaves", "terraqueous:cherry"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "mulberry", "mulberry_leaves", "mulberry"));
+                "terraqueous", "coconut", "coconut_leaves", "terraqueous:coconut"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "orange", "orange_leaves", "orange"));
+                "terraqueous", "lemon", "lemon_leaves", "terraqueous:lemon"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "peach", "peach_leaves", "peach"));
+                "terraqueous", "mango", "mango_leaves", "terraqueous:mango"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "pear", "pear_leaves", "pear"));
+                "terraqueous", "mulberry", "mulberry_leaves", "terraqueous:mulberry"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "terraqueous", "plum", "plum_leaves", "plum"));
+                "terraqueous", "orange", "orange_leaves", "terraqueous:orange"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "peach", "peach_leaves", "terraqueous:peach"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "pear", "pear_leaves", "terraqueous:pear"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "terraqueous", "plum", "plum_leaves", "terraqueous:plum"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "twilightforest", "beanstalk", "beanstalk_leaves", "twilightforest:twilight_oak"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "twilightforest", "thorn", "thorn_leaves", "twilightforest:twilight_oak"));
 
-
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ulterlands", "souldrained", "souldrained_leaves", "oak"));
-
     }
 }
