@@ -1,6 +1,8 @@
 {
-  "fluid.selene.generic_fluid": "Fluido sem Nome",
+  "fluid.moonlight.generic_fluid": "Fluido Sem Nome",
   "item.minecraft.potion_lingering": "Poção Prolongada",
-  "item.minecraft.potion_splash": "Poção Arremessável"
-  "gui.moonlight.open_mod_page": "Abra a página do %s no CurseForge"
+  "item.minecraft.potion_splash": "Poção Arremessável",
+  "gui.moonlight.open_mod_page": "Abra a página %s Curse Forge",
+  "message.moonlight.anti_repost": "Parece que você baixou %1$s de um site malicioso :( Obtenha a versão real %2$s.",
+  "message.moonlight.anti_repost_link": "aqui"
 }
