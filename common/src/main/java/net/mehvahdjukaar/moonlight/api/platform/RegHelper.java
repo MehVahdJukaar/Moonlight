@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
@@ -63,6 +64,14 @@ import java.util.function.*;
  * Helper class dedicated to platform independent registration methods
  */
 public class RegHelper {
+
+    /**
+     * Call at the end of your mod init on fabric to register all your entries. Has no effect on forge. Its optional
+     */
+    @PlatformOnly(PlatformOnly.FABRIC)
+    @ExpectPlatform
+    public static void registerModEntries(String modId){
+    }
 
     @ExpectPlatform
     public static <T, E extends T> RegSupplier<E> register(

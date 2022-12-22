@@ -169,6 +169,8 @@ public class RegHelperImpl {
         CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
     }
 
+    public static void registerModEntries(String modId) {
+    }
 
 
 }

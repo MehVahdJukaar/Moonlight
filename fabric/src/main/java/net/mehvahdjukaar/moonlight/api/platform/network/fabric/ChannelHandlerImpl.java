@@ -18,11 +18,13 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@ApiStatus.Internal
 public class ChannelHandlerImpl extends ChannelHandler {
 
     public static ChannelHandler createChannel(ResourceLocation channelMame) {

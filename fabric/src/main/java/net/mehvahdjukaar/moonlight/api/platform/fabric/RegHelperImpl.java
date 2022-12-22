@@ -14,8 +14,8 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
+import net.mehvahdjukaar.moonlight.fabric.FabricHooks;
 import net.mehvahdjukaar.moonlight.fabric.FabricRecipeConditionManager;
-import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -42,6 +42,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+@ApiStatus.Internal
 public class RegHelperImpl {
 
     public static final Map<ResourceKey<? extends Registry<?>>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
@@ -72,7 +73,8 @@ public class RegHelperImpl {
         //register entities attributes now
         ATTRIBUTE_REGISTRATIONS.forEach(e -> e.accept(FabricDefaultAttributeRegistry::register));
     }
-    public static void finishRegistration(String modId) {
+
+    public static void registerModEntries(String modId) {
         for (var r : REGISTRIES.entrySet()) {
             var m = r.getValue();
             var v = m.get(modId);
@@ -84,7 +86,7 @@ public class RegHelperImpl {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier,ResourceKey<? extends Registry<T>> reg) {
+    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
         if (supplier == null) {
             throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
         }
@@ -92,7 +94,7 @@ public class RegHelperImpl {
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId,
                 c -> {
-                    if(PlatformHelper.getPhysicalSide().isClient()) AntiRepostWarning.addMod(modId);
+                    if (PlatformHelper.getPhysicalSide().isClient()) AntiRepostWarning.addMod(modId);
 
                     return new RegistryQueue<>(reg);
                 });
@@ -131,12 +133,12 @@ public class RegHelperImpl {
     }
 
     public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        FabricSetupCallbacks.COMMON_SETUP.add(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
+        FabricHooks.addCommonSetup(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
     }
 
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         //this just runs immediately... needs to run on mod setup instead
-        FabricSetupCallbacks.COMMON_SETUP.add(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
+        FabricHooks.addCommonSetup(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
     }
 
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {

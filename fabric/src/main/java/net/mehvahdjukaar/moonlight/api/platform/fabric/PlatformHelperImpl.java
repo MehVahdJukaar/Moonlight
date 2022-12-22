@@ -16,7 +16,8 @@ import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
-import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
+import net.mehvahdjukaar.moonlight.fabric.FabricHelper;
+import net.mehvahdjukaar.moonlight.fabric.FabricHooks;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -48,6 +49,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -56,10 +58,10 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@ApiStatus.Internal
 public class PlatformHelperImpl {
 
     public static PlatformHelper.Platform getPlatform() {
@@ -119,7 +121,7 @@ public class PlatformHelperImpl {
 
     @Nullable
     public static MinecraftServer getCurrentServer() {
-        return MoonlightFabric.currentServer;
+        return FabricHooks.getCurrentServer();
     }
 
     public static Packet<?> getEntitySpawnPacket(Entity entity) {
@@ -226,9 +228,8 @@ public class PlatformHelperImpl {
         return true;
     }
 
-    public static void addCommonSetup(Runnable clientSetup) {
-        FabricSetupCallbacks.COMMON_SETUP.add(clientSetup);
+    public static void addCommonSetup(Runnable commonSetup) {
+        FabricHooks.addCommonSetup(commonSetup);
     }
-
 
 }

@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 public class FabricRecipeConditionManager {
 
-    private static final Map<ResourceLocation, Function<JsonObject, Boolean>> CONDITIONS = new HashMap<>();
+    private static final Map<ResourceLocation, Predicate<JsonObject>> CONDITIONS = new HashMap<>();
 
     static {
         register(new ResourceLocation("forge:mod_loaded"), FabricRecipeConditionManager::forgeModLoaded);
@@ -30,7 +30,7 @@ public class FabricRecipeConditionManager {
     }
 
 
-    public static void register(ResourceLocation id, Function<JsonObject, Boolean> function) {
+    public static void register(ResourceLocation id, Predicate<JsonObject> function) {
         CONDITIONS.put(id, function);
     }
 
@@ -68,7 +68,7 @@ public class FabricRecipeConditionManager {
         ResourceLocation res = new ResourceLocation(type);
         var c = CONDITIONS.get(res);
         if (c != null) {
-            return c.apply(jo);
+            return c.test(jo);
         }
         return true;
     }

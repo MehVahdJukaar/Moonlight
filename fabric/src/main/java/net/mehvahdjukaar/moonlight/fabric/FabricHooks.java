@@ -1,13 +1,14 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
 
+import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.TagManager;
-import net.minecraft.world.item.CreativeModeTabs;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,27 +17,42 @@ import java.util.*;
 
 public class FabricHooks {
 
-    private static WeakReference<RegistryAccess> REGISTRY_ACCESS = null;
-    private static TagContext TAG_CONTEXT = null;
+
+    static final List<Runnable> COMMON_SETUP = new ArrayList<>();
+    static final List<Runnable> CLIENT_SETUP = new ArrayList<>();
+    private static MinecraftServer currentServer = null;
+    private static WeakReference<RegistryAccess> registryAccess = null;
+    private static TagContext tagContext = null;
 
     @Nullable
     public static RegistryAccess getRegistryAccess() {
-        if (REGISTRY_ACCESS == null) return null;
-        return REGISTRY_ACCESS.get();
+        if (registryAccess == null) return null;
+        return registryAccess.get();
     }
+
+    @Nullable
+    public static MinecraftServer getCurrentServer() {
+        return currentServer;
+    }
+
     @Nullable
     public static TagContext getTagContext() {
-        return TAG_CONTEXT;
+        return tagContext;
     }
 
     @ApiStatus.Internal
     public static void setRegistryAccess(RegistryAccess registryAccess) {
-        REGISTRY_ACCESS = new WeakReference<>(registryAccess);
+        FabricHooks.registryAccess = new WeakReference<>(registryAccess);
     }
 
     @ApiStatus.Internal
     public static void setTagContext(TagManager tagManager) {
-        TAG_CONTEXT = new TagContext(tagManager);
+        tagContext = new TagContext(tagManager);
+    }
+
+    @ApiStatus.Internal
+    public static void setCurrentServer(MinecraftServer serverLevel) {
+        currentServer = serverLevel;
     }
 
     public static class TagContext {
@@ -61,5 +77,27 @@ public class FabricHooks {
             }
             return (Map) loadedTags.getOrDefault(registry, Collections.emptyMap());
         }
+    }
+
+
+    /**
+     * Equivalent of forge common setup. called by this mod client initializer and server initializer
+     */
+    public static void addCommonSetup(Runnable runnable) {
+        COMMON_SETUP.add(runnable);
+    }
+
+    /**
+     * Equivalent of forge client setup. called by this mod client initializer
+     */
+    public static void addClientSetup(Runnable runnable) {
+        CLIENT_SETUP.add(runnable);
+    }
+
+    /**
+     * Initializes the registries
+     */
+    public static void finishModInit(String modId){
+        RegHelperImpl.finishRegistration(modId);
     }
 }

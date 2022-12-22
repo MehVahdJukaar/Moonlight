@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client;
 
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
@@ -10,7 +9,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 //used for quick access when recoloring textures
-public class TextureCache {
+public class ModelTextureCache {
 
     /**
      * Hacky method to add weird textures for blocks that have ones with odd names that might not get picked up.

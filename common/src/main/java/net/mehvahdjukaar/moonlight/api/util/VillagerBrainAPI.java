@@ -9,8 +9,7 @@ import net.minecraft.world.entity.npc.Villager;
 
 import java.util.function.Consumer;
 
-//TODO: move to entity
-public class VillagerAIManager {
+public class VillagerBrainAPI {
 
     /**
      * Register an event listener for the villager brain event.

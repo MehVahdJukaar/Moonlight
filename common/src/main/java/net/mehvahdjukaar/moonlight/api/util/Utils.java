@@ -135,6 +135,7 @@ public class Utils {
 
     @UnstableApi
     public static ResourceLocation getID(Object object) {
+        Registries.
         if (object instanceof Block b) return getID(b);
         if (object instanceof Item b) return getID(b);
         if (object instanceof EntityType<?> b) return getID(b);

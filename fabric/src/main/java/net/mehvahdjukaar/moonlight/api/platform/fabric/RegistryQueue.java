@@ -9,12 +9,14 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@ApiStatus.Internal
 public class RegistryQueue<T> {
     private final ResourceKey<? extends Registry<T>> registry;
     private final List<EntryWrapper<? extends T, T>> entries = new ArrayList<>();

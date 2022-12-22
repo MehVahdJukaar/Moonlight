@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
-import net.mehvahdjukaar.moonlight.api.client.TextureCache;
+import net.mehvahdjukaar.moonlight.api.client.ModelTextureCache;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
@@ -13,7 +13,6 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
@@ -68,7 +67,7 @@ public class RPUtils {
      * @return found texture location
      */
     public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
-        var cached = TextureCache.getCached(block, texturePredicate);
+        var cached = ModelTextureCache.getCached(block, texturePredicate);
         if (cached != null) {
             return new ResourceLocation(cached);
         }
@@ -86,7 +85,7 @@ public class RPUtils {
             List<String> textures = findAllTexturesInModelRecursive(manager, modelPath);
 
             for (var t : textures) {
-                TextureCache.add(block, t);
+                ModelTextureCache.add(block, t);
                 if (texturePredicate.test(t)) return new ResourceLocation(t);
             }
         } catch (Exception ignored) {
@@ -94,7 +93,7 @@ public class RPUtils {
         //if texture is not there try to guess location. Hack for better end
         var hack = guessTextureLocation(res, manager, block);
         for (var t : hack) {
-            TextureCache.add(block, t);
+            ModelTextureCache.add(block, t);
             if (texturePredicate.test(t)) return new ResourceLocation(t);
         }
 
@@ -154,7 +153,7 @@ public class RPUtils {
      * @return found texture location
      */
     public static ResourceLocation findFirstItemTextureLocation(ResourceManager manager, Item item, Predicate<String> texturePredicate) throws FileNotFoundException {
-        var cached = TextureCache.getCached(item, texturePredicate);
+        var cached = ModelTextureCache.getCached(item, texturePredicate);
         if (cached != null) return new ResourceLocation(cached);
         ResourceLocation res = Utils.getID(item);
         var itemModel = manager.getResource(ResType.ITEM_MODELS.getPath(res));
@@ -164,7 +163,7 @@ public class RPUtils {
 
             var textures = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject().getAsJsonObject("textures"));
             for (var t : textures) {
-                TextureCache.add(item, t);
+                ModelTextureCache.add(item, t);
                 if (texturePredicate.test(t)) return new ResourceLocation(t);
             }
 

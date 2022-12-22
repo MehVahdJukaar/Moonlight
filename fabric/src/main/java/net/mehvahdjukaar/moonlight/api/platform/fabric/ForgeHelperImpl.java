@@ -29,12 +29,14 @@ import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+@ApiStatus.Internal
 public class ForgeHelperImpl {
 
     public static boolean onProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
