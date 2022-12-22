@@ -15,13 +15,7 @@ public class CompatTypes {
                     new ResourceLocation("domum_ornamentum:cactus_extra"), new ResourceLocation("cactus")));
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
-                "ars_nouveau", "blue_archwood", "archwood_planks", "blue_archwood_log"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
-                "ars_nouveau", "green_archwood", "archwood_planks", "green_archwood_log"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
-                "ars_nouveau", "purple_archwood", "archwood_planks", "purple_archwood_log"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
-                "ars_nouveau", "red_archwood", "archwood_planks", "red_archwood_log"));
+                "ars_nouveau", "archwood", "archwood_planks", "blue_archwood_log"));
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "blue_skies", "crystallized", "crystallized_planks", "crystallized_log"));
@@ -164,9 +158,9 @@ public class CompatTypes {
                 "terraqueous", "plum", "plum_leaves", "plum"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "twilightforest", "beanstalk", "beanstalk_leaves", "huge_stalk"));
+                "twilightforest", "beanstalk", "beanstalk_leaves", "twilightforest:twilight_oak"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "twilightforest", "thorn", "thorn_leaves", "huge_stalk"));
+                "twilightforest", "thorn", "thorn_leaves", "twilightforest:twilight_oak"));
 
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
