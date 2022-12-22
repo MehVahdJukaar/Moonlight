@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.minecraft.resources.ResourceLocation;
-
+//place for all known weird wood types from mods that aren't getting detected
 public class CompatTypes {
 
     public static void init() {
@@ -100,13 +100,13 @@ public class CompatTypes {
         //leaves
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "ars_nouveau", "blue_archwood", "blue_archwood_leaves", "blue_archwood"));
+                "ars_nouveau", "blue_archwood", "blue_archwood_leaves", "ars_nouveau:blue_archwood"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "ars_nouveau", "green_archwood", "green_archwood_leaves", "green_archwood"));
+                "ars_nouveau", "green_archwood", "green_archwood_leaves", "ars_nouveau:green_archwood"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "ars_nouveau", "purple_archwood", "purple_archwood_leaves", "purple_archwood"));
+                "ars_nouveau", "purple_archwood", "purple_archwood_leaves", "ars_nouveau:purple_archwood"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "ars_nouveau", "red_archwood", "red_archwood_leaves", "red_archwood"));
+                "ars_nouveau", "red_archwood", "red_archwood_leaves", "ars_nouveau:red_archwood"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "biomesoplenty", "origin", "origin_leaves", "oak"));
@@ -123,9 +123,9 @@ public class CompatTypes {
                 "biomesoplenty", "rainbow_birch", "rainbow_birch_leaves", "birch"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "blue_skies", "crystallized", "crystallized_leaves", "crystallized"));
+                "blue_skies", "crystallized", "crystallized_leaves", "blue_skies:crystallized"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "blue_skies", "crescent_fruit", "crescent_fruit_leaves", "dusk"));
+                "blue_skies", "crescent_fruit", "crescent_fruit_leaves", "blue_skies:dusk"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "pokecube_legends", "dyna_pastel_pink", "dyna_leaves_pastel_pink", "aged"));

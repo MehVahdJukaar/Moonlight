@@ -236,8 +236,14 @@ public class BlocksColorInternal {
                     id = new ResourceLocation("quark", "clear_shard");
                 }
             }
-            this.defaultBlock = registry.getOptional(id).orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
-
+            ResourceLocation finalId = id;
+            var o = registry.getOptional(id);
+            if(o.isEmpty()){
+                this.defaultBlock = registry.getOptional(new ResourceLocation(finalId.getPath()))
+                    .orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
+            }else{
+                this.defaultBlock = o.get();
+            }
         }
 
         /**
