@@ -135,11 +135,11 @@ public class CompatTypes {
                 "pokecube_legends", "dyna_red", "dyna_leaves_red", "pokecube_legends:aged"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "regions_unexlpored", "bamboo", "bamboo_leaves", "twigs:bamboo"));
+                "regions_unexplored", "bamboo", "bamboo_leaves", "twigs:bamboo"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "regions_unexlpored", "golden_larch", "golden_larch_leaves", "regions_unexlpored:larch"));
+                "regions_unexplored", "golden_larch", "golden_larch_leaves", "regions_unexplored:larch"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "regions_unexlpored", "dead_pine", "dead_pine_leaves", "regions_unexlpored:pine"));
+                "regions_unexplored", "dead_pine", "dead_pine_leaves", "regions_unexplored:pine"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "terraqueous", "apple", "apple_leaves", "terraqueous:apple"));
