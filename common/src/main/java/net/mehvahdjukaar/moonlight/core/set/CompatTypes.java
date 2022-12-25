@@ -128,6 +128,55 @@ public class CompatTypes {
                 "blue_skies", "crescent_fruit", "crescent_fruit_leaves", "blue_skies:dusk"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "blue_azalea", "blue_azalea_leaves", "colorfulazaleas:azule_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "blue_blooming_azalea", "blue_blooming_azalea_leaves", "colorfulazaleas:azule_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "blue_flowering_azalea", "blue_flowering_azalea_leaves", "colorfulazaleas:azule_azalea"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "orange_azalea", "orange_azalea_leaves", "colorfulazaleas:tecal_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "orange_blooming_azalea", "orange_blooming_azalea_leaves", "colorfulazaleas:tecal_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "orange_flowering_azalea", "orange_flowering_azalea_leaves", "colorfulazaleas:tecal_azalea"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "pink_azalea", "pink_azalea_leaves", "colorfulazaleas:bright_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "pink_blooming_azalea", "pink_blooming_azalea_leaves", "colorfulazaleas:bright_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "pink_flowering_azalea", "pink_flowering_azalea_leaves", "colorfulazaleas:bright_azalea"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "purple_azalea", "purple_azalea_leaves", "colorfulazaleas:walnut_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "purple_blooming_azalea", "purple_blooming_azalea_leaves", "colorfulazaleas:walnut_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "purple_flowering_azalea", "purple_flowering_azalea_leaves", "colorfulazaleas:walnut_azalea"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "red_azalea", "red_azalea_leaves", "colorfulazaleas:roze_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "red_blooming_azalea", "red_blooming_azalea_leaves", "colorfulazaleas:roze_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "red_flowering_azalea", "red_flowering_azalea_leaves", "colorfulazaleas:roze_azalea"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "white_azalea", "white_azalea_leaves", "colorfulazaleas:titanium_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "white_blooming_azalea", "white_blooming_azalea_leaves", "colorfulazaleas:titanium_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "white_flowering_azalea", "white_flowering_azalea_leaves", "colorfulazaleas:titanium_azalea"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "yellow_azalea", "yellow_azalea_leaves", "colorfulazaleas:fiss_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "yellow_blooming_azalea", "yellow_blooming_azalea_leaves", "colorfulazaleas:fiss_azalea"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "colorfulazaleas", "yellow_flowering_azalea", "yellow_flowering_azalea_leaves", "colorfulazaleas:fiss_azalea"));
+
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "pokecube_legends", "dyna_pastel_pink", "dyna_leaves_pastel_pink", "pokecube_legends:aged"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "pokecube_legends", "dyna_pink", "dyna_leaves_pink", "pokecube_legends:aged"));
@@ -135,7 +184,7 @@ public class CompatTypes {
                 "pokecube_legends", "dyna_red", "dyna_leaves_red", "pokecube_legends:aged"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "regions_unexplored", "bamboo", "bamboo_leaves", "twigs:bamboo"));
+                "regions_unexplored", "bamboo", "bamboo_leaves", "jungle"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "regions_unexplored", "golden_larch", "golden_larch_leaves", "regions_unexplored:larch"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
