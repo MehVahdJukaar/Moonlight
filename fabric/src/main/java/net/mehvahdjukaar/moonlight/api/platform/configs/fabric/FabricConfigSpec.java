@@ -89,12 +89,12 @@ public class FabricConfigSpec extends ConfigSpec {
     }
 
     private static final boolean YACL = PlatformHelper.isModLoaded("yet-another-config-lib");
-    private static final boolean clothConfig = PlatformHelper.isModLoaded("cloth_config");
+    private static final boolean CLOTH_CONFIG = PlatformHelper.isModLoaded("cloth-config");
 
     @Override
     @Environment(EnvType.CLIENT)
     public Screen makeScreen(Screen parent, ResourceLocation background) {
-        if (clothConfig) {
+        if (CLOTH_CONFIG) {
           //  return ClothConfigCompat.makeScreen(parent, this, background);
         }else if(YACL){ //TODO:
            // return YACLCompat.makeScreen(parent, this, background);
