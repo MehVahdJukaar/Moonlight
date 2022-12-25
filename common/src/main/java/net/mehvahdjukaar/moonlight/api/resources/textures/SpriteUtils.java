@@ -231,5 +231,20 @@ public final class SpriteUtils {
         }
     }
 
+    public static TextureImage savePaletteStrip(ResourceManager manager, List<Integer> colors) {
+
+        try (var image = TextureImage.createNew(16, 16, null)) {
+            var it = colors.iterator();
+            image.forEachFrame((x, y, f) -> {
+                if (it.hasNext()) {
+                    image.getImage().setPixelRGBA(x, y, it.next());
+                }
+            });
+            return image;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create palette strip");
+        }
+    }
+
 
 }

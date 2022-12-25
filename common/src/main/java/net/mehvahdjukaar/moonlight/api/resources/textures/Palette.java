@@ -19,7 +19,7 @@ public class Palette implements Set<PaletteColor> {
 
     private float tolerance = 0;
     //ordered from darkest to lightest (luminance)
-    private final ArrayList<PaletteColor> internal = new ArrayList<>();
+    private final List<PaletteColor> internal = new ArrayList<>();
 
     protected Palette(Collection<PaletteColor> colors) {
         this.internal.addAll(colors);
