@@ -1,20 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
-import net.mehvahdjukaar.moonlight.api.resources.textures.Palette;
-import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
-import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.function.UnaryOperator;
 
 public class MthUtils {
@@ -166,7 +159,7 @@ public class MthUtils {
      */
     public static final float PHI = (float) (1 + (Math.sqrt(5d) - 1) / 2f);
 
-    public static<T extends BaseColor<T>> T lerpColorScale(List<T> palette, float phase) {
+    public static <T extends BaseColor<T>> T lerpColorScale(List<T> palette, float phase) {
         if (phase >= 1) phase = phase % 1;
 
         int n = palette.size();
