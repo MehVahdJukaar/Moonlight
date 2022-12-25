@@ -1,21 +1,22 @@
 package net.mehvahdjukaar.moonlight.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.fluids.forge.SoftFluidRegistryImpl;
-import net.mehvahdjukaar.moonlight.api.map.forge.MapDecorationRegistryImpl;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.misc.Registrator;
+import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
+import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.ForgeMod;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+
+import java.util.Collection;
 
 /**
  * Author: MehVahdJukaar
@@ -29,6 +30,12 @@ public class MoonlightForge {
         Moonlight.commonInit();
 
         MinecraftForge.EVENT_BUS.register(this);
+
+
+        BlockSetAPI.addDynamicBlockRegistration(MoonlightForge::forceInitBlockSets, WoodType.class);
+    }
+
+    private static <T extends BlockType> void forceInitBlockSets(Registrator<Block> blockRegistrator, Collection<T> ts) {
     }
 
     @SubscribeEvent

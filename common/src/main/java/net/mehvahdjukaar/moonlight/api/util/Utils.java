@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
 import io.netty.util.internal.UnstableApi;
+import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
@@ -120,6 +121,8 @@ public class Utils {
     public static ResourceLocation getID(BlockEntityType<?> object) {
         return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(object);
     }
+
+    ParticleUtil
 
     public static ResourceLocation getID(RecipeSerializer<?> object) {
         return BuiltInRegistries.RECIPE_SERIALIZER.getKey(object);

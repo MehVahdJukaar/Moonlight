@@ -152,7 +152,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     }
 
     @Nullable
-    public T getBlockTypeOf(ItemLike itemLike) {
+    public T getBlockTypeOf(Object itemLike) {
         return childrenToType.getOrDefault(itemLike, null);
     }
 

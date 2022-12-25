@@ -105,7 +105,7 @@ public class BlockSetInternal {
     }
 
     @Nullable
-    public static <T extends BlockType> T getBlockTypeOf(ItemLike itemLike, Class<T> typeClass) {
+    public static <T extends BlockType> T getBlockTypeOf(Object itemLike, Class<T> typeClass) {
         BlockTypeRegistry<T> r = getRegistry(typeClass);
         if (r != null) {
             return r.getBlockTypeOf(itemLike);

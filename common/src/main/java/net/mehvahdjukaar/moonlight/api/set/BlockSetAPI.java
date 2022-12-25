@@ -103,7 +103,7 @@ public class BlockSetAPI {
      * @return BlockType of the provided block
      */
     @Nullable
-    public static <T extends BlockType> T getBlockTypeOf(ItemLike itemLike, Class<T> typeClass){
+    public static <T extends BlockType> T getBlockTypeOf(Object itemLike, Class<T> typeClass){
         return BlockSetInternal.getBlockTypeOf(itemLike, typeClass);
     }
 
