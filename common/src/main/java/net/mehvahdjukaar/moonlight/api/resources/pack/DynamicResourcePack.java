@@ -212,7 +212,6 @@ public abstract class DynamicResourcePack implements PackResources {
 
     private void addJson(ResourceLocation path, JsonElement json) {
         try {
-            //json.toString().getBytes();
             this.addBytes(path, RPUtils.serializeJson(json).getBytes());
         } catch (IOException e) {
             LOGGER.error("Failed to write JSON {} to resource pack {}.", path, this.resourcePackName, e);
