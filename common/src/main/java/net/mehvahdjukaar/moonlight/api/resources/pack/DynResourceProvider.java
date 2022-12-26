@@ -173,4 +173,10 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
         }
     }
 
+    public void addResourceIfNotPresent(ResourceManager manager, StaticResource resource) {
+        if (!alreadyHasAssetAtLocation(manager, resource.location)) {
+            this.dynamicPack.addResource(resource);
+        }
+    }
+
 }
