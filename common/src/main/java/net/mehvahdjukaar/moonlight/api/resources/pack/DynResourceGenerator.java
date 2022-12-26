@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
+import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.VanillaResourceManager;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +22,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class DynResourceGenerator<T extends DynamicResourcePack> implements PreparableReloadListener {
 
@@ -170,6 +172,12 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             fullText = textTransform.apply(fullText);
 
             this.dynamicPack.addBytes(newRes, fullText.getBytes());
+        }
+    }
+
+    public void addResourceIfNotPresent(ResourceManager manager, StaticResource resource) {
+        if (!alreadyHasAssetAtLocation(manager, resource.location)) {
+            this.dynamicPack.addResource(resource);
         }
     }
 

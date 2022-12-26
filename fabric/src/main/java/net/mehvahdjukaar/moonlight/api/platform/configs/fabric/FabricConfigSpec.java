@@ -14,6 +14,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -99,6 +100,7 @@ public class FabricConfigSpec extends ConfigSpec {
         }else if(YACL){ //TODO:
            // return YACLCompat.makeScreen(parent, this, background);
         }
+        DynClientResourcesGenerator
         return null;
     }
 
