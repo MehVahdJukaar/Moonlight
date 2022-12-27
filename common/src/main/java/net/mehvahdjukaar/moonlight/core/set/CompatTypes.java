@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.minecraft.resources.ResourceLocation;
-
+//place for all known weird wood types from mods that aren't getting detected
 public class CompatTypes {
 
     public static void init() {

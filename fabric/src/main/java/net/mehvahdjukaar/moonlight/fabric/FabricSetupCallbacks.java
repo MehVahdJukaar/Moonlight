@@ -1,5 +1,8 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,5 +19,8 @@ public interface FabricSetupCallbacks {
     List<Runnable> CLIENT_SETUP = new ArrayList<>();
 
 
+    static void finishModInit(String modId){
+        RegHelperImpl.finishRegistration(modId);
+    }
 
 }
