@@ -187,8 +187,6 @@ public class CompatTypes {
                 "regions_unexplored", "bamboo", "bamboo_leaves", "jungle"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "regions_unexplored", "golden_larch", "golden_larch_leaves", "regions_unexplored:larch"));
-        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "regions_unexplored", "dead_pine", "dead_pine_leaves", "regions_unexplored:pine"));
 
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "terraqueous", "apple", "apple_leaves", "terraqueous:apple"));
