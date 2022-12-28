@@ -21,6 +21,8 @@
   ],
   "equivalent_fluids": [
     "create:honey",
+    "minecraft:honey",
+    "forge:honey",
     "cyclic:honey",
     "inspirations:honey",
     "the_bumblezone:honey_fluid",

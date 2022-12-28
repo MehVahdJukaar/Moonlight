@@ -19,6 +19,7 @@ public interface FabricSetupCallbacks {
     List<Runnable> CLIENT_SETUP = new ArrayList<>();
 
 
+    @Deprecated(forRemoval = true)
     static void finishModInit(String modId){
         RegHelperImpl.finishRegistration(modId);
     }

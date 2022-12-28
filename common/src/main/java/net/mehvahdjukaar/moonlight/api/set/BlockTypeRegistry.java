@@ -107,7 +107,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
                 if (Objects.equals(e.getNamespace(), modId)) {
                     if (!linkedHashMap.containsKey(e.getId())) {
                         linkedHashMap.put(e.getId(), e);
-                    }else Moonlight.LOGGER.warn("Found block type with duplicate id ({}), skipping",e.id);
+                    }
                 }
             });
         }

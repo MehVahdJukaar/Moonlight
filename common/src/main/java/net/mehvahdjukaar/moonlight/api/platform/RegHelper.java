@@ -99,8 +99,8 @@ public class RegHelper {
         return registerAsync(name, feature, Registry.STRUCTURE_TYPES);
     }
 
-    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<PlacedFeature> registerPlacedFeature(
-            ResourceLocation name, RegSupplier<ConfiguredFeature<FC, F>> feature, Supplier<List<PlacementModifier>> modifiers) {
+    public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<PlacedFeature> registerPlacedFeature(
+            ResourceLocation name, RegSupplier<ConfiguredFeature<C, F>> feature, Supplier<List<PlacementModifier>> modifiers) {
         return registerPlacedFeature(name, () -> new PlacedFeature(Holder.hackyErase(feature.getHolder()), modifiers.get()));
     }
 
@@ -108,18 +108,22 @@ public class RegHelper {
         return register(name, featureSupplier, BuiltinRegistries.PLACED_FEATURE);
     }
 
-    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<ConfiguredFeature<FC, F>> registerConfiguredFeature(
-            ResourceLocation name, Supplier<F> feature, Supplier<FC> featureConfiguration) {
+    public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<ConfiguredFeature<C, F>> registerConfiguredFeature(
+            ResourceLocation name, Supplier<F> feature, Supplier<C> featureConfiguration) {
         return registerConfiguredFeature(name, () -> new ConfiguredFeature<>(feature.get(), featureConfiguration.get()));
     }
 
-    public static <FC extends FeatureConfiguration, F extends Feature<FC>> RegSupplier<ConfiguredFeature<FC, F>> registerConfiguredFeature(
-            ResourceLocation name, Supplier<ConfiguredFeature<FC, F>> featureSupplier) {
+    public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<ConfiguredFeature<C, F>> registerConfiguredFeature(
+            ResourceLocation name, Supplier<ConfiguredFeature<C, F>> featureSupplier) {
         return register(name, featureSupplier, BuiltinRegistries.CONFIGURED_FEATURE);
     }
 
     public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> sound) {
         return register(name, sound, Registry.SOUND_EVENT);
+    }
+
+    public static RegSupplier<SoundEvent> registerSound(ResourceLocation name) {
+        return registerSound(name, () -> new SoundEvent(name));
     }
 
     public static <T extends PaintingVariant> RegSupplier<T> registerPainting(ResourceLocation name, Supplier<T> painting) {
