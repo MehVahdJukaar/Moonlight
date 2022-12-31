@@ -38,7 +38,7 @@ public class ModItemListing implements VillagerTrades.ItemListing {
     }
 
     public ModItemListing(int emeralds, ItemStack forSale, int maxTrades, int xp) {
-        this(new ItemStack(Items.EMERALD, emeralds), forSale, maxTrades, xp, 1);
+        this(new ItemStack(Items.EMERALD, emeralds), forSale, maxTrades, xp, 0.05f);
     }
 
     @Nullable

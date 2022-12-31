@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
@@ -33,10 +34,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.crafting.ConditionalRecipe;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
+import net.minecraftforge.event.level.NoteBlockEvent;
 import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,7 +88,9 @@ public class ForgeHelperImpl {
 
 
 
-
+    public static boolean canEquipItem(LivingEntity entity, ItemStack stack, EquipmentSlot slot) {
+        return stack.canEquip(slot, entity);
+    }
 
     public static boolean canEntityDestroy(Level level, BlockPos blockPos, Animal animal) {
         return ForgeHooks.canEntityDestroy(level, blockPos, animal);
@@ -169,6 +175,10 @@ public class ForgeHelperImpl {
 
     public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
         ForgeHooks.onCropsGrowPost(level, pos, state);
+    }
+
+    public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to){
+        MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(entity, slot, from, to));
     }
 
     @Nullable

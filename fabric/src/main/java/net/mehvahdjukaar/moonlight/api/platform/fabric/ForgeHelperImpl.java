@@ -9,9 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
@@ -153,5 +151,12 @@ public class ForgeHelperImpl {
 
     public static boolean canItemStack(ItemStack selected, ItemStack item) {
         return ItemStack.isSameIgnoreDurability(selected, item);
+    }
+
+    public static boolean canEquipItem(LivingEntity entity, ItemStack stack, EquipmentSlot slot) {
+        return slot == Mob.getEquipmentSlotForItem(stack);
+    }
+
+    public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
     }
 }

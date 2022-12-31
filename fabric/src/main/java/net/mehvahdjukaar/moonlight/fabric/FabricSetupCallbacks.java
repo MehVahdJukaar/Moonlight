@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
+import net.mehvahdjukaar.moonlight.api.misc.ModItemListing;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 
@@ -21,7 +22,7 @@ public interface FabricSetupCallbacks {
 
     @Deprecated(forRemoval = true)
     static void finishModInit(String modId){
-        RegHelperImpl.finishRegistration(modId);
+       // RegHelperImpl.finishRegistration(modId);
     }
 
 }

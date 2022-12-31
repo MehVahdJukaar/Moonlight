@@ -11,11 +11,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
@@ -65,6 +67,12 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
+
+    @Contract
+    @ExpectPlatform
+    public static boolean canEquipItem(LivingEntity entity, ItemStack stack, EquipmentSlot slot) {
+        throw new AssertionError();
+    }
 
     @Contract
     @ExpectPlatform
@@ -173,6 +181,10 @@ public class ForgeHelper {
 
     @ExpectPlatform
     public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
+    }
+
+    @ExpectPlatform
+    public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to){
     }
 
     @ExpectPlatform
