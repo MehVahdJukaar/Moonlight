@@ -40,10 +40,10 @@ public class RotHlpr {
     private static final Quaternionf NONE = Axis.YP.rotationDegrees(0);
 
 
-    public static final Map<Direction, Quaternionf> DIR2ROT = Maps.newEnumMap((Map<Direction, Quaternionf>) Arrays.stream(Direction.values())
+    private static final Map<Direction, Quaternionf> DIR2ROT = Maps.newEnumMap(Arrays.stream(Direction.values())
             .collect(Collectors.toMap(Functions.identity(), Direction::getRotation)));
 
-    public static final Map<Integer, Quaternionf> YAW2ROT = Arrays.stream(Direction.values()).filter(d -> d.getAxis() != Direction.Axis.Y)
+    private static final Map<Integer, Quaternionf> YAW2ROT = Arrays.stream(Direction.values()).filter(d -> d.getAxis() != Direction.Axis.Y)
             .map(d -> (int) -d.toYRot()).collect(Collectors.toMap(Functions.identity(), y -> Axis.YP.rotationDegrees(y)));
 
     public static Quaternionf rot(Direction dir) {

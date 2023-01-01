@@ -94,10 +94,4 @@ public class FabricHooks {
         CLIENT_SETUP.add(runnable);
     }
 
-    /**
-     * Initializes the registries
-     */
-    public static void finishModInit(String modId){
-        RegHelperImpl.finishRegistration(modId);
-    }
 }

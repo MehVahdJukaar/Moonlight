@@ -3,6 +3,8 @@ package net.mehvahdjukaar.moonlight.api.client.util.forge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
+import net.mehvahdjukaar.moonlight.forge.MoonlightForgeClient;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -69,6 +71,10 @@ public class RenderUtilImpl {
 
     public static BakedModel handleCameraTransforms(BakedModel model, PoseStack poseStack, ItemTransforms.TransformType transform) {
         return ForgeHooksClient.handleCameraTransforms(poseStack, model, transform, false);
+    }
+
+    public static float getPartialTicks() {
+        return MoonlightForgeClient.partialTicks;
     }
 
 

@@ -1,12 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
 import io.netty.util.internal.UnstableApi;
-import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
@@ -122,7 +122,6 @@ public class Utils {
         return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(object);
     }
 
-    ParticleUtil
 
     public static ResourceLocation getID(RecipeSerializer<?> object) {
         return BuiltInRegistries.RECIPE_SERIALIZER.getKey(object);
@@ -138,7 +137,6 @@ public class Utils {
 
     @UnstableApi
     public static ResourceLocation getID(Object object) {
-        Registries.
         if (object instanceof Block b) return getID(b);
         if (object instanceof Item b) return getID(b);
         if (object instanceof EntityType<?> b) return getID(b);

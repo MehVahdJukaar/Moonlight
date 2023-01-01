@@ -16,9 +16,7 @@ import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
-import net.mehvahdjukaar.moonlight.fabric.FabricHelper;
 import net.mehvahdjukaar.moonlight.fabric.FabricHooks;
-import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -168,7 +166,7 @@ public class PlatformHelperImpl {
     }
 
     public static String getModPageUrl(String modId) {
-       return FabricLoader.getInstance().getModContainer(modId).get().getMetadata().getContact().get("homepage").orElse(null);
+        return FabricLoader.getInstance().getModContainer(modId).get().getMetadata().getContact().get("homepage").orElse(null);
     }
 
     public static String getModName(String modId) {
@@ -188,7 +186,7 @@ public class PlatformHelperImpl {
         return new ModRecord(power, music.get(), properties);
     }
 
-    public static SimpleParticleType newParticle(){
+    public static SimpleParticleType newParticle() {
         return FabricParticleTypes.simple();
     }
 
@@ -230,6 +228,9 @@ public class PlatformHelperImpl {
 
     public static void addCommonSetup(Runnable commonSetup) {
         FabricHooks.addCommonSetup(commonSetup);
+    }
+
+    public static List<CreativeModeTab> getItemTabs(Item asItem) {
     }
 
 }

@@ -155,6 +155,11 @@ public class RenderUtil {
         GuiComponent.blit(matrixStack, x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
     }
 
+    @ExpectPlatform
+    public static float getPartialTicks(){
+        throw new AssertionError();
+    }
+
 
 }
 

@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 
 public abstract class ItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 
-    public ItemStackRenderer() {
+    protected ItemStackRenderer() {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
     }
 

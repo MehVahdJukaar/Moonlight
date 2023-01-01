@@ -175,11 +175,6 @@ public class ClientPlatformHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
-    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation) {
-        throw new AssertionError();
-    }
-
     @FunctionalInterface
     public interface TooltipComponentEvent {
         <T extends TooltipComponent> void register(Class<T> type, Function<? super T, ? extends ClientTooltipComponent> factory);
@@ -215,6 +210,7 @@ public class ClientPlatformHelper {
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
         throw new AssertionError();
     }
+    //todo split
 
     @ExpectPlatform
     public static BlockModel parseBlockModel(JsonElement json) {
@@ -226,7 +222,10 @@ public class ClientPlatformHelper {
         throw new AssertionError();
     }
 
-
+    @ExpectPlatform
+    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation) {
+        throw new AssertionError();
+    }
     @Deprecated(forRemoval = true)
     public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate, Level world, BlockPos blockpos, BlockRenderDispatcher blockRenderer) {
         RenderUtil.renderBlock(seed, matrixStack, buffer, blockstate, world, blockpos, blockRenderer);

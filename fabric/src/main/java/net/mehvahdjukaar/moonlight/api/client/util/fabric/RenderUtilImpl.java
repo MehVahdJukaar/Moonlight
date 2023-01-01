@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.client.util.fabric;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ItemRendererAccessor;
+import net.mehvahdjukaar.moonlight.fabric.MoonlightFabricClient;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -55,6 +56,10 @@ public class RenderUtilImpl {
             renderer.renderModelLists(model, stack, combinedLight, combinedOverlay, poseStack, vertexConsumer);
         }
         poseStack.popPose();
+    }
+
+    public static float getPartialTicks() {
+        return MoonlightFabricClient.partialTicks;
     }
 
 

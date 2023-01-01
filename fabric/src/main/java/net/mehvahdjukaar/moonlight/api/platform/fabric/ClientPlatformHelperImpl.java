@@ -14,7 +14,7 @@ import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ModelManagerAccessor;
-import net.mehvahdjukaar.moonlight.fabric.FabricHelper;
+import net.mehvahdjukaar.moonlight.fabric.FabricHooks;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -43,7 +43,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -108,8 +109,8 @@ public class ClientPlatformHelperImpl {
 
     public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientPlatformHelper.AtlasTextureEvent> eventListener) {
         //ClientSpriteRegistryCallback.event(atlasLocation).register(((atlasTexture, registry) -> {
-       //     eventListener.accept(registry::register);
-       // }));
+        //     eventListener.accept(registry::register);
+        // }));
     }
 
     public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation name) {
@@ -155,9 +156,8 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addKeyBindRegistration(Consumer<ClientPlatformHelper.KeyBindEvent> eventListener) {
-       eventListener.accept(KeyBindingHelper::registerKeyBinding);
+        eventListener.accept(KeyBindingHelper::registerKeyBinding);
     }
-
 
 
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
@@ -179,7 +179,7 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addClientSetup(Runnable clientSetup) {
-        FabricHelper.CLIENT_SETUP.add(clientSetup);
+        FabricHooks.addClientSetup(clientSetup);
     }
 
 

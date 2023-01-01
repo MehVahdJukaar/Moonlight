@@ -100,13 +100,12 @@ public class FabricConfigSpec extends ConfigSpec {
         }else if(YACL){ //TODO:
            // return YACLCompat.makeScreen(parent, this, background);
         }
-        DynClientResourcesGenerator
         return null;
     }
 
     @Override
     public boolean hasConfigScreen() {
-        return clothConfig || YACL;
+        return CLOTH_CONFIG || YACL;
     }
 
     @Override

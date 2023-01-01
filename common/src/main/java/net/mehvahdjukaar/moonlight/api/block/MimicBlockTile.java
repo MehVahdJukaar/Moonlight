@@ -9,7 +9,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -18,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder, IExtraModelDataProvider {
 
-    public static final ModelDataKey<BlockState> MIMIC = new ModelDataKey<>(BlockState.class);
+    public static final ModelDataKey<BlockState> MIMIC_KEY = new ModelDataKey<>(BlockState.class);
 
     private BlockState mimic = Blocks.AIR.defaultBlockState();
 
@@ -29,7 +28,7 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
     @Override
     public ExtraModelData getExtraModelData() {
         return ExtraModelData.builder()
-                .with(MIMIC, this.getHeldBlock())
+                .with(MIMIC_KEY, this.getHeldBlock())
                 .build();
     }
 

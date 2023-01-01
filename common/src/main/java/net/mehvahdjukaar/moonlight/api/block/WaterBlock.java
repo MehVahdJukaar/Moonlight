@@ -48,7 +48,7 @@ public abstract class WaterBlock extends Block implements SimpleWaterloggedBlock
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter reader, BlockPos pos, PathComputationType PathComputationType) {
+    public boolean isPathfindable(BlockState state, BlockGetter reader, BlockPos pos, PathComputationType pathComputationType) {
         return false;
     }
 

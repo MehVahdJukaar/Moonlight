@@ -61,7 +61,7 @@ public class RegHelperImpl {
 
         @Override
         public Holder<T> getHolder() {
-            return registryObject.getHolder().get();
+            return registryObject.getHolder().orElseThrow();
         }
     }
 
