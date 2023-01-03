@@ -210,17 +210,6 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
-    @Deprecated(forRemoval = true)
-    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar){
-        return createModTab(name ,icon, hasSearchBar, null);
-    }
-
-    @Deprecated(forRemoval = true)
-    @ExpectPlatform
-    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
-                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> itemSupplier){
-        throw new AssertionError();
-    }
 
     @ExpectPlatform
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties){

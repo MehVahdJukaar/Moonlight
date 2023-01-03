@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.network;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -31,7 +32,6 @@ public abstract class ChannelHandler {
             NetworkDir direction,
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder);
-
 
 
     public interface Context {

@@ -187,7 +187,7 @@ public class PlatformHelperImpl {
     }
 
     public static SimpleParticleType newParticle() {
-        return FabricParticleTypes.simple();
+        return FabricParticleTypes.simple(true);
     }
 
     public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatformHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
