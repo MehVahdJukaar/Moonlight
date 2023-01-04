@@ -1,15 +1,12 @@
 package net.mehvahdjukaar.moonlight.core;
 
-import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
-import net.mehvahdjukaar.moonlight.core.misc.ModCriteriaTriggers;
+import net.mehvahdjukaar.moonlight.core.criteria_triggers.ModCriteriaTriggers;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;

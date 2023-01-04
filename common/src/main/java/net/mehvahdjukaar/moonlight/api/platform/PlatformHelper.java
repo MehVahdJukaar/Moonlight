@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
+import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -67,6 +68,11 @@ public class PlatformHelper {
 
     @ExpectPlatform
     public static boolean isModLoadingValid() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static boolean evaluateRecipeCondition(JsonElement jo) {
         throw new AssertionError();
     }
 

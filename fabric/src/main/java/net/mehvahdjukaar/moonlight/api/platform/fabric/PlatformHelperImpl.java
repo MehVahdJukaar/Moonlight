@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
+import com.google.gson.JsonElement;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
@@ -17,12 +18,12 @@ import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
+import net.mehvahdjukaar.moonlight.fabric.FabricRecipeConditionManager;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -36,7 +37,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -197,7 +197,7 @@ public class PlatformHelperImpl {
     }
 
     public static SimpleParticleType newParticle(){
-        return FabricParticleTypes.simple();
+        return FabricParticleTypes.simple(true);
     }
 
     public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatformHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
@@ -238,6 +238,10 @@ public class PlatformHelperImpl {
 
     public static void addCommonSetup(Runnable clientSetup) {
         FabricSetupCallbacks.COMMON_SETUP.add(clientSetup);
+    }
+
+    public static boolean evaluateRecipeCondition(JsonElement jo) {
+       return FabricRecipeConditionManager.areConditionsMet(jo);
     }
 
 

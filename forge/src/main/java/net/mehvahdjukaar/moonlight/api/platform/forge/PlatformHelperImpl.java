@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
+import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -35,6 +37,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.conditions.ConditionContext;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -223,6 +228,10 @@ public class PlatformHelperImpl {
     public static void addCommonSetup(Runnable commonSetup) {
         Consumer<FMLCommonSetupEvent> eventConsumer = event -> event.enqueueWork(commonSetup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+    public static boolean evaluateRecipeCondition(JsonElement jo) {
+       return CraftingHelper.getCondition(jo.getAsJsonObject()).test(ICondition.IContext.EMPTY);
     }
 
 
