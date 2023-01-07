@@ -9,10 +9,10 @@ public class MoonlightClient {
 
     public static void initClient() {
         ClientPlatformHelper.addAtlasTextureCallback(TextureAtlas.LOCATION_BLOCKS, e -> {
+            TextureCache.clear();
             SoftFluidClient.getTexturesToStitch().forEach(e::addSprite);
         });
 
         ClientPlatformHelper.addClientReloadListener(new SoftFluidClient(), Moonlight.res("soft_fluids"));
-        ClientPlatformHelper.addAtlasTextureCallback(TextureAtlas.LOCATION_BLOCKS, (e) -> TextureCache.clear());
     }
 }

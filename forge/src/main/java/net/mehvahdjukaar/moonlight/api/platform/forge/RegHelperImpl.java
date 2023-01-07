@@ -169,6 +169,4 @@ public class RegHelperImpl {
         CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
     }
 
-
-
 }
