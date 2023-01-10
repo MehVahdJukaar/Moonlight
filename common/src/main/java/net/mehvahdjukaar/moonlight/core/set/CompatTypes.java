@@ -3,8 +3,9 @@ package net.mehvahdjukaar.moonlight.core.set;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
+import net.mehvahdjukaar.moonlight.core.recipe.ShapelessRecipeTemplate;
 import net.minecraft.resources.ResourceLocation;
-//place for all known weird wood types from mods that aren't getting detected
+//place for all known weird hardcoded wood types from mods that aren't getting detected
 public class CompatTypes {
 
     public static void init() {
@@ -58,16 +59,24 @@ public class CompatTypes {
         cerulean.addChild("stripped_log", "cerulean_stem_stripped");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, cerulean);
 
-        var soulblight = WoodType.Finder.simple(
-                "gardens_of_the_dead", "soulblight", "soulblight_planks", "soulblight_stem");
+        var soulblight = WoodType.Finder.simple("gardens_of_the_dead",
+                "soulblight", "soulblight_planks", "soulblight_stem");
         cerulean.addChild("stripped_wood", "stripped_soulblight_hyphae");
         cerulean.addChild("wood", "soulblight_hyphae");
         cerulean.addChild("stripped_log", "stripped_soulblight_stem");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, soulblight);
 
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("desolation",
+                "charred", "charredlog", "charred_planks"));
 
-        var bamboo = WoodType.Finder.simple(
-                "twigs", "bamboo", "stripped_bamboo_planks", "bundled_bamboo");
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("gardens_of_the_dead",
+                "whistlecane", "whistlecane_block", "whistlecane"));
+
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("quark", "bamboo",
+                "bamboo_planks", "bamboo_block"));
+
+        var bamboo = WoodType.Finder.simple("twigs", "bamboo",
+                "stripped_bamboo_planks", "bundled_bamboo");
 
         bamboo.addChild("stripped_log", "stripped_bundled_bamboo");
 

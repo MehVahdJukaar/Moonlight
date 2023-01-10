@@ -135,9 +135,11 @@ public class ParticleUtil {
             dy = j * Mth.randomBetween(level.random, minSpeed, maxSpeed);
             dz = k * Mth.randomBetween(level.random, minSpeed, maxSpeed);
         } else {
-            dx = (i == 0) ? maxSpeed * level.random.nextDouble() : 0.0D;
-            dy = (j == 0) ? maxSpeed * level.random.nextDouble() : 0.0D;
-            dz = (k == 0) ? maxSpeed * level.random.nextDouble() : 0.0D;
+            float d = maxSpeed - minSpeed;
+
+            dx = (i == 0) ? (minSpeed + d * level.random.nextDouble()) : 0.0D;
+            dy = (j == 0) ? (minSpeed + d * level.random.nextDouble()) : 0.0D;
+            dz = (k == 0) ? (minSpeed + d * level.random.nextDouble()) : 0.0D;
         }
         level.addParticle(particleOptions, d0, d1, d2, dx, dy, dz);
     }

@@ -20,7 +20,7 @@
     "MapExtendingRecipeMixin",
     "MapItemMixin",
     "MultiPackResourceManagerMixin",
-    "PistonBaseMixin",
+    "PistonBlockEntityMixin",
     "VillagerMixin",
     "accessor.BlockLootAccessor",
     "accessor.BrainAccessor",

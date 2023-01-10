@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
@@ -58,6 +59,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.*;
 
 /**
@@ -151,6 +153,10 @@ public class RegHelper {
         return register(name, sensorType, Registry.SENSOR_TYPE);
     }
 
+    public static <T extends Sensor<?>> RegSupplier<SensorType<T>> registerSensorI(ResourceLocation name, Supplier<T> sensor) {
+        return register(name, () -> new SensorType<>(sensor), Registry.SENSOR_TYPE);
+    }
+
     public static <T extends Activity> RegSupplier<T> registerActivity(ResourceLocation name, Supplier<T> activity) {
         return register(name, activity, Registry.ACTIVITY);
     }
@@ -163,12 +169,16 @@ public class RegHelper {
         return register(name, memory, Registry.MEMORY_MODULE_TYPE);
     }
 
+    public static <U> RegSupplier<MemoryModuleType<U>> registerMemoryModule(ResourceLocation name, @Nullable Codec<U> codec) {
+        return register(name, () -> new MemoryModuleType<>(Optional.ofNullable(codec)), Registry.MEMORY_MODULE_TYPE);
+    }
+
     public static <T extends RecipeSerializer<?>> RegSupplier<T> registerRecipeSerializer(ResourceLocation name, Supplier<T> recipe) {
         return register(name, recipe, Registry.RECIPE_SERIALIZER);
     }
 
     public static <T extends Recipe<?>> Supplier<RecipeType<T>> registerRecipeType(ResourceLocation name) {
-       return RegHelper.register(name, () -> {
+        return RegHelper.register(name, () -> {
             String id = name.toString();
             return new RecipeType<T>() {
                 @Override

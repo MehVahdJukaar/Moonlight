@@ -74,7 +74,7 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
             var newIng = IRecipeTemplate.convertIngredients(originalMat, destinationMat, ing);
             if(newIng != null){
                 atLeastOneChanged = true;
-            }newIng = ing;
+            }else newIng = ing;
             builder.requires(newIng);
         }
         //if recipe fails
