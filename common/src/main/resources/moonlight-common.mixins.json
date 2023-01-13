@@ -12,6 +12,7 @@
   ],
   "mixins": [
     "BeeGoalMixin",
+    "FixBlockPlaceContextMixin",
     "CreativeModeTabMixin",
     "GrindstoneMenuSlotMixin",
     "LevelChunkMixin",
