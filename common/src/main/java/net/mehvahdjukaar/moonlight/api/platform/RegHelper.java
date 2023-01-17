@@ -56,10 +56,7 @@ import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -285,6 +282,34 @@ public class RegHelper {
         }
     }
 
+    public static EnumMap<VariantType, Supplier<Block>> registerBaseBlockSet(ResourceLocation baseName,
+                                                                             Block parentBlock, boolean isHidden) {
+        return registerBaseBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock), isHidden);
+    }
+
+    /**
+     * Registers block, slab and vertical slab
+     */
+    public static EnumMap<VariantType, Supplier<Block>> registerBaseBlockSet(
+            ResourceLocation baseName, BlockBehaviour.Properties properties, boolean isHidden) {
+        return registerBlockSet(new VariantType[]{VariantType.BLOCK, VariantType.SLAB,
+                VariantType.VERTICAL_SLAB}, baseName, properties, isHidden);
+    }
+
+    public static EnumMap<VariantType, Supplier<Block>> registerReducedBlockSet(ResourceLocation baseName,
+                                                                                Block parentBlock, boolean isHidden) {
+        return registerReducedBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock), isHidden);
+    }
+
+    /**
+     * Registers block, slab stairs and vertical slab
+     */
+    public static EnumMap<VariantType, Supplier<Block>> registerReducedBlockSet(
+            ResourceLocation baseName, BlockBehaviour.Properties properties, boolean isHidden) {
+        return registerBlockSet(new VariantType[]{VariantType.BLOCK, VariantType.SLAB,
+                VariantType.VERTICAL_SLAB, VariantType.STAIRS}, baseName, properties, isHidden);
+    }
+
     public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
                                                                              Block parentBlock, boolean isHidden) {
         return registerFullBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock), isHidden);
@@ -297,26 +322,38 @@ public class RegHelper {
      */
     public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(
             ResourceLocation baseName, BlockBehaviour.Properties properties, boolean isHidden) {
+        return registerBlockSet(VariantType.values(), baseName, properties, isHidden);
+    }
 
+    public static EnumMap<VariantType, Supplier<Block>> registerBlockSet(
+            VariantType[] types, ResourceLocation baseName, BlockBehaviour.Properties properties, boolean isHidden) {
+
+        if (!new ArrayList<>(List.of(types)).contains(VariantType.BLOCK))
+            throw new IllegalStateException("Must contain base variant type");
         EnumMap<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
-        for (VariantType type : VariantType.values()) {
+        for (VariantType type : types) {
             String modId = baseName.getNamespace();
             String name = baseName.getPath();
             if (!type.equals(VariantType.BLOCK)) name += "_" + type.name().toLowerCase(Locale.ROOT);
             Supplier<Block> base = type != VariantType.BLOCK ? map.get(VariantType.BLOCK) : null;
-            Supplier<Block> block = registerBlock(new ResourceLocation(modId, name), () -> type.create(properties, base));
+            ResourceLocation blockId = new ResourceLocation(modId, name);
+            Supplier<Block> block = registerBlock(blockId, () -> type.create(properties, base));
             CreativeModeTab tab = switch (type) {
                 case VERTICAL_SLAB ->
-                        !isHidden && PlatformHelper.isModLoaded("quark") ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
+                        !isHidden && shouldRegisterVSlab() ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
                 case WALL -> !isHidden ? CreativeModeTab.TAB_DECORATIONS : null;
                 default -> !isHidden ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
             };
-            registerItem(new ResourceLocation(modId, name), () -> new BlockItem(block.get(), (new Item.Properties()).tab(tab)));
+            registerItem(blockId, () -> new BlockItem(block.get(), (new Item.Properties()).tab(tab)));
             map.put(type, block);
         }
         return map;
     }
 
+    private static boolean shouldRegisterVSlab() {
+        return PlatformHelper.isModLoaded("quark") || PlatformHelper.isModLoaded("v_slab_compat");
+    }
+    //TODO: fix bricks
 }
 
 

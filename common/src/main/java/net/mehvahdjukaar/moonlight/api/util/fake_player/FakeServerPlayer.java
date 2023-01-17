@@ -22,7 +22,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.stats.Stat;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,6 +49,14 @@ public class FakeServerPlayer extends ServerPlayer {
         return FAKE_PLAYERS.computeIfAbsent(level, l-> new HashMap<>())
                 .computeIfAbsent(username, u -> new FakeServerPlayer(level, username));
     }
+
+    static void unloadLevel(Level level) {
+        for (var v : FAKE_PLAYERS.keySet()) {
+            if (v == level) FAKE_PLAYERS.remove(v);
+        }
+    }
+
+    private final EntityDimensions dimensions = EntityDimensions.fixed(0, 0);
 
     public FakeServerPlayer(ServerLevel level, GameProfile name) {
         super(level.getServer(), level, name, null);
@@ -72,6 +83,11 @@ public class FakeServerPlayer extends ServerPlayer {
     public void setYRot(float pYRot) {
         super.setYRot(pYRot);
         this.yRotO = pYRot;
+    }
+
+    @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        return dimensions;
     }
 
     @Override

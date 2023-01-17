@@ -5,6 +5,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.UUID;
 
@@ -42,7 +44,12 @@ public class FakePlayerManager {
         return p;
     }
 
+    @Deprecated(forRemoval = true)
     public static Player get(Entity copyPosFrom, Entity copyRotFrom) {
+        return getDefault(copyPosFrom, copyRotFrom);
+    }
+
+    public static Player getDefault(Entity copyPosFrom, Entity copyRotFrom) {
         return get(DEFAULT, copyPosFrom, copyRotFrom);
     }
 
@@ -52,5 +59,18 @@ public class FakePlayerManager {
 
     public static Player getDefault(Entity entity) {
         return get(DEFAULT, entity);
+    }
+
+    @ApiStatus.Internal
+    public static void unloadLevel(LevelAccessor level){
+        try {
+            if (level instanceof ServerLevel sl) {
+               FakeServerPlayer.unloadLevel(sl);
+            } else {
+                FakeLocalPlayer.unloadLevel((Level)level);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Level must be either ServerLevel or ClientLevel", e);
+        }
     }
 }

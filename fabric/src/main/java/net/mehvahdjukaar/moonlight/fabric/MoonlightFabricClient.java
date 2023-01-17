@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent;
 import net.minecraft.world.entity.Entity;
 
 public class MoonlightFabricClient implements ClientModInitializer {

@@ -1,10 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.util.fake_player;
 
 import com.mojang.authlib.GameProfile;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -13,6 +16,8 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 public class FakeLocalPlayer extends AbstractClientPlayer {
+
+    private static final boolean HAS_CACHE = PlatformHelper.getPlatform().isForge(); //fabric doesnt have world unload event
 
     // Map of all active fake player usernames to their entities
     // automatically gets cleaned when level is unloaded as key won't be in use anymore
@@ -24,9 +29,18 @@ public class FakeLocalPlayer extends AbstractClientPlayer {
      * WorldEvent.Unload and kill all references to prevent worlds staying in memory.
      */
     static FakeLocalPlayer get(Level level, GameProfile username) {
+        if (!HAS_CACHE) return new FakeLocalPlayer((ClientLevel) level, username);
         return FAKE_PLAYERS.computeIfAbsent((ClientLevel) level, l -> new HashMap<>())
                 .computeIfAbsent(username, u -> new FakeLocalPlayer((ClientLevel) level, username));
     }
+
+    static void unloadLevel(Level level) {
+        for (var v : FAKE_PLAYERS.keySet()) {
+            if (v == level) FAKE_PLAYERS.remove(v);
+        }
+    }
+
+    private final EntityDimensions dimensions = EntityDimensions.fixed(0, 0);
 
     public FakeLocalPlayer(ClientLevel pClientLevel, GameProfile pGameProfile) {
         super(pClientLevel, pGameProfile, null);
@@ -35,6 +49,11 @@ public class FakeLocalPlayer extends AbstractClientPlayer {
 
     @Override
     public void playSound(SoundEvent pSound, float pVolume, float pPitch) {
+    }
+
+    @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        return dimensions;
     }
 
     @Override
