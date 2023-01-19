@@ -9,6 +9,7 @@ import net.minecraft.world.level.LevelAccessor;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class FakePlayerManager {
 
@@ -26,13 +27,15 @@ public class FakePlayerManager {
             if (level instanceof ServerLevel sl) {
                 fakePlayer = FakeServerPlayer.get(sl, id);
             } else {
-                fakePlayer = FakeLocalPlayer.get(level, id);
+                //class loading hacks
+                fakePlayer = ClientAccess.get(level, id);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Level must be either ServerLevel or ClientLevel", e);
         }
         return fakePlayer;
     }
+
 
     public static Player get(GameProfile id, Entity copyPosFrom, Entity copyRotFrom) {
         Player p = get(id, copyPosFrom.level);
@@ -62,15 +65,18 @@ public class FakePlayerManager {
     }
 
     @ApiStatus.Internal
-    public static void unloadLevel(LevelAccessor level){
+    public static void unloadLevel(LevelAccessor level) {
         try {
             if (level instanceof ServerLevel sl) {
-               FakeServerPlayer.unloadLevel(sl);
-            } else {
-                FakeLocalPlayer.unloadLevel((Level)level);
+                FakeServerPlayer.unloadLevel(sl);
+            } else if (level.isClientSide()) {
+                //got to be careful with classloading
+                ClientAccess.unloadLevel(level);
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("Level must be either ServerLevel or ClientLevel", e);
+            //  Moonlight new IllegalArgumentException("Level must be either ServerLevel or ClientLevel", e);
         }
     }
+
+
 }

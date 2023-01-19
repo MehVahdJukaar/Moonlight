@@ -19,6 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -83,7 +84,7 @@ public class SoftFluid {
 
 
         //TODO: remove
-        this.isGenerated = builder.custom;
+        this.isGenerated = builder.isFromData;
     }
 
     //better to call registry directly. Here we cache the name
@@ -247,7 +248,7 @@ public class SoftFluid {
         private final List<Fluid> equivalentFluids = new ArrayList<>();
 
         //used to indicate automatically generated fluids
-        public final boolean custom = true;
+        public boolean isFromData = true;
         private ResourceLocation useTexturesFrom;
 
         /**
@@ -271,7 +272,7 @@ public class SoftFluid {
             //these textures are later overwritten by copy textures from;
             this.copyTexturesFrom(Utils.getID(fluid));
             this.addEqFluid(fluid);
-
+            this.isFromData = false;
             addFluidSpecificAttributes(this, fluid);
         }
 
@@ -601,11 +602,13 @@ public class SoftFluid {
         };
     }
 
+    @ApiStatus.Internal
     @ExpectPlatform
     public static void addFluidSpecificAttributes(SoftFluid.Builder builder, Fluid fluid) {
         throw new AssertionError(); //fabric gets nothing here :/
     }
 
+    @ApiStatus.Internal
     @Nullable
     @ExpectPlatform
     public static Triplet<ResourceLocation, ResourceLocation, Integer> getRenderingData(ResourceLocation useTexturesFrom) {

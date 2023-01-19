@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.util.fake_player;
 
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -9,6 +11,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
@@ -34,9 +37,9 @@ public class FakeLocalPlayer extends AbstractClientPlayer {
                 .computeIfAbsent(username, u -> new FakeLocalPlayer((ClientLevel) level, username));
     }
 
-    static void unloadLevel(Level level) {
-        for (var v : FAKE_PLAYERS.keySet()) {
-            if (v == level) FAKE_PLAYERS.remove(v);
+    static void unloadLevel(LevelAccessor level) {
+        for (var l : FAKE_PLAYERS.keySet()) {
+            if (l == level) FAKE_PLAYERS.remove(l);
         }
     }
 

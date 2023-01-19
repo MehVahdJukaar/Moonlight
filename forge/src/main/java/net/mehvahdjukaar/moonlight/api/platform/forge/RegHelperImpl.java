@@ -11,7 +11,6 @@ import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -76,14 +75,16 @@ public class RegHelperImpl {
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(
             ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
-        if(supplier == null) {
+        if (supplier == null) {
             throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
         }
-
+        if (name.getNamespace().equals("minecraft")) {
+            throw new IllegalArgumentException("Registering under minecraft namespace is not supported");
+        }
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
-            if(PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+            if (PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
 
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
             var bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -101,7 +102,7 @@ public class RegHelperImpl {
 
     public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {
         Consumer<RegisterEvent> eventConsumer = event -> {
-            if(event.getVanillaRegistry() == reg){
+            if (event.getVanillaRegistry() == reg) {
                 eventListener.accept(event.getForgeRegistry()::register);
             }
         };

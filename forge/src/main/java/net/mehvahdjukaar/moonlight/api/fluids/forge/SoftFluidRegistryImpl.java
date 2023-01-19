@@ -76,6 +76,7 @@ public class SoftFluidRegistryImpl {
         var fluidMap = getFluidsMap();
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.getDataPackRegistry();
         reg.unfreeze();
+        //yes its hacky
         for (Fluid f : ForgeRegistries.FLUIDS) {
             try {
                 if (f == null) continue;

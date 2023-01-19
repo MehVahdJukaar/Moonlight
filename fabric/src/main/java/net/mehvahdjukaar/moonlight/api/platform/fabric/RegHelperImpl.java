@@ -89,6 +89,9 @@ public class RegHelperImpl {
         if (supplier == null) {
             throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
         }
+        if (name.getNamespace().equals("minecraft")) {
+            throw new IllegalArgumentException("Registering under minecraft namespace is not supported");
+        }
         String modId = name.getNamespace();
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId,
