@@ -1,11 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
+import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
-import com.electronwill.nightconfig.toml.TomlFormat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
+import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -19,14 +20,18 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ConfigTracker;
+import net.minecraftforge.fml.config.IConfigEvent;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 
 public class ConfigSpecWrapper extends ConfigSpec {
@@ -34,6 +39,9 @@ public class ConfigSpecWrapper extends ConfigSpec {
     private final ForgeConfigSpec spec;
 
     private final ModConfig modConfig;
+    private final ModContainer modContainer;
+
+    private static final Method setConfigData = ObfuscationReflectionHelper.findMethod(ModConfig.class, "setConfigData", CommentedConfig.class);
 
     public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced, @javax.annotation.Nullable Runnable onChange) {
         super(name, FMLPaths.CONFIGDIR.get(), type, synced, onChange);
@@ -49,7 +57,8 @@ public class ConfigSpecWrapper extends ConfigSpec {
 
         ModConfig.Type t = this.getConfigType() == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
 
-        ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
+        this.modContainer = ModLoadingContext.get().getActiveContainer();
+
         this.modConfig = new ModConfig(t, spec, modContainer, name.getNamespace() + "-" + name.getPath() + ".toml");
         //for event
         ConfigSpec.addTrackedSpec(this);
@@ -74,17 +83,13 @@ public class ConfigSpecWrapper extends ConfigSpec {
 
     @Override
     public void loadFromFile() {
+        //same stuff that forge config tracker does
         try {
-            CommentedFileConfig configFile = CommentedFileConfig
-                    .builder(this.getFullPath())
-                    .sync()
-                    .preserveInsertionOrder()
-                    .writingMode(WritingMode.REPLACE)
-                    .build();
-            configFile.load();
-            configFile.save();
-
-            spec.setConfig(configFile);
+            final CommentedFileConfig configData = modConfig.getHandler().reader(FMLPaths.CONFIGDIR.get()).apply(modConfig);
+            setConfigData.setAccessible(true);
+            setConfigData.invoke(modConfig, configData);
+            modContainer.dispatchConfigEvent(IConfigEvent.loading(modConfig));
+            modConfig.save();
         } catch (Exception e) {
             throw new RuntimeException(
                     new IOException("Failed to load " + this.getFileName() + " config. Try deleting it: " + e));
@@ -146,23 +151,24 @@ public class ConfigSpecWrapper extends ConfigSpec {
     @EventCalled
     protected void onConfigChange(ModConfigEvent event) {
         if (event.getConfig().getSpec() == this.getSpec()) {
-            //send this configuration to connected clients
-            if (this.isSynced()) sendSyncedConfigsToAllPlayers();
+            //send this configuration to connected clients if on server
+            if (this.isSynced() && PlatformHelper.getEnv().isServer()) sendSyncedConfigsToAllPlayers();
             onRefresh();
         }
     }
 
     @Override
     public void loadFromBytes(InputStream stream) {
-        // try { //this should work the same as below
-        //      var b = stream.readAllBytes();
-        //     this.modConfig.acceptSyncedConfig(b);
-        // } catch (Exception ignored) {
-        // }
+        try { //this should work the same as below and internaly calls refresh
+            var b = stream.readAllBytes();
+            this.modConfig.acceptSyncedConfig(b);
+        } catch (Exception e) {
+            Moonlight.LOGGER.warn("Failed to sync config file {}:", this.getFileName(), e);
+        }
 
         //using this isntead so we dont fire the config changes event otherwise this will loop
-        this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
-        this.onRefresh();
+        //this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
+        //this.onRefresh();
     }
 
 

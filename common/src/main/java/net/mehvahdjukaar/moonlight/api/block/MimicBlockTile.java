@@ -18,8 +18,7 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
 
     public static final ModelDataKey<BlockState> MIMIC = new ModelDataKey<>(BlockState.class);
 
-    @Deprecated(forRemoval = true)
-    public BlockState mimic = Blocks.AIR.defaultBlockState();
+    protected BlockState mimic = Blocks.AIR.defaultBlockState();
 
     protected MimicBlockTile(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);

@@ -33,7 +33,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -123,7 +122,7 @@ public class ClientPlatformHelperImpl {
     @SuppressWarnings("ConstantConditions")
     public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         Minecraft mc = Minecraft.getInstance();
-        if(mc != null) { // datagens
+        if (mc != null) { // datagens
             ((ReloadableResourceManager) mc.getResourceManager())
                     .registerReloadListener(listener);
         }

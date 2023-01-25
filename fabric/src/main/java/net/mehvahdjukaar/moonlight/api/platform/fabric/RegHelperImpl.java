@@ -30,6 +30,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -38,6 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -47,7 +51,7 @@ public class RegHelperImpl {
     private static final List<Consumer<RegHelper.AttributeEvent>> ATTRIBUTE_REGISTRATIONS = new ArrayList<>();
 
     public static final List<Registry<?>> REG_PRIORITY = List.of(
-            Registry.SOUND_EVENT, Registry.BLOCK, Registry.FLUID, Registry.PARTICLE_TYPE,
+            Registry.SOUND_EVENT, Registry.FLUID, Registry.BLOCK, Registry.PARTICLE_TYPE,
             Registry.ENTITY_TYPE, Registry.ITEM,
             Registry.BLOCK_ENTITY_TYPE, Registry.PLACEMENT_MODIFIERS, Registry.STRUCTURE_TYPES,
             Registry.STRUCTURE_PIECE, Registry.FEATURE, BuiltinRegistries.CONFIGURED_FEATURE,
@@ -154,6 +158,11 @@ public class RegHelperImpl {
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         FabricRecipeConditionManager.registerSimple(id, predicate);
+    }
+
+
+    public static <T extends Recipe<?>> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, Function<ResourceLocation, T> factory) {
+        return RegHelper.registerRecipeSerializer(name, () -> new SimpleRecipeSerializer<>(factory));
     }
 
 

@@ -22,7 +22,7 @@ import java.util.Map;
 public class SoftFluidRegistryImpl {
 
     public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(
-            Moonlight.res("moonlight/soft_fluids"));
+            new ResourceLocation("moonlight:moonlight/soft_fluids"));
 
     public static void init() {
     }

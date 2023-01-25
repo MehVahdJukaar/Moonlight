@@ -8,6 +8,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -49,14 +50,14 @@ public class RenderUtil {
     }
 
     public static void renderGuiItemRelative(ItemStack stack, int x, int y, ItemRenderer renderer,
-                                             BiConsumer<PoseStack, Boolean> movement) {
+                                             BiConsumer<PoseStack, BakedModel> movement) {
         renderGuiItemRelative(stack, x, y, renderer, movement, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
     }
 
 
     //im not even using this on fabric...
     public static void renderGuiItemRelative(ItemStack stack, int x, int y, ItemRenderer renderer,
-                                             BiConsumer<PoseStack, Boolean> movement, int combinedLight, int pCombinedOverlay) {
+                                             BiConsumer<PoseStack, BakedModel> movement, int combinedLight, int pCombinedOverlay) {
 
         BakedModel model = renderer.getModel(stack, null, null, 0);
 
@@ -100,7 +101,7 @@ public class RenderUtil {
 
         //custom rotation
 
-        movement.accept(matrixStack, model.isGui3d());
+        movement.accept(matrixStack, model);
 
         renderGuiItem(model, stack, renderer, combinedLight, pCombinedOverlay, matrixStack, bufferSource, flag);
 

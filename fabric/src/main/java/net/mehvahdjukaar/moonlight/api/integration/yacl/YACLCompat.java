@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.util.function.Function;
 
 public class YACLCompat {
 
@@ -99,7 +100,7 @@ public class YACLCompat {
             var e = Option.createBuilder(Double.class)
                     .name(dc.getTranslation())
                     .binding(dc.getDefaultValue(), dc, dc::set)
-                    .controller(o -> new DoubleSliderController(o, dc.getMin(), dc.getMax(), 0.0001));
+                    .controller(o -> new DoubleSliderController(o, dc.getMin(), dc.getMax(), 0.0001, DOUBLE_FORMATTER));
             var description = dc.getDescription();
             if (description != null) e.tooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
@@ -132,6 +133,7 @@ public class YACLCompat {
         }
         throw new UnsupportedOperationException("unknown entry: " + entry.getClass().getName());
     }
+    public static final Function<Double, Component> DOUBLE_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
 
     private static <T extends Enum<T>> Option<T> addEnum(EnumConfigValue<T> ec) {
         var e = Option.createBuilder(ec.getEnumClass())

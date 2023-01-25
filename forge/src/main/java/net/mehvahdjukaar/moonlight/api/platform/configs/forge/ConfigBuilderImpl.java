@@ -3,7 +3,9 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -76,12 +78,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return () -> Integer.parseUnsignedInt(stringConfig.get().replace("0x", ""), 16);
     }
 
-    @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         maybeAddTranslationString(name);
-        ForgeConfigSpec.ConfigValue<String> stringConfig = builder.define(name, (String) defaultValue, validator);
-        return stringConfig;
+        return builder.define(name, defaultValue, validator);
     }
 
     @Override

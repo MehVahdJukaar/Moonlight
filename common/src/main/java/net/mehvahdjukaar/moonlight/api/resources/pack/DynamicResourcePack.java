@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.ResourcePackFileNotFoundException;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer;
@@ -19,6 +20,7 @@ import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -139,9 +141,12 @@ public abstract class DynamicResourcePack implements PackResources {
 
     @Nullable
     @Override
-    public InputStream getRootResource(String pFileName) {
-        return new ByteArrayInputStream(this.rootResources.get(pFileName));
+    public InputStream getRootResource(String pFileName) throws IOException{
+        byte[] buf = this.rootResources.get(pFileName);
+        if(buf!=null) return new ByteArrayInputStream(buf);
+        throw makeException(pFileName);
     }
+
 
     @Override
     public Collection<ResourceLocation> getResources(
@@ -170,7 +175,7 @@ public abstract class DynamicResourcePack implements PackResources {
                 e.printStackTrace();
             }
         }
-        throw makeFileNotFoundException(String.format("%s/%s/%s", type.getDirectory(), id.getNamespace(), id.getPath()));
+        throw makeException(String.format("%s/%s/%s", type.getDirectory(), id.getNamespace(), id.getPath()));
     }
 
     @Override
@@ -187,8 +192,8 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
-    public FileNotFoundException makeFileNotFoundException(String path) {
-        return new FileNotFoundException(String.format("'%s' in ResourcePack '%s'", path, this.resourcePackName));
+    private FileNotFoundException makeException(String pFileName) {
+        return new FileNotFoundException(String.format(Locale.ROOT, "'%s' in ResourcePack '%s'", pFileName, this.resourcePackName));
     }
 
     protected void addBytes(ResourceLocation path, byte[] bytes) {

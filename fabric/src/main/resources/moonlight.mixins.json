@@ -27,6 +27,8 @@
     "RecipeManagerMixin",
     "RegistryAccessMixin",
     "ReloadableServerResourcesMixin",
+    "SelfModFlowingFluidMixin",
+    "SelfModFluidRendererPropertiesMixin",
     "ServerPlayerAccessor"
   ],
   "injectors": {

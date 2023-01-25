@@ -39,6 +39,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -48,13 +49,13 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -85,6 +86,10 @@ public class RegHelper {
 
     public static <T extends Block> RegSupplier<T> registerBlock(ResourceLocation name, Supplier<T> block) {
         return register(name, block, Registry.BLOCK);
+    }
+
+    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
+        return register(name, fluid, Registry.FLUID);
     }
 
     public static <T extends Item> RegSupplier<T> registerItem(ResourceLocation name, Supplier<T> item) {
@@ -173,6 +178,11 @@ public class RegHelper {
 
     public static <T extends RecipeSerializer<?>> RegSupplier<T> registerRecipeSerializer(ResourceLocation name, Supplier<T> recipe) {
         return register(name, recipe, Registry.RECIPE_SERIALIZER);
+    }
+
+    @ExpectPlatform
+    public static <T extends Recipe<?>> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, Function<ResourceLocation, T> factory) {
+        throw new AssertionError();
     }
 
     public static <T extends Recipe<?>> Supplier<RecipeType<T>> registerRecipeType(ResourceLocation name) {
@@ -340,8 +350,7 @@ public class RegHelper {
             ResourceLocation blockId = new ResourceLocation(modId, name);
             Supplier<Block> block = registerBlock(blockId, () -> type.create(properties, base));
             CreativeModeTab tab = switch (type) {
-                case VERTICAL_SLAB ->
-                        !isHidden && shouldRegisterVSlab() ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
+                case VERTICAL_SLAB -> !isHidden && shouldRegisterVSlab() ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
                 case WALL -> !isHidden ? CreativeModeTab.TAB_DECORATIONS : null;
                 default -> !isHidden ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
             };

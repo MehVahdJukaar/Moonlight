@@ -47,10 +47,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -242,6 +244,10 @@ public class PlatformHelperImpl {
 
     public static boolean evaluateRecipeCondition(JsonElement jo) {
        return FabricRecipeConditionManager.areConditionsMet(jo);
+    }
+
+    public static LiquidBlock newLiquidBlock(Supplier<FlowingFluid> flowingFluid, BlockBehaviour.Properties properties) {
+        return new LiquidBlock(flowingFluid.get(), properties);
     }
 
 

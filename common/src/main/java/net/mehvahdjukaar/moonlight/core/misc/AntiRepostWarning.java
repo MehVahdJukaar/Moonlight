@@ -34,17 +34,17 @@ public class AntiRepostWarning {
         try {
             for (var m : reposted) {
                 String url = PlatformHelper.getModPageUrl(m);
-                if (url != null) {
-                    MutableComponent link = Component.translatable("message.moonlight.anti_repost_link");
-                    String modName = PlatformHelper.getModName(m);
-                    MutableComponent name = Component.literal(modName).withStyle(ChatFormatting.BOLD);
+                if (url == null) url ="https://curseforge.com/minecraft/mc-mods";
+                MutableComponent link = Component.translatable("message.moonlight.anti_repost_link");
+                String modName = PlatformHelper.getModName(m);
+                MutableComponent name = Component.literal(modName).withStyle(ChatFormatting.BOLD);
 
-                    ClickEvent click = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
-                    link.setStyle(link.getStyle().withClickEvent(click).withUnderlined(true)
-                            .withColor(TextColor.fromLegacyFormat(ChatFormatting.GOLD)));
+                ClickEvent click = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
+                link.setStyle(link.getStyle().withClickEvent(click).withUnderlined(true)
+                        .withColor(TextColor.fromLegacyFormat(ChatFormatting.GOLD)));
 
-                    player.displayClientMessage(Component.translatable("message.moonlight.anti_repost", name, link), false);
-                }
+                player.displayClientMessage(Component.translatable("message.moonlight.anti_repost", name, link), false);
+
             }
         } catch (Exception ignored) {
         }

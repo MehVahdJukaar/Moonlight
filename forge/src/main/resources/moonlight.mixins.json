@@ -7,10 +7,12 @@
     "ItemMixin",
     "SelfCustomBakedModel",
     "SelfExtraModelDataProvider",
-    "SelfCustomModelLoaderMixin"
+    "SelfCustomModelLoaderMixin",
+    "SelfModFluidRendererPropertiesMixin"
   ],
   "mixins": [
     "FireBlockMixin",
+    "SelfModFlowingFluidMixin",
     "SelfEntitySpawnDataMixin",
     "SelfItemDisplayTileMixin"
   ],

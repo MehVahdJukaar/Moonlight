@@ -6,10 +6,7 @@ import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -31,10 +28,14 @@ public abstract class ConfigBuilder {
         throw new AssertionError();
     }
 
+    public static ConfigBuilder create(String modId, ConfigType type) {
+        return create(new ResourceLocation(modId, type.toString().toLowerCase(Locale.ROOT)), type);
+    }
+
     private final ResourceLocation name;
     protected final ConfigType type;
 
-    public ConfigBuilder(ResourceLocation name, ConfigType type) {
+    protected ConfigBuilder(ResourceLocation name, ConfigType type) {
         this.name = name;
         this.type = type;
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
@@ -43,11 +44,11 @@ public abstract class ConfigBuilder {
         MoonlightEventsHelper.addListener(consumer, AfterLanguageLoadEvent.class);
     }
 
-    public ConfigSpec buildAndRegister(){
+    public ConfigSpec buildAndRegister() {
         var spec = this.build();
         spec.register();
         return spec;
-    };
+    }
 
     public abstract ConfigSpec build();
 
@@ -85,7 +86,7 @@ public abstract class ConfigBuilder {
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
     @Deprecated(forRemoval = true)
-    public abstract  <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator);
+    public abstract <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator);
 
     public Component description(String name) {
         return Component.translatable(translationKey(name));
@@ -118,15 +119,15 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    public ConfigBuilder setSynced(){
-        if(this.type == ConfigType.CLIENT){
+    public ConfigBuilder setSynced() {
+        if (this.type == ConfigType.CLIENT) {
             throw new UnsupportedOperationException("Config syncing cannot be used for client config as its not needed");
         }
         this.synced = true;
         return this;
     }
 
-    public ConfigBuilder onChange(Runnable callback){
+    public ConfigBuilder onChange(Runnable callback) {
         this.changeCallback = callback;
         return this;
     }

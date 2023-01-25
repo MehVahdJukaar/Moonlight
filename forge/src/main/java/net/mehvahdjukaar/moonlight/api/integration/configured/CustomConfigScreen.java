@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -269,31 +270,26 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
             float p = (float) (Math.PI / 180f);
 
-            RenderUtil.renderGuiItemRelative(this.icon, center + 90 - 17, top + 2, renderer, (s, r) -> {
-                if (ticks != 0) {
-                    if (r) {
-                        s.mulPose(Vector3f.YP.rotation(((ticks + partialTicks) * p * 10f)));
+            RenderUtil.renderGuiItemRelative(this.icon, center + 90 - 17, top + 2, renderer,
+                    (s, m) -> rotateItem(partialTicks, p, s, m));
 
-                    } else {
-                        float scale = 1 + 0.1f * Mth.sin(((ticks + partialTicks) * p * 20));
-                        s.scale(scale, scale, scale);
-                    }
+
+            RenderUtil.renderGuiItemRelative(this.icon, center - 90, top + 2, renderer,
+                    (s, m) -> rotateItem(partialTicks, p, s, m));
+
+
+        }
+
+        private void rotateItem(float partialTicks, float p, PoseStack s, BakedModel m) {
+            if (ticks != 0) {
+                if (m.usesBlockLight()) {
+                    s.mulPose(Vector3f.YP.rotation((ticks + partialTicks) * p * 10f));
+
+                } else {
+                    float scale = 1 + 0.1f * Mth.sin((ticks + partialTicks) * p * 20);
+                    s.scale(scale, scale, scale);
                 }
-            });
-
-            RenderUtil.renderGuiItemRelative(this.icon, center - 90, top + 2, renderer, (s, r) -> {
-                if (ticks != 0) {
-                    if (r) {
-                        s.mulPose(Vector3f.YP.rotation((ticks + partialTicks) * p * 10f));
-
-                    } else {
-                        float scale = 1 + 0.1f * Mth.sin((ticks + partialTicks) * p * 20);
-                        s.scale(scale, scale, scale);
-                    }
-                }
-            });
-
-
+            }
         }
 
     }

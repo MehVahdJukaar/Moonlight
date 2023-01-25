@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
@@ -8,12 +9,15 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -23,9 +27,13 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -41,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -168,6 +177,25 @@ public class RegHelperImpl {
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
+    }
+
+    public static <T extends Recipe<?>> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, Function<ResourceLocation, T> factory) {
+        return RegHelper.registerRecipeSerializer(name, () -> new OptionalSimpleRecipeSerializer<>(factory));
+    }
+
+    private static class OptionalSimpleRecipeSerializer<T extends Recipe<?>> extends SimpleRecipeSerializer<T>{
+        public OptionalSimpleRecipeSerializer(Function<ResourceLocation, T> function) {
+            super(function);
+        }
+
+        @Override
+        public T fromJson(ResourceLocation recipeId, JsonObject json, ICondition.IContext context) {
+
+            if (CraftingHelper.processConditions(GsonHelper.getAsJsonArray(json, "conditions"), context)) {
+                return super.fromJson(recipeId, json, context);
+            }
+            return null;
+        }
     }
 
 }

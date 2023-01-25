@@ -29,10 +29,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ForgeSpawnEggItem;
@@ -234,5 +237,8 @@ public class PlatformHelperImpl {
        return CraftingHelper.getCondition(jo.getAsJsonObject()).test(ICondition.IContext.EMPTY);
     }
 
+    public static LiquidBlock newLiquidBlock(Supplier<FlowingFluid> flowingFluid, BlockBehaviour.Properties properties) {
+        return new LiquidBlock(flowingFluid, properties);
+    }
 
 }
