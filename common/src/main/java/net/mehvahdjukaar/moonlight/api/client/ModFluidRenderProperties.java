@@ -26,6 +26,10 @@ public class ModFluidRenderProperties {
         this.still = still;
         this.flowing = flowing;
         this.tint = tint;
+        this.afterInit();
+    }
+
+    private void afterInit() {
     }
 
     public ModFluidRenderProperties(ResourceLocation still, ResourceLocation flowing) {

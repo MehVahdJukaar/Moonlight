@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.mehvahdjukaar.moonlight.api.client.ModFluidRenderProperties;
+import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -11,12 +12,28 @@ import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 //implementing is enough. they have same signature
 @Mixin(ModFluidRenderProperties.class)
 public abstract class SelfModFluidRendererPropertiesMixin implements FluidRenderHandler {
+
+    /**
+     * @author
+     * @reason
+     */
+    @Overwrite(remap = false)
+    protected void afterInit() {
+        ClientPlatformHelper.addAtlasTextureCallback(TextureAtlas.LOCATION_BLOCKS, e -> {
+            e.addSprite(this.getFlowingTexture());
+            e.addSprite(this.getStillTexture());
+            var o = this.getOverlayTexture();
+            if (o != null) e.addSprite(o);
+        });
+    }
+
 
     @Unique
     protected final TextureAtlasSprite[] sprites = new TextureAtlasSprite[3];

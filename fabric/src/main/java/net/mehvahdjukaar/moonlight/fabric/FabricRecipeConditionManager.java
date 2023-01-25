@@ -3,14 +3,19 @@ package net.mehvahdjukaar.moonlight.fabric;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -87,12 +92,21 @@ public class FabricRecipeConditionManager {
     }
 
     private static Boolean forgeTagEmpty(JsonObject object) {
-        var key = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(GsonHelper.getAsString(object, "tag")));
-        var tagContext = FabricHooks.getTagContext();
-        if (tagContext != null) {
-            return tagContext.getAllTags(key.registry()).getOrDefault(key.location(), Set.of()).isEmpty();
+        var id= new ResourceLocation(GsonHelper.getAsString(object, "tag"));
+        Map<ResourceKey<?>, Map<ResourceLocation, Collection<Holder<?>>>> allTags = ResourceConditionsImpl.LOADED_TAGS.get();
+
+        if (allTags == null) {
+            Moonlight.LOGGER.warn("Can't retrieve deserialized tags. Failing tags_populated resource condition check.");
+            return true;
         }
-        return true;
+        Map<ResourceLocation, Collection<Holder<?>>> registryTags = allTags.get(Registry.ITEM_REGISTRY);
+        if (registryTags == null) {
+            // No tag for this registry
+            return false;
+        }
+        Collection<Holder<?>> tags = registryTags.get(id);
+
+        return tags != null && !tags.isEmpty();
     }
 
 }

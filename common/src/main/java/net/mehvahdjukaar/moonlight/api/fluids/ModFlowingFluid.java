@@ -32,6 +32,10 @@ public abstract class ModFlowingFluid extends FlowingFluid {
     protected ModFlowingFluid(Properties properties, Supplier<? extends LiquidBlock> block) {
         this.block = block;
         this.convertsToSource = properties.canConvertToSource;
+        this.afterInit(properties, block); //for mixin
+    }
+
+    private void afterInit(Properties properties, Supplier<? extends LiquidBlock> block) {
     }
 
     public static Properties properties() {
