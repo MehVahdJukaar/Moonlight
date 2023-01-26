@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.block.ModLiquidBlock;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.mehvahdjukaar.moonlight.api.client.ModFluidRenderProperties;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
@@ -30,7 +31,7 @@ public class Moonlight {
 
     public static final String MOD_ID = "moonlight";
 
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     public static final boolean HAS_BEEN_INIT = true;
 
     public static ResourceLocation res(String name) {
@@ -39,7 +40,7 @@ public class Moonlight {
 
     //called on mod creation
     public static void commonInit() {
-
+        ModLiquidBlock.aa();
         BlockSetInternal.registerBlockSetDefinition(WoodTypeRegistry.INSTANCE);
         BlockSetInternal.registerBlockSetDefinition(LeavesTypeRegistry.INSTANCE);
         //MoonlightEventsHelper.addListener( BlockSetInternal::addTranslations, AfterLanguageLoadEvent.class);

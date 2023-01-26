@@ -239,11 +239,6 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
-    public static LiquidBlock newLiquidBlock(Supplier<FlowingFluid> flowingFluid, BlockBehaviour.Properties properties) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
     public static SimpleParticleType newParticle(){
         throw new AssertionError();
     }

@@ -246,9 +246,5 @@ public class PlatformHelperImpl {
        return FabricRecipeConditionManager.areConditionsMet(jo);
     }
 
-    public static LiquidBlock newLiquidBlock(Supplier<FlowingFluid> flowingFluid, BlockBehaviour.Properties properties) {
-        return new LiquidBlock(flowingFluid.get(), properties);
-    }
-
 
 }

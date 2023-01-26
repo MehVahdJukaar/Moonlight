@@ -1,40 +1,38 @@
 modLoader = "javafml"
 loaderVersion = "[40,)"
-#issueTrackerURL = ""
 license = "ARR"
 issueTrackerURL = "https://github.com/MehVahdJukaar/Moonlight/issues" #optional
 
 [[mods]]
-modId = "moonlight"
-version = "${version}"
-displayName = "Moonlight Library"
-authors = "MehVahdJukaar"
-modUrl = "https://www.curseforge.com/minecraft/mc-mods/selene" #optional
-updateJSONURL = "https://raw.githubusercontent.com/MehVahdJukaar/Moonlight/multi-loader/forge/update.json"
+    modId = "moonlight"
+    version = "${version}"
+    displayName = "Moonlight Library"
+    authors = "MehVahdJukaar"
+    modUrl = "https://www.curseforge.com/minecraft/mc-mods/selene" #optional
+    updateJSONURL = "https://raw.githubusercontent.com/MehVahdJukaar/Moonlight/multi-loader/forge/update.json"
 
-logoFile="icon.png" #optional
-description = '''
-A small library with many cool unique features, from dynamic asset generation to dynamic villager schedules and multi loader utilities
-'''
-#logoFile = ""
-
-[[dependencies.moonlight]]
-modId = "forge"
-mandatory = true
-versionRange = "[42.1.0,)"
-ordering = "NONE"
-side = "BOTH"
+    logoFile="icon.png" #optional
+    description = '''
+    A small library with many cool unique features, from dynamic asset generation to dynamic villager schedules and simple multi loader utilities
+    '''
 
 [[dependencies.moonlight]]
-modId = "minecraft"
-mandatory = true
-versionRange = "[1.19.1,)"
-ordering = "NONE"
-side = "BOTH"
+    modId = "forge"
+    mandatory = true
+    versionRange = "[42.1.0,)"
+    ordering = "NONE"
+    side = "BOTH"
 
 [[dependencies.moonlight]]
-modId = "configured"
-mandatory = false
-versionRange = "[2.0.0-1.19.2,)"
-ordering = "NONE"
-side = "BOTH"
+    modId = "minecraft"
+    mandatory = true
+    versionRange = "[1.19.1,)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.moonlight]]
+    modId = "configured"
+    mandatory = false
+    versionRange = "[2.0.0-1.19.2,)"
+    ordering = "NONE"
+    side = "BOTH"

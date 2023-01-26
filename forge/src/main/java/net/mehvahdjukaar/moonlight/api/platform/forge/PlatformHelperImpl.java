@@ -237,8 +237,4 @@ public class PlatformHelperImpl {
        return CraftingHelper.getCondition(jo.getAsJsonObject()).test(ICondition.IContext.EMPTY);
     }
 
-    public static LiquidBlock newLiquidBlock(Supplier<FlowingFluid> flowingFluid, BlockBehaviour.Properties properties) {
-        return new LiquidBlock(flowingFluid, properties);
-    }
-
 }
