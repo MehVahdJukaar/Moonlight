@@ -43,6 +43,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -62,6 +63,11 @@ public class ClientPlatformHelper {
 
     @ExpectPlatform
     public static void registerRenderType(Block block, RenderType type) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void registerFluidRenderType(Fluid fluid, RenderType type) {
         throw new AssertionError();
     }
 
@@ -223,6 +229,13 @@ public class ClientPlatformHelper {
         throw new AssertionError();
     }
 
+    /**
+     * Pack in /resources/resourcepacks
+     */
+    @ExpectPlatform
+    public static void registerOptionalTexturePack(ResourceLocation folderName) {
+        throw new AssertionError();
+    }
 
     @Deprecated(forRemoval = true)
     public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate, Level world, BlockPos blockpos, BlockRenderDispatcher blockRenderer) {

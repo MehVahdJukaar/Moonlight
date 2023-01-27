@@ -3,22 +3,22 @@ package net.mehvahdjukaar.moonlight.fabric;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
+import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Items;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -92,21 +92,24 @@ public class FabricRecipeConditionManager {
     }
 
     private static Boolean forgeTagEmpty(JsonObject object) {
-        var id= new ResourceLocation(GsonHelper.getAsString(object, "tag"));
+        var id = new ResourceLocation(GsonHelper.getAsString(object, "tag"));
         Map<ResourceKey<?>, Map<ResourceLocation, Collection<Holder<?>>>> allTags = ResourceConditionsImpl.LOADED_TAGS.get();
-
         if (allTags == null) {
-            Moonlight.LOGGER.warn("Can't retrieve deserialized tags. Failing tags_populated resource condition check.");
+            Moonlight.LOGGER.warn("Can't retrieve deserialized tags. Failing tag resource condition check.");
             return true;
         }
         Map<ResourceLocation, Collection<Holder<?>>> registryTags = allTags.get(Registry.ITEM_REGISTRY);
         if (registryTags == null) {
             // No tag for this registry
-            return false;
+            return true;
         }
         Collection<Holder<?>> tags = registryTags.get(id);
-
-        return tags != null && !tags.isEmpty();
+        if (tags == null) return true;
+        if (tags.size() == 1 && tags.stream().findFirst().get().value() == Items.AIR){
+            Moonlight.LOGGER.warn("Found broken tag which just contained the empty item: "+id);
+            return true;
+        }
+        return tags.isEmpty();
     }
 
 }

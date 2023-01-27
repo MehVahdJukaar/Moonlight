@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.fabric.impl.client.model.ModelLoadingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.FabricModelLoaderRegistry;
@@ -41,6 +42,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -181,5 +183,14 @@ public class ClientPlatformHelperImpl {
         FabricSetupCallbacks.CLIENT_SETUP.add(clientSetup);
     }
 
+    public static void registerFluidRenderType(Fluid fluid, RenderType type) {
+        BlockRenderLayerMap.INSTANCE.putFluid(fluid, type);
+    }
+
+    public static void registerOptionalTexturePack(ResourceLocation folderName) {
+        FabricLoader.getInstance().getModContainer(folderName.getNamespace()).ifPresent(c -> {
+            ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, ResourcePackActivationType.NORMAL);
+        });
+    }
 
 }

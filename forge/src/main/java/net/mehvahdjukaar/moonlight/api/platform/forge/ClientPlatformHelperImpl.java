@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -16,7 +17,12 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.item.Item;
@@ -25,16 +31,21 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ExtendedBlockModelDeserializer;
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.minecraftforge.data.loading.DatagenModLoader;
+import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
+import net.minecraftforge.resource.PathPackResources;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -44,6 +55,10 @@ public class ClientPlatformHelperImpl {
     public static void registerRenderType(Block block, RenderType type) {
         //from 0.64 we should register render types in out model json
         ItemBlockRenderTypes.setRenderLayer(block, type);
+    }
+
+    public static void registerFluidRenderType(Fluid fluid, RenderType type) {
+        ItemBlockRenderTypes.setRenderLayer(fluid, type);
     }
 
     public static void registerItemProperty(Item item, ResourceLocation name, ClampedItemPropertyFunction property) {
@@ -204,6 +219,34 @@ public class ClientPlatformHelperImpl {
     public static void addClientSetup(Runnable clientSetup) {
         Consumer<FMLClientSetupEvent> eventConsumer = event -> event.enqueueWork(clientSetup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+    public static void registerOptionalTexturePack(ResourceLocation folderName) {
+        Consumer<AddPackFindersEvent> eventConsumer = e -> {
+            if (e.getPackType() == PackType.CLIENT_RESOURCES) {
+                e.addRepositorySource((consumer, constructor) -> {
+                    IModFile file = ModList.get().getModFileById(folderName.getNamespace()).getFile();
+                    try (PathPackResources pack = new PathPackResources(
+                            folderName.toString(),
+                            file.findResource("resourcepacks/" + folderName.getPath()));) {
+
+                        consumer.accept(constructor.create(
+                                folderName.toString(),
+                                Component.literal(LangBuilder.getReadableName(folderName.getPath())),
+                                false,
+                                () -> pack,
+                                pack.getMetadataSection(PackMetadataSection.SERIALIZER),
+                                Pack.Position.TOP,
+                                PackSource.BUILT_IN,
+                                false));
+
+                    } catch (IOException ee) {
+                        if (!DatagenModLoader.isRunningDataGen()) ee.printStackTrace();
+                    }
+                });
+            }
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().register(eventConsumer);
     }
 
 

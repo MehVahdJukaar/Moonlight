@@ -25,7 +25,6 @@ public class MoonlightForge {
     public MoonlightForge() {
         Moonlight.commonInit();
         MinecraftForge.EVENT_BUS.register(this);
-
     }
 
 
