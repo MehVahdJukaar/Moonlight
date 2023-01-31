@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.client;
 
 import com.mojang.blaze3d.shaders.FogShape;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -66,6 +69,21 @@ public class ModFluidRenderProperties {
      */
     public void modifyFogRender(Camera camera, FogRenderer.FogMode mode, float renderDistance, float partialTick, float nearDistance, float farDistance, FogShape shape) {
     }
+
+    @NotNull
+    public Vector3f modifyFogColor(Camera camera, float partialTick, ClientLevel level, int renderDistance, float darkenWorldAmount, Vector3f fluidFogColor) {
+        return fluidFogColor;
+    }
+
+    /**
+     * location of the texture to apply to the camera when it is within the fluid
+     */
+    @Nullable
+    public ResourceLocation getRenderOverlayTexture(Minecraft mc)
+    {
+        return null;
+    }
+
 
     // Level accessors
 

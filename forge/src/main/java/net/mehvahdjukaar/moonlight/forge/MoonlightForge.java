@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.forge;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.util.fake_player.FakePlayerManager;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,6 +26,7 @@ public class MoonlightForge {
     public MoonlightForge() {
         Moonlight.commonInit();
         MinecraftForge.EVENT_BUS.register(this);
+        ModLootModifiers.init();
     }
 
 

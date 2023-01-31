@@ -246,7 +246,7 @@ public class ClientPlatformHelperImpl {
                 });
             }
         };
-        FMLJavaModLoadingContext.get().getModEventBus().register(eventConsumer);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
 

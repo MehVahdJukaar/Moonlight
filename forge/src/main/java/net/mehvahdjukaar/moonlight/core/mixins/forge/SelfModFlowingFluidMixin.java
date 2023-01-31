@@ -22,7 +22,7 @@ public abstract class SelfModFlowingFluidMixin extends FlowingFluid {
      * @reason
      */
     @Overwrite(remap = false)
-    public void afterInit(ModFlowingFluid.Properties properties, Supplier<? extends LiquidBlock> block) {
+    private void afterInit(ModFlowingFluid.Properties properties, Supplier<? extends LiquidBlock> block) {
         this.type = ModFluidType.create(properties, (ModFlowingFluid) (Object) this);
     }
 
