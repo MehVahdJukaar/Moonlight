@@ -46,4 +46,5 @@ public abstract class MapDecorationType<D extends CustomMapDecoration, M extends
     @Nullable
     public abstract M getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos);
 
+
 }

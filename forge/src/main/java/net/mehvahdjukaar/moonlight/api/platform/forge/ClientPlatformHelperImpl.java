@@ -48,6 +48,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ClientPlatformHelperImpl {
@@ -235,7 +236,7 @@ public class ClientPlatformHelperImpl {
                                 Component.literal(LangBuilder.getReadableName(folderName.getPath())),
                                 false,
                                 () -> pack,
-                                pack.getMetadataSection(PackMetadataSection.SERIALIZER),
+                                Objects.requireNonNull(pack.getMetadataSection(PackMetadataSection.SERIALIZER)),
                                 Pack.Position.TOP,
                                 PackSource.BUILT_IN,
                                 false));

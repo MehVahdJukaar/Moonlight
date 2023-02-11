@@ -8,8 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class WoodBasedItem extends BlockTypeBasedItem<WoodType> {
 
-    private final int burnTime;
-
     public WoodBasedItem(Properties builder, WoodType woodType) {
         this(builder, woodType, 300);
     }
@@ -19,13 +17,8 @@ public class WoodBasedItem extends BlockTypeBasedItem<WoodType> {
     }
 
     public WoodBasedItem(Properties builder, WoodType woodType, int burnTicks) {
-        super(builder, woodType);
-        this.burnTime = woodType.canBurn() ? burnTicks : 0;
+        super(builder, woodType, woodType.canBurn() ? () -> burnTicks : () -> 0);
     }
 
-    @Override
-    public final int getBurnTime(ItemStack itemStack, @Nullable RecipeType<?> recipeType) {
-        return this.burnTime;
-    }
 
 }

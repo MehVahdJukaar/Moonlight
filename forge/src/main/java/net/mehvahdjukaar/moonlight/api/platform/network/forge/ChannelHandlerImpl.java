@@ -27,15 +27,13 @@ import java.util.function.Supplier;
 
 public class ChannelHandlerImpl extends ChannelHandler {
 
-    //needs to be concurrent as mod loading happens in parallel and these are created there
-    static Map<ResourceLocation, ChannelHandler> CHANNELS = new ConcurrentHashMap<>();
 
     public static ChannelHandler createChannel(ResourceLocation channelMame) {
-        return CHANNELS.computeIfAbsent(channelMame, c -> new ChannelHandlerImpl(channelMame));
+        return new ChannelHandlerImpl(channelMame);
     }
 
     public final SimpleChannel channel;
-    public int id = 0;
+    protected int id = 0;
 
     public ChannelHandlerImpl(ResourceLocation channelName) {
         super(channelName);

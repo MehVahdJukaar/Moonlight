@@ -30,7 +30,7 @@ public class ParticleUtil {
 
         RandomSource random = level.random;
         float offset = 0.1f;
-        Vec3 blockCenter = new Vec3(-0.5 + (bb.maxX - bb.minX) / 2f, -0.5 + (bb.maxY - bb.minY) / 2f, -0.5 + (bb.maxZ - bb.minZ) / 2f);
+        Vec3 blockCenter = new Vec3(bb.minX-0.5 + (bb.maxX - bb.minX) / 2f, bb.minY-0.5 + (bb.maxY - bb.minY) / 2f, bb.minZ-0.5 + (bb.maxZ - bb.minZ) / 2f);
         bb = bb.move(-blockCenter.x, -blockCenter.y, -blockCenter.z);
         //north
         int i = uniformInt.sample(random);

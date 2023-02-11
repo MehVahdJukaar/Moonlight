@@ -11,9 +11,13 @@ import com.mrcrayfish.configured.api.IConfigValue;
 import com.mrcrayfish.configured.api.IModConfig;
 import com.mrcrayfish.configured.api.ValueEntry;
 import com.mrcrayfish.configured.client.screen.ConfigScreen;
+import com.mrcrayfish.configured.client.screen.widget.IconButton;
+import com.mrcrayfish.configured.client.util.ScreenUtil;
 import com.mrcrayfish.configured.impl.forge.ForgeConfig;
-import com.mrcrayfish.configured.impl.forge.ForgeFolderEntry;
+import com.mrcrayfish.configured.impl.forge.ForgeValue;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
@@ -78,35 +82,57 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     }
 
     //shorthand
-    public CustomConfigScreen(CustomConfigSelectScreen parent, IModConfig config) {
+    protected CustomConfigScreen(CustomConfigSelectScreen parent, IModConfig config) {
         this(parent.getModId(), parent.getMainIcon(), parent.getBackgroundTexture(), parent.getTitle(), parent, config);
     }
 
-    public CustomConfigScreen(CustomConfigSelectScreen parent, ModConfig config) {
+    protected CustomConfigScreen(CustomConfigSelectScreen parent, ModConfig config) {
         this(parent.getModId(), parent.getMainIcon(), parent.getBackgroundTexture(), parent.getTitle(), parent, config);
     }
 
-    public CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
-                              Screen parent, ModConfig config) {
+    protected CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
+                                 Screen parent, ModConfig config) {
         this(modId, mainIcon, background, title, parent, new ForgeConfig(config));
 
     }
 
     //needed for custom title
-    public CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
-                              Screen parent, IModConfig config) {
+    protected CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
+                                 Screen parent, IModConfig config) {
         super(parent, title, config, background);
         this.modId = modId;
         this.mainIcon = mainIcon;
     }
 
-    private ItemStack getIcon(String name) {
-        if (!icons.containsKey(name)) {
-            String formatted = name.toLowerCase(Locale.ROOT).replace(" ", "_");
-            var item = Registry.ITEM.getOptional(new ResourceLocation(modId, formatted));
-            item.ifPresent(value -> addIcon(name, value.asItem().getDefaultInstance()));
+    @Override
+    protected void constructEntries(List<Item> entries) {
+        super.constructEntries(entries);
+        List<Item> copy = new ArrayList<>(entries);
+        entries.clear();
+        ListIterator<Item> iter = copy.listIterator();
+        while (iter.hasNext()) {
+            var e = iter.next();
+            if (e.getLabel().toLowerCase(Locale.ROOT).equals(getEnabledKeyword())) {
+                iter.remove();
+                entries.add(e);
+            }
         }
-        return icons.getOrDefault(name, mainIcon);
+        entries.addAll(copy);
+    }
+
+    public ItemStack getIcon(String... path) {
+        String last = path[path.length - 1];
+        if (path.length > 1 && last.equals(getEnabledKeyword())) {
+            last = path[path.length - 2];
+        }
+        last = last.toLowerCase(Locale.ROOT).replace("_", " ");
+        if (!icons.containsKey(last)) {
+            String formatted = last.toLowerCase(Locale.ROOT).replace(" ", "_");
+            var item = Registry.ITEM.getOptional(new ResourceLocation(modId, formatted));
+            String finalLast = last;
+            item.ifPresent(value -> addIcon(finalLast, value.asItem().getDefaultInstance()));
+        }
+        return icons.getOrDefault(last, ItemStack.EMPTY);
     }
 
     private void addIcon(String s, ItemStack i) {
@@ -117,11 +143,8 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     protected void init() {
         super.init();
 
-        //replace list with new custom entries
-        boolean reg = this.hasFancyBooleans() && !this.folderEntry.isRoot();
-
-        this.list.replaceEntries(replaceItems(this.list.children(), reg));
-        Collection<Item> temp = replaceItems(this.entries, reg);
+        this.list.replaceEntries(replaceItems(this.list.children()));
+        Collection<Item> temp = replaceItems(this.entries);
         this.entries = new ArrayList<>(temp);
 
         //overrides save button
@@ -134,9 +157,12 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         }
     }
 
-    public abstract boolean hasFancyBooleans();
+    @Deprecated(forRemoval = true)
+    public boolean hasFancyBooleans() {
+        return true;
+    }
 
-    private Collection<Item> replaceItems(Collection<Item> originals, boolean fancyBooleans) {
+    private Collection<Item> replaceItems(Collection<Item> originals) {
         ArrayList<Item> newList = new ArrayList<>();
         for (Item c : originals) {
             if (c instanceof FolderItem f) {
@@ -146,7 +172,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                     continue;
                 }
             } else if (c instanceof BooleanItem b) {
-                BooleanWrapper wrapper = wrapBooleanItem(b, fancyBooleans);
+                BooleanWrapper wrapper = wrapBooleanItem(b);
                 if (wrapper != null) {
                     newList.add(wrapper);
                     continue;
@@ -196,12 +222,12 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         try {
             String oldName = old.getLabel();
             //find correct folder
-            ForgeFolderEntry found = null;
+            IConfigEntry found = null;
             for (IConfigEntry e : folderEntry.getChildren()) {
-                if (e instanceof ForgeFolderEntry f) {
-                    String n = Component.literal(ConfigScreen.createLabel(f.getEntryName())).getString();
+                if (!(e instanceof ValueEntry)) {
+                    String n = Component.literal(ConfigScreen.createLabel(e.getEntryName())).getString();
                     if (n.equals(oldName)) {
-                        found = f;
+                        found = e;
                         break;
                     }
                 }
@@ -210,7 +236,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                 return new FolderWrapper(found, oldName);
             }
         } catch (Exception ignored) {
-            Moonlight.LOGGER.error("error",ignored);
+            Moonlight.LOGGER.error("error", ignored);
         }
 
         return null;
@@ -218,12 +244,27 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
     public abstract CustomConfigScreen createSubScreen(Component title);
 
+    public String getEnabledKeyword() {
+        return "enabled";
+    }
+
+    //TODO: refactor and put in constructor for 1.20
+    //ugly
+    public List<ConfigSpec> getCustomSpecs() {
+        return List.of();
+    }
+
+
     private class FolderWrapper extends FolderItem {
 
         private final ItemStack icon;
         protected final Button button;
+        protected boolean light;
 
-        private FolderWrapper(ForgeFolderEntry folderEntry, String label) {
+        private int ticks = 0;
+        private int lastTick = 1;
+
+        private FolderWrapper(IConfigEntry folderEntry, String label) {
             super(folderEntry);
             //make new button I can access
             this.button = new Button(10, 5, 44, 20, (Component.literal(label)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), (onPress) -> {
@@ -236,7 +277,22 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                 }
                 CustomConfigScreen.this.minecraft.setScreen(sc);
             });
-            this.icon = getIcon(label.toLowerCase(Locale.ROOT));
+            var i = getIcon(label.toLowerCase(Locale.ROOT));
+            this.icon = i.isEmpty() ? mainIcon : i;
+            this.light = getFolderEnabledValue(folderEntry);
+        }
+
+        private boolean getFolderEnabledValue(IConfigEntry entry) {
+            for (var c : entry.getChildren()) {
+                IConfigValue<?> value = c.getValue();
+                if (value != null && value.getName().equals(getEnabledKeyword())) {
+                    Object object = value.get();
+                    if (object instanceof Boolean b) {
+                        return b;
+                    }
+                }
+            }
+            return true;
         }
 
         @Override
@@ -244,16 +300,14 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             return ImmutableList.of(this.button);
         }
 
-        private int ticks = 0;
-        private int lastTick = 1;
-
         @Override
         public void render(PoseStack matrixStack, int x, int top, int left, int width, int height,
-                           int mouseX, int mouseY, boolean selected, float partialTicks) {
+                           int mouseX, int mouseY, boolean hovered, float partialTicks) {
 
+            int light = this.light ? LightTexture.FULL_BRIGHT : 0;
 
             if (lastTick < CustomConfigScreen.this.ticks) {
-                ticks = Math.max(0, ticks + (selected ? 1 : -2)) % (36);
+                ticks = Math.max(0, ticks + (hovered ? 1 : -2)) % (36);
             }
 
             this.lastTick = CustomConfigScreen.this.ticks;
@@ -268,34 +322,19 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
             ItemRenderer renderer = CustomConfigScreen.this.itemRenderer;
 
-            float p = (float) (Math.PI / 180f);
-
-            RenderUtil.renderGuiItemRelative(this.icon, center + 90 - 17, top + 2, renderer,
-                    (s, m) -> rotateItem(partialTicks, p, s, m));
+            RenderUtil.renderGuiItemRelative(this.icon, center + 95 - 17, top + 2, renderer,
+                    (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
 
 
-            RenderUtil.renderGuiItemRelative(this.icon, center - 90, top + 2, renderer,
-                    (s, m) -> rotateItem(partialTicks, p, s, m));
+            RenderUtil.renderGuiItemRelative(this.icon, center - 95, top + 2, renderer,
+                    (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
 
-
-        }
-
-        private void rotateItem(float partialTicks, float p, PoseStack s, BakedModel m) {
-            if (ticks != 0) {
-                if (m.usesBlockLight()) {
-                    s.mulPose(Vector3f.YP.rotation((ticks + partialTicks) * p * 10f));
-
-                } else {
-                    float scale = 1 + 0.1f * Mth.sin((ticks + partialTicks) * p * 20);
-                    s.scale(scale, scale, scale);
-                }
-            }
         }
 
     }
 
     @Nullable
-    public BooleanWrapper wrapBooleanItem(BooleanItem old, boolean displayItem) {
+    public BooleanWrapper wrapBooleanItem(BooleanItem old) {
         try {
             IConfigValue<Boolean> holder = (IConfigValue<Boolean>) CONFIG_VALUE_HOLDER.get(old);
 
@@ -307,7 +346,9 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                 }
             }
             if (found != null) {
-                return displayItem ? new BooleanWrapperItem(holder) : new BooleanWrapper(holder);
+                var path = ((ForgeValue<Boolean>) holder).configValue.getPath().toArray(String[]::new);
+                ItemStack icon = getIcon(path);
+                return new BooleanWrapper(holder, icon);
             }
         } catch (Exception ignored) {
             Moonlight.LOGGER.error("error");
@@ -315,63 +356,67 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         return null;
     }
 
-    private class BooleanWrapperItem extends BooleanWrapper {
-
-        private final ItemStack item;
-
-        public BooleanWrapperItem(IConfigValue<Boolean> holder) {
-            super(holder);
-
-            this.item = getIcon(label.getString().toLowerCase(Locale.ROOT));
-            this.iconOffset = 7;
-        }
-
-        @Override
-        public void render(PoseStack poseStack, int index, int top, int left, int width, int p_230432_6_, int mouseX, int mouseY, boolean hovered, float partialTicks) {
-            boolean on = this.holder.get();
-            super.render(poseStack, index, top, left, width, p_230432_6_, mouseX, mouseY, hovered, partialTicks);
-
-            int light = LightTexture.FULL_BRIGHT;
-            if (!on) {
-
-                //int sky = LightTexture.sky(light);
-                //int block = 0;//LightTexture.block(light);
-                light = 0;//LightTexture.pack(block, sky);
-            }
-            int center = (int) (this.button.x + this.button.getWidth() / 2f);
-            ItemRenderer renderer = CustomConfigScreen.this.itemRenderer;
-
-            RenderUtil.renderGuiItemRelative(this.item, center - 8 - iconOffset, top + 2, renderer, (a, b) -> {
-            }, light, OverlayTexture.NO_OVERLAY);
-        }
-
-        @Override
-        public void onResetValue() {
-            this.button.setMessage(Component.literal(""));
-        }
-    }
 
     private class BooleanWrapper extends BooleanItem {
-        private static final int ICON_WIDTH = 12;
-        protected Button button;
-        protected boolean active = false;
-        protected int iconOffset = 0;
+        private static final int ICON_SIZE = 12;
 
-        public BooleanWrapper(IConfigValue<Boolean> holder) {
+        private final ItemStack item;
+        protected final int iconOffset;
+
+        protected Button button;
+        protected boolean needsGameRestart;
+        private int ticks = 0;
+        private int lastTick = 1;
+
+        public BooleanWrapper(IConfigValue<Boolean> holder, ItemStack item) {
             super(holder);
+
             try {
                 button = (Button) BOOLEAN_ITEM_BUTTON.get(this);
             } catch (Exception ignored) {
             }
             button.setMessage(Component.literal(""));
+
+            this.needsGameRestart = hackyCheckIfValueNeedsGameRestart(holder);
+            this.item = item;
+            this.iconOffset = item.isEmpty() ? 0 : 7;
+        }
+
+        public BooleanWrapper(IConfigValue<Boolean> holder) {
+            this(holder, ItemStack.EMPTY);
         }
 
         @Override
-        public void render(PoseStack poseStack, int index, int top, int left, int width, int p_230432_6_, int mouseX, int mouseY, boolean hovered, float partialTicks) {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            var r = super.mouseClicked(mouseX, mouseY, button);
+            this.needsGameRestart = !this.needsGameRestart;
+            return r;
+        }
+
+        @Override
+        public void render(PoseStack poseStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovered, float partialTicks) {
             this.button.setMessage(Component.literal(""));
+            super.render(poseStack, index, top, left, width, height, mouseX, mouseY, hovered, partialTicks);
+            //hovered concerns the entire entry not just the button
+            hovered = this.button.isMouseOver(mouseX, mouseY);
+            if (lastTick < CustomConfigScreen.this.ticks) {
+                this.ticks = Math.max(0, ticks + (hovered ? 1 : -2)) % (36);
+                if (!hovered && this.ticks > 17) this.ticks %= 18;
+            }
 
-            super.render(poseStack, index, top, left, width, p_230432_6_, mouseX, mouseY, hovered, partialTicks);
+            this.lastTick = CustomConfigScreen.this.ticks;
 
+            //world restart stuff for forge values
+            if (needsGameRestart) {
+                RenderSystem.setShaderTexture(0, IconButton.ICONS);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                Screen.blit(poseStack, left - 18, top + 5, 11, 11, 51.0F, 22.0F, 11, 11, 64, 64);
+                if (ScreenUtil.isMouseWithin(left - 18, top + 5, 11, 11, mouseX, mouseY)) {
+                    String translationKey = "configured.gui.requires_game_restart";
+                    int outline = -1438090048;
+                    CustomConfigScreen.this.setActiveTooltip(Component.translatable(translationKey), outline);
+                }
+            }
 
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, CustomConfigSelectScreen.MISC_ICONS);
@@ -381,14 +426,34 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             RenderSystem.defaultBlendFunc();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-            int iconX = iconOffset + (int) (this.button.x + Math.ceil((this.button.getWidth() - ICON_WIDTH) / 2f));
-            int iconY = (int) (this.button.y + Math.ceil(((this.button.getHeight() - ICON_WIDTH) / 2f)));
+            int iconX = iconOffset + (int) (this.button.x + Math.ceil((this.button.getWidth() - ICON_SIZE) / 2f));
+            int iconY = (int) (this.button.y + Math.ceil(((this.button.getHeight() - ICON_SIZE) / 2f)));
 
-            int u = this.holder.get() ? ICON_WIDTH : 0;
+            boolean on = this.holder.get();
 
-            blit(poseStack, iconX, iconY, this.button.getBlitOffset(), (float) u, (float) 0, ICON_WIDTH, ICON_WIDTH, 64, 64);
+            int u = on ? ICON_SIZE : 0;
+
+            blit(poseStack, iconX, iconY, this.button.getBlitOffset(), u, 0, ICON_SIZE, ICON_SIZE, 64, 64);
 
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1);
+
+            if (!item.isEmpty()) {
+                int light = on ? LightTexture.FULL_BRIGHT : 0;
+                int center = (int) (this.button.x + this.button.getWidth() / 2f);
+                ItemRenderer renderer = CustomConfigScreen.this.itemRenderer;
+
+                RenderUtil.renderGuiItemRelative(this.item, center - 8 - iconOffset, top + 2, renderer,
+                        (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
+            }
+        }
+
+        private boolean hackyCheckIfValueNeedsGameRestart(IConfigValue<Boolean> value) {
+            for (var v : CustomConfigScreen.this.getCustomSpecs()) {
+                if (v.getFileName().equals(CustomConfigScreen.this.config.getFileName())) {
+                    return ((ConfigSpecWrapper) v).requiresGameRestart(((ForgeValue<Boolean>) value).configValue);
+                }
+            }
+            return false;
         }
 
         @Override
@@ -398,6 +463,18 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     }
 
 
+    private static void rotateItem(int ticks, float partialTicks, PoseStack s, BakedModel m) {
+        if (ticks != 0) {
+            float p = (float) (Math.PI / 180f);
+            if (m.usesBlockLight()) {
+                s.mulPose(Vector3f.YP.rotation((ticks + partialTicks) * p * 10f));
+
+            } else {
+                float scale = 1 + 0.1f * Mth.sin((ticks + partialTicks) * p * 20);
+                s.scale(scale, scale, scale);
+            }
+        }
+    }
 }
 
 

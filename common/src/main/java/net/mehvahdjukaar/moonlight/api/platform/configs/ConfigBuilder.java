@@ -132,10 +132,14 @@ public abstract class ConfigBuilder {
         return this;
     }
 
+    public abstract ConfigBuilder worldReload();
+
+    public abstract ConfigBuilder gameRestart();
+
     protected void maybeAddTranslationString(String name) {
         this.currentKey = this.tooltipKey(name);
         if (this.currentComment != null && this.currentKey != null) {
-            comments.put(currentKey, currentComment);
+            this.comments.put(currentKey, currentComment);
             this.currentComment = null;
             this.currentKey = null;
         }

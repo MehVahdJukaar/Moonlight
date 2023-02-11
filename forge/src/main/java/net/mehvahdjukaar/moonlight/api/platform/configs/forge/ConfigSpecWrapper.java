@@ -20,7 +20,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.fml.config.IConfigEvent;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -33,17 +32,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ConfigSpecWrapper extends ConfigSpec {
+
+    private static final Method SET_CONFIG_DATA = ObfuscationReflectionHelper.findMethod(ModConfig.class, "setConfigData", CommentedConfig.class);
 
     private final ForgeConfigSpec spec;
 
     private final ModConfig modConfig;
     private final ModContainer modContainer;
 
-    private static final Method setConfigData = ObfuscationReflectionHelper.findMethod(ModConfig.class, "setConfigData", CommentedConfig.class);
+    private final Map<ForgeConfigSpec.ConfigValue<?>, Object> requireRestartValues;
 
-    public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced, @javax.annotation.Nullable Runnable onChange) {
+    public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced,
+                             @Nullable Runnable onChange, List<ForgeConfigSpec.ConfigValue<?>> requireRestart) {
         super(name, FMLPaths.CONFIGDIR.get(), type, synced, onChange);
         this.spec = spec;
 
@@ -62,6 +67,11 @@ public class ConfigSpecWrapper extends ConfigSpec {
         this.modConfig = new ModConfig(t, spec, modContainer, name.getNamespace() + "-" + name.getPath() + ".toml");
         //for event
         ConfigSpec.addTrackedSpec(this);
+
+        if(!requireRestart.isEmpty()){
+            loadFromFile(); //early load if this has world reload ones
+        }
+        this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ForgeConfigSpec.ConfigValue::get));
     }
 
     @Override
@@ -86,8 +96,8 @@ public class ConfigSpecWrapper extends ConfigSpec {
         //same stuff that forge config tracker does
         try {
             final CommentedFileConfig configData = modConfig.getHandler().reader(FMLPaths.CONFIGDIR.get()).apply(modConfig);
-            setConfigData.setAccessible(true);
-            setConfigData.invoke(modConfig, configData);
+            SET_CONFIG_DATA.setAccessible(true);
+            SET_CONFIG_DATA.invoke(modConfig, configData);
             modContainer.dispatchConfigEvent(IConfigEvent.loading(modConfig));
             modConfig.save();
         } catch (Exception e) {
@@ -169,6 +179,13 @@ public class ConfigSpecWrapper extends ConfigSpec {
         //using this isntead so we dont fire the config changes event otherwise this will loop
         //this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
         //this.onRefresh();
+    }
+
+
+    public boolean requiresGameRestart(ForgeConfigSpec.ConfigValue<?> value) {
+        var v = requireRestartValues.get(value);
+        if (v == null) return false;
+        else return v != value.get();
     }
 
 

@@ -246,5 +246,9 @@ public class PlatformHelperImpl {
        return FabricRecipeConditionManager.areConditionsMet(jo);
     }
 
+    public static List<String> getInstalledMods() {
+        return FabricLoader.getInstance().getAllMods().stream().map(m->m.getMetadata().getId()).toList();
+    }
+
 
 }

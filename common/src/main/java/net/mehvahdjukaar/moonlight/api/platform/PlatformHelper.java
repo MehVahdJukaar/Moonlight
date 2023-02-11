@@ -175,6 +175,10 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
+    @ExpectPlatform
+    public static List<String> getInstalledMods(){
+        throw new AssertionError();
+    }
 
     @ExpectPlatform
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {

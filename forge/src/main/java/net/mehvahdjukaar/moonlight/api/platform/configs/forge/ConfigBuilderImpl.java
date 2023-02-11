@@ -3,15 +3,18 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ConfigBuilderImpl extends ConfigBuilder {
+
+    private final List<ForgeConfigSpec.ConfigValue<?>> requireGameRestart = new ArrayList<>();
+    private boolean currentGameRestart;
+    private ForgeConfigSpec.ConfigValue<?> currentValue;
 
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         return new ConfigBuilderImpl(name, type);
@@ -34,7 +37,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigSpecWrapper build() {
-        return new ConfigSpecWrapper(this.getName(), this.builder.build(), this.type, this.synced, this.changeCallback);
+        return new ConfigSpecWrapper(this.getName(), this.builder.build(), this.type, this.synced,
+                this.changeCallback, this.requireGameRestart);
     }
 
     @Override
@@ -56,38 +60,54 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
         maybeAddTranslationString(name);
-        return builder.define(name, defaultValue);
+        var value = builder.define(name, defaultValue);
+        this.currentValue = value;
+        maybeAddGameRestart();
+        return value;
     }
 
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
         maybeAddTranslationString(name);
-        return builder.defineInRange(name, defaultValue, min, max);
+        var value = builder.defineInRange(name, defaultValue, min, max);
+        this.currentValue = value;
+        maybeAddGameRestart();
+        return value;
     }
 
     @Override
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
         maybeAddTranslationString(name);
-        return builder.defineInRange(name, defaultValue, min, max);
+        var value = builder.defineInRange(name, defaultValue, min, max);
+        this.currentValue = value;
+        maybeAddGameRestart();
+        return value;
     }
 
     @Override
     public Supplier<Integer> defineColor(String name, int defaultValue) {
         maybeAddTranslationString(name);
         var stringConfig = builder.define(name, Integer.toHexString(defaultValue), ConfigBuilder.COLOR_CHECK);
+        this.currentValue = stringConfig;
+        maybeAddGameRestart();
         return () -> Integer.parseUnsignedInt(stringConfig.get().replace("0x", ""), 16);
     }
 
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         maybeAddTranslationString(name);
-        return builder.define(name, defaultValue, validator);
+        var value = builder.define(name, defaultValue, validator);
+        this.currentValue = value;
+        maybeAddGameRestart();
+        return value;
     }
 
     @Override
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
         maybeAddTranslationString(name);
         var value = builder.defineList(name, defaultValue, predicate);
+        this.currentValue = value;
+        maybeAddGameRestart();
         return () -> (List<String>) value.get();
     }
 
@@ -101,7 +121,30 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
         maybeAddTranslationString(name);
-        return builder.defineEnum(name, defaultValue);
+        var value = builder.defineEnum(name, defaultValue);
+        this.currentValue = value;
+        maybeAddGameRestart();
+        return value;
+    }
+
+    private void maybeAddGameRestart() {
+        if(currentGameRestart && currentValue != null){
+            requireGameRestart.add(currentValue);
+            currentGameRestart = false;
+            currentValue = null;
+        }
+    }
+
+    @Override
+    public ConfigBuilder gameRestart() {
+        this.currentGameRestart = true;
+        return this;
+    }
+
+    @Override
+    public ConfigBuilder worldReload(){
+        builder.worldRestart();
+        return this;
     }
 
     @Override

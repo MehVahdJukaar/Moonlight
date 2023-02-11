@@ -132,4 +132,15 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         comments.put(this.translationKey(name), LangBuilder.getReadableName(name));
         super.maybeAddTranslationString(name);
     }
+
+    //NYI
+    @Override
+    public ConfigBuilder gameRestart() {
+        return this;
+    }
+
+    @Override
+    public ConfigBuilder worldReload() {
+        return this;
+    }
 }

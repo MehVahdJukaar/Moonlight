@@ -71,6 +71,12 @@ public abstract class ModFlowingFluid extends FlowingFluid {
         return fluidIn == getSource() || fluidIn == getFlowing();
     }
 
+    @Override
+    public abstract Fluid getSource();
+
+    @Override
+    public abstract Fluid getFlowing();
+
     @Environment(EnvType.CLIENT)
     public abstract ModFluidRenderProperties createRenderProperties();
 

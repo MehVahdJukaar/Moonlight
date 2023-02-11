@@ -22,11 +22,11 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
     public BlockPos pos;
     //private final int rotation;
 
-    public MapBlockMarker(MapDecorationType<D, ?> type) {
+    protected MapBlockMarker(MapDecorationType<D, ?> type) {
         this.type = type;
     }
 
-    public MapBlockMarker(MapDecorationType<D, ?> type, BlockPos pos) {
+    protected MapBlockMarker(MapDecorationType<D, ?> type, BlockPos pos) {
         this(type);
         this.pos = pos;
     }

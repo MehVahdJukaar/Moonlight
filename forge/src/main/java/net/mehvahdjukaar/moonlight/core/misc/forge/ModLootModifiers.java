@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 public class ModLootModifiers {
 
-    public static void init() {
+    public static void register() {
         LOOT_MODIFIERS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
@@ -33,14 +33,12 @@ public class ModLootModifiers {
     public static final RegistryObject<Codec<? extends IGlobalLootModifier>> REPLACE_ITEM_GLM =
             LOOT_MODIFIERS.register("replace_item", ReplaceItemModifier.CODEC);
 
-
     public static class AddItemModifier extends LootModifier {
 
         public static final Supplier<Codec<AddItemModifier>> CODEC = Suppliers.memoize(() ->
                 RecordCodecBuilder.create(inst -> codecStart(inst).and(
-                                ItemStack.CODEC.fieldOf("item").forGetter(m -> m.addedItemStack)
-                        )
-                        .apply(inst, AddItemModifier::new)));
+                        ItemStack.CODEC.fieldOf("item").forGetter(m -> m.addedItemStack)
+                ).apply(inst, AddItemModifier::new)));
 
         private final ItemStack addedItemStack;
 

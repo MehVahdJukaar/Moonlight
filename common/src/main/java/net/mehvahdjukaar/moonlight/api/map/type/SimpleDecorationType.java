@@ -26,24 +26,28 @@ public class SimpleDecorationType extends MapDecorationType<CustomMapDecoration,
 
     @Nullable
     private final String name;
+    @Nullable
+    private final ResourceLocation structureId; //TODO: finish
     private final float rotation;
 
 
     public static final Codec<SimpleDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             RuleTest.CODEC.optionalFieldOf("target_block").forGetter(SimpleDecorationType::getTarget),
             Codec.STRING.optionalFieldOf("name").forGetter(SimpleDecorationType::getName),
-            Codec.FLOAT.optionalFieldOf("rotation").forGetter(SimpleDecorationType::getRotation)
+            Codec.FLOAT.optionalFieldOf("rotation").forGetter(SimpleDecorationType::getRotation),
+            ResourceLocation.CODEC.optionalFieldOf("structure").forGetter(SimpleDecorationType::getStructure)
     ).apply(instance, SimpleDecorationType::new));
 
 
     //TODO: finish these 2
     public SimpleDecorationType(Optional<RuleTest> target) {
-        this(target, Optional.empty(), Optional.empty());
+        this(target, Optional.empty(), Optional.empty(), Optional.empty());
     }
-    public SimpleDecorationType(Optional<RuleTest> target, Optional<String> name, Optional<Float> rotation) {
+    public SimpleDecorationType(Optional<RuleTest> target, Optional<String> name, Optional<Float> rotation, Optional<ResourceLocation> structure) {
         this.target = target.orElse(null);
         this.name = name.orElse(null);
         this.rotation = rotation.orElse(0f);
+        this.structureId = structure.orElse(null);
     }
 
     public Optional<RuleTest> getTarget() {
@@ -56,6 +60,10 @@ public class SimpleDecorationType extends MapDecorationType<CustomMapDecoration,
 
     public Optional<Float> getRotation() {
         return Optional.of(rotation);
+    }
+
+    public Optional<ResourceLocation> getStructure() {
+        return Optional.ofNullable(structureId);
     }
 
     @Override
