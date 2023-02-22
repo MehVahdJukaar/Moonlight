@@ -9,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -17,7 +16,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -31,6 +29,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
@@ -42,6 +41,7 @@ import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -183,7 +183,14 @@ public class RegHelperImpl {
         return RegHelper.registerRecipeSerializer(name, () -> new OptionalSimpleRecipeSerializer<>(factory));
     }
 
-    private static class OptionalSimpleRecipeSerializer<T extends Recipe<?>> extends SimpleRecipeSerializer<T>{
+    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
+        var f = register(name, fluid, Registry.FLUID);
+        //register fluid type
+        register(name, () -> f.get().getFluidType(), ForgeRegistries.Keys.FLUID_TYPES);
+        return f;
+    }
+
+    private static class OptionalSimpleRecipeSerializer<T extends Recipe<?>> extends SimpleRecipeSerializer<T> {
         public OptionalSimpleRecipeSerializer(Function<ResourceLocation, T> function) {
             super(function);
         }

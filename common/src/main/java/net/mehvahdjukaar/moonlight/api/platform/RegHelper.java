@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -88,8 +89,9 @@ public class RegHelper {
         return register(name, block, Registry.BLOCK);
     }
 
+    @ExpectPlatform
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
-        return register(name, fluid, Registry.FLUID);
+        throw new AssertionError();
     }
 
     public static <T extends Item> RegSupplier<T> registerItem(ResourceLocation name, Supplier<T> item) {

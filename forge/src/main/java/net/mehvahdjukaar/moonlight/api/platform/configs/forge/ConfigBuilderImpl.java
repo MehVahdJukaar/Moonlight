@@ -30,7 +30,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    protected String currentCategory() {
+    public String currentCategory() {
         return cat;
     }
 

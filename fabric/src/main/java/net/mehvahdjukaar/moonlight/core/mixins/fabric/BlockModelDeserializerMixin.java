@@ -4,6 +4,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import net.fabricmc.fabric.mixin.client.model.BakedModelManagerMixin;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.FabricModelLoaderRegistry;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +24,6 @@ public abstract class BlockModelDeserializerMixin {
     public void deserialize(JsonElement element, Type targetType, JsonDeserializationContext deserializationContext,
                             CallbackInfoReturnable<BlockModel> cir) throws JsonParseException {
         JsonObject jsonobject = element.getAsJsonObject();
-
         if (jsonobject.has("loader")) {
             ResourceLocation loader = new ResourceLocation(GsonHelper.getAsString(jsonobject, "loader"));
             BlockModel custom = FabricModelLoaderRegistry.getUnbakedModel(

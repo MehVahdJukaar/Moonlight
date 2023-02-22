@@ -56,7 +56,6 @@ public abstract class ConfigBuilder {
         return name;
     }
 
-
     public abstract ConfigBuilder push(String category);
 
     public abstract ConfigBuilder pop();
@@ -79,7 +78,7 @@ public abstract class ConfigBuilder {
         return define(name, defaultValue, s -> true);
     }
 
-    protected abstract String currentCategory();
+    public abstract String currentCategory();
 
     public abstract <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate);
 

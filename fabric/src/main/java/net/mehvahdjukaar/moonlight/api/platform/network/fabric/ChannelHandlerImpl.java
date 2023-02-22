@@ -43,14 +43,20 @@ public class ChannelHandlerImpl extends ChannelHandler {
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder) {
 
+        if(direction == NetworkDir.BOTH){
+            register(NetworkDir.PLAY_TO_CLIENT, messageClass, decoder);
+            direction = NetworkDir.PLAY_TO_SERVER;
+        }
+
         ResourceLocation res = new ResourceLocation(this.channelName.getNamespace(), "" + id++);
         ID_MAP.put(messageClass, res);
 
         if (direction == NetworkDir.PLAY_TO_SERVER) {
+            NetworkDir finalDirection = direction;
             ServerPlayNetworking.registerGlobalReceiver(
                     res, (server, player, h, buf, r) -> {
                         M message = decoder.apply(buf);
-                        server.execute(() -> message.handle(new Wrapper(player, direction)));
+                        server.execute(() -> message.handle(new Wrapper(player, finalDirection)));
                     });
         } else {
             if (PlatformHelper.getEnv().isClient()) FabricClientNetwork.register(res, decoder);

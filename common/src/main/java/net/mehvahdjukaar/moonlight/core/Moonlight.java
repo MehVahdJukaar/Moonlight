@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.item.ModBucketItem;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
@@ -13,6 +14,7 @@ import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.CompatTypes;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BucketItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

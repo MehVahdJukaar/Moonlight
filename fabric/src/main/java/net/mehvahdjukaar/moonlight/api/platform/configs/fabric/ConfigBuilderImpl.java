@@ -41,7 +41,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    protected String currentCategory() {
+    public String currentCategory() {
         return categoryStack.peek().getName();
     }
 
@@ -52,6 +52,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         categoryStack.push(cat);
         return this;
     }
+
+
 
     @Override
     public ConfigBuilderImpl pop() {

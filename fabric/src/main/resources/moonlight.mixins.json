@@ -9,6 +9,7 @@
     "ClientPacketListenerMixin",
     "ItemRendererAccessor",
     "ItemRendererMixin",
+    "LocalPlayerMixin",
     "MenuScreensAccessor",
     "ModelManagerAccessor",
     "SelfCustomBakedModel",

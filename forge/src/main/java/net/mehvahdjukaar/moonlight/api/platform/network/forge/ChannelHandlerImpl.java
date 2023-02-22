@@ -47,9 +47,13 @@ public class ChannelHandlerImpl extends ChannelHandler {
             NetworkDir dir,
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder) {
+        Optional<NetworkDirection> d = switch (dir){
+            case BOTH -> Optional.empty();
+            case PLAY_TO_CLIENT -> Optional.of(NetworkDirection.PLAY_TO_CLIENT);
+            case PLAY_TO_SERVER -> Optional.of(NetworkDirection.PLAY_TO_SERVER);
+        };
 
-        NetworkDirection d = dir == NetworkDir.PLAY_TO_SERVER ? NetworkDirection.PLAY_TO_SERVER : NetworkDirection.PLAY_TO_CLIENT;
-        channel.registerMessage(id++, messageClass, Message::writeToBuffer, decoder, this::consumer, Optional.of(d));
+        channel.registerMessage(id++, messageClass, Message::writeToBuffer, decoder, this::consumer, d);
     }
 
     private <M extends Message> void consumer(M message, Supplier<NetworkEvent.Context> context) {

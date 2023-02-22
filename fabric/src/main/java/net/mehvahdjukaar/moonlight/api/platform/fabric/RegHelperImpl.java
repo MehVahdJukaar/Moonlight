@@ -34,6 +34,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -163,6 +164,10 @@ public class RegHelperImpl {
 
     public static <T extends Recipe<?>> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, Function<ResourceLocation, T> factory) {
         return RegHelper.registerRecipeSerializer(name, () -> new SimpleRecipeSerializer<>(factory));
+    }
+
+    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
+        return register(name, fluid, Registry.FLUID);
     }
 
 
