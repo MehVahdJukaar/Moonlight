@@ -222,7 +222,7 @@ public class ClientPlatformHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void registerOptionalTexturePack(ResourceLocation folderName) {
+    public static void registerOptionalTexturePack(ResourceLocation folderName, String displayName, boolean defaultEnabled) {
         Consumer<AddPackFindersEvent> eventConsumer = e -> {
             if (e.getPackType() == PackType.CLIENT_RESOURCES) {
                 e.addRepositorySource((consumer, constructor) -> {
@@ -233,8 +233,8 @@ public class ClientPlatformHelperImpl {
 
                         consumer.accept(constructor.create(
                                 folderName.toString(),
-                                Component.literal(LangBuilder.getReadableName(folderName.getPath())),
-                                false,
+                                Component.literal(displayName),
+                                defaultEnabled,
                                 () -> pack,
                                 Objects.requireNonNull(pack.getMetadataSection(PackMetadataSection.SERIALIZER)),
                                 Pack.Position.TOP,

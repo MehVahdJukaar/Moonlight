@@ -30,6 +30,8 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         ServerLifecycleEvents.SERVER_STARTED.register((s)->SoftFluidRegistry.onDataLoad()); //need this too because fabric is stupid
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((a,b,c)->SoftFluidRegistry.onDataLoad()); //only fire after reload command
         ServerWorldEvents.UNLOAD.register((s,w)-> FakePlayerManager.unloadLevel(w));
+
+        ModResourceConditionsBridge.init();
     }
 
     //called after all other mod initialize have been called.

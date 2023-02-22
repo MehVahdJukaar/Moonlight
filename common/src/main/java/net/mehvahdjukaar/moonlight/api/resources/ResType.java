@@ -11,6 +11,9 @@ public enum ResType {
     RECIPES("recipes/%s.json"),
     ADVANCEMENTS("advancements/%s.json"),
     CONFIGURED_FEATURES("worldgen/configured_feature/%s.json"),
+    STRUCTURE("worldgen/structure/%s.json"),
+    STRUCTURE_SET("worldgen/structure_set/%s.json"),
+    TEMPLATE_POOL("worldgen/template_pool/%s.json"),
 
     LANG("lang/%s.json"),
     TEXTURES("textures/%s.png"),

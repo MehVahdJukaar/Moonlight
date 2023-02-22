@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -74,7 +75,7 @@ public class FabricConfigListScreen extends Screen {
         super.render(poseStack, mouseX, mouseY, partialTick);
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
 
-        if (modURL != null && isMouseWithin((this.width / 2) - 90, 2 + 6, 180, 16 + 2, mouseX, mouseY)) {
+        if (modURL != null && MthUtils.isWithinRectangle((this.width / 2) - 90, 2 + 6, 180, 16 + 2, mouseX, mouseY)) {
             this.renderTooltip(poseStack, this.font.split(Component.translatable("gui.moonlight.open_mod_page", this.modId), 200), mouseX, mouseY);
         }
         int titleWidth = this.font.width(this.title) + 35;
@@ -82,13 +83,9 @@ public class FabricConfigListScreen extends Screen {
         this.itemRenderer.renderAndDecorateFakeItem(this.mainIcon, (this.width / 2) - titleWidth / 2, 2 + 8);
     }
 
-    private boolean isMouseWithin(int x, int y, int width, int height, int mouseX, int mouseY) {
-        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
-    }
-
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (modURL != null && isMouseWithin((this.width / 2) - 90, 2 + 6, 180, 16 + 2, (int) mouseX, (int) mouseY)) {
+        if (modURL != null && MthUtils.isWithinRectangle((this.width / 2) - 90, 2 + 6, 180, 16 + 2, (int) mouseX, (int) mouseY)) {
             Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,  modURL));
             this.handleComponentClicked(style);
             return true;

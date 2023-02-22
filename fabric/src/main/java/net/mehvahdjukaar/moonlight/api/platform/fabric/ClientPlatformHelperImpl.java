@@ -187,9 +187,10 @@ public class ClientPlatformHelperImpl {
         BlockRenderLayerMap.INSTANCE.putFluid(fluid, type);
     }
 
-    public static void registerOptionalTexturePack(ResourceLocation folderName) {
+    public static void registerOptionalTexturePack(ResourceLocation folderName, String displayName, boolean defaultEnabled) {
         FabricLoader.getInstance().getModContainer(folderName.getNamespace()).ifPresent(c -> {
-            ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, ResourcePackActivationType.NORMAL);
+            ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, displayName,
+                    defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL);
         });
     }
 

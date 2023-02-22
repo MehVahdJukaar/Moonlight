@@ -178,4 +178,8 @@ public class MthUtils {
         return start.mixWith(end, delta);
     }
 
+    public static boolean isWithinRectangle(int x, int y, int width, int height, int mouseX, int mouseY) {
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    }
+
 }

@@ -27,7 +27,6 @@
     "MenuTypeAccessor",
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
-    "RecipeManagerMixin",
     "RegistryAccessMixin",
     "ReloadableServerResourcesMixin",
     "ServerPlayerAccessor"

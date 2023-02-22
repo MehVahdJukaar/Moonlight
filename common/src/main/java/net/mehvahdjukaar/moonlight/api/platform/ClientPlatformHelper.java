@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -233,8 +234,12 @@ public class ClientPlatformHelper {
      * Pack in /resources/resourcepacks
      */
     @ExpectPlatform
-    public static void registerOptionalTexturePack(ResourceLocation folderName) {
+    public static void registerOptionalTexturePack(ResourceLocation folderName, String displayName , boolean defaultEnabled) {
         throw new AssertionError();
+    }
+
+    public static void registerOptionalTexturePack(ResourceLocation folderName) {
+        registerOptionalTexturePack(folderName, LangBuilder.getReadableName(folderName.getPath()), false);
     }
 
     @Deprecated(forRemoval = true)

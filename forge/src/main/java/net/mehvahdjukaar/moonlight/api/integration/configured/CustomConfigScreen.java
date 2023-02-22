@@ -18,6 +18,7 @@ import com.mrcrayfish.configured.impl.forge.ForgeValue;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
+import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
@@ -411,7 +412,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                 RenderSystem.setShaderTexture(0, IconButton.ICONS);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 Screen.blit(poseStack, left - 18, top + 5, 11, 11, 51.0F, 22.0F, 11, 11, 64, 64);
-                if (ScreenUtil.isMouseWithin(left - 18, top + 5, 11, 11, mouseX, mouseY)) {
+                if (MthUtils.isWithinRectangle(left - 18, top + 5, 11, 11, mouseX, mouseY)) {
                     String translationKey = "configured.gui.requires_game_restart";
                     int outline = -1438090048;
                     CustomConfigScreen.this.setActiveTooltip(Component.translatable(translationKey), outline);

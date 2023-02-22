@@ -14,7 +14,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
-import net.mehvahdjukaar.moonlight.fabric.FabricRecipeConditionManager;
+import net.mehvahdjukaar.moonlight.fabric.ModResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
@@ -158,7 +158,7 @@ public class RegHelperImpl {
     }
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
-        FabricRecipeConditionManager.registerSimple(id, predicate);
+        ModResourceConditionsBridge.registerSimple(id, predicate);
     }
 
 

@@ -16,6 +16,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -81,7 +82,8 @@ public class FabricConfigSpec extends ConfigSpec {
             mainEntry.getEntries().forEach(e -> e.saveToJson(jo));
 
             GSON.toJson(jo, writer);
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            Moonlight.LOGGER.error("Failed to save config {}:", this.getName(), e);
         }
         this.onRefresh();
     }
