@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -125,8 +127,17 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator) {
-        return () -> defaultValue;
+    public Supplier<JsonElement> defineJson(String name, JsonElement defaultValue) {
+        var config = new JsonConfigValue(name, defaultValue);
+        doAddConfig(name, config);
+        return config;
+    }
+
+    @Override
+    public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultValue, Codec<T> codec) {
+        var config = new ObjectConfigValue<>(name, defaultValue, codec);
+        doAddConfig(name, config);
+        return config;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
 
+import net.mehvahdjukaar.moonlight.core.mixins.fabric.SelfCustomBakedModel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;

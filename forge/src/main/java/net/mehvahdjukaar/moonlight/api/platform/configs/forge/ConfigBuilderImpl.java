@@ -1,10 +1,17 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -112,10 +119,96 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public <T> Supplier<List<? extends T>> defineForgeList(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
-        maybeAddTranslationString(name);
-        var value = builder.defineList(name, defaultValue, predicate);
-        return (Supplier<List<? extends T>>) value;
+    public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
+        if (usesConfigBuddy) return ConfigHelper.defineObject(builder, name, codec, defaultSupplier); //actual toml parse
+        return StringCodecConfigValue.define(this, name, defaultSupplier.get(), codec); //string based config
+    }
+
+    private static class StringCodecConfigValue<T> implements Supplier<T> {
+
+        private final StringJsonConfigValue inner;
+        private final Codec<T> codec;
+        private T cache;
+
+        public static <T> StringCodecConfigValue<T> define(ConfigBuilderImpl cfg, String name, T defaultValue, Codec<T> codec) {
+            var e = codec.encodeStart(JsonOps.INSTANCE, defaultValue);
+            var json = e.resultOrPartial(s -> {
+                throw new RuntimeException("Invalid default value for config " + name + ": " + s);
+            });
+            if (json.isEmpty()) throw new RuntimeException("Invalid default value for config " + name);
+            var jsonConfig = cfg.defineJson(name, json.get());
+            return new StringCodecConfigValue<>(jsonConfig, codec);
+        }
+
+        public StringCodecConfigValue(StringJsonConfigValue jsonConfig, Codec<T> codec) {
+            this.inner = jsonConfig;
+            this.codec = codec;
+        }
+
+        @Override
+        public T get() {
+            if (inner.hasBeenReset()) this.cache = null;
+            if (cache == null) {
+                var j = inner.get();
+                var d = codec.decode(JsonOps.INSTANCE, j);
+                var o = d.resultOrPartial(s -> {
+                    throw new RuntimeException("Failed to decode config: " + s);
+                });
+                if (o.isEmpty()) throw new RuntimeException("Failed to parse decode with value" + j);
+                return o.get().getFirst();
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public StringJsonConfigValue defineJson(String path, JsonElement defaultValue) {
+        return StringJsonConfigValue.define(this, path, defaultValue);
+    }
+
+    private static class StringJsonConfigValue implements Supplier<JsonElement> {
+
+        private static final Field cachedValue = ObfuscationReflectionHelper.findField(ForgeConfigSpec.ConfigValue.class, "cachedValue");
+
+        static {
+            cachedValue.setAccessible(true);
+        }
+
+        private final ForgeConfigSpec.ConfigValue<String> inner;
+        private JsonElement cache = null;
+
+        public static StringJsonConfigValue define(ConfigBuilderImpl cfg, String path, JsonElement defaultValue) {
+            return new StringJsonConfigValue(cfg.define(path, defaultValue.toString().replace(" ", "")
+                    .replace("\"", "'")));
+        }
+
+        StringJsonConfigValue(Supplier<String> innerConfig) {
+            this.inner = (ForgeConfigSpec.ConfigValue<String>) innerConfig;
+        }
+
+        @Override
+        public JsonElement get() {
+            if (hasBeenReset()) {
+                this.cache = null;
+            }
+            if (cache == null) {
+                String s = inner.get().replace("'", "\"");
+                try {
+                    this.cache = JsonParser.parseString(s);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to parse json config: ", e);
+                }
+            }
+            return cache;
+        }
+
+        public boolean hasBeenReset() {
+            try {
+                return cachedValue.get(inner) == null;
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Override
@@ -128,7 +221,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     private void maybeAddGameRestart() {
-        if(currentGameRestart && currentValue != null){
+        if (currentGameRestart && currentValue != null) {
             requireGameRestart.add(currentValue);
             currentGameRestart = false;
             currentValue = null;
@@ -142,7 +235,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public ConfigBuilder worldReload(){
+    public ConfigBuilder worldReload() {
         builder.worldRestart();
         return this;
     }

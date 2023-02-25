@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.fabric.impl.client.model.ModelLoadingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.api.client.model.fabric.FabricModelLoaderRegistry;
+import net.mehvahdjukaar.moonlight.api.client.model.fabric.MLFabricModelLoaderRegistry;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
@@ -152,7 +152,7 @@ public class ClientPlatformHelperImpl {
 
 
     public static void addModelLoaderRegistration(Consumer<ClientPlatformHelper.ModelLoaderEvent> eventListener) {
-        eventListener.accept(FabricModelLoaderRegistry::registerLoader);
+        eventListener.accept(MLFabricModelLoaderRegistry::registerLoader);
     }
 
     public static void addKeyBindRegistration(Consumer<ClientPlatformHelper.KeyBindEvent> eventListener) {

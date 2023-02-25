@@ -1,26 +1,26 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 
-import java.util.function.Predicate;
+public class JsonConfigValue extends ConfigValue<JsonElement> {
 
-public class ColorConfigValue extends IntConfigValue {
+    public JsonConfigValue(String name, JsonElement defaultValue) {
+        super(name, defaultValue);
+    }
 
-    public ColorConfigValue(String name, int defaultValue) {
-        super(name, defaultValue, 0, 0xffffff);
+    @Override
+    public boolean isValid(JsonElement value) {
+        return value.isJsonObject();
     }
 
     @Override
     public void loadFromJson(JsonObject element) {
         if (element.has(this.name)) {
             try {
-                String s = element.get(this.name).getAsString();
-                if (ConfigBuilder.COLOR_CHECK.test(s)){
-                    this.value = ConfigBuilder.stringColorToInt(s);
-                    return;
-                }
+                this.value = element.get(this.name);
+                if (this.isValid(value)) return;
                 //if not valid it defaults
                 this.value = defaultValue;
             } catch (Exception ignored) {
@@ -34,8 +34,6 @@ public class ColorConfigValue extends IntConfigValue {
     @Override
     public void saveToJson(JsonObject object) {
         if (this.value == null) this.value = defaultValue;
-        object.addProperty(this.name, Integer.toHexString(this.value));
+        object.add(this.name, this.value);
     }
-
-
 }

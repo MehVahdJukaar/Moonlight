@@ -2,6 +2,11 @@ package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
+import net.fabricmc.fabric.api.client.model.BakedModelManagerHelper;
+import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
+import net.fabricmc.fabric.impl.client.model.BakedModelManagerHooks;
+import net.fabricmc.fabric.mixin.renderer.client.BakedModelMixin;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -11,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FabricModelLoaderRegistry {
+public class MLFabricModelLoaderRegistry {
 
     private static final Map<ResourceLocation, CustomModelLoader> DESERIALIZER_MAP = new HashMap<>();
 

@@ -101,8 +101,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
             modContainer.dispatchConfigEvent(IConfigEvent.loading(modConfig));
             modConfig.save();
         } catch (Exception e) {
-            throw new RuntimeException(
-                    new IOException("Failed to load " + this.getFileName() + " config. Try deleting it: " + e));
+            throw new RuntimeException("Failed to load " + this.getFileName() + " config. Try deleting it: ", e);
         }
     }
 

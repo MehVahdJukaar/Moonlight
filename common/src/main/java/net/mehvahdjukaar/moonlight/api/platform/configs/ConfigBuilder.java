@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
@@ -22,6 +24,9 @@ public abstract class ConfigBuilder {
     private String currentKey;
     protected boolean synced;
     protected Runnable changeCallback;
+
+    //always on. can be called to disable
+    public boolean usesConfigBuddy = true;
 
     @ExpectPlatform
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
@@ -84,8 +89,37 @@ public abstract class ConfigBuilder {
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
-    @Deprecated(forRemoval = true)
-    public abstract <T> Supplier<List<? extends T>> defineForgeList(String path, List<? extends T> defaultValue, Predicate<Object> elementValidator);
+    public abstract <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec);
+
+    public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec){
+        return defineObject(name, defaultSupplier, codec.listOf());
+    }
+
+    public abstract Supplier<JsonElement> defineJson(String name, JsonElement defaultValue);
+
+    public Supplier<ResourceLocation> define(String name, ResourceLocation defaultValue) {
+        return new ResourceLocationConfigValue(this, name, defaultValue);
+    }
+
+    private static class ResourceLocationConfigValue implements Supplier<ResourceLocation> {
+
+        private final Supplier<String> inner;
+        private ResourceLocation cache;
+        private String oldString;
+
+        public ResourceLocationConfigValue(ConfigBuilder builder, String path, ResourceLocation defaultValue) {
+            this.inner = builder.define(path, defaultValue.toString(), s -> s != null && ResourceLocation.isValidResourceLocation((String) s));
+        }
+
+        @Override
+        public ResourceLocation get() {
+            String s = inner.get();
+            if (!s.equals(oldString)) cache = null;
+            oldString = s;
+            if (cache == null) cache = new ResourceLocation(s);
+            return cache;
+        }
+    }
 
     public Component description(String name) {
         return Component.translatable(translationKey(name));
@@ -155,10 +189,14 @@ public abstract class ConfigBuilder {
 
     public static final Predicate<Object> COLOR_CHECK = s -> {
         try {
-            Integer.parseUnsignedInt(((String) s).replace("0x", ""), 16);
+            stringColorToInt((String) s);
             return true;
         } catch (Exception e) {
             return false;
         }
     };
+
+    public static int stringColorToInt(String s) {
+        return Integer.parseUnsignedInt(s.replace("0x", ""), 16);
+    }
 }
