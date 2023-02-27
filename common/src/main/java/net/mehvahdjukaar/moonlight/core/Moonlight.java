@@ -13,8 +13,12 @@ import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.CompatTypes;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,6 +28,7 @@ public class Moonlight {
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     public static final boolean HAS_BEEN_INIT = true;
+    public static final TagKey<Block> SHEATABLE_TAG = TagKey.create(Registry.BLOCK_REGISTRY,new ResourceLocation("mineable/shear"));
 
     public static ResourceLocation res(String name) {
         return new ResourceLocation(MOD_ID, name);

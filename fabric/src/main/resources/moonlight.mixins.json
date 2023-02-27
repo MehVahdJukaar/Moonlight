@@ -23,6 +23,7 @@
   "mixins": [
     "BuiltinRegistryMixin",
     "ConditionsHackMixin",
+    "DataPackContentMixin",
     "FireBlockMixin",
     "MappedRegistryAccessor",
     "MenuTypeAccessor",

@@ -19,8 +19,9 @@ import java.lang.reflect.Type;
 @Mixin(BlockModel.Deserializer.class)
 public abstract class BlockModelDeserializerMixin {
 
+    //I dont remember why but head doesnt work
     @Inject(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/client/renderer/block/model/BlockModel;",
-            at = @At("HEAD"), cancellable = true)
+            at = @At("TAIL"), cancellable = true)
     public void deserialize(JsonElement element, Type targetType, JsonDeserializationContext deserializationContext,
                             CallbackInfoReturnable<BlockModel> cir) throws JsonParseException {
         JsonObject jsonobject = element.getAsJsonObject();

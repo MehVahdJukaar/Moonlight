@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client;
+package net.mehvahdjukaar.moonlight.api.misc;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-@Deprecated(forRemoval = true)
 public abstract class GenericSimpleResourceReloadListener implements PreparableReloadListener {
     private final String pathSuffix;
     private final int suffixLength;

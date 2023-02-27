@@ -8,6 +8,10 @@ import net.mehvahdjukaar.moonlight.fluids.fabric.SoftFluidTank;
 
  */
 
+import net.mehvahdjukaar.moonlight.api.block.ISoftFluidTankProvider;
+import net.mehvahdjukaar.moonlight.api.fluids.FluidContainerList;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
 import net.minecraft.core.BlockPos;
@@ -18,18 +22,21 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,27 +50,6 @@ public class DispenserHelper {
     public static void registerPlaceBlockBehavior(ItemLike block) {
         DispenserBlock.registerBehavior(block, PLACE_BLOCK_BEHAVIOR);
     }
-
-    private static final Set<Item> REGISTERED_FLUID_ITEMS = new HashSet<>();
-
-    /*
-    public static void registerFluidBehavior(SoftFluid f) {
-        Collection<FluidContainerList.Category> categories = f.getContainerList().getCategories();
-        for (FluidContainerList.Category c : categories) {
-            Item empty = c.getEmptyContainer();
-            //prevents registering stuff twice
-            if (empty != Items.AIR && !REGISTERED_FLUID_ITEMS.contains(empty)) {
-                registerCustomBehavior(new FillFluidHolderBehavior(empty));
-                REGISTERED_FLUID_ITEMS.add(empty);
-            }
-            for (Item full : c.getFilledItems()) {
-                if (full != Items.AIR && !REGISTERED_FLUID_ITEMS.contains(full)) {
-                    registerCustomBehavior(new FillFluidHolderBehavior(full));
-                    REGISTERED_FLUID_ITEMS.add(full);
-                }
-            }
-        }
-    }*/
 
     /**
      * implement this to add your own custom behaviors
@@ -176,40 +162,6 @@ public class DispenserHelper {
         }
     }
 
-
-    /*
-    public static class FillFluidHolderBehavior extends AdditionalDispenserBehavior {
-
-        public FillFluidHolderBehavior(Item item) {
-            super(item);
-        }
-
-        @Override
-        protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
-            //this.setSuccessful(false);
-            ServerLevel world = source.getLevel();
-            BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
-            BlockEntity te = world.getBlockEntity(blockpos);
-            if (te instanceof ISoftFluidTank tile) {
-
-                ItemStack returnStack;
-
-                if (tile.canInteractWithSoftFluidTank()) {
-
-                    SoftFluidTank tank = tile.getSoftFluidTank();
-                    if (!tank.isFull()) {
-                        returnStack = tank.interactWithItem(stack, world, blockpos, false);
-                        if (returnStack != null) {
-                            te.setChanged();
-                            return InteractionResultHolder.success(returnStack);
-                        }
-                    }
-                }
-                return InteractionResultHolder.fail(stack);
-            }
-            return InteractionResultHolder.pass(stack);
-        }
-    }*/
 
     public static class PlaceBlockDispenseBehavior extends OptionalDispenseItemBehavior {
 

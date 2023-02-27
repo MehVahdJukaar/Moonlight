@@ -97,6 +97,11 @@ public abstract class SoftFluidTank {
         return returnStack;
     }
 
+    public ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
+        return tryDrainItem(filledContainerStack, world, pos, simulate, true);
+    }
+
+    //TODO: use interaction result holder
     /**
      * tries pouring the content of provided item in the tank
      * also plays sound
@@ -104,7 +109,7 @@ public abstract class SoftFluidTank {
      * @return empty container item, null if it failed
      */
     @Nullable
-    public ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
+    public ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
 
         //TODO: generalize this adding a function list that converts items in compounds and fluid pair or a compound whitelist
         //TODO: all of this  is horrible
@@ -186,6 +191,11 @@ public abstract class SoftFluidTank {
         return null;
     }
 
+    public ItemStack tryFillingItem(Item emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
+        return tryFillingItem(emptyContainer, world, pos, simulate, true);
+    }
+
+
     /**
      * tries removing said amount of fluid and returns filled item
      * also plays sound
@@ -193,7 +203,7 @@ public abstract class SoftFluidTank {
      * @return filled bottle item. null if it failed or if simulated is true and failed
      */
     @Nullable
-    public ItemStack tryFillingItem(Item emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
+    public ItemStack tryFillingItem(Item emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
         var opt = fluid.getContainerList().getCategoryFromEmpty(emptyContainer);
         if (opt.isPresent()) {
             var category = opt.get();

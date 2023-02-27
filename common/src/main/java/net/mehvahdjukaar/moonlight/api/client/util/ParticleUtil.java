@@ -1,8 +1,16 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TerrainParticle;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -14,6 +22,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import static com.mojang.blaze3d.vertex.DefaultVertexFormat.PARTICLE;
 
 public class ParticleUtil {
 
@@ -30,7 +40,7 @@ public class ParticleUtil {
 
         RandomSource random = level.random;
         float offset = 0.1f;
-        Vec3 blockCenter = new Vec3(bb.minX-0.5 + (bb.maxX - bb.minX) / 2f, bb.minY-0.5 + (bb.maxY - bb.minY) / 2f, bb.minZ-0.5 + (bb.maxZ - bb.minZ) / 2f);
+        Vec3 blockCenter = new Vec3(bb.minX - 0.5 + (bb.maxX - bb.minX) / 2f, bb.minY - 0.5 + (bb.maxY - bb.minY) / 2f, bb.minZ - 0.5 + (bb.maxZ - bb.minZ) / 2f);
         bb = bb.move(-blockCenter.x, -blockCenter.y, -blockCenter.z);
         //north
         int i = uniformInt.sample(random);
@@ -173,4 +183,27 @@ public class ParticleUtil {
             }
         });
     }
+
+    public static final ParticleRenderType ADDITIVE_TRANSLUCENCY_RENDER_TYPE = new ParticleRenderType() {
+        @Override
+        public void begin(BufferBuilder builder, TextureManager textureManager) {
+            RenderSystem.depthMask(false);
+            RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+            builder.begin(VertexFormat.Mode.QUADS, PARTICLE);
+        }
+
+        @Override
+        public void end(Tesselator tesselator) {
+            tesselator.end();
+            RenderSystem.depthMask(true);
+            RenderSystem.disableBlend();
+            RenderSystem.defaultBlendFunc();
+        }
+
+        public String toString() {
+            return "PARTICLE_SHEET_ADDITIVE_TRANSLUCENT";
+        }
+    };
 }

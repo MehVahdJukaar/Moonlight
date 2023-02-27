@@ -12,8 +12,8 @@
   ],
   "mixins": [
     "BeeGoalMixin",
-    "FixBlockPlaceContextMixin",
     "CreativeModeTabMixin",
+    "FixBlockPlaceContextMixin",
     "GrindstoneMenuSlotMixin",
     "LevelChunkMixin",
     "LightningEntityMixin",
@@ -22,6 +22,7 @@
     "MapItemMixin",
     "MultiPackResourceManagerMixin",
     "PistonBlockEntityMixin",
+    "ShearItemMixin",
     "VillagerMixin",
     "accessor.BlockLootAccessor",
     "accessor.BrainAccessor",

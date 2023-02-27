@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigBuilderImpl;
@@ -15,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -33,6 +35,11 @@ public class MoonlightForge {
         MinecraftForge.EVENT_BUS.register(this);
         ModLootModifiers.register();
         ModLootConditions.register();
+    }
+    //hacky but eh
+    @SubscribeEvent
+    public static void onTagUpdated(TagsUpdatedEvent event) {
+        RegistryAccessJsonReloadListener.runReloads(event.getRegistryAccess());
     }
 
     @SubscribeEvent
