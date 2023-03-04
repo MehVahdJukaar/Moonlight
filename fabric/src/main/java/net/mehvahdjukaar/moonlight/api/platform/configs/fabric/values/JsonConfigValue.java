@@ -1,13 +1,19 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values;
 
+import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 
+import java.util.function.Supplier;
+
 public class JsonConfigValue extends ConfigValue<JsonElement> {
 
-    public JsonConfigValue(String name, JsonElement defaultValue) {
-        super(name, defaultValue);
+    private final com.google.common.base.Supplier<JsonElement> defValue;
+
+    public JsonConfigValue(String name, Supplier<JsonElement> defaultSupplier) {
+        super(name, null);
+        this.defValue = Suppliers.memoize(defaultSupplier::get);
     }
 
     @Override
@@ -22,7 +28,7 @@ public class JsonConfigValue extends ConfigValue<JsonElement> {
                 this.value = element.get(this.name);
                 if (this.isValid(value)) return;
                 //if not valid it defaults
-                this.value = defaultValue;
+                this.value = getDefaultValue();
             } catch (Exception ignored) {
             }
             Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
@@ -32,8 +38,13 @@ public class JsonConfigValue extends ConfigValue<JsonElement> {
     }
 
     @Override
+    public JsonElement getDefaultValue() {
+        return defValue.get();
+    }
+
+    @Override
     public void saveToJson(JsonObject object) {
-        if (this.value == null) this.value = defaultValue;
+        if (this.value == null) this.value = getDefaultValue();
         object.add(this.name, this.value);
     }
 }

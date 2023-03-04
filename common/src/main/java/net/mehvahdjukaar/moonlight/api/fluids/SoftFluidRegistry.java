@@ -11,6 +11,7 @@ import net.mehvahdjukaar.moonlight.core.network.ClientBoundFinalizeFluidsMessage
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -58,7 +59,11 @@ public class SoftFluidRegistry {
     }
 
     public static Registry<SoftFluid> getDataPackRegistry() {
-        return Utils.hackyGetRegistryAccess().registryOrThrow(getRegistryKey());
+        return getDataPackRegistry(Utils.hackyGetRegistryAccess());
+    }
+
+    public static Registry<SoftFluid> getDataPackRegistry(RegistryAccess registryAccess) {
+        return registryAccess.registryOrThrow(getRegistryKey());
     }
 
     public static Collection<SoftFluid> getValues() {

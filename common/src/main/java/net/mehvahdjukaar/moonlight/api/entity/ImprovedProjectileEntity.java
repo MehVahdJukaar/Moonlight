@@ -221,7 +221,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                 }
             }
         }
-        if (this.hasReachedEndOfLife()) {
+        if (this.hasReachedEndOfLife() && !isRemoved()) {
             this.reachedEndOfLife();
         }
     }

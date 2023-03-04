@@ -26,7 +26,7 @@ public abstract class ConfigBuilder {
     protected Runnable changeCallback;
 
     //always on. can be called to disable
-    public boolean usesConfigBuddy = true;
+    protected boolean usesDataBuddy = true;
 
     @ExpectPlatform
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
@@ -65,6 +65,11 @@ public abstract class ConfigBuilder {
 
     public abstract ConfigBuilder pop();
 
+    public <T extends ConfigBuilder> T setWriteJsons(){
+        this.usesDataBuddy = false;
+        return (T) this;
+    }
+
     public abstract Supplier<Boolean> define(String name, boolean defaultValue);
 
     public abstract Supplier<Double> define(String name, double defaultValue, double min, double max);
@@ -96,6 +101,9 @@ public abstract class ConfigBuilder {
     }
 
     public abstract Supplier<JsonElement> defineJson(String name, JsonElement defaultValue);
+
+    public abstract Supplier<JsonElement> defineJson(String name, Supplier<JsonElement> defaultValue);
+
 
     public Supplier<ResourceLocation> define(String name, ResourceLocation defaultValue) {
         return new ResourceLocationConfigValue(this, name, defaultValue);

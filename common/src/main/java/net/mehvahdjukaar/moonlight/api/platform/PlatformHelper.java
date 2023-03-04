@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -16,7 +15,6 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -29,17 +27,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FlowingFluid;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -81,6 +76,15 @@ public class PlatformHelper {
 
     public enum Platform {
         FORGE, FABRIC;
+        private static boolean quilt = false;
+
+        static {
+            try {
+                Class.forName("org.quiltmc.loader.api.QuiltLoader");
+                quilt = true;
+            } catch (ClassNotFoundException ignored) {
+            }
+        }
 
         public boolean isForge() {
             return this == FORGE;
@@ -88,6 +92,10 @@ public class PlatformHelper {
 
         public boolean isFabric() {
             return this == FABRIC;
+        }
+
+        public boolean isQuilt() {
+            return isFabric() && quilt;
         }
 
         public void ifForge(Runnable runnable) {
@@ -176,7 +184,7 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
-    public static List<String> getInstalledMods(){
+    public static List<String> getInstalledMods() {
         throw new AssertionError();
     }
 
@@ -219,31 +227,33 @@ public class PlatformHelper {
         throw new AssertionError();
     }
 
-    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar){
-        return createModTab(name ,icon, hasSearchBar, null);
+    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar) {
+        return createModTab(name, icon, hasSearchBar, null);
     }
 
     @ExpectPlatform
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
-                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> itemSupplier){
+                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> itemSupplier) {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties){
+    public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
         throw new AssertionError();
     }
+
     @ExpectPlatform
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {
         throw new AssertionError();
     }
+
     @ExpectPlatform
     public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties, int duration) {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static SimpleParticleType newParticle(){
+    public static SimpleParticleType newParticle() {
         throw new AssertionError();
     }
 
@@ -256,10 +266,11 @@ public class PlatformHelper {
     public interface BlockEntitySupplier<T extends BlockEntity> {
         @NotNull T create(BlockPos pos, BlockState state);
     }
+
     @ExpectPlatform
     public static <E extends Entity> EntityType<E> newEntityType(String name,
-            EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
-            int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
+                                                                 EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
+                                                                 int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
         throw new AssertionError();
     }
 

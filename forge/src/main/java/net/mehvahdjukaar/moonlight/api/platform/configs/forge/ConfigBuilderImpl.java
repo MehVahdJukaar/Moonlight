@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
+import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
@@ -109,6 +110,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return value;
     }
 
+    public <T> Supplier<T> define(String name, Supplier<T> defaultValue, Predicate<Object> validator) {
+        maybeAddTranslationString(name);
+        var value = builder.define(name, defaultValue, validator);
+        this.currentValue = value;
+        maybeAddGameRestart();
+        return value;
+    }
+
     @Override
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
         maybeAddTranslationString(name);
@@ -120,8 +129,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
-        if (usesConfigBuddy) return ConfigHelper.defineObject(builder, name, codec, defaultSupplier); //actual toml parse
-        return StringCodecConfigValue.define(this, name, defaultSupplier.get(), codec); //string based config
+        if (usesDataBuddy) return ConfigHelper.defineObject(builder, name, codec, defaultSupplier); //actual toml parse
+        return StringCodecConfigValue.define(this, name, defaultSupplier, codec); //string based config
+    }
+
+    @Override
+    public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec) {
+        builder.comment("This is a list. Add more entries with syntax [[...]]");
+        return super.defineObjectList(name, defaultSupplier, codec);
     }
 
     private static class StringCodecConfigValue<T> implements Supplier<T> {
@@ -130,13 +145,17 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         private final Codec<T> codec;
         private T cache;
 
-        public static <T> StringCodecConfigValue<T> define(ConfigBuilderImpl cfg, String name, T defaultValue, Codec<T> codec) {
-            var e = codec.encodeStart(JsonOps.INSTANCE, defaultValue);
-            var json = e.resultOrPartial(s -> {
-                throw new RuntimeException("Invalid default value for config " + name + ": " + s);
-            });
-            if (json.isEmpty()) throw new RuntimeException("Invalid default value for config " + name);
-            var jsonConfig = cfg.defineJson(name, json.get());
+        public static <T> StringCodecConfigValue<T> define(ConfigBuilderImpl cfg, String name, Supplier<T> defaultValueSupplier, Codec<T> codec) {
+            Supplier<JsonElement> jsonSupplier = ()->{
+                var e = codec.encodeStart(JsonOps.INSTANCE, defaultValueSupplier.get());
+                var json = e.resultOrPartial(s -> {
+                    throw new RuntimeException("Invalid default value for config " + name + ": " + s);
+                });
+                if (json.isEmpty()) throw new RuntimeException("Invalid default value for config " + name);
+                return json.get();
+            };
+
+            var jsonConfig = cfg.defineJson(name, jsonSupplier);
             return new StringCodecConfigValue<>(jsonConfig, codec);
         }
 
@@ -166,6 +185,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return StringJsonConfigValue.define(this, path, defaultValue);
     }
 
+    @Override
+    public StringJsonConfigValue defineJson(String path, Supplier<JsonElement> defaultValue) {
+        return StringJsonConfigValue.define(this, path, defaultValue);
+    }
+
     private static class StringJsonConfigValue implements Supplier<JsonElement> {
 
         private static final Field cachedValue = ObfuscationReflectionHelper.findField(ForgeConfigSpec.ConfigValue.class, "cachedValue");
@@ -176,6 +200,12 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
         private final ForgeConfigSpec.ConfigValue<String> inner;
         private JsonElement cache = null;
+
+        public static StringJsonConfigValue define(ConfigBuilderImpl cfg, String path, Supplier<JsonElement> defaultValueSupplier) {
+            com.google.common.base.Supplier<JsonElement> lazyDefaultValue = Suppliers.memoize(defaultValueSupplier::get);
+            return new StringJsonConfigValue(cfg.define(path, () -> lazyDefaultValue.get().toString().replace(" ", "")
+                    .replace("\"", "'"), o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass())));
+        }
 
         public static StringJsonConfigValue define(ConfigBuilderImpl cfg, String path, JsonElement defaultValue) {
             return new StringJsonConfigValue(cfg.define(path, defaultValue.toString().replace(" ", "")

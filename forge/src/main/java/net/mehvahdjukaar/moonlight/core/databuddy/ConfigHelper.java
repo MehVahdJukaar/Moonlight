@@ -120,7 +120,7 @@ public class ConfigHelper
      * @param builder Builder to build configs with
      * @param name The name of the field in your config that will hold objects of this type
      * @param codec A Codec for de/serializing your object type.
-     * @param defaultObject The default instance of your config field. The given codec must be able to serialize this;
+     * @param defaultSupplier The default instance of your config field. The given codec must be able to serialize this;
      * if it cannot, an exception will be intentionally thrown the first time the config attempts to load.
      * If the codec fails to deserialize the config field at a later time, an error message will be logged and this default instance will be used instead.
      * @return A reload-sensitive wrapper around your config object value. Use ConfigObject#get to get the most up-to-date object.

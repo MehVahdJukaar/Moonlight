@@ -152,7 +152,7 @@ public class MthUtils {
      * Same as above but value is included between max and min
      */
     public static float nextWeighted(RandomSource rand, float max, float bias, float min) {
-        return nextWeighted(rand, max, bias) + min;
+        return nextWeighted(rand, max - min, bias) + min;
     }
 
     public static float nextWeighted(RandomSource rand, float max) {

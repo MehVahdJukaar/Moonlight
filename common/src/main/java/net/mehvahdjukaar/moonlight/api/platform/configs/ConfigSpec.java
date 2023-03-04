@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.moonlight.api.entity.ImprovedProjectileEntity;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
@@ -36,6 +37,7 @@ public abstract class ConfigSpec {
         if (map != null) {
             return map.getOrDefault(type, null);
         }
+        ImprovedProjectileEntity
         return null;
     }
 
