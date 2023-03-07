@@ -1,13 +1,14 @@
-package net.mehvahdjukaar.moonlight.core.mixins.fabric;
+package net.mehvahdjukaar.moonlight.core.mixins.forge;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
+import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,16 +24,17 @@ public abstract class ConditionsHackMixin {
     //literally copies what fabric does
     @Inject(at = @At("HEAD"), method = "method_18790")
     private void applyResourceConditions(ResourceManager resourceManager, ProfilerFiller profiler, Object object, CallbackInfo ci) {
-        if((Object)this instanceof SimpleJsonResourceReloadListener) {
+        if ((Object) this instanceof SimpleJsonResourceReloadListener) {
+            var context = MoonlightForge.getConditionContext();
+            if (context == null) return;
             Iterator<Map.Entry<ResourceLocation, JsonElement>> it = ((Map<ResourceLocation, JsonElement>) object).entrySet().iterator();
 
             while (it.hasNext()) {
                 Map.Entry<ResourceLocation, JsonElement> entry = it.next();
                 JsonElement resourceData = entry.getValue();
-
                 if (resourceData.isJsonObject()) {
                     JsonObject obj = resourceData.getAsJsonObject();
-                    if (!ResourceConditionsBridge.matchesForgeCondition(obj)) {
+                    if (!CraftingHelper.processConditions(obj, "global_conditions", context)) {
                         it.remove();
                     }
                 }

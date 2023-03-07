@@ -11,6 +11,7 @@
     "SelfModFluidRendererPropertiesMixin"
   ],
   "mixins": [
+    "ConditionsHackMixin",
     "FireBlockMixin",
     "SelfModFlowingFluidMixin",
     "SelfEntitySpawnDataMixin",

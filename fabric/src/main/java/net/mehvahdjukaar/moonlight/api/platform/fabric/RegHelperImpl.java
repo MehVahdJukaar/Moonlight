@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
@@ -21,9 +22,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
@@ -34,6 +33,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -50,6 +50,7 @@ public class RegHelperImpl {
 
     public static final Map<Registry<?>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
     private static final List<Consumer<RegHelper.AttributeEvent>> ATTRIBUTE_REGISTRATIONS = new ArrayList<>();
+    private static final List<Consumer<RegHelper.SpawnPlacementEvent>> SPAWN_PLACEMENT_REGISTRATIONS = new ArrayList<>();
 
     public static final List<Registry<?>> REG_PRIORITY = List.of(
             Registry.SOUND_EVENT, Registry.FLUID, Registry.BLOCK, Registry.PARTICLE_TYPE,
@@ -76,6 +77,19 @@ public class RegHelperImpl {
         }
         //register entities attributes now
         ATTRIBUTE_REGISTRATIONS.forEach(e -> e.accept(FabricDefaultAttributeRegistry::register));
+        SPAWN_PLACEMENT_REGISTRATIONS.forEach(e->e.accept(new SpawnPlacementsImpl()));
+    }
+
+    static class SpawnPlacementsImpl implements RegHelper.SpawnPlacementEvent {
+        @Override
+        public <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
+                                                Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
+            try {
+                SpawnPlacements.register((EntityType<Mob>) entityType, decoratorType, heightMapType, (SpawnPlacements.SpawnPredicate<Mob>) decoratorPredicate);
+            }catch (Exception e){
+                Moonlight.LOGGER.warn("Skipping placement registration for {} as its not of Mob type", entityType);
+            }
+        }
     }
 
     public static void finishRegistration(String modId) {
@@ -152,10 +166,15 @@ public class RegHelperImpl {
         ATTRIBUTE_REGISTRATIONS.add(eventListener);
     }
 
+    public static void addSpawnPlacementsRegistration(Consumer<RegHelper.SpawnPlacementEvent> eventListener) {
+        SPAWN_PLACEMENT_REGISTRATIONS.add(eventListener);
+    }
 
     public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
         CommandRegistrationCallback.EVENT.register((d, s, b) -> eventListener.accept(d));
     }
+
+
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         ResourceConditionsBridge.registerSimple(id, predicate);
@@ -169,6 +188,8 @@ public class RegHelperImpl {
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
         return register(name, fluid, Registry.FLUID);
     }
+
+
 
 
 }

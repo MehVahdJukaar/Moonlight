@@ -208,9 +208,9 @@ public class ParticleUtil {
         @Override
         public void end(Tesselator tesselator) {
             tesselator.end();
-            RenderSystem.depthMask(true);
-            RenderSystem.disableBlend();
-            RenderSystem.defaultBlendFunc();
+            //RenderSystem.depthMask(true);
+            //RenderSystem.disableBlend();
+            //RenderSystem.defaultBlendFunc();
         }
 
         public String toString() {

@@ -1,7 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
+import com.electronwill.nightconfig.core.ConfigFormat;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.io.WritingMode;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
@@ -20,6 +22,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ConfigFileTypeHandler;
 import net.minecraftforge.fml.config.IConfigEvent;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -28,7 +31,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -39,6 +41,8 @@ import java.util.stream.Collectors;
 public class ConfigSpecWrapper extends ConfigSpec {
 
     private static final Method SET_CONFIG_DATA = ObfuscationReflectionHelper.findMethod(ModConfig.class, "setConfigData", CommentedConfig.class);
+    private static final Method SETUP_CONFIG_FILE = ObfuscationReflectionHelper.findMethod(ConfigFileTypeHandler.class,
+            "setupConfigFile", ModConfig.class, Path.class, ConfigFormat.class);
 
     private final ForgeConfigSpec spec;
 
@@ -68,7 +72,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
         //for event
         ConfigSpec.addTrackedSpec(this);
 
-        if(!requireRestart.isEmpty()){
+        if (!requireRestart.isEmpty()) {
             loadFromFile(); //early load if this has world reload ones
         }
         this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ForgeConfigSpec.ConfigValue::get));
@@ -95,13 +99,38 @@ public class ConfigSpecWrapper extends ConfigSpec {
     public void loadFromFile() {
         //same stuff that forge config tracker does
         try {
-            final CommentedFileConfig configData = modConfig.getHandler().reader(FMLPaths.CONFIGDIR.get()).apply(modConfig);
+            CommentedFileConfig configData = readConfig(modConfig.getHandler(), FMLPaths.CONFIGDIR.get(), modConfig);
             SET_CONFIG_DATA.setAccessible(true);
             SET_CONFIG_DATA.invoke(modConfig, configData);
             modContainer.dispatchConfigEvent(IConfigEvent.loading(modConfig));
             modConfig.save();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load " + this.getFileName() + " config. Try deleting it: ", e);
+            throw new ConfigLoadingException(modConfig, e);
+        }
+    }
+
+    //we need this so we don't add a second file watcher. Same as handler::reader
+    private CommentedFileConfig readConfig(ConfigFileTypeHandler handler, Path configBasePath, ModConfig c) {
+        Path configPath = configBasePath.resolve(c.getFileName());
+        CommentedFileConfig configData = CommentedFileConfig.builder(configPath).sync().
+                preserveInsertionOrder().
+                autosave().
+                onFileNotFound((newfile, configFormat) -> {
+                    try {
+                        return (Boolean) SETUP_CONFIG_FILE.invoke(handler, c, newfile, configFormat);
+                    } catch (Exception e) {
+                        throw new ConfigLoadingException(c, e);
+                    }
+                }).
+                writingMode(WritingMode.REPLACE).
+                build();
+        configData.load();
+        return configData;
+    }
+
+    private static class ConfigLoadingException extends RuntimeException {
+        public ConfigLoadingException(ModConfig config, Exception cause) {
+            super("Failed loading config file " + config.getFileName() + " of type " + config.getType() + " for modid " + config.getModId() + ". Try deleting it", cause);
         }
     }
 

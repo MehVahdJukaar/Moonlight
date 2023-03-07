@@ -37,7 +37,6 @@ public abstract class ConfigSpec {
         if (map != null) {
             return map.getOrDefault(type, null);
         }
-        ImprovedProjectileEntity
         return null;
     }
 

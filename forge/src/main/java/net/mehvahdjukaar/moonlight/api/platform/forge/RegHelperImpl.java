@@ -19,6 +19,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
@@ -36,6 +38,7 @@ import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -175,6 +178,32 @@ public class RegHelperImpl {
         MinecraftForge.EVENT_BUS.addListener(eventConsumer);
     }
 
+    record PlacementEventImpl(SpawnPlacementRegisterEvent event) implements RegHelper.SpawnPlacementEvent {
+        @Override
+        public <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
+                                                Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
+           event.register(entityType, decoratorType, heightMapType, decoratorPredicate, SpawnPlacementRegisterEvent.Operation.AND);
+        }
+    }
+
+    public static void addSpawnPlacementsRegistration(Consumer<RegHelper.SpawnPlacementEvent> eventListener) {
+        Consumer<SpawnPlacementRegisterEvent> eventConsumer = event -> {
+            RegHelper.SpawnPlacementEvent spawnPlacementEvent = new PlacementEventImpl(event);
+            eventListener.accept(spawnPlacementEvent);
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+    private static <T extends Entity> void doStuff(EntityType<T> a, SpawnPlacements.Type b, Heightmap.Types c, SpawnPlacements.SpawnPredicate<T> d) {
+    }
+
+    private static <T extends Entity> void extracted(SpawnPlacementRegisterEvent event,
+                                                     SpawnPlacements.Type b, Heightmap.Types c,
+                                                     SpawnPlacements.SpawnPredicate<T> d, EntityType<T> h) {
+        event.register(h, b, c, d, SpawnPlacementRegisterEvent.Operation.AND);
+    }
+
+
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
     }
@@ -189,6 +218,7 @@ public class RegHelperImpl {
         register(name, () -> f.get().getFluidType(), ForgeRegistries.Keys.FLUID_TYPES);
         return f;
     }
+
 
     private static class OptionalSimpleRecipeSerializer<T extends Recipe<?>> extends SimpleRecipeSerializer<T> {
         public OptionalSimpleRecipeSerializer(Function<ResourceLocation, T> function) {

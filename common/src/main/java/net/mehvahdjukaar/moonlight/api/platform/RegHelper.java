@@ -18,10 +18,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -50,6 +47,7 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -266,6 +264,17 @@ public class RegHelper {
 
     @ExpectPlatform
     public static void addAttributeRegistration(Consumer<AttributeEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface SpawnPlacementEvent {
+         <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
+                Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate);
+    }
+
+    @ExpectPlatform
+    public static void addSpawnPlacementsRegistration(Consumer<SpawnPlacementEvent> eventListener) {
         throw new AssertionError();
     }
 

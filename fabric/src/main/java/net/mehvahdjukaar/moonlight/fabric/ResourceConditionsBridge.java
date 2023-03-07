@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 public class ResourceConditionsBridge {
 
     public static final String CONDITIONS_KEY = "conditions";
+    public static final String NON_RECIPE_CONDITIONS_KEY = "global_conditions";
     public static final String CONDITION_ID = "type";
 
     public static void init() {
@@ -88,12 +89,15 @@ public class ResourceConditionsBridge {
 
     public static boolean matchesForgeCondition(JsonObject obj) {
         try {
-            JsonArray conditions = GsonHelper.getAsJsonArray(obj, CONDITIONS_KEY, null);
+            JsonArray conditions = GsonHelper.getAsJsonArray(obj, NON_RECIPE_CONDITIONS_KEY, null);
+            if(conditions == null){
+                conditions = GsonHelper.getAsJsonArray(obj, CONDITIONS_KEY, null);
+            }
             if (conditions != null) {
                 return conditionsMatch(conditions, true);
             }
         } catch (RuntimeException exception) {
-            Moonlight.LOGGER.warn("Failed to parse resource conditions for %s".formatted(obj), exception);
+            //Moonlight.LOGGER.warn("Failed to parse resource conditions for %s".formatted(obj), exception);
         }
         return true;
 

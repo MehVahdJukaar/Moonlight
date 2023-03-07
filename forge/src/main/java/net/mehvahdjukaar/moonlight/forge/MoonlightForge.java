@@ -3,20 +3,16 @@ package net.mehvahdjukaar.moonlight.forge;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
-import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigBuilderImpl;
 import net.mehvahdjukaar.moonlight.api.util.fake_player.FakePlayerManager;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
-import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -25,6 +21,9 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Author: MehVahdJukaar
@@ -38,15 +37,30 @@ public class MoonlightForge {
         MinecraftForge.EVENT_BUS.register(this);
         ModLootModifiers.register();
         ModLootConditions.register();
-        if(PlatformHelper.getEnv().isClient()){
+        if (PlatformHelper.getEnv().isClient()) {
             FMLJavaModLoadingContext.get().getModEventBus()
                     .addListener(MoonlightForgeClient::registerShader);
         }
     }
+
     //hacky but eh
     @SubscribeEvent
     public void onTagUpdated(TagsUpdatedEvent event) {
         RegistryAccessJsonReloadListener.runReloads(event.getRegistryAccess());
+    }
+
+    @Nullable
+    private static WeakReference<ICondition.IContext> context = null;
+
+    @Nullable
+    public static ICondition.IContext getConditionContext() {
+        if (context == null) return null;
+        return context.get();
+    }
+
+    @SubscribeEvent
+    public void onResourceReload(AddReloadListenerEvent event) {
+        context = new WeakReference<>(event.getConditionContext());
     }
 
     @SubscribeEvent

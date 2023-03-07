@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.moonlight.core.client;
 
-import net.mehvahdjukaar.moonlight.api.client.GenericSimpleResourceReloadListener;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.GenericSimpleResourceReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
