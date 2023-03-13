@@ -22,17 +22,33 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 public class FabricConfigSpec extends ConfigSpec {
 
+    @ApiStatus.Internal
+    public static void loadAllConfigs() {
+        for (var c : CONFIG_STORAGE.entrySet()) {
+            for (var m : c.getValue().values()) {
+                if (m.isLoaded()) continue;
+                try {
+                    m.loadFromFile();
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to load config from mod:" + c.getKey(), e);
+                }
+            }
+        }
+    }
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private final ResourceLocation res;
     private final ConfigSubCategory mainEntry;
     private final File file;
+    private boolean initialized = false;
 
     public FabricConfigSpec(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, boolean synced, Runnable changeCallback) {
         super(name, FabricLoader.getInstance().getConfigDir(), type, synced, changeCallback);
@@ -46,6 +62,11 @@ public class FabricConfigSpec extends ConfigSpec {
 
     public ConfigSubCategory getMainEntry() {
         return mainEntry;
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return initialized;
     }
 
     @Override
@@ -69,8 +90,12 @@ public class FabricConfigSpec extends ConfigSpec {
         }
 
         if (config instanceof JsonObject jo) {
-            //don't call load directly so we skip the main category name
+            //don't call load directly, so we skip the main category name
             mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
+        }
+        if(!initialized){
+            this.initialized = true;
+            this.saveConfig();
         }
     }
 
@@ -89,7 +114,7 @@ public class FabricConfigSpec extends ConfigSpec {
     }
 
     public Component getName() {
-        return Component.literal(LangBuilder.getReadableName(this.res.getPath()+"_configs"));
+        return Component.literal(LangBuilder.getReadableName(this.res.getPath() + "_configs"));
     }
 
     private static final boolean YACL = PlatformHelper.isModLoaded("yet-another-config-lib");
@@ -100,7 +125,7 @@ public class FabricConfigSpec extends ConfigSpec {
     public Screen makeScreen(Screen parent, ResourceLocation background) {
         if (CLOTH_CONFIG) {
             return ClothConfigCompat.makeScreen(parent, this, background);
-        }else if(YACL){
+        } else if (YACL) {
             return YACLCompat.makeScreen(parent, this, background);
         }
         return null;

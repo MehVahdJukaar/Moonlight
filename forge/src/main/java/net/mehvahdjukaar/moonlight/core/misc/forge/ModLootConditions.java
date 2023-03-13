@@ -25,7 +25,7 @@ public class ModLootConditions {
 
     public static final Supplier<LootItemConditionType> ICONDITION_LOOT_CONDITION = RegHelper.register(Moonlight.res("iconditions"),
             () -> new LootItemConditionType(new IConditionLootCondition.ConditionSerializer()), Registry.LOOT_CONDITION_TYPE);
-    
+
     public record IConditionLootCondition(List<ICondition> conditions) implements LootItemCondition {
         @Override
         public boolean test(LootContext lootContext) {
@@ -65,4 +65,6 @@ public class ModLootConditions {
             }
         }
     }
+
+
 }

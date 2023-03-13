@@ -123,6 +123,10 @@ public class ClothConfigCompat {
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         }
+        else if(entry instanceof JsonConfigValue || entry instanceof ObjectConfigValue<?>){
+          var e =  builder.entryBuilder().startTextDescription(Component.literal("Unsupported entry. Edit config manually"));
+            return e.build();
+        }
         throw new UnsupportedOperationException("unknown entry: " + entry.getClass().getName());
     }
 

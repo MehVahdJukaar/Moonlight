@@ -8,6 +8,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntry;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,12 +18,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Iterator;
 import java.util.Map;
 
+//TODO: figure out
 @Mixin(SimplePreparableReloadListener.class)
 public abstract class ConditionsHackMixin {
 
     //TODO: refactor in 1.20 and mixin into forge side instead. Then use fabric stuff everywhere directly
     //literally copies what fabric does
-    @Inject(at = @At("HEAD"), method = "method_18790")
+    @Inject(at = @At("HEAD"), method = {"m_10789_","lambda$reload$0"}, remap = false)
     private void applyResourceConditions(ResourceManager resourceManager, ProfilerFiller profiler, Object object, CallbackInfo ci) {
         if ((Object) this instanceof SimpleJsonResourceReloadListener) {
             var context = MoonlightForge.getConditionContext();

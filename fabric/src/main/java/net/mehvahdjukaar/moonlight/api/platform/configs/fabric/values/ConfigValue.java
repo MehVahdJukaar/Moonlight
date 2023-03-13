@@ -14,11 +14,13 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
     private String translationKey;
     private String descriptionKey;
 
-    public ConfigValue(String name, T defaultValue) {
+    protected ConfigValue(String name, T defaultValue) {
         super(name);
         this.defaultValue = defaultValue;
-        Objects.requireNonNull(defaultValue, "default value cant be null");
-        assert this.isValid(defaultValue) : "default value is invalid";
+        if (!(this instanceof ObjectConfigValue<T>) && !(this instanceof JsonConfigValue)) {
+            Objects.requireNonNull(defaultValue, "default value cant be null");
+            assert this.isValid(defaultValue) : "default value is invalid";
+        }
     }
 
     public T getDefaultValue() {

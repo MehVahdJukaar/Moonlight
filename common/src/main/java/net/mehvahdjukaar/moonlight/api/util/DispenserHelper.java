@@ -1,17 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
-/*
-import net.mehvahdjukaar.moonlight.fluids.FluidContainerList;
-import net.mehvahdjukaar.moonlight.fluids.fabric.ISoftFluidTank;
-import net.mehvahdjukaar.moonlight.fluids.SoftFluid;
-import net.mehvahdjukaar.moonlight.fluids.fabric.SoftFluidTank;
 
- */
-
-import net.mehvahdjukaar.moonlight.api.block.ISoftFluidTankProvider;
-import net.mehvahdjukaar.moonlight.api.fluids.FluidContainerList;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
 import net.minecraft.core.BlockPos;
@@ -22,23 +11,17 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 public class DispenserHelper {
 
@@ -172,7 +155,8 @@ public class DispenserHelper {
             if (item instanceof BlockItem bi) {
                 Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
                 BlockPos blockpos = source.getPos().relative(direction);
-                Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
+                // Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
+                Direction direction1 = direction;
                 InteractionResult result = bi.place(new DirectionalPlaceContext(source.getLevel(), blockpos, direction, stack, direction1));
                 this.setSuccess(result.consumesAction());
             }

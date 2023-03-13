@@ -32,7 +32,7 @@ public class SoftFluidRegistryImpl {
     public static final DeferredRegister<SoftFluid> DEFERRED_REGISTER = DeferredRegister.create(KEY, KEY.location().getNamespace());
     public static final Supplier<IForgeRegistry<SoftFluid>> SOFT_FLUIDS = DEFERRED_REGISTER.makeRegistry(() ->
             new RegistryBuilder<SoftFluid>()
-                    .setDefaultKey(Moonlight.res("empty"))
+                    .setDefaultKey(SoftFluidRegistry.EMPTY_ID)
                     .dataPackRegistry(SoftFluid.CODEC, SoftFluid.CODEC)
                     .onCreate(SoftFluidRegistryImpl::onCreate)
                     .onClear(SoftFluidRegistryImpl::onClear)

@@ -24,13 +24,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class ConfigSpec {
 
-    private static final Map<String, Map<ConfigType, ConfigSpec>> CONFIG_STORAGE = new ConcurrentHashMap<>(); //wack. multithreading mod loading
+    protected static final Map<String, Map<ConfigType, ConfigSpec>> CONFIG_STORAGE = new ConcurrentHashMap<>(); //wack. multithreading mod loading
 
 
     public static void addTrackedSpec(ConfigSpec spec) {
         var map = CONFIG_STORAGE.computeIfAbsent(spec.getModId(), n -> new HashMap<>());
         map.put(spec.getConfigType(), spec);
     }
+
     @Nullable
     public static ConfigSpec getSpec(String modId, ConfigType type) {
         var map = CONFIG_STORAGE.get(modId);

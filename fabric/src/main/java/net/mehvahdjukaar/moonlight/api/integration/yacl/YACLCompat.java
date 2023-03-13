@@ -130,6 +130,15 @@ public class YACLCompat {
               var description = lc.getDescription();
               if (description != null) e.tooltip(description);// Shown when the user hover over this option
               return e.build(); // Builds the option entry for cloth config
+        } else if(entry instanceof JsonConfigValue || entry instanceof ObjectConfigValue<?>){
+            var lc = (ConfigValue)entry;
+            var e = Option.createBuilder(Component.class)
+                    .name(lc.getTranslation())
+                    .binding(Binding.immutable(Component.literal("Object fields are not supported. Edit the config manually instead")))
+                    .controller(LabelController::new);
+            var description = lc.getDescription();
+            if (description != null) e.tooltip(description);// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
         }
         throw new UnsupportedOperationException("unknown entry: " + entry.getClass().getName());
     }

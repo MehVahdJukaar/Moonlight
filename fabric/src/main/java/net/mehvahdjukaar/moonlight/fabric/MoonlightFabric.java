@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.api.util.fake_player.FakePlayerManager;
@@ -38,6 +39,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     // we can register extra stuff here that depends on those before client and server common setup is fired
     static void commonSetup() {
         RegHelperImpl.lateRegisterEntries();
+        FabricConfigSpec.loadAllConfigs();
         FabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
     }
 

@@ -9,6 +9,8 @@ import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.Stack;
 import java.util.function.Predicate;
@@ -25,21 +27,19 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     private final ConfigSubCategory mainCategory = new ConfigSubCategory(this.getName().getNamespace());
 
-    private final Stack<ConfigSubCategory> categoryStack = new Stack<>();
+    private final Deque<ConfigSubCategory> categoryStack = new ArrayDeque<>();
 
     public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);
         categoryStack.push(mainCategory);
     }
 
+    //doesn't load it immediately. happens after registration to mimic forge
     @NotNull
     public FabricConfigSpec build() {
         assert categoryStack.size() == 1;
-        FabricConfigSpec spec = new FabricConfigSpec(this.getName(),
+        return new FabricConfigSpec(this.getName(),
                 mainCategory, this.type, this.synced, this.changeCallback);
-        spec.loadFromFile();
-        spec.saveConfig();
-        return spec;
     }
 
     @Override

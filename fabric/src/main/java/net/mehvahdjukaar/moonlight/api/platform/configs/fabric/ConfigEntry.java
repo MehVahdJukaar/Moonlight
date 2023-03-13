@@ -6,7 +6,7 @@ public abstract class ConfigEntry{
 
     protected final String name;
 
-    public ConfigEntry(String name) {
+    protected ConfigEntry(String name) {
         this.name = name;
     }
 
