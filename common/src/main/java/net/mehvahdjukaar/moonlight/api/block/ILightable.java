@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface ILightable {
 
-    TagKey<Item> FLINT_AND_STEELS = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("forge", "tools/flint_and_steel"));
+    TagKey<Item> FLINT_AND_STEELS = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "tools/flint_and_steel"));
 
     boolean isLitUp(BlockState state);
 
@@ -67,14 +67,14 @@ public interface ILightable {
     default boolean interactWithProjectile(Level level, BlockState state, Projectile projectile, BlockPos pos) {
         if (projectile.isOnFire()) {
             Entity entity = projectile.getOwner();
-            if (entity == null || entity instanceof Player || PlatformHelper.isMobGriefingOn(level, entity)) {
+            if (entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity)) {
                 if (lightUp(projectile, state, pos, level, FireSourceType.FLAMING_ARROW)) {
                     return true;
                 }
             }
         } else if (projectile instanceof ThrownPotion potion && PotionUtils.getPotion(potion.getItem()) == Potions.WATER) {
             Entity entity = projectile.getOwner();
-            boolean flag = entity == null || entity instanceof Player || PlatformHelper.isMobGriefingOn(level, entity);
+            boolean flag = entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity);
             if (flag && extinguish(projectile, state, pos, level)) {
                 return true;
             }

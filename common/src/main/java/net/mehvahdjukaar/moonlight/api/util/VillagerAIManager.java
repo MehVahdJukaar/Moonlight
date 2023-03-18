@@ -16,7 +16,7 @@ public class VillagerAIManager {
      * Register an event listener for the villager brain event.
      * On forge Use the subscribe event annotation instead
      */
-    public static void addListener(Consumer<IVillagerBrainEvent> eventConsumer){
+    public static void addBrainModification(Consumer<IVillagerBrainEvent> eventConsumer){
         MoonlightEventsHelper.addListener(eventConsumer, IVillagerBrainEvent.class);
     }
 

@@ -40,7 +40,7 @@ public abstract class SoftFluidTank {
     protected final int capacity;
     @Nullable
     protected CompoundTag nbt = null;
-    protected SoftFluid fluid = VanillaSoftFluids.EMPTY.get(); //not null
+    protected SoftFluid fluid = BuiltInSoftFluids.EMPTY.get(); //not null
     //special tint color. Used for dynamic tint fluids like water and potions
     protected int specialColor = 0;
     protected boolean needsColorRefresh = true;
@@ -150,7 +150,7 @@ public abstract class SoftFluidTank {
         Potion potion = PotionUtils.getPotion(filledContainerStack);
         boolean hasCustomPot = (com != null && com.contains("CustomPotionEffects"));
         if (potion == Potions.WATER && !hasCustomPot) {
-            s = VanillaSoftFluids.WATER.get();
+            s = BuiltInSoftFluids.WATER.get();
         }
         //add tags to splash and lingering potions
         else if (potion != Potions.EMPTY || hasCustomPot) {
@@ -212,7 +212,7 @@ public abstract class SoftFluidTank {
                 if (simulate) return ItemStack.EMPTY;
                 ItemStack stack = new ItemStack(category.getFirstFilled().get());
                 //case for lingering potions
-                if (this.fluid == VanillaSoftFluids.POTION.get()) {
+                if (this.fluid == BuiltInSoftFluids.POTION.get()) {
                     if (this.nbt != null && this.nbt.contains(POTION_TYPE_KEY) && !Utils.getID(emptyContainer).getNamespace().equals("inspirations")) {
                         String bottle = this.nbt.getString(POTION_TYPE_KEY);
                         if (bottle.equals("SPLASH")) stack = new ItemStack(Items.SPLASH_POTION);
@@ -221,7 +221,7 @@ public abstract class SoftFluidTank {
                 }
 
                 //converts water bottles into potions
-                if (emptyContainer == Items.GLASS_BOTTLE && fluid == VanillaSoftFluids.WATER.get())
+                if (emptyContainer == Items.GLASS_BOTTLE && fluid == BuiltInSoftFluids.WATER.get())
                     stack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
 
                 this.applyNBTtoItemStack(stack);
@@ -494,7 +494,7 @@ public abstract class SoftFluidTank {
      * resets & clears the tank
      */
     public void clear() {
-        this.fluid = VanillaSoftFluids.EMPTY.get();
+        this.fluid = BuiltInSoftFluids.EMPTY.get();
         this.setCount(0);
         this.nbt = null;
         this.specialColor = 0;
@@ -549,7 +549,7 @@ public abstract class SoftFluidTank {
         if (nbt != null) {
             this.nbt = nbt.copy();
             //even more hardcoded shit
-            if (fluid.equals(VanillaSoftFluids.POTION.get()) && !this.nbt.contains(POTION_TYPE_KEY)) {
+            if (fluid.equals(BuiltInSoftFluids.POTION.get()) && !this.nbt.contains(POTION_TYPE_KEY)) {
                 this.nbt.putString(POTION_TYPE_KEY, "REGULAR");
             }
         }

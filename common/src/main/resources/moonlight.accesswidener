@@ -44,8 +44,8 @@ transitive-accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaz
 
 
 #fabric datapack reg
-transitive-accessible class net/minecraft/data/BuiltinRegistries$RegistryBootstrap
-transitive-accessible method net/minecraft/data/BuiltinRegistries registerSimple (Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/data/BuiltinRegistries$RegistryBootstrap;)Lnet/minecraft/core/Registry;
+transitive-accessible class net/minecraft/data/BuiltInRegistries$RegistryBootstrap
+transitive-accessible method net/minecraft/data/BuiltInRegistries registerSimple (Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/data/BuiltInRegistries$RegistryBootstrap;)Lnet/minecraft/core/Registry;
 
 #flute renderer fabric
 transitive-accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V

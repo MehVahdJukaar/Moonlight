@@ -2,13 +2,15 @@ package net.mehvahdjukaar.moonlight.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.mehvahdjukaar.moonlight.api.util.fake_player.FakePlayerManager;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
+import net.mehvahdjukaar.moonlight.core.fake_player.FakeServerPlayer;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
@@ -37,7 +39,7 @@ public class MoonlightForge {
         MinecraftForge.EVENT_BUS.register(this);
         ModLootModifiers.register();
         ModLootConditions.register();
-        if (PlatformHelper.getEnv().isClient()) {
+        if (PlatHelper.getEnv().isClient()) {
             FMLJavaModLoadingContext.get().getModEventBus()
                     .addListener(MoonlightForgeClient::registerShader);
         }
@@ -89,7 +91,16 @@ public class MoonlightForge {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onDimensionUnload(LevelEvent.Unload event) {
-        FakePlayerManager.unloadLevel(event.getLevel());
+        var level = event.getLevel();
+        try {
+            if (level instanceof ServerLevel sl) {
+                FakeServerPlayer.unloadLevel(sl);
+            } else if (level.isClientSide()) {
+                //got to be careful with classloading
+                FPClientAccess.unloadLevel(level);
+            }
+        } catch (Exception ignored) {
+        }
     }
 
 }

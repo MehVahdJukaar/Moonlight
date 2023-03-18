@@ -31,6 +31,6 @@ public class AfterLanguageLoadEvent implements SimpleEvent {
     }
 
     public boolean isDefault() {
-        return languageInfo.stream().anyMatch(l -> l.getCode().equals("en_us"));
+        return languageInfo.stream().anyMatch(l -> l.name().equals("en_us"));
     }
 }

@@ -1,9 +1,7 @@
-package net.mehvahdjukaar.moonlight.api.util.fake_player;
+package net.mehvahdjukaar.moonlight.core.fake_player;
 
 import com.mojang.authlib.GameProfile;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
@@ -20,7 +18,7 @@ import java.util.WeakHashMap;
 
 public class FakeLocalPlayer extends AbstractClientPlayer {
 
-    private static final boolean HAS_CACHE = PlatformHelper.getPlatform().isForge(); //fabric doesnt have world unload event
+    private static final boolean HAS_CACHE = PlatHelper.getPlatform().isForge(); //fabric doesnt have world unload event
 
     // Map of all active fake player usernames to their entities
     // automatically gets cleaned when level is unloaded as key won't be in use anymore

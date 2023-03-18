@@ -1,12 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.set.leaves;
 
 import com.google.common.base.Suppliers;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -70,21 +69,21 @@ public class LeavesType extends BlockType {
 
         public static Finder simple(String modId, String leavesTypeName, String leavesName) {
             return new Finder(new ResourceLocation(modId, leavesTypeName),
-                    () -> Registry.BLOCK.get(new ResourceLocation(modId, leavesName)), null);
+                    () -> BuiltInRegistries.BLOCK.get(new ResourceLocation(modId, leavesName)), null);
         }
 
         public static Finder simple(String modId, String leavesTypeName, String leavesName, String woodTypeName) {
             return new Finder(new ResourceLocation(modId, leavesTypeName),
-                    () -> Registry.BLOCK.get(new ResourceLocation(modId, leavesName)),
+                    () -> BuiltInRegistries.BLOCK.get(new ResourceLocation(modId, leavesName)),
                     () -> WoodTypeRegistry.INSTANCE.get(new ResourceLocation(woodTypeName)));
         }
 
         @Override
         public Optional<LeavesType> get() {
-            if (PlatformHelper.isModLoaded(id.getNamespace())) {
+            if (PlatHelper.isModLoaded(id.getNamespace())) {
                 try {
                     Block leaves = leavesFinder.get();
-                    var d = Registry.BLOCK.get(Registry.BLOCK.getDefaultKey());
+                    var d = BuiltInRegistries.BLOCK.get(BuiltInRegistries.BLOCK.getDefaultKey());
                     if (leaves != d && leaves != null) {
                         if (woodFinder == null) {
                             return Optional.of(new LeavesType(id, leaves));

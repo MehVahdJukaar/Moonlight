@@ -37,11 +37,11 @@ public class OptionalItemPool extends LootPoolSingletonContainer {
     @Nullable
     private static Item getOptional(String res) {
         if (res.startsWith("#")) {
-            TagKey<Item> key = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(res.substring(1)));
-            for (var v : Registry.ITEM.getTagOrEmpty(key)) return v.value();
+            TagKey<Item> key = TagKey.create(Registries.ITEM, new ResourceLocation(res.substring(1)));
+            for (var v : BuiltInRegistries.ITEM.getTagOrEmpty(key)) return v.value();
             return null;
         }
-        return Registry.ITEM.getOptional(new ResourceLocation(res)).orElse(null);
+        return BuiltInRegistries.ITEM.getOptional(new ResourceLocation(res)).orElse(null);
     }
 
     //hacky

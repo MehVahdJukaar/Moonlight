@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.set;
 
 import com.google.common.base.Stopwatch;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.HolderSet;
@@ -34,18 +34,18 @@ public class BlocksColorInternal {
         VANILLA_COLORS.forEach(d -> colors.put(d.getName(), d));
         List<String> colorPriority = new ArrayList<>(colors.keySet().stream().toList());
 
-        addColoredFromRegistry(colors, colorPriority, Registry.BLOCK, BLOCK_COLOR_SETS);
-        addColoredFromRegistry(colors, colorPriority, Registry.ITEM, ITEM_COLOR_SETS);
+        addColoredFromRegistry(colors, colorPriority, BuiltInRegistries.BLOCK, BLOCK_COLOR_SETS);
+        addColoredFromRegistry(colors, colorPriority, BuiltInRegistries.ITEM, ITEM_COLOR_SETS);
 
         Moonlight.LOGGER.info("Initialized color sets in {}ms", sw.elapsed().toMillis());
     }
 
     public static void registerBlockColorSet(ResourceLocation key, EnumMap<DyeColor, Block> blocks, @Nullable Block defaultBlock) {
-        BLOCK_COLOR_SETS.put(key.toString(), new ColoredSet<>(key, blocks, Registry.BLOCK, defaultBlock));
+        BLOCK_COLOR_SETS.put(key.toString(), new ColoredSet<>(key, blocks, BuiltInRegistries.BLOCK, defaultBlock));
     }
 
     public static void registerItemColorSet(ResourceLocation key, EnumMap<DyeColor, Item> items, @Nullable Item defaultItem) {
-        ITEM_COLOR_SETS.put(key.toString(), new ColoredSet<>(key, items, Registry.ITEM, defaultItem));
+        ITEM_COLOR_SETS.put(key.toString(), new ColoredSet<>(key, items, BuiltInRegistries.ITEM, defaultItem));
     }
 
     private static <T> void addColoredFromRegistry(Map<String, DyeColor> colors, List<String> colorPriority,
@@ -191,7 +191,7 @@ public class BlocksColorInternal {
     public static HolderSet<Block> getBlockHolderSet(String key) {
         var set = getBlockSet(key);
         if (set != null) {
-            return set.makeHolderSet(Registry.BLOCK);
+            return set.makeHolderSet(BuiltInRegistries.BLOCK);
         }
         return null;
     }
@@ -200,7 +200,7 @@ public class BlocksColorInternal {
     public static HolderSet<Item> getItemHolderSet(String key) {
         var set = getItemSet(key);
         if (set != null) {
-            return set.makeHolderSet(Registry.ITEM);
+            return set.makeHolderSet(BuiltInRegistries.ITEM);
         }
         return null;
     }
@@ -273,7 +273,7 @@ public class BlocksColorInternal {
                     new ResourceLocation(id.getNamespace(), id.getPath() + "s")));
             if (v.isEmpty()) {
                 v = registry.getTag(TagKey.create(registry.key(),
-                        new ResourceLocation(PlatformHelper.getPlatform().isForge() ? "forge" : "c", id.getPath() + "s")));
+                        new ResourceLocation(PlatHelper.getPlatform().isForge() ? "forge" : "c", id.getPath() + "s")));
             }
             if (v.isPresent()) {
                 var tag = v.get();

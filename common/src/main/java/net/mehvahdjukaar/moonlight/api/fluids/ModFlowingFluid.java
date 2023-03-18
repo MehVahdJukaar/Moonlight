@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -43,7 +44,7 @@ public abstract class ModFlowingFluid extends FlowingFluid {
     }
 
     @Override
-    protected boolean canConvertToSource() {
+    protected boolean canConvertToSource(Level level) {
         return convertsToSource;
     }
 

@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client;
 
 import com.mojang.blaze3d.shaders.FogShape;
-import com.mojang.math.Vector3f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -12,6 +11,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 /**
  * Register with ClientPlatformHelper.registerFluidRenderProperties

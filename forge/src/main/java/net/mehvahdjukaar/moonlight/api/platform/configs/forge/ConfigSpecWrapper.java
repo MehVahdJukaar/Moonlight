@@ -5,7 +5,7 @@ import com.electronwill.nightconfig.core.ConfigFormat;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -190,7 +190,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
     protected void onConfigChange(ModConfigEvent event) {
         if (event.getConfig().getSpec() == this.getSpec()) {
             //send this configuration to connected clients if on server
-            if (this.isSynced() && PlatformHelper.getEnv().isServer()) sendSyncedConfigsToAllPlayers();
+            if (this.isSynced() && PlatHelper.getEnv().isServer()) sendSyncedConfigsToAllPlayers();
             onRefresh();
         }
     }

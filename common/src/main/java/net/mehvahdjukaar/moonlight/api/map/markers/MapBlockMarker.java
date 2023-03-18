@@ -19,8 +19,7 @@ import java.util.Objects;
  */
 public abstract class MapBlockMarker<D extends CustomMapDecoration> {
     private final MapDecorationType<D, ?> type;
-    public BlockPos pos;
-    //private final int rotation;
+    private BlockPos pos;
 
     protected MapBlockMarker(MapDecorationType<D, ?> type) {
         this.type = type;

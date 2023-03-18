@@ -3,15 +3,12 @@ package net.mehvahdjukaar.moonlight.api.client.model;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.CPlatHelper;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Collection;
-import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -29,7 +26,7 @@ public class NestedModelLoader implements CustomModelLoader{
 
     @Override
     public CustomGeometry deserialize(JsonObject json, JsonDeserializationContext context) throws JsonParseException {
-        return new Geometry(ClientPlatformHelper.parseBlockModel(json.get(path)));
+        return new Geometry(CPlatHelper.parseBlockModel(json.get(path)));
     }
 
     private class Geometry implements CustomGeometry{
@@ -38,11 +35,6 @@ public class NestedModelLoader implements CustomModelLoader{
 
         private Geometry(BlockModel model){
             this.model = model;
-        }
-
-        @Override
-        public Collection<Material> getMaterials(Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
-            return model.getMaterials(modelGetter, missingTextureErrors);
         }
 
         @Override

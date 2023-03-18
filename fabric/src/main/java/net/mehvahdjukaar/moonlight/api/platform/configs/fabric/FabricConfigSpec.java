@@ -12,7 +12,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
@@ -117,8 +117,8 @@ public class FabricConfigSpec extends ConfigSpec {
         return Component.literal(LangBuilder.getReadableName(this.res.getPath() + "_configs"));
     }
 
-    private static final boolean YACL = PlatformHelper.isModLoaded("yet-another-config-lib");
-    private static final boolean CLOTH_CONFIG = PlatformHelper.isModLoaded("cloth-config");
+    private static final boolean YACL = PlatHelper.isModLoaded("yet-another-config-lib");
+    private static final boolean CLOTH_CONFIG = PlatHelper.isModLoaded("cloth-config");
 
     @Override
     @Environment(EnvType.CLIENT)

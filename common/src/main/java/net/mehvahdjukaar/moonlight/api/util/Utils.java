@@ -6,13 +6,14 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -87,51 +88,39 @@ public class Utils {
         return xp;
     }
 
-    public static VoxelShape rotateVoxelShape(VoxelShape source, Direction direction) {
-        AtomicReference<VoxelShape> newShape = new AtomicReference<>(Shapes.empty());
-        source.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-            Vec3 min = new Vec3(minX - 0.5, minY - 0.5, minZ - 0.5);
-            Vec3 max = new Vec3(maxX - 0.5, maxY - 0.5, maxZ - 0.5);
-            Vec3 v1 = MthUtils.rotateVec3(min, direction);
-            Vec3 v2 = MthUtils.rotateVec3(max, direction);
-            VoxelShape s = Shapes.create(0.5 + Math.min(v1.x, v2.x), 0.5 + Math.min(v1.y, v2.y), 0.5 + Math.min(v1.z, v2.z),
-                    0.5 + Math.max(v1.x, v2.x), 0.5 + Math.max(v1.y, v2.y), 0.5 + Math.max(v1.z, v2.z));
-            newShape.set(Shapes.or(newShape.get(), s));
-        });
-        return newShape.get();
-    }
+
 
     public static ResourceLocation getID(Block object) {
-        return Registry.BLOCK.getKey(object);
+        return BuiltInRegistries.BLOCK.getKey(object);
     }
 
     public static ResourceLocation getID(EntityType<?> object) {
-        return Registry.ENTITY_TYPE.getKey(object);
+        return BuiltInRegistries.ENTITY_TYPE.getKey(object);
     }
 
     //TODO: not sure if this is correct
     public static ResourceLocation getID(Biome object) {
-        return BuiltinRegistries.BIOME.getKey(object);
+        return BuiltInRegistries.BIOME.getKey(object);
     }
 
     public static ResourceLocation getID(ConfiguredFeature<?, ?> object) {
-        return BuiltinRegistries.CONFIGURED_FEATURE.getKey(object);
+        return BuiltInRegistries.CONFIGURED_FEATURE.getKey(object);
     }
 
     public static ResourceLocation getID(Item object) {
-        return Registry.ITEM.getKey(object);
+        return BuiltInRegistries.ITEM.getKey(object);
     }
 
     public static ResourceLocation getID(Fluid object) {
-        return Registry.FLUID.getKey(object);
+        return BuiltInRegistries.FLUID.getKey(object);
     }
 
     public static ResourceLocation getID(BlockEntityType<?> object) {
-        return Registry.BLOCK_ENTITY_TYPE.getKey(object);
+        return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(object);
     }
 
     public static ResourceLocation getID(RecipeSerializer<?> object) {
-        return Registry.RECIPE_SERIALIZER.getKey(object);
+        return BuiltInRegistries.RECIPE_SERIALIZER.getKey(object);
     }
 
     public static ResourceLocation getID(SoftFluid object) {
@@ -160,9 +149,9 @@ public class Utils {
 
     //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
-        var s = PlatformHelper.getCurrentServer();
+        var s = PlatHelper.getCurrentServer();
         if (s != null) return s.registryAccess();
-        if (!PlatformHelper.getEnv().isServer()) {
+        if (!PlatHelper.getEnv().isServer()) {
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
         }

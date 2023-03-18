@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
-import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.CPlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -24,7 +24,7 @@ public class DynamicTexturePack extends DynamicResourcePack {
     }
 
     void addPackLogo() {
-        Path logoPath = ClientPlatformHelper.getModIcon(this.mainNamespace);
+        Path logoPath = CPlatHelper.getModIcon(this.mainNamespace);
         if (logoPath != null) {
             try {
                 this.addRootResource("pack.png", Files.readAllBytes(logoPath));

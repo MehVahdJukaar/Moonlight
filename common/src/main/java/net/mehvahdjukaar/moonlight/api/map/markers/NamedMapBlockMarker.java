@@ -14,7 +14,7 @@ public abstract class NamedMapBlockMarker<D extends CustomMapDecoration> extends
 
     //additional data to be stored
     @Nullable
-    public Component name;
+    protected Component name;
 
     protected NamedMapBlockMarker(MapDecorationType<D, ?> type) {
         super(type);

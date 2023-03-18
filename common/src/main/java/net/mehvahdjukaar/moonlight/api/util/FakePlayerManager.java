@@ -1,15 +1,14 @@
-package net.mehvahdjukaar.moonlight.api.util.fake_player;
+package net.mehvahdjukaar.moonlight.api.util;
 
 import com.mojang.authlib.GameProfile;
+import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
+import net.mehvahdjukaar.moonlight.core.fake_player.FakeServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
 public class FakePlayerManager {
 
@@ -28,14 +27,13 @@ public class FakePlayerManager {
                 fakePlayer = FakeServerPlayer.get(sl, id);
             } else {
                 //class loading hacks
-                fakePlayer = ClientAccess.get(level, id);
+                fakePlayer = FPClientAccess.get(level, id);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Level must be either ServerLevel or ClientLevel", e);
         }
         return fakePlayer;
     }
-
 
     public static Player get(GameProfile id, Entity copyPosFrom, Entity copyRotFrom) {
         Player p = get(id, copyPosFrom.level);
@@ -45,11 +43,6 @@ public class FakePlayerManager {
         p.setYRot(copyRotFrom.getYRot());
         p.setOldPosAndRot();
         return p;
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Player get(Entity copyPosFrom, Entity copyRotFrom) {
-        return getDefault(copyPosFrom, copyRotFrom);
     }
 
     public static Player getDefault(Entity copyPosFrom, Entity copyRotFrom) {
@@ -63,20 +56,4 @@ public class FakePlayerManager {
     public static Player getDefault(Entity entity) {
         return get(DEFAULT, entity);
     }
-
-    @ApiStatus.Internal
-    public static void unloadLevel(LevelAccessor level) {
-        try {
-            if (level instanceof ServerLevel sl) {
-                FakeServerPlayer.unloadLevel(sl);
-            } else if (level.isClientSide()) {
-                //got to be careful with classloading
-                ClientAccess.unloadLevel(level);
-            }
-        } catch (Exception e) {
-            //  Moonlight new IllegalArgumentException("Level must be either ServerLevel or ClientLevel", e);
-        }
-    }
-
-
 }

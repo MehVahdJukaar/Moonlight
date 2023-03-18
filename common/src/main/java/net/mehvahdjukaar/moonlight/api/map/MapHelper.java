@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.map;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -21,7 +21,7 @@ import java.util.Optional;
 
 public class MapHelper {
 
-    public static final boolean MAP_ATLASES = PlatformHelper.isModLoaded("map_atlases");
+    public static final boolean MAP_ATLASES = PlatHelper.isModLoaded("map_atlases");
 
     @Nullable
     public static MapItemSavedData getMapData(ItemStack stack, Level level, @Nullable Player player) {

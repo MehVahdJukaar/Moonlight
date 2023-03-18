@@ -53,7 +53,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         //stuff for tfc
         if(baseRes.getNamespace().equals("tfc")){
             if(path.contains("wood/planks/")){
-                var log = Registry.BLOCK.getOptional(
+                var log = BuiltInRegistries.BLOCK.getOptional(
                         new ResourceLocation(baseRes.getNamespace(),path.replace("planks","log")));
                 if(log.isPresent()){
                     ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), path.replace("wood/planks/",""));
@@ -114,8 +114,8 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         };
         Block temp = null;
         for (var r : test) {
-            if (Registry.BLOCK.containsKey(r)) {
-                temp = Registry.BLOCK.get(r);
+            if (BuiltInRegistries.BLOCK.containsKey(r)) {
+                temp = BuiltInRegistries.BLOCK.get(r);
                 break;
             }
         }

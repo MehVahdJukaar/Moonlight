@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -60,7 +60,7 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
                                                 ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
                                                 Executor workerExecutor, Executor mainExecutor) {
         //not used anymore. Loading early instead
-        if (Moonlight.HAS_BEEN_INIT && PlatformHelper.isModLoadingValid()) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
+        if (Moonlight.HAS_BEEN_INIT && PlatHelper.isModLoadingValid()) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
             onNormalReload(manager);
         } else {
             Moonlight.LOGGER.error("Cowardly refusing generate assets for a broken mod state");

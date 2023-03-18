@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.misc;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.*;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -180,7 +180,7 @@ public class DummyWorld extends Level {
 
         @Override
         public ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
-            return new EmptyLevelChunk(this.world, new ChunkPos(x, z), BuiltinRegistries.BIOME.getHolderOrThrow(Biomes.FOREST));
+            return new EmptyLevelChunk(this.world, new ChunkPos(x, z), BuiltInRegistries.BIOME.getHolderOrThrow(Biomes.FOREST));
         }
 
         @Override

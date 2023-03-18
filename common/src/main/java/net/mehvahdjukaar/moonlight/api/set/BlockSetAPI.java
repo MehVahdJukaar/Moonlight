@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.set;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -70,12 +71,12 @@ public class BlockSetAPI {
      */
     public static <T extends BlockType> void addDynamicBlockRegistration(
             BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, Registry.BLOCK);
+        addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.BLOCK);
     }
 
     public static <T extends BlockType> void addDynamicItemRegistration(
             BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, Registry.ITEM);
+        addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.ITEM);
     }
 
     public static <T extends BlockType, E> void addDynamicRegistration(

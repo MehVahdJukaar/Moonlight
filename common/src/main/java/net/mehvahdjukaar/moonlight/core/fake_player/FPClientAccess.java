@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.util.fake_player;
+package net.mehvahdjukaar.moonlight.core.fake_player;
 
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
-class ClientAccess {
+public class FPClientAccess {
     
     @Environment(EnvType.CLIENT)
     public static Player get(Level level, GameProfile id) {

@@ -21,7 +21,7 @@
     "TextureAtlasSpriteMixin"
   ],
   "mixins": [
-    "BuiltinRegistryMixin",
+    "BuiltInRegistriesMixin",
     "ConditionsHackMixin",
     "DataPackContentMixin",
     "FireBlockMixin",

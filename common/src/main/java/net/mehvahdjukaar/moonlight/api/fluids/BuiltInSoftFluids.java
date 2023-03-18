@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
 
-public class VanillaSoftFluids {
+public class BuiltInSoftFluids {
 
     public static final DataObjectReference<SoftFluid> EMPTY = create("empty");
     public static final DataObjectReference<SoftFluid> WATER = create("water");

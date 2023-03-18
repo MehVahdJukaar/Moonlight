@@ -1,12 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.google.gson.JsonElement;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
-import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.KeyMapping;
@@ -17,9 +15,7 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -39,7 +35,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -55,7 +50,7 @@ import java.util.function.Supplier;
 /**
  * Helper class dedicated to platform independent client utility methods
  */
-public class ClientPlatformHelper {
+public class CPlatHelper {
 
     @ExpectPlatform
     public static void addClientSetup(Runnable clientSetup) {
@@ -240,10 +235,5 @@ public class ClientPlatformHelper {
 
     public static void registerOptionalTexturePack(ResourceLocation folderName) {
         registerOptionalTexturePack(folderName, LangBuilder.getReadableName(folderName.getPath()), false);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate, Level world, BlockPos blockpos, BlockRenderDispatcher blockRenderer) {
-        RenderUtil.renderBlock(seed, matrixStack, buffer, blockstate, world, blockpos, blockRenderer);
     }
 }

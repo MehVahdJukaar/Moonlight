@@ -1,8 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.entity.ImprovedProjectileEntity;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
@@ -130,11 +129,11 @@ public class SoftFluidRegistry {
         var fluidsMap = getFluidsMap();
         fluidsMap.clear();
         for (var s : getValues()) {
-            if (PlatformHelper.isModLoaded(s.getFromMod())) {
+            if (PlatHelper.isModLoaded(s.getFromMod())) {
                 s.getEquivalentFluids().forEach(f -> fluidsMap.put(f, s));
                 s.getContainerList().getPossibleFilled().forEach(i -> {
                     //don't associate water to potion bottle
-                    if (i != Items.POTION || s != VanillaSoftFluids.WATER.get()) {
+                    if (i != Items.POTION || s != BuiltInSoftFluids.WATER.get()) {
                         itemMap.put(i, s);
                     }
                 });

@@ -34,9 +34,12 @@ public interface IThirdPersonAnimationProvider {
      * @param mainHand hand side
      * @return True if default animation should be skipped
      */
-    <T extends LivingEntity> boolean poseLeftArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand, DualWeildState twoHanded);
+    <T extends LivingEntity> boolean poseLeftArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand);
 
 
+    /**
+     * Controls weather the other hand item renders or not
+     */
     default boolean isTwoHanded(){
         return false;
     }

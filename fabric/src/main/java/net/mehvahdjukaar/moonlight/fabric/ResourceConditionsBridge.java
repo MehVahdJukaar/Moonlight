@@ -6,11 +6,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.mixins.fabric.ConditionsHackMixin;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -59,7 +57,7 @@ public class ResourceConditionsBridge {
     }
 
     private static boolean forgeModLoaded(JsonObject jsonObject) {
-        return PlatformHelper.isModLoaded(GsonHelper.getAsString(jsonObject, "modid"));
+        return PlatHelper.isModLoaded(GsonHelper.getAsString(jsonObject, "modid"));
     }
 
     private static Boolean forgeTagEmpty(JsonObject object) {
@@ -69,7 +67,7 @@ public class ResourceConditionsBridge {
             Moonlight.LOGGER.warn("Can't retrieve deserialized tags. Failing tag resource condition check.");
             return true;
         }
-        Map<ResourceLocation, Collection<Holder<?>>> registryTags = allTags.get(Registry.ITEM_REGISTRY);
+        Map<ResourceLocation, Collection<Holder<?>>> registryTags = allTags.get(Registries.ITEM);
         if (registryTags == null) {
             // No tag for this registry
             return true;

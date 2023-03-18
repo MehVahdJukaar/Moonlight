@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.Nonnull;
 
 public class VerticalSlabBlock extends WaterBlock {
+
     public static final EnumProperty<VerticalSlabType> TYPE = EnumProperty.create("type", VerticalSlabType.class);
 
     public VerticalSlabBlock(Properties properties) {

@@ -10,7 +10,7 @@ import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
@@ -19,7 +19,7 @@ import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
@@ -53,11 +53,11 @@ public class RegHelperImpl {
     private static final List<Consumer<RegHelper.SpawnPlacementEvent>> SPAWN_PLACEMENT_REGISTRATIONS = new ArrayList<>();
 
     public static final List<Registry<?>> REG_PRIORITY = List.of(
-            Registry.SOUND_EVENT, Registry.FLUID, Registry.BLOCK, Registry.PARTICLE_TYPE,
-            Registry.ENTITY_TYPE, Registry.ITEM,
-            Registry.BLOCK_ENTITY_TYPE, Registry.PLACEMENT_MODIFIERS, Registry.STRUCTURE_TYPES,
-            Registry.STRUCTURE_PIECE, Registry.FEATURE, BuiltinRegistries.CONFIGURED_FEATURE,
-            BuiltinRegistries.PLACED_FEATURE
+            Registry.SOUND_EVENT, Registry.FLUID, BuiltInRegistries.BLOCK, Registry.PARTICLE_TYPE,
+            Registry.ENTITY_TYPE, BuiltInRegistries.ITEM,
+            BuiltInRegistries.BLOCK_ENTITY_TYPE, Registry.PLACEMENT_MODIFIERS, Registry.STRUCTURE_TYPES,
+            Registry.STRUCTURE_PIECE, Registry.FEATURE, BuiltInRegistries.CONFIGURED_FEATURE,
+            BuiltInRegistries.PLACED_FEATURE
     );
 
     //order is important here
@@ -75,7 +75,7 @@ public class RegHelperImpl {
             for(var s : sorted){
                 v.get(s).initializeEntries();
             }
-            if (m.getKey() == Registry.BLOCK) {
+            if (m.getKey() == BuiltInRegistries.BLOCK) {
                 //dynamic block registration after all blocks
                 BlockSetInternalImpl.registerEntries();
             }
@@ -120,7 +120,7 @@ public class RegHelperImpl {
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId,
                 c -> {
-                    if (PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+                    if (PlatHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
 
                     return new RegistryQueue<>(reg);
                 });

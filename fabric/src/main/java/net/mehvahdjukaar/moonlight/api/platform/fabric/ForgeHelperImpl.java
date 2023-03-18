@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.data.recipes.FinishedRecipe;
@@ -61,7 +61,7 @@ public class ForgeHelperImpl {
         if (!level.isLoaded(pos)) {
             return false;
         } else {
-            return PlatformHelper.isMobGriefingOn(level, animal);
+            return PlatHelper.isMobGriefingOn(level, animal);
         }
     }
 

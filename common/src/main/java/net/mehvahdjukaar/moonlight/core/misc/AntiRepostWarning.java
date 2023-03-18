@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -26,17 +26,17 @@ public class AntiRepostWarning {
     }
 
     public static void run() {
-        if (PlatformHelper.isDev()) return;
+        if (PlatHelper.isDev()) return;
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
         Set<String> reposted = MODS.stream().filter(AntiRepostWarning::isFileNameSus).collect(Collectors.toSet());
 
         try {
             for (var m : reposted) {
-                String url = PlatformHelper.getModPageUrl(m);
+                String url = PlatHelper.getModPageUrl(m);
                 if (url == null) url ="https://curseforge.com/minecraft/mc-mods";
                 MutableComponent link = Component.translatable("message.moonlight.anti_repost_link");
-                String modName = PlatformHelper.getModName(m);
+                String modName = PlatHelper.getModName(m);
                 MutableComponent name = Component.literal(modName).withStyle(ChatFormatting.BOLD);
 
                 ClickEvent click = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
@@ -51,7 +51,7 @@ public class AntiRepostWarning {
     }
 
     private static boolean isFileNameSus(String mod) {
-        var path = PlatformHelper.getModFilePath(mod);
+        var path = PlatHelper.getModFilePath(mod);
         if (path == null || path.getFileName() == null) {
             Moonlight.LOGGER.warn("Failed to get file path of mod {}", mod);
         } else {

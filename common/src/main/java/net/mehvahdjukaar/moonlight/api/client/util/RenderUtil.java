@@ -5,10 +5,9 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.CPlatHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -32,6 +31,9 @@ import java.util.function.BiConsumer;
 
 public class RenderUtil {
 
+    static final ModelResourceLocation TRIDENT_MODEL = ModelResourceLocation.vanilla("trident", "inventory");
+    static final ModelResourceLocation SPYGLASS_MODEL = ModelResourceLocation.vanilla("spyglass", "inventory");
+
     @ExpectPlatform
     public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate, Level world, BlockPos blockpos, BlockRenderDispatcher blockRenderer) {
         throw new AssertionError();
@@ -44,7 +46,7 @@ public class RenderUtil {
         blockRenderer.getModelRenderer().renderModel(matrixStack.last(),
                 buffer.getBuffer(cutout ? Sheets.cutoutBlockSheet() : Sheets.solidBlockSheet()),
                 null,
-                ClientPlatformHelper.getModel(blockRenderer.getBlockModelShaper().getModelManager(), modelLocation),
+                CPlatHelper.getModel(blockRenderer.getBlockModelShaper().getModelManager(), modelLocation),
                 1.0F, 1.0F, 1.0F,
                 light, overlay);
     }
@@ -91,9 +93,9 @@ public class RenderUtil {
         matrixStack.pushPose();
 
         if (stack.is(Items.TRIDENT)) {
-            model = renderer.getItemModelShaper().getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
+            model = renderer.getItemModelShaper().getModelManager().getModel(TRIDENT_MODEL);
         } else if (stack.is(Items.SPYGLASS)) {
-            model = renderer.getItemModelShaper().getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass#inventory"));
+            model = renderer.getItemModelShaper().getModelManager().getModel(SPYGLASS_MODEL);
         }
 
 
@@ -146,9 +148,10 @@ public class RenderUtil {
      */
     public static void blitSprite(PoseStack matrixStack, int x, int y, int w, int h,
                                   float u, float v, int uW, int vH, TextureAtlasSprite sprite) {
-        RenderSystem.setShaderTexture(0, sprite.atlas().location());
-        int width = (int) (sprite.getWidth() / (sprite.getU1() - sprite.getU0()));
-        int height = (int) (sprite.getHeight() / (sprite.getV1() - sprite.getV0()));
+        RenderSystem.setShaderTexture(0, sprite.atlasLocation());
+        var c = sprite.contents();
+        int width = (int) (c.width() / (sprite.getU1() - sprite.getU0()));
+        int height = (int) (c.height() / (sprite.getV1() - sprite.getV0()));
         GuiComponent.blit(matrixStack, x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
     }
 

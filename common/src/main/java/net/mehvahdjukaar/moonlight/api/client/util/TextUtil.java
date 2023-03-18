@@ -18,9 +18,11 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import org.apache.commons.lang3.StringUtils;
+import org.joml.Matrix4f;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -58,13 +60,6 @@ public class TextUtil {
         return Pair.of(splitLines, 1f / scalingFactor);
     }
 
-    //not server safe don't use
-    @Deprecated(forRemoval = true)
-    public static String getReadableName(String name) {
-        return Arrays.stream((name).replace(":", "_").split("_"))
-                .map(StringUtils::capitalize).collect(Collectors.joining(" "));
-    }
-
     public static FormattedText parseText(String s) {
         try {
             FormattedText mutableComponent = Component.Serializer.fromJson(s);
@@ -93,7 +88,7 @@ public class TextUtil {
             //int centerX = (-font.width(string) / 2);
 
             FormattedCharSequence charSequence = FormattedCharSequence.forward(string, properties.style);
-            float centerX = (float) (-font.width(charSequence) / 2);
+            float centerX = -font.width(charSequence) / 2f;
             renderLineInternal(charSequence, font, centerX, yOffset, matrix4f, buffer, properties);
 
             String substring = string.substring(0, Math.min(cursorPos, string.length()));
@@ -207,10 +202,10 @@ public class TextUtil {
      */
     public record RenderTextProperties(int textColor, int darkenedColor, boolean glowing, int light, Style style) {
 
-        public RenderTextProperties(DyeColor color, boolean glowing, int combinedLight, Style style, Supplier<Boolean> isVeryNear) {
+        public RenderTextProperties(DyeColor color, boolean glowing, int combinedLight, Style style, BooleanSupplier isVeryNear) {
             this(color.getTextColor(),
                     getDarkenedColor(color.getTextColor(), glowing),
-                    glowing && (isVeryNear.get() || color == DyeColor.BLACK),
+                    glowing && (isVeryNear.getAsBoolean() || color == DyeColor.BLACK),
                     glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
 
         }

@@ -1,12 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
-import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -208,9 +206,6 @@ public class ParticleUtil {
         @Override
         public void end(Tesselator tesselator) {
             tesselator.end();
-            //RenderSystem.depthMask(true);
-            //RenderSystem.disableBlend();
-            //RenderSystem.defaultBlendFunc();
         }
 
         public String toString() {

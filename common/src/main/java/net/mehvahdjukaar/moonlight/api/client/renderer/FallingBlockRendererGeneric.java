@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.FallingBlockRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -36,12 +37,12 @@ public class FallingBlockRendererGeneric<T extends FallingBlockEntity> extends E
             boolean isJustSpawned = Math.abs(entity.getY() - pos.getY()) < 0.02 && entity.tickCount < 0 && state != level.getBlockState(pos);
             if (!isJustSpawned && state.getRenderShape() != RenderShape.INVISIBLE) {
                 poseStack.pushPose();
-                BlockPos blockpos = new BlockPos(entity.getX(), entity.getBoundingBox().maxY, entity.getZ());
+                BlockPos blockPos = BlockPos.containing(entity.getX(), entity.getBoundingBox().maxY, entity.getZ());
+
                 poseStack.translate(-0.5D, 0.0D, -0.5D);
                 BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-
                 RenderUtil.renderBlock(state.getSeed(entity.getStartPos()),
-                        poseStack, buffer, state, level, blockpos, dispatcher);
+                        poseStack, buffer, state, level, blockPos, dispatcher);
                 poseStack.popPose();
                 super.render(entity, pEntityYaw, pPartialTicks, poseStack, buffer, pPackedLight);
             }

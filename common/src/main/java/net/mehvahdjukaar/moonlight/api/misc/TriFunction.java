@@ -1,9 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
+import net.minecraft.data.models.blockstates.PropertyDispatch;
+
 import java.util.Objects;
 import java.util.function.Function;
 
-//TODO: rename
 @FunctionalInterface
 public interface TriFunction<T, U, V, R> {
 

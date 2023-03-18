@@ -31,7 +31,7 @@ public class ImprovedFallingBlockEntity extends FallingBlockEntity {
         this.xo = pos.getX() + 0.5D;
         this.yo = pos.getY();
         this.zo = pos.getZ() + 0.5D;
-        this.setPos(xo, yo + (double) ((1.0F - this.getBbHeight()) / 2.0F), zo);
+        this.setPos(xo, yo + ((1.0F - this.getBbHeight()) / 2.0F), zo);
         this.setDeltaMovement(Vec3.ZERO);
         this.setStartPos(this.blockPosition());
         this.setBlockState(blockState);
@@ -77,10 +77,10 @@ public class ImprovedFallingBlockEntity extends FallingBlockEntity {
     @Override
     public ItemEntity spawnAtLocation(ItemLike itemIn, int offset) {
         ItemStack stack = new ItemStack(itemIn);
-        if (itemIn instanceof Block && this.saveTileDataToItem) {
+        if (itemIn instanceof Block && this.saveTileDataToItem && this.blockData != null) {
             stack.addTagElement("BlockEntityTag", this.blockData);
         }
-        return this.spawnAtLocation(stack, (float) offset);
+        return this.spawnAtLocation(stack, offset);
     }
 
     @Override

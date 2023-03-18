@@ -2,19 +2,16 @@
 // Source code recreated from a .class file by Quiltflower
 //
 
-package net.mehvahdjukaar.moonlight.api.util.fake_player;
+package net.mehvahdjukaar.moonlight.core.fake_player;
 
-import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.minecraft.client.multiplayer.ClientLevel;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket.RelativeArgument;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +21,7 @@ import net.minecraft.stats.Stat;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -40,17 +38,22 @@ public class FakeServerPlayer extends ServerPlayer {
     // automatically gets cleaned when level is unloaded as key won't be in use anymore
     private static final WeakHashMap<ServerLevel, Map<GameProfile, FakeServerPlayer>> FAKE_PLAYERS = new WeakHashMap<>();
 
+    public FakeServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile) {
+        super(minecraftServer, serverLevel, gameProfile);
+        this.connection = new FakeServerPlayer.FakePlayerNetHandler(level.getServer(), this);
+    }
+
     /**
      * Get a fake player with a given username,
      * Mods should either hold weak references to the return value, or listen for a
      * WorldEvent.Unload and kill all references to prevent worlds staying in memory.
      */
-    static FakeServerPlayer get(ServerLevel level, GameProfile username) {
+    public static FakeServerPlayer get(ServerLevel level, GameProfile username) {
         return FAKE_PLAYERS.computeIfAbsent(level, l-> new HashMap<>())
-                .computeIfAbsent(username, u -> new FakeServerPlayer(level, username));
+                .computeIfAbsent(username, u -> new FakeServerPlayer(level.getServer(), level, username));
     }
 
-    static void unloadLevel(Level level) {
+    public static void unloadLevel(Level level) {
         for (var v : FAKE_PLAYERS.keySet()) {
             if (v == level) FAKE_PLAYERS.remove(v);
         }
@@ -58,10 +61,7 @@ public class FakeServerPlayer extends ServerPlayer {
 
     private final EntityDimensions dimensions = EntityDimensions.fixed(0, 0);
 
-    public FakeServerPlayer(ServerLevel level, GameProfile name) {
-        super(level.getServer(), level, name, null);
-        this.connection = new FakeServerPlayer.FakePlayerNetHandler(level.getServer(), this);
-    }
+
 
     @Override
     public Vec3 position() {
@@ -123,7 +123,7 @@ public class FakeServerPlayer extends ServerPlayer {
     @Nullable
     @Override
     public MinecraftServer getServer() {
-        return PlatformHelper.getCurrentServer();
+        return PlatHelper.getCurrentServer();
     }
 
     @ParametersAreNonnullByDefault
@@ -232,7 +232,8 @@ public class FakeServerPlayer extends ServerPlayer {
         }
 
         @Override
-        public void teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeArgument> relativeSet) {
+        public void teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeSet) {
+            super.teleport(x, y, z, yaw, pitch, relativeSet);
         }
 
         @Override

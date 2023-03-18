@@ -2,8 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.mehvahdjukaar.moonlight.api.entity.ImprovedProjectileEntity;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
@@ -128,7 +127,7 @@ public abstract class ConfigSpec {
     //called on server. sync server -> all clients
     public void sendSyncedConfigsToAllPlayers() {
         if (this.getConfigType() == ConfigType.COMMON && this.isSynced()) {
-            MinecraftServer currentServer = PlatformHelper.getCurrentServer();
+            MinecraftServer currentServer = PlatHelper.getCurrentServer();
             if (currentServer != null) {
                 PlayerList playerList = currentServer.getPlayerList();
                 for (ServerPlayer player : playerList.getPlayers()) {

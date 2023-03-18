@@ -100,13 +100,13 @@ public class BlockSetInternal {
     @Deprecated(forRemoval = true)
     public static <T extends BlockType> void addDynamicBlockRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, Registry.BLOCK);
+        addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.BLOCK);
     }
 
     @Deprecated(forRemoval = true)
     public static <T extends BlockType> void addDynamicItemRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, Registry.ITEM);
+        addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.ITEM);
     }
 
 

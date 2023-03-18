@@ -33,11 +33,11 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     private UUID owner = null;
     private NonNullList<ItemStack> stacks;
 
-    public ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state) {
+    protected ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state) {
         this(type, pos, state, 1);
     }
 
-    public ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state, int slots) {
+    protected ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state, int slots) {
         super(type, pos, state);
         this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
     }

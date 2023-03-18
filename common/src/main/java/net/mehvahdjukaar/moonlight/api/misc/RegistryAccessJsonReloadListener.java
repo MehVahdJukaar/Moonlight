@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Used to parse objects with registry codecs
+ */
 public abstract class RegistryAccessJsonReloadListener extends SimpleJsonResourceReloadListener {
 
     private static final List<RegistryAccessJsonReloadListener> INSTANCES = new ArrayList<>();

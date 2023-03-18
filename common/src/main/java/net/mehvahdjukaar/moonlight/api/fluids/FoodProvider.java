@@ -3,9 +3,9 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundEvents;
@@ -19,14 +19,13 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class FoodProvider {
 
     public static final Codec<FoodProvider> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            Registry.ITEM.byNameCodec().fieldOf("item").forGetter(f -> f.food),
+            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(f -> f.food),
             Codec.INT.fieldOf("divider").forGetter(f -> f.divider)
     ).apply(instance, FoodProvider::create));
 
@@ -64,7 +63,7 @@ public class FoodProvider {
 
         //food
 
-        FoodProperties foodProperties = PlatformHelper.getFoodProperties(this.food, stack, player);
+        FoodProperties foodProperties = PlatHelper.getFoodProperties(this.food, stack, player);
         //single items are handled by items themselves
         if (this.divider == 1) {
             this.food.finishUsingItem(stack.copy(), world, player);
@@ -104,7 +103,7 @@ public class FoodProvider {
             ItemStack stack = this.food.getDefaultInstance();
             if (nbtApplier != null) nbtApplier.accept(stack);
             for (MobEffectInstance effect : player.getActiveEffectsMap().values()) {
-                if ( ForgeHelper.isCurativeItem(stack,effect)) {
+                if (ForgeHelper.isCurativeItem(stack, effect)) {
                     player.removeEffect(effect.getEffect());
                     break;
                 }
@@ -146,10 +145,10 @@ public class FoodProvider {
         }
     };
 
-    public static final Map<Item, FoodProvider> CUSTOM_PROVIDERS = new IdentityHashMap<>() {{
-        put(Items.AIR, EMPTY);
-        put(Items.SUSPICIOUS_STEW, SUS_STEW);
-        put(Items.MILK_BUCKET, MILK);
-        put(Items.EXPERIENCE_BOTTLE, XP);
-    }};
+    public static final Map<Item, FoodProvider> CUSTOM_PROVIDERS = Map.of(
+            Items.AIR, EMPTY,
+            Items.SUSPICIOUS_STEW, SUS_STEW,
+            Items.MILK_BUCKET, MILK,
+            Items.EXPERIENCE_BOTTLE, XP
+    );
 }

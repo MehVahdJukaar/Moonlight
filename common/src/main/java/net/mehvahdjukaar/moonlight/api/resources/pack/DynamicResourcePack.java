@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
@@ -20,23 +20,19 @@ import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public abstract class DynamicResourcePack implements PackResources {
     protected static final Logger LOGGER = LogManager.getLogger();
@@ -75,7 +71,7 @@ public abstract class DynamicResourcePack implements PackResources {
         this.fixed = fixed;
         this.hidden = hidden; //UNUSED. TODO: re add (forge)
 
-        this.generateDebugResources = PlatformHelper.isDev();
+        this.generateDebugResources = PlatHelper.isDev();
     }
 
     /**
@@ -105,7 +101,7 @@ public abstract class DynamicResourcePack implements PackResources {
      */
     public void registerPack() {
 
-        PlatformHelper.registerResourcePack(this.packType, () ->
+        PlatHelper.registerResourcePack(this.packType, () ->
                 new Pack(
                         this.getName(),    // id
                         true,    // required -- this MAY need to be true for the pack to be enabled by default

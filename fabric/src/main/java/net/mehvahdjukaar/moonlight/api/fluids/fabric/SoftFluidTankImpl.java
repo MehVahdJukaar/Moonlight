@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids.fabric;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
-import net.mehvahdjukaar.moonlight.api.fluids.VanillaSoftFluids;
+import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
 import net.minecraft.core.BlockPos;
@@ -64,7 +64,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
     //grabs world/ fluid stack dependent tint color if fluid has associated forge fluid. overrides normal tint color
     private void refreshSpecialColor(@Nullable LevelReader world, @Nullable BlockPos pos) {
 
-        if (fluid == VanillaSoftFluids.POTION.get()) {
+        if (fluid == BuiltInSoftFluids.POTION.get()) {
             this.specialColor = PotionNBTHelper.getColorFromNBT(this.nbt);
         } else {
             Fluid f = this.fluid.getForgeFluid();

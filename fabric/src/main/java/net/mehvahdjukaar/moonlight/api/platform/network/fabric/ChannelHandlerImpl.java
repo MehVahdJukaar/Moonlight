@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.network.fabric;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
@@ -59,7 +59,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
                         server.execute(() -> message.handle(new Wrapper(player, finalDirection)));
                     });
         } else {
-            if (PlatformHelper.getEnv().isClient()) FabricClientNetwork.register(res, decoder);
+            if (PlatHelper.getEnv().isClient()) FabricClientNetwork.register(res, decoder);
         }
     }
 
@@ -96,7 +96,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
     @Override
     public void sendToAllClientPlayers(Message message) {
-        for (var p : PlatformHelper.getCurrentServer().getPlayerList().getPlayers()) {
+        for (var p : PlatHelper.getCurrentServer().getPlayerList().getPlayers()) {
             sendToClientPlayer(p, message);
         }
     }
@@ -111,7 +111,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
     @Override
     public void sendToAllClientPlayersInRange(Level level, BlockPos pos, double radius, Message message) {
 
-        MinecraftServer currentServer = PlatformHelper.getCurrentServer();
+        MinecraftServer currentServer = PlatHelper.getCurrentServer();
         if (currentServer != null) {
             PlayerList players = currentServer.getPlayerList();
             var dimension = level.dimension();

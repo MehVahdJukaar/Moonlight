@@ -8,12 +8,12 @@ import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
-import net.mehvahdjukaar.moonlight.api.set.BlocksColorAPI;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -83,7 +83,7 @@ public class RegHelper {
     }
 
     public static <T extends Block> RegSupplier<T> registerBlock(ResourceLocation name, Supplier<T> block) {
-        return register(name, block, Registry.BLOCK);
+        return register(name, block, BuiltInRegistries.BLOCK);
     }
 
     @ExpectPlatform
@@ -92,17 +92,17 @@ public class RegHelper {
     }
 
     public static <T extends Item> RegSupplier<T> registerItem(ResourceLocation name, Supplier<T> item) {
-        return register(name, item, Registry.ITEM);
+        return register(name, item, BuiltInRegistries.ITEM);
     }
 
     public static <T extends Feature<?>> RegSupplier<T> registerFeature(ResourceLocation name, Supplier<T> feature) {
-        return register(name, feature, Registry.FEATURE);
+        return register(name, feature, BuiltInRegistries.FEATURE);
     }
 
     public static <T extends StructureType<?>> RegSupplier<T> registerStructure(ResourceLocation name, Supplier<T> feature) {
         //TODO: this causes issues on fabric and its very random as might be on only with some random unrelated mods. best to lave it like this
         // return register(name, feature, Registry.STRUCTURE_TYPES);
-        return registerAsync(name, feature, Registry.STRUCTURE_TYPES);
+        return registerAsync(name, feature, BuiltInRegistries.STRUCTURE_TYPE);
     }
 
     public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<PlacedFeature> registerPlacedFeature(
@@ -111,7 +111,7 @@ public class RegHelper {
     }
 
     public static RegSupplier<PlacedFeature> registerPlacedFeature(ResourceLocation name, Supplier<PlacedFeature> featureSupplier) {
-        return register(name, featureSupplier, BuiltinRegistries.PLACED_FEATURE);
+        return register(name, featureSupplier, BuiltInRegistries.PLACED_FEATURE);
     }
 
     public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<ConfiguredFeature<C, F>> registerConfiguredFeature(
@@ -121,11 +121,11 @@ public class RegHelper {
 
     public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<ConfiguredFeature<C, F>> registerConfiguredFeature(
             ResourceLocation name, Supplier<ConfiguredFeature<C, F>> featureSupplier) {
-        return register(name, featureSupplier, BuiltinRegistries.CONFIGURED_FEATURE);
+        return register(name, featureSupplier, BuiltInRegistries.CONFIGURED_FEATURE);
     }
 
     public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> sound) {
-        return register(name, sound, Registry.SOUND_EVENT);
+        return register(name, sound, BuiltInRegistries.SOUND_EVENT);
     }
 
     public static RegSupplier<SoundEvent> registerSound(ResourceLocation name) {
@@ -133,7 +133,7 @@ public class RegHelper {
     }
 
     public static <T extends PaintingVariant> RegSupplier<T> registerPainting(ResourceLocation name, Supplier<T> painting) {
-        return register(name, painting, Registry.PAINTING_VARIANT);
+        return register(name, painting, BuiltInRegistries.PAINTING_VARIANT);
     }
 
     @ExpectPlatform
@@ -144,39 +144,39 @@ public class RegHelper {
     }
 
     public static <T extends MobEffect> RegSupplier<T> registerEffect(ResourceLocation name, Supplier<T> effect) {
-        return register(name, effect, Registry.MOB_EFFECT);
+        return register(name, effect, BuiltInRegistries.MOB_EFFECT);
     }
 
     public static <T extends Enchantment> RegSupplier<T> registerEnchantment(ResourceLocation name, Supplier<T> enchantment) {
-        return register(name, enchantment, Registry.ENCHANTMENT);
+        return register(name, enchantment, BuiltInRegistries.ENCHANTMENT);
     }
 
     public static <T extends SensorType<? extends Sensor<?>>> RegSupplier<T> registerSensor(ResourceLocation name, Supplier<T> sensorType) {
-        return register(name, sensorType, Registry.SENSOR_TYPE);
+        return register(name, sensorType, BuiltInRegistries.SENSOR_TYPE);
     }
 
     public static <T extends Sensor<?>> RegSupplier<SensorType<T>> registerSensorI(ResourceLocation name, Supplier<T> sensor) {
-        return register(name, () -> new SensorType<>(sensor), Registry.SENSOR_TYPE);
+        return register(name, () -> new SensorType<>(sensor), BuiltInRegistries.SENSOR_TYPE);
     }
 
     public static <T extends Activity> RegSupplier<T> registerActivity(ResourceLocation name, Supplier<T> activity) {
-        return register(name, activity, Registry.ACTIVITY);
+        return register(name, activity, BuiltInRegistries.ACTIVITY);
     }
 
     public static <T extends Schedule> RegSupplier<T> registerSchedule(ResourceLocation name, Supplier<T> schedule) {
-        return register(name, schedule, Registry.SCHEDULE);
+        return register(name, schedule, BuiltInRegistries.SCHEDULE);
     }
 
     public static <T extends MemoryModuleType<?>> RegSupplier<T> registerMemoryModule(ResourceLocation name, Supplier<T> memory) {
-        return register(name, memory, Registry.MEMORY_MODULE_TYPE);
+        return register(name, memory, BuiltInRegistries.MEMORY_MODULE_TYPE);
     }
 
     public static <U> RegSupplier<MemoryModuleType<U>> registerMemoryModule(ResourceLocation name, @Nullable Codec<U> codec) {
-        return register(name, () -> new MemoryModuleType<>(Optional.ofNullable(codec)), Registry.MEMORY_MODULE_TYPE);
+        return register(name, () -> new MemoryModuleType<>(Optional.ofNullable(codec)), BuiltInRegistries.MEMORY_MODULE_TYPE);
     }
 
     public static <T extends RecipeSerializer<?>> RegSupplier<T> registerRecipeSerializer(ResourceLocation name, Supplier<T> recipe) {
-        return register(name, recipe, Registry.RECIPE_SERIALIZER);
+        return register(name, recipe, BuiltInRegistries.RECIPE_SERIALIZER);
     }
 
     @ExpectPlatform
@@ -193,15 +193,15 @@ public class RegHelper {
                     return id;
                 }
             };
-        }, Registry.RECIPE_TYPE);
+        }, BuiltInRegistries.RECIPE_TYPE);
     }
 
     public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(ResourceLocation name, Supplier<T> blockEntity) {
-        return register(name, blockEntity, Registry.BLOCK_ENTITY_TYPE);
+        return register(name, blockEntity, BuiltInRegistries.BLOCK_ENTITY_TYPE);
     }
 
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
-        return register(name, PlatformHelper::newParticle, Registry.PARTICLE_TYPE);
+        return register(name, PlatHelper::newParticle, BuiltInRegistries.PARTICLE_TYPE);
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
@@ -224,7 +224,7 @@ public class RegHelper {
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
-        return register(name, type, Registry.ENTITY_TYPE);
+        return register(name, type, BuiltInRegistries.ENTITY_TYPE);
     }
 
     public static void registerCompostable(ItemLike name, float chance) {
@@ -389,7 +389,7 @@ public class RegHelper {
     }
 
     private static boolean shouldRegisterVSlab() {
-        return PlatformHelper.isModLoaded("quark") || PlatformHelper.isModLoaded("v_slab_compat");
+        return PlatHelper.isModLoaded("quark") || PlatHelper.isModLoaded("v_slab_compat");
     }
     //TODO: fix bricks
 }

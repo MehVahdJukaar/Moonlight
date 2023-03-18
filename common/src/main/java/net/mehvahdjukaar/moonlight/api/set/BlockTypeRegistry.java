@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -133,7 +134,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             this.registerBlockType(this.getDefaultType());
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
-            for (Block b : Registry.BLOCK) {
+            for (Block b : BuiltInRegistries.BLOCK) {
                 this.detectTypeFromBlock(b, Utils.getID(b)).ifPresent(t -> {
                     if (!notInclude.contains(t.getId())) this.registerBlockType(t);
                 });

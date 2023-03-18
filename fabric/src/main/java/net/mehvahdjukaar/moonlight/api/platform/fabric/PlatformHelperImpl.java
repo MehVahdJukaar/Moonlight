@@ -15,7 +15,7 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
@@ -66,8 +66,8 @@ import java.util.function.Supplier;
 
 public class PlatformHelperImpl {
 
-    public static PlatformHelper.Platform getPlatform() {
-        return PlatformHelper.Platform.FABRIC;
+    public static PlatHelper.Platform getPlatform() {
+        return PlatHelper.Platform.FABRIC;
     }
 
     public static boolean isData() {
@@ -101,8 +101,8 @@ public class PlatformHelperImpl {
         return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnChance();
     }
 
-    public static PlatformHelper.Env getEnv() {
-        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatformHelper.Env.CLIENT : PlatformHelper.Env.SERVER;
+    public static PlatHelper.Env getEnv() {
+        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatHelper.Env.CLIENT : PlatHelper.Env.SERVER;
     }
 
     @Nullable
@@ -148,7 +148,7 @@ public class PlatformHelperImpl {
 
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
         EXTRA_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
-        if (packType == PackType.CLIENT_RESOURCES && PlatformHelper.getEnv().isClient()) {
+        if (packType == PackType.CLIENT_RESOURCES && PlatHelper.getEnv().isClient()) {
             if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
                 var newSources = new HashSet<>(rep.getSources());
                 getAdditionalPacks(packType).forEach(l -> {
@@ -201,7 +201,7 @@ public class PlatformHelperImpl {
         return FabricParticleTypes.simple(true);
     }
 
-    public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatformHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
+    public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
         return FabricBlockEntityTypeBuilder.create(blockEntitySupplier::create, validBlocks).build();
     }
 

@@ -36,7 +36,7 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
         if (c != null) count = c.getAsInt();
 
         this.count = count;
-        this.result = Registry.ITEM.get(item);
+        this.result = BuiltInRegistries.ITEM.get(item);
 
         var g = json.get("group");
         this.group = g == null ? "" : g.getAsString();

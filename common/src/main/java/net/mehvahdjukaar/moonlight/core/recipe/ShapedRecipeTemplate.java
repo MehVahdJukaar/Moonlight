@@ -36,7 +36,7 @@ public class ShapedRecipeTemplate implements IRecipeTemplate<ShapedRecipeBuilder
         var c = result.get("count");
         if (c != null) count = c.getAsInt();
 
-        this.result = Registry.ITEM.get(item);
+        this.result = BuiltInRegistries.ITEM.get(item);
         this.count = count;
 
         var g = json.get("group");

@@ -8,7 +8,7 @@ import net.mehvahdjukaar.moonlight.core.mixins.fabric.MappedRegistryAccessor;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -78,7 +78,7 @@ public class SoftFluidRegistryImpl {
 
     public static Holder<? extends SoftFluid> getDefaultValue(Registry<SoftFluid> reg) {
         //called my mixin. registers and get the default value
-        return BuiltinRegistries.register(reg, ResourceKey.create(KEY, SoftFluidRegistry.EMPTY_ID),
+        return BuiltInRegistries.register(reg, ResourceKey.create(KEY, SoftFluidRegistry.EMPTY_ID),
                 new SoftFluid.Builder(new ResourceLocation(""), new ResourceLocation("")).build());
     }
 

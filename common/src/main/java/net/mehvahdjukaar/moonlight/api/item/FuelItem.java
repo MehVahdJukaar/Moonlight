@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.item;
 
 import dev.architectury.injectables.annotations.PlatformOnly;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -16,7 +16,7 @@ public class FuelItem extends Item {
     public FuelItem(Properties pProperties, Supplier<Integer> burnTime) {
         super(pProperties);
         this.burnTime = burnTime;
-        if (PlatformHelper.getPlatform().isFabric()) {
+        if (PlatHelper.getPlatform().isFabric()) {
             int b = burnTime.get();
             //this won't work for non-vanilla based items... too bad
             if (b != 0) RegHelper.registerItemBurnTime(this, b);

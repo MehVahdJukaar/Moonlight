@@ -1,9 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.item;
 
 import com.google.common.base.Suppliers;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.block.Block;
 
@@ -19,7 +18,7 @@ public class BlockTypeBasedBlockItem<T extends BlockType> extends FuelBlockItem 
     }
 
     public BlockTypeBasedBlockItem(Block pBlock, Properties pProperties, T blockType) {
-        this(pBlock, pProperties, blockType, Suppliers.memoize(() -> PlatformHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance())));
+        this(pBlock, pProperties, blockType, Suppliers.memoize(() -> PlatHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance())));
     }
 
     @Override

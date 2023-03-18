@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.gson.JsonElement;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -74,8 +74,8 @@ public class PlatformHelperImpl {
     }
 
 
-    public static PlatformHelper.Platform getPlatform() {
-        return PlatformHelper.Platform.FORGE;
+    public static PlatHelper.Platform getPlatform() {
+        return PlatHelper.Platform.FORGE;
     }
 
     public static boolean isModLoaded(String name) {
@@ -112,8 +112,8 @@ public class PlatformHelperImpl {
         return state.getFlammability(level, pos, face);
     }
 
-    public static PlatformHelper.Env getEnv() {
-        return FMLEnvironment.dist == Dist.CLIENT ? PlatformHelper.Env.CLIENT : PlatformHelper.Env.SERVER;
+    public static PlatHelper.Env getEnv() {
+        return FMLEnvironment.dist == Dist.CLIENT ? PlatHelper.Env.CLIENT : PlatHelper.Env.SERVER;
     }
 
     @Nullable
@@ -199,7 +199,7 @@ public class PlatformHelperImpl {
         return new SimpleParticleType(true);
     }
 
-    public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatformHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
+    public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
         return BlockEntityType.Builder.of(blockEntitySupplier::create, validBlocks).build(null);
     }
 

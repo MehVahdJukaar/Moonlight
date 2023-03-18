@@ -46,7 +46,7 @@ import java.util.function.Supplier;
 /**
  * Helper class dedicated to platform independent common utility methods
  */
-public class PlatformHelper {
+public class PlatHelper {
 
     @ExpectPlatform
     public static void addCommonSetup(Runnable commonSetup) {

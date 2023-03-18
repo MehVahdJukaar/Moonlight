@@ -207,12 +207,6 @@ public class RPUtils {
             return Set.of(element.getAsString());
         }
     }
-    /*
-    //this is actually slightly slower
-        var bbb = BlockModelDefinition.fromStream( new BlockModelDefinition.Context(),
-        new InputStreamReader(oakBlockstate.getInputStream(), StandardCharsets.UTF_8));
-     */
-
     //recipe stuff
 
     public static Recipe<?> readRecipe(ResourceManager manager, String location) {

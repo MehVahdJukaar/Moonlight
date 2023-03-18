@@ -5,7 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
@@ -96,7 +96,7 @@ public class RegHelperImpl {
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
-            if (PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+            if (PlatHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
 
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
             var bus = FMLJavaModLoadingContext.get().getModEventBus();

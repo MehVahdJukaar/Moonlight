@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StairBlock;
@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public class ModStairBlock extends StairBlock {
 
-    private static final Field FORGE_BLOCK_SUPPLIER = PlatformHelper.findField(StairBlock.class, "stateSupplier");
+    private static final Field FORGE_BLOCK_SUPPLIER = PlatHelper.findField(StairBlock.class, "stateSupplier");
 
     public ModStairBlock(Supplier<Block> baseBlock, Properties settings) {
         super(FORGE_BLOCK_SUPPLIER == null ? baseBlock.get().defaultBlockState() : Blocks.AIR.defaultBlockState(), settings);

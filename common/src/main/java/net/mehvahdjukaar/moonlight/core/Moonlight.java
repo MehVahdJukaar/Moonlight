@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.ModCriteriaTriggers;
@@ -12,7 +12,6 @@ import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.CompatTypes;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -25,7 +24,7 @@ public class Moonlight {
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     public static final boolean HAS_BEEN_INIT = true;
-    public static final TagKey<Block> SHEATABLE_TAG = TagKey.create(Registry.BLOCK_REGISTRY,new ResourceLocation("mineable/shear"));
+    public static final TagKey<Block> SHEATABLE_TAG = TagKey.create(Registries.BLOCK,new ResourceLocation("mineable/shear"));
 
     public static ResourceLocation res(String name) {
         return new ResourceLocation(MOD_ID, name);
@@ -47,11 +46,11 @@ public class Moonlight {
         MapDecorationRegistry.init();
 
         //client init
-        if (PlatformHelper.getEnv().isClient()) {
+        if (PlatHelper.getEnv().isClient()) {
             MoonlightClient.initClient();
         }
 
-        PlatformHelper.addCommonSetup(BlocksColorInternal::setup);
+        PlatHelper.addCommonSetup(BlocksColorInternal::setup);
     }
 
 }

@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.client.model;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import java.util.Objects;
 
 /**
@@ -14,7 +12,7 @@ public interface IExtraModelDataProvider {
     default void requestModelReload() {
     }
 
-    default void afterDataPacket(ExtraModelData oldData){
+    default void afterDataPacket(ExtraModelData oldData) {
         if (!Objects.equals(oldData, this.getExtraModelData())) {
             //this request render data refresh
             this.requestModelReload();

@@ -25,11 +25,6 @@ public class StaticResource {
         this.sourceName = sourceName;
     }
 
-    @Deprecated(forRemoval = true)
-    public InputStream getInputStream() {
-        return new ByteArrayInputStream(data);
-    }
-
     /**
      * Converts and consume a resource to be used multiple time
      */

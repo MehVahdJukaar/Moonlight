@@ -129,7 +129,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         last = last.toLowerCase(Locale.ROOT).replace("_", " ");
         if (!icons.containsKey(last)) {
             String formatted = last.toLowerCase(Locale.ROOT).replace(" ", "_");
-            var item = Registry.ITEM.getOptional(new ResourceLocation(modId, formatted));
+            var item = BuiltInRegistries.ITEM.getOptional(new ResourceLocation(modId, formatted));
             String finalLast = last;
             item.ifPresent(value -> addIcon(finalLast, value.asItem().getDefaultInstance()));
         }
