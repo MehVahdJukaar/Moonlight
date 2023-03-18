@@ -18,7 +18,7 @@ import java.util.*;
 
 public class BlocksColorInternal {
     public static final List<DyeColor> VANILLA_COLORS = List.of(Arrays.copyOfRange(DyeColor.values(), 0, 16));
-    public static final List<DyeColor> MODDED_COLORS = Arrays.stream(DyeColor.values()).filter(v -> !VANILLA_COLORS.contains(v)).toList();
+    public static final List<DyeColor> MODDED_COLORS = List.of(Arrays.stream(DyeColor.values()).filter(v -> !VANILLA_COLORS.contains(v)).toArray(DyeColor[]::new));
 
     private static final Map<String, ColoredSet<Block>> BLOCK_COLOR_SETS = new HashMap<>();
     private static final Map<String, ColoredSet<Item>> ITEM_COLOR_SETS = new HashMap<>();
@@ -38,6 +38,14 @@ public class BlocksColorInternal {
         addColoredFromRegistry(colors, colorPriority, Registry.ITEM, ITEM_COLOR_SETS);
 
         Moonlight.LOGGER.info("Initialized color sets in {}ms", sw.elapsed().toMillis());
+    }
+
+    public static void registerBlockColorSet(ResourceLocation key, EnumMap<DyeColor, Block> blocks, @Nullable Block defaultBlock) {
+        BLOCK_COLOR_SETS.put(key.toString(), new ColoredSet<>(key, blocks, Registry.BLOCK, defaultBlock));
+    }
+
+    public static void registerItemColorSet(ResourceLocation key, EnumMap<DyeColor, Item> items, @Nullable Item defaultItem) {
+        ITEM_COLOR_SETS.put(key.toString(), new ColoredSet<>(key, items, Registry.ITEM, defaultItem));
     }
 
     private static <T> void addColoredFromRegistry(Map<String, DyeColor> colors, List<String> colorPriority,
@@ -207,6 +215,10 @@ public class BlocksColorInternal {
         private final T defaultBlock;
 
         private ColoredSet(ResourceLocation id, EnumMap<DyeColor, T> map, Registry<T> registry) {
+            this(id, map, registry, null);
+        }
+
+        private ColoredSet(ResourceLocation id, EnumMap<DyeColor, T> map, Registry<T> registry, @Nullable T defBlock) {
             this.colorsToBlock = map;
             this.id = id;
 
@@ -227,6 +239,10 @@ public class BlocksColorInternal {
             }
 
             //fill default
+            this.defaultBlock = defBlock == null ? computeDefault(id, registry) : defBlock;
+        }
+
+        private T computeDefault(ResourceLocation id, Registry<T> registry) {
             if (id.getNamespace().equals("minecraft") && id.getPath().contains("stained_glass")) {
                 id = new ResourceLocation(id.getPath().replace("stained_", ""));
             } else if (id.getNamespace().equals("quark")) {
@@ -235,14 +251,16 @@ public class BlocksColorInternal {
                 } else if (id.getPath().equals("shard")) {
                     id = new ResourceLocation("quark", "clear_shard");
                 }
+            } else if (id.equals(new ResourceLocation("suppsquared:sack"))) {
+                id = new ResourceLocation("supplementaries:sack");
             }
             ResourceLocation finalId = id;
             var o = registry.getOptional(id);
-            if(o.isEmpty()){
-                this.defaultBlock = registry.getOptional(new ResourceLocation(finalId.getPath()))
-                    .orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
-            }else{
-                this.defaultBlock = o.get();
+            if (o.isEmpty()) {
+                return registry.getOptional(new ResourceLocation(finalId.getPath()))
+                        .orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
+            } else {
+                return o.get();
             }
         }
 

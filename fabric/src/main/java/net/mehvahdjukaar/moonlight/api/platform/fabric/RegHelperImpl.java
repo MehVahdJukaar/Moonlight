@@ -69,7 +69,12 @@ public class RegHelperImpl {
     @ApiStatus.Internal
     public static void lateRegisterEntries() {
         for (var m : REGISTRIES.entrySet()) {
-            m.getValue().values().forEach(RegistryQueue::initializeEntries);
+            var v = m.getValue();
+            //freaking fabric just runs mod initializers in random order. hate this. we run in deterministic manner here
+            var sorted = v.keySet().stream().sorted().toList();
+            for(var s : sorted){
+                v.get(s).initializeEntries();
+            }
             if (m.getKey() == Registry.BLOCK) {
                 //dynamic block registration after all blocks
                 BlockSetInternalImpl.registerEntries();

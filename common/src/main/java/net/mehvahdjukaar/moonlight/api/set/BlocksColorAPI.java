@@ -2,12 +2,14 @@ package net.mehvahdjukaar.moonlight.api.set;
 
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
+import java.util.EnumMap;
 import java.util.Set;
 
 public class BlocksColorAPI {
@@ -98,4 +100,15 @@ public class BlocksColorAPI {
         return BlocksColorInternal.getItemHolderSet(key);
     }
 
+
+    /**
+     * Registers or override a color set if not already detected
+     */
+    public static void registerBlockColorSet(ResourceLocation key, EnumMap<DyeColor, Block> blocks, @Nullable Block defaultBlock) {
+        BlocksColorInternal.registerBlockColorSet(key, blocks, defaultBlock);
+    }
+
+    public static void registerItemColorSet(ResourceLocation key, EnumMap<DyeColor, Item> items, @Nullable Item defaultItem) {
+        BlocksColorInternal.registerItemColorSet(key, items, defaultItem);
+    }
 }

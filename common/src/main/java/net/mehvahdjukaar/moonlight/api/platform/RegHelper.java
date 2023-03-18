@@ -8,7 +8,7 @@ import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.set.BlocksColorAPI;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -37,7 +37,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -269,8 +268,8 @@ public class RegHelper {
 
     @FunctionalInterface
     public interface SpawnPlacementEvent {
-         <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
-                Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate);
+        <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
+                                         Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate);
     }
 
     @ExpectPlatform
@@ -299,7 +298,7 @@ public class RegHelper {
             this.constructor = (b, p) -> constructor.apply(p);
         }
 
-        private Block create(BlockBehaviour.Properties properties, @Nullable Supplier<Block> parent) {
+        public Block create(BlockBehaviour.Properties properties, @Nullable Supplier<Block> parent) {
             return this.constructor.apply(parent, properties);
         }
     }
@@ -347,28 +346,46 @@ public class RegHelper {
         return registerBlockSet(VariantType.values(), baseName, properties, isHidden);
     }
 
+    //TODO: add support for mod tabs
     public static EnumMap<VariantType, Supplier<Block>> registerBlockSet(
             VariantType[] types, ResourceLocation baseName, BlockBehaviour.Properties properties, boolean isHidden) {
 
         if (!new ArrayList<>(List.of(types)).contains(VariantType.BLOCK))
             throw new IllegalStateException("Must contain base variant type");
+
+        var block = registerBlock(baseName, () -> VariantType.BLOCK.create(properties, null));
+        registerItem(baseName, () -> new BlockItem(block.get(), (new Item.Properties()).tab(isHidden ? null : CreativeModeTab.TAB_BUILDING_BLOCKS)));
+
+        var m = registerBlockSet(types, block, baseName.getNamespace());
+        m.put(VariantType.BLOCK, block);
+        return m;
+    }
+
+    public static EnumMap<VariantType, Supplier<Block>> registerBlockSet(
+            VariantType[] types, RegSupplier<? extends Block> baseBlock, String modId) {
+
+        ResourceLocation baseName = baseBlock.getId();
         EnumMap<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
         for (VariantType type : types) {
-            String modId = baseName.getNamespace();
+            if (type.equals(VariantType.BLOCK)) continue;
             String name = baseName.getPath();
-            if (!type.equals(VariantType.BLOCK)) name += "_" + type.name().toLowerCase(Locale.ROOT);
-            Supplier<Block> base = type != VariantType.BLOCK ? map.get(VariantType.BLOCK) : null;
+            name += "_" + type.name().toLowerCase(Locale.ROOT);
             ResourceLocation blockId = new ResourceLocation(modId, name);
-            Supplier<Block> block = registerBlock(blockId, () -> type.create(properties, base));
-            CreativeModeTab tab = switch (type) {
-                case VERTICAL_SLAB -> !isHidden && shouldRegisterVSlab() ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
-                case WALL -> !isHidden ? CreativeModeTab.TAB_DECORATIONS : null;
-                default -> !isHidden ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
-            };
-            registerItem(blockId, () -> new BlockItem(block.get(), (new Item.Properties()).tab(tab)));
+            var block = registerBlock(blockId, () ->
+                    type.create(BlockBehaviour.Properties.copy(baseBlock.get()), baseBlock::get));
+            registerItem(blockId, () -> new BlockItem(block.get(), (new Item.Properties()).tab(getTab(block, type))));
             map.put(type, block);
         }
         return map;
+    }
+
+    private static CreativeModeTab getTab(RegSupplier<? extends Block> block, VariantType type) {
+        boolean isHidden = block.get().asItem().getItemCategory() == null;
+        return switch (type) {
+            case VERTICAL_SLAB -> !isHidden && shouldRegisterVSlab() ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
+            case WALL -> !isHidden ? CreativeModeTab.TAB_DECORATIONS : null;
+            default -> !isHidden ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
+        };
     }
 
     private static boolean shouldRegisterVSlab() {
