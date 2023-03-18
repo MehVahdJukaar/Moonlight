@@ -24,8 +24,8 @@ public abstract class LanguageManagerMixin {
 
 
     @Inject(method = "loadFrom", at = @At("HEAD"))
-    private static void loadFrom(ResourceManager pResourceManager, List<LanguageInfo> pLanguageInfo,
-                                 CallbackInfoReturnable<ClientLanguage> cir) {
+    private static void loadFrom(ResourceManager resourceManager, List<String> list,
+                                 boolean bl, CallbackInfoReturnable<ClientLanguage> cir) {
         cachedLanguageInfo = pLanguageInfo;
     }
 

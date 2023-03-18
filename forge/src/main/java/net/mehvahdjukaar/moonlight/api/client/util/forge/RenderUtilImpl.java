@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -47,7 +48,7 @@ public class RenderUtilImpl {
                     if (stack.is(Items.COMPASS) && stack.hasFoil()) {
                         poseStack.pushPose();
                         PoseStack.Pose pose = poseStack.last();
-                        pose.pose().multiply(0.5F);
+                        pose.pose().scale(0.5F);
 
                         vertexconsumer = ItemRenderer.getCompassFoilBufferDirect(buffer, renderType, pose);
 
@@ -60,14 +61,14 @@ public class RenderUtilImpl {
                 }
             }
         } else {
-            IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemTransforms.TransformType.GUI,
+            IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.GUI,
                     poseStack, buffer, combinedLight, pCombinedOverlay);
         }
 
         poseStack.popPose();
     }
 
-    public static BakedModel handleCameraTransforms(BakedModel model, PoseStack poseStack, ItemTransforms.TransformType transform) {
+    public static BakedModel handleCameraTransforms(BakedModel model, PoseStack poseStack, ItemDisplayContext transform) {
         return ForgeHooksClient.handleCameraTransforms(poseStack, model, transform, false);
     }
 

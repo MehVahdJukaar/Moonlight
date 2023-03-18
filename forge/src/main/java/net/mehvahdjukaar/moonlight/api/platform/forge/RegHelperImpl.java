@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -124,14 +125,14 @@ public class RegHelperImpl {
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
-        return register(name, () -> IForgeMenuType.create(containerFactory::apply), Registry.MENU);
+        return register(name, () -> IForgeMenuType.create(containerFactory::apply), Registries.MENU);
     }
 
     public static <T extends
             Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category,
                                                                   float width, float height, int clientTrackingRange, int updateInterval) {
         return register(name, () -> EntityType.Builder.of(factory, category)
-                .sized(width, height).build(name.toString()), Registry.ENTITY_TYPE);
+                .sized(width, height).build(name.toString()), Registries.ENTITY_TYPE);
     }
 
     public static void registerItemBurnTime(Item item, int burnTime) {
@@ -182,7 +183,7 @@ public class RegHelperImpl {
         @Override
         public <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
                                                 Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
-           event.register(entityType, decoratorType, heightMapType, decoratorPredicate, SpawnPlacementRegisterEvent.Operation.AND);
+            event.register(entityType, decoratorType, heightMapType, decoratorPredicate, SpawnPlacementRegisterEvent.Operation.AND);
         }
     }
 
@@ -213,7 +214,7 @@ public class RegHelperImpl {
     }
 
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
-        var f = register(name, fluid, Registry.FLUID);
+        var f = register(name, fluid, Registries.FLUID);
         //register fluid type
         register(name, () -> f.get().getFluidType(), ForgeRegistries.Keys.FLUID_TYPES);
         return f;

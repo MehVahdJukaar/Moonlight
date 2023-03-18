@@ -5,6 +5,6 @@ import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(IExtraClientSpawnData.class)
-public abstract interface SelfEntitySpawnDataMixin extends IEntityAdditionalSpawnData {
+public interface SelfEntitySpawnDataMixin extends IEntityAdditionalSpawnData {
 
 }

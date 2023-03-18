@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -35,7 +36,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
 
     public ClientBoundSpawnCustomEntityMessage(Entity e) {
         this.entity = e;
-        this.typeId = Registry.ENTITY_TYPE.getId(e.getType());
+        this.typeId = BuiltInRegistries.ENTITY_TYPE.getId(e.getType());
         this.entityId = e.getId();
         this.uuid = e.getUUID();
         this.posX = e.getX();
@@ -94,26 +95,24 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
 
     @Override
     public void handle(ChannelHandler.Context context) {
-        EntityType<?> type = Registry.ENTITY_TYPE.byId(this.typeId);
-        if (type != null) {
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.byId(this.typeId);
 
-            Level world = context.getSender().getLevel();
-            Entity e = type.create(world);
-            if (e != null) {
-                e.syncPacketPositionCodec(this.posX, this.posY, this.posZ);
-                e.absMoveTo(this.posX, this.posY, this.posZ,  (this.yaw * 360) / 256.0F,  (this.pitch * 360) / 256.0F);
-                e.setYHeadRot( (this.headYaw * 360) / 256.0F);
-                e.setYBodyRot( (this.headYaw * 360) / 256.0F);
-                e.setId(this.entityId);
-                e.setUUID(this.uuid);
-                Objects.requireNonNull(ClientLevel.class);
+        Level world = context.getSender().getLevel();
+        Entity e = type.create(world);
+        if (e != null) {
+            e.syncPacketPositionCodec(this.posX, this.posY, this.posZ);
+            e.absMoveTo(this.posX, this.posY, this.posZ, (this.yaw * 360) / 256.0F, (this.pitch * 360) / 256.0F);
+            e.setYHeadRot((this.headYaw * 360) / 256.0F);
+            e.setYBodyRot((this.headYaw * 360) / 256.0F);
+            e.setId(this.entityId);
+            e.setUUID(this.uuid);
+            Objects.requireNonNull(ClientLevel.class);
 
-                clientSideStuff(world, e);
+            clientSideStuff(world, e);
 
-                e.lerpMotion( this.velX / 8000.0,  this.velY / 8000.0,  this.velZ / 8000.0);
-                if (e instanceof IExtraClientSpawnData spawnData) {
-                    spawnData.readSpawnData(this.buf);
-                }
+            e.lerpMotion(this.velX / 8000.0, this.velY / 8000.0, this.velZ / 8000.0);
+            if (e instanceof IExtraClientSpawnData spawnData) {
+                spawnData.readSpawnData(this.buf);
             }
         }
         this.buf.clear();

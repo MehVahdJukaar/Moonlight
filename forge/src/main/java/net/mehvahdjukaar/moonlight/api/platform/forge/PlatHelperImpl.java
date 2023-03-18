@@ -63,7 +63,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class PlatformHelperImpl {
+public class PlatHelperImpl {
 
     public static boolean isDev() {
         return !FMLLoader.isProduction();

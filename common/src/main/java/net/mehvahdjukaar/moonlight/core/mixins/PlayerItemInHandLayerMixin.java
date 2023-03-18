@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,11 +30,10 @@ public abstract class PlayerItemInHandLayerMixin<T extends Player, M extends Ent
     }
 
     @Inject(method = "renderArmWithItem", at = @At(value = "HEAD"), cancellable = true)
-    public void poseRightArm(LivingEntity entity, ItemStack stack, ItemTransforms.TransformType transformType,
-                             HumanoidArm humanoidArm, PoseStack poseStack, MultiBufferSource bufferSource,
-                             int light, CallbackInfo ci) {
+    public void poseRightArm(LivingEntity entity, ItemStack stack, ItemDisplayContext itemDisplayContext, HumanoidArm humanoidArm,
+                             PoseStack poseStack, MultiBufferSource multiBufferSource, int light, CallbackInfo ci) {
         if (stack.getItem() instanceof IThirdPersonSpecialItemRenderer item) {
-            item.renderThirdPersonItem(this.getParentModel(), entity, stack, humanoidArm, poseStack, bufferSource, light);
+            item.renderThirdPersonItem(this.getParentModel(), entity, stack, humanoidArm, poseStack, multiBufferSource, light);
             ci.cancel();
         }
 

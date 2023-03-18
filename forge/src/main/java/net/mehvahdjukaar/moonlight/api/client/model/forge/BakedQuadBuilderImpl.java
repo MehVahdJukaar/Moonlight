@@ -12,6 +12,7 @@ import net.minecraftforge.client.model.IQuadTransformer;
 import net.minecraftforge.client.model.QuadTransformers;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 

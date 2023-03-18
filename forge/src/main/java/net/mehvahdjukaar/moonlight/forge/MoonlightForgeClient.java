@@ -32,13 +32,6 @@ public class MoonlightForgeClient {
             }
         }
     }
-    /*
-    @SubscribeEvent
-    public static void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            RenderedTexturesManager.updateTextures();
-        }
-    }*/
 
     private static ShaderInstance translucentParticle;
 
@@ -48,7 +41,7 @@ public class MoonlightForgeClient {
 
     public static void registerShader(RegisterShadersEvent event) {
         try {
-            ShaderInstance translucentParticleShader = new ShaderInstance(event.getResourceManager(),
+            ShaderInstance translucentParticleShader = new ShaderInstance(event.getResourceProvider(),
                     Moonlight.res("particle_translucent"), DefaultVertexFormat.POSITION_TEX);
 
             event.registerShader(translucentParticleShader, s -> translucentParticle = s);

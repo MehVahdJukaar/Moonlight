@@ -22,16 +22,10 @@ public class GeometryWrapper implements IUnbakedGeometry<GeometryWrapper> {
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext iGeometryBakingContext, ModelBakery bakery,
+    public BakedModel bake(IGeometryBakingContext iGeometryBakingContext, ModelBaker bakery,
                            Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
                            ItemOverrides itemOverrides, ResourceLocation modelLocation) {
         return owner.bake(bakery, spriteGetter, modelState, modelLocation);
     }
 
-    @Override
-    public Collection<Material> getMaterials(IGeometryBakingContext context,
-                                             Function<ResourceLocation, UnbakedModel> spriteGetter,
-                                             Set<Pair<String, String>> missingTextureErrors) {
-        return owner.getMaterials(spriteGetter,missingTextureErrors);
-    }
 }

@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.MappedRegistry;
@@ -32,8 +34,7 @@ public class SoftFluidRegistryImpl {
     public static final DeferredRegister<SoftFluid> DEFERRED_REGISTER = DeferredRegister.create(KEY, KEY.location().getNamespace());
     public static final Supplier<IForgeRegistry<SoftFluid>> SOFT_FLUIDS = DEFERRED_REGISTER.makeRegistry(() ->
             new RegistryBuilder<SoftFluid>()
-                    .setDefaultKey(SoftFluidRegistry.EMPTY_ID)
-                    .dataPackRegistry(SoftFluid.CODEC, SoftFluid.CODEC)
+                    .setDefaultKey(Moonlight.res("empty"))
                     .onCreate(SoftFluidRegistryImpl::onCreate)
                     .onClear(SoftFluidRegistryImpl::onClear)
                     .allowModification()
@@ -41,11 +42,12 @@ public class SoftFluidRegistryImpl {
 
     //do not reference. will cause problem on client
     private static final RegistryObject<SoftFluid> EMPTY = DEFERRED_REGISTER.register(SoftFluidRegistry.EMPTY_ID.getPath(),
-            () ->  new SoftFluid.Builder(new ResourceLocation(""),
+            () -> new SoftFluid.Builder(new ResourceLocation(""),
                     new ResourceLocation("")).build());
 
     public static void init() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(SoftFluidRegistryImpl::registerDataPackRegistry);
         DEFERRED_REGISTER.register(bus);
     }
 
@@ -76,7 +78,6 @@ public class SoftFluidRegistryImpl {
         var fluidMap = getFluidsMap();
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.getDataPackRegistry();
         reg.unfreeze();
-        //yes its hacky
         for (Fluid f : ForgeRegistries.FLUIDS) {
             try {
                 if (f == null) continue;
@@ -98,5 +99,8 @@ public class SoftFluidRegistryImpl {
         reg.freeze();
     }
 
-
+    @EventCalled
+    public static void registerDataPackRegistry(DataPackRegistryEvent.NewRegistry event) {
+        event.dataPackRegistry(KEY, SoftFluid.CODEC, SoftFluid.CODEC);
+    }
 }

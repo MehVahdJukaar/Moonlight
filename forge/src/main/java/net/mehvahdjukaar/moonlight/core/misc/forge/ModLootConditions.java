@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.Serializer;
@@ -24,7 +25,7 @@ public class ModLootConditions {
     }
 
     public static final Supplier<LootItemConditionType> ICONDITION_LOOT_CONDITION = RegHelper.register(Moonlight.res("iconditions"),
-            () -> new LootItemConditionType(new IConditionLootCondition.ConditionSerializer()), Registry.LOOT_CONDITION_TYPE);
+            () -> new LootItemConditionType(new IConditionLootCondition.ConditionSerializer()), Registries.LOOT_CONDITION_TYPE);
 
     public record IConditionLootCondition(List<ICondition> conditions) implements LootItemCondition {
         @Override
