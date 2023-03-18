@@ -1,73 +1,53 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.TextAndImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
+import org.w3c.dom.Text;
 
 import java.util.Calendar;
 
-public class LinkButton extends Button {
+public class LinkButton {
 
     public static final ResourceLocation MISC_ICONS = Moonlight.res("textures/gui/misc_icons.png");
 
-    private final Component label;
-    private final int u;
-    private final int v;
-    private final ResourceLocation texture;
-    private final int iconW;
-    private final int iconH;
-    private final int textureW;
-    private final int textureH;
-
-    public static LinkButton create(ResourceLocation texture,
+    public static TextAndImageButton create(
                                     Screen parent, int x, int y, int uInd, int vInd, String url, String tooltip) {
-        return create(texture, 64, 64, 14, 14, parent, x, y, uInd, vInd, url, tooltip);
+        return create(MISC_ICONS, 64, 64, 14, 14, parent, x, y, uInd, vInd, url, tooltip);
     }
 
-    public static LinkButton create(ResourceLocation texture, int textureW, int textureH, int iconW, int iconH,
-                                    Screen parent, int x, int y, int uInd, int vInd, String url, String tooltip) {
+    public static TextAndImageButton create(ResourceLocation texture, int textureW, int textureH, int iconW, int iconH,
+                              Screen parent, int x, int y, int uInd, int vInd, String url, String tooltip) {
 
         String finalUrl = getLink(url);
-        OnPress onPress = (op) -> {
+        Button.OnPress onPress = (op) -> {
             Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, finalUrl));
             parent.handleComponentClicked(style);
         };
 
-        var button = new LinkButton(texture, textureW, textureH, iconW, iconH, x, y, uInd * iconW, vInd * iconH,
-                iconW + 6, iconH + 6, CommonComponents.EMPTY, onPress);
+        var button = TextAndImageButton.builder(CommonComponents.EMPTY, texture, onPress)
+                .textureSize(iconW, iconH)
+                .usedTextureSize(textureW, textureH)
+                .texStart(uInd * iconW, vInd * iconH)
+                .offset(x,y)
+                .build();
+
         button.setTooltip(Tooltip.create(Component.literal(tooltip)));
         return button;
     }
 
-    //TODO: use builder
-    public LinkButton(ResourceLocation texture, int textureW, int textureH, int iconW, int iconH,
-                      int x, int y, int u, int v, int width, int height, Component label, OnPress onPress) {
-        super(x, y, width, height, CommonComponents.EMPTY, onPress, (c) -> Component.empty());
-        this.label = label;
-        this.u = u;
-        this.v = v;
-        this.texture = texture;
-        this.iconW = iconW;
-        this.iconH = iconH;
-        this.textureW = textureW;
-        this.textureH = textureH;
-    }
 
+    /*
     @Override
-    public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        super.render(poseStack, mouseX, mouseY, partialTick);
         Minecraft mc = Minecraft.getInstance();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, texture);
@@ -85,11 +65,7 @@ public class LinkButton extends Button {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
         int textColor = this.getFGColor() | Mth.ceil(this.alpha * 255.0F) << 24;
         drawString(poseStack, mc.font, this.label, iconX + 14, iconY + 1, textColor);
-    }
-
-    public int getFGColor() {
-        return this.active ? 16777215 : 10526880;
-    }
+    }*/
 
     private static String getLink(String original) {
         return LOL ? "https://www.youtube.com/watch?v=dQw4w9WgXcQ" : original;

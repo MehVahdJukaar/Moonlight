@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
@@ -21,7 +22,7 @@ public class VillagerAIInternal {
 
     //schedule to which all the tasks are registered to
     public static final Supplier<Schedule> CUSTOM_VILLAGER_SCHEDULE =
-            RegHelper.register(Moonlight.res("custom_villager_schedule"), Schedule::new, Registry.SCHEDULE);
+            RegHelper.register(Moonlight.res("custom_villager_schedule"), Schedule::new, Registries.SCHEDULE);
 
 
     //called by mixin. Do not call

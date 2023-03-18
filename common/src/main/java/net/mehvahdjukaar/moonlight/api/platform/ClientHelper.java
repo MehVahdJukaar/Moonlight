@@ -50,7 +50,7 @@ import java.util.function.Supplier;
 /**
  * Helper class dedicated to platform independent client utility methods
  */
-public class CPlatHelper {
+public class ClientHelper {
 
     @ExpectPlatform
     public static void addClientSetup(Runnable clientSetup) {

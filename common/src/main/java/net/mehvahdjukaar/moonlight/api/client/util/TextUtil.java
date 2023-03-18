@@ -1,30 +1,26 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
-import org.apache.commons.lang3.StringUtils;
 import org.joml.Matrix4f;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class TextUtil {
 
@@ -113,22 +109,15 @@ public class TextUtil {
                     int l1 = Math.max(cursorPos, selectionPos);
                     int i2 = font.width(string.substring(0, l3)) - font.width(string) / 2;
                     int j2 = font.width(string.substring(0, l1)) - font.width(string) / 2;
-                    int k2 = Math.min(i2, j2);
-                    int l2 = Math.max(i2, j2);
-                    Tesselator tesselator = Tesselator.getInstance();
-                    BufferBuilder bufferbuilder = tesselator.getBuilder();
-                    RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                    RenderSystem.disableTexture();
+                    int startX = Math.min(i2, j2);
+                    int startY = Math.max(i2, j2);
+
+
                     RenderSystem.enableColorLogicOp();
                     RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-                    bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                    bufferbuilder.vertex(matrix4f,  k2, (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-                    bufferbuilder.vertex(matrix4f,  l2, (yOffset + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-                    bufferbuilder.vertex(matrix4f,  l2, yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
-                    bufferbuilder.vertex(matrix4f,  k2, yOffset, 0.0F).color(0, 0, 255, 255).endVertex();
-                    BufferUploader.drawWithShader(bufferbuilder.end());
+                    Gui.fill(poseStack, startX, startY, yOffset, (yOffset + 9), -16776961);
                     RenderSystem.disableColorLogicOp();
-                    RenderSystem.enableTexture();
+
                 }
             }
             if (!(isSelected && blink)) {
@@ -159,7 +148,7 @@ public class TextUtil {
     public static void renderLine(FormattedCharSequence formattedCharSequences, Font font, float yOffset, PoseStack poseStack,
                                   MultiBufferSource buffer, RenderTextProperties properties) {
         if (formattedCharSequences == null) return;
-        float x = (float) (-font.width(formattedCharSequences) / 2);
+        float x = -font.width(formattedCharSequences) / 2f;
         renderLineInternal(formattedCharSequences, font, x, yOffset, poseStack.last().pose(), buffer, properties);
     }
 
@@ -180,7 +169,7 @@ public class TextUtil {
                     matrix4f, buffer, properties.light);
         } else {
             font.drawInBatch(formattedCharSequences, xOffset, yOffset, properties.darkenedColor, false,
-                    matrix4f, buffer, false, 0, properties.light);
+                    matrix4f, buffer, Font.DisplayMode.NORMAL, 0, properties.light);
         }
     }
 
@@ -191,10 +180,10 @@ public class TextUtil {
     }
 
     private static int getDarkenedColor(int color, float amount) {
-        int j = (int) ((double) NativeImage.getR(color) * amount);
-        int k = (int) ((double) NativeImage.getG(color) * amount);
-        int l = (int) ((double) NativeImage.getB(color) * amount);
-        return NativeImage.combine(0, l, k, j);
+        int j = (int) ((double) FastColor.ABGR32.red(color) * amount);
+        int k = (int) ((double) FastColor.ABGR32.green(color) * amount);
+        int l = (int) ((double) FastColor.ABGR32.blue(color) * amount);
+        return FastColor.ABGR32.color(0, l, k, j);
     }
 
     /**

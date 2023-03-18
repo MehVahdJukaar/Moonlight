@@ -13,7 +13,7 @@ import net.fabricmc.fabric.impl.client.model.ModelLoadingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.MLFabricModelLoaderRegistry;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
-import net.mehvahdjukaar.moonlight.api.platform.CPlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ModelManagerAccessor;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
@@ -61,24 +61,24 @@ public class ClientPlatformHelperImpl {
         ItemProperties.register(item, name, property);
     }
 
-    public static void addParticleRegistration(Consumer<CPlatHelper.ParticleEvent> eventListener) {
+    public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {
         eventListener.accept(ClientPlatformHelperImpl::registerParticle);
     }
 
-    private static <P extends ParticleType<T>, T extends ParticleOptions> void registerParticle(P type, CPlatHelper.ParticleFactory<T> registration) {
+    private static <P extends ParticleType<T>, T extends ParticleOptions> void registerParticle(P type, ClientHelper.ParticleFactory<T> registration) {
         ParticleFactoryRegistry.getInstance().register(type, registration::create);
     }
 
-    public static void addEntityRenderersRegistration(Consumer<CPlatHelper.EntityRendererEvent> eventListener) {
+    public static void addEntityRenderersRegistration(Consumer<ClientHelper.EntityRendererEvent> eventListener) {
         eventListener.accept(EntityRendererRegistry::register);
     }
 
-    public static void addBlockEntityRenderersRegistration(Consumer<CPlatHelper.BlockEntityRendererEvent> eventListener) {
+    public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {
         eventListener.accept(BlockEntityRendererRegistry::register);
     }
 
-    public static void addBlockColorsRegistration(Consumer<CPlatHelper.BlockColorEvent> eventListener) {
-        eventListener.accept(new CPlatHelper.BlockColorEvent() {
+    public static void addBlockColorsRegistration(Consumer<ClientHelper.BlockColorEvent> eventListener) {
+        eventListener.accept(new ClientHelper.BlockColorEvent() {
             @Override
             public void register(BlockColor color, Block... block) {
                 ColorProviderBuiltInRegistries.BLOCK.register(color, block);
@@ -92,8 +92,8 @@ public class ClientPlatformHelperImpl {
         });
     }
 
-    public static void addItemColorsRegistration(Consumer<CPlatHelper.ItemColorEvent> eventListener) {
-        eventListener.accept(new CPlatHelper.ItemColorEvent() {
+    public static void addItemColorsRegistration(Consumer<ClientHelper.ItemColorEvent> eventListener) {
+        eventListener.accept(new ClientHelper.ItemColorEvent() {
             @Override
             public void register(ItemColor color, ItemLike... items) {
                 ColorProviderBuiltInRegistries.ITEM.register(color, items);
@@ -107,7 +107,7 @@ public class ClientPlatformHelperImpl {
         });
     }
 
-    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<CPlatHelper.AtlasTextureEvent> eventListener) {
+    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientHelper.AtlasTextureEvent> eventListener) {
         ClientSpriteRegistryCallback.event(atlasLocation).register(((atlasTexture, registry) -> {
             eventListener.accept(registry::register);
         }));
@@ -129,20 +129,20 @@ public class ClientPlatformHelperImpl {
 
     public static final Map<ItemLike, IItemDecoratorRenderer> ITEM_DECORATORS = new IdentityHashMap<>();
 
-    public static void addItemDecoratorsRegistration(Consumer<CPlatHelper.ItemDecoratorEvent> eventListener) {
+    public static void addItemDecoratorsRegistration(Consumer<ClientHelper.ItemDecoratorEvent> eventListener) {
         eventListener.accept(ITEM_DECORATORS::put);
     }
 
 
-    public static void addModelLayerRegistration(Consumer<CPlatHelper.ModelLayerEvent> eventListener) {
+    public static void addModelLayerRegistration(Consumer<ClientHelper.ModelLayerEvent> eventListener) {
         eventListener.accept((a, b) -> EntityModelLayerRegistry.registerModelLayer(a, b::get));
     }
 
-    public static void addSpecialModelRegistration(Consumer<CPlatHelper.SpecialModelEvent> eventListener) {
+    public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
         ModelLoadingRegistryImpl.INSTANCE.registerModelProvider((m, loader) -> eventListener.accept(loader::accept));
     }
 
-    public static void addTooltipComponentRegistration(Consumer<CPlatHelper.TooltipComponentEvent> eventListener) {
+    public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
         eventListener.accept(ClientPlatformHelperImpl::tooltipReg);
     }
 
@@ -151,11 +151,11 @@ public class ClientPlatformHelperImpl {
     }
 
 
-    public static void addModelLoaderRegistration(Consumer<CPlatHelper.ModelLoaderEvent> eventListener) {
+    public static void addModelLoaderRegistration(Consumer<ClientHelper.ModelLoaderEvent> eventListener) {
         eventListener.accept(MLFabricModelLoaderRegistry::registerLoader);
     }
 
-    public static void addKeyBindRegistration(Consumer<CPlatHelper.KeyBindEvent> eventListener) {
+    public static void addKeyBindRegistration(Consumer<ClientHelper.KeyBindEvent> eventListener) {
        eventListener.accept(KeyBindingHelper::registerKeyBinding);
     }
 

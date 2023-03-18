@@ -44,7 +44,7 @@ public class FakeLocalPlayer extends AbstractClientPlayer {
     private final EntityDimensions dimensions = EntityDimensions.fixed(0, 0);
 
     public FakeLocalPlayer(ClientLevel pClientLevel, GameProfile pGameProfile) {
-        super(pClientLevel, pGameProfile, null);
+        super(pClientLevel, pGameProfile);
         this.noPhysics = true;
     }
 

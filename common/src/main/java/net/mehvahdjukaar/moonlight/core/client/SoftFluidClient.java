@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesM
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.GenericSimpleResourceReloadListener;
-import net.mehvahdjukaar.moonlight.api.platform.CPlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -90,7 +90,7 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
                 for (int x = 0; x < sprite.getWidth(); x++) {
                     for (int y = 0; y < sprite.getHeight(); y++) {
 
-                        int pixel = CPlatHelper.getPixelRGBA(sprite, tryFrame, x, y);
+                        int pixel = ClientHelper.getPixelRGBA(sprite, tryFrame, x, y);
 
                         // this is in 0xAABBGGRR format, not the usual 0xAARRGGBB.
                         int pixelB = pixel >> 16 & 255;

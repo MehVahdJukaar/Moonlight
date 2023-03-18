@@ -12,6 +12,7 @@ import net.minecraft.client.resources.metadata.animation.AnimationMetadataSectio
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.FastColor;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 
@@ -297,7 +298,7 @@ public class TextureImage implements AutoCloseable {
         for (var o : overlays) {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    if(NativeImage.getA(image.getPixelRGBA(x,y))!=0) {
+                    if(FastColor.ABGR32.alpha(image.getPixelRGBA(x,y))!=0) {
                         image.blendPixel(x, y, o.image.getPixelRGBA(x, y));
                     }
                 }
@@ -313,14 +314,14 @@ public class TextureImage implements AutoCloseable {
         for (int x = 0; x < image.getWidth(); ++x) {
             for (int y = 0; y < image.getHeight(); ++y) {
                 int oldValue = image.getPixelRGBA(x, y);
-                int a = NativeImage.getA(oldValue);
+                int a = FastColor.ABGR32.alpha(oldValue);
                 if (a == 0) {
                     image.setPixelRGBA(x, y, backgroundColor);
                 } else {
-                    image.setPixelRGBA(x, y, NativeImage.combine(255,
-                            NativeImage.getB(oldValue),
-                            NativeImage.getG(oldValue),
-                            NativeImage.getR(oldValue)));
+                    image.setPixelRGBA(x, y, FastColor.ABGR32.color(255,
+                            FastColor.ABGR32.blue(oldValue),
+                            FastColor.ABGR32.green(oldValue),
+                            FastColor.ABGR32.red(oldValue)));
                 }
             }
         }
@@ -344,7 +345,7 @@ public class TextureImage implements AutoCloseable {
         }
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if(NativeImage.getA(mask.image.getPixelRGBA(x,y))!=0 == inner) {
+                if(FastColor.ABGR32.alpha(mask.image.getPixelRGBA(x,y))!=0 == inner) {
                     image.setPixelRGBA(x,y,0);
                 }
             }

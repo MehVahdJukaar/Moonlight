@@ -86,11 +86,17 @@ public class SoftFluidRegistry {
      */
     public static SoftFluid get(ResourceLocation id) {
         String namespace = id.getNamespace();
-        if (namespace.equals("selene") || namespace.equals("minecraft"))
-            id = Moonlight.res(id.getPath()); //backwards compat
-        // mc stuff has my id //TODO: split into diff folders for each modded fluid
-        var r = getDataPackRegistry().get(id);
-        if (r == null) return getDataPackRegistry().get(EMPTY_ID); //should not be needed but better be sure
+        Registry<SoftFluid> reg = getDataPackRegistry();
+        var r = reg.get(id);
+        if (r == null) {
+            if (namespace.equals("selene") || namespace.equals("minecraft"))
+                id = Moonlight.res(id.getPath()); //backwards compat
+            // mc stuff has my id //TODO: split into diff folders for each modded fluid
+            r = reg.get(id);
+            if(r == null){
+                return reg.get(EMPTY_ID); //should not be needed but better be sure
+            }
+        }
         return r;
     }
 

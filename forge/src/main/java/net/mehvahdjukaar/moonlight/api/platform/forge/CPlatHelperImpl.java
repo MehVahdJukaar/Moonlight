@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.gson.JsonElement;
-import net.mehvahdjukaar.moonlight.api.platform.CPlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -65,7 +65,7 @@ public class CPlatHelperImpl {
         ItemProperties.register(item, name, property);
     }
 
-    public static void addParticleRegistration(Consumer<CPlatHelper.ParticleEvent> eventListener) {
+    public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {
         Consumer<RegisterParticleProvidersEvent> eventConsumer = event -> {
             W w = new W(event);
             eventListener.accept(w::register);
@@ -74,26 +74,26 @@ public class CPlatHelperImpl {
     }
 
     private record W(RegisterParticleProvidersEvent event) {
-        public <T extends ParticleOptions> void register(ParticleType<T> type, CPlatHelper.ParticleFactory<T> provider) {
+        public <T extends ParticleOptions> void register(ParticleType<T> type, ClientHelper.ParticleFactory<T> provider) {
             this.event.register(type, provider::create);
         }
     }
 
-    public static void addEntityRenderersRegistration(Consumer<CPlatHelper.EntityRendererEvent> eventListener) {
+    public static void addEntityRenderersRegistration(Consumer<ClientHelper.EntityRendererEvent> eventListener) {
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerEntityRenderer);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addBlockEntityRenderersRegistration(Consumer<CPlatHelper.BlockEntityRendererEvent> eventListener) {
+    public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerBlockEntityRenderer);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addBlockColorsRegistration(Consumer<CPlatHelper.BlockColorEvent> eventListener) {
+    public static void addBlockColorsRegistration(Consumer<ClientHelper.BlockColorEvent> eventListener) {
         Consumer<RegisterColorHandlersEvent.Block> eventConsumer = event -> {
-            eventListener.accept(new CPlatHelper.BlockColorEvent() {
+            eventListener.accept(new ClientHelper.BlockColorEvent() {
                 @Override
                 public void register(BlockColor color, Block... block) {
                     event.register(color, block);
@@ -108,9 +108,9 @@ public class CPlatHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addItemColorsRegistration(Consumer<CPlatHelper.ItemColorEvent> eventListener) {
+    public static void addItemColorsRegistration(Consumer<ClientHelper.ItemColorEvent> eventListener) {
         Consumer<RegisterColorHandlersEvent.Item> eventConsumer = event -> {
-            eventListener.accept(new CPlatHelper.ItemColorEvent() {
+            eventListener.accept(new ClientHelper.ItemColorEvent() {
                 @Override
                 public void register(ItemColor color, ItemLike... items) {
                     event.register(color, items);
@@ -125,7 +125,7 @@ public class CPlatHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<CPlatHelper.AtlasTextureEvent> eventListener) {
+    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientHelper.AtlasTextureEvent> eventListener) {
         Consumer<TextureStitchEvent.Pre> eventConsumer = event -> {
             if (event.getAtlas().location().equals(atlasLocation)) {
                 eventListener.accept(event::addSprite);
@@ -143,42 +143,42 @@ public class CPlatHelperImpl {
         }
     }
 
-    public static void addModelLayerRegistration(Consumer<CPlatHelper.ModelLayerEvent> eventListener) {
+    public static void addModelLayerRegistration(Consumer<ClientHelper.ModelLayerEvent> eventListener) {
         Consumer<EntityRenderersEvent.RegisterLayerDefinitions> eventConsumer = event -> {
             eventListener.accept(event::registerLayerDefinition);
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addSpecialModelRegistration(Consumer<CPlatHelper.SpecialModelEvent> eventListener) {
+    public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
         Consumer<ModelEvent.RegisterAdditional> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addTooltipComponentRegistration(Consumer<CPlatHelper.TooltipComponentEvent> eventListener) {
+    public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
         Consumer<RegisterClientTooltipComponentFactoriesEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addModelLoaderRegistration(Consumer<CPlatHelper.ModelLoaderEvent> eventListener) {
+    public static void addModelLoaderRegistration(Consumer<ClientHelper.ModelLoaderEvent> eventListener) {
         Consumer<ModelEvent.RegisterGeometryLoaders> eventConsumer = event -> {
             eventListener.accept((i, l) -> event.register(i.getPath(), (IGeometryLoader<?>) l));
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addItemDecoratorsRegistration(Consumer<CPlatHelper.ItemDecoratorEvent> eventListener) {
+    public static void addItemDecoratorsRegistration(Consumer<ClientHelper.ItemDecoratorEvent> eventListener) {
         Consumer<RegisterItemDecorationsEvent> eventConsumer = event -> {
             eventListener.accept((i, l) -> event.register(i, l::render));
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addKeyBindRegistration(Consumer<CPlatHelper.KeyBindEvent> eventListener) {
+    public static void addKeyBindRegistration(Consumer<ClientHelper.KeyBindEvent> eventListener) {
         Consumer<RegisterKeyMappingsEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
         };

@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HCLColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.LABColor;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -594,9 +595,9 @@ public class Palette implements Set<PaletteColor> {
             }
             var builder = paletteBuilders.get(index);
 
-            if (mask == null || NativeImage.getA(mask.getPixelRGBA(x, y)) == 0) {
+            if (mask == null || FastColor.ABGR32.alpha(mask.getPixelRGBA(x, y)) == 0) {
                 int color = image.getPixelRGBA(x, y);
-                if (NativeImage.getA(color) != 0) {
+                if (FastColor.ABGR32.alpha(color) != 0) {
                     var paletteColor = builder.computeIfAbsent(color,
                             p -> new PaletteColor(color));
                     paletteColor.occurrence++;

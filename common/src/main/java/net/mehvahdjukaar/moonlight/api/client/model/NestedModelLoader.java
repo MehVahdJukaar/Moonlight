@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.client.model;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import net.mehvahdjukaar.moonlight.api.platform.CPlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
@@ -26,7 +26,7 @@ public class NestedModelLoader implements CustomModelLoader{
 
     @Override
     public CustomGeometry deserialize(JsonObject json, JsonDeserializationContext context) throws JsonParseException {
-        return new Geometry(CPlatHelper.parseBlockModel(json.get(path)));
+        return new Geometry(ClientHelper.parseBlockModel(json.get(path)));
     }
 
     private class Geometry implements CustomGeometry{
@@ -38,8 +38,8 @@ public class NestedModelLoader implements CustomModelLoader{
         }
 
         @Override
-        public CustomBakedModel bake(ModelBakery modelBakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
-            BakedModel bakedModel = this.model.bake(modelBakery, model, spriteGetter, transform, location, true);
+        public CustomBakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
+            BakedModel bakedModel = this.model.bake(modelBaker, model, spriteGetter, transform, location, true);
             return NestedModelLoader.this.factory.apply(bakedModel);
         }
     }

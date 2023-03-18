@@ -129,7 +129,7 @@ public abstract class BaseColor<T extends BaseColor<T>> {
             Integer.parseUnsignedInt(st, 16);
             return DataResult.success(st);
         } catch (NumberFormatException e) {
-            return DataResult.error("Invalid color format. Must be in hex format (0xff00ff, #ff00ff, ff00ff) or integer value");
+            return DataResult.error(() -> "Invalid color format. Must be in hex format (0xff00ff, #ff00ff, ff00ff) or integer value");
         }
     }
 }

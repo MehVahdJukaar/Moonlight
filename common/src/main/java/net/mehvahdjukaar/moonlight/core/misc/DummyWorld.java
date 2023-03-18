@@ -1,8 +1,12 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.*;
-import net.minecraft.data.BuiltInRegistries;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -11,6 +15,7 @@ import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -39,17 +44,26 @@ import java.util.function.BooleanSupplier;
 
 public class DummyWorld extends Level {
 
-    public static final DummyWorld INSTANCE = new DummyWorld();
+    private static DummyWorld instance;
 
     private final Scoreboard scoreboard = new Scoreboard();
     private final ChunkSource chunkManager = new DummyChunkManager(this);
 
     private DummyWorld() {
         super(new ClientLevel.ClientLevelData(Difficulty.NORMAL, false, false),
-                ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("dummy")),
-                RegistryAccess.BUILTIN.get().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
+                ResourceKey.create(Registries.DIMENSION, new ResourceLocation("dummy")),
+                Utils.hackyGetRegistryAccess(),
+                Utils.hackyGetRegistryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
                 () -> InactiveProfiler.INSTANCE, true, false, 0, 0);
     }
+
+    public static DummyWorld getInstance() {
+        if (instance == null) {
+            instance = new DummyWorld();
+        }
+        return instance;
+    }
+
 
     @Override
     public Scoreboard getScoreboard() {
@@ -71,13 +85,19 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public void playSeededSound(@Nullable Player p_220363_, double p_220364_, double p_220365_, double p_220366_, SoundEvent p_220367_, SoundSource p_220368_, float p_220369_, float p_220370_, long p_220371_) {
+    public void playSeededSound(@Nullable Player player, double d, double e, double f, Holder<SoundEvent> holder, SoundSource soundSource, float g, float h, long l) {
+
+    }
+
+    @Override
+    public void playSeededSound(@Nullable Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float p_220369_, float p_220370_, long p_220371_) {
         throw new IllegalStateException("not implemented");
     }
 
     @Override
-    public void playSeededSound(@Nullable Player p_220372_, Entity p_220373_, SoundEvent p_220374_, SoundSource p_220375_, float p_220376_, float p_220377_, long p_220378_) {
+    public void playSeededSound(@Nullable Player player, Entity entity, Holder<SoundEvent> holder, SoundSource soundSource, float f, float g, long l) {
         throw new IllegalStateException("not implemented");
+
     }
 
     @Override
@@ -166,7 +186,12 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public Holder<Biome> getUncachedNoiseBiome(int p_204159_, int p_204160_, int p_204161_) {
+    public FeatureFlagSet enabledFeatures() {
+        return null;
+    }
+
+    @Override
+    public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
         throw new IllegalStateException("not implemented");
     }
 
@@ -180,7 +205,8 @@ public class DummyWorld extends Level {
 
         @Override
         public ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
-            return new EmptyLevelChunk(this.world, new ChunkPos(x, z), BuiltInRegistries.BIOME.getHolderOrThrow(Biomes.FOREST));
+            return new EmptyLevelChunk(this.world, new ChunkPos(x, z), Utils.hackyGetRegistryAccess().registryOrThrow(Registries.BIOME)
+                    .getHolderOrThrow(Biomes.FOREST));
         }
 
         @Override

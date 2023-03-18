@@ -13,8 +13,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
@@ -70,6 +70,12 @@ public class RegHelper {
     }
 
     @ExpectPlatform
+    public static <T, E extends T> RegSupplier<E> register(
+            ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {
         throw new AssertionError();
     }
@@ -78,7 +84,7 @@ public class RegHelper {
      * Registers stuff immediately on fabric. Normal behavior for forge
      */
     @ExpectPlatform
-    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
         throw new AssertionError();
     }
 

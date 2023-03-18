@@ -16,15 +16,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RegistryQueue<T> {
-    private final Registry<T> registry;
+    private final ResourceKey<? extends Registry<T>> registry;
     private final List<EntryWrapper<? extends T, T>> entries = new ArrayList<>();
     private final List<Consumer<Registrator<T>>> batchRegistration = new ArrayList<>();
 
-    public RegistryQueue(Registry<T> registry) {
+    public RegistryQueue(ResourceKey<? extends Registry<T>> registry) {
         this.registry = registry;
     }
 
-    public Registry<T> getRegistry() {
+    public ResourceKey<? extends Registry<T>> getRegistry() {
         return registry;
     }
 
@@ -46,16 +46,18 @@ public class RegistryQueue<T> {
 
     static class EntryWrapper<T extends R, R> implements RegSupplier<T> {
         private final ResourceLocation id;
-        private final Registry<R> registry;
+        private final ResourceKey<? extends Registry<R>> registry;
         private Supplier<T> regSupplier;
         private T entry;
         private Holder<T> holder;
 
-        public EntryWrapper(ResourceLocation id, Supplier<T> factory, Registry<R> registry) {
+
+        public EntryWrapper(ResourceLocation id, Supplier<T> factory, ResourceKey<? extends Registry<R>> registry) {
             this.regSupplier = factory;
             this.id = id;
             this.registry = registry;
         }
+
 
         @Override
         public T get() {
@@ -73,7 +75,7 @@ public class RegistryQueue<T> {
         }
 
         void initialize() {
-            this.holder = ((WritableRegistry) registry).register(ResourceKey.create(registry.key(), id), regSupplier.get(), Lifecycle.stable());
+            this.holder = ((WritableRegistry) registry).register(ResourceKey.create(registry, id), regSupplier.get(), Lifecycle.stable());
             this.entry = this.holder.value();
             regSupplier = null;
         }

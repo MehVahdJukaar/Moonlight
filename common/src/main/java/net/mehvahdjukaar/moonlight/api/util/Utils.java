@@ -7,14 +7,12 @@ import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -37,11 +35,8 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 
@@ -87,7 +82,6 @@ public class Utils {
         for (int i = 0; i < bottleCount; i++) xp += (3 + rand.nextInt(5) + rand.nextInt(5));
         return xp;
     }
-
 
 
     public static ResourceLocation getID(Block object) {
@@ -145,6 +139,10 @@ public class Utils {
         if (object instanceof SoftFluid s) return getID(s);
         if (object instanceof MapDecorationType<?, ?> s) return getID(s);
         throw new UnsupportedOperationException("Unknown class type " + object.getClass());
+    }
+
+    public static <T> boolean isTagged(T potion, Registry<T> registry, TagKey<T> tag) {
+        return registry.getHolder(registry.getResourceKey(potion).get()).map(h -> h.is(tag)).orElse(false);
     }
 
     //very hacky

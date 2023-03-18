@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.mehvahdjukaar.moonlight.api.client.ModFluidRenderProperties;
-import net.mehvahdjukaar.moonlight.api.platform.CPlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -26,7 +26,7 @@ public abstract class SelfModFluidRendererPropertiesMixin implements FluidRender
      */
     @Overwrite(remap = false)
     private void afterInit() {
-        CPlatHelper.addAtlasTextureCallback(TextureAtlas.LOCATION_BLOCKS, e -> {
+        ClientHelper.addAtlasTextureCallback(TextureAtlas.LOCATION_BLOCKS, e -> {
             e.addSprite(this.getFlowingTexture());
             e.addSprite(this.getStillTexture());
             var o = this.getOverlayTexture();

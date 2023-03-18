@@ -5,14 +5,13 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.platform.CPlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -21,6 +20,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -46,36 +46,36 @@ public class RenderUtil {
         blockRenderer.getModelRenderer().renderModel(matrixStack.last(),
                 buffer.getBuffer(cutout ? Sheets.cutoutBlockSheet() : Sheets.solidBlockSheet()),
                 null,
-                CPlatHelper.getModel(blockRenderer.getBlockModelShaper().getModelManager(), modelLocation),
+                ClientHelper.getModel(blockRenderer.getBlockModelShaper().getModelManager(), modelLocation),
                 1.0F, 1.0F, 1.0F,
                 light, overlay);
     }
 
-    public static void renderGuiItemRelative(ItemStack stack, int x, int y, ItemRenderer renderer,
+    public static void renderGuiItemRelative(PoseStack poseStack, ItemStack stack, int x, int y, ItemRenderer renderer,
                                              BiConsumer<PoseStack, BakedModel> movement) {
-        renderGuiItemRelative(stack, x, y, renderer, movement, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+        renderGuiItemRelative(poseStack, stack, x, y, renderer, movement, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
     }
 
 
     //im not even using this on fabric...
-    public static void renderGuiItemRelative(ItemStack stack, int x, int y, ItemRenderer renderer,
+    public static void renderGuiItemRelative(PoseStack poseStack, ItemStack stack, int x, int y, ItemRenderer renderer,
                                              BiConsumer<PoseStack, BakedModel> movement, int combinedLight, int pCombinedOverlay) {
 
         BakedModel model = renderer.getModel(stack, null, null, 0);
-
-        renderer.blitOffset = renderer.blitOffset + 50.0F;
+        int l = 0;
+        poseStack.pushPose();
+        poseStack.translate(0.0F, 0.0F, (50 + (model.isGui3d() ? l : 0)));
 
         Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
         RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        PoseStack posestack = RenderSystem.getModelViewStack();
-        posestack.pushPose();
-        posestack.translate(x, y, 100.0F + renderer.blitOffset);
-        posestack.translate(8.0D, 8.0D, 0.0D);
-        posestack.scale(1.0F, -1.0F, 1.0F);
-        posestack.scale(16.0F, 16.0F, 16.0F);
+        poseStack.pushPose();
+        poseStack.translate(x, y, 100.0F);
+        poseStack.translate(8.0D, 8.0D, 0.0D);
+        poseStack.scale(1.0F, -1.0F, 1.0F);
+        poseStack.scale(16.0F, 16.0F, 16.0F);
         RenderSystem.applyModelViewMatrix();
 
         PoseStack matrixStack = new PoseStack();
@@ -88,7 +88,7 @@ public class RenderUtil {
 
         //-----render---
 
-        ItemTransforms.TransformType pTransformType = ItemTransforms.TransformType.GUI;
+        ItemDisplayContext pTransformType = ItemDisplayContext.GUI;
 
         matrixStack.pushPose();
 
@@ -116,14 +116,14 @@ public class RenderUtil {
             Lighting.setupFor3DItems();
         }
 
-        posestack.popPose();
+        poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
 
-        renderer.blitOffset = renderer.blitOffset - 50.0F;
+        poseStack.popPose();
     }
 
     @ExpectPlatform
-    private static BakedModel handleCameraTransforms(BakedModel model, PoseStack matrixStack, ItemTransforms.TransformType pTransformType) {
+    private static BakedModel handleCameraTransforms(BakedModel model, PoseStack matrixStack, ItemDisplayContext pTransformType) {
         throw new ArrayStoreException();
     }
 
