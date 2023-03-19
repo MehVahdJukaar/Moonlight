@@ -191,16 +191,6 @@ public class ClientHelper {
     }
 
     @FunctionalInterface
-    public interface AtlasTextureEvent {
-        void addSprite(ResourceLocation spriteLocation);
-    }
-
-    @ExpectPlatform
-    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<AtlasTextureEvent> eventListener) {
-        throw new AssertionError();
-    }
-
-    @FunctionalInterface
     public interface KeyBindEvent {
         void register(KeyMapping keyMapping);
     }

@@ -125,15 +125,6 @@ public class ClientHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientHelper.AtlasTextureEvent> eventListener) {
-        Consumer<TextureStitchEvent.Pre> eventConsumer = event -> {
-            if (event.getAtlas().location().equals(atlasLocation)) {
-                eventListener.accept(event::addSprite);
-            }
-        };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
-    }
-
     @SuppressWarnings("ConstantConditions")
     public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         Minecraft mc = Minecraft.getInstance();

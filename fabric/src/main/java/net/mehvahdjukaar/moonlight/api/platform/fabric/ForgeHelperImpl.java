@@ -149,10 +149,6 @@ public class ForgeHelperImpl {
         return null;
     }
 
-    public static boolean canItemStack(ItemStack selected, ItemStack item) {
-        return ItemStack.isSameIgnoreDurability(selected, item);
-    }
-
     public static boolean canEquipItem(LivingEntity entity, ItemStack stack, EquipmentSlot slot) {
         return slot == Mob.getEquipmentSlotForItem(stack);
     }

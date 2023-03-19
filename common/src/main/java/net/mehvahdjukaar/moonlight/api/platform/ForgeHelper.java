@@ -193,8 +193,4 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
-    public static boolean canItemStack(ItemStack selected, ItemStack item) {
-        throw new AssertionError();
-    }
 }

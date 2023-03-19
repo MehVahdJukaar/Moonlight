@@ -96,6 +96,7 @@ public class FabricConfigSpec extends ConfigSpec {
         if(!initialized){
             this.initialized = true;
             this.saveConfig();
+            Moonlight.LOGGER.info("Loaded config {}", this.getName());
         }
     }
 

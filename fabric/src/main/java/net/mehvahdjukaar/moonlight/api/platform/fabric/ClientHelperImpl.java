@@ -3,13 +3,12 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 import com.google.gson.JsonElement;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
-import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
-import net.fabricmc.fabric.impl.client.model.ModelLoadingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.MLFabricModelLoaderRegistry;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
@@ -45,7 +44,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -81,12 +81,12 @@ public class ClientHelperImpl {
         eventListener.accept(new ClientHelper.BlockColorEvent() {
             @Override
             public void register(BlockColor color, Block... block) {
-                ColorProviderBuiltInRegistries.BLOCK.register(color, block);
+                ColorProviderRegistry.BLOCK.register(color, block);
             }
 
             @Override
             public int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint) {
-                var c = ColorProviderBuiltInRegistries.BLOCK.get(block.getBlock());
+                var c = ColorProviderRegistry.BLOCK.get(block.getBlock());
                 return c == null ? -1 : c.getColor(block, level, pos, tint);
             }
         });
@@ -96,21 +96,15 @@ public class ClientHelperImpl {
         eventListener.accept(new ClientHelper.ItemColorEvent() {
             @Override
             public void register(ItemColor color, ItemLike... items) {
-                ColorProviderBuiltInRegistries.ITEM.register(color, items);
+                ColorProviderRegistry.ITEM.register(color, items);
             }
 
             @Override
             public int getColor(ItemStack stack, int tint) {
-                var c = ColorProviderBuiltInRegistries.ITEM.get(stack.getItem());
+                var c = ColorProviderRegistry.ITEM.get(stack.getItem());
                 return c == null ? -1 : c.getColor(stack, tint);
             }
         });
-    }
-
-    public static void addAtlasTextureCallback(ResourceLocation atlasLocation, Consumer<ClientHelper.AtlasTextureEvent> eventListener) {
-        ClientSpriteRegistryCallback.event(atlasLocation).register(((atlasTexture, registry) -> {
-            eventListener.accept(registry::register);
-        }));
     }
 
     public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation name) {
@@ -139,7 +133,7 @@ public class ClientHelperImpl {
     }
 
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
-        ModelLoadingRegistryImpl.INSTANCE.registerModelProvider((m, loader) -> eventListener.accept(loader::accept));
+        ModelLoadingRegistry.INSTANCE.registerModelProvider((m, loader) -> eventListener.accept(loader::accept));
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
@@ -156,9 +150,8 @@ public class ClientHelperImpl {
     }
 
     public static void addKeyBindRegistration(Consumer<ClientHelper.KeyBindEvent> eventListener) {
-       eventListener.accept(KeyBindingHelper::registerKeyBinding);
+        eventListener.accept(KeyBindingHelper::registerKeyBinding);
     }
-
 
 
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
