@@ -11,10 +11,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,6 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -92,13 +96,12 @@ public class Utils {
         return BuiltInRegistries.ENTITY_TYPE.getKey(object);
     }
 
-    //TODO: not sure if this is correct
     public static ResourceLocation getID(Biome object) {
-        return BuiltInRegistries.BIOME.getKey(object);
+        return hackyGetRegistry(Registries.BIOME).getKey(object);
     }
 
     public static ResourceLocation getID(ConfiguredFeature<?, ?> object) {
-        return BuiltInRegistries.CONFIGURED_FEATURE.getKey(object);
+        return hackyGetRegistry(Registries.CONFIGURED_FEATURE).getKey(object);
     }
 
     public static ResourceLocation getID(Item object) {
@@ -118,14 +121,21 @@ public class Utils {
     }
 
     public static ResourceLocation getID(SoftFluid object) {
-        return SoftFluidRegistry.getID(object);
+        return SoftFluidRegistry.hackyGetRegistry().getKey(object);
     }
 
     public static ResourceLocation getID(MapDecorationType<?, ?> object) {
-        return MapDecorationRegistry.getID(object);
+        return MapDecorationRegistry.hackyGetRegistry().getKey(object);
     }
 
-    @UnstableApi
+    public static ResourceLocation getID(Potion object) {
+        return BuiltInRegistries.POTION.getKey(object);
+    }
+
+    public static ResourceLocation getID(MobEffect object) {
+        return BuiltInRegistries.MOB_EFFECT.getKey(object);
+    }
+
     public static ResourceLocation getID(Object object) {
         if (object instanceof Block b) return getID(b);
         if (object instanceof Item b) return getID(b);
@@ -135,6 +145,8 @@ public class Utils {
         if (object instanceof BlockEntityType<?> b) return getID(b);
         if (object instanceof RecipeSerializer<?> b) return getID(b);
         if (object instanceof ConfiguredFeature<?, ?> c) return getID(c);
+        if (object instanceof Potion c) return getID(c);
+        if (object instanceof MobEffect c) return getID(c);
         if (object instanceof Supplier<?> s) return getID(s.get());
         if (object instanceof SoftFluid s) return getID(s);
         if (object instanceof MapDecorationType<?, ?> s) return getID(s);
@@ -154,6 +166,10 @@ public class Utils {
             if (level != null) return level.registryAccess();
         }
         throw new UnsupportedOperationException("Failed to get registry access. This is a bug");
+    }
+
+    public static <T> Registry<T> hackyGetRegistry(ResourceKey<Registry<T>> registry) {
+        return hackyGetRegistryAccess().registryOrThrow(registry);
     }
 
     /**

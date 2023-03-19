@@ -6,14 +6,17 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.SimpleDecorationType;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -34,7 +37,7 @@ import java.util.function.Supplier;
 //TODO: split into api and core
 public class MapDecorationRegistry {
 
-   //pain
+    //pain
     public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC =
             Codec.either(CustomDecorationType.CODEC, SimpleDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
@@ -99,6 +102,10 @@ public class MapDecorationRegistry {
 
 
     //map markers
+
+    public static final ResourceKey<Registry<MapDecorationType<?,?>>> KEY = ResourceKey.createRegistryKey(
+            Moonlight.res((PlatHelper.getPlatform().isFabric() ? "moonlight/" : "")+ "map_markers"));
+
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
 
     public static MapDecorationType<?, ?> getGenericStructure(){
@@ -138,26 +145,20 @@ public class MapDecorationRegistry {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
-    public static ResourceKey<Registry<MapDecorationType<?, ?>>> getRegistryKey() {
-        throw new AssertionError();
+    public static Registry<MapDecorationType<?, ?>> hackyGetRegistry() {
+        return Utils.hackyGetRegistryAccess().registryOrThrow(KEY);
     }
 
-    public static Registry<MapDecorationType<?, ?>> getDataPackRegistry() {
-        return Utils.hackyGetRegistryAccess().registryOrThrow(getRegistryKey());
+    public static Registry<MapDecorationType<?,?>> getRegistry(RegistryAccess registryAccess) {
+        return registryAccess.registryOrThrow(KEY);
     }
 
     public static Collection<MapDecorationType<?, ?>> getValues() {
-        return getDataPackRegistry().stream().toList();
+        return hackyGetRegistry().stream().toList();
     }
 
     public static Set<Map.Entry<ResourceKey<MapDecorationType<?, ?>>, MapDecorationType<?, ?>>> getEntries() {
-        return getDataPackRegistry().entrySet();
-    }
-
-    @Nullable
-    public static ResourceLocation getID(MapDecorationType<?, ?> s) {
-        return getDataPackRegistry().getKey(s);
+        return hackyGetRegistry().entrySet();
     }
 
     @Nullable
@@ -166,11 +167,11 @@ public class MapDecorationRegistry {
     }
 
     public static MapDecorationType<?, ?> get(ResourceLocation id) {
-        return getDataPackRegistry().get(id);
+        return hackyGetRegistry().get(id);
     }
 
     public static Optional<MapDecorationType<?, ?>> getOptional(ResourceLocation id) {
-        return getDataPackRegistry().getOptional(id);
+        return hackyGetRegistry().getOptional(id);
     }
 
 

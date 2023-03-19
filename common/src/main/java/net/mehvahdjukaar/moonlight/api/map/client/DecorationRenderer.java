@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.joml.Matrix4f;
@@ -56,9 +57,9 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
 
             int color = this.getMapColor(decoration);
 
-            int b = NativeImage.getR(color);
-            int g = NativeImage.getG(color);
-            int r = NativeImage.getB(color);
+            int b = FastColor.ARGB32.blue(color);
+            int g = FastColor.ARGB32.green(color);
+            int r = FastColor.ARGB32.red(color);
 
             vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F,  index * -0.001F).color(r, g, b, 255).uv(0, 1).uv2(light).endVertex();
             vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F,  index * -0.001F).color(r, g, b, 255).uv(1, 1).uv2(light).endVertex();
@@ -74,7 +75,7 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
                 matrixStack.translate( (0.0F + (float) decoration.getX() / 2.0F + 64.0F - f6 * f7 / 2.0F),  (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
                 matrixStack.scale(f7, f7, 1.0F);
                 matrixStack.translate(0.0D, 0.0D,  -0.1F);
-                font.drawInBatch(displayName, 0.0F, 0.0F, -1, false, matrixStack.last().pose(), buffer, false, Integer.MIN_VALUE, light);
+                font.drawInBatch(displayName, 0.0F, 0.0F, -1, false, matrixStack.last().pose(), buffer, Font.DisplayMode.NORMAL, Integer.MIN_VALUE, light);
                 matrixStack.popPose();
             }
             return true;

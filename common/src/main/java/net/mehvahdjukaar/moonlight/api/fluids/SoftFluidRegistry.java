@@ -16,7 +16,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -26,6 +25,9 @@ import java.util.Set;
 
 //TODO: maybe split into api/core?
 public class SoftFluidRegistry {
+
+    public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(
+            Moonlight.res((PlatHelper.getPlatform().isFabric() ? "moonlight/" : "")+ "soft_fluids"));
 
     public static final ResourceLocation EMPTY_ID = Moonlight.res("empty");
 
@@ -39,11 +41,6 @@ public class SoftFluidRegistry {
     }
 
     @ExpectPlatform
-    public static ResourceKey<Registry<SoftFluid>> getRegistryKey() {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
     public static Map<Fluid, SoftFluid> getFluidsMap() {
         throw new AssertionError();
     }
@@ -53,29 +50,23 @@ public class SoftFluidRegistry {
         throw new AssertionError();
     }
 
-    public static Registry<SoftFluid> getDataPackRegistry() {
-        return getDataPackRegistry(Utils.hackyGetRegistryAccess());
+    public static Registry<SoftFluid> hackyGetRegistry() {
+        return Utils.hackyGetRegistry(KEY);
     }
-
-    public static Registry<SoftFluid> getDataPackRegistry(RegistryAccess registryAccess) {
-        return registryAccess.registryOrThrow(getRegistryKey());
+    public static Registry<SoftFluid> getRegistry(RegistryAccess registryAccess) {
+        return registryAccess.registryOrThrow(KEY);
     }
 
     public static Collection<SoftFluid> getValues() {
-        return getDataPackRegistry().stream().toList();
+        return hackyGetRegistry().stream().toList();
     }
 
     public static Set<Map.Entry<ResourceKey<SoftFluid>, SoftFluid>> getEntries() {
-        return getDataPackRegistry().entrySet();
+        return hackyGetRegistry().entrySet();
     }
 
     public static SoftFluid get(String id) {
         return get(new ResourceLocation(id));
-    }
-
-    @Nullable
-    public static ResourceLocation getID(SoftFluid s) {
-        return getDataPackRegistry().getKey(s);
     }
 
     /**
@@ -86,7 +77,7 @@ public class SoftFluidRegistry {
      */
     public static SoftFluid get(ResourceLocation id) {
         String namespace = id.getNamespace();
-        Registry<SoftFluid> reg = getDataPackRegistry();
+        Registry<SoftFluid> reg = hackyGetRegistry();
         var r = reg.get(id);
         if (r == null) {
             if (namespace.equals("selene") || namespace.equals("minecraft"))
@@ -104,7 +95,7 @@ public class SoftFluidRegistry {
         String namespace = id.getNamespace();
         if (namespace.equals("selene") || namespace.equals("minecraft"))
             id = Moonlight.res(id.getPath()); //backwards compat
-        return getDataPackRegistry().getOptional(id);
+        return hackyGetRegistry().getOptional(id);
     }
 
     /**

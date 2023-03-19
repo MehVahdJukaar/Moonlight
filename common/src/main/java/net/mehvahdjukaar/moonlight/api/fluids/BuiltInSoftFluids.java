@@ -24,6 +24,6 @@ public class BuiltInSoftFluids {
 
 
     private static DataObjectReference<SoftFluid> create(String name) {
-        return new DataObjectReference<>(Moonlight.res(name), SoftFluidRegistry.getRegistryKey());
+        return new DataObjectReference<>(Moonlight.res(name), SoftFluidRegistry.KEY);
     }
 }

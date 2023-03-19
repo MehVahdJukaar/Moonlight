@@ -2,13 +2,11 @@ package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -24,12 +22,13 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry.KEY;
+
 public class SoftFluidRegistryImpl {
 
     private static final ResourceLocation FLUIDS_MAP_KEY = Moonlight.res("fluids_map");
     private static final ResourceLocation ITEMS_MAP_KEY = Moonlight.res("items_map");
 
-    public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(Moonlight.res("soft_fluids"));
 
     public static final DeferredRegister<SoftFluid> DEFERRED_REGISTER = DeferredRegister.create(KEY, KEY.location().getNamespace());
     public static final Supplier<IForgeRegistry<SoftFluid>> SOFT_FLUIDS = DEFERRED_REGISTER.makeRegistry(() ->
@@ -49,10 +48,6 @@ public class SoftFluidRegistryImpl {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(SoftFluidRegistryImpl::registerDataPackRegistry);
         DEFERRED_REGISTER.register(bus);
-    }
-
-    public static ResourceKey<Registry<SoftFluid>> getRegistryKey() {
-        return KEY;
     }
 
     public static Map<Fluid, SoftFluid> getFluidsMap() {
@@ -76,7 +71,7 @@ public class SoftFluidRegistryImpl {
     public static void registerExistingVanillaFluids() {
         //only runs on the first object
         var fluidMap = getFluidsMap();
-        MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.getDataPackRegistry();
+        MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.hackyGetRegistry();
         reg.unfreeze();
         for (Fluid f : ForgeRegistries.FLUIDS) {
             try {

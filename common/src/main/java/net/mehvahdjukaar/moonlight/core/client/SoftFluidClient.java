@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.GenericSimpleResourceReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -39,7 +40,7 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
     private static final HashMap<ResourceLocation, Integer> PARTICLE_COLORS = new HashMap<>();
 
     public static int get(SoftFluid s) {
-        return PARTICLE_COLORS.getOrDefault(SoftFluidRegistry.getID(s), -1);
+        return PARTICLE_COLORS.getOrDefault(Utils.getID(s), -1);
     }
 
     public static List<ResourceLocation> getTexturesToStitch() {

@@ -3,12 +3,11 @@ package net.mehvahdjukaar.moonlight.api.fluids.fabric;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.MappedRegistryAccessor;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltInRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -19,18 +18,12 @@ import net.minecraft.world.level.material.Fluids;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-public class SoftFluidRegistryImpl {
+import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry.KEY;
 
-    public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(
-            new ResourceLocation("moonlight:moonlight/soft_fluids"));
+public class SoftFluidRegistryImpl {
 
     public static void init() {
     }
-
-    public static ResourceKey<Registry<SoftFluid>> getRegistryKey() {
-        return KEY;
-    }
-
 
     public static Registry<SoftFluid> REG;
 
@@ -41,9 +34,9 @@ public class SoftFluidRegistryImpl {
     public static void registerExistingVanillaFluids() {
         //only runs on the first object
         var fluidMap = getFluidsMap();
-        MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.getDataPackRegistry();
+        MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.hackyGetRegistry();
         ((MappedRegistryAccessor) reg).setFrozen(false);
-        for (Fluid f : Registry.FLUID) {
+        for (Fluid f : BuiltInRegistries.FLUID) {
             try {
                 if (f == null) continue;
                 if (f instanceof FlowingFluid flowingFluid && flowingFluid.getSource() != f) continue;

@@ -15,8 +15,6 @@ import java.util.function.Supplier;
 
 public class MapDecorationRegistryImpl {
     //rest done by mixin
-    public static final ResourceKey<Registry<MapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(
-            new ResourceLocation("moonlight:moonlight/map_markers"));
 
     public static Registry<MapDecorationType<?, ?>> REG;
 

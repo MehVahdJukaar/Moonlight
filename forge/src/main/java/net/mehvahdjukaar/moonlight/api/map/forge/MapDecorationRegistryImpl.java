@@ -17,9 +17,6 @@ import java.util.function.Supplier;
 
 public class MapDecorationRegistryImpl {
 
-    public static final ResourceKey<Registry<MapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(
-            Moonlight.res("map_markers"));
-
     public static final DeferredRegister<MapDecorationType<?, ?>> DEFERRED_REGISTER = DeferredRegister.create(KEY, KEY.location().getNamespace());
     public static final Supplier<IForgeRegistry<MapDecorationType<?, ?>>> MAP_MARKERS = DEFERRED_REGISTER.makeRegistry(() ->
             new RegistryBuilder<MapDecorationType<?, ?>>()
