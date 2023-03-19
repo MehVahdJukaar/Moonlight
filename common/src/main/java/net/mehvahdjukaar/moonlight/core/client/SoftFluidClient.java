@@ -78,17 +78,18 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
     //credits to Random832
     @SuppressWarnings("ConstantConditions")
     private static int getColorFrom(TextureAtlasSprite sprite, int tint) {
-        if (sprite == null || sprite.getFrameCount() == 0) return -1;
+        var c= sprite.contents();
+        if (sprite == null || c.getFrameCount() == 0) return -1;
 
         int tintR = tint >> 16 & 255;
         int tintG = tint >> 8 & 255;
         int tintB = tint & 255;
         int total = 0, totalR = 0, totalB = 0, totalG = 0;
 
-        for (int tryFrame = 0; tryFrame < sprite.getFrameCount(); tryFrame++) {
+        for (int tryFrame = 0; tryFrame < c.getFrameCount(); tryFrame++) {
             try {
-                for (int x = 0; x < sprite.getWidth(); x++) {
-                    for (int y = 0; y < sprite.getHeight(); y++) {
+                for (int x = 0; x < c.width(); x++) {
+                    for (int y = 0; y < c.height(); y++) {
 
                         int pixel = ClientHelper.getPixelRGBA(sprite, tryFrame, x, y);
 

@@ -20,12 +20,6 @@ public class BlockTypeBasedItem<T extends BlockType> extends FuelItem {
         this.blockType = blockType;
     }
 
-    @Override
-    protected boolean allowedIn(CreativeModeTab tab) {
-        if (blockType.mainChild().asItem().getItemCategory() == null) return false;
-        return super.allowedIn(tab);
-    }
-
     public T getBlockType() {
         return blockType;
     }

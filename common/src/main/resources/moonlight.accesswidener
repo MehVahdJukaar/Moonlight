@@ -6,10 +6,6 @@ transitive-accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenC
 
 transitive-accessible method net/minecraft/client/gui/screens/MenuScreens register (Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V
 
-transitive-accessible class net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture
-transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite getFrameCount ()I
-transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameX (I)I
-transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameY (I)I
 
 #criteria trigger
 transitive-accessible method net/minecraft/advancements/CriteriaTriggers register (Lnet/minecraft/advancements/CriterionTrigger;)Lnet/minecraft/advancements/CriterionTrigger;
@@ -42,10 +38,8 @@ transitive-accessible field net/minecraft/world/entity/animal/Parrot TAME_FOOD L
 #key mapping
 transitive-accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
 
+transitive-accessible method net/minecraft/client/renderer/texture/SpriteContents getFrameCount()I
 
-#fabric datapack reg
-transitive-accessible class net/minecraft/data/BuiltInRegistries$RegistryBootstrap
-transitive-accessible method net/minecraft/data/BuiltInRegistries registerSimple (Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/data/BuiltInRegistries$RegistryBootstrap;)Lnet/minecraft/core/Registry;
 
 #flute renderer fabric
 transitive-accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V

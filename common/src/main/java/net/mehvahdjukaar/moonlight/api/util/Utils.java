@@ -149,7 +149,7 @@ public class Utils {
     public static RegistryAccess hackyGetRegistryAccess() {
         var s = PlatHelper.getCurrentServer();
         if (s != null) return s.registryAccess();
-        if (!PlatHelper.getEnv().isServer()) {
+        if (!PlatHelper.getPhysicalSide().isServer()) {
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
         }

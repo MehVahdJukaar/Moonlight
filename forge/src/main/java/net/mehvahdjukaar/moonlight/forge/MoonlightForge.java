@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.fluids.forge.SoftFluidRegistryImpl;
+import net.mehvahdjukaar.moonlight.api.map.forge.MapDecorationRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -20,6 +22,7 @@ import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -39,10 +42,12 @@ public class MoonlightForge {
         MinecraftForge.EVENT_BUS.register(this);
         ModLootModifiers.register();
         ModLootConditions.register();
-        if (PlatHelper.getEnv().isClient()) {
-            FMLJavaModLoadingContext.get().getModEventBus()
-                    .addListener(MoonlightForgeClient::registerShader);
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        if (PlatHelper.getPhysicalSide().isClient()) {
+            modEventBus.addListener(MoonlightForgeClient::registerShader);
         }
+        modEventBus.addListener(SoftFluidRegistryImpl::registerDataPackRegistry);
+        modEventBus.addListener(MapDecorationRegistryImpl::registerDataPackRegistry);
     }
 
     //hacky but eh

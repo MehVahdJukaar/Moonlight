@@ -21,12 +21,6 @@ public class BlockTypeBasedBlockItem<T extends BlockType> extends FuelBlockItem 
         this(pBlock, pProperties, blockType, Suppliers.memoize(() -> PlatHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance())));
     }
 
-    @Override
-    protected boolean allowedIn(CreativeModeTab tab) {
-        if (blockType.mainChild().asItem().getItemCategory() == null) return false;
-        return super.allowedIn(tab);
-    }
-
     public T getBlockType() {
         return blockType;
     }

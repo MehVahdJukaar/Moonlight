@@ -51,7 +51,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ClientPlatformHelperImpl {
+public class ClientHelperImpl {
 
     public static void registerRenderType(Block block, RenderType type) {
         BlockRenderLayerMap.INSTANCE.putBlock(block, type);
@@ -62,7 +62,7 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {
-        eventListener.accept(ClientPlatformHelperImpl::registerParticle);
+        eventListener.accept(ClientHelperImpl::registerParticle);
     }
 
     private static <P extends ParticleType<T>, T extends ParticleOptions> void registerParticle(P type, ClientHelper.ParticleFactory<T> registration) {
@@ -143,7 +143,7 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
-        eventListener.accept(ClientPlatformHelperImpl::tooltipReg);
+        eventListener.accept(ClientHelperImpl::tooltipReg);
     }
 
     private static <T extends TooltipComponent> void tooltipReg(Class<T> tClass, Function<? super T, ? extends ClientTooltipComponent> factory) {

@@ -112,8 +112,8 @@ public class PlatHelperImpl {
         return state.getFlammability(level, pos, face);
     }
 
-    public static PlatHelper.Env getEnv() {
-        return FMLEnvironment.dist == Dist.CLIENT ? PlatHelper.Env.CLIENT : PlatHelper.Env.SERVER;
+    public static PlatHelper.Side getEnv() {
+        return FMLEnvironment.dist == Dist.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
     }
 
     @Nullable

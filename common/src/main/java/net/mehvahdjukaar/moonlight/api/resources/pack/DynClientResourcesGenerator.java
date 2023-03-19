@@ -17,9 +17,9 @@ import java.util.function.Supplier;
  * Class responsible to generate assets and manage your dynamic resource texture pack (client)
  * Handles and registers your dynamic pack instance which needs to be provides
  */
-public abstract class DynClientResourcesProvider extends DynResourceProvider<DynamicTexturePack> {
+public abstract class DynClientResourcesGenerator extends DynResourceGenerator<DynamicTexturePack> {
 
-    protected DynClientResourcesProvider(DynamicTexturePack pack) {
+    protected DynClientResourcesGenerator(DynamicTexturePack pack) {
         super(pack);
     }
 

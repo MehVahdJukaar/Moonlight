@@ -20,7 +20,7 @@ public abstract class SelfModFlowingFluidMixin extends FlowingFluid {
      */
     @Overwrite(remap = false)
     private void afterInit(ModFlowingFluid.Properties properties, Supplier<? extends LiquidBlock> block) {
-        if (PlatHelper.getEnv().isClient()) {
+        if (PlatHelper.getPhysicalSide().isClient()) {
             FluidRenderHandlerRegistry.INSTANCE.register(this, (FluidRenderHandler) ((ModFlowingFluid) (Object) this).createRenderProperties());
         }
     }

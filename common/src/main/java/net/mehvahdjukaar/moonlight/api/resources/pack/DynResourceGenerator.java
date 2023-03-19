@@ -22,13 +22,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-public abstract class DynResourceProvider<T extends DynamicResourcePack> implements PreparableReloadListener {
+public abstract class DynResourceGenerator<T extends DynamicResourcePack> implements PreparableReloadListener {
 
     public final T dynamicPack;
     private boolean hasBeenInitialized;
 
     //creates this object and registers it
-    protected DynResourceProvider(T pack) {
+    protected DynResourceGenerator(T pack) {
         this.dynamicPack = pack;
     }
 

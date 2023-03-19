@@ -59,7 +59,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
                         server.execute(() -> message.handle(new Wrapper(player, finalDirection)));
                     });
         } else {
-            if (PlatHelper.getEnv().isClient()) FabricClientNetwork.register(res, decoder);
+            if (PlatHelper.getPhysicalSide().isClient()) FabricClientNetwork.register(res, decoder);
         }
     }
 

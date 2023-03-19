@@ -113,7 +113,7 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
-    public enum Env {
+    public enum Side {
         CLIENT, SERVER;
 
         public boolean isClient() {
@@ -135,7 +135,7 @@ public class PlatHelper {
 
     @Contract
     @ExpectPlatform
-    public static Env getEnv() {
+    public static Side getPhysicalSide() {
         throw new AssertionError();
     }
 
@@ -169,6 +169,11 @@ public class PlatHelper {
     @Nullable
     @ExpectPlatform
     public static Method findMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static List<CreativeModeTab> getItemTabs(Item asItem) {
         throw new AssertionError();
     }
 

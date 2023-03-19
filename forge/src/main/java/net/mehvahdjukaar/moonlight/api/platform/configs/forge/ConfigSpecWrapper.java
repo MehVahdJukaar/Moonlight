@@ -190,7 +190,7 @@ public class ConfigSpecWrapper extends ConfigSpec {
     protected void onConfigChange(ModConfigEvent event) {
         if (event.getConfig().getSpec() == this.getSpec()) {
             //send this configuration to connected clients if on server
-            if (this.isSynced() && PlatHelper.getEnv().isServer()) sendSyncedConfigsToAllPlayers();
+            if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()) sendSyncedConfigsToAllPlayers();
             onRefresh();
         }
     }

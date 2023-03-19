@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.mehvahdjukaar.moonlight.api.platform.fabric.ClientPlatformHelperImpl;
+import net.mehvahdjukaar.moonlight.api.platform.fabric.ClientHelperImpl;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -35,7 +35,7 @@ public abstract class ItemRendererMixin {
     )
     private void renderInGui(Font fr, ItemStack stack, int xPosition, int yPosition, String text, CallbackInfo ci) {
         if (!stack.isEmpty()) {
-            var decorator = ClientPlatformHelperImpl.ITEM_DECORATORS.get(stack.getItem());
+            var decorator = ClientHelperImpl.ITEM_DECORATORS.get(stack.getItem());
             if (decorator != null) {
                 decorator.render(fr, stack, xPosition, yPosition, this.blitOffset);
             }

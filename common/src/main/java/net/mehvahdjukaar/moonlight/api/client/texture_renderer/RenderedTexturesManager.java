@@ -155,10 +155,10 @@ public class RenderedTexturesManager {
         //gui setup code
         //RenderSystem.clear(256, Minecraft.ON_OSX);
         Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
-        Matrix4f matrix4f = Matrix4f.orthographic(0.0F,
+        Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F,
                 size, 0, size, 1000.0F, 3000); //ForgeHooksClient.getGuiFarPlane()
         RenderSystem.setProjectionMatrix(matrix4f);
-Utils
+
         //model view stuff
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();

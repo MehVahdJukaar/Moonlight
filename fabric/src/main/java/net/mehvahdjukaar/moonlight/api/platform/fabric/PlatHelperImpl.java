@@ -64,7 +64,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class PlatformHelperImpl {
+public class PlatHelperImpl {
 
     public static PlatHelper.Platform getPlatform() {
         return PlatHelper.Platform.FABRIC;
@@ -101,8 +101,8 @@ public class PlatformHelperImpl {
         return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnChance();
     }
 
-    public static PlatHelper.Env getEnv() {
-        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatHelper.Env.CLIENT : PlatHelper.Env.SERVER;
+    public static PlatHelper.Side getEnv() {
+        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
     }
 
     @Nullable
@@ -148,7 +148,7 @@ public class PlatformHelperImpl {
 
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
         EXTRA_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
-        if (packType == PackType.CLIENT_RESOURCES && PlatHelper.getEnv().isClient()) {
+        if (packType == PackType.CLIENT_RESOURCES && PlatHelper.getPhysicalSide().isClient()) {
             if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
                 var newSources = new HashSet<>(rep.getSources());
                 getAdditionalPacks(packType).forEach(l -> {

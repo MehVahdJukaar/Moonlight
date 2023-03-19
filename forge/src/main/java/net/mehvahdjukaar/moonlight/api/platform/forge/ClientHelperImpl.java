@@ -50,7 +50,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class CPlatHelperImpl {
+public class ClientHelperImpl {
 
     public static void registerRenderType(Block block, RenderType type) {
         //from 0.64 we should register render types in out model json

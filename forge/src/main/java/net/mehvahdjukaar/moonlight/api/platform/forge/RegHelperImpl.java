@@ -97,7 +97,7 @@ public class RegHelperImpl {
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
-            if (PlatHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
+            if (PlatHelper.getPhysicalSide().isClient()) AntiRepostWarning.addMod(modId);
 
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
             var bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -108,8 +108,7 @@ public class RegHelperImpl {
         return new EntryWrapper<>(registry.register(name.getPath(), supplier));
     }
 
-    public static <T, E extends
-            T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
         return register(name, supplier, reg);
     }
 
