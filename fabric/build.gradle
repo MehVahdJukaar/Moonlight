@@ -125,5 +125,5 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
     mainFile.changelogType = "markdown"
     mainFile.releaseType = "release"
     mainFile.addGameVersion(rootProject.minecraft_version)
-    mainFile.addModLoader("forge")
+    mainFile.addModLoader("fabric")
 }

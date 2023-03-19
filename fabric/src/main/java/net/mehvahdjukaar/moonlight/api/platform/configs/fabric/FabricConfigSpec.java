@@ -17,6 +17,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -96,6 +97,7 @@ public class FabricConfigSpec extends ConfigSpec {
         if(!initialized){
             this.initialized = true;
             this.saveConfig();
+            Moonlight.LOGGER.info("Loaded config {}", this.getName());
         }
     }
 
