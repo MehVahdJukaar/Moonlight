@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
+import net.mehvahdjukaar.moonlight.api.item.FuelBlockItem;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
@@ -84,6 +85,16 @@ public class RegHelper {
 
     public static <T extends Block> RegSupplier<T> registerBlock(ResourceLocation name, Supplier<T> block) {
         return register(name, block, Registry.BLOCK);
+    }
+
+    public static <T extends Block> RegSupplier<T> registerBlockWithItem(ResourceLocation name, Supplier<T> blockFactory, CreativeModeTab tab) {
+        return registerBlockWithItem(name, blockFactory, new Item.Properties().tab(tab));
+    }
+
+    public static <T extends Block> RegSupplier<T> registerBlockWithItem(ResourceLocation name, Supplier<T> blockFactory, Item.Properties properties ) {
+        RegSupplier<T> block = registerBlock(name, blockFactory);
+        registerItem(name, () -> new BlockItem(block.get(), properties));
+        return block;
     }
 
     @ExpectPlatform

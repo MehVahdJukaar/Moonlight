@@ -1,0 +1,1 @@
+* added more registry helpers
