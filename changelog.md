@@ -1,1 +1,1 @@
-* added more registry helpers
+* fixed a crash with shears and shearable tag
