@@ -21,7 +21,7 @@ public abstract class PackRepositoryMixin {
         var list = PlatHelperImpl.getAdditionalPacks(packType);
         var newSources = new HashSet<>(((PackRepositoryAccessor) this).getSources());
         list.forEach(l -> {
-            newSources.add((infoConsumer, b) -> infoConsumer.accept(l.get()));
+            newSources.add((infoConsumer) -> infoConsumer.accept(l.get()));
         });
         ((PackRepositoryAccessor) this).setSources(newSources);
     }

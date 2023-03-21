@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "FirstPersonRendererMixin",
-    "LanguageManagerMixin",
+    "ClientLanguagesMixin",
     "MapItemRendererMixin",
     "PlayerItemInHandLayerMixin",
     "ThirdPersonRendererMixin"
@@ -24,7 +24,6 @@
     "PistonBlockEntityMixin",
     "ShearItemMixin",
     "VillagerMixin",
-    "accessor.BlockLootAccessor",
     "accessor.BrainAccessor",
     "accessor.DispenserBlockAccessor",
     "accessor.DispenserBlockEntityAccessor"

@@ -10,9 +10,9 @@ import java.util.Map;
 public class AfterLanguageLoadEvent implements SimpleEvent {
 
     private final Map<String, String> languageLines;
-    private final List<LanguageInfo> languageInfo;
+    private final List<String> languageInfo;
 
-    public AfterLanguageLoadEvent(Map<String, String> lines, List<LanguageInfo> info) {
+    public AfterLanguageLoadEvent(Map<String, String> lines, List<String> info) {
         this.languageInfo = info;
         this.languageLines = lines;
     }
@@ -31,6 +31,6 @@ public class AfterLanguageLoadEvent implements SimpleEvent {
     }
 
     public boolean isDefault() {
-        return languageInfo.stream().anyMatch(l -> l.name().equals("en_us"));
+        return languageInfo.stream().anyMatch(l -> l.equals("en_us"));
     }
 }

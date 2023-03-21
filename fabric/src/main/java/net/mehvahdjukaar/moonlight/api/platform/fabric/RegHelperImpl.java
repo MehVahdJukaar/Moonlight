@@ -15,12 +15,11 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
-import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
+import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +32,6 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
@@ -76,7 +74,7 @@ public class RegHelperImpl {
             var v = m.getValue();
             //freaking fabric just runs mod initializers in random order. hate this. we run in deterministic manner here
             var sorted = v.keySet().stream().sorted().toList();
-            for(var s : sorted){
+            for (var s : sorted) {
                 v.get(s).initializeEntries();
             }
             if (m.getKey() == Registries.BLOCK) {
@@ -86,7 +84,7 @@ public class RegHelperImpl {
         }
         //register entities attributes now
         ATTRIBUTE_REGISTRATIONS.forEach(e -> e.accept(FabricDefaultAttributeRegistry::register));
-        SPAWN_PLACEMENT_REGISTRATIONS.forEach(e->e.accept(new SpawnPlacementsImpl()));
+        SPAWN_PLACEMENT_REGISTRATIONS.forEach(e -> e.accept(new SpawnPlacementsImpl()));
     }
 
     static class SpawnPlacementsImpl implements RegHelper.SpawnPlacementEvent {
@@ -95,7 +93,7 @@ public class RegHelperImpl {
                                                 Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
             try {
                 SpawnPlacements.register((EntityType<Mob>) entityType, decoratorType, heightMapType, (SpawnPlacements.SpawnPredicate<Mob>) decoratorPredicate);
-            }catch (Exception e){
+            } catch (Exception e) {
                 Moonlight.LOGGER.warn("Skipping placement registration for {} as its not of Mob type", entityType);
             }
         }
@@ -184,7 +182,6 @@ public class RegHelperImpl {
     }
 
 
-
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         ResourceConditionsBridge.registerSimple(id, predicate);
     }
@@ -197,8 +194,6 @@ public class RegHelperImpl {
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
         return register(name, fluid, Registries.FLUID);
     }
-
-
 
 
 }

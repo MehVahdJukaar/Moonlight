@@ -1,15 +1,18 @@
 package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
-import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomGeometry;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.BlockModelAccessor;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.*;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class UnbakedModelWrapper extends BlockModel {
@@ -29,16 +32,9 @@ public class UnbakedModelWrapper extends BlockModel {
         this.geometry = geometry;
     }
 
-    @Override
-    public Collection<Material> getMaterials(Function<ResourceLocation, UnbakedModel> modelGetter,
-                                             Set<Pair<String, String>> missingTextureErrors) {
-        Set<Material> old = new HashSet<>(super.getMaterials(modelGetter, missingTextureErrors));
-        old.addAll(geometry.getMaterials(modelGetter, missingTextureErrors));
-        return old;
-    }
 
     @Override
-    public BakedModel bake(ModelBakery modelBakery, Function<Material, TextureAtlasSprite> spriteGetter,
+    public BakedModel bake(ModelBaker modelBakery, Function<Material, TextureAtlasSprite> spriteGetter,
                            ModelState transform, ResourceLocation location) {
         return geometry.bake(modelBakery, spriteGetter, transform, location);
     }

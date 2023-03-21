@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
@@ -38,6 +39,7 @@ public class MoonlightForge {
     public static final String MOD_ID = Moonlight.MOD_ID;
 
     public MoonlightForge() {
+
         Moonlight.commonInit();
         MinecraftForge.EVENT_BUS.register(this);
         ModLootModifiers.register();

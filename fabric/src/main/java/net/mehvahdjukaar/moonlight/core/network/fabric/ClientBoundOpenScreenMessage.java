@@ -17,6 +17,8 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
@@ -44,7 +46,7 @@ public class ClientBoundOpenScreenMessage implements Message {
 
     public ClientBoundOpenScreenMessage(FriendlyByteBuf buf) {
         this.containerId = buf.readVarInt();
-        this.type = buf.readById(Registry.MENU);
+        this.type = buf.readById(BuiltInRegistries.MENU);
         this.title = buf.readComponent();
         this.additionalData = new FriendlyByteBuf(Unpooled.wrappedBuffer(buf.readByteArray(32600)));
     }
@@ -52,7 +54,7 @@ public class ClientBoundOpenScreenMessage implements Message {
     @Override
     public void writeToBuffer(FriendlyByteBuf buf) {
         buf.writeVarInt(this.containerId);
-        buf.writeId(Registry.MENU, this.type);
+        buf.writeId(BuiltInRegistries.MENU, this.type);
         buf.writeComponent(this.title);
         buf.writeByteArray(this.additionalData.readByteArray());
     }

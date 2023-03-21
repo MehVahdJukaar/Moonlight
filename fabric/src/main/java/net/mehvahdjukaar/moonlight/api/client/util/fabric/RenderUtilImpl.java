@@ -14,6 +14,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -26,7 +27,7 @@ public class RenderUtilImpl {
                 false, RandomSource.create(), seed, OverlayTexture.NO_OVERLAY);
     }
 
-    public static BakedModel handleCameraTransforms(BakedModel model, PoseStack matrixStack, ItemTransforms.TransformType pTransformType) {
+    public static BakedModel handleCameraTransforms(BakedModel model, PoseStack matrixStack, ItemDisplayContext pTransformType) {
         model.getTransforms().getTransform(pTransformType).apply(false, matrixStack);
         return model;
     }
@@ -35,7 +36,7 @@ public class RenderUtilImpl {
 
         poseStack.translate(-0.5, -0.5, -0.5);
         if (model.isCustomRenderer() || stack.is(Items.TRIDENT) && !flatItem) {
-            ((ItemRendererAccessor) renderer).getBlockEntityRenderer().renderByItem(stack, ItemTransforms.TransformType.GUI,
+            ((ItemRendererAccessor) renderer).getBlockEntityRenderer().renderByItem(stack, ItemDisplayContext.GUI,
                     poseStack, buffer, combinedLight, combinedOverlay);
         } else {
             VertexConsumer vertexConsumer;
@@ -45,7 +46,7 @@ public class RenderUtilImpl {
                 poseStack.pushPose();
                 PoseStack.Pose pose = poseStack.last();
 
-                pose.pose().multiply(0.5f);
+                pose.pose().scale(0.5f);
 
                 vertexConsumer = ItemRenderer.getCompassFoilBufferDirect(buffer, renderType, pose);
                 poseStack.popPose();

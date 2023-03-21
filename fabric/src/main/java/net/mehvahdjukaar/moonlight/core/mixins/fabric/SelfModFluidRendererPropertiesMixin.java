@@ -20,21 +20,6 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(ModFluidRenderProperties.class)
 public abstract class SelfModFluidRendererPropertiesMixin implements FluidRenderHandler {
 
-    /**
-     * @author
-     * @reason
-     */
-    @Overwrite(remap = false)
-    private void afterInit() {
-        ClientHelper.addAtlasTextureCallback(TextureAtlas.LOCATION_BLOCKS, e -> {
-            e.addSprite(this.getFlowingTexture());
-            e.addSprite(this.getStillTexture());
-            var o = this.getOverlayTexture();
-            if (o != null) e.addSprite(o);
-        });
-    }
-
-
     @Unique
     protected final TextureAtlasSprite[] sprites = new TextureAtlasSprite[3];
 

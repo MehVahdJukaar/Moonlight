@@ -8,9 +8,11 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -24,8 +26,6 @@ public class SoftFluidRegistryImpl {
 
     public static void init() {
     }
-
-    public static Registry<SoftFluid> REG;
 
     private static final Map<Fluid, SoftFluid> FLUID_MAP = new IdentityHashMap<>();
     private static final Map<Item, SoftFluid> ITEM_MAP = new IdentityHashMap<>();
@@ -69,9 +69,8 @@ public class SoftFluidRegistryImpl {
     }
 
 
-    public static Holder<? extends SoftFluid> getDefaultValue(Registry<SoftFluid> reg) {
-        //called my mixin. registers and get the default value
-        return BuiltInRegistries.register(reg, ResourceKey.create(KEY, SoftFluidRegistry.EMPTY_ID),
+    public static void bootstrap(BootstapContext<SoftFluid> bootstapContext) {
+        bootstapContext.register(ResourceKey.create(KEY, SoftFluidRegistry.EMPTY_ID),
                 new SoftFluid.Builder(new ResourceLocation(""), new ResourceLocation("")).build());
     }
 
