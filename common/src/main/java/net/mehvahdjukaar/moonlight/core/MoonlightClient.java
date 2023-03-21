@@ -8,11 +8,6 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 public class MoonlightClient {
 
     public static void initClient() {
-        ClientHelper.addAtlasTextureCallback(TextureAtlas.LOCATION_BLOCKS, e -> {
-            TextureCache.clear();
-            SoftFluidClient.getTexturesToStitch().forEach(e::addSprite);
-        });
-
         ClientHelper.addClientReloadListener(new SoftFluidClient(), Moonlight.res("soft_fluids"));
     }
 }

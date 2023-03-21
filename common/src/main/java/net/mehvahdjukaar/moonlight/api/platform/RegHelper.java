@@ -13,7 +13,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -34,7 +33,6 @@ import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -45,6 +43,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -154,7 +153,11 @@ public class RegHelper {
     }
 
     public static RegSupplier<SoundEvent> registerSound(ResourceLocation name) {
-        return registerSound(name, () -> new SoundEvent(name));
+        return registerSound(name, () -> SoundEvent.createVariableRangeEvent(name));
+    }
+
+    public static RegSupplier<SoundEvent> registerSound(ResourceLocation name, float fixedRange) {
+        return registerSound(name, () -> SoundEvent.createFixedRangeEvent(name, fixedRange));
     }
 
     public static <T extends PaintingVariant> RegSupplier<T> registerPainting(ResourceLocation name, Supplier<T> painting) {
@@ -227,6 +230,10 @@ public class RegHelper {
 
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
         return register(name, PlatHelper::newParticle, Registries.PARTICLE_TYPE);
+    }
+
+    public static RegSupplier<BannerPattern> registerBannerPattern(ResourceLocation name, String patternId) {
+        return register(name, () -> new BannerPattern(patternId), Registries.BANNER_PATTERN);
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,

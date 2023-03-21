@@ -71,9 +71,8 @@ public abstract class DynamicResourcePack implements PackResources {
         this.position = position;
         this.fixed = fixed;
         this.hidden = hidden; //UNUSED. TODO: re add (forge)
-        this.metadata = new PackMetadataSection(component, type.getVersion(SharedConstants.getCurrentVersion()));
+        this.metadata = new PackMetadataSection(component, (SharedConstants.getCurrentVersion().getPackVersion(type)));
         this.info = new Pack.Info(metadata.getDescription(), metadata.getPackFormat(), FeatureFlagSet.of());
-
         this.generateDebugResources = PlatHelper.isDev();
     }
 

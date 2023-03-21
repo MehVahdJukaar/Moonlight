@@ -126,8 +126,7 @@ public class PlatHelperImpl {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         Consumer<AddPackFindersEvent> consumer = event -> {
             if (event.getPackType() == packType) {
-                event.addRepositorySource((infoConsumer, packFactory) ->
-                        infoConsumer.accept(packSupplier.get()));
+                event.addRepositorySource(infoConsumer -> infoConsumer.accept(packSupplier.get()));
             }
         };
         bus.addListener(consumer);
@@ -156,27 +155,6 @@ public class PlatHelperImpl {
 
     public static String getModName(String modId) {
         return ModList.get().getModContainerById(modId).get().getModInfo().getDisplayName();
-    }
-
-    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
-                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> fillItemList) {
-        return new CreativeModeTab(name.getPath()) {
-            @Override
-            public ItemStack makeIcon() {
-                return icon.get();
-            }
-
-            @Override
-            public boolean hasSearchBar() {
-                return hasSearchBar;
-            }
-
-            @Override
-            public void fillItemList(NonNullList<ItemStack> items) {
-                if (fillItemList != null) fillItemList.accept(items, this);
-                else super.fillItemList(items);
-            }
-        };
     }
 
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
@@ -235,6 +213,11 @@ public class PlatHelperImpl {
 
     public static List<String> getInstalledMods() {
         return ModList.get().getMods().stream().map(IModInfo::getModId).toList();
+    }
+
+    public static List<CreativeModeTab> getTabsContainingItem(Item asItem) {
+       //TODO:
+        return List.of(CreativeModeTabs.COMBAT);
     }
 
 }

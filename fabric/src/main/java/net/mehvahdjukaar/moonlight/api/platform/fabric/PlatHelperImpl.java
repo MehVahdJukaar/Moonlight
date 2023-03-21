@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -137,13 +136,6 @@ public class PlatHelperImpl {
         return FabricLoader.getInstance().getGameDir();
     }
 
-    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
-                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> fillItemList) {
-        var t = FabricItemGroupBuilder.create(name);
-        t.appendItems(fillItemList).icon(icon);
-        return t.build();
-    }
-
     private static final Map<PackType, List<Supplier<Pack>>> EXTRA_PACKS = new EnumMap<>(PackType.class);
 
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
@@ -152,7 +144,7 @@ public class PlatHelperImpl {
             if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
                 var newSources = new HashSet<>(rep.getSources());
                 getAdditionalPacks(packType).forEach(l -> {
-                    newSources.add((infoConsumer, b) -> infoConsumer.accept(l.get()));
+                    newSources.add((infoConsumer) -> infoConsumer.accept(l.get()));
                 });
                 rep.setSources(newSources);
             }
@@ -248,6 +240,11 @@ public class PlatHelperImpl {
 
     public static List<String> getInstalledMods() {
         return FabricLoader.getInstance().getAllMods().stream().map(m -> m.getMetadata().getId()).toList();
+    }
+
+    public static List<CreativeModeTab> getItemTabs(Item asItem) {
+        //TODO:
+        return List.of(CreativeModeTabs.COMBAT);
     }
 
 

@@ -14,6 +14,9 @@ transitive-accessible field net/minecraft/world/entity/item/FallingBlockEntity c
 #arrow
 transitive-accessible field net/minecraft/world/entity/projectile/Projectile hasBeenShot Z
 
+#recipe book
+transitive-accessible method net/minecraft/data/recipes/CraftingRecipeBuilder determineBookCategory (Lnet/minecraft/data/recipes/RecipeCategory;)Lnet/minecraft/world/item/crafting/CraftingBookCategory;
+
 #fox sleeping for cages
 transitive-accessible method net/minecraft/world/entity/animal/Fox setSleeping (Z)V
 transitive-accessible method net/minecraft/world/entity/animal/Fox trusts (Ljava/util/UUID;)Z

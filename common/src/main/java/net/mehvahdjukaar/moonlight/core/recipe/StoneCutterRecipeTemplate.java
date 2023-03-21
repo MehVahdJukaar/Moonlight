@@ -2,16 +2,17 @@ package net.mehvahdjukaar.moonlight.core.recipe;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +29,7 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
     public final int count;
     public final String group;
     public final Ingredient ingredient;
+    public final CraftingBookCategory category;
 
     public StoneCutterRecipeTemplate(JsonObject json) {
         JsonElement result = json.get("result");
@@ -38,6 +40,7 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
 
         this.count = count;
         this.result = BuiltInRegistries.ITEM.get(item);
+        this.category = CraftingBookCategory.CODEC.decode(JsonOps.INSTANCE, json.get("category")).get().orThrow().getFirst();
 
         var g = json.get("group");
         this.group = g == null ? "" : g.getAsString();
@@ -53,7 +56,7 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
             throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
                     this.result, originalMat, destinationMat));
         }
-        if(newRes.asItem().getItemCategory() == null){
+        if (PlatHelper.getTabsContainingItem(newRes.asItem()).isEmpty()) {
             Moonlight.LOGGER.error("Failed to generate recipe for {} in block type {}: Output item {} cannot have empty creative tab, skipping", this.result, destinationMat, newRes);
             return null;
         }
@@ -62,7 +65,8 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
         //if recipe fails
         if (ing == null) return null;
 
-        SingleItemRecipeBuilder builder = SingleItemRecipeBuilder.stonecutting(ing, newRes);
+        SingleItemRecipeBuilder builder = SingleItemRecipeBuilder.stonecutting(
+                ing, determineBookCategory(this.category), newRes);
         builder.group(group);
 
         builder.unlockedBy("has_planks", InventoryChangeTrigger.TriggerInstance.hasItems(unlockItem));

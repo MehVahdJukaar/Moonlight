@@ -7,8 +7,10 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
+import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -29,9 +31,7 @@ public class TextureImage implements AutoCloseable {
     private final AnimationMetadataSection metadata;
     private final NativeImage image;
     //width of a frame
-    private final int frameW;
-    //height of a frame
-    private final int frameH;
+    private final FrameSize frameSize;
     //all frames. Includes unused ones
     private final int maxFrames;
 
@@ -43,10 +43,9 @@ public class TextureImage implements AutoCloseable {
         this.metadata = metadata;
         int imgWidth = this.imageWidth(); // 16
         int imgHeight = this.imageHeight(); // 48
-        this.frameW = metadata == null ? imgWidth : metadata.getFrameWidth(imgWidth);
-        this.frameH = metadata == null ? imgHeight : metadata.getFrameHeight(imgWidth);
-        this.frameScale = imgWidth / frameW; // 1
-        int frameScaleHeight = imgHeight / frameH; // 2
+        this.frameSize = metadata == null ? new FrameSize(imgWidth,imgHeight) : metadata.calculateFrameSize(imgWidth, imgHeight);
+        this.frameScale = imgWidth / frameSize.width(); // 1
+        int frameScaleHeight = imgHeight / frameSize.height(); // 2
         this.maxFrames = frameScale * frameScaleHeight; // 2
     }
 
@@ -58,8 +57,8 @@ public class TextureImage implements AutoCloseable {
         for (int ind = 0; ind < maxFrames; ind++) {
             int xOff = getFrameX(ind);
             int yOff = getFrameY(ind);
-            for (int x = 0; x < frameW; x++) {
-                for (int y = 0; y < frameH; y++) {
+            for (int x = 0; x < frameWidth(); x++) {
+                for (int y = 0; y < framesSize(); y++) {
                     framePixelConsumer.accept(ind, x + xOff, y + yOff);
                 }
             }
@@ -76,11 +75,11 @@ public class TextureImage implements AutoCloseable {
 
 
     public int frameWidth() {
-        return frameW;
+        return frameSize.width();
     }
 
     public int frameHeight() {
-        return frameH;
+        return frameSize.height();
     }
 
     @FunctionalInterface
@@ -91,11 +90,11 @@ public class TextureImage implements AutoCloseable {
 
 
     public int getFrameX(int frameIndex) {
-        return (frameIndex % frameScale) * frameW; //(2 % 1) * 16
+        return (frameIndex % frameScale) * frameWidth(); //(2 % 1) * 16
     }
 
     public int getFrameY(int frameIndex) {
-        return (frameIndex / frameScale) * frameH; // (2/1) * 32
+        return (frameIndex / frameScale) * frameHeight(); // (2/1) * 32
     }
 
     public NativeImage getImage() {
@@ -129,7 +128,7 @@ public class TextureImage implements AutoCloseable {
      */
     public TextureImage createAnimationTemplate(int length, List<AnimationFrame> frameData, int frameTime, boolean interpolate) {
         NativeImage im = new NativeImage(this.frameWidth(), this.frameHeight() * length, false);
-        TextureImage t = new TextureImage(im, new AnimationMetadataSection(frameData, this.frameW, this.frameH, frameTime, interpolate));
+        TextureImage t = new TextureImage(im, new AnimationMetadataSection(frameData, this.frameWidth(), this.frameHeight(), frameTime, interpolate));
 
         t.forEachFrame((i, x, y) -> {
             int xo = x - t.getFrameX(i);
@@ -193,11 +192,11 @@ public class TextureImage implements AutoCloseable {
         }
         int imgWidth = this.imageWidth(); // 16
         int imgHeight = this.imageHeight(); // 48
-        int frameW = metadata.getFrameWidth(imgWidth);
-        int frameH = metadata.getFrameHeight(imgWidth);
+        var fs =   metadata.calculateFrameSize(imgWidth, imgHeight);
 
-        int frameScaleWidth = imgWidth / frameW; // 1
-        int frameScaleHeight = imgHeight / frameH; // 2
+
+        int frameScaleWidth = imgWidth / fs.width(); // 1
+        int frameScaleHeight = imgHeight / fs.height(); // 2
         int maxFrames = frameScaleWidth * frameScaleHeight; // 2
 
         List<Integer> indexList = Lists.newArrayList();
@@ -214,13 +213,13 @@ public class TextureImage implements AutoCloseable {
         } else {
             for (int index : indexList) { // 2, 1
 
-                int xOffset = (index % frameScaleWidth) * frameW; //(2 % 1) * 16
-                int yOffset = (index / frameScaleWidth) * frameH; // (2/1) * 32 =
+                int xOffset = (index % frameScaleWidth) * frameWidth(); //(2 % 1) * 16
+                int yOffset = (index / frameScaleWidth) * frameHeight(); // (2/1) * 32 =
 
-                if (index >= 0 && xOffset + frameW < imgWidth && yOffset + frameH < imgHeight) {
-                    NativeImage f = new NativeImage(frameW, frameH, false);
-                    for (int x = 0; x < frameW; x++) {
-                        for (int y = 0; y < frameH; y++) {
+                if (index >= 0 && xOffset + frameWidth() < imgWidth && yOffset + frameHeight() < imgHeight) {
+                    NativeImage f = new NativeImage(frameWidth(), frameHeight(), false);
+                    for (int x = 0; x < frameWidth(); x++) {
+                        for (int y = 0; y < frameHeight(); y++) {
                             f.setPixelRGBA(x, y, this.image.getPixelRGBA(x + xOffset, y + yOffset));
                         }
                     }
@@ -241,8 +240,8 @@ public class TextureImage implements AutoCloseable {
 
         animation.addProperty("frametime", metadata.getDefaultFrameTime());
         animation.addProperty("interpolate", metadata.isInterpolatedFrames());
-        animation.addProperty("height", metadata.getFrameHeight(this.frameHeight()));
-        animation.addProperty("width", metadata.getFrameWidth(this.frameWidth()));
+        animation.addProperty("height", frameSize.height());
+        animation.addProperty("width", frameSize.width());
 
         JsonArray frames = new JsonArray();
 
@@ -354,4 +353,3 @@ public class TextureImage implements AutoCloseable {
     }
 
 }
-

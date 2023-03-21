@@ -173,7 +173,7 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
-    public static List<CreativeModeTab> getItemTabs(Item asItem) {
+    public static List<CreativeModeTab> getTabsContainingItem(Item asItem) {
         throw new AssertionError();
     }
 

@@ -2,16 +2,17 @@ package net.mehvahdjukaar.moonlight.core.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 
@@ -27,12 +28,14 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
     public final int count;
     public final String group;
     public final List<Ingredient> ingredients;
+    public final CraftingBookCategory category;
 
     ShapelessRecipeTemplate(ShapedRecipeTemplate shaped) {
         this.result = shaped.result;
         this.count = shaped.count;
         this.group = shaped.group;
         this.ingredients = shaped.keys.values().stream().toList();
+        this.category = shaped.category;
     }
 
     public ShapelessRecipeTemplate(JsonObject json) {
@@ -44,6 +47,7 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
 
         this.result = BuiltInRegistries.ITEM.get(item);
         this.count = count;
+        this.category = CraftingBookCategory.CODEC.decode(JsonOps.INSTANCE, json.get("category")).get().orThrow().getFirst();
 
         var g = json.get("group");
         this.group = g == null ? "" : g.getAsString();
@@ -63,19 +67,21 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
             throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
                     this.result, originalMat, destinationMat));
         }
-        if(newRes.asItem().getItemCategory() == null){
+        if (PlatHelper.getTabsContainingItem(newRes.asItem()).isEmpty()) {
             Moonlight.LOGGER.error("Failed to generate recipe for {} in block type {}: Output item {} cannot have empty creative tab, skipping", this.result, destinationMat, newRes);
             return null;
         }
 
-        ShapelessRecipeBuilder builder = new ShapelessRecipeBuilder(newRes, this.count);
+        ShapelessRecipeBuilder builder = new ShapelessRecipeBuilder(determineBookCategory(this.category),
+                newRes, this.count);
 
         boolean atLeastOneChanged = false;
         for (var ing : this.ingredients) {
             var newIng = IRecipeTemplate.convertIngredients(originalMat, destinationMat, ing);
-            if(newIng != null){
+            if (newIng != null) {
                 atLeastOneChanged = true;
-            }else newIng = ing;
+            }
+            newIng = ing;
             builder.requires(newIng);
         }
         //if recipe fails
@@ -93,7 +99,6 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
         }
         return newRecipe.get();
     }
-
 
 
     @Override

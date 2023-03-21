@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client;
 
+import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
@@ -33,6 +34,9 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
 
         //also using this to reset texture cache
         RenderedTexturesManager.clearCache();
+
+        //also using for this
+        TextureCache.clear();
     }
 
     private static final List<ResourceLocation> TEXTURES_TO_STITCH = new ArrayList<>();
