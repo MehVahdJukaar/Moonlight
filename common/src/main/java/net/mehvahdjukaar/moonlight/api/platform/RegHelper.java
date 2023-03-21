@@ -367,13 +367,18 @@ public class RegHelper {
         var block = registerBlock(baseName, () -> VariantType.BLOCK.create(properties, null));
         registerItem(baseName, () -> new BlockItem(block.get(), (new Item.Properties()).tab(isHidden ? null : CreativeModeTab.TAB_BUILDING_BLOCKS)));
 
-        var m = registerBlockSet(types, block, baseName.getNamespace());
+        var m = registerBlockSet(types, block, baseName.getNamespace(),isHidden);
         m.put(VariantType.BLOCK, block);
         return m;
     }
-
+    @Deprecated(forRemoval = true)
     public static EnumMap<VariantType, Supplier<Block>> registerBlockSet(
             VariantType[] types, RegSupplier<? extends Block> baseBlock, String modId) {
+     return    registerBlockSet(types, baseBlock, modId, false);
+    }
+
+    public static EnumMap<VariantType, Supplier<Block>> registerBlockSet(
+            VariantType[] types, RegSupplier<? extends Block> baseBlock, String modId, boolean isHidden) {
 
         ResourceLocation baseName = baseBlock.getId();
         EnumMap<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
@@ -384,14 +389,13 @@ public class RegHelper {
             ResourceLocation blockId = new ResourceLocation(modId, name);
             var block = registerBlock(blockId, () ->
                     type.create(BlockBehaviour.Properties.copy(baseBlock.get()), baseBlock::get));
-            registerItem(blockId, () -> new BlockItem(block.get(), (new Item.Properties()).tab(getTab(block, type))));
+            registerItem(blockId, () -> new BlockItem(block.get(), (new Item.Properties()).tab(getTab(isHidden, type))));
             map.put(type, block);
         }
         return map;
     }
 
-    private static CreativeModeTab getTab(RegSupplier<? extends Block> block, VariantType type) {
-        boolean isHidden = block.get().asItem().getItemCategory() == null;
+    private static CreativeModeTab getTab( boolean isHidden, VariantType type) {
         return switch (type) {
             case VERTICAL_SLAB -> !isHidden && shouldRegisterVSlab() ? CreativeModeTab.TAB_BUILDING_BLOCKS : null;
             case WALL -> !isHidden ? CreativeModeTab.TAB_DECORATIONS : null;
