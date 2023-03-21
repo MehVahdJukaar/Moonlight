@@ -17,11 +17,11 @@ public abstract class TextureAtlasSpriteMixin implements ITextureAtlasSpriteExte
 
     public int getPixelRGBA(int frameIndex, int x, int y) {
         if (this.contents.animatedTexture != null) {
-            x += this.contents.animatedTexture.getFrameX(frameIndex) * this.contents.width;
-            y += this.contents.animatedTexture.getFrameY(frameIndex) * this.contents.height;
+            x += this.contents.animatedTexture.getFrameX(frameIndex) * this.contents.width();
+            y += this.contents.animatedTexture.getFrameY(frameIndex) * this.contents.height();
         }
 
-        return this.contents.getOriginalImage().getPixelRGBA(x, y);
+        return this.contents.originalImage.getPixelRGBA(x, y);
     }
 
 

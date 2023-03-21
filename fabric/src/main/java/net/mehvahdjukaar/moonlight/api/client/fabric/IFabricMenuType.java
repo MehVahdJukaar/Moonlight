@@ -3,12 +3,13 @@ package net.mehvahdjukaar.moonlight.api.client.fabric;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 
 public interface IFabricMenuType<T> {
-    static <T extends AbstractContainerMenu> MenuType<T> create(Factory<T> factory, FeatureFlagSet feature) {
-        return new MenuType<>(factory, feature);
+    static <T extends AbstractContainerMenu> MenuType<T> create(Factory<T> factory) {
+        return new MenuType<>(factory,  FeatureFlags.DEFAULT_FLAGS);
     }
 
 

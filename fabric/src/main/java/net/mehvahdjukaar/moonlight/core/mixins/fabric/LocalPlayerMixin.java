@@ -25,8 +25,8 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
 
     @Shadow @Final protected Minecraft minecraft;
 
-    protected LocalPlayerMixin(ClientLevel clientLevel, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
-        super(clientLevel, gameProfile, profilePublicKey);
+    protected LocalPlayerMixin(ClientLevel clientLevel, GameProfile gameProfile) {
+        super(clientLevel, gameProfile);
     }
 
     @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/Input;tick(ZF)V",

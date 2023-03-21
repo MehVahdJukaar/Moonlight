@@ -31,7 +31,7 @@ public abstract class RegistryAccessMixin {
     private static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> builder,
                                 ResourceKey<? extends Registry<E>> key, Codec<E> networkCodec, CallbackInfo ci) {
         //who needs an event, nobody will use this but me anyway
-        if (!initializedMlReg && key == Registries.DAMAGE_TYPE) {
+        if (!initializedMlReg && key.registry().equals(Registries.DAMAGE_TYPE.registry())) {
             initializedMlReg = true;
             put(builder, SoftFluidRegistry.KEY, SoftFluid.CODEC);
             put(builder, MapDecorationRegistry.KEY, MapDecorationRegistry.TYPE_CODEC);

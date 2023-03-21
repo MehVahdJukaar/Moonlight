@@ -4,10 +4,9 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
-import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -62,8 +61,9 @@ public class FabricConfigListScreen extends Screen {
     }
 
     protected void addExtraButtons() {
-        this.addRenderableWidget(new Button(this.width / 2 - 155 + 160, this.height - 29, 150, 20,
-                CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.parent)));
+        this.addRenderableWidget(Button.builder(
+                        CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.parent))
+                .bounds(this.width / 2 - 155 + 160, this.height - 29, 150, 20).build());
     }
 
     @Override
@@ -75,18 +75,22 @@ public class FabricConfigListScreen extends Screen {
         super.render(poseStack, mouseX, mouseY, partialTick);
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
 
-        if (modURL != null && MthUtils.isWithinRectangle((this.width / 2) - 90, 2 + 6, 180, 16 + 2, mouseX, mouseY)) {
+        if (modURL != null && isMouseWithin((this.width / 2) - 90, 2 + 6, 180, 16 + 2, mouseX, mouseY)) {
             this.renderTooltip(poseStack, this.font.split(Component.translatable("gui.moonlight.open_mod_page", this.modId), 200), mouseX, mouseY);
         }
         int titleWidth = this.font.width(this.title) + 35;
-        this.itemRenderer.renderAndDecorateFakeItem(this.mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2 + 8);
-        this.itemRenderer.renderAndDecorateFakeItem(this.mainIcon, (this.width / 2) - titleWidth / 2, 2 + 8);
+        this.itemRenderer.renderAndDecorateFakeItem(poseStack, this.mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2 + 8);
+        this.itemRenderer.renderAndDecorateFakeItem(poseStack, this.mainIcon, (this.width / 2) - titleWidth / 2, 2 + 8);
+    }
+
+    private boolean isMouseWithin(int x, int y, int width, int height, int mouseX, int mouseY) {
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (modURL != null && MthUtils.isWithinRectangle((this.width / 2) - 90, 2 + 6, 180, 16 + 2, (int) mouseX, (int) mouseY)) {
-            Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,  modURL));
+        if (modURL != null && isMouseWithin((this.width / 2) - 90, 2 + 6, 180, 16 + 2, (int) mouseX, (int) mouseY)) {
+            Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, modURL));
             this.handleComponentClicked(style);
             return true;
         }
@@ -135,92 +139,51 @@ public class FabricConfigListScreen extends Screen {
 
             int i = this.getScrollbarPosition();
             int j = i + 6;
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder bufferBuilder = tesselator.getBuilder();
-            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             //this.hovered = this.isMouseOver((double)mouseX, (double)mouseY) ? this.getEntryAtPosition((double)mouseX, (double)mouseY) : null;
-
-            RenderSystem.setShaderTexture(0, background);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            float f = 32.0F;
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(this.x0, this.y1, 0.0).uv((float) this.x0 / 32.0F, (float) (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-            bufferBuilder.vertex(this.x1, this.y1, 0.0).uv((float) this.x1 / 32.0F, (float) (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-            bufferBuilder.vertex(this.x1, this.y0, 0.0).uv((float) this.x1 / 32.0F, (float) (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.y0, 0.0).uv((float) this.x0 / 32.0F, (float) (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-            tesselator.end();
-
+            if (true) {
+                RenderSystem.setShaderTexture(0, background);
+                RenderSystem.setShaderColor(0.125F, 0.125F, 0.125F, 1.0F);
+                int k = 32;
+                blit(poseStack, this.x0, this.y0, this.x1, (this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            }
 
             int k = this.getRowLeft();
-            int l = this.y0 + 4 - (int) this.getScrollAmount();
+            int l = this.y0 + 4 - (int)this.getScrollAmount();
+            this.enableScissor();
+            if (true) {
+                this.renderHeader(poseStack, k, l);
+            }
 
+            this.renderList(poseStack, mouseX, mouseY, partialTick);
+            disableScissor();
+            if (true) {
+                RenderSystem.setShaderTexture(0, background);
+                int m = 32;
+                RenderSystem.setShaderColor(0.25F, 0.25F, 0.25F, 1.0F);
+                blit(poseStack, this.x0, 0, 0.0F, 0.0F, this.width, this.y0, 32, 32);
+                blit(poseStack, this.x0, this.y1, 0.0F, this.y1, this.width, this.height - this.y1, 32, 32);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                int n = 4;
+                fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
+                fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
+            }
 
-            this.renderList(poseStack, k, l, partialTick);
-
-            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-            RenderSystem.setShaderTexture(0, background);
-            RenderSystem.enableDepthTest();
-            RenderSystem.depthFunc(519);
-
-
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(this.x0, this.y0, -100.0).uv(0.0F, (float) this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0 + this.width, this.y0, -100.0).uv((float) this.width / 32.0F, (float) this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0 + this.width, 0.0, -100.0).uv((float) this.width / 32.0F, 0.0F).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0, 0.0, -100.0).uv(0.0F, 0.0F).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.height, -100.0).uv(0.0F, (float) this.height / 32.0F).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0 + this.width, this.height, -100.0).uv((float) this.width / 32.0F, (float) this.height / 32.0F).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0 + this.width, this.y1, -100.0).uv((float) this.width / 32.0F, (float) this.y1 / 32.0F).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.y1, -100.0).uv(0.0F, (float) this.y1 / 32.0F).color(64, 64, 64, 255).endVertex();
-            tesselator.end();
-            RenderSystem.depthFunc(515);
-            RenderSystem.disableDepthTest();
-            RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-            RenderSystem.disableTexture();
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(this.x0, this.y0 + 4, 0.0).color(0, 0, 0, 0).endVertex();
-            bufferBuilder.vertex(this.x1, this.y0 + 4, 0.0).color(0, 0, 0, 0).endVertex();
-            bufferBuilder.vertex(this.x1, this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(this.x1, this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(this.x1, this.y1 - 4, 0.0).color(0, 0, 0, 0).endVertex();
-            bufferBuilder.vertex(this.x0, this.y1 - 4, 0.0).color(0, 0, 0, 0).endVertex();
-            tesselator.end();
-
-
-            int o = this.getMaxScroll();
-            if (o > 0) {
-                RenderSystem.disableTexture();
-                RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                int m = (int) ((float) ((this.y1 - this.y0) * (this.y1 - this.y0)) / (float) this.getMaxPosition());
-                m = Mth.clamp(m, 32, this.y1 - this.y0 - 8);
-                int n = (int) this.getScrollAmount() * (this.y1 - this.y0 - m) / o + this.y0;
-                if (n < this.y0) {
-                    n = this.y0;
+            int m = this.getMaxScroll();
+            if (m > 0) {
+                int n = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
+                n = Mth.clamp(n, 32, this.y1 - this.y0 - 8);
+                int o = (int)this.getScrollAmount() * (this.y1 - this.y0 - n) / m + this.y0;
+                if (o < this.y0) {
+                    o = this.y0;
                 }
 
-                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                bufferBuilder.vertex(i, this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-                bufferBuilder.vertex(j, this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-                bufferBuilder.vertex(j, this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-                bufferBuilder.vertex(i, this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-                bufferBuilder.vertex(i, n + m, 0.0).color(128, 128, 128, 255).endVertex();
-                bufferBuilder.vertex(j, n + m, 0.0).color(128, 128, 128, 255).endVertex();
-                bufferBuilder.vertex(j, n, 0.0).color(128, 128, 128, 255).endVertex();
-                bufferBuilder.vertex(i, n, 0.0).color(128, 128, 128, 255).endVertex();
-                bufferBuilder.vertex(i, n + m - 1, 0.0).color(192, 192, 192, 255).endVertex();
-                bufferBuilder.vertex(j - 1, n + m - 1, 0.0).color(192, 192, 192, 255).endVertex();
-                bufferBuilder.vertex(j - 1, n, 0.0).color(192, 192, 192, 255).endVertex();
-                bufferBuilder.vertex(i, n, 0.0).color(192, 192, 192, 255).endVertex();
-                tesselator.end();
+                fill(poseStack, i, this.y0, j, this.y1, -16777216);
+                fill(poseStack, i, o, j, o + n, -8355712);
+                fill(poseStack, i, o, j - 1, o + n - 1, -4144960);
             }
 
             this.renderDecorations(poseStack, mouseX, mouseY);
-            RenderSystem.enableTexture();
             RenderSystem.disableBlend();
         }
     }
@@ -234,14 +197,15 @@ public class FabricConfigListScreen extends Screen {
         }
 
         protected ConfigButton(ConfigSpec spec, int width, int buttonWidth) {
-            this(new Button(width / 2 - buttonWidth / 2, 0, buttonWidth, 20, Component.literal(spec.getFileName()), (b) ->
-                    Minecraft.getInstance().setScreen(spec.makeScreen(FabricConfigListScreen.this, FabricConfigListScreen.this.background))));
+            this(Button.builder(Component.literal(spec.getFileName()), b ->
+                    Minecraft.getInstance().setScreen(spec.makeScreen(FabricConfigListScreen.this, FabricConfigListScreen.this.background))
+            ).bounds(width / 2 - buttonWidth / 2, 0, buttonWidth, 20).build());
         }
 
         @Override
         public void render(PoseStack poseStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
             this.children.forEach((button) -> {
-                button.y = top;
+                button.setY(top);
                 button.render(poseStack, mouseX, mouseY, partialTick);
             });
         }
@@ -258,4 +222,3 @@ public class FabricConfigListScreen extends Screen {
     }
 
 }
-

@@ -27,9 +27,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -208,10 +207,6 @@ public class RegHelperImpl {
         CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
     }
 
-    public static <T extends Recipe<?>> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, Function<ResourceLocation, T> factory) {
-        return RegHelper.registerRecipeSerializer(name, () -> new OptionalSimpleRecipeSerializer<>(factory));
-    }
-
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
         var f = register(name, fluid, Registries.FLUID);
         //register fluid type
@@ -219,15 +214,19 @@ public class RegHelperImpl {
         return f;
     }
 
+    public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
+        return RegHelper.registerRecipeSerializer(name, () -> new SimpleCraftingRecipeSerializer<>(factory));
+    }
 
-    private static class OptionalSimpleRecipeSerializer<T extends Recipe<?>> extends SimpleRecipeSerializer<T> {
-        public OptionalSimpleRecipeSerializer(Function<ResourceLocation, T> function) {
+    //TODO: remove. not even needed with new conditions thingies
+    @Deprecated(forRemoval = true)
+    private static class OptionalSimpleRecipeSerializer<T extends CraftingRecipe> extends SimpleCraftingRecipeSerializer<T> {
+        public OptionalSimpleRecipeSerializer(SimpleCraftingRecipeSerializer.Factory<T> function) {
             super(function);
         }
 
         @Override
         public T fromJson(ResourceLocation recipeId, JsonObject json, ICondition.IContext context) {
-
             if (CraftingHelper.processConditions(GsonHelper.getAsJsonArray(json, "conditions"), context)) {
                 return super.fromJson(recipeId, json, context);
             }

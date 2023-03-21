@@ -59,7 +59,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -151,8 +150,13 @@ public class PlatHelperImpl {
         }
     }
 
-    public static Collection<Supplier<Pack>> getAdditionalPacks(PackType packType) {
+    public static Collection<Supplier<Pack>> getAdditionalPacks(@Nullable PackType packType) {
         List<Supplier<Pack>> list = new ArrayList<>();
+        if (packType == null) {
+            List<Supplier<Pack>> p = EXTRA_PACKS.get(PackType.CLIENT_RESOURCES);
+            if (p != null) list.addAll(p);
+            packType = PackType.SERVER_DATA;
+        }
         var suppliers = EXTRA_PACKS.get(packType);
         if (suppliers != null) {
             list.addAll(suppliers);
