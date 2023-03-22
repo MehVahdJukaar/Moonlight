@@ -59,20 +59,10 @@ public class Moonlight {
         }
 
         PlatformHelper.addCommonSetup(BlocksColorInternal::setup);
-
-        MoonlightEventsHelper.addListener(Moonlight::test, IDropItemOnDeathEvent.class);
-    }
-
-    private static void test(IDropItemOnDeathEvent event) {
-        if (event.getItemStack().getItem() == Items.DIAMOND) {
-            event.setCanceled(true);
-        }
     }
 
     @EventCalled
     public static void onPlayerCloned(Player oldPlayer, Player newPlayer, boolean wasDeath) {
-        newPlayer.getInventory().replaceWith(oldPlayer.getInventory());
-        if(true)return;
         if (wasDeath && !oldPlayer.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
             var inv = oldPlayer.getInventory();
             int i = 0;
