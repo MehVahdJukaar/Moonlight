@@ -1,10 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.gson.JsonElement;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -24,6 +27,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -31,6 +35,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.client.IItemDecorator;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ExtendedBlockModelDeserializer;
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
@@ -164,7 +169,15 @@ public class ClientHelperImpl {
 
     public static void addItemDecoratorsRegistration(Consumer<ClientHelper.ItemDecoratorEvent> eventListener) {
         Consumer<RegisterItemDecorationsEvent> eventConsumer = event -> {
-            eventListener.accept((i, l) -> event.register(i, l::render));
+            eventListener.accept((i, l) -> {
+                IItemDecorator deco = new IItemDecorator() {
+                    @Override
+                    public boolean render(PoseStack poseStack, Font font, ItemStack stack, int xOffset, int yOffset) {
+                        return l.render(poseStack, font, stack, xOffset, yOffset);
+                    }
+                };
+                event.register(i,deco);
+            });
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
@@ -212,32 +225,31 @@ public class ClientHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void registerOptionalTexturePack(ResourceLocation folderName, String displayName, boolean defaultEnabled) {
-        Consumer<AddPackFindersEvent> eventConsumer = e -> {
-            if (e.getPackType() == PackType.CLIENT_RESOURCES) {
-                e.addRepositorySource((consumer, constructor) -> {
-                    IModFile file = ModList.get().getModFileById(folderName.getNamespace()).getFile();
-                    try (PathPackResources pack = new PathPackResources(
-                            folderName.toString(),
-                            file.findResource("resourcepacks/" + folderName.getPath()));) {
-
-                        consumer.accept(constructor.create(
-                                folderName.toString(),
-                                Component.literal(displayName),
-                                defaultEnabled,
-                                () -> pack,
-                                Objects.requireNonNull(pack.getMetadataSection(PackMetadataSection.SERIALIZER)),
-                                Pack.Position.TOP,
-                                PackSource.BUILT_IN,
-                                false));
-
-                    } catch (IOException ee) {
-                        if (!DatagenModLoader.isRunningDataGen()) ee.printStackTrace();
-                    }
-                });
-            }
-        };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
+       PlatHelper.registerResourcePack(PackType.CLIENT_RESOURCES,
+               ()-> {
+                   IModFile file = ModList.get().getModFileById(folderName.getNamespace()).getFile();
+                   try (PathPackResources pack = new PathPackResources(
+                           folderName.toString(),
+                           true,
+                           file.findResource("resourcepacks/" + folderName.getPath()))) {
+                       var metadata = Objects.requireNonNull(pack.getMetadataSection(PackMetadataSection.TYPE));
+                       return Pack.create(
+                               folderName.toString(),
+                               displayName,
+                               defaultEnabled,
+                               (s) -> pack,
+                               new Pack.Info(metadata.getDescription(), metadata.getPackFormat(), FeatureFlagSet.of()),
+                               PackType.CLIENT_RESOURCES,
+                               Pack.Position.TOP,
+                               false,
+                               PackSource.BUILT_IN);
+                   } catch (Exception ee) {
+                       if (!DatagenModLoader.isRunningDataGen()) ee.printStackTrace();
+                   }
+                   return null;
+               }
+       );
     }
 
 

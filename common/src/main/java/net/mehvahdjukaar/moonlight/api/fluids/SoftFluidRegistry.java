@@ -53,6 +53,7 @@ public class SoftFluidRegistry {
     public static Registry<SoftFluid> hackyGetRegistry() {
         return Utils.hackyGetRegistry(KEY);
     }
+
     public static Registry<SoftFluid> getRegistry(RegistryAccess registryAccess) {
         return registryAccess.registryOrThrow(KEY);
     }

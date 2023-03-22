@@ -5,14 +5,13 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import com.mrcrayfish.configured.api.IConfigEntry;
 import com.mrcrayfish.configured.api.IConfigValue;
 import com.mrcrayfish.configured.api.IModConfig;
 import com.mrcrayfish.configured.api.ValueEntry;
 import com.mrcrayfish.configured.client.screen.ConfigScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
-import com.mrcrayfish.configured.client.util.ScreenUtil;
 import com.mrcrayfish.configured.impl.forge.ForgeConfig;
 import com.mrcrayfish.configured.impl.forge.ForgeValue;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
@@ -29,7 +28,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -37,6 +36,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -206,8 +206,8 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         super.render(poseStack, mouseX, mouseY, partialTicks);
 
         int titleWidth = this.font.width(this.title) + 35;
-        this.itemRenderer.renderAndDecorateFakeItem(mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2);
-        this.itemRenderer.renderAndDecorateFakeItem(mainIcon, (this.width / 2) - titleWidth / 2, 2);
+        this.itemRenderer.renderAndDecorateFakeItem(poseStack, mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2);
+        this.itemRenderer.renderAndDecorateFakeItem(poseStack, mainIcon, (this.width / 2) - titleWidth / 2, 2);
     }
 
     private int ticks = 0;
@@ -268,16 +268,20 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         private FolderWrapper(IConfigEntry folderEntry, String label) {
             super(folderEntry);
             //make new button I can access
-            this.button = new Button(10, 5, 44, 20, (Component.literal(label)).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE), (onPress) -> {
-                Component newTitle = CustomConfigScreen.this.title.plainCopy().append(" > " + label);
-                var sc = createSubScreen(newTitle);
-                //hax
-                try {
-                    FOLDER_ENTRY.set(sc, folderEntry);
-                } catch (Exception ignored) {
-                }
-                CustomConfigScreen.this.minecraft.setScreen(sc);
-            });
+            this.button = Button.builder(Component.literal(label).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE),
+                            (onPress) -> {
+                                Component newTitle = CustomConfigScreen.this.title.plainCopy().append(" > " + label);
+                                var sc = createSubScreen(newTitle);
+                                //hax
+                                try {
+                                    FOLDER_ENTRY.set(sc, folderEntry);
+                                } catch (Exception ignored) {
+                                }
+                                CustomConfigScreen.this.minecraft.setScreen(sc);
+                            })
+                    .bounds(10, 5, 44, 20)
+                    .build();
+
             var i = getIcon(label.toLowerCase(Locale.ROOT));
             this.icon = i.isEmpty() ? mainIcon : i;
             this.light = getFolderEnabledValue(folderEntry);
@@ -314,20 +318,20 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             this.lastTick = CustomConfigScreen.this.ticks;
 
 
-            this.button.x = left - 1;
-            this.button.y = top;
+            this.button.setX(left - 1);
+            this.button.setY(top);
             this.button.setWidth(width);
             this.button.render(matrixStack, mouseX, mouseY, partialTicks);
 
-            int center = this.button.x + width / 2;
+            int center = this.button.getX() + width / 2;
 
             ItemRenderer renderer = CustomConfigScreen.this.itemRenderer;
 
-            RenderUtil.renderGuiItemRelative(this.icon, center + 95 - 17, top + 2, renderer,
+            RenderUtil.renderGuiItemRelative(matrixStack, this.icon, center + 95 - 17, top + 2, renderer,
                     (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
 
 
-            RenderUtil.renderGuiItemRelative(this.icon, center - 95, top + 2, renderer,
+            RenderUtil.renderGuiItemRelative(matrixStack, this.icon, center - 95, top + 2, renderer,
                     (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
 
         }
@@ -427,23 +431,23 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             RenderSystem.defaultBlendFunc();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-            int iconX = iconOffset + (int) (this.button.x + Math.ceil((this.button.getWidth() - ICON_SIZE) / 2f));
-            int iconY = (int) (this.button.y + Math.ceil(((this.button.getHeight() - ICON_SIZE) / 2f)));
+            int iconX = iconOffset + (int) (this.button.getX() + Math.ceil((this.button.getWidth() - ICON_SIZE) / 2f));
+            int iconY = (int) (this.button.getY() + Math.ceil(((this.button.getHeight() - ICON_SIZE) / 2f)));
 
             boolean on = this.holder.get();
 
             int u = on ? ICON_SIZE : 0;
 
-            blit(poseStack, iconX, iconY, this.button.getBlitOffset(), u, 0, ICON_SIZE, ICON_SIZE, 64, 64);
+            blit(poseStack, iconX, iconY, 0, u, 0, ICON_SIZE, ICON_SIZE, 64, 64);
 
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1);
 
             if (!item.isEmpty()) {
                 int light = on ? LightTexture.FULL_BRIGHT : 0;
-                int center = (int) (this.button.x + this.button.getWidth() / 2f);
+                int center = (int) (this.button.getX() + this.button.getWidth() / 2f);
                 ItemRenderer renderer = CustomConfigScreen.this.itemRenderer;
 
-                RenderUtil.renderGuiItemRelative(this.item, center - 8 - iconOffset, top + 2, renderer,
+                RenderUtil.renderGuiItemRelative(poseStack, this.item, center - 8 - iconOffset, top + 2, renderer,
                         (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
             }
         }
@@ -468,7 +472,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         if (ticks != 0) {
             float p = (float) (Math.PI / 180f);
             if (m.usesBlockLight()) {
-                s.mulPose(Vector3f.YP.rotation((ticks + partialTicks) * p * 10f));
+                s.mulPose(Axis.YP.rotation((ticks + partialTicks) * p * 10f));
 
             } else {
                 float scale = 1 + 0.1f * Mth.sin((ticks + partialTicks) * p * 20);
@@ -477,10 +481,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         }
     }
 }
-
-
-
-
 
 
     /*

@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model.forge;
 
 import com.google.common.base.Preconditions;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;

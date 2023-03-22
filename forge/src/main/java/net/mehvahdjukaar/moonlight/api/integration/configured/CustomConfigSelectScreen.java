@@ -135,8 +135,8 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         super.render(poseStack, mouseX, mouseY, partialTicks);
 
         int titleWidth = this.font.width(this.title) + 35;
-        this.itemRenderer.renderAndDecorateFakeItem(mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2);
-        this.itemRenderer.renderAndDecorateFakeItem(mainIcon, (this.width / 2) - titleWidth / 2, 2);
+        this.itemRenderer.renderAndDecorateFakeItem(poseStack, mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2);
+        this.itemRenderer.renderAndDecorateFakeItem(poseStack, mainIcon, (this.width / 2) - titleWidth / 2, 2);
 
         if (this.modURL != null && MthUtils.isWithinRectangle((this.width / 2) - 90, 2, 180, 16, mouseX, mouseY)) {
             this.renderTooltip(poseStack, this.font.split(Component.translatable("gui.moonlight.open_mod_page", this.modId), 200), mouseX, mouseY);

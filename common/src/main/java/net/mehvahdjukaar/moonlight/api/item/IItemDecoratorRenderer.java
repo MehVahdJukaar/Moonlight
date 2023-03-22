@@ -6,5 +6,6 @@ import net.minecraft.world.item.ItemStack;
 
 @FunctionalInterface
 public interface IItemDecoratorRenderer {
-    boolean render(Font font, ItemStack stack, int x, int y, PoseStack poseStack);
+    boolean render(PoseStack poseStack, Font font, ItemStack stack, int x, int y);
+
 }

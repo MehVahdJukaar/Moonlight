@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -59,7 +58,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -73,6 +71,9 @@ public class PlatHelperImpl {
         return FMLLoader.getLaunchHandler().isData();
     }
 
+    public static PlatHelper.Side getPhysicalSide() {
+        return FMLEnvironment.dist == Dist.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
+    }
 
     public static PlatHelper.Platform getPlatform() {
         return PlatHelper.Platform.FORGE;
@@ -112,17 +113,14 @@ public class PlatHelperImpl {
         return state.getFlammability(level, pos, face);
     }
 
-    public static PlatHelper.Side getEnv() {
-        return FMLEnvironment.dist == Dist.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
-    }
-
     @Nullable
     public static FoodProperties getFoodProperties(Item food, ItemStack stack, Player player) {
         return food.getFoodProperties(stack, player);
     }
 
 
-    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+    public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
+        if (packType == null) return;
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         Consumer<AddPackFindersEvent> consumer = event -> {
             if (event.getPackType() == packType) {
@@ -216,8 +214,9 @@ public class PlatHelperImpl {
     }
 
     public static List<CreativeModeTab> getTabsContainingItem(Item asItem) {
-       //TODO:
+        //TODO:
         return List.of(CreativeModeTabs.COMBAT);
     }
+
 
 }

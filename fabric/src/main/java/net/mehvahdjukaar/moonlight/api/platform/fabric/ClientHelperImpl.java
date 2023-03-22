@@ -29,6 +29,7 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -180,7 +181,7 @@ public class ClientHelperImpl {
         BlockRenderLayerMap.INSTANCE.putFluid(fluid, type);
     }
 
-    public static void registerOptionalTexturePack(ResourceLocation folderName, String displayName, boolean defaultEnabled) {
+    public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
         FabricLoader.getInstance().getModContainer(folderName.getNamespace()).ifPresent(c -> {
             ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, displayName,
                     defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL);

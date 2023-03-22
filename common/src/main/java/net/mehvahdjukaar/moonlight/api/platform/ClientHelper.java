@@ -26,6 +26,7 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
@@ -42,6 +43,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -219,11 +221,11 @@ public class ClientHelper {
      * Pack in /resources/resourcepacks
      */
     @ExpectPlatform
-    public static void registerOptionalTexturePack(ResourceLocation folderName, String displayName , boolean defaultEnabled) {
+    public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName , boolean defaultEnabled) {
         throw new AssertionError();
     }
 
     public static void registerOptionalTexturePack(ResourceLocation folderName) {
-        registerOptionalTexturePack(folderName, LangBuilder.getReadableName(folderName.getPath()), false);
+        registerOptionalTexturePack(folderName, Component.literal(LangBuilder.getReadableName(folderName.getPath())), false);
     }
 }

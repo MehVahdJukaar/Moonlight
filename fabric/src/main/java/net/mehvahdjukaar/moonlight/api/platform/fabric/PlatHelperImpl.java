@@ -99,7 +99,7 @@ public class PlatHelperImpl {
         return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnChance();
     }
 
-    public static PlatHelper.Side getEnv() {
+    public static PlatHelper.Side getPhysicalSide() {
         return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
     }
 
