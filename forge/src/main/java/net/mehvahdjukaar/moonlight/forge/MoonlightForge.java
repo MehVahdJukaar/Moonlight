@@ -48,8 +48,6 @@ public class MoonlightForge {
         if (PlatHelper.getPhysicalSide().isClient()) {
             modEventBus.addListener(MoonlightForgeClient::registerShader);
         }
-        modEventBus.addListener(SoftFluidRegistryImpl::registerDataPackRegistry);
-        modEventBus.addListener(MapDecorationRegistryImpl::registerDataPackRegistry);
     }
 
     //hacky but eh

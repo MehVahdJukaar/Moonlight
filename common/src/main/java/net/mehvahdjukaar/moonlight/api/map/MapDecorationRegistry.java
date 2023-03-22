@@ -6,7 +6,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
@@ -66,8 +65,8 @@ public class MapDecorationRegistry {
         @Override
         public <T> DataResult<Pair<MapDecorationType<?, ?>, T>> decode(DynamicOps<T> ops, T input) {
             var first = CustomDecorationType.CODEC.decode(ops, input);
-            if(first.result().isPresent())return first.map(v -> v.mapFirst(a-> a));
-            return SimpleDecorationType.CODEC.decode(ops, input).map(v -> v.mapFirst(a-> a));
+            if (first.result().isPresent()) return first.map(v -> v.mapFirst(a -> a));
+            return SimpleDecorationType.CODEC.decode(ops, input).map(v -> v.mapFirst(a -> a));
         }
     };
 
@@ -103,12 +102,12 @@ public class MapDecorationRegistry {
 
     //map markers
 
-    public static final ResourceKey<Registry<MapDecorationType<?,?>>> KEY = ResourceKey.createRegistryKey(
-            Moonlight.res((PlatHelper.getPlatform().isFabric() ? "moonlight/" : "")+ "map_markers"));
+    public static final ResourceKey<Registry<MapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(
+            Moonlight.res((PlatHelper.getPlatform().isFabric() ? "moonlight/" : "") + "map_markers"));
 
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
 
-    public static MapDecorationType<?, ?> getGenericStructure(){
+    public static MapDecorationType<?, ?> getGenericStructure() {
         return get(GENERIC_STRUCTURE_ID);
     }
 
@@ -149,7 +148,7 @@ public class MapDecorationRegistry {
         return Utils.hackyGetRegistryAccess().registryOrThrow(KEY);
     }
 
-    public static Registry<MapDecorationType<?,?>> getRegistry(RegistryAccess registryAccess) {
+    public static Registry<MapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
         return registryAccess.registryOrThrow(KEY);
     }
 
@@ -167,7 +166,10 @@ public class MapDecorationRegistry {
     }
 
     public static MapDecorationType<?, ?> get(ResourceLocation id) {
-        return hackyGetRegistry().get(id);
+        var reg = hackyGetRegistry();
+        var r = reg.get(id);
+        if (r == null) return reg.get(GENERIC_STRUCTURE_ID);
+        return r;
     }
 
     public static Optional<MapDecorationType<?, ?>> getOptional(ResourceLocation id) {

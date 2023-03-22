@@ -18,10 +18,7 @@ import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 //TODO: maybe split into api/core?
 public class SoftFluidRegistry {
@@ -31,23 +28,16 @@ public class SoftFluidRegistry {
 
     public static final ResourceLocation EMPTY_ID = Moonlight.res("empty");
 
+    private static final Map<Fluid, SoftFluid> FLUID_MAP = new IdentityHashMap<>();
+    private static final Map<Item, SoftFluid> ITEM_MAP = new IdentityHashMap<>();
+
+
     public static SoftFluid getEmpty() {
         return get(EMPTY_ID);
     }
 
     @ExpectPlatform
     public static void init() {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static Map<Fluid, SoftFluid> getFluidsMap() {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static Map<Item, SoftFluid> getItemsMap() {
-        throw new AssertionError();
     }
 
     public static Registry<SoftFluid> hackyGetRegistry() {
@@ -106,7 +96,7 @@ public class SoftFluidRegistry {
      * @return soft fluid. empty fluid if not found
      */
     public static SoftFluid fromForgeFluid(Fluid fluid) {
-        return getFluidsMap().getOrDefault(fluid, getEmpty());
+        return FLUID_MAP.getOrDefault(fluid, getEmpty());
     }
 
     /**
@@ -117,14 +107,14 @@ public class SoftFluidRegistry {
      */
     @Nonnull
     public static SoftFluid fromItem(Item filledContainerItem) {
-        return getItemsMap().getOrDefault(filledContainerItem, getEmpty());
+        return ITEM_MAP.getOrDefault(filledContainerItem, getEmpty());
     }
 
     //needs to be called on both sides
     private static void populateSlaveMaps() {
-        var itemMap = getItemsMap();
+        var itemMap = ITEM_MAP;
         itemMap.clear();
-        var fluidsMap = getFluidsMap();
+        var fluidsMap = FLUID_MAP;
         fluidsMap.clear();
         for (var s : getValues()) {
             if (PlatHelper.isModLoaded(s.getFromMod())) {
@@ -160,12 +150,11 @@ public class SoftFluidRegistry {
         populateSlaveMaps();
         //registers existing fluids. also update the salve maps
         //TODO: why not needed on the client?
-        registerExistingVanillaFluids();
+        registerExistingVanillaFluids(FLUID_MAP, ITEM_MAP);
     }
 
-
     @ExpectPlatform
-    private static void registerExistingVanillaFluids() {
+    private static void registerExistingVanillaFluids(Map<Fluid, SoftFluid> fluidMap, Map<Item, SoftFluid> itemMap) {
         throw new AssertionError();
     }
 

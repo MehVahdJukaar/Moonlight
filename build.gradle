@@ -3,6 +3,7 @@ plugins {
     id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
     id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
     id 'net.darkhax.curseforgegradle' version '1.0.7'
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 architectury {

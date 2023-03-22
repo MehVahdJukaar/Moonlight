@@ -27,13 +27,8 @@ public class SoftFluidRegistryImpl {
     public static void init() {
     }
 
-    private static final Map<Fluid, SoftFluid> FLUID_MAP = new IdentityHashMap<>();
-    private static final Map<Item, SoftFluid> ITEM_MAP = new IdentityHashMap<>();
-
-
-    public static void registerExistingVanillaFluids() {
+    public static void registerExistingVanillaFluids(Map<Fluid, SoftFluid> fluidMap, Map<Item, SoftFluid> itemMap) {
         //only runs on the first object
-        var fluidMap = getFluidsMap();
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.hackyGetRegistry();
         ((MappedRegistryAccessor) reg).setFrozen(false);
         for (Fluid f : BuiltInRegistries.FLUID) {
@@ -60,19 +55,11 @@ public class SoftFluidRegistryImpl {
         reg.freeze();
     }
 
-    public static Map<Fluid, SoftFluid> getFluidsMap() {
-        return FLUID_MAP;
-    }
-
-    public static Map<Item, SoftFluid> getItemsMap() {
-        return ITEM_MAP;
-    }
-
-
     public static void bootstrap(BootstapContext<SoftFluid> bootstapContext) {
         bootstapContext.register(ResourceKey.create(KEY, SoftFluidRegistry.EMPTY_ID),
                 new SoftFluid.Builder(new ResourceLocation(""), new ResourceLocation("")).build());
     }
+
 
 
 }

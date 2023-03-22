@@ -43,8 +43,8 @@ public class Moonlight {
         ModLootPoolEntries.register();
 
         VillagerAIInternal.init();
-        SoftFluidRegistry.init();
         MapDecorationRegistry.init();
+        SoftFluidRegistry.init();
 
         //client init
         if (PlatHelper.getPhysicalSide().isClient()) {
