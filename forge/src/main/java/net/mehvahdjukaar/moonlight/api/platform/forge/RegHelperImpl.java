@@ -94,7 +94,8 @@ public class RegHelperImpl {
             throw new IllegalArgumentException("Registering under minecraft namespace is not supported");
         }
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
-        String modId = ModLoadingContext.get().getActiveContainer().getModId();
+        //String modId = ModLoadingContext.get().getActiveContainer().getModId();
+        String modId = name.getNamespace();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
             if (PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
 
