@@ -4,8 +4,8 @@
   "package": "net.mehvahdjukaar.moonlight.core.mixins",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "FirstPersonRendererMixin",
     "ClientLanguagesMixin",
+    "FirstPersonRendererMixin",
     "MapItemRendererMixin",
     "PlayerItemInHandLayerMixin",
     "ThirdPersonRendererMixin"
@@ -15,6 +15,7 @@
     "EntityMixin",
     "FixBlockPlaceContextMixin",
     "GrindstoneMenuSlotMixin",
+    "InventoryMixin",
     "LevelChunkMixin",
     "LightningEntityMixin",
     "MapDataMixin",

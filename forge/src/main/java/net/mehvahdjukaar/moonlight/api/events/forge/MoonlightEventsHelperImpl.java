@@ -1,9 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.events.forge;
 
-import net.mehvahdjukaar.moonlight.api.events.IFireConsumeBlockEvent;
-import net.mehvahdjukaar.moonlight.api.events.ILightningStruckBlockEvent;
-import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
-import net.mehvahdjukaar.moonlight.api.events.SimpleEvent;
+import net.mehvahdjukaar.moonlight.api.events.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -28,6 +25,9 @@ public class MoonlightEventsHelperImpl {
             MinecraftForge.EVENT_BUS.addListener(eventConsumer);
         } else if (eventClass == ILightningStruckBlockEvent.class) {
             Consumer<LightningStruckBlockEvent> eventConsumer = e -> listener.accept((T) e);
+            MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+        } else if (eventClass == IDropItemOnDeathEvent.class) {
+            Consumer<DropItemOnDeathEvent> eventConsumer = e -> listener.accept((T) e);
             MinecraftForge.EVENT_BUS.addListener(eventConsumer);
         } else {
             //other 2 events dont work on forge bus for some reason... Randomly too
