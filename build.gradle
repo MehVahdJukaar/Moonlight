@@ -39,7 +39,7 @@ subprojects {
         modrinth {
             projectId = rootProject.mod_id
             uploadFile = tasks.remapJar
-            gameVersions = [minecraft_version]
+            gameVersions = [rootProject.minecraft_version]
             loaders = [modLoader]
             changelog = changelogText
 
@@ -48,9 +48,6 @@ subprojects {
                     required.project "fabric-api"
                 }
             } else {
-                dependencies {
-                    //  required.project "ctm"
-                }
             }
         }
     }
@@ -62,7 +59,7 @@ subprojects {
                 id = rootProject.project_id
                 changelog = changelogText
                 releaseType = 'release'
-                addGameVersion minecraft_version
+                addGameVersion rootProject.minecraft_version
                 addGameVersion modLoader.capitalize()
 
                 mainArtifact(tasks.remapJar)
@@ -72,9 +69,6 @@ subprojects {
                         requiredDependency "fabric-api"
                     }
                 } else {
-                    relations {
-                        //optionalDependency "roughly-enough-items"
-                    }
                 }
             }
         }
