@@ -3,6 +3,8 @@ plugins {
     id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
     id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
     id "com.matthewprenger.cursegradle" version "1.4.0"
+    id "com.modrinth.minotaur" version "1.2+"
+
 }
 
 architectury {
@@ -13,6 +15,7 @@ subprojects {
     apply plugin: "dev.architectury.loom"
     apply plugin: "io.github.juuxel.loom-quiltflower"
     apply plugin: "com.matthewprenger.cursegradle"
+    apply plugin: "com.modrinth.minotaur"
 
     loom {
         silentMojangMappingsLicense()
@@ -35,7 +38,7 @@ subprojects {
     var changelogFile = rootProject.file("changelog.md")
     var changelogText = changelogFile.exists() ? changelogFile.text : ""
 
-    if (env.MODRINTH_TOKEN) {
+    if (true) {
         modrinth {
             projectId = rootProject.mod_id
             uploadFile = tasks.remapJar
@@ -52,9 +55,9 @@ subprojects {
         }
     }
 
-    if (env.curseforge_token) {
+    if (env.CURSEFORGE_TOKEN) {
         curseforge {
-            apiKey = env.curseforge_token
+            apiKey = env.CURSEFORGE_TOKEN
             project {
                 id = rootProject.project_id
                 changelog = changelogText
