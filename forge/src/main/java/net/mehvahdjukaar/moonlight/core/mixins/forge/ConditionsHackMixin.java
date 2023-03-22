@@ -24,7 +24,7 @@ public abstract class ConditionsHackMixin {
 
     //TODO: refactor in 1.20 and mixin into forge side instead. Then use fabric stuff everywhere directly
     //literally copies what fabric does
-    @Inject(at = @At("HEAD"), method = {"m_10789_","lambda$reload$0"}, remap = false)
+    @Inject(at = @At("HEAD"), method = {"m_10789_","method_18790","lambda$reload$0"}, remap = false)
     private void applyResourceConditions(ResourceManager resourceManager, ProfilerFiller profiler, Object object, CallbackInfo ci) {
         if ((Object) this instanceof SimpleJsonResourceReloadListener) {
             var context = MoonlightForge.getConditionContext();

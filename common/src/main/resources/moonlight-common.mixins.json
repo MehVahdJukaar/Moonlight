@@ -16,6 +16,7 @@
     "EntityMixin",
     "FixBlockPlaceContextMixin",
     "GrindstoneMenuSlotMixin",
+    "InventoryMixin",
     "LevelChunkMixin",
     "LightningEntityMixin",
     "MapDataMixin",

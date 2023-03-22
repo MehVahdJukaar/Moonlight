@@ -114,16 +114,3 @@ repositories {
     maven { url "https://maven.shedaniel.me/" }
     maven { url "https://maven.terraformersmc.com/releases" }
 }
-
-task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
-
-    apiToken = System.getenv('curseforge_token')
-    disableVersionDetection()
-
-    def mainFile = upload(rootProject.project_id, file("${project.buildDir}/libs/${archivesBaseName}-${version}-fabric.jar"))
-    mainFile.changelog = rootProject.file('changelog.md')
-    mainFile.changelogType = "markdown"
-    mainFile.releaseType = "release"
-    mainFile.addGameVersion(rootProject.minecraft_version)
-    mainFile.addModLoader("fabric")
-}

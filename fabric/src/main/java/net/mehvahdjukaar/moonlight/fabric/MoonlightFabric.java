@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.fabric;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -31,6 +32,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         ServerLifecycleEvents.SERVER_STARTED.register((s)->SoftFluidRegistry.onDataLoad()); //need this too because fabric is stupid
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((a,b,c)->SoftFluidRegistry.onDataLoad()); //only fire after reload command
         ServerWorldEvents.UNLOAD.register((s,w)-> FakePlayerManager.unloadLevel(w));
+        ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
 
         ResourceConditionsBridge.init();
     }

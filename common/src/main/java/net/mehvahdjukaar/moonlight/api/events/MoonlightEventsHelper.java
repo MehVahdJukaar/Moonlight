@@ -19,5 +19,4 @@ public class MoonlightEventsHelper {
         throw new AssertionError();
     }
 
-
 }

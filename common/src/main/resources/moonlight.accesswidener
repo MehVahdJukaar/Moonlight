@@ -11,6 +11,8 @@ transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasS
 transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameX (I)I
 transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameY (I)I
 
+transitive-accessible field net/minecraft/world/entity/LivingEntity dead Z
+
 #criteria trigger
 transitive-accessible method net/minecraft/advancements/CriteriaTriggers register (Lnet/minecraft/advancements/CriterionTrigger;)Lnet/minecraft/advancements/CriterionTrigger;
 #falling block
