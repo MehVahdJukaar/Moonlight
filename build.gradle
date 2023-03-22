@@ -3,8 +3,7 @@ plugins {
     id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
     id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
     id "com.matthewprenger.cursegradle" version "1.4.0"
-    id "com.modrinth.minotaur" version "1.2+"
-
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 architectury {
@@ -38,7 +37,7 @@ subprojects {
     var changelogFile = rootProject.file("changelog.md")
     var changelogText = changelogFile.exists() ? changelogFile.text : ""
 
-    if (true) {
+    if (env.MODRINTH_TOKEN) {
         modrinth {
             projectId = rootProject.mod_id
             uploadFile = tasks.remapJar
@@ -116,6 +115,3 @@ allprojects {
         withSourcesJar()
     }
 }
-
-
-
