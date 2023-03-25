@@ -9,14 +9,23 @@ public class IDropItemOnDeathEventImpl implements IDropItemOnDeathEvent {
     private final ItemStack itemStack;
     private final Player player;
     private boolean canceled = false;
+    private ItemStack returnStack;
+    private boolean isBeforeDrop;
 
-    public IDropItemOnDeathEventImpl(ItemStack itemStack, Player player) {
+    public IDropItemOnDeathEventImpl(ItemStack itemStack, Player player, boolean beforeDrop) {
         this.itemStack = itemStack;
         this.player = player;
+        this.returnStack = itemStack;
+        this.isBeforeDrop = beforeDrop;
     }
 
-    public static IDropItemOnDeathEvent create(ItemStack itemStack, Player player) {
-        return new IDropItemOnDeathEventImpl(itemStack, player);
+    public static IDropItemOnDeathEvent create(ItemStack itemStack, Player player, boolean beforeDrop) {
+        return new IDropItemOnDeathEventImpl(itemStack, player, beforeDrop);
+    }
+
+    @Override
+    public boolean isBeforeDrop() {
+        return this.isBeforeDrop;
     }
 
     @Override
@@ -34,8 +43,18 @@ public class IDropItemOnDeathEventImpl implements IDropItemOnDeathEvent {
         this.canceled = cancelled;
     }
 
+    @Override
     public boolean isCanceled() {
-        return this.canceled;
+        return canceled;
     }
 
+    @Override
+    public void setReturnItemStack(ItemStack stack) {
+        this.returnStack = stack;
+    }
+
+    @Override
+    public ItemStack getReturnItemStack() {
+        return returnStack;
+    }
 }

@@ -8,14 +8,22 @@ import net.minecraftforge.eventbus.api.Event;
 public class DropItemOnDeathEvent extends Event implements IDropItemOnDeathEvent {
     private final ItemStack itemStack;
     private final Player player;
+    private final boolean beforeDrop;
+    private ItemStack returnStack;
 
-    public DropItemOnDeathEvent(ItemStack itemStack, Player player) {
+    public DropItemOnDeathEvent(ItemStack itemStack, Player player, boolean beforeDrop) {
         this.itemStack = itemStack;
         this.player = player;
+        this.returnStack = itemStack;
+        this.beforeDrop = beforeDrop;
     }
 
-    public static IDropItemOnDeathEvent create(ItemStack itemStack, Player player) {
-        return new DropItemOnDeathEvent(itemStack, player);
+    public boolean isBeforeDrop() {
+        return beforeDrop;
+    }
+
+    public static IDropItemOnDeathEvent create(ItemStack itemStack, Player player, boolean beforeDrop) {
+        return new DropItemOnDeathEvent(itemStack, player, beforeDrop);
     }
 
     @Override
@@ -26,6 +34,16 @@ public class DropItemOnDeathEvent extends Event implements IDropItemOnDeathEvent
     @Override
     public ItemStack getItemStack() {
         return this.itemStack;
+    }
+
+    @Override
+    public void setReturnItemStack(ItemStack stack) {
+        this.returnStack = stack;
+    }
+
+    @Override
+    public ItemStack getReturnItemStack() {
+        return returnStack;
     }
 
 }

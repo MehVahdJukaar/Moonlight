@@ -7,8 +7,9 @@ import net.minecraftforge.eventbus.api.Event;
 
 public class IDropItemOnDeathEventImpl {
 
-    public static IDropItemOnDeathEvent create(ItemStack itemStack, Player player) {
-        return new DropItemOnDeathEvent(itemStack, player);
+    public static IDropItemOnDeathEvent create(ItemStack itemStack, Player player, boolean beforeDrop) {
+        return new DropItemOnDeathEvent(itemStack, player, beforeDrop);
     }
+
 
 }
