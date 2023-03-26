@@ -27,12 +27,10 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
@@ -45,7 +43,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -78,7 +75,11 @@ public class RegHelperImpl {
             //freaking fabric just runs mod initializers in random order. hate this. we run in deterministic manner here
             var sorted = v.keySet().stream().sorted().toList();
             for (var s : sorted) {
-                v.get(s).initializeEntries();
+                try {
+                    v.get(s).initializeEntries();
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to initialize registry objects for namespace [" + s + "]", e);
+                }
             }
             if (m.getKey() == Registries.BLOCK) {
                 //dynamic block registration after all blocks

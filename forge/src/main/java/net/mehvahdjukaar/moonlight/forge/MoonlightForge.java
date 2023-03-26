@@ -109,5 +109,9 @@ public class MoonlightForge {
         }
     }
 
+    @SubscribeEvent
+    public void onPlayerClone(PlayerEvent.Clone event) {
+        Moonlight.onPlayerCloned(event.getOriginal(), event.getEntity(), event.isWasDeath());
+    }
 }
 

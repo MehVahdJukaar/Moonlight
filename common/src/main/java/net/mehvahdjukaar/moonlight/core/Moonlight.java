@@ -67,10 +67,10 @@ public class Moonlight {
             int i = 0;
             for (var v : inv.items) {
                 if (v != ItemStack.EMPTY) {
-                    IDropItemOnDeathEvent e = IDropItemOnDeathEvent.create(v, oldPlayer);
+                    IDropItemOnDeathEvent e = IDropItemOnDeathEvent.create(v, oldPlayer, false);
                     MoonlightEventsHelper.postEvent(e, IDropItemOnDeathEvent.class);
                     if (e.isCanceled()) {
-                        newPlayer.getInventory().setItem(i, v);
+                        newPlayer.getInventory().setItem(i, e.getReturnItemStack());
                     }
                 }
                 i++;

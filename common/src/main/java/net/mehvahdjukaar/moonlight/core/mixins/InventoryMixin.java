@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Mixin(Inventory.class)
-public abstract class InventoryMixin {
+public class InventoryMixin {
 
     @Shadow @Final public Player player;
 
@@ -31,11 +31,11 @@ public abstract class InventoryMixin {
     public void fireDropEvent(CallbackInfo ci, Iterator var1, List<ItemStack> list, int i) {
         if(this.player.isDeadOrDying() || this.player.dead){
             ItemStack stack = list.get(i);
-            IDropItemOnDeathEvent event = IDropItemOnDeathEvent.create(stack, player);
+            IDropItemOnDeathEvent event = IDropItemOnDeathEvent.create(stack, player, true);
             MoonlightEventsHelper.postEvent( event,IDropItemOnDeathEvent.class);
             if(event.isCanceled()){
                 list.set(i, ItemStack.EMPTY);
-                toRestore = stack;
+                toRestore = event.getReturnItemStack();
             }
         }
     }
