@@ -143,11 +143,6 @@ public abstract class BlockType {
         return this.children.get(key);
     }
 
-    @Deprecated(forRemoval = true)
-    public void addChild(String genericName, @Nullable ItemLike itemLike) {
-        addChild(genericName, (Object) itemLike);
-    }
-
     /**
      * Should be called after you register a block that is made out of this wood type
      */
@@ -238,14 +233,6 @@ public abstract class BlockType {
             }
         }
         if (changed instanceof Block b) return b;
-        return null;
-    }
-
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static ItemLike changeItemBlockType(ItemLike current, BlockType originalMat, BlockType destinationMat) {
-        var v = changeType(current, originalMat, destinationMat);
-        if (v instanceof ItemLike il) return il;
         return null;
     }
 

@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
@@ -16,7 +15,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -35,7 +33,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -216,22 +213,6 @@ public class RegHelperImpl {
 
     public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
         return RegHelper.registerRecipeSerializer(name, () -> new SimpleCraftingRecipeSerializer<>(factory));
-    }
-
-    //TODO: remove. not even needed with new conditions thingies
-    @Deprecated(forRemoval = true)
-    private static class OptionalSimpleRecipeSerializer<T extends CraftingRecipe> extends SimpleCraftingRecipeSerializer<T> {
-        public OptionalSimpleRecipeSerializer(SimpleCraftingRecipeSerializer.Factory<T> function) {
-            super(function);
-        }
-
-        @Override
-        public T fromJson(ResourceLocation recipeId, JsonObject json, ICondition.IContext context) {
-            if (CraftingHelper.processConditions(GsonHelper.getAsJsonArray(json, "conditions"), context)) {
-                return super.fromJson(recipeId, json, context);
-            }
-            return null;
-        }
     }
 
 }

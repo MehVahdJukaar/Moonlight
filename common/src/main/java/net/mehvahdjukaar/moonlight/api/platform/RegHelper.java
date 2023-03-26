@@ -410,7 +410,6 @@ public class RegHelper {
     private static boolean shouldRegisterVSlab() {
         return PlatHelper.isModLoaded("quark") || PlatHelper.isModLoaded("v_slab_compat");
     }
-    //TODO: fix bricks
 }
 
 

@@ -110,12 +110,5 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         Preconditions.checkNotNull(sprite, "sprite cannot be null");
         return inner.toBakedQuad(0, sprite, false);
     }
-
-    @Deprecated(forRemoval = true)
-    public BakedQuadBuilder useTransform(Matrix4f matrix4f) {
-        this.transform = matrix4f;
-        return this;
-    }
-
 }
 

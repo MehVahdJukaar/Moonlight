@@ -158,11 +158,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         }
     }
 
-    @Deprecated(forRemoval = true)
-    public boolean hasFancyBooleans() {
-        return true;
-    }
-
     private Collection<Item> replaceItems(Collection<Item> originals) {
         ArrayList<Item> newList = new ArrayList<>();
         for (Item c : originals) {
@@ -249,7 +244,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         return "enabled";
     }
 
-    //TODO: refactor and put in constructor for 1.20
     //ugly
     public List<ConfigSpec> getCustomSpecs() {
         return List.of();

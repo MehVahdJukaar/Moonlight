@@ -231,7 +231,7 @@ public class Palette implements Set<PaletteColor> {
         matchSize(targetSize, null);
     }
 
-    //TODO: make this depend on terger palette luminance step too
+    //TODO: make this depend on interger palette luminance step too
     public void matchSize(int targetSize, @Nullable Float targetLumStep) {
         if (this.size() == 0 || targetSize <= 0) {
             throw new UnsupportedOperationException("Palette size can't be 0");

@@ -1,1 +1,1 @@
-1.19.4
+* fixed fabric version
