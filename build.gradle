@@ -7,14 +7,18 @@ plugins {
 }
 
 architectury {
+
     minecraft = rootProject.minecraft_version
 }
+
+
 
 subprojects {
     apply plugin: "dev.architectury.loom"
     apply plugin: "io.github.juuxel.loom-quiltflower"
     apply plugin: "com.matthewprenger.cursegradle"
     apply plugin: "com.modrinth.minotaur"
+
 
     loom {
         silentMojangMappingsLicense()

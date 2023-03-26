@@ -36,8 +36,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
 
         ResourceConditionsBridge.init();
-
-        RegHelper.registerSound(Moonlight.res("aa"));
     }
 
     //called after all other mod initialize have been called.

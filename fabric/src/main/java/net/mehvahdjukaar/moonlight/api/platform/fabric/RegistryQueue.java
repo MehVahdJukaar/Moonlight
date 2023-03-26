@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
@@ -46,7 +47,7 @@ public class RegistryQueue<T> {
 
     static class EntryWrapper<T extends R, R> implements RegSupplier<T> {
         private final ResourceLocation id;
-        private final ResourceKey<? extends Registry<R>> registry;
+        private final ResourceKey<? extends Registry<R>> registryKey;
         private Supplier<T> regSupplier;
         private T entry;
         private Holder<T> holder;
@@ -55,7 +56,7 @@ public class RegistryQueue<T> {
         public EntryWrapper(ResourceLocation id, Supplier<T> factory, ResourceKey<? extends Registry<R>> registry) {
             this.regSupplier = factory;
             this.id = id;
-            this.registry = registry;
+            this.registryKey = registry;
         }
 
 
@@ -75,7 +76,8 @@ public class RegistryQueue<T> {
         }
 
         void initialize() {
-            this.holder = ((WritableRegistry) registry).register(ResourceKey.create(registry, id), regSupplier.get(), Lifecycle.stable());
+            this.holder = ((WritableRegistry) BuiltInRegistries.REGISTRY.get(registryKey.location()))
+                    .register(ResourceKey.create(registryKey, id), regSupplier.get(), Lifecycle.stable());
             this.entry = this.holder.value();
             regSupplier = null;
         }
