@@ -15,7 +15,7 @@ import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ModelManagerAccessor;
-import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
+import net.mehvahdjukaar.moonlight.fabric.MLFabricSetupCallbacks;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -174,7 +174,7 @@ public class ClientHelperImpl {
     }
 
     public static void addClientSetup(Runnable clientSetup) {
-        FabricSetupCallbacks.CLIENT_SETUP.add(clientSetup);
+        MLFabricSetupCallbacks.CLIENT_SETUP.add(clientSetup);
     }
 
     public static void registerFluidRenderType(Fluid fluid, RenderType type) {

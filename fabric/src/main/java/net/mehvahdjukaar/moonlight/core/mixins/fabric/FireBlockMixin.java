@@ -22,7 +22,7 @@ public abstract class FireBlockMixin extends BaseFireBlock {
     @Unique
     private BlockState bs;
 
-    public FireBlockMixin(Properties settings, float damage) {
+    protected FireBlockMixin(Properties settings, float damage) {
         super(settings, damage);
     }
 

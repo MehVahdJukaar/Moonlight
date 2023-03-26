@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -199,6 +200,7 @@ public class PlatHelper {
     }
 
 
+
     @Contract
     @ExpectPlatform
     public static boolean isMobGriefingOn(Level level, Entity entity) {
@@ -228,12 +230,23 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
-    public static Packet<?> getEntitySpawnPacket(Entity entity) {
+    public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
         throw new AssertionError();
     }
 
     public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar) {
         return createModTab(name, icon, hasSearchBar, null);
+    }
+
+    @ExpectPlatform
+    public static List<CreativeModeTab> getCreativeModeTabs() {
+        throw new AssertionError();
+    }
+
+    @Nullable
+    @ExpectPlatform
+    public static CreativeModeTab getCreativeModeTab(ResourceLocation name) {
+        throw new AssertionError();
     }
 
     @ExpectPlatform

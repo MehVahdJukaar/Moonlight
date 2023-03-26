@@ -15,18 +15,17 @@ import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.CreativeModeTabRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,8 +48,26 @@ public class MoonlightForge {
         if (PlatHelper.getPhysicalSide().isClient()) {
             modEventBus.addListener(MoonlightForgeClient::registerShader);
         }
+
+        modEventBus.addListener(MoonlightForge::common);
+        modEventBus.addListener(MoonlightForge::tab);
     }
 
+
+    @SubscribeEvent
+
+    public static void common(FMLCommonSetupEvent event) {
+        int aa = 1;
+
+    }
+
+
+        @SubscribeEvent
+
+    public static void tab(CreativeModeTabEvent event) {
+        int aa = 1;
+
+    }
     //hacky but eh
     @SubscribeEvent
     public void onTagUpdated(TagsUpdatedEvent event) {

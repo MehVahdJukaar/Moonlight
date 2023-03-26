@@ -1,14 +1,10 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
-import net.mehvahdjukaar.moonlight.api.misc.ModItemListing;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
-import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
-
 import java.util.ArrayList;
 import java.util.List;
 
 //fix concurrency
-public interface FabricSetupCallbacks {
+public interface MLFabricSetupCallbacks {
 
     /**
      * Equivalent of forge common setup. called by this mod client initializer and server initializer

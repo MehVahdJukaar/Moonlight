@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.CreativeModeTabRegistry;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.MinecraftForge;
@@ -39,6 +41,7 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
@@ -58,6 +61,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -139,7 +143,7 @@ public class PlatHelperImpl {
         return ServerLifecycleHooks.getCurrentServer();
     }
 
-    public static Packet<?> getEntitySpawnPacket(Entity entity) {
+    public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
         return NetworkHooks.getEntitySpawningPacket(entity);
     }
 
@@ -213,10 +217,12 @@ public class PlatHelperImpl {
         return ModList.get().getMods().stream().map(IModInfo::getModId).toList();
     }
 
-    public static List<CreativeModeTab> getTabsContainingItem(Item asItem) {
-        //TODO:
-        return List.of(CreativeModeTabs.COMBAT);
+    public static List<CreativeModeTab> getCreativeModeTabs() {
+        return CreativeModeTabRegistry.getSortedCreativeModeTabs();
     }
 
+    public static CreativeModeTab getCreativeModeTab(ResourceLocation name) {
+        return CreativeModeTabRegistry.getTab(name);
+    }
 
 }

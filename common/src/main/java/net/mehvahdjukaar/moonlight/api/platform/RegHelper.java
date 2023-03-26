@@ -6,6 +6,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.item.FuelBlockItem;
+import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
@@ -32,8 +33,7 @@ import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
@@ -284,6 +284,48 @@ public class RegHelper {
     @ExpectPlatform
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static Supplier<CreativeModeTab> registerCreativeModeTab(
+            ResourceLocation name, List<Object> beforeTabs, List<Object> afterTabs, Consumer<CreativeModeTab.Builder> configurator
+    ) {
+        throw new AssertionError();
+    }
+
+    private static final List<Object> DEFAULT_AFTER_ENTRIES = List.of(CreativeModeTabs.SPAWN_EGGS);
+
+    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
+        return registerCreativeModeTab(name, DEFAULT_AFTER_ENTRIES, List.of(), configurator);
+    }
+
+    @ExpectPlatform
+    public static void addItemsToTabsRegistration(Consumer<ItemToTabEvent> event) {
+        throw new AssertionError();
+    }
+
+    public record ItemToTabEvent(
+            QuadConsumer<CreativeModeTab, @Nullable Predicate<ItemStack>, Boolean, Collection<ItemStack>> action) {
+
+        public void add(CreativeModeTab tab, Item... items) {
+            addAfter(tab, null, items);
+        }
+
+        public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, Item... items) {
+            action.accept(tab, target, true, Arrays.stream(items).map(Item::getDefaultInstance).toList());
+        }
+
+        public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
+            action.accept(tab, target, true, List.of(items));
+        }
+
+        public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, Item... items) {
+            action.accept(tab, target, false, Arrays.stream(items).map(Item::getDefaultInstance).toList());
+        }
+
+        public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
+            action.accept(tab, target, false, List.of(items));
+        }
     }
 
     @FunctionalInterface

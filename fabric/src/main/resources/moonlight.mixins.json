@@ -21,7 +21,6 @@
     "TextureAtlasSpriteMixin"
   ],
   "mixins": [
-    "VanillaRegistriesMixin",
     "ConditionsHackMixin",
     "DataPackContentMixin",
     "FireBlockMixin",
@@ -30,8 +29,9 @@
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
     "RegistryAccessMixin",
-    "ReloadableServerResourcesMixin",
-    "ServerPlayerAccessor"
+    "RegistryDataLoaderMixin",
+    "ServerPlayerAccessor",
+    "VanillaRegistriesMixin"
   ],
   "injectors": {
     "defaultRequire": 1

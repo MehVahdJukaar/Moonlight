@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.itemgroup.v1.IdentifiableItemGroup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -13,13 +14,14 @@ import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.fabric.impl.itemgroup.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
-import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
+import net.mehvahdjukaar.moonlight.fabric.MLFabricSetupCallbacks;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -27,6 +29,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -59,6 +62,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -124,7 +128,7 @@ public class PlatHelperImpl {
         return MoonlightFabric.currentServer;
     }
 
-    public static Packet<?> getEntitySpawnPacket(Entity entity) {
+    public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
         var packet = new ClientBoundSpawnCustomEntityMessage(entity);
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeToBuffer(buf);
@@ -234,7 +238,7 @@ public class PlatHelperImpl {
     }
 
     public static void addCommonSetup(Runnable clientSetup) {
-        FabricSetupCallbacks.COMMON_SETUP.add(clientSetup);
+        MLFabricSetupCallbacks.COMMON_SETUP.add(clientSetup);
     }
 
     public static boolean evaluateRecipeCondition(JsonElement jo) {
@@ -246,9 +250,17 @@ public class PlatHelperImpl {
         return FabricLoader.getInstance().getAllMods().stream().map(m -> m.getMetadata().getId()).toList();
     }
 
-    public static List<CreativeModeTab> getItemTabs(Item asItem) {
-        //TODO:
-        return List.of(CreativeModeTabs.COMBAT);
+    public static List<CreativeModeTab> getCreativeModeTabs() {
+        return CreativeModeTabs.allTabs();
+    }
+
+    public static CreativeModeTab getCreativeModeTab(ResourceLocation name) {
+        for(var c : getCreativeModeTabs()){
+            if(c.getId().equals(name)){
+                return c;
+            }
+        }
+        return null;
     }
 
 

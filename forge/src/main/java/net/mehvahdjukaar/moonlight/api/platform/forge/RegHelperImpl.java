@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
+import com.google.common.collect.Lists;
 import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
@@ -24,7 +25,9 @@ import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
@@ -34,6 +37,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
@@ -46,6 +50,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -190,16 +195,6 @@ public class RegHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    private static <T extends Entity> void doStuff(EntityType<T> a, SpawnPlacements.Type b, Heightmap.Types c, SpawnPlacements.SpawnPredicate<T> d) {
-    }
-
-    private static <T extends Entity> void extracted(SpawnPlacementRegisterEvent event,
-                                                     SpawnPlacements.Type b, Heightmap.Types c,
-                                                     SpawnPlacements.SpawnPredicate<T> d, EntityType<T> h) {
-        event.register(h, b, c, d, SpawnPlacementRegisterEvent.Operation.AND);
-    }
-
-
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
     }
@@ -213,6 +208,56 @@ public class RegHelperImpl {
 
     public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
         return RegHelper.registerRecipeSerializer(name, () -> new SimpleCraftingRecipeSerializer<>(factory));
+    }
+
+    public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
+        Consumer<CreativeModeTabEvent.BuildContents> eventConsumer = event -> {
+            RegHelper.ItemToTabEvent itemToTabEvent = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
+                if (tab != event.getTab()) return;
+                if (target == null) {
+                    event.acceptAll(items);
+                } else {
+                    var entries = event.getEntries();
+                    for (var e : entries) {
+                        ItemStack item = e.getKey();
+                        if (target.test(item)) {
+                            if (after) {
+                                var reverse = Lists.reverse(new ArrayList<>(items));
+                                for (var ni : reverse) {
+                                    entries.putAfter(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                                }
+                            } else {
+                                items.forEach(ni -> entries.putBefore(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
+                            }
+                            return;
+                        }
+                    }
+                }
+            });
+            eventListener.accept(itemToTabEvent);
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+
+    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<Object> beforeEntries, List<Object> afterEntries, Consumer<CreativeModeTab.Builder> configurator) {
+        TabSupp tab = new TabSupp();
+        Consumer<CreativeModeTabEvent.Register> eventConsumer = event -> {
+            tab.instance = event.registerCreativeModeTab(name, beforeEntries, afterEntries, configurator);
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        return tab;
+    }
+
+    private static class TabSupp implements Supplier<CreativeModeTab> {
+
+        private CreativeModeTab instance;
+
+        @Override
+        public CreativeModeTab get() {
+            if (instance != null) return instance;
+            throw new UnsupportedOperationException("Tried to access creative tab before it was registered");
+        }
     }
 
 }

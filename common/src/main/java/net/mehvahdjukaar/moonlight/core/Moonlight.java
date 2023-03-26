@@ -20,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.LogManager;
@@ -58,6 +59,12 @@ public class Moonlight {
         }
 
         PlatHelper.addCommonSetup(BlocksColorInternal::setup);
+
+        MoonlightEventsHelper.addListener( Moonlight::aa,IDropItemOnDeathEvent.class);
+    }
+
+    public static void aa(IDropItemOnDeathEvent event){
+        if(event.getItemStack().is(Items.DIAMOND))event.setCanceled(true);
     }
 
     @EventCalled

@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
@@ -15,7 +17,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
-import net.mehvahdjukaar.moonlight.fabric.FabricSetupCallbacks;
+import net.mehvahdjukaar.moonlight.fabric.MLFabricSetupCallbacks;
 import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
@@ -29,7 +31,9 @@ import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
@@ -37,11 +41,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -165,12 +167,12 @@ public class RegHelperImpl {
     }
 
     public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        FabricSetupCallbacks.COMMON_SETUP.add(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
+        MLFabricSetupCallbacks.COMMON_SETUP.add(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
     }
 
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         //this just runs immediately... needs to run on mod setup instead
-        FabricSetupCallbacks.COMMON_SETUP.add(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
+        MLFabricSetupCallbacks.COMMON_SETUP.add(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
     }
 
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
@@ -197,6 +199,43 @@ public class RegHelperImpl {
 
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
         return register(name, fluid, Registries.FLUID);
+    }
+
+
+    public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
+        MLFabricSetupCallbacks.COMMON_SETUP.add(() -> {
+            RegHelper.ItemToTabEvent event = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
+                ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
+                    if (target == null) {
+                        entries.acceptAll(items);
+                    } else {
+                        if (after) {
+                            entries.addAfter(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                        } else {
+                            entries.addBefore(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                        }
+                    }
+                });
+            });
+            eventListener.accept(event);
+        });
+    }
+
+    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<Object> beforeEntries, List<Object> afterEntries, Consumer<CreativeModeTab.Builder> configurator) {
+        var builder = FabricItemGroup.builder(name);
+        configurator.accept(builder);
+        CreativeModeTab tab = builder.build();
+        return () -> tab;
+    }
+
+    public static void addItemsToTab(CreativeModeTab tab, @Nullable Predicate<ItemStack> addAfter, ItemStack... items) {
+        ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
+            if (addAfter == null) {
+                entries.acceptAll(List.of(items));
+            } else {
+                entries.addAfter(addAfter, Arrays.stream(items).toList(), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+            }
+        });
     }
 
 
