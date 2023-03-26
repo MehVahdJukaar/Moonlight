@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
@@ -50,6 +51,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -94,9 +96,12 @@ public class RegHelperImpl {
             throw new IllegalArgumentException("Registering under minecraft namespace is not supported");
         }
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
-        //String modId = ModLoadingContext.get().getActiveContainer().getModId();
         String modId = name.getNamespace();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
+            String activeMod = ModLoadingContext.get().getActiveContainer().getModId();
+            if(!Objects.equals(modId, activeMod)){
+                Moonlight.LOGGER.warn("Mod {} seems to have forcefully initialized registry content from mod {}",activeMod, modId);
+            }
             if (PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
 
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
