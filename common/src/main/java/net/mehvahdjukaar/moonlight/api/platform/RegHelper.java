@@ -307,12 +307,13 @@ public class RegHelper {
     public record ItemToTabEvent(
             QuadConsumer<CreativeModeTab, @Nullable Predicate<ItemStack>, Boolean, Collection<ItemStack>> action) {
 
-        public void add(CreativeModeTab tab, Item... items) {
+
+        public void add(CreativeModeTab tab, ItemLike... items) {
             addAfter(tab, null, items);
         }
 
-        public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, Item... items) {
-            action.accept(tab, target, true, Arrays.stream(items).map(Item::getDefaultInstance).toList());
+        public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, ItemLike... items) {
+            action.accept(tab, target, true, Arrays.stream(items).map(i->i.asItem().getDefaultInstance()).toList());
         }
 
         public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
