@@ -1,1 +1,1 @@
-* improved item drop on death event
+* registration fix

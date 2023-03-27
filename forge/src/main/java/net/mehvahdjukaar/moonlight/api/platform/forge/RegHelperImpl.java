@@ -42,8 +42,10 @@ import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.village.WandererTradesEvent;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -51,7 +53,6 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -98,19 +99,24 @@ public class RegHelperImpl {
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
         String modId = name.getNamespace();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
-            String activeMod = ModLoadingContext.get().getActiveContainer().getModId();
-            if(!Objects.equals(modId, activeMod)){
-                Moonlight.LOGGER.warn("Mod {} seems to have forcefully initialized registry content from mod {}",activeMod, modId);
-            }
             if (PlatformHelper.getEnv().isClient()) AntiRepostWarning.addMod(modId);
 
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
-            var bus = FMLJavaModLoadingContext.get().getModEventBus();
+            IEventBus bus = getModEventBus(modId);
             r.register(bus);
             return r;
         });
-        //forge we don't care about mod id since it's always the active container one
         return new EntryWrapper<>(registry.register(name.getPath(), supplier));
+    }
+
+    private static IEventBus getModEventBus(String modId) {
+        var cont = ModList.get().getModContainerById(modId).get();
+        IEventBus bus;
+        if (!(cont instanceof FMLModContainer container)) {
+            Moonlight.LOGGER.warn("Failed to get mod container for mod {}", modId);
+            bus = FMLJavaModLoadingContext.get().getModEventBus();
+        } else bus = container.getEventBus();
+        return bus;
     }
 
     public static <T, E extends
@@ -188,7 +194,7 @@ public class RegHelperImpl {
         @Override
         public <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
                                                 Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
-           event.register(entityType, decoratorType, heightMapType, decoratorPredicate, SpawnPlacementRegisterEvent.Operation.AND);
+            event.register(entityType, decoratorType, heightMapType, decoratorPredicate, SpawnPlacementRegisterEvent.Operation.AND);
         }
     }
 
