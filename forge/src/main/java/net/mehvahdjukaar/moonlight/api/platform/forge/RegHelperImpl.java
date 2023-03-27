@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
@@ -43,8 +44,11 @@ import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.village.WandererTradesEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -96,17 +100,27 @@ public class RegHelperImpl {
             throw new IllegalArgumentException("Registering under minecraft namespace is not supported");
         }
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
-        String modId = ModLoadingContext.get().getActiveContainer().getModId();
+        String modId = name.getNamespace();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
             if (PlatHelper.getPhysicalSide().isClient()) AntiRepostWarning.addMod(modId);
 
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
-            var bus = FMLJavaModLoadingContext.get().getModEventBus();
+            var bus = getModEventBus(modId);
             r.register(bus);
             return r;
         });
         //forge we don't care about mod id since it's always the active container one
         return new EntryWrapper<>(registry.register(name.getPath(), supplier));
+    }
+
+    private static IEventBus getModEventBus(String modId) {
+        var cont = ModList.get().getModContainerById(modId).get();
+        IEventBus bus;
+        if (!(cont instanceof FMLModContainer container)) {
+            Moonlight.LOGGER.warn("Failed to get mod container for mod {}", modId);
+            bus = FMLJavaModLoadingContext.get().getModEventBus();
+        } else bus = container.getEventBus();
+        return bus;
     }
 
     public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
