@@ -2,15 +2,14 @@ package net.mehvahdjukaar.moonlight.api.set;
 
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
-import java.util.EnumMap;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class BlocksColorAPI {
 
@@ -110,5 +109,40 @@ public class BlocksColorAPI {
 
     public static void registerItemColorSet(ResourceLocation key, EnumMap<DyeColor, Item> items, @Nullable Item defaultItem) {
         BlocksColorInternal.registerItemColorSet(key, items, defaultItem);
+    }
+
+
+    public static final List<DyeColor> SORTED_COLORS;
+    static {
+        List<DyeColor> l = new ArrayList<>();
+        l.add(DyeColor.WHITE);
+        l.add(DyeColor.LIGHT_GRAY);
+        l.add(DyeColor.GRAY);
+        l.add(DyeColor.BLACK);
+        l.add(DyeColor.BROWN);
+        l.add(DyeColor.RED);
+        l.add(DyeColor.ORANGE);
+        l.add(DyeColor.YELLOW);
+        l.add(DyeColor.LIME);
+        l.add(DyeColor.GREEN);
+        l.add(DyeColor.CYAN);
+        l.add(DyeColor.LIGHT_BLUE);
+        l.add(DyeColor.BLUE);
+        l.add(DyeColor.PURPLE);
+        l.add(DyeColor.MAGENTA);
+        l.add(DyeColor.PINK);
+        for (var c : DyeColor.values()){
+            if(!l.contains(c))l.add(c);
+        }
+        SORTED_COLORS = List.of(l.toArray(DyeColor[]::new));
+    }
+
+    /**
+     * Helper to register colors in order
+     */
+    public static<T> Stream<T> ordered(Map<DyeColor, T> map){
+       return map.entrySet().stream()
+                .sorted(Comparator.comparing(entry -> SORTED_COLORS.indexOf(entry.getKey())))
+                .map(Map.Entry::getValue);
     }
 }

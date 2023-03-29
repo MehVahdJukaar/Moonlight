@@ -167,12 +167,12 @@ public class RegHelperImpl {
     }
 
     public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        MLFabricSetupCallbacks.COMMON_SETUP.add(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
+        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.add(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
     }
 
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         //this just runs immediately... needs to run on mod setup instead
-        MLFabricSetupCallbacks.COMMON_SETUP.add(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
+        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.add(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
     }
 
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
@@ -203,7 +203,7 @@ public class RegHelperImpl {
 
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
-        MLFabricSetupCallbacks.COMMON_SETUP.add(() -> {
+        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.add(() -> {
             RegHelper.ItemToTabEvent event = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
                 ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
                     if (target == null) {

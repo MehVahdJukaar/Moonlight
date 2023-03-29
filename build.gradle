@@ -56,9 +56,9 @@ subprojects {
         }
     }
 
-    if (env.curseforge_token) {
+    if (env.CURSEFORGE_TOKEN) {
         curseforge {
-            apiKey = env.curseforge_token
+            apiKey = env.CURSEFORGE_TOKEN
             project {
                 id = rootProject.project_id
                 changelog = changelogText

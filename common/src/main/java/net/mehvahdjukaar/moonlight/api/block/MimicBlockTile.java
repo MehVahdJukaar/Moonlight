@@ -5,10 +5,13 @@ import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
 import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -46,7 +49,8 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
     @Override
     public void load(CompoundTag compound) {
         super.load(compound);
-        this.mimic = NbtUtils.readBlockState(this.level.holderLookup(Registries.BLOCK), compound.getCompound("Mimic"));
+        HolderGetter<Block> holderGetter = this.level != null ? this.level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK.asLookup();
+        this.mimic = NbtUtils.readBlockState(holderGetter, compound.getCompound("Mimic"));
     }
 
     @Override

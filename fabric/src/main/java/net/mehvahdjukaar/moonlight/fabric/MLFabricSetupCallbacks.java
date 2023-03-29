@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,5 +22,8 @@ public interface MLFabricSetupCallbacks {
     static void finishModInit(String modId){
        // RegHelperImpl.finishRegistration(modId);
     }
+
+    @ApiStatus.Internal
+    List<Runnable> BEFORE_COMMON_SETUP = new ArrayList<>();
 
 }

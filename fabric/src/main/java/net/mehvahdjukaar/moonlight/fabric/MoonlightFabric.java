@@ -42,7 +42,11 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     static void commonSetup() {
         RegHelperImpl.lateRegisterEntries();
         FabricConfigSpec.loadAllConfigs();
+        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.forEach(Runnable::run);
         MLFabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
+
+        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.clear();
+        MLFabricSetupCallbacks.COMMON_SETUP.clear();
     }
 
     public static MinecraftServer currentServer;

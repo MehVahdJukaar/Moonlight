@@ -319,9 +319,12 @@ public class RegHelper {
         public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
             action.accept(tab, target, true, List.of(items));
         }
-
+        @Deprecated(forRemoval = true)
         public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, Item... items) {
             action.accept(tab, target, false, Arrays.stream(items).map(Item::getDefaultInstance).toList());
+        }
+        public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, ItemLike... items) {
+            action.accept(tab, target, false, Arrays.stream(items).map(i->i.asItem().getDefaultInstance()).toList());
         }
 
         public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
@@ -374,6 +377,19 @@ public class RegHelper {
         public Block create(BlockBehaviour.Properties properties, @Nullable Supplier<Block> parent) {
             return this.constructor.apply(parent, properties);
         }
+
+        //TODO: find a better way to do this
+        public static void addToTab(ItemToTabEvent event, Map<VariantType, Supplier<Block>> blocks){
+            Map<VariantType, Supplier<Block>> m = new EnumMap<>(blocks);
+            if(!shouldRegisterVSlab()){
+                m.remove(VERTICAL_SLAB);
+            }
+            event.add(CreativeModeTabs.BUILDING_BLOCKS, m.values().stream().map(Supplier::get).toArray(Block[]::new));
+        }
+
+        private static boolean shouldRegisterVSlab() {
+            return PlatHelper.isModLoaded("quark") || PlatHelper.isModLoaded("v_slab_compat");
+        }
     }
 
     public static EnumMap<VariantType, Supplier<Block>> registerBaseBlockSet(ResourceLocation baseName, Block parentBlock) {
@@ -417,7 +433,6 @@ public class RegHelper {
         return registerBlockSet(VariantType.values(), baseName, properties);
     }
 
-    //TODO: add support for mod tabs
     public static EnumMap<VariantType, Supplier<Block>> registerBlockSet(
             VariantType[] types, ResourceLocation baseName, BlockBehaviour.Properties properties) {
 
@@ -450,9 +465,6 @@ public class RegHelper {
         return map;
     }
 
-    private static boolean shouldRegisterVSlab() {
-        return PlatHelper.isModLoaded("quark") || PlatHelper.isModLoaded("v_slab_compat");
-    }
 }
 
 
