@@ -2,7 +2,11 @@
   "fluid.moonlight.generic_fluid": "Безымянная жидкость",
   "item.minecraft.potion_lingering": "Туманное зелье",
   "item.minecraft.potion_splash": "Взрывное зелье",
-  "gui.moonlight.open_mod_page": "Открыть страницу в %s CurseForge",
-  "message.moonlight.anti_repost": "Кажется, у тебя загружена %1$s из злонамеренного сайта :( Получи настоящую версию %2$s.",
-  "message.moonlight.anti_repost_link": "здесь"
+  "gui.moonlight.open_mod_page": "Открыть страницу CurseForge %s",
+  "message.moonlight.anti_repost": "Кажется, Вы скачали %1$s из опасного сайта :( Получите настоящую версию %2$s.",
+  "message.moonlight.anti_repost_link": "здесь",
+
+  "wood_type.twilightforest.dark": "Тёмный лес",
+  "leaves_type.twilightforest.dark": "Тёмный лес",
+  "leaves_type.ulterlands.souldrained": "Окаменелый"
 }
