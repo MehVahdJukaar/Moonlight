@@ -282,25 +282,28 @@ public class RPUtils {
     }
 
     @FunctionalInterface
-    public interface CrossbowModelAdder {
+    public interface OverrideAppender {
         void add(ItemOverride override);
     }
 
     /**
-     * Utility method to add crossbow models in a non-destructive way. Provided overrides will be added on top of whatever crossbow model is currently provided by vanilla or mod resources
+     * Utility method to add models overrides in a non-destructive way. Provided overrides will be added on top of whatever model is currently provided by vanilla or mod resources. IE: crossbows
      */
-    public static void addCrossbowModel(ResourceManager manager, DynamicTexturePack pack, Consumer<CrossbowModelAdder> modelConsumer) {
-        var res = new ResourceLocation("crossbow");
-        var o = manager.getResource(ResType.ITEM_MODELS.getPath(res));
+    public static void appendModelOverride(ResourceManager manager, DynamicTexturePack pack,
+                                           ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
+        var o = manager.getResource(ResType.ITEM_MODELS.getPath(modelRes));
         if (o.isPresent()) {
             try (var model = o.get().open()) {
                 var json = RPUtils.deserializeJson(model);
-                var overrides = json.getAsJsonArray("overrides");
+                JsonArray overrides;
+                if(json.has("overrides")){
+                    overrides = json.getAsJsonArray("overrides");;
+                }else overrides = new JsonArray();
 
                 modelConsumer.accept(ov -> overrides.add(serializeOverride(ov)));
 
                 json.add("overrides", overrides);
-                pack.addItemModel(res, json);
+                pack.addItemModel(modelRes, json);
             } catch (Exception ignored) {
             }
         }
