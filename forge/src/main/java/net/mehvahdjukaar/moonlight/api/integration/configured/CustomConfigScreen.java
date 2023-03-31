@@ -33,10 +33,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -93,7 +93,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
     protected CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
                                  Screen parent, ModConfig config) {
-        this(modId, mainIcon, background, title, parent, new ForgeConfig(config));
+        this(modId, mainIcon, background, title, parent, new ForgeConfig(config, (ForgeConfigSpec) config.getSpec()));
 
     }
 

@@ -1,1 +1,1 @@
-fixed a mixin error
+updated configured dependency
