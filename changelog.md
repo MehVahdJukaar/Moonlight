@@ -1,1 +1,1 @@
-updated configured dependency
+version number screwup
