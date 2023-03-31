@@ -24,6 +24,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
@@ -91,7 +92,8 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     private static Map<ConfigType, Set<IModConfig>> createConfigMap(ConfigSpec... specs) {
         Map<ConfigType, Set<IModConfig>> modConfigMap = new EnumMap<>(ConfigType.class);
         for (var s : specs) {
-            var c = new ForgeConfig(((ConfigSpecWrapper) s).getModConfig());
+            ModConfig modConfig = ((ConfigSpecWrapper) s).getModConfig();
+            var c = new ForgeConfig(modConfig, (ForgeConfigSpec) modConfig.getSpec());
             var set = modConfigMap.computeIfAbsent(
                     c.getType(), a -> new HashSet<>());
             set.add(c);

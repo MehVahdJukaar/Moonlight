@@ -1,1 +1,1 @@
-* registration fix
+updated configured dependency

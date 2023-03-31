@@ -12,7 +12,6 @@ import com.mrcrayfish.configured.api.IModConfig;
 import com.mrcrayfish.configured.api.ValueEntry;
 import com.mrcrayfish.configured.client.screen.ConfigScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
-import com.mrcrayfish.configured.client.util.ScreenUtil;
 import com.mrcrayfish.configured.impl.forge.ForgeConfig;
 import com.mrcrayfish.configured.impl.forge.ForgeValue;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
@@ -34,6 +33,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.Nullable;
@@ -93,7 +93,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
     protected CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
                                  Screen parent, ModConfig config) {
-        this(modId, mainIcon, background, title, parent, new ForgeConfig(config));
+        this(modId, mainIcon, background, title, parent, new ForgeConfig(config, (ForgeConfigSpec) config.getSpec()));
 
     }
 
