@@ -30,9 +30,3 @@ issueTrackerURL = "https://github.com/MehVahdJukaar/Moonlight/issues" #optional
     ordering = "NONE"
     side = "BOTH"
 
-[[dependencies.moonlight]]
-    modId = "configured"
-    mandatory = false
-    versionRange = "[2.1.1-1.19.2,)"
-    ordering = "NONE"
-    side = "CLIENT"

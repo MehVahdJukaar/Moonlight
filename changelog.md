@@ -1,1 +1,1 @@
-updated configured dependency
+fixed version number
