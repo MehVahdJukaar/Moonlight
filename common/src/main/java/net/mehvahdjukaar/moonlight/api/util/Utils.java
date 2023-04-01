@@ -101,6 +101,16 @@ public class Utils {
         return newShape.get();
     }
 
+    public static VoxelShape moveVoxelShape(VoxelShape source, Vec3 v) {
+        AtomicReference<VoxelShape> newShape = new AtomicReference<>(Shapes.empty());
+        source.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+            VoxelShape s = Shapes.create(minX + v.x, minY + v.y, minZ + v.z,
+                    maxX + v.x, maxY + v.y, maxZ + v.z);
+            newShape.set(Shapes.or(newShape.get(), s));
+        });
+        return newShape.get();
+    }
+
     public static ResourceLocation getID(Block object) {
         return Registry.BLOCK.getKey(object);
     }
