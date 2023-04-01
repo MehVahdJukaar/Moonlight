@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[40,)"
-license = "ARR"
+license = "gplv3"
 issueTrackerURL = "https://github.com/MehVahdJukaar/Moonlight/issues" #optional
 
 [[mods]]

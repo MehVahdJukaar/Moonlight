@@ -11,7 +11,7 @@
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/selene",
     "sources": "https://github.com/MehVahdJukaar/Moonlight"
   },
-  "license": "ARR",
+  "license": "gplv3",
   "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
