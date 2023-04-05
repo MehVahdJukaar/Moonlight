@@ -1,21 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
-import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
-import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Vector2i;
 
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 
@@ -82,11 +76,17 @@ public class MthUtils {
                 cos = 0;
                 sin = -1;
             }
+            case UP -> {
+                return new Vec3(vec.x, -vec.z, vec.y);
+            }
+            case DOWN -> {
+                return new Vec3(vec.x, vec.z, vec.y);
+            }
         }
-        double d0 = vec.x * cos + vec.z * sin;
-        double d1 = vec.y;
-        double d2 = vec.z * cos - vec.x * sin;
-        return new Vec3(d0, d1, d2);
+        double dx = vec.x * cos + vec.z * sin;
+        double dy = vec.y;
+        double dz = vec.z * cos - vec.x * sin;
+        return new Vec3(dx, dy, dz);
     }
 
     /**
@@ -167,7 +167,7 @@ public class MthUtils {
      */
     public static final float PHI = (float) (1 + (Math.sqrt(5d) - 1) / 2f);
 
-    public static<T extends BaseColor<T>> T lerpColorScale(List<T> palette, float phase) {
+    public static <T extends BaseColor<T>> T lerpColorScale(List<T> palette, float phase) {
         if (phase >= 1) phase = phase % 1;
 
         int n = palette.size();
@@ -186,6 +186,7 @@ public class MthUtils {
     }
 
     public static VoxelShape rotateVoxelShape(VoxelShape source, Direction direction) {
+        if (direction == Direction.NORTH) return source;
         AtomicReference<VoxelShape> newShape = new AtomicReference<>(Shapes.empty());
         source.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
             Vec3 min = new Vec3(minX - 0.5, minY - 0.5, minZ - 0.5);
