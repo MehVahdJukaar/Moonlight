@@ -8,11 +8,12 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class MoonlightEventsHelperImpl {
 
-    private static final Map<Class<? extends SimpleEvent>, List<Consumer<? extends SimpleEvent>>> LISTENERS = new IdentityHashMap<>();
+    private static final Map<Class<? extends SimpleEvent>, List<Consumer<? extends SimpleEvent>>> LISTENERS = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
     public static <T extends SimpleEvent> void addListener(Consumer<T> listener, Class<T> eventClass) {

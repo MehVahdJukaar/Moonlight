@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;

@@ -1,1 +1,1 @@
-version number screwup
+Fixed a concurrency issue and crash that could have happened with some other mod
