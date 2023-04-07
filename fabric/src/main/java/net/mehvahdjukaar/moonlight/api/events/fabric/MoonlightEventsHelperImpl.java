@@ -5,11 +5,12 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.HitResult;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class MoonlightEventsHelperImpl {
 
-    private static final Map<Class<? extends SimpleEvent>, List<Consumer<? extends SimpleEvent>>> LISTENERS = new IdentityHashMap<>();
+    private static final Map<Class<? extends SimpleEvent>, List<Consumer<? extends SimpleEvent>>> LISTENERS = new ConcurrentHashMap<>();
 
 
     public static <T extends SimpleEvent> void addListener(Consumer<T> listener, Class<T> eventClass) {
