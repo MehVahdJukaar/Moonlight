@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
-import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
+import net.mehvahdjukaar.moonlight.api.block.IVerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.item.FuelBlockItem;
 import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
@@ -361,7 +361,7 @@ public class RegHelper {
     public enum VariantType {
         BLOCK(Block::new),
         SLAB(SlabBlock::new),
-        VERTICAL_SLAB(VerticalSlabBlock::new),
+        VERTICAL_SLAB(IVerticalSlabBlock::new),
         WALL(WallBlock::new),
         STAIRS(ModStairBlock::new);
         private final BiFunction<Supplier<Block>, BlockBehaviour.Properties, Block> constructor;

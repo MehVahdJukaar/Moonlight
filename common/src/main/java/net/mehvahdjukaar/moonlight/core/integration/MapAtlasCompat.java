@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.integration;
+package net.mehvahdjukaar.moonlight.core.integration;
 
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
