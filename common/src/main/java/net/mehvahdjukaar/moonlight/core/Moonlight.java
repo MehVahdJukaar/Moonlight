@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.ModCriteriaTriggers;
+import net.mehvahdjukaar.moonlight.core.fake_player.FakeServerPlayer;
 import net.mehvahdjukaar.moonlight.core.loot_pool_entries.ModLootPoolEntries;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
@@ -58,13 +59,13 @@ public class Moonlight {
             MoonlightClient.initClient();
         }
 
-        PlatHelper.addCommonSetup(BlocksColorInternal::setup);
-
-        MoonlightEventsHelper.addListener( Moonlight::aa,IDropItemOnDeathEvent.class);
+        PlatHelper.addCommonSetup(Moonlight::commonSetup);
     }
 
-    public static void aa(IDropItemOnDeathEvent event){
-        if(event.getItemStack().is(Items.DIAMOND))event.setCanceled(true);
+    private static void commonSetup() {
+        BlocksColorInternal.setup();
+
+        FakeServerPlayer.init();
     }
 
     @EventCalled

@@ -126,12 +126,19 @@ public class FakeServerPlayer extends ServerPlayer {
         return PlatHelper.getCurrentServer();
     }
 
+    public static void init(){
+        FakePlayerNetHandler.init();
+    }
+
     @ParametersAreNonnullByDefault
     private static class FakePlayerNetHandler extends ServerGamePacketListenerImpl {
         private static final Connection DUMMY_CONNECTION = new Connection(PacketFlow.CLIENTBOUND);
 
         public FakePlayerNetHandler(MinecraftServer server, ServerPlayer player) {
             super(server, DUMMY_CONNECTION, player);
+        }
+
+        public static void init() {
         }
 
         @Override
