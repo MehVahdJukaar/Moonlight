@@ -1,1 +1,1 @@
-Fixed a concurrency issue and crash that could have happened with some other mod
+possibly fixed a rare concurrency issue that would happen with some mod

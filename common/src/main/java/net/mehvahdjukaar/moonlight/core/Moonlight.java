@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
+import net.mehvahdjukaar.moonlight.api.util.fake_player.FakeServerPlayer;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.ModCriteriaTriggers;
 import net.mehvahdjukaar.moonlight.core.loot_pool_entries.ModLootPoolEntries;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
@@ -59,6 +60,14 @@ public class Moonlight {
         }
 
         PlatformHelper.addCommonSetup(BlocksColorInternal::setup);
+        PlatformHelper.addCommonSetup(Moonlight::commonSetup);
+
+    }
+
+    private static void commonSetup() {
+        BlocksColorInternal.setup();
+
+        FakeServerPlayer.init();
     }
 
     @EventCalled

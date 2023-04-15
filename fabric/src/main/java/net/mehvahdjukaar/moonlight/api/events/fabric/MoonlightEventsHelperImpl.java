@@ -6,15 +6,16 @@ import net.minecraft.world.phys.HitResult;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
 public class MoonlightEventsHelperImpl {
 
-    private static final Map<Class<? extends SimpleEvent>, List<Consumer<? extends SimpleEvent>>> LISTENERS = new ConcurrentHashMap<>();
+    private static final Map<Class<? extends SimpleEvent>, Queue<Consumer<? extends SimpleEvent>>> LISTENERS = new ConcurrentHashMap<>();
 
 
     public static <T extends SimpleEvent> void addListener(Consumer<T> listener, Class<T> eventClass) {
-        LISTENERS.computeIfAbsent(eventClass, e -> new ArrayList<>()).add(listener);
+        LISTENERS.computeIfAbsent(eventClass, e -> new ConcurrentLinkedDeque<>()).add(listener);
     }
 
     @SuppressWarnings("unchecked")

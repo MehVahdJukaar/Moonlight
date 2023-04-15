@@ -4,10 +4,8 @@
 
 package net.mehvahdjukaar.moonlight.api.util.fake_player;
 
-import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
@@ -46,7 +44,7 @@ public class FakeServerPlayer extends ServerPlayer {
      * WorldEvent.Unload and kill all references to prevent worlds staying in memory.
      */
     static FakeServerPlayer get(ServerLevel level, GameProfile username) {
-        return FAKE_PLAYERS.computeIfAbsent(level, l-> new HashMap<>())
+        return FAKE_PLAYERS.computeIfAbsent(level, l -> new HashMap<>())
                 .computeIfAbsent(username, u -> new FakeServerPlayer(level, username));
     }
 
@@ -126,8 +124,15 @@ public class FakeServerPlayer extends ServerPlayer {
         return PlatformHelper.getCurrentServer();
     }
 
+    public static void init() {
+        FakePlayerNetHandler.init();
+    }
+
     @ParametersAreNonnullByDefault
-    private static class FakePlayerNetHandler extends ServerGamePacketListenerImpl {
+    public static class FakePlayerNetHandler extends ServerGamePacketListenerImpl {
+        public static void init() {
+        }
+
         private static final Connection DUMMY_CONNECTION = new Connection(PacketFlow.CLIENTBOUND);
 
         public FakePlayerNetHandler(MinecraftServer server, ServerPlayer player) {
