@@ -22,7 +22,7 @@ public class MoonlightEventsHelperImpl {
     public static <T extends SimpleEvent> void postEvent(T event, Class<T> eventClass) {
         var consumers = LISTENERS.get(eventClass);
         if (consumers != null) {
-            ((List<Consumer<T>>) (Object) consumers).forEach(e -> e.accept(event));
+            ((Queue<Consumer<T>>) (Object) consumers).forEach(e -> e.accept(event));
         }
     }
 

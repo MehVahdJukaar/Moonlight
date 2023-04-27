@@ -40,7 +40,7 @@ public class MoonlightEventsHelperImpl {
         } else {
             var consumers = LISTENERS.get(eventClass);
             if (consumers != null) {
-                ((List<Consumer<T>>) (Object) consumers).forEach(e -> e.accept(event));
+                ((Queue<Consumer<T>>) (Object) consumers).forEach(e -> e.accept(event));
             }
         }
     }
