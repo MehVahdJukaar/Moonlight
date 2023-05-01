@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.events.fabric;
 
+import net.fabricmc.fabric.mixin.resource.loader.client.KeyedResourceReloadListenerClientMixin;
 import net.mehvahdjukaar.moonlight.api.events.SimpleEvent;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.HitResult;
@@ -16,7 +17,7 @@ public class MoonlightEventsHelperImpl {
 
 
     public static <T extends SimpleEvent> void addListener(Consumer<T> listener, Class<T> eventClass) {
-        LISTENERS.computeIfAbsent(eventClass, e -> new ConcurrentLinkedDeque()).add(listener);
+        LISTENERS.computeIfAbsent(eventClass, e -> new ConcurrentLinkedDeque<>()).add(listener);
     }
 
     @SuppressWarnings("unchecked")

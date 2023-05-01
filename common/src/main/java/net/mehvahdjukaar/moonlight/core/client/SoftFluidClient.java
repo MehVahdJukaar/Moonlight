@@ -23,14 +23,13 @@ import java.util.List;
 public class SoftFluidClient extends GenericSimpleResourceReloadListener {
 
     public SoftFluidClient() {
-        super("textures/soft_fluids", ".png");
+        super("textures/soft_fluids", ".png"); //unused, just need for color reload
     }
 
     //adds all textures in this folder
     @Override
     public void apply(List<ResourceLocation> locations, ResourceManager manager, ProfilerFiller filler) {
-        TEXTURES_TO_STITCH.clear();
-        TEXTURES_TO_STITCH.addAll(locations);
+        refreshParticleColors();
 
         //also using this to reset texture cache
         RenderedTexturesManager.clearCache();
@@ -39,24 +38,14 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
         TextureCache.clear();
     }
 
-    private static final List<ResourceLocation> TEXTURES_TO_STITCH = new ArrayList<>();
-
     private static final HashMap<ResourceLocation, Integer> PARTICLE_COLORS = new HashMap<>();
 
     public static int get(SoftFluid s) {
         return PARTICLE_COLORS.getOrDefault(Utils.getID(s), -1);
     }
 
-    public static List<ResourceLocation> getTexturesToStitch() {
-        //fluids aren't registered here, so we can't just iterate over them
-        var list = new ArrayList<ResourceLocation>();
-        TEXTURES_TO_STITCH.forEach(e -> list.add(new ResourceLocation(e.getNamespace(), "soft_fluids/" + e.getPath())));
-        return list;
-    }
-
     //TODO: possibly do it for ALL fluids, not only non grayscale ones
-    //TODO: call after pack reload
-    public static void refresh() {
+    public static void refreshParticleColors() {
         Minecraft mc = Minecraft.getInstance();
         if (mc == null || mc.level == null) return;
         var v = SoftFluidRegistry.getEntries();
