@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Mixin(Inventory.class)
-public class InventoryMixin {
+public abstract class InventoryMixin {
 
     @Shadow @Final public Player player;
 

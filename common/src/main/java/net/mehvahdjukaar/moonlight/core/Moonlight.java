@@ -21,7 +21,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +32,7 @@ public class Moonlight {
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     public static final boolean HAS_BEEN_INIT = true;
-    public static final TagKey<Block> SHEATABLE_TAG = TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("mineable/shear"));
+    public static final TagKey<Block> SHEARABLE_TAG = TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("mineable/shear"));
 
     public static ResourceLocation res(String name) {
         return new ResourceLocation(MOD_ID, name);
@@ -87,4 +86,5 @@ public class Moonlight {
             }
         }
     }
+
 }
