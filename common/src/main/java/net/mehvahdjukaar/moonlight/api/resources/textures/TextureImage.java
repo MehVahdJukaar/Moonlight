@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
@@ -43,7 +42,7 @@ public class TextureImage implements AutoCloseable {
         this.metadata = metadata;
         int imgWidth = this.imageWidth(); // 16
         int imgHeight = this.imageHeight(); // 48
-        this.frameSize = metadata == null ? new FrameSize(imgWidth,imgHeight) : metadata.calculateFrameSize(imgWidth, imgHeight);
+        this.frameSize = metadata == null ? new FrameSize(imgWidth, imgHeight) : metadata.calculateFrameSize(imgWidth, imgHeight);
         this.frameScale = imgWidth / frameSize.width(); // 1
         int frameScaleHeight = imgHeight / frameSize.height(); // 2
         this.maxFrames = frameScale * frameScaleHeight; // 2
@@ -65,11 +64,11 @@ public class TextureImage implements AutoCloseable {
         }
     }
 
-    public void toGrayscale(){
+    public void toGrayscale() {
         SpriteUtils.grayscaleImage(this.image);
     }
 
-    public RGBColor getAverageColor(){
+    public RGBColor getAverageColor() {
         return SpriteUtils.averageColor(this.image);
     }
 
@@ -152,11 +151,12 @@ public class TextureImage implements AutoCloseable {
         AnimationMetadataSection metadata = null;
 
         var res = manager.getResource(metadataLoc);
-        if(res.isPresent()){
+        if (res.isPresent()) {
             try (InputStream metadataStream = res.get().open()) {
                 metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
 
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         return new TextureImage(i, metadata);
@@ -192,7 +192,7 @@ public class TextureImage implements AutoCloseable {
         }
         int imgWidth = this.imageWidth(); // 16
         int imgHeight = this.imageHeight(); // 48
-        var fs =   metadata.calculateFrameSize(imgWidth, imgHeight);
+        var fs = metadata.calculateFrameSize(imgWidth, imgHeight);
 
 
         int frameScaleWidth = imgWidth / fs.width(); // 1
@@ -297,7 +297,7 @@ public class TextureImage implements AutoCloseable {
         for (var o : overlays) {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    if(FastColor.ABGR32.alpha(image.getPixelRGBA(x,y))!=0) {
+                    if (FastColor.ABGR32.alpha(image.getPixelRGBA(x, y)) != 0) {
                         image.blendPixel(x, y, o.image.getPixelRGBA(x, y));
                     }
                 }
@@ -326,17 +326,18 @@ public class TextureImage implements AutoCloseable {
         }
     }
 
-    public void crop(TextureImage mask){
+    public void crop(TextureImage mask) {
         crop(mask, true);
     }
 
     /**
      * Crop the given image with the provided mask. All that isnt transparent will be erased
      * Closes the given mask
-     * @param mask mask
-     * @param inner if the operation should be reversed by keeping what is not transparent
+     *
+     * @param mask         mask
+     * @param discardInner crops pixels that are not transparent. False for opposite behavior
      */
-    public void crop(TextureImage mask, boolean inner){
+    public void crop(TextureImage mask, boolean discardInner) {
         int width = imageWidth();
         int height = imageHeight();
         if (mask.imageHeight() < height || mask.imageWidth() < width) {
@@ -344,8 +345,8 @@ public class TextureImage implements AutoCloseable {
         }
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if(FastColor.ABGR32.alpha(mask.image.getPixelRGBA(x,y))!=0 == inner) {
-                    image.setPixelRGBA(x,y,0);
+                if (FastColor.ABGR32.alpha(mask.image.getPixelRGBA(x, y)) != 0 == discardInner) {
+                    image.setPixelRGBA(x, y, 0);
                 }
             }
         }
