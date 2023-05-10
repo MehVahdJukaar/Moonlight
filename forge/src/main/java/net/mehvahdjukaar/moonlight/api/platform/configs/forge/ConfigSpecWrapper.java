@@ -11,6 +11,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -81,6 +82,11 @@ public class ConfigSpecWrapper extends ConfigSpec {
     @Override
     public String getFileName() {
         return modConfig.getFileName();
+    }
+
+    @Override
+    public Component getName() {
+        return Component.literal(getFileName());
     }
 
     @Override

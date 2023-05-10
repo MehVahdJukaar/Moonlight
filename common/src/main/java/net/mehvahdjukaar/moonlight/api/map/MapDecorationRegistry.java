@@ -111,32 +111,17 @@ public class MapDecorationRegistry {
         return get(GENERIC_STRUCTURE_ID);
     }
 
-    public static final Map<ResourceLocation, Supplier<CustomDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new HashMap<>();
+    private static final Map<ResourceLocation, CustomDecorationType<?, ?>> CODE_TYPES_FACTORIES = new HashMap<>();
 
     /**
-     * Call before mod setup. Register a code defined map marker
-     * For now only works for FORGE as fabric has some unknown bugs I cant figure out involving vanilla codecs
+     * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
      */
-    public static void register(ResourceLocation id, Supplier<CustomDecorationType<?, ?>> markerType) {
-        CODE_TYPES_FACTORIES.put(id, markerType);
-        registerInternal(id, markerType::get);
+    public static void registerCustomType(CustomDecorationType<?, ?> markerType) {
+        CODE_TYPES_FACTORIES.put(markerType.getCustomFactoryID(), markerType);
     }
 
-    /**
-     * creates & registers a simple decoration with no associated world marker.<br>
-     * useful for exploration maps. It's however better to add these via data pack
-     *
-     * @param modId mod id
-     * @param name  decoration name
-     */
-    public static void registerSimple(String modId, String name) {
-        var id = new ResourceLocation(modId, name);
-        register(id, () -> new CustomDecorationType<>(id, CustomMapDecoration::new));
-    }
-
-    @ExpectPlatform
-    private static void registerInternal(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
-        throw new AssertionError();
+    public static CustomDecorationType<?,?> getCustomType(ResourceLocation resourceLocation){
+      return Objects.requireNonNull(CODE_TYPES_FACTORIES.get(resourceLocation),"No map decoration type with id: "+resourceLocation);
     }
 
     @ExpectPlatform

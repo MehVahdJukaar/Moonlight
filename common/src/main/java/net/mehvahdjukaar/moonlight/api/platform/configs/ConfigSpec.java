@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,7 +41,6 @@ public abstract class ConfigSpec {
         return null;
     }
 
-
     private final String fileName;
     private final String modId;
     private final Path filePath;
@@ -61,6 +61,8 @@ public abstract class ConfigSpec {
         this.synced = synced;
         this.changeCallback = changeCallback;
     }
+
+    public abstract Component getName();
 
     protected void onRefresh(){
         if(this.changeCallback!= null){

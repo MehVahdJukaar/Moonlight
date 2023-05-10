@@ -24,8 +24,4 @@ public class MapDecorationRegistryImpl {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.register(MapDecorationRegistryImpl.class);
     }
-
-    public static void registerInternal(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
-        RegHelperImpl.register(id, markerType, KEY);
-    }
 }

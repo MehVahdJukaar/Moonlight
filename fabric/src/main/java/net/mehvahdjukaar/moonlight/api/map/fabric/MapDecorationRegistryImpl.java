@@ -18,13 +18,6 @@ public class MapDecorationRegistryImpl {
     public static void init() {
     }
 
-    public static void registerInternal(ResourceLocation id, Supplier<MapDecorationType<?, ?>> markerType) {
-        //TODO: this could be what causes issues? its currently disabled
-        MappedRegistry<MapDecorationType<?, ?>> reg = (MappedRegistry<MapDecorationType<?, ?>>) MapDecorationRegistry.hackyGetRegistry();
-
-        Registry.register(reg, id, markerType.get());
-    }
-
     public static void bootstrap(BootstapContext<MapDecorationType<?, ?>> bootstapContext) {
         bootstapContext.register(ResourceKey.create(MapDecorationRegistry.KEY,
                 MapDecorationRegistry.GENERIC_STRUCTURE_ID), new SimpleDecorationType(Optional.empty()));

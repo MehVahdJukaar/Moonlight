@@ -15,6 +15,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -124,6 +125,7 @@ public class RegHelper {
         return registerAsync(name, feature, Registries.STRUCTURE_TYPE);
     }
 
+    /*
     public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<PlacedFeature> registerPlacedFeature(
             ResourceLocation name, RegSupplier<ConfiguredFeature<C, F>> feature, Supplier<List<PlacementModifier>> modifiers) {
         return registerPlacedFeature(name, () -> new PlacedFeature(hackyErase(feature.getHolder()), modifiers.get()));
@@ -145,7 +147,7 @@ public class RegHelper {
     public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<ConfiguredFeature<C, F>> registerConfiguredFeature(
             ResourceLocation name, Supplier<ConfiguredFeature<C, F>> featureSupplier) {
         return register(name, featureSupplier, Registries.CONFIGURED_FEATURE);
-    }
+    }*/
 
     public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> sound) {
         return register(name, sound, Registries.SOUND_EVENT);

@@ -20,14 +20,14 @@ public abstract class MapDecorationType<D extends CustomMapDecoration, M extends
     //wish I knew how to do this better, but I can't partially dispatch an optional key
     @Deprecated
     public static final Codec<MapDecorationType<?, ?>> GENERIC_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.optionalFieldOf("custom", new ResourceLocation("")).forGetter(MapDecorationType::getCustomFactoryID),
+            ResourceLocation.CODEC.optionalFieldOf("custom_type", new ResourceLocation("")).forGetter(MapDecorationType::getCustomFactoryID),
             RuleTest.CODEC.optionalFieldOf("target_block").forGetter(b -> b instanceof SimpleDecorationType s ? s.getTarget() : Optional.empty())
     ).apply(instance, MapDecorationType::decode));
 
     @Deprecated
     private static MapDecorationType<?, ?> decode(ResourceLocation customFactory, Optional<RuleTest> ruleTest) {
-        var f = MapDecorationRegistry.CODE_TYPES_FACTORIES.get(customFactory);
-        if (f != null) return f.get();
+        var f = MapDecorationRegistry.getCustomType(customFactory);
+        if (f != null) return f;
         else return new SimpleDecorationType(ruleTest);
     }
 

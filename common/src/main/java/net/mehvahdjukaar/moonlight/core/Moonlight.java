@@ -31,7 +31,7 @@ public class Moonlight {
 
     public static final String MOD_ID = "moonlight";
 
-    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+    public static final Logger LOGGER = LogManager.getLogger("Moonlight");
     public static final boolean HAS_BEEN_INIT = true;
     public static final TagKey<Block> SHEARABLE_TAG = TagKey.create(Registries.BLOCK, new ResourceLocation("mineable/shear"));
     public static boolean test = true;

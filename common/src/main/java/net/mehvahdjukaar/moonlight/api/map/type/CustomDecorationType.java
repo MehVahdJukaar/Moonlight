@@ -22,8 +22,8 @@ public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBl
 
 
     public static final Codec<CustomDecorationType<?, ?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("custom").forGetter(MapDecorationType::getCustomFactoryID)
-    ).apply(instance, c -> MapDecorationRegistry.CODE_TYPES_FACTORIES.get(c).get()));
+            ResourceLocation.CODEC.fieldOf("custom_type").forGetter(MapDecorationType::getCustomFactoryID)
+    ).apply(instance, MapDecorationRegistry::getCustomType));
 
 
     protected final Supplier<M> markerFactory;

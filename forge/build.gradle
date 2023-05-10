@@ -38,6 +38,7 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
     modCompileOnly ("curse.maven:configured-457570:4462894")
+    modImplementation("curse.maven:yacl-667299:4523736")
 
     modCompileOnly ("curse.maven:map-atlases-forge-519759:3949437")
 
