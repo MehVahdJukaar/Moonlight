@@ -20,6 +20,7 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -193,4 +194,8 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
+    @ExpectPlatform
+    public static boolean canItemStack(ItemStack i, ItemStack i1){
+        throw new AssertionError();
+    }
 }

@@ -5,5 +5,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class QuarkCompatImpl {
     public static Block createVerticalSlab(BlockBehaviour.Properties properties) {
+        //TODO:
+        return null;
     }
 }

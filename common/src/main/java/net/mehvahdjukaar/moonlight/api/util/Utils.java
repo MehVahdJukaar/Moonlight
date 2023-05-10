@@ -39,6 +39,7 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.units.qual.A;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -153,8 +154,8 @@ public class Utils {
         throw new UnsupportedOperationException("Unknown class type " + object.getClass());
     }
 
-    public static <T> boolean isTagged(T potion, Registry<T> registry, TagKey<T> tag) {
-        return registry.getHolder(registry.getResourceKey(potion).get()).map(h -> h.is(tag)).orElse(false);
+    public static <T> boolean isTagged(T entry, Registry<T> registry, TagKey<T> tag) {
+        return registry.getHolder(registry.getId(entry)).map(h -> h.is(tag)).orElse(false);
     }
 
     //very hacky
@@ -199,4 +200,6 @@ public class Utils {
     public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> getTicker(BlockEntityType<A> type, BlockEntityType<E> targetType, BlockEntityTicker<? super E> ticker) {
         return targetType == type ? (BlockEntityTicker<A>) ticker : null;
     }
+
+
 }

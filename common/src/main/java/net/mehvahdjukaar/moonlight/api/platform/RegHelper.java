@@ -4,13 +4,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
-import net.mehvahdjukaar.moonlight.api.block.IVerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.item.FuelBlockItem;
 import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -353,15 +354,20 @@ public class RegHelper {
         throw new AssertionError();
     }
 
+    @FunctionalInterface
+    public interface CommandRegistration {
+        void accept(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context, Commands.CommandSelection selection);
+    }
+
     @ExpectPlatform
-    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
+    public static void addCommandRegistration(CommandRegistration eventListener) {
         throw new AssertionError();
     }
 
     public enum VariantType {
         BLOCK(Block::new),
         SLAB(SlabBlock::new),
-        VERTICAL_SLAB(IVerticalSlabBlock::new),
+        VERTICAL_SLAB(Block::new), //TODO
         WALL(WallBlock::new),
         STAIRS(ModStairBlock::new);
         private final BiFunction<Supplier<Block>, BlockBehaviour.Properties, Block> constructor;

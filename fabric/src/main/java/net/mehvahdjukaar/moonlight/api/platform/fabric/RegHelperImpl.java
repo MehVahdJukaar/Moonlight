@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
-import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -19,7 +18,6 @@ import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.MLFabricSetupCallbacks;
 import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -183,8 +181,8 @@ public class RegHelperImpl {
         SPAWN_PLACEMENT_REGISTRATIONS.add(eventListener);
     }
 
-    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
-        CommandRegistrationCallback.EVENT.register((d, s, b) -> eventListener.accept(d));
+    public static void addCommandRegistration(RegHelper.CommandRegistration eventListener) {
+        CommandRegistrationCallback.EVENT.register(eventListener::accept);
     }
 
 

@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.common.collect.Lists;
-import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
@@ -10,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -46,7 +44,6 @@ import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.DeferredRegister;
@@ -186,9 +183,9 @@ public class RegHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    public static void addCommandRegistration(Consumer<CommandDispatcher<CommandSourceStack>> eventListener) {
+    public static void addCommandRegistration(RegHelper.CommandRegistration eventListener) {
         Consumer<RegisterCommandsEvent> eventConsumer = event -> {
-            eventListener.accept(event.getDispatcher());
+            eventListener.accept(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
         };
         MinecraftForge.EVENT_BUS.addListener(eventConsumer);
     }

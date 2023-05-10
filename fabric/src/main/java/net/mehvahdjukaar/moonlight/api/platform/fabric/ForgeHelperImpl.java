@@ -155,4 +155,8 @@ public class ForgeHelperImpl {
 
     public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
     }
+
+    public static boolean canItemStack(ItemStack i, ItemStack i1) {
+        return ItemStack.isSameItemSameTags(i, i1);
+    }
 }
