@@ -553,6 +553,10 @@ public class Palette implements Set<PaletteColor> {
 
         Palette palette = merge(palettes.toArray(new Palette[0]));
         if (tolerance != 0) palette.updateTolerance(tolerance);
+
+        if (palette.isEmpty()) {
+            throw new AssertionError("Palette from image " + textureImage + " ended ub being empty");
+        }
         return palette;
     }
 

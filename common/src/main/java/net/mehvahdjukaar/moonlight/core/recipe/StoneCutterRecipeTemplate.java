@@ -11,6 +11,7 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -40,7 +41,7 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
 
         this.count = count;
         this.result = BuiltInRegistries.ITEM.get(item);
-        this.category = CraftingBookCategory.CODEC.decode(JsonOps.INSTANCE, json.get("category")).get().orThrow().getFirst();
+        this.category = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, "category", null), CraftingBookCategory.MISC);
 
         var g = json.get("group");
         this.group = g == null ? "" : g.getAsString();
@@ -56,10 +57,7 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
             throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
                     this.result, originalMat, destinationMat));
         }
-        if (PlatHelper.getTabsContainingItem(newRes.asItem()).isEmpty()) {
-            Moonlight.LOGGER.error("Failed to generate recipe for {} in block type {}: Output item {} cannot have empty creative tab, skipping", this.result, destinationMat, newRes);
-            return null;
-        }
+
         Ingredient ing = IRecipeTemplate.convertIngredients(originalMat, destinationMat, ingredient);
 
         //if recipe fails

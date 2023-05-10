@@ -173,11 +173,6 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
-    public static List<CreativeModeTab> getTabsContainingItem(Item asItem) {
-        throw new AssertionError();
-    }
-
     @Nullable
     @ExpectPlatform
     public static MinecraftServer getCurrentServer() {

@@ -34,10 +34,13 @@ public class LinkButton {
 
         var button = TextAndImageButton.builder(CommonComponents.EMPTY, texture, onPress)
                 .textureSize(iconW, iconH)
-                .usedTextureSize(textureW, textureH)
+                .usedTextureSize(iconW, iconH)
+                .textureSize(textureW, textureH)
                 .texStart(uInd * iconW, vInd * iconH)
-                .offset(x,y)
                 .build();
+        button.setPosition(x,y);
+        button.setWidth(iconW + 6);
+        button.height = iconH + 6;
 
         button.setTooltip(Tooltip.create(Component.literal(tooltip)));
         return button;
