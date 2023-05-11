@@ -66,10 +66,6 @@ public class ClientHelperImpl {
         ItemBlockRenderTypes.setRenderLayer(fluid, type);
     }
 
-    public static void registerItemProperty(Item item, ResourceLocation name, ClampedItemPropertyFunction property) {
-        ItemProperties.register(item, name, property);
-    }
-
     public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {
         Consumer<RegisterParticleProvidersEvent> eventConsumer = event -> {
             W w = new W(event);

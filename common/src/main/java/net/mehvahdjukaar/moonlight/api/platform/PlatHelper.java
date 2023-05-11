@@ -229,10 +229,6 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
-    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar) {
-        return createModTab(name, icon, hasSearchBar, null);
-    }
-
     @ExpectPlatform
     public static List<CreativeModeTab> getCreativeModeTabs() {
         throw new AssertionError();
@@ -241,12 +237,6 @@ public class PlatHelper {
     @Nullable
     @ExpectPlatform
     public static CreativeModeTab getCreativeModeTab(ResourceLocation name) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static CreativeModeTab createModTab(ResourceLocation name, Supplier<ItemStack> icon, boolean hasSearchBar,
-                                               @Nullable BiConsumer<List<ItemStack>, CreativeModeTab> itemSupplier) {
         throw new AssertionError();
     }
 

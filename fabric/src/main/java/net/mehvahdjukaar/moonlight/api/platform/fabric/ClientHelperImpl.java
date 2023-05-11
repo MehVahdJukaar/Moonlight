@@ -58,10 +58,6 @@ public class ClientHelperImpl {
         BlockRenderLayerMap.INSTANCE.putBlock(block, type);
     }
 
-    public static void registerItemProperty(Item item, ResourceLocation name, ClampedItemPropertyFunction property) {
-        ItemProperties.register(item, name, property);
-    }
-
     public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {
         eventListener.accept(ClientHelperImpl::registerParticle);
     }

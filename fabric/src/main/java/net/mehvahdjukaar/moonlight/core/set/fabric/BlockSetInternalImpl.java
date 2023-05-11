@@ -35,10 +35,9 @@ public class BlockSetInternalImpl {
         BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
 
 
-        List<Registry<?>> priority = new ArrayList<>(QUEUES.keySet().stream().toList());
-        priority.sort(Comparator.comparingInt(
-                RegHelperImpl.REG_PRIORITY::indexOf));
-        for(var r : priority) {
+        List<Registry<?>> available = new ArrayList<>(QUEUES.keySet().stream().toList());
+        available.sort(Comparator.comparingInt((a) -> RegHelperImpl.REG_PRIORITY.indexOf(a.key())));
+        for (var r : available) {
             var blockQueue = QUEUES.get(r);
             if (blockQueue != null) {
                 for (var e : blockQueue.entrySet()) {
@@ -64,7 +63,7 @@ public class BlockSetInternalImpl {
             queue.add(callback);
         }
 
-        public void registerEntries(){
+        public void registerEntries() {
             queue.forEach(a -> a.accept((n, i) ->
                     Registry.register(registry, n, i), BlockSetAPI.getBlockSet(blockType).getValues()));
         }

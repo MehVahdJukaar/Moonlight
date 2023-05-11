@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
+import com.google.common.collect.ImmutableList;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
+import net.minecraft.Util;
 import net.minecraft.core.HolderSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
@@ -111,31 +113,17 @@ public class BlocksColorAPI {
         BlocksColorInternal.registerItemColorSet(key, items, defaultItem);
     }
 
-
-    public static final List<DyeColor> SORTED_COLORS;
-    static {
-        List<DyeColor> l = new ArrayList<>();
-        l.add(DyeColor.WHITE);
-        l.add(DyeColor.LIGHT_GRAY);
-        l.add(DyeColor.GRAY);
-        l.add(DyeColor.BLACK);
-        l.add(DyeColor.BROWN);
-        l.add(DyeColor.RED);
-        l.add(DyeColor.ORANGE);
-        l.add(DyeColor.YELLOW);
-        l.add(DyeColor.LIME);
-        l.add(DyeColor.GREEN);
-        l.add(DyeColor.CYAN);
-        l.add(DyeColor.LIGHT_BLUE);
-        l.add(DyeColor.BLUE);
-        l.add(DyeColor.PURPLE);
-        l.add(DyeColor.MAGENTA);
-        l.add(DyeColor.PINK);
-        for (var c : DyeColor.values()){
-            if(!l.contains(c))l.add(c);
+    public static final List<DyeColor> SORTED_COLORS = Util.make(() -> {
+        ImmutableList.Builder<DyeColor> b = ImmutableList.builder();
+        var l = List.of(DyeColor.WHITE, DyeColor.LIGHT_GRAY, DyeColor.GRAY, DyeColor.BLACK, DyeColor.BROWN,
+                DyeColor.RED, DyeColor.ORANGE, DyeColor.YELLOW, DyeColor.LIME, DyeColor.GREEN,
+                DyeColor.CYAN, DyeColor.LIGHT_BLUE, DyeColor.BLUE, DyeColor.PURPLE, DyeColor.MAGENTA, DyeColor.PINK);
+        b.addAll(l);
+        for(var v : DyeColor.values()){
+            if(!l.contains(v))b.add(v);
         }
-        SORTED_COLORS = List.of(l.toArray(DyeColor[]::new));
-    }
+        return b.build();
+    });
 
     /**
      * Helper to register colors in order

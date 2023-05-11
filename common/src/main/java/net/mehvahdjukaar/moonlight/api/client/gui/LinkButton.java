@@ -36,6 +36,7 @@ public class LinkButton {
                 .textureSize(iconW, iconH)
                 .usedTextureSize(iconW, iconH)
                 .textureSize(textureW, textureH)
+                .offset(0,3)
                 .texStart(uInd * iconW, vInd * iconH)
                 .build();
         button.setPosition(x,y);

@@ -322,10 +322,7 @@ public class RegHelper {
         public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
             action.accept(tab, target, true, List.of(items));
         }
-        @Deprecated(forRemoval = true)
-        public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, Item... items) {
-            action.accept(tab, target, false, Arrays.stream(items).map(Item::getDefaultInstance).toList());
-        }
+
         public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, ItemLike... items) {
             action.accept(tab, target, false, Arrays.stream(items).map(i->i.asItem().getDefaultInstance()).toList());
         }

@@ -152,7 +152,7 @@ public abstract class DynamicResourcePack implements PackResources {
     @Override
     public void listResources(PackType packType, String namespace, String id, ResourceOutput output) {
         //why are we only using server resources here?
-        if (packType == this.packType && packType == PackType.SERVER_DATA && this.namespaces.contains(namespace)) {
+        if (packType == this.packType && this.namespaces.contains(namespace)) {
             //idk why but somebody had an issue with concurrency here during world load
 
             this.resources.entrySet().stream()

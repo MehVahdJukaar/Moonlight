@@ -70,11 +70,6 @@ public class ClientHelper {
     }
 
     @ExpectPlatform
-    public static void registerItemProperty(Item item, ResourceLocation name, ClampedItemPropertyFunction property) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
     public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         throw new AssertionError();
     }

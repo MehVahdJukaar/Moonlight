@@ -1,12 +1,11 @@
-package net.mehvahdjukaar.moonlight.core.set;
+package net.mehvahdjukaar.moonlight.core.integration;
 
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
-import net.mehvahdjukaar.moonlight.core.recipe.ShapelessRecipeTemplate;
 import net.minecraft.resources.ResourceLocation;
 //place for all known weird hardcoded wood types from mods that aren't getting detected
-public class CompatTypes {
+public class CompatWoodTypes {
 
     public static void init() {
 
@@ -72,15 +71,6 @@ public class CompatTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("gardens_of_the_dead",
                 "whistlecane", "whistlecane_block", "whistlecane"));
 
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("quark", "bamboo",
-                "bamboo_planks", "bamboo_block"));
-
-        var bamboo = WoodType.Finder.simple("twigs", "bamboo",
-                "stripped_bamboo_planks", "bundled_bamboo");
-
-        bamboo.addChild("stripped_log", "stripped_bundled_bamboo");
-
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, bamboo);
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "habitat", "fairy_ring_mushroom", "fairy_ring_mushroom_planks", "enhanced_fairy_ring_mushroom_stem"));

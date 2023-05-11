@@ -555,7 +555,7 @@ public class Palette implements Set<PaletteColor> {
         if (tolerance != 0) palette.updateTolerance(tolerance);
 
         if (palette.isEmpty()) {
-            throw new AssertionError("Palette from image " + textureImage + " ended ub being empty");
+            throw new RuntimeException("Palette from image " + textureImage + " ended ub being empty");
         }
         return palette;
     }

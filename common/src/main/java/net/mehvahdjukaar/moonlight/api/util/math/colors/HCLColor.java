@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
-import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
-import net.mehvahdjukaar.moonlight.core.set.CompatTypes;
 import net.minecraft.util.Mth;
 
 import javax.annotation.concurrent.Immutable;

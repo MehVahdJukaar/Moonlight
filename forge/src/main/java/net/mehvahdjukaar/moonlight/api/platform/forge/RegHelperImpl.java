@@ -25,6 +25,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -42,6 +43,7 @@ import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.village.WandererTradesEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -229,17 +231,23 @@ public class RegHelperImpl {
                     event.acceptAll(items);
                 } else {
                     var entries = event.getEntries();
+                    boolean lastValid = false;
                     for (var e : entries) {
                         ItemStack item = e.getKey();
-                        if (target.test(item)) {
-                            if (after) {
-                                var reverse = Lists.reverse(new ArrayList<>(items));
-                                for (var ni : reverse) {
-                                    entries.putAfter(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                                }
-                            } else {
-                                items.forEach(ni -> entries.putBefore(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
+
+                        boolean newValid = target.test(item);
+                        if (after && lastValid && !newValid) {
+                            var reverse = Lists.reverse(new ArrayList<>(items));
+                            for (var ni : reverse) {
+                                entries.putAfter(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                             }
+
+                            return;
+                        }
+
+                        lastValid = newValid;
+                        if (!after && lastValid) {
+                            items.forEach(ni -> entries.putBefore(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
                             return;
                         }
                     }
@@ -256,7 +264,7 @@ public class RegHelperImpl {
         Consumer<CreativeModeTabEvent.Register> eventConsumer = event -> {
             tab.instance = event.registerCreativeModeTab(name, beforeEntries, afterEntries, configurator);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.HIGH, eventConsumer);
         return tab;
     }
 

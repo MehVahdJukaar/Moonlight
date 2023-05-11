@@ -1,9 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.set.wood;
 
-import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.minecraft.core.Registry;
+import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -39,6 +37,11 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     public WoodTypeRegistry() {
         super(WoodType.class, "wood_type");
+        this.addFinder(() -> {
+            var b = new WoodType(new ResourceLocation("bamboo"), Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_BLOCK);
+            b.addChild("stripped_log", Blocks.STRIPPED_BAMBOO_BLOCK);
+            return Optional.of(b);
+        });
     }
 
     @Override
@@ -52,12 +55,12 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         String name = null;
         String path = baseRes.getPath();
         //stuff for tfc
-        if(baseRes.getNamespace().equals("tfc")){
-            if(path.contains("wood/planks/")){
+        if (baseRes.getNamespace().equals("tfc")) {
+            if (path.contains("wood/planks/")) {
                 var log = BuiltInRegistries.BLOCK.getOptional(
-                        new ResourceLocation(baseRes.getNamespace(),path.replace("planks","log")));
-                if(log.isPresent()){
-                    ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), path.replace("wood/planks/",""));
+                        new ResourceLocation(baseRes.getNamespace(), path.replace("planks", "log")));
+                if (log.isPresent()) {
+                    ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), path.replace("wood/planks/", ""));
                     return Optional.of(new WoodType(id, baseBlock, log.get()));
                 }
             }
@@ -122,7 +125,6 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         }
         return temp;
     }
-
 
     @Override
     public void addTypeTranslations(AfterLanguageLoadEvent language) {
