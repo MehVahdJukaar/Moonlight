@@ -81,7 +81,7 @@ public final class SpriteUtils {
                         Mth.clamp(hsv.value() * brightnessIncrease, 0, 1),
                         hsv.alpha());
                 PaletteColor newP = new PaletteColor(newCol);
-                newP.occurrence = color.occurrence;
+                newP.setOccurrence(color.getOccurrence());
                 palette.set(size - 1, newP);
                 palette.remove(size - 2);
             }
@@ -111,7 +111,7 @@ public final class SpriteUtils {
                 Mth.clamp(hsv.value() * brightnessMult, 0, 1),
                 hsv.alpha());
         PaletteColor newP = new PaletteColor(newCol);
-        newP.occurrence = color.occurrence;
+        newP.setOccurrence(color.getOccurrence());
         palette.set(0, newP);
         return palette;
     }

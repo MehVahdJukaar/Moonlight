@@ -38,13 +38,13 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
     modCompileOnly ("curse.maven:configured-457570:4462894")
-    modImplementation("curse.maven:yacl-667299:4523736")
+    modRuntimeOnly("curse.maven:yacl-667299:4523736")
 
     modCompileOnly ("curse.maven:map-atlases-forge-519759:3949437")
 
-    modImplementation("curse.maven:autoreglib-250363:3857246")
-    modImplementation("curse.maven:quark-oddities-301051:3575623")
-    modImplementation("curse.maven:quark-243121:4463411")
+    modCompileOnly("curse.maven:autoreglib-250363:3857246")
+    modCompileOnly("curse.maven:quark-oddities-301051:3575623")
+    modCompileOnly("curse.maven:quark-243121:4463411")
 
    // modRuntimeOnly("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
    //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")

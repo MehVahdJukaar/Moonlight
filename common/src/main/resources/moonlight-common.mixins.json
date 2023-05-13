@@ -6,7 +6,6 @@
   "client": [
     "ClientLanguagesMixin",
     "FirstPersonRendererMixin",
-    "ItemOverridesCacheMixin",
     "MapItemRendererMixin",
     "PlayerItemInHandLayerMixin",
     "ThirdPersonRendererMixin"

@@ -32,7 +32,7 @@ public class TextureImage implements AutoCloseable {
     //width of a frame
     private final FrameSize frameSize;
     //all frames. Includes unused ones
-    private final int maxFrames;
+    private final int frameCount;
 
     private final int frameScale;
 
@@ -45,7 +45,7 @@ public class TextureImage implements AutoCloseable {
         this.frameSize = metadata == null ? new FrameSize(imgWidth, imgHeight) : metadata.calculateFrameSize(imgWidth, imgHeight);
         this.frameScale = imgWidth / frameSize.width(); // 1
         int frameScaleHeight = imgHeight / frameSize.height(); // 2
-        this.maxFrames = frameScale * frameScaleHeight; // 2
+        this.frameCount = frameScale * frameScaleHeight; // 2
     }
 
     /**
@@ -53,11 +53,11 @@ public class TextureImage implements AutoCloseable {
      * The given coordinates are global texture coordinates while the index represents the currently viewed frame
      */
     public void forEachFrame(FramePixelConsumer framePixelConsumer) {
-        for (int ind = 0; ind < maxFrames; ind++) {
+        for (int ind = 0; ind < frameCount; ind++) {
             int xOff = getFrameX(ind);
             int yOff = getFrameY(ind);
             for (int x = 0; x < frameWidth(); x++) {
-                for (int y = 0; y < framesSize(); y++) {
+                for (int y = 0; y < frameHeight(); y++) {
                     framePixelConsumer.accept(ind, x + xOff, y + yOff);
                 }
             }
@@ -100,8 +100,8 @@ public class TextureImage implements AutoCloseable {
         return image;
     }
 
-    public int framesSize() {
-        return maxFrames;
+    public int frameCount() {
+        return frameCount;
     }
 
     @Nullable

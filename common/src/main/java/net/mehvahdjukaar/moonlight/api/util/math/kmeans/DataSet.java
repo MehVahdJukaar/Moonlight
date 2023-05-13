@@ -20,7 +20,7 @@ public class DataSet<A> {
 
         public ColorPoint(PaletteColor color) {
             this.color = color;
-            this.weight = color.occurrence;
+            this.weight = color.getOccurrence();
         }
 
         @Override

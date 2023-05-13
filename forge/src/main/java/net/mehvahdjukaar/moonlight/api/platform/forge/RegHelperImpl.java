@@ -25,7 +25,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -231,22 +230,26 @@ public class RegHelperImpl {
                     event.acceptAll(items);
                 } else {
                     var entries = event.getEntries();
-                    boolean lastValid = false;
+                    ItemStack lastValid = null;
                     for (var e : entries) {
                         ItemStack item = e.getKey();
 
-                        boolean newValid = target.test(item);
-                        if (after && lastValid && !newValid) {
+                        if (!item.isItemEnabled(event.getFlags())) continue;
+
+                        boolean isValid = target.test(item);
+                        if (after && lastValid != null && !isValid) {
                             var reverse = Lists.reverse(new ArrayList<>(items));
                             for (var ni : reverse) {
-                                entries.putAfter(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                                entries.putAfter(lastValid, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                             }
-
                             return;
                         }
 
-                        lastValid = newValid;
-                        if (!after && lastValid) {
+                        if (isValid) {
+                            lastValid = item;
+                        }
+
+                        if (!after && isValid) {
                             items.forEach(ni -> entries.putBefore(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
                             return;
                         }

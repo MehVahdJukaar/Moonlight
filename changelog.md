@@ -1,1 +1,1 @@
-fixed version number
+model related fixes 

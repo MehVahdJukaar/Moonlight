@@ -124,11 +124,14 @@ public class PlatHelperImpl {
 
 
     public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
-        if (packType == null) return;
+        if (packSupplier == null) return;
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         Consumer<AddPackFindersEvent> consumer = event -> {
             if (event.getPackType() == packType) {
-                event.addRepositorySource(infoConsumer -> infoConsumer.accept(packSupplier.get()));
+                var p = packSupplier.get();
+                if(p != null) {
+                    event.addRepositorySource(infoConsumer -> infoConsumer.accept(packSupplier.get()));
+                }
             }
         };
         bus.addListener(consumer);

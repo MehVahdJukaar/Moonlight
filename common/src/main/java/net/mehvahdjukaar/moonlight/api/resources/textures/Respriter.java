@@ -60,10 +60,10 @@ public class Respriter {
         if (colorsToSwap.size() == 0)
             throw new UnsupportedOperationException("Respriter must have a non empty target palette");
         //assures that frames size and palette size match
-        if (imageToRecolor.framesSize() > colorsToSwap.size()) {
+        if (imageToRecolor.frameCount() > colorsToSwap.size()) {
             //if it does not have enough colors just uses the first one
             var firstPalette = colorsToSwap.get(0);
-            for (int i = 0; i < imageToRecolor.framesSize(); i++) {
+            for (int i = 0; i < imageToRecolor.frameCount(); i++) {
                 colorsToSwap.set(i, firstPalette);
             }
         }

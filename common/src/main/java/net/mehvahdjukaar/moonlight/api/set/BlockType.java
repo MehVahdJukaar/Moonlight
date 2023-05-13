@@ -11,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -236,6 +237,10 @@ public abstract class BlockType {
         return null;
     }
 
-
+    public SoundType getSound(){
+        if(this.mainChild() instanceof Block b){
+            return b.getSoundType(b.defaultBlockState());
+        }return SoundType.STONE;
+    }
 
 }

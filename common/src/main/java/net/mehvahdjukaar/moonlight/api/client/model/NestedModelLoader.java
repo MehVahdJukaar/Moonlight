@@ -39,6 +39,7 @@ public class NestedModelLoader implements CustomModelLoader {
         @Override
         public CustomBakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
             UnbakedModel model = modelBaker.getModel(modelLoc);
+            model.resolveParents(modelBaker::getModel);
             BakedModel bakedModel = model.bake(modelBaker, spriteGetter, transform, modelLoc);
             if (model == modelBaker.getModel(ModelBakery.MISSING_MODEL_LOCATION)) {
                 throw new JsonParseException("Found missing model for location " + modelLoc + " while parsing nested model " + location);

@@ -303,7 +303,7 @@ public class Palette implements Set<PaletteColor> {
         //remove the one with the least occurrence
         PaletteColor toRemove = internal.get(0);
         for (var p : internal) {
-            if (p.occurrence < toRemove.occurrence) {
+            if (p.getOccurrence() < toRemove.getOccurrence()) {
                 toRemove = p;
             }
         }
@@ -353,7 +353,7 @@ public class Palette implements Set<PaletteColor> {
         this.remove(toRemove);
         this.remove(toRemove2);
         var newColor = new PaletteColor(toRemove.lab().mixWith(toRemove2.lab()));
-        newColor.occurrence = toRemove.occurrence * toRemove2.occurrence;
+        newColor.setOccurrence(toRemove.getOccurrence() * toRemove2.getOccurrence());
         this.add(newColor);
         return newColor;
     }
@@ -497,7 +497,7 @@ public class Palette implements Set<PaletteColor> {
             for (PaletteColor c : p.getValues()) {
                 int color = c.value();
                 if (map.containsKey(color)) {
-                    map.get(color).occurrence += c.occurrence;
+                    map.get(color).setOccurrence(map.get(color).getOccurrence() + c.getOccurrence());
                 } else map.put(color, c);
             }
         }
@@ -579,7 +579,7 @@ public class Palette implements Set<PaletteColor> {
      */
     public static List<Palette> fromAnimatedImage(TextureImage textureImage, @Nullable TextureImage textureMask, float tolerance) {
         if (textureMask != null &&
-                (textureImage.framesSize() != textureMask.framesSize() ||
+                (textureImage.frameCount() != textureMask.frameCount() ||
                         textureMask.frameWidth() < textureImage.frameWidth() ||
                         textureMask.frameHeight() < textureImage.frameHeight())) {
             throw new UnsupportedOperationException("Palette mask needs to be at least as large as the target image and have the same format");
@@ -604,7 +604,7 @@ public class Palette implements Set<PaletteColor> {
                 if (FastColor.ABGR32.alpha(color) != 0) {
                     var paletteColor = builder.computeIfAbsent(color,
                             p -> new PaletteColor(color));
-                    paletteColor.occurrence++;
+                    paletteColor.setOccurrence(paletteColor.getOccurrence() + 1);
                 }
             }
         });

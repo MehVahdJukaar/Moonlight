@@ -52,8 +52,8 @@ public class BlockSetInternalImpl {
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
         if(registry == BuiltInRegistries.BLOCK) {
             addDynamicBlockRegistration((BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
-        }else if(registry == BuiltInRegistries.FLUID){
-            throw new IllegalArgumentException("Fluid registry not supported here");
+        }else if(registry == BuiltInRegistries.FLUID || registry == BuiltInRegistries.SOUND_EVENT){
+            throw new IllegalArgumentException("Fluid and Sound Events registry not supported here");
         } else{
             //other entries
             RegHelper.registerInBatch(registry, e-> registrationFunction.accept(e, BlockSetAPI.getBlockSet(blockType).getValues()));
@@ -108,7 +108,7 @@ public class BlockSetInternalImpl {
     //shittiest code ever lol
     protected static void registerLateBlockAndItems(RegisterEvent event) {
         //fires right after blocks
-        if (!event.getRegistryKey().equals(ForgeRegistries.FLUIDS.getRegistryKey())) return;
+        if (!event.getRegistryKey().equals(ForgeRegistries.ATTRIBUTES.getRegistryKey())) return;
         //when the first registration function is called we find all block types
         if (!hasFilledBlockSets) {
             BlockSetInternal.initializeBlockSets();

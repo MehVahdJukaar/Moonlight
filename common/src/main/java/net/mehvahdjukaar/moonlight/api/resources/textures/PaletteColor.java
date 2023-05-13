@@ -16,7 +16,7 @@ public class PaletteColor implements Comparable<PaletteColor> {
     private final LABColor lab;
     private final HCLColor hcl;
 
-    public int occurrence = 0;
+    private int occurrence = 0;
 
     public PaletteColor(int color) {
         this(new RGBColor(color));
@@ -24,7 +24,7 @@ public class PaletteColor implements Comparable<PaletteColor> {
 
     public PaletteColor(BaseColor<?> color, int occurrence) {
         this(color);
-        this.occurrence = occurrence;
+        this.setOccurrence(occurrence);
     }
 
     public PaletteColor(BaseColor<?> color) {
@@ -60,7 +60,7 @@ public class PaletteColor implements Comparable<PaletteColor> {
      */
     public PaletteColor getDarkened() {
         var p = new PaletteColor(this.lab.withLuminance(this.lab.luminance() * 0.9f));
-        p.occurrence = this.occurrence;
+        p.setOccurrence(this.getOccurrence());
         return p;
     }
 
@@ -69,7 +69,7 @@ public class PaletteColor implements Comparable<PaletteColor> {
      */
     public PaletteColor getLightened() {
         var p = new PaletteColor(this.lab.withLuminance(this.lab.luminance() * 0.9f + 0.1f));
-        p.occurrence = this.occurrence;
+        p.setOccurrence(this.getOccurrence());
         return p;
     }
 
@@ -96,11 +96,19 @@ public class PaletteColor implements Comparable<PaletteColor> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(value, color, lab, hcl, occurrence);
+        return Objects.hash(value);
     }
 
     @Override
     public String toString() {
-        return "PaletteColor:" + value;
+        return "PaletteColor: " + Integer.toHexString(value);
+    }
+
+    public int getOccurrence() {
+        return occurrence;
+    }
+
+    public void setOccurrence(int occurrence) {
+        this.occurrence = occurrence;
     }
 }
