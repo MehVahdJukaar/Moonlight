@@ -231,6 +231,12 @@ public class RegHelperImpl {
                 } else {
                     var entries = event.getEntries();
                     ItemStack lastValid = null;
+                    boolean added = false;
+
+                    if(after){
+                        items = Lists.reverse(new ArrayList<>(items));
+                    }
+
                     for (var e : entries) {
                         ItemStack item = e.getKey();
 
@@ -238,8 +244,7 @@ public class RegHelperImpl {
 
                         boolean isValid = target.test(item);
                         if (after && lastValid != null && !isValid) {
-                            var reverse = Lists.reverse(new ArrayList<>(items));
-                            for (var ni : reverse) {
+                            for (var ni : items) {
                                 entries.putAfter(lastValid, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                             }
                             return;
@@ -253,6 +258,10 @@ public class RegHelperImpl {
                             items.forEach(ni -> entries.putBefore(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
                             return;
                         }
+                    }
+                    //add at the end if it fails
+                    for (var ni : items) {
+                        entries.put(ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                     }
                 }
             });
