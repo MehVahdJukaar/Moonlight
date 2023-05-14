@@ -49,25 +49,8 @@ public class MoonlightForge {
             modEventBus.addListener(MoonlightForgeClient::registerShader);
         }
 
-        modEventBus.addListener(MoonlightForge::common);
-        modEventBus.addListener(MoonlightForge::tab);
     }
 
-
-    @SubscribeEvent
-
-    public static void common(FMLCommonSetupEvent event) {
-        int aa = 1;
-
-    }
-
-
-        @SubscribeEvent
-
-    public static void tab(CreativeModeTabEvent event) {
-        int aa = 1;
-
-    }
     //hacky but eh
     @SubscribeEvent
     public void onTagUpdated(TagsUpdatedEvent event) {

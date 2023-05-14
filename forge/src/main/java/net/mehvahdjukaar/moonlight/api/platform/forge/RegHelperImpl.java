@@ -226,16 +226,14 @@ public class RegHelperImpl {
         Consumer<CreativeModeTabEvent.BuildContents> eventConsumer = event -> {
             RegHelper.ItemToTabEvent itemToTabEvent = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
                 if (tab != event.getTab()) return;
+
                 if (target == null) {
                     event.acceptAll(items);
                 } else {
+
                     var entries = event.getEntries();
                     ItemStack lastValid = null;
-                    boolean added = false;
 
-                    if(after){
-                        items = Lists.reverse(new ArrayList<>(items));
-                    }
 
                     for (var e : entries) {
                         ItemStack item = e.getKey();
@@ -244,7 +242,8 @@ public class RegHelperImpl {
 
                         boolean isValid = target.test(item);
                         if (after && lastValid != null && !isValid) {
-                            for (var ni : items) {
+                            var rev = Lists.reverse(new ArrayList<>(items));
+                            for (var ni : rev) {
                                 entries.putAfter(lastValid, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                             }
                             return;
@@ -271,10 +270,10 @@ public class RegHelperImpl {
     }
 
 
-    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<Object> beforeEntries, List<Object> afterEntries, Consumer<CreativeModeTab.Builder> configurator) {
+    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<Object> afterEntries, List<Object> beforeEntries, Consumer<CreativeModeTab.Builder> configurator) {
         TabSupp tab = new TabSupp();
         Consumer<CreativeModeTabEvent.Register> eventConsumer = event -> {
-            tab.instance = event.registerCreativeModeTab(name, beforeEntries, afterEntries, configurator);
+            tab.instance = event.registerCreativeModeTab(name, configurator);
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.HIGH, eventConsumer);
         return tab;

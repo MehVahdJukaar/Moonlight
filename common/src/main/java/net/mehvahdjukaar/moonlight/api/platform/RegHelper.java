@@ -12,10 +12,8 @@ import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -48,11 +46,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
@@ -291,7 +285,7 @@ public class RegHelper {
 
     @ExpectPlatform
     public static Supplier<CreativeModeTab> registerCreativeModeTab(
-            ResourceLocation name, List<Object> beforeTabs, List<Object> afterTabs, Consumer<CreativeModeTab.Builder> configurator
+            ResourceLocation name, List<Object> afterTabs, List<Object> beforeTabs, Consumer<CreativeModeTab.Builder> configurator
     ) {
         throw new AssertionError();
     }
@@ -315,8 +309,12 @@ public class RegHelper {
             addAfter(tab, null, items);
         }
 
+        public void add(CreativeModeTab tab, ItemStack... items) {
+            addAfter(tab, null, items);
+        }
+
         public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, ItemLike... items) {
-            action.accept(tab, target, true, Arrays.stream(items).map(i->i.asItem().getDefaultInstance()).toList());
+            action.accept(tab, target, true, Arrays.stream(items).map(i -> i.asItem().getDefaultInstance()).toList());
         }
 
         public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
@@ -324,7 +322,7 @@ public class RegHelper {
         }
 
         public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, ItemLike... items) {
-            action.accept(tab, target, false, Arrays.stream(items).map(i->i.asItem().getDefaultInstance()).toList());
+            action.accept(tab, target, false, Arrays.stream(items).map(i -> i.asItem().getDefaultInstance()).toList());
         }
 
         public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
@@ -365,10 +363,10 @@ public class RegHelper {
 
     public enum VariantType {
         BLOCK(Block::new),
+        STAIRS(ModStairBlock::new),
         SLAB(SlabBlock::new),
         VERTICAL_SLAB(Block::new), //TODO
-        WALL(WallBlock::new),
-        STAIRS(ModStairBlock::new);
+        WALL(WallBlock::new);
         private final BiFunction<Supplier<Block>, BlockBehaviour.Properties, Block> constructor;
 
         VariantType(BiFunction<Supplier<Block>, BlockBehaviour.Properties, Block> constructor) {
@@ -384,9 +382,9 @@ public class RegHelper {
         }
 
         //TODO: find a better way to do this
-        public static void addToTab(ItemToTabEvent event, Map<VariantType, Supplier<Block>> blocks){
+        public static void addToTab(ItemToTabEvent event, Map<VariantType, Supplier<Block>> blocks) {
             Map<VariantType, Supplier<Block>> m = new EnumMap<>(blocks);
-            if(!shouldRegisterVSlab()){
+            if (!shouldRegisterVSlab()) {
                 m.remove(VERTICAL_SLAB);
             }
             event.add(CreativeModeTabs.BUILDING_BLOCKS, m.values().stream().map(Supplier::get).toArray(Block[]::new));
