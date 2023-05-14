@@ -1,1 +1,1 @@
-fixed mess up in latest version
+Removed some early Items class classloading so we don't erroneously get the blame for other mods failed mixins
