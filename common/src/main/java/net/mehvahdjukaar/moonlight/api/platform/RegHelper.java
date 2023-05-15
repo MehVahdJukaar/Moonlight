@@ -365,7 +365,6 @@ public class RegHelper {
         BLOCK(Block::new),
         STAIRS(ModStairBlock::new),
         SLAB(SlabBlock::new),
-        VERTICAL_SLAB(Block::new), //TODO
         WALL(WallBlock::new);
         private final BiFunction<Supplier<Block>, BlockBehaviour.Properties, Block> constructor;
 
@@ -381,18 +380,11 @@ public class RegHelper {
             return this.constructor.apply(parent, properties);
         }
 
-        //TODO: find a better way to do this
         public static void addToTab(ItemToTabEvent event, Map<VariantType, Supplier<Block>> blocks) {
             Map<VariantType, Supplier<Block>> m = new EnumMap<>(blocks);
-            if (!shouldRegisterVSlab()) {
-                m.remove(VERTICAL_SLAB);
-            }
             event.add(CreativeModeTabs.BUILDING_BLOCKS, m.values().stream().map(Supplier::get).toArray(Block[]::new));
         }
 
-        private static boolean shouldRegisterVSlab() {
-            return PlatHelper.isModLoaded("quark") || PlatHelper.isModLoaded("v_slab_compat");
-        }
     }
 
     public static EnumMap<VariantType, Supplier<Block>> registerBaseBlockSet(ResourceLocation baseName, Block parentBlock) {
@@ -404,8 +396,7 @@ public class RegHelper {
      */
     public static EnumMap<VariantType, Supplier<Block>> registerBaseBlockSet(
             ResourceLocation baseName, BlockBehaviour.Properties properties) {
-        return registerBlockSet(new VariantType[]{VariantType.BLOCK, VariantType.SLAB,
-                VariantType.VERTICAL_SLAB}, baseName, properties);
+        return registerBlockSet(new VariantType[]{VariantType.BLOCK, VariantType.SLAB}, baseName, properties);
     }
 
     public static EnumMap<VariantType, Supplier<Block>> registerReducedBlockSet(ResourceLocation baseName, Block parentBlock) {
@@ -417,8 +408,7 @@ public class RegHelper {
      */
     public static EnumMap<VariantType, Supplier<Block>> registerReducedBlockSet(
             ResourceLocation baseName, BlockBehaviour.Properties properties) {
-        return registerBlockSet(new VariantType[]{VariantType.BLOCK, VariantType.SLAB,
-                VariantType.VERTICAL_SLAB, VariantType.STAIRS}, baseName, properties);
+        return registerBlockSet(new VariantType[]{VariantType.BLOCK,VariantType.STAIRS, VariantType.SLAB}, baseName, properties);
     }
 
     public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
