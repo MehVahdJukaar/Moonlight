@@ -56,7 +56,7 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
         buffer.writeVarInt(this.customData.length);
 
         for (CustomDataHolder.Instance<?> data : this.customData) {
-            buffer.writeUtf(data.getType().id().toString());
+            buffer.writeResourceLocation(data.getType().id());
             data.saveToBuffer(buffer);
         }
     }
@@ -78,7 +78,7 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
         //TODO: I really could have merged the 2 systems
         this.customData = new CustomDataHolder.Instance[pBuffer.readVarInt()];
         for (int m = 0; m < this.customData.length; ++m) {
-            CustomDataHolder<?> type = MapDecorationRegistry.CUSTOM_MAP_DATA_TYPES.getOrDefault(new ResourceLocation(pBuffer.readUtf()), null);
+            CustomDataHolder<?> type = MapDecorationRegistry.CUSTOM_MAP_DATA_TYPES.getOrDefault(pBuffer.readResourceLocation(), null);
             if (type != null) {
                 this.customData[m] = type.createFromBuffer(pBuffer);
             }

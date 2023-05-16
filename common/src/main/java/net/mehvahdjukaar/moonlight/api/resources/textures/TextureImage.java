@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FastColor;
+import net.minecraft.world.level.block.Rotation;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 
@@ -351,6 +352,10 @@ public class TextureImage implements AutoCloseable {
             }
         }
         mask.close();
+    }
+
+    public TextureImage createRotated(Rotation rotation){
+
     }
 
 }

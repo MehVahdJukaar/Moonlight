@@ -72,7 +72,7 @@ public class RenderUtil {
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         poseStack.pushPose();
-        poseStack.translate(x, y, 100.0F);
+        poseStack.translate(x, y, 100.0F  + 50.0F);
         poseStack.translate(8.0D, 8.0D, 0.0D);
         poseStack.scale(1.0F, -1.0F, 1.0F);
         poseStack.scale(16.0F, 16.0F, 16.0F);
