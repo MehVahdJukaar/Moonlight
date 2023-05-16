@@ -616,9 +616,8 @@ public abstract class SoftFluidTank {
             cmp.putString("Fluid", id.toString());
         }
         //for item render. needed for potion colors
-        if (this.specialColor != 0) {
-            cmp.putInt("CachedColor", this.getTintColor(null, null));
-        }
+        cmp.putInt("CachedColor", this.getTintColor(null, null));
+
         if (nbt != null && !nbt.isEmpty()) cmp.put("NBT", nbt);
         compound.put("FluidHolder", cmp);
         return compound;
