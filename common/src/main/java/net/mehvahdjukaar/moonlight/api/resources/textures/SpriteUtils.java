@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -123,6 +124,10 @@ public final class SpriteUtils {
         return (0.299f * r + 0.587f * g + 0.114f * b);
     }
 
+    @Deprecated(forRemoval = true)
+    public static void reduceColors(NativeImage image, UnaryOperator<Integer> sizeFn) {
+        reduceColors(image , (IntUnaryOperator) sizeFn::apply);
+    }
 
     /**
      * Given an image, reduce its color palette using k-means algorithm
@@ -131,7 +136,7 @@ public final class SpriteUtils {
      * @param image  original image
      * @param sizeFn target size function. Goes from original size to target size
      */
-    public static void reduceColors(NativeImage image, UnaryOperator<Integer> sizeFn) {
+    public static void reduceColors(NativeImage image, IntUnaryOperator sizeFn) {
 
         // read data
         Palette p = Palette.fromImage(TextureImage.of(image, null), null, 0);
@@ -139,7 +144,7 @@ public final class SpriteUtils {
         if (p.size() == 0) return;
         DataSet<DataSet.ColorPoint> data = DataSet.fromPalette(p);
 
-        int size = sizeFn.apply(p.size());
+        int size = sizeFn.applyAsInt(p.size());
 
         if (size >= p.size()) return;
 
