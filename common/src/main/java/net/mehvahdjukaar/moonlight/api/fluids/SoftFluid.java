@@ -226,7 +226,7 @@ public class SoftFluid {
         private ResourceLocation flowingTexture;
 
         private String fromMod = "minecraft";
-        private String translationKey = "fluid.selene.generic_fluid";
+        private String translationKey = "fluid.moonlight.generic_fluid";
 
         private int luminosity = 0;
         private int tintColor = -1;

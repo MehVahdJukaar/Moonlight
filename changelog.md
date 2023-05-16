@@ -1,1 +1,1 @@
-fixes and improvements to new 1.19.4 code
+no more builtin vertical slabs compat. use vslab compat

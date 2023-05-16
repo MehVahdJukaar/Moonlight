@@ -226,8 +226,8 @@ public final class SpriteUtils {
                 throw new RuntimeException("Image at " + fullTexturePath + " has too few colors! Expected at least " + expectColors + " and got " + list.size());
             }
             return list;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to find image at location " + fullTexturePath);
+        } catch (IOException | NoSuchElementException e) {
+            throw new RuntimeException("Failed to find image at location " + fullTexturePath, e);
         }
     }
 
