@@ -55,8 +55,8 @@ public class TextureImage implements AutoCloseable {
      */
     public void forEachFrame(FramePixelConsumer framePixelConsumer) {
         for (int ind = 0; ind < frameCount; ind++) {
-            int xOff = getFrameX(ind);
-            int yOff = getFrameY(ind);
+            int xOff = getFrameStartX(ind);
+            int yOff = getFrameStartY(ind);
             for (int x = 0; x < frameWidth(); x++) {
                 for (int y = 0; y < frameHeight(); y++) {
                     framePixelConsumer.accept(ind, x + xOff, y + yOff);
@@ -89,12 +89,21 @@ public class TextureImage implements AutoCloseable {
     }
 
 
-    public int getFrameX(int frameIndex) {
+    //local frame coord from global
+    public int getFrameStartX(int frameIndex) {
         return (frameIndex % frameScale) * frameWidth(); //(2 % 1) * 16
     }
 
-    public int getFrameY(int frameIndex) {
+    public int getFrameStartY(int frameIndex) {
         return (frameIndex / frameScale) * frameHeight(); // (2/1) * 32
+    }
+
+    public int getFramePixel(int frameIndex, int x, int y) {
+        return image.getPixelRGBA(getFrameStartX(frameIndex) + x, getFrameStartY(frameIndex) + y);
+    }
+
+    public void setFramePixel(int frameIndex, int x, int y, int color) {
+        image.setPixelRGBA(getFrameStartX(frameIndex) + x, getFrameStartY(frameIndex) + y, color);
     }
 
     public NativeImage getImage() {
@@ -131,8 +140,8 @@ public class TextureImage implements AutoCloseable {
         TextureImage t = new TextureImage(im, new AnimationMetadataSection(frameData, this.frameWidth(), this.frameHeight(), frameTime, interpolate));
 
         t.forEachFrame((i, x, y) -> {
-            int xo = x - t.getFrameX(i);
-            int yo = y - t.getFrameY(i);
+            int xo = x - t.getFrameStartX(i);
+            int yo = y - t.getFrameStartY(i);
             t.image.setPixelRGBA(x, y, this.image.getPixelRGBA(xo, yo));
         });
         return t;
@@ -164,7 +173,30 @@ public class TextureImage implements AutoCloseable {
     }
 
     public static TextureImage createNew(int width, int height, @Nullable AnimationMetadataSection animation) {
-        return new TextureImage(new NativeImage(width, height, false), animation);
+        var v = new TextureImage(new NativeImage(width, height, false), animation);
+        v.clear();
+        return v;
+    }
+
+    public TextureImage createResized(float widthScale, float heightScale) {
+        int newW = (int) (this.imageWidth() * widthScale);
+        int newH = (int) (this.imageHeight() * heightScale);
+        AnimationMetadataSection meta = null;
+        if (metadata != null) {
+            int mW = (int) (metadata.frameWidth * widthScale);
+            int mH = (int) (metadata.frameHeight * heightScale);
+            meta = new AnimationMetadataSection(metadata.frames, mW, mH,
+                    metadata.getDefaultFrameTime(), metadata.isInterpolatedFrames());
+        }
+        var im = TextureImage.createNew(newW, newH, meta);
+        var t = ImageTransformer.builder(this.frameWidth(), this.frameHeight(), im.frameWidth(), im.frameHeight())
+                .copyRect(0, 0, this.frameWidth(), this.frameHeight(), 0, 0).build();
+        t.apply(this, im);
+        return im;
+    }
+
+    public void clear() {
+        image.fillRect(0, 0, image.getWidth(), image.getHeight(), 0);
     }
 
     public static TextureImage of(NativeImage image, @Nullable AnimationMetadataSection animation) {
@@ -354,8 +386,39 @@ public class TextureImage implements AutoCloseable {
         mask.close();
     }
 
-    public TextureImage createRotated(Rotation rotation){
+    public TextureImage createRotated(Rotation rotation) {
 
+        TextureImage flippedImage = TextureImage.createNew(frameHeight(), frameWidth() * frameCount, metadata);
+
+        this.forEachFrame((frameIndex, globalX, globalY) -> {
+
+            int frameX = globalX - this.getFrameStartX(frameIndex);
+            int frameY = globalY - this.getFrameStartY(frameIndex);
+
+            int newFrameX = frameX;
+            int newFrameY = frameY;
+            int frameWidth = this.frameWidth();
+            int frameHeight = this.frameHeight();
+
+            if (rotation == Rotation.CLOCKWISE_90) {
+                newFrameX = frameHeight - frameY - 1;
+                newFrameY = frameX;
+            } else if (rotation == Rotation.CLOCKWISE_180) {
+                newFrameX = frameWidth - frameX - 1;
+                newFrameY = frameHeight - frameY - 1;
+            } else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
+                newFrameX = frameY;
+                newFrameY = frameWidth - frameX - 1;
+            }
+
+            int newGlobalX = flippedImage.getFrameStartX(frameIndex) + newFrameX;
+            int newGlobalY = flippedImage.getFrameStartY(frameIndex) + newFrameY;
+
+            int pixel = this.getImage().getPixelRGBA(globalX, globalY);
+            flippedImage.getImage().setPixelRGBA(newGlobalX, newGlobalY, pixel);
+        });
+
+        return flippedImage;
     }
 
 }

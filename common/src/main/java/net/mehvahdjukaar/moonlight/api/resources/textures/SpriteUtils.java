@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
+import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HSVColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
@@ -126,7 +127,7 @@ public final class SpriteUtils {
 
     @Deprecated(forRemoval = true)
     public static void reduceColors(NativeImage image, UnaryOperator<Integer> sizeFn) {
-        reduceColors(image , (IntUnaryOperator) sizeFn::apply);
+        reduceColors(image, (IntUnaryOperator) sizeFn::apply);
     }
 
     /**
@@ -251,4 +252,5 @@ public final class SpriteUtils {
             throw new RuntimeException("Failed to create palette strip");
         }
     }
+
 }

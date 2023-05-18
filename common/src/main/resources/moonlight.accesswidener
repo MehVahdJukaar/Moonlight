@@ -66,6 +66,10 @@ transitive-accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaz
 
 transitive-accessible method net/minecraft/client/renderer/texture/SpriteContents getFrameCount ()I
 
+#texture image stuff
+accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameWidth I
+accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameHeight I
+accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frames Ljava/util/List;
 
 #fabric texture stuff
 accessible field net/minecraft/client/renderer/texture/SpriteContents animatedTexture Lnet/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture;

@@ -1,1 +1,1 @@
-no more builtin vertical slabs compat. use vslab compat
+- added ImageTransformer, an utility class to rotate or move parts of a texture in another

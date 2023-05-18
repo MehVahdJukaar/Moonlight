@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.set.leaves;
 
 import com.google.common.base.Suppliers;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
@@ -17,6 +19,13 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class LeavesType extends BlockType {
+
+    public static final Codec<LeavesType> CODEC = ResourceLocation.CODEC.flatXmap(r -> {
+                LeavesType w = LeavesTypeRegistry.getValue(r);
+                if (w == null) return DataResult.error(() -> "No such leaves type: " + r);
+                return DataResult.success(w);
+            },
+            t -> DataResult.success(t.id));
 
     public final Block leaves;
 

@@ -1,5 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.set.wood;
 
+import com.google.common.base.Suppliers;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -20,12 +23,22 @@ import java.util.function.Supplier;
 
 public class WoodType extends BlockType {
 
+    public static final Codec<WoodType> CODEC = ResourceLocation.CODEC.flatXmap(r -> {
+                WoodType w = WoodTypeRegistry.getValue(r);
+                if (w == null) return DataResult.error(() -> "No such wood type: " + r);
+                return DataResult.success(w);
+            },
+            t -> DataResult.success(t.id));
+
     public final Material material;
     public final Block planks;
     public final Block log;
 
-    @Nullable
-    private final net.minecraft.world.level.block.state.properties.WoodType vanillaType;
+    private final Supplier<net.minecraft.world.level.block.state.properties.WoodType> vanillaType = Suppliers.memoize(() -> {
+        String i = (id.getNamespace().equals("minecraft") ? "" : id.getNamespace() + "/") + id.getPath();
+        var o = net.minecraft.world.level.block.state.properties.WoodType.values().filter(v -> v.name().equals(i)).findAny();
+        return o.orElse(null);
+    });
 
     protected WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
         super(id);
@@ -33,9 +46,7 @@ public class WoodType extends BlockType {
         this.log = logBlock;
         this.material = baseBlock.defaultBlockState().getMaterial();
 
-        String i = id.getNamespace().equals("minecraft") ? "" : id.getNamespace() + "/" + id.getPath();
-        var o = net.minecraft.world.level.block.state.properties.WoodType.values().filter(v -> v.name().equals(i)).findAny();
-        this.vanillaType = o.orElse(null);
+
     }
 
     @Nullable
@@ -43,7 +54,7 @@ public class WoodType extends BlockType {
         if (this.id.getNamespace().equals("tfc")) {
             var o = BuiltInRegistries.BLOCK.getOptional(
                     new ResourceLocation(id.getNamespace(),
-                            "wood/" + append + "_" + postpend+"/" + id.getPath()));
+                            "wood/" + append + "_" + postpend + "/" + id.getPath()));
             if (o.isPresent()) return o.get();
         }
 
@@ -77,7 +88,7 @@ public class WoodType extends BlockType {
 
     @Nullable
     public net.minecraft.world.level.block.state.properties.WoodType toVanilla() {
-        return this.vanillaType;
+        return this.vanillaType.get();
     }
 
     /**
@@ -106,26 +117,26 @@ public class WoodType extends BlockType {
 
     @Override
     public void initializeChildrenBlocks() {
-        this.addChild("planks",(Object) this.planks);
-        this.addChild("log",(Object) this.log);
-        this.addChild("leaves", (Object)this.findRelatedEntry("leaves", BuiltInRegistries.BLOCK));
-        this.addChild("stripped_log",(Object) this.findLogRelatedBlock("stripped", "log"));
-        this.addChild("stripped_wood",(Object) this.findLogRelatedBlock("stripped", "wood"));
-        this.addChild("wood",(Object) this.findRelatedEntry("wood", BuiltInRegistries.BLOCK));
-        this.addChild("slab",(Object) this.findRelatedEntry("slab", BuiltInRegistries.BLOCK));
-        this.addChild("stairs",(Object) this.findRelatedEntry("stairs", BuiltInRegistries.BLOCK));
-        this.addChild("fence",(Object) this.findRelatedEntry("fence", BuiltInRegistries.BLOCK));
-        this.addChild("fence_gate",(Object) this.findRelatedEntry("fence_gate", BuiltInRegistries.BLOCK));
-        this.addChild("door",(Object) this.findRelatedEntry("door", BuiltInRegistries.BLOCK));
-        this.addChild("trapdoor",(Object) this.findRelatedEntry("trapdoor", BuiltInRegistries.BLOCK));
-        this.addChild("button",(Object) this.findRelatedEntry("button", BuiltInRegistries.BLOCK));
-        this.addChild("pressure_plate",(Object) this.findRelatedEntry("pressure_plate", BuiltInRegistries.BLOCK));
+        this.addChild("planks", this.planks);
+        this.addChild("log", this.log);
+        this.addChild("leaves", this.findRelatedEntry("leaves", BuiltInRegistries.BLOCK));
+        this.addChild("stripped_log", this.findLogRelatedBlock("stripped", "log"));
+        this.addChild("stripped_wood", this.findLogRelatedBlock("stripped", "wood"));
+        this.addChild("wood", this.findRelatedEntry("wood", BuiltInRegistries.BLOCK));
+        this.addChild("slab", this.findRelatedEntry("slab", BuiltInRegistries.BLOCK));
+        this.addChild("stairs", this.findRelatedEntry("stairs", BuiltInRegistries.BLOCK));
+        this.addChild("fence", this.findRelatedEntry("fence", BuiltInRegistries.BLOCK));
+        this.addChild("fence_gate", this.findRelatedEntry("fence_gate", BuiltInRegistries.BLOCK));
+        this.addChild("door", this.findRelatedEntry("door", BuiltInRegistries.BLOCK));
+        this.addChild("trapdoor", this.findRelatedEntry("trapdoor", BuiltInRegistries.BLOCK));
+        this.addChild("button", this.findRelatedEntry("button", BuiltInRegistries.BLOCK));
+        this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", BuiltInRegistries.BLOCK));
     }
 
     @Override
     public void initializeChildrenItems() {
-        this.addChild("boat",(Object) this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
-        this.addChild("sign",(Object) this.findRelatedEntry("sign", BuiltInRegistries.ITEM));
+        this.addChild("boat", this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
+        this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.ITEM));
     }
 
     public static class Finder implements SetFinder<WoodType> {
@@ -169,7 +180,7 @@ public class WoodType extends BlockType {
                     var d = BuiltInRegistries.BLOCK.get(BuiltInRegistries.BLOCK.getDefaultKey());
                     if (plank != d && log != d && plank != null && log != null) {
                         var w = new WoodType(id, plank, log);
-                        childNames.forEach((key, value) -> w.addChild(key,(Object) BuiltInRegistries.BLOCK.get(value)));
+                        childNames.forEach((key, value) -> w.addChild(key, (Object) BuiltInRegistries.BLOCK.get(value)));
                         return Optional.of(w);
                     }
                 } catch (Exception ignored) {
