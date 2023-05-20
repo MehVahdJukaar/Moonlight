@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -84,24 +85,26 @@ public interface ILightable {
 
     //call on use
     default InteractionResult interactWithPlayer(BlockState state, Level level, BlockPos pos, Player player, InteractionHand handIn) {
-        ItemStack stack = player.getItemInHand(handIn);
-        if (!this.isLitUp(state)) {
-            Item item = stack.getItem();
-            if (item instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS)) {
-                if (lightUp(player, state, pos, level, FireSourceType.FLINT_AND_STEEL)) {
-                    stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
+        if(Utils.mayBuild(player, pos)) {
+            ItemStack stack = player.getItemInHand(handIn);
+            if (!this.isLitUp(state)) {
+                Item item = stack.getItem();
+                if (item instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS)) {
+                    if (lightUp(player, state, pos, level, FireSourceType.FLINT_AND_STEEL)) {
+                        stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
+                        return InteractionResult.sidedSuccess(level.isClientSide);
+                    }
+                } else if (item instanceof FireChargeItem) {
+                    if (lightUp(player, state, pos, level, FireSourceType.FIRE_CHANGE)) {
+                        stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
+                        if (!player.isCreative()) stack.shrink(1);
+                        return InteractionResult.sidedSuccess(level.isClientSide);
+                    }
+                }
+            } else if (this.canBeExtinguishedBy(stack)) {
+                if (extinguish(player, state, pos, level)) {
                     return InteractionResult.sidedSuccess(level.isClientSide);
                 }
-            } else if (item instanceof FireChargeItem) {
-                if (lightUp(player, state, pos, level, FireSourceType.FIRE_CHANGE)) {
-                    stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
-                    if (!player.isCreative()) stack.shrink(1);
-                    return InteractionResult.sidedSuccess(level.isClientSide);
-                }
-            }
-        } else if (this.canBeExtinguishedBy(stack)) {
-            if (extinguish(player, state, pos, level)) {
-                return InteractionResult.sidedSuccess(level.isClientSide);
             }
         }
         return InteractionResult.PASS;

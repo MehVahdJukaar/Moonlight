@@ -1,20 +1,20 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
-import com.google.common.collect.ImmutableList;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -23,7 +23,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -43,7 +42,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.function.Supplier;
 
 
@@ -203,6 +201,19 @@ public class Utils {
         return targetType == type ? (BlockEntityTicker<A>) ticker : null;
     }
 
+    /**
+     * Call this instead of player.abilities.mayBuild. Mainly used for adventure mode ege case
+     * This is needed as vanilla handles most of its block altering actions from the item class which calls this.
+     * In a Block class this should be called instead to allow adventure mode to work properly
+     */
+    public static boolean mayBuild(Player player, BlockPos pos) {
+        if (player.getAbilities().mayBuild) return true; //Exit early
+        if (player instanceof ServerPlayer sp) {
+            return player.blockActionRestricted(player.level, pos, sp.gameMode.getGameModeForPlayer());
+        } else {
+            return player.blockActionRestricted(player.level, pos, Minecraft.getInstance().gameMode.getPlayerMode());
+        }
+    }
 
 
 }
