@@ -84,36 +84,34 @@ public interface ILightable {
 
     //call on use
     default InteractionResult interactWithPlayer(BlockState state, Level level, BlockPos pos, Player player, InteractionHand handIn) {
-        if(player.getAbilities().mayBuild) {
-            ItemStack stack = player.getItemInHand(handIn);
-            if (!this.isLitUp(state)) {
-                Item item = stack.getItem();
-                if (item instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS)) {
-                    if (lightUp(player, state, pos, level, FireSourceType.FLINT_AND_STEEL)) {
-                        stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
-                        return InteractionResult.sidedSuccess(level.isClientSide);
-                    }
-                } else if (item instanceof FireChargeItem) {
-                    if (lightUp(player, state, pos, level, FireSourceType.FIRE_CHANGE)) {
-                        stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
-                        if (!player.isCreative()) stack.shrink(1);
-                        return InteractionResult.sidedSuccess(level.isClientSide);
-                    }
-                }
-            }else if(this.canBeExtinguishedBy(stack)){
-                if(extinguish(player, state, pos, level)){
+        ItemStack stack = player.getItemInHand(handIn);
+        if (!this.isLitUp(state)) {
+            Item item = stack.getItem();
+            if (item instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS)) {
+                if (lightUp(player, state, pos, level, FireSourceType.FLINT_AND_STEEL)) {
+                    stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
                     return InteractionResult.sidedSuccess(level.isClientSide);
                 }
+            } else if (item instanceof FireChargeItem) {
+                if (lightUp(player, state, pos, level, FireSourceType.FIRE_CHANGE)) {
+                    stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
+                    if (!player.isCreative()) stack.shrink(1);
+                    return InteractionResult.sidedSuccess(level.isClientSide);
+                }
+            }
+        } else if (this.canBeExtinguishedBy(stack)) {
+            if (extinguish(player, state, pos, level)) {
+                return InteractionResult.sidedSuccess(level.isClientSide);
             }
         }
         return InteractionResult.PASS;
     }
 
-    default boolean canBeExtinguishedBy(ItemStack item){
+    default boolean canBeExtinguishedBy(ItemStack item) {
         return item.getItem() instanceof ShovelItem;
     }
 
-    default void playLightUpSound(LevelAccessor world, BlockPos pos, FireSourceType type){
+    default void playLightUpSound(LevelAccessor world, BlockPos pos, FireSourceType type) {
         type.play(world, pos);
     }
 
