@@ -9,11 +9,13 @@ import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -195,5 +197,19 @@ public class Utils {
     @Nullable
     public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> getTicker(BlockEntityType<A> type, BlockEntityType<E> targetType, BlockEntityTicker<? super E> ticker) {
         return targetType == type ? (BlockEntityTicker<A>) ticker : null;
+    }
+
+    /**
+     * Call this instead of player.abilities.mayBuild. Mainly used for adventure mode ege case
+     * This is needed as vanilla handles most of its block altering actions from the item class which calls this.
+     * In a Block class this should be called instead to allow adventure mode to work properly
+     */
+    public static boolean mayBuild(Player player, BlockPos pos) {
+        if (player.getAbilities().mayBuild) return true; //Exit early
+        if (player instanceof ServerPlayer sp) {
+            return player.blockActionRestricted(player.level, pos, sp.gameMode.getGameModeForPlayer());
+        } else {
+            return player.blockActionRestricted(player.level, pos, Minecraft.getInstance().gameMode.getPlayerMode());
+        }
     }
 }
