@@ -209,9 +209,9 @@ public class Utils {
     public static boolean mayBuild(Player player, BlockPos pos) {
         if (player.getAbilities().mayBuild) return true; //Exit early
         if (player instanceof ServerPlayer sp) {
-            return player.blockActionRestricted(player.level, pos, sp.gameMode.getGameModeForPlayer());
+            return !player.blockActionRestricted(player.level, pos, sp.gameMode.getGameModeForPlayer());
         } else {
-            return player.blockActionRestricted(player.level, pos, Minecraft.getInstance().gameMode.getPlayerMode());
+            return !player.blockActionRestricted(player.level, pos, Minecraft.getInstance().gameMode.getPlayerMode());
         }
     }
 
