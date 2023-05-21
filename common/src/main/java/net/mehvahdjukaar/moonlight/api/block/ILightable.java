@@ -103,7 +103,9 @@ public interface ILightable {
                 }
             } else if (this.canBeExtinguishedBy(stack)) {
                 if (extinguish(player, state, pos, level)) {
-                    return InteractionResult.sidedSuccess(level.isClientSide);
+                    if (!(stack.getItem() instanceof BrushItem)) {
+                        return InteractionResult.sidedSuccess(level.isClientSide);
+                    }
                 }
             }
         }
@@ -111,7 +113,7 @@ public interface ILightable {
     }
 
     default boolean canBeExtinguishedBy(ItemStack item) {
-        return item.getItem() instanceof ShovelItem;
+        return item.getItem() instanceof ShovelItem || item.getItem() instanceof BrushItem;
     }
 
     default void playLightUpSound(LevelAccessor world, BlockPos pos, FireSourceType type) {

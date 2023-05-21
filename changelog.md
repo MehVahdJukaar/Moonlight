@@ -1,1 +1,1 @@
-- added ImageTransformer, an utility class to rotate or move parts of a texture in another
+added more utilities
