@@ -1,1 +1,1 @@
-fixed fluid tanks not saving their fluid colors correctly
+fixed a rare issue with players in adventure mode
