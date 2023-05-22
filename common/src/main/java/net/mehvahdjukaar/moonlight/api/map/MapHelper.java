@@ -47,6 +47,9 @@ public class MapHelper {
      */
     public static void addVanillaDecorations(ItemStack stack, BlockPos pos, MapDecoration.Type type, int mapColor) {
         MapItemSavedData.addTargetDecoration(stack, pos, "+", type);
+        if (mapColor == 0 && type.hasMapColor()) {
+            mapColor = type.getMapColor();
+        }
         if (mapColor != 0) {
             CompoundTag com = stack.getOrCreateTagElement("display");
             com.putInt("MapColor", mapColor);

@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
@@ -52,11 +53,17 @@ public class DynamicDataPack extends DynamicResourcePack {
      * @param block block to be dropped
      */
     public void addSimpleBlockLootTable(Block block) {
-        this.addJson(block.getLootTable(),
-                LootTables.serialize(BlockLootAccessor.invokeCreateSingleItemTable(block)
-                        .setParamSet(LootContextParamSets.BLOCK).build()),
-                ResType.LOOT_TABLES);
+        this.addLootTable(block,BlockLootAccessor.invokeCreateSingleItemTable(block));
     }
+
+    public void addLootTable(Block block, LootTable.Builder table){
+        this.addLootTable(block.getLootTable(), table.build());
+    }
+
+    public void addLootTable(ResourceLocation id, LootTable table){
+        this.addJson(id, LootTables.serialize(table), ResType.LOOT_TABLES);
+    }
+
 
     public void addRecipe(FinishedRecipe recipe) {
         this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);

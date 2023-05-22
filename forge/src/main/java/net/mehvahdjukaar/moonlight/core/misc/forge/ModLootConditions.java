@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.misc.forge;
 
 import com.google.gson.*;
+import net.mehvahdjukaar.moonlight.api.map.MapHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.KeyMapping;
