@@ -33,8 +33,10 @@ public class RenderUtilImpl {
         }
     }
 
-    public static void renderGuiItem(BakedModel model, ItemStack stack, ItemRenderer renderer, int combinedLight, int pCombinedOverlay, PoseStack poseStack,
-                                     MultiBufferSource.BufferSource buffer, boolean flatItem) {
+    public static void renderGuiItem(BakedModel model, ItemStack stack, ItemRenderer renderer, int combinedLight, int pCombinedOverlay,
+                                     PoseStack poseStack, MultiBufferSource.BufferSource buffer, boolean flatItem) {
+
+        poseStack.pushPose();
 
         poseStack.translate(-0.5D, -0.5D, -0.5D);
 

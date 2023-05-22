@@ -34,6 +34,8 @@ public class RenderUtilImpl {
 
     public static void renderGuiItem(BakedModel model, ItemStack stack, ItemRenderer renderer, int combinedLight, int combinedOverlay, PoseStack poseStack, MultiBufferSource.BufferSource buffer, boolean flatItem) {
 
+        poseStack.pushPose();
+
         poseStack.translate(-0.5, -0.5, -0.5);
         if (model.isCustomRenderer() || stack.is(Items.TRIDENT) && !flatItem) {
             ((ItemRendererAccessor) renderer).getBlockEntityRenderer().renderByItem(stack, ItemDisplayContext.GUI,

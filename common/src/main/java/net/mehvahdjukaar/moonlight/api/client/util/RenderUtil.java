@@ -76,9 +76,7 @@ public class RenderUtil {
         poseStack.translate(8.0D, 8.0D, 0.0D);
         poseStack.scale(1.0F, -1.0F, 1.0F);
         poseStack.scale(16.0F, 16.0F, 16.0F);
-        RenderSystem.applyModelViewMatrix();
 
-        PoseStack matrixStack = new PoseStack();
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         boolean flag = !model.usesBlockLight();
@@ -90,7 +88,6 @@ public class RenderUtil {
 
         ItemDisplayContext pTransformType = ItemDisplayContext.GUI;
 
-        matrixStack.pushPose();
 
         if (stack.is(Items.TRIDENT)) {
             model = renderer.getItemModelShaper().getModelManager().getModel(TRIDENT_MODEL);
@@ -98,14 +95,13 @@ public class RenderUtil {
             model = renderer.getItemModelShaper().getModelManager().getModel(SPYGLASS_MODEL);
         }
 
-
-        model = handleCameraTransforms(model, matrixStack, pTransformType);
+        model = handleCameraTransforms(model, poseStack, pTransformType);
 
         //custom rotation
 
-        movement.accept(matrixStack, model);
+        movement.accept(poseStack, model);
 
-        renderGuiItem(model, stack, renderer, combinedLight, pCombinedOverlay, matrixStack, bufferSource, flag);
+        renderGuiItem(model, stack, renderer, combinedLight, pCombinedOverlay, poseStack, bufferSource, flag);
 
 
         //----end-render---
@@ -117,7 +113,6 @@ public class RenderUtil {
         }
 
         poseStack.popPose();
-        RenderSystem.applyModelViewMatrix();
 
         poseStack.popPose();
     }
