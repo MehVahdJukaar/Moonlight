@@ -57,10 +57,16 @@ public class DynamicDataPack extends DynamicResourcePack {
      * @param block block to be dropped
      */
     public void addSimpleBlockLootTable(Block block) {
-        this.addJson(block.getLootTable(),
-                LootTables.serialize(createSingleItemTable(block)
-                        .setParamSet(LootContextParamSets.BLOCK).build()),
-                ResType.LOOT_TABLES);
+        this.addLootTable(block, createSingleItemTable(block)
+                        .setParamSet(LootContextParamSets.BLOCK));
+    }
+
+    public void addLootTable(Block block, LootTable.Builder table){
+        this.addLootTable(block.getLootTable(), table.build());
+    }
+
+    public void addLootTable(ResourceLocation id, LootTable table){
+        this.addJson(id, LootTables.serialize(table), ResType.LOOT_TABLES);
     }
 
     protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {
