@@ -53,7 +53,8 @@ public class DynamicDataPack extends DynamicResourcePack {
      * @param block block to be dropped
      */
     public void addSimpleBlockLootTable(Block block) {
-        this.addLootTable(block,BlockLootAccessor.invokeCreateSingleItemTable(block));
+        this.addLootTable(block,BlockLootAccessor.invokeCreateSingleItemTable(block)
+                .setParamSet(LootContextParamSets.BLOCK));
     }
 
     public void addLootTable(Block block, LootTable.Builder table){
