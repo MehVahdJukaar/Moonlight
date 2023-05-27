@@ -12,6 +12,8 @@ import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
@@ -33,7 +35,13 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         return INSTANCE.getFromNBT(name);
     }
 
+    public static WoodType fromVanilla(net.minecraft.world.level.block.state.properties.WoodType vanillaType) {
+        return INSTANCE.getFromVanilla(vanillaType);
+    }
+
     //instance stuff
+
+    Map<net.minecraft.world.level.block.state.properties.WoodType, WoodType> fromVanilla = new IdentityHashMap<>();
 
     public WoodTypeRegistry() {
         super(WoodType.class, "wood_type");
@@ -131,5 +139,15 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         getValues().forEach((w) -> {
             if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
         });
+    }
+
+    @Nullable
+    public WoodType getFromVanilla(net.minecraft.world.level.block.state.properties.WoodType woodType) {
+        return fromVanilla.get(woodType);
+    }
+
+    void mapVanillaWood(WoodType woodType) {
+        var v = woodType.toVanilla();
+        if (v != null) fromVanilla.put(v, woodType);
     }
 }

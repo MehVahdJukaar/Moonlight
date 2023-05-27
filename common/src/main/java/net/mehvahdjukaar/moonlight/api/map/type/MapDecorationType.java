@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public abstract class MapDecorationType<D extends CustomMapDecoration, M extends MapBlockMarker<D>> {

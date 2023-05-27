@@ -214,7 +214,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         bufferedimage.setRGB(0, 0, width, height, data, 0, width);
 
         ImageIO.write(bufferedimage, "png", output.toFile());
-        Moonlight.LOGGER.info("Exported png to: {}", output.toString());
+        //   WoodGood.LOGGER.info("Exported png to: {}", output.toString());
         textureFiles.add(output);
 
         return textureFiles;

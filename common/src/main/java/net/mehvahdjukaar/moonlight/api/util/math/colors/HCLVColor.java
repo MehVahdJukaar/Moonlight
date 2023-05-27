@@ -2,11 +2,9 @@ package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
 import net.minecraft.util.Mth;
 
-import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
 
 //Polar LUV
-@Immutable
 public class HCLVColor extends BaseColor<HCLVColor> {
 
     public HCLVColor(float h, float c, float l, float a) {

@@ -136,7 +136,7 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @javax.annotation.Nullable
+    @org.jetbrains.annotations.Nullable
     @ExpectPlatform
     public static DyeColor getColor(ItemStack stack) {
         throw new AssertionError();
@@ -160,7 +160,7 @@ public class ForgeHelper {
     }
 
     @ExpectPlatform
-    public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, @javax.annotation.Nullable AbstractMinecart o) {
+    public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, @org.jetbrains.annotations.Nullable AbstractMinecart o) {
         throw new AssertionError();
     }
 
@@ -189,7 +189,7 @@ public class ForgeHelper {
     }
 
     @ExpectPlatform
-    @javax.annotation.Nullable
+    @org.jetbrains.annotations.Nullable
     public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
         throw new AssertionError();
     }

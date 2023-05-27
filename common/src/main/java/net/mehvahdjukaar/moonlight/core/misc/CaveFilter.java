@@ -51,6 +51,7 @@ public class CaveFilter extends PlacementFilter {
                 int k = context.getHeight(h, pos.getX(), pos.getZ());
                 if (y > k) return false;
             }
+            return true;
         }
         return false;
     }

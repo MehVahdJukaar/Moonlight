@@ -2,9 +2,6 @@ package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
 import net.minecraft.util.Mth;
 
-import javax.annotation.concurrent.Immutable;
-
-@Immutable
 public class LABColor extends BaseColor<LABColor> {
 
     public LABColor(float l, float a, float b, float alpha) {
@@ -71,13 +68,15 @@ public class LABColor extends BaseColor<LABColor> {
     public RGBColor asRGB() {
         return ColorSpaces.XYZtoRGB(ColorSpaces.LABtoXYZ(this));
     }
+
     @Override
     public LABColor multiply(LABColor color, float luminance, float a, float b, float alpha) {
-        return new LABColor(Mth.clamp(luminance*this.luminance(), 0,1),
-                Mth.clamp(a*this.a(), 0,1),
-                Mth.clamp(b*this.b(), 0,1),
-                Mth.clamp(alpha*this.alpha(), 0,1));
+        return new LABColor(Mth.clamp(luminance * this.luminance(), 0, 1),
+                Mth.clamp(a * this.a(), 0, 1),
+                Mth.clamp(b * this.b(), 0, 1),
+                Mth.clamp(alpha * this.alpha(), 0, 1));
     }
+
     @Override
     public LABColor mixWith(LABColor color, float bias) {
         float i = 1 - bias;

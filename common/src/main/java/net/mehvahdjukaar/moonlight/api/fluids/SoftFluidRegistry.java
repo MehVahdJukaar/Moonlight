@@ -17,7 +17,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 //TODO: maybe split into api/core?
@@ -105,7 +105,7 @@ public class SoftFluidRegistry {
      * @param filledContainerItem item containing provided fluid
      * @return soft fluid. empty fluid if not found
      */
-    @Nonnull
+    @NotNull
     public static SoftFluid fromItem(Item filledContainerItem) {
         return ITEM_MAP.getOrDefault(filledContainerItem, getEmpty());
     }

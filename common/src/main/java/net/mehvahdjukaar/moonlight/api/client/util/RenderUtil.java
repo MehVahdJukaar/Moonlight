@@ -82,6 +82,8 @@ public class RenderUtil {
         boolean flag = !model.usesBlockLight();
         if (flag) {
             Lighting.setupForFlatItems();
+        }else{
+            Lighting.setupFor3DItems();
         }
 
         //-----render---

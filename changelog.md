@@ -1,1 +1,3 @@
-added more utilities
+- fixed cave filter placement modifier
+- added to vanilla methods to wood type
+- fixed some item rendering methods

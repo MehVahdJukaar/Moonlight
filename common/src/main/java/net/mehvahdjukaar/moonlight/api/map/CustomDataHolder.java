@@ -9,8 +9,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -37,7 +37,7 @@ public record CustomDataHolder<T>(ResourceLocation id,
         private T object;
         private final CustomDataHolder<T> type;
 
-        private Instance(T value, @Nonnull CustomDataHolder<T> type) {
+        private Instance(T value, @NotNull CustomDataHolder<T> type) {
             this.object = value;
             this.type = type;
         }

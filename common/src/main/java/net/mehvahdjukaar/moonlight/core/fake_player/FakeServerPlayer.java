@@ -27,7 +27,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -130,7 +129,6 @@ public class FakeServerPlayer extends ServerPlayer {
         FakePlayerNetHandler.init();
     }
 
-    @ParametersAreNonnullByDefault
     private static class FakePlayerNetHandler extends ServerGamePacketListenerImpl {
         private static final Connection DUMMY_CONNECTION = new Connection(PacketFlow.CLIENTBOUND);
 

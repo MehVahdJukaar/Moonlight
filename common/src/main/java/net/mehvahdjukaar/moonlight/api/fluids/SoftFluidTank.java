@@ -20,8 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
@@ -476,7 +476,7 @@ public abstract class SoftFluidTank {
         return count;
     }
 
-    @Nonnull
+    @NotNull
     public SoftFluid getFluid() {
         return fluid;
     }

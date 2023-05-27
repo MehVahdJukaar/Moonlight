@@ -7,22 +7,21 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -77,6 +76,12 @@ public class RenderedTexturesManager {
         return texture;
     }
 
+
+    @Deprecated(forRemoval = true)
+    public static FrameBufferBackedDynamicTexture getFlatItemStackTexture(ResourceLocation res, ItemStack stack, int size) {
+        return requestFlatItemStackTexture(res, stack, size);
+    }
+
     public static FrameBufferBackedDynamicTexture requestFlatItemStackTexture(ResourceLocation res, ItemStack stack, int size) {
         return requestTexture(res, size, t -> drawItem(t, stack), true);
     }
@@ -124,6 +129,7 @@ public class RenderedTexturesManager {
         drawAsInGUI(tex, s -> {
             //render stuff
             ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+            //Minecraft.getInstance().gui.render(s,1);
             itemRenderer.renderGuiItem(s, stack, 0, 0);
         });
     }
@@ -164,13 +170,24 @@ public class RenderedTexturesManager {
         posestack.pushPose();
         posestack.setIdentity();
 
-        posestack.translate(0.0D, 0.0D, 1000F - 3000); //ForgeHooksClient.getGuiFarPlane()
+        posestack.translate(0.0D, 0.0D, -2000); //ForgeHooksClient.getGuiFarPlane()
         //apply new model view transformation
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();
         //end gui setup code
 
         drawFunction.accept(posestack);
+
+        var t = new Tesselator();
+        var b = t.getBuilder();
+        b.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+
+        b.color(1.0f, 0.0f, 0.0f, 1);
+        b.vertex(0.0f, 0f,0);
+        b.vertex(5f, 5f, 0.0f);
+        b.vertex(0f, 5f, 0.0f);
+
+        BufferUploader.drawWithShader(b.end());
 
         //reset stuff
         posestack.popPose();
@@ -186,6 +203,6 @@ public class RenderedTexturesManager {
 
 
     //TODO: Stitch on an atlas
-
+    //unused
 
 }

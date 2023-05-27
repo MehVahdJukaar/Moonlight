@@ -2,9 +2,6 @@ package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
 import net.minecraft.util.Mth;
 
-import javax.annotation.concurrent.Immutable;
-
-@Immutable
 public class LUVColor extends BaseColor<LUVColor> {
 
     public LUVColor(float l, float u, float v, float alpha) {
@@ -74,11 +71,12 @@ public class LUVColor extends BaseColor<LUVColor> {
 
     @Override
     public LUVColor multiply(LUVColor color, float luminance, float u, float v, float alpha) {
-        return new LUVColor(Mth.clamp(luminance*this.luminance(), 0,1),
-                Mth.clamp(u*this.u(), 0,1),
-                Mth.clamp(v*this.v(), 0,1),
-                Mth.clamp(alpha*this.alpha(), 0,1));
+        return new LUVColor(Mth.clamp(luminance * this.luminance(), 0, 1),
+                Mth.clamp(u * this.u(), 0, 1),
+                Mth.clamp(v * this.v(), 0, 1),
+                Mth.clamp(alpha * this.alpha(), 0, 1));
     }
+
     @Override
     public LUVColor mixWith(LUVColor color, float bias) {
         float i = 1 - bias;

@@ -36,8 +36,8 @@ import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.Function;
@@ -132,13 +132,13 @@ public class ConfigHelper {
      * A config-reload-sensitive wrapper around a config field for a complex object
      **/
     public static class ConfigObject<T> implements Supplier<T> {
-        private @Nonnull
+        private @NotNull
         final ConfigValue<Object> value;
-        private @Nonnull
+        private @NotNull
         final Codec<T> codec;
         private @Nullable Object cachedObject;
-        private @Nonnull T parsedObject;
-        private final @Nonnull Supplier<T> defaultObject;
+        private @NotNull T parsedObject;
+        private final @NotNull Supplier<T> defaultObject;
 
         private ConfigObject(ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
             this.value = value;
@@ -147,7 +147,7 @@ public class ConfigHelper {
         }
 
         @Override
-        @Nonnull
+        @NotNull
         public T get() {
             Object freshObject = this.value.get();
             if (!Objects.equals(this.cachedObject, freshObject)) {

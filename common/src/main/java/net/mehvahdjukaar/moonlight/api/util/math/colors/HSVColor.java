@@ -2,10 +2,8 @@ package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
 import net.minecraft.util.Mth;
 
-import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
 
-@Immutable
 public class HSVColor extends BaseColor<HSVColor> {
 
     public HSVColor(float h, float s, float b, float a) {
@@ -73,13 +71,15 @@ public class HSVColor extends BaseColor<HSVColor> {
         }
         return new HSVColor(averageAngles(hues), s / size, v / size, a / size);
     }
+
     @Override
     public HSVColor multiply(HSVColor color, float hue, float saturation, float value, float alpha) {
-        return new HSVColor(Mth.clamp(hue*this.hue(), 0,1),
-                Mth.clamp(saturation*this.saturation(), 0,1),
-                Mth.clamp(value*this.value(), 0,1),
-                Mth.clamp(alpha*this.alpha(), 0,1));
+        return new HSVColor(Mth.clamp(hue * this.hue(), 0, 1),
+                Mth.clamp(saturation * this.saturation(), 0, 1),
+                Mth.clamp(value * this.value(), 0, 1),
+                Mth.clamp(alpha * this.alpha(), 0, 1));
     }
+
     @Override
     public HSVColor mixWith(HSVColor color, float bias) {
         float i = 1 - bias;

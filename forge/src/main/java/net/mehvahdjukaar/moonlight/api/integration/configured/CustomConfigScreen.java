@@ -361,9 +361,10 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
         private final ItemStack item;
         protected final int iconOffset;
+        protected final boolean needsGameRestart;
+        protected boolean doesNeedsGameRestart = false;
 
         protected Button button;
-        protected boolean needsGameRestart;
         private int ticks = 0;
         private int lastTick = 1;
 
@@ -388,7 +389,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             var r = super.mouseClicked(mouseX, mouseY, button);
-            this.needsGameRestart = !this.needsGameRestart;
+            this.doesNeedsGameRestart = !this.doesNeedsGameRestart;
             return r;
         }
 
@@ -406,7 +407,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             this.lastTick = CustomConfigScreen.this.ticks;
 
             //world restart stuff for forge values
-            if (needsGameRestart) {
+            if (doesNeedsGameRestart) {
                 RenderSystem.setShaderTexture(0, IconButton.ICONS);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 Screen.blit(poseStack, left - 18, top + 5, 11, 11, 51.0F, 22.0F, 11, 11, 64, 64);

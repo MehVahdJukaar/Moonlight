@@ -14,7 +14,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -36,7 +36,7 @@ public class ModLootConditions {
             return true;
         }
 
-        @Nonnull
+        @NotNull
         @Override
         public LootItemConditionType getType() {
             return ICONDITION_LOOT_CONDITION.get();
@@ -44,7 +44,7 @@ public class ModLootConditions {
 
         public record ConditionSerializer() implements Serializer<IConditionLootCondition> {
             @Override
-            public void serialize(@Nonnull JsonObject json, @Nonnull IConditionLootCondition value, @Nonnull JsonSerializationContext context) {
+            public void serialize(@NotNull JsonObject json, @NotNull IConditionLootCondition value, @NotNull JsonSerializationContext context) {
                 JsonArray ja = new JsonArray();
                 for (var c : value.conditions) {
                     ja.add(CraftingHelper.serialize(c));
@@ -52,9 +52,9 @@ public class ModLootConditions {
                 json.add("values", ja);
             }
 
-            @Nonnull
+            @NotNull
             @Override
-            public IConditionLootCondition deserialize(@Nonnull JsonObject json, @Nonnull JsonDeserializationContext context) {
+            public IConditionLootCondition deserialize(@NotNull JsonObject json, @NotNull JsonDeserializationContext context) {
                 var ja = GsonHelper.getAsJsonArray(json, "values");
                 List<ICondition> l = new ArrayList<>();
                 for (var c : ja) {
