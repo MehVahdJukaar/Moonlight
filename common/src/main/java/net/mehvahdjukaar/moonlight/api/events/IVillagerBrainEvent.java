@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerBrainEventInternal;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -40,7 +41,7 @@ public interface IVillagerBrainEvent extends SimpleEvent {
      * @param activity        the identifier of the activity
      * @param activityPackage the play package itself that will be executed
      */
-    void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends Behavior<? super Villager>>> activityPackage);
+    void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> activityPackage);
 
     /**
      * Adds an activity to the schedule. will override any activity that is in that specified time window
