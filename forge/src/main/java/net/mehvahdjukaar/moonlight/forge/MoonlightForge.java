@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.map.forge.MapDecorationRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeServerPlayer;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
@@ -47,6 +48,9 @@ public class MoonlightForge {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         if (PlatHelper.getPhysicalSide().isClient()) {
             modEventBus.addListener(MoonlightForgeClient::registerShader);
+            modEventBus.addListener(MoonlightForgeClient::clientSetup);
+            MoonlightClient.initClient();
+
         }
 
     }

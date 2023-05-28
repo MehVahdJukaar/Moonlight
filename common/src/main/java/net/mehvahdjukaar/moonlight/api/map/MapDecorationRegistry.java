@@ -1,21 +1,16 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
 import com.mojang.datafixers.util.Either;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
-import net.mehvahdjukaar.moonlight.api.map.type.SimpleDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.JsonDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -24,21 +19,21 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.ApiStatus;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 //TODO: split into api and core
 public class MapDecorationRegistry {
 
     //pain
     public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC =
-            Codec.either(CustomDecorationType.CODEC, SimpleDecorationType.CODEC).xmap(
+            Codec.either(CustomDecorationType.CODEC, JsonDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
                         if (type == null) {
@@ -47,31 +42,10 @@ public class MapDecorationRegistry {
                         if (type instanceof CustomDecorationType<?, ?> c) {
                             return Either.left(c);
                         }
-                        return Either.right((SimpleDecorationType) type);
+                        return Either.right((JsonDecorationType) type);
                     });
 
-    public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC_BUGGY_2 = MapDecorationType.GENERIC_CODEC;
-
-    public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC_2 = new Codec<>() {
-        @Override
-        public <T> DataResult<T> encode(MapDecorationType<?, ?> input, DynamicOps<T> ops, T prefix) {
-            if (input instanceof CustomDecorationType<?, ?> type) {
-                return CustomDecorationType.CODEC.encode(type, ops, prefix);
-            } else {
-                return SimpleDecorationType.CODEC.encode(((SimpleDecorationType) input), ops, prefix);
-            }
-        }
-
-        @Override
-        public <T> DataResult<Pair<MapDecorationType<?, ?>, T>> decode(DynamicOps<T> ops, T input) {
-            var first = CustomDecorationType.CODEC.decode(ops, input);
-            if (first.result().isPresent()) return first.map(v -> v.mapFirst(a -> a));
-            return SimpleDecorationType.CODEC.decode(ops, input).map(v -> v.mapFirst(a -> a));
-        }
-    };
-
     //data holder
-
 
     public static final Map<ResourceLocation, CustomDataHolder<?>> CUSTOM_MAP_DATA_TYPES = new HashMap<>();
 
@@ -104,24 +78,32 @@ public class MapDecorationRegistry {
 
     public static final ResourceKey<Registry<MapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(
             Moonlight.res((PlatHelper.getPlatform().isFabric() ? "moonlight/" : "") + "map_markers"));
-
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
+    private static final Map<ResourceLocation, CustomDecorationType<?, ?>> CODE_TYPES_FACTORIES = new HashMap<>();
 
     public static MapDecorationType<?, ?> getGenericStructure() {
         return get(GENERIC_STRUCTURE_ID);
     }
 
-    private static final Map<ResourceLocation, CustomDecorationType<?, ?>> CODE_TYPES_FACTORIES = new HashMap<>();
-
     /**
      * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
      */
-    public static void registerCustomType(CustomDecorationType<?, ?> markerType) {
+    public static <T extends CustomDecorationType<?, ?>> void registerCustomType(T markerType) {
         CODE_TYPES_FACTORIES.put(markerType.getCustomFactoryID(), markerType);
     }
 
-    public static CustomDecorationType<?,?> getCustomType(ResourceLocation resourceLocation){
-      return Objects.requireNonNull(CODE_TYPES_FACTORIES.get(resourceLocation),"No map decoration type with id: "+resourceLocation);
+    public static CustomDecorationType<?, ?> getCustomType(ResourceLocation resourceLocation) {
+        return Objects.requireNonNull(CODE_TYPES_FACTORIES.get(resourceLocation), "No map decoration type with id: " + resourceLocation);
+    }
+
+    public static MapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
+        for (var v : getValues()) {
+            Optional<HolderSet<Structure>> associatedStructure = v.getAssociatedStructure();
+            if (associatedStructure.isPresent() && associatedStructure.get().contains(structure)) {
+                return v;
+            }
+        }
+        return getGenericStructure();
     }
 
     @ExpectPlatform

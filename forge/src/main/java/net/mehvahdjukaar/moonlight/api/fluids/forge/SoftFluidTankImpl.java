@@ -6,7 +6,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
+import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -214,7 +214,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         if (this.isEmpty()) return -1;
         int tintColor = this.getTintColor(world, pos);
         //if tint color is white gets averaged color
-        if (tintColor == -1) return SoftFluidClient.get(this.fluid);
+        if (tintColor == -1) return SoftFluidParticleColors.getParticleColor(this.fluid);
         return tintColor;
     }
 

@@ -1,13 +1,14 @@
 package net.mehvahdjukaar.moonlight.core;
 
-import net.mehvahdjukaar.moonlight.api.client.TextureCache;
+import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientManager;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
 
 public class MoonlightClient {
 
     public static void initClient() {
-        ClientHelper.addClientReloadListener(new SoftFluidClient(), Moonlight.res("soft_fluids"));
+
+        ClientHelper.addClientReloadListener(() -> SoftFluidParticleColors.INSTANCE, Moonlight.res("soft_fluids"));
+        ClientHelper.addClientReloadListener(() -> MapDecorationClientManager.INSTANCE, Moonlight.res("map_markers"));
     }
 }

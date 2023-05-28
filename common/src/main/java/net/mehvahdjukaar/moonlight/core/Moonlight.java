@@ -62,11 +62,6 @@ public class Moonlight {
         MapDecorationRegistry.init();
         SoftFluidRegistry.init();
 
-        //client init
-        if (PlatHelper.getPhysicalSide().isClient()) {
-            MoonlightClient.initClient();
-        }
-
         PlatHelper.addCommonSetup(Moonlight::commonSetup);
     }
 

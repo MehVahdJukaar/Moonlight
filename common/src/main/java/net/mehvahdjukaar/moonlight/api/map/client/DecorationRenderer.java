@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.map.client;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -8,7 +7,8 @@ import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
@@ -17,15 +17,16 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.joml.Matrix4f;
 
 public class DecorationRenderer<T extends CustomMapDecoration> {
-    private final RenderType renderType;
+    private final ResourceLocation textureId;
     private final int mapColor;
     private final boolean renderOnFrame;
 
     public DecorationRenderer(ResourceLocation texture,  int mapColor, boolean renderOnFrame){
-        this.renderType = RenderType.text(texture);
         this.renderOnFrame = renderOnFrame;
         this.mapColor = mapColor;
-    }
+        this.textureId = texture;
+        }
+
     public DecorationRenderer(ResourceLocation texture, int mapColor){
         this(texture,mapColor,true);
     }
@@ -34,15 +35,12 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
         this(texture,-1,true);
     }
 
-    public int getMapColor(T decoration) {
+    public int getColor(T decoration) {
         return mapColor;
     }
 
-    public RenderType getRenderType(T decoration) {
-        return renderType;
-    }
-
-    public boolean render(T decoration, PoseStack matrixStack, MultiBufferSource buffer, MapItemSavedData mapData, boolean isOnFrame, int light, int index) {
+    public boolean render(T decoration, PoseStack matrixStack, VertexConsumer vertexBuilder,
+                          MultiBufferSource buffer, MapItemSavedData mapData, boolean isOnFrame, int light, int index) {
         if (!isOnFrame || renderOnFrame) {
 
             matrixStack.pushPose();
@@ -53,13 +51,16 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
 
             Matrix4f matrix4f1 = matrixStack.last().pose();
 
-            VertexConsumer vertexBuilder = buffer.getBuffer(this.getRenderType(decoration));
 
-            int color = this.getMapColor(decoration);
+            int color = this.getColor(decoration);
 
             int b = FastColor.ARGB32.blue(color);
             int g = FastColor.ARGB32.green(color);
             int r = FastColor.ARGB32.red(color);
+
+            TextureAtlasSprite sprite = MapDecorationClientManager.getAtlasSprite(this.textureId);
+            //so we can use local coordinates
+            vertexBuilder = sprite.wrap(vertexBuilder);
 
             vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F,  index * -0.001F).color(r, g, b, 255).uv(0, 1).uv2(light).endVertex();
             vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F,  index * -0.001F).color(r, g, b, 255).uv(1, 1).uv2(light).endVertex();

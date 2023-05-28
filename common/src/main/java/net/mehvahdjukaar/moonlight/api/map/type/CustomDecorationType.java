@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 
 //equivalent of TileEntityType. Singleton which will be in charge of creating CustomDecoration and MapBlockMarker instances
 //used for custom implementations
-public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBlockMarker<D>> extends MapDecorationType<D, M> {
+public final class CustomDecorationType<D extends CustomMapDecoration, M extends MapBlockMarker<D>> extends MapDecorationType<D, M> {
 
 
     public static final Codec<CustomDecorationType<?, ?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -26,10 +26,9 @@ public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBl
     ).apply(instance, MapDecorationRegistry::getCustomType));
 
 
-    protected final Supplier<M> markerFactory;
-    protected final BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory;
-    protected final BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory;
-    protected final boolean hasMarker;
+    private final Supplier<M> markerFactory;
+    private final BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory;
+    private final BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory;
     private final ResourceLocation factoryID;
 
     /**
@@ -39,22 +38,17 @@ public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBl
      * @param markerFromWorldFactory function that retrieves an optional world marker from the world at a certain pos
      * @param decorationFactory      read decoration data from buffer
      */
-    public CustomDecorationType(ResourceLocation factoryID, Supplier<M> markerFactory, BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory,
+    public CustomDecorationType(ResourceLocation typeId, Supplier<M> markerFactory, BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory,
                                 BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory) {
         this.markerFactory = markerFactory;
         this.markerFromWorldFactory = markerFromWorldFactory;
         this.decorationFactory = decorationFactory;
-        this.hasMarker = true;
-        this.factoryID = factoryID;
+        this.factoryID = typeId;
     }
 
-    public CustomDecorationType(ResourceLocation factoryID, BiFunction<MapDecorationType<?, ?>,
+    public CustomDecorationType(ResourceLocation typeId, BiFunction<MapDecorationType<?, ?>,
             FriendlyByteBuf, D> decoFromBuffer) {
-        this.markerFactory = () -> null;
-        this.markerFromWorldFactory = (s, d) -> null;
-        this.decorationFactory = decoFromBuffer;
-        this.hasMarker = false;
-        this.factoryID = factoryID;
+        this(typeId, null, null, decoFromBuffer);
     }
 
     @Override
@@ -64,7 +58,7 @@ public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBl
 
     @Override
     public boolean hasMarker() {
-        return hasMarker;
+        return markerFactory != null;
     }
 
     @Override
@@ -82,7 +76,7 @@ public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBl
     @Override
     @Nullable
     public M loadMarkerFromNBT(CompoundTag compound) {
-        if (hasMarker) {
+        if (hasMarker()) {
             M marker = markerFactory.get();
             try {
                 marker.loadFromNBT(compound);
@@ -97,7 +91,7 @@ public class CustomDecorationType<D extends CustomMapDecoration, M extends MapBl
     @Override
     @Nullable
     public M getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos) {
-        return hasMarker ? markerFromWorldFactory.apply(reader, pos) : null;
+        return hasMarker() ? markerFromWorldFactory.apply(reader, pos) : null;
     }
 
 }

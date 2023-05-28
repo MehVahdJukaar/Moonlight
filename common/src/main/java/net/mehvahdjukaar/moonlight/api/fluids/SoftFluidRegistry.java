@@ -4,7 +4,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.client.SoftFluidClient;
+import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundFinalizeFluidsMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.Registry;
@@ -16,15 +16,15 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
-
 import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 //TODO: maybe split into api/core?
 public class SoftFluidRegistry {
 
     public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(
-            Moonlight.res((PlatHelper.getPlatform().isFabric() ? "moonlight/" : "")+ "soft_fluids"));
+            Moonlight.res((PlatHelper.getPlatform().isFabric() ? "moonlight/" : "") + "soft_fluids"));
 
     public static final ResourceLocation EMPTY_ID = Moonlight.res("empty");
 
@@ -75,7 +75,7 @@ public class SoftFluidRegistry {
                 id = Moonlight.res(id.getPath()); //backwards compat
             // mc stuff has my id //TODO: split into diff folders for each modded fluid
             r = reg.get(id);
-            if(r == null){
+            if (r == null) {
                 return reg.get(EMPTY_ID); //should not be needed but better be sure
             }
         }
@@ -136,7 +136,7 @@ public class SoftFluidRegistry {
     @ApiStatus.Internal
     public static void postInitClient() {
         populateSlaveMaps();
-        SoftFluidClient.refreshParticleColors();
+        SoftFluidParticleColors.INSTANCE.refreshParticleColors();
     }
 
     @ApiStatus.Internal

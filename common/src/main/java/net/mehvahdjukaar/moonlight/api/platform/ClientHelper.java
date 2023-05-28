@@ -69,8 +69,13 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation location) {
+        addClientReloadListener(()->listener, location);
+    }
+
+    @ExpectPlatform
+    public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation location) {
         throw new AssertionError();
     }
 

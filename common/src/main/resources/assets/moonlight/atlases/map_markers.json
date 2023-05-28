@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {
+      "type": "directory",
+      "source": "map_marker",
+      "prefix": "map_marker/"
+    }
+  ]
+}

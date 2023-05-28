@@ -16,13 +16,16 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.profiling.ProfilerFiller;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class SoftFluidClient extends GenericSimpleResourceReloadListener {
+public class SoftFluidParticleColors extends GenericSimpleResourceReloadListener {
 
-    public SoftFluidClient() {
+    public static final SoftFluidParticleColors INSTANCE = new SoftFluidParticleColors();
+
+    private final HashMap<ResourceLocation, Integer> particleColors = new HashMap<>();
+
+    protected SoftFluidParticleColors() {
         super("textures/soft_fluids", ".png"); //unused, just need for color reload
     }
 
@@ -38,22 +41,20 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
         TextureCache.clear();
     }
 
-    private static final HashMap<ResourceLocation, Integer> PARTICLE_COLORS = new HashMap<>();
-
-    public static int get(SoftFluid s) {
-        return PARTICLE_COLORS.getOrDefault(Utils.getID(s), -1);
+    public static int getParticleColor(SoftFluid s) {
+        return INSTANCE.particleColors.getOrDefault(Utils.getID(s), -1);
     }
 
     //TODO: possibly do it for ALL fluids, not only non grayscale ones
-    public static void refreshParticleColors() {
+    public void refreshParticleColors() {
         Minecraft mc = Minecraft.getInstance();
         if (mc == null || mc.level == null) return;
         var v = SoftFluidRegistry.getEntries();
-        PARTICLE_COLORS.clear();
+        particleColors.clear();
         for (var entry : v) {
             SoftFluid s = entry.getValue();
             ResourceLocation key = entry.getKey().location();
-            if (!PARTICLE_COLORS.containsKey(key) && !s.isColored()) {
+            if (!particleColors.containsKey(key) && !s.isColored()) {
                 ResourceLocation location = s.getStillTexture();
                 if (location == null) continue;
                 TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
@@ -64,7 +65,7 @@ public class SoftFluidClient extends GenericSimpleResourceReloadListener {
                 } catch (Exception e) {
                     Moonlight.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
                 }
-                PARTICLE_COLORS.put(key, averageColor);
+                particleColors.put(key, averageColor);
             }
         }
     }

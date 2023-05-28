@@ -6,30 +6,19 @@ import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderSet;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
+//type itself can have 2 types: json defined or custom code defined
 public abstract class MapDecorationType<D extends CustomMapDecoration, M extends MapBlockMarker<D>> {
-
-    //wish I knew how to do this better, but I can't partially dispatch an optional key
-    @Deprecated
-    public static final Codec<MapDecorationType<?, ?>> GENERIC_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.optionalFieldOf("custom_type", new ResourceLocation("")).forGetter(MapDecorationType::getCustomFactoryID),
-            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(b -> b instanceof SimpleDecorationType s ? s.getTarget() : Optional.empty())
-    ).apply(instance, MapDecorationType::decode));
-
-    @Deprecated
-    private static MapDecorationType<?, ?> decode(ResourceLocation customFactory, Optional<RuleTest> ruleTest) {
-        var f = MapDecorationRegistry.getCustomType(customFactory);
-        if (f != null) return f;
-        else return new SimpleDecorationType(ruleTest);
-    }
 
     abstract boolean hasMarker();
 
@@ -46,5 +35,12 @@ public abstract class MapDecorationType<D extends CustomMapDecoration, M extends
     @Nullable
     public abstract M getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos);
 
+    public int getDefaultMapColor(){
+        return 1;
+    }
+
+    public Optional<HolderSet<Structure>> getAssociatedStructure(){
+        return Optional.empty();
+    }
 
 }

@@ -2,15 +2,18 @@ package net.mehvahdjukaar.moonlight.fabric;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeServerPlayer;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
@@ -22,16 +25,21 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     @Override
     public void onInitialize() {
         Moonlight.commonInit();
+        //client init
+        if (PlatHelper.getPhysicalSide().isClient()) {
+             MoonlightClient.initClient();
+        }
+
         ModMessages.CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundOpenScreenMessage.class, ClientBoundOpenScreenMessage::new);
 
-        ServerPlayConnectionEvents.JOIN.register((l, s, m) ->  ModMessages.CHANNEL.sendToClientPlayer(l.player,
-                        new ClientBoundSendLoginPacket()));
+        ServerPlayConnectionEvents.JOIN.register((l, s, m) -> ModMessages.CHANNEL.sendToClientPlayer(l.player,
+                new ClientBoundSendLoginPacket()));
         ServerLifecycleEvents.SERVER_STARTING.register(s -> currentServer = s);
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(SoftFluidRegistry::onDataSyncToPlayer);
-        ServerLifecycleEvents.SERVER_STARTED.register((s)->SoftFluidRegistry.onDataLoad()); //need this too because fabric is stupid
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((a,b,c)->SoftFluidRegistry.onDataLoad()); //only fire after reload command
-        ServerWorldEvents.UNLOAD.register((s,w)-> FakeServerPlayer.unloadLevel(w));
+        ServerLifecycleEvents.SERVER_STARTED.register((s) -> SoftFluidRegistry.onDataLoad()); //need this too because fabric is stupid
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((a, b, c) -> SoftFluidRegistry.onDataLoad()); //only fire after reload command
+        ServerWorldEvents.UNLOAD.register((s, w) -> FakeServerPlayer.unloadLevel(w));
         ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
 
         ResourceConditionsBridge.init();

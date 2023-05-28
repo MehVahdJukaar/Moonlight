@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.google.gson.JsonElement;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
@@ -21,8 +22,6 @@ import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
@@ -36,7 +35,6 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
@@ -51,6 +49,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ClientHelperImpl {
 
@@ -104,17 +103,20 @@ public class ClientHelperImpl {
         });
     }
 
-    public static void addClientReloadListener(PreparableReloadListener listener, ResourceLocation name) {
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
-            @Override
-            public ResourceLocation getFabricId() {
-                return name;
-            }
+    public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation name) {
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
+                private final PreparableReloadListener inner = listener.get();
+                @Override
+                public ResourceLocation getFabricId() {
+                    return name;
+                }
 
-            @Override
-            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-                return listener.reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
-            }
+                @Override
+                public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+                    return inner.reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+                }
+            });
         });
     }
 
