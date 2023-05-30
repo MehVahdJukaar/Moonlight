@@ -3,7 +3,8 @@ package net.mehvahdjukaar.moonlight.api.map.type;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.markers.GenericMapBlockMarker;
+import net.mehvahdjukaar.moonlight.api.map.markers.DummyMapBlockMarker;
+import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 //base type for simple data driven type. Basically a simple version of CustomDecorationType that can be serialized
-public final class JsonDecorationType extends MapDecorationType<CustomMapDecoration, GenericMapBlockMarker<CustomMapDecoration>> {
+public final class JsonDecorationType extends MapDecorationType<CustomMapDecoration, DummyMapBlockMarker<CustomMapDecoration>> {
 
     //using this and not block predicate since it requires a worldLevelGen...
     @Nullable
@@ -39,7 +40,7 @@ public final class JsonDecorationType extends MapDecorationType<CustomMapDecorat
     public static final Codec<JsonDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             RuleTest.CODEC.optionalFieldOf("target_block").forGetter(JsonDecorationType::getTarget),
             Codec.STRING.optionalFieldOf("name").forGetter(JsonDecorationType::getName),
-            Codec.FLOAT.optionalFieldOf("rotation" ,0f).forGetter(JsonDecorationType::getRotation),
+            Codec.FLOAT.optionalFieldOf("rotation", 0f).forGetter(JsonDecorationType::getRotation),
             Codec.INT.optionalFieldOf("map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
             RegistryCodecs.homogeneousList(Registries.STRUCTURE).optionalFieldOf("target_structures")
                     .forGetter(JsonDecorationType::getAssociatedStructure)
@@ -47,8 +48,9 @@ public final class JsonDecorationType extends MapDecorationType<CustomMapDecorat
 
 
     public JsonDecorationType(Optional<RuleTest> target) {
-        this(target, Optional.empty(), 0, 0,Optional.empty());
+        this(target, Optional.empty(), 0, 0, Optional.empty());
     }
+
     public JsonDecorationType(Optional<RuleTest> target, Optional<String> name, float rotation,
                               int mapColor, Optional<HolderSet<Structure>> structure) {
         this.target = target.orElse(null);
@@ -100,9 +102,9 @@ public final class JsonDecorationType extends MapDecorationType<CustomMapDecorat
 
     @Nullable
     @Override
-    public GenericMapBlockMarker<CustomMapDecoration> loadMarkerFromNBT(CompoundTag compound) {
+    public DummyMapBlockMarker<CustomMapDecoration> loadMarkerFromNBT(CompoundTag compound) {
         if (this.hasMarker()) {
-            GenericMapBlockMarker<CustomMapDecoration> marker = new GenericMapBlockMarker<>(this);
+            DummyMapBlockMarker<CustomMapDecoration> marker = new DummyMapBlockMarker<>(this);
             try {
                 marker.loadFromNBT(compound);
                 return marker;
@@ -115,12 +117,18 @@ public final class JsonDecorationType extends MapDecorationType<CustomMapDecorat
 
     @Nullable
     @Override
-    public GenericMapBlockMarker<CustomMapDecoration> getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos) {
+    public DummyMapBlockMarker<CustomMapDecoration> getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos) {
         if (this.target != null) {
             if (target.test(reader.getBlockState(pos), RandomSource.create())) {
-                return new GenericMapBlockMarker<>(this, pos);
+                return new DummyMapBlockMarker<>(this, pos);
             }
         }
         return null;
     }
+
+    @Override
+    public MapBlockMarker<CustomMapDecoration> getDefaultMarker(BlockPos pos) {
+        return new DummyMapBlockMarker<>(this, pos);
+    }
+
 }

@@ -2,10 +2,9 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.google.common.collect.Maps;
 import net.mehvahdjukaar.moonlight.api.map.*;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.api.map.markers.GenericMapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncCustomMapDecorationMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.BlockPos;
@@ -57,8 +56,12 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Final
     private Map<String, MapBanner> bannerMarkers;
 
-    @Shadow @Final public int centerX;
-    @Shadow @Final public int centerZ;
+    @Shadow
+    @Final
+    public int centerX;
+    @Shadow
+    @Final
+    public int centerZ;
     //new decorations (stuff that gets rendered)
     @Unique
     public Map<String, CustomMapDecoration> customDecorations = Maps.newLinkedHashMap();
@@ -121,21 +124,21 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     /**
      * @param world level
-     * @param pos world position where a marker providing block could be
+     * @param pos   world position where a marker providing block could be
      * @return true if a marker was toggled
      */
     @Override
     public boolean toggleCustomDecoration(LevelAccessor world, BlockPos pos) {
-        if(world.isClientSide()){
+        if (world.isClientSide()) {
             List<MapBlockMarker<?>> markers = MapDecorationRegistry.getMarkersFromWorld(world, pos);
             return !markers.isEmpty();
         }
 
-        double d0 =  pos.getX() + 0.5D;
-        double d1 =  pos.getZ() + 0.5D;
+        double d0 = pos.getX() + 0.5D;
+        double d1 = pos.getZ() + 0.5D;
         int i = 1 << this.scale;
-        double d2 = (d0 -  this.centerX) /  i;
-        double d3 = (d1 -  this.centerZ) /  i;
+        double d2 = (d0 - this.centerX) / i;
+        double d3 = (d1 - this.centerZ) / i;
         if (d2 >= -63.0D && d3 >= -63.0D && d2 <= 63.0D && d3 <= 63.0D) {
             List<MapBlockMarker<?>> markers = MapDecorationRegistry.getMarkersFromWorld(world, pos);
 
@@ -194,7 +197,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
                         MapDecorationType<? extends CustomMapDecoration, ?> type = MapDecorationRegistry.get(name);
                         if (type != null) {
-                            MapBlockMarker<CustomMapDecoration> dummy = new GenericMapBlockMarker(type, com.getInt("x"), com.getInt("z"));
+                            var dummy = type.getDefaultMarker(new BlockPos(com.getInt("x"), 64, com.getInt("z")));
                             this.addCustomDecoration(dummy);
                         } else {
                             Moonlight.LOGGER.warn("Failed to load map decoration " + name + ". Skipping it");

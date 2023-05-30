@@ -1,2 +1,1 @@
-- fixed texture renderer
-- fixed villager ai stuff
+- fixed map markers rendering

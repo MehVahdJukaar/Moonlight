@@ -8,10 +8,10 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientManager;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -125,13 +125,32 @@ public class RenderedTexturesManager {
         });
     }
 
+    public static void drawTexture(FrameBufferBackedDynamicTexture tex, ResourceLocation texture) {
+        RenderedTexturesManager.drawAsInGUI(tex, s -> {
+            RenderSystem.setShaderTexture(0, MapDecorationClientManager.LOCATION_MAP_MARKERS);
+            var matrix = s.last().pose();
+            RenderSystem.disableDepthTest();
+            RenderSystem.depthMask(false);
+            RenderSystem.disableBlend();
+            RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1);
+            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+            bufferBuilder.vertex(matrix, 0.0f, 16, 0).uv(0, 0).endVertex();
+            bufferBuilder.vertex(matrix, 16, 16, 0).uv(1, 0).endVertex();
+            bufferBuilder.vertex(matrix, 16, 0.0f, 0).uv(1, 1).endVertex();
+            bufferBuilder.vertex(matrix, 0.0f, 0.0f, 0).uv(0, 1).endVertex();
+            BufferUploader.drawWithShader(bufferBuilder.end());
+        });
+    }
+
     /**
      * Coordinates here are from 0 to 1
      */
     public static void drawNormalized(FrameBufferBackedDynamicTexture tex, Consumer<PoseStack> drawFunction) {
         drawAsInGUI(tex, s -> {
             float scale = 1f / 16f;
-            s.translate(8,8,0);
+            s.translate(8, 8, 0);
             s.scale(scale, scale, 1);
             drawFunction.accept(s);
         });

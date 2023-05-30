@@ -7,21 +7,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
 /**
- * utility class do not instance
  * used to merge decorations for decoration types that don't have a block marker (for structure decorations for example)
+ * also used for json defined ones
  */
-public class GenericMapBlockMarker<T extends CustomMapDecoration> extends MapBlockMarker<T> {
+public final class DummyMapBlockMarker<T extends CustomMapDecoration> extends MapBlockMarker<T> {
 
-    public GenericMapBlockMarker(MapDecorationType<T, ?> type, int x, int z) {
-        this(type, new BlockPos(x, 64, z));
-    }
-
-    public GenericMapBlockMarker(MapDecorationType<T, ?> type, BlockPos pos) {
+    public DummyMapBlockMarker(MapDecorationType<T, ?> type, BlockPos pos) {
         this(type);
         this.setPos(pos);
     }
 
-    public GenericMapBlockMarker(MapDecorationType<T, ?> type) {
+    public DummyMapBlockMarker(MapDecorationType<T, ?> type) {
         super(type);
     }
 

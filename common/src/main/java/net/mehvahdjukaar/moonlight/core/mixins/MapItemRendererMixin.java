@@ -21,13 +21,12 @@ public abstract class MapItemRendererMixin {
     private void render(PoseStack poseStack, MultiBufferSource buffer, int mapId, MapItemSavedData mapData, boolean isOnFrame, int light, CallbackInfo ci) {
         if (mapData instanceof ExpandedMapData data) {
             int index = data.getVanillaDecorationSize();
-            VertexConsumer vertexBuilder = null;
             for (CustomMapDecoration decoration : data.getCustomDecorations().values()) {
-                if (vertexBuilder == null) {
-                    vertexBuilder = buffer.getBuffer(MapDecorationClientManager.MAP_MARKERS_RENDER_TYPE);
-                }
+                //this shouldnt texture swap if we didnt draw complex shit in their renderes. still need to create a new one because we might have
+                VertexConsumer vertexBuilder = buffer.getBuffer(MapDecorationClientManager.MAP_MARKERS_RENDER_TYPE);
                 if (MapDecorationClientManager.render(decoration, poseStack, vertexBuilder, buffer, mapData, isOnFrame, light, index))
                     index++;
+
             }
         }
     }

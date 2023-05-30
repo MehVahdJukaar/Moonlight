@@ -7,29 +7,25 @@ import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.mixins.MapItemRendererMixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.client.resources.TextureAtlasHolder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;
 
-public class MapDecorationClientManager extends TextureAtlasHolder{
+public class MapDecorationClientManager extends TextureAtlasHolder {
 
     public static final ResourceLocation LOCATION_MAP_MARKERS = Moonlight.res("textures/atlas/map_markers.png");
     public static final RenderType MAP_MARKERS_RENDER_TYPE = RenderType.text(LOCATION_MAP_MARKERS);
     public static final MapDecorationClientManager INSTANCE = new MapDecorationClientManager();
 
     protected MapDecorationClientManager() {
-        super(Minecraft.getInstance().getTextureManager(), LOCATION_MAP_MARKERS,  Moonlight.res("map_markers"));
+        super(Minecraft.getInstance().getTextureManager(), LOCATION_MAP_MARKERS, Moonlight.res("map_markers"));
     }
 
     public static TextureAtlasSprite getAtlasSprite(ResourceLocation location) {
@@ -48,13 +44,13 @@ public class MapDecorationClientManager extends TextureAtlasHolder{
 
     private static <T extends CustomMapDecoration> DecorationRenderer<T> simpleRenderer(MapDecorationType<T, ?> type) {
         var id = Utils.getID(type);
-        ResourceLocation texture = new ResourceLocation(id.getNamespace(),  id.getPath() + ".png");
+        ResourceLocation texture = new ResourceLocation(id.getNamespace(), "map_marker/" + id.getPath());
         return new DecorationRenderer<>(texture);
     }
 
     @ApiStatus.Internal
     public static <E extends CustomMapDecoration> DecorationRenderer<E> getRenderer(E decoration) {
-        return (DecorationRenderer<E>) RENDERERS.computeIfAbsent(decoration.getType(),t-> simpleRenderer(decoration.getType()));
+        return (DecorationRenderer<E>) RENDERERS.computeIfAbsent(decoration.getType(), t -> simpleRenderer(decoration.getType()));
     }
 
     @ApiStatus.Internal
@@ -65,7 +61,6 @@ public class MapDecorationClientManager extends TextureAtlasHolder{
         }
         return false;
     }
-
 
 
 }

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
+import net.mehvahdjukaar.moonlight.api.map.markers.DummyMapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
@@ -20,16 +21,19 @@ import java.util.function.Supplier;
 //used for custom implementations
 public final class CustomDecorationType<D extends CustomMapDecoration, M extends MapBlockMarker<D>> extends MapDecorationType<D, M> {
 
-
     public static final Codec<CustomDecorationType<?, ?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("custom_type").forGetter(MapDecorationType::getCustomFactoryID)
     ).apply(instance, MapDecorationRegistry::getCustomType));
 
+    private final ResourceLocation id; //just stored here instead than in a registry
 
-    private final Supplier<M> markerFactory;
-    private final BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory;
+    //used to restore decorations from nbt
     private final BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory;
-    private final ResourceLocation factoryID;
+
+    //creates empty marker. optional
+    private final Supplier<M> markerFactory;
+    //creates marker from world
+    private final BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory;
 
     /**
      * Normal constructor for decoration type that has a world marker associated. i.e: banners
@@ -43,9 +47,12 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
         this.markerFactory = markerFactory;
         this.markerFromWorldFactory = markerFromWorldFactory;
         this.decorationFactory = decorationFactory;
-        this.factoryID = typeId;
+        this.id = typeId;
     }
 
+    /**
+     * For one with no marker
+     */
     public CustomDecorationType(ResourceLocation typeId, BiFunction<MapDecorationType<?, ?>,
             FriendlyByteBuf, D> decoFromBuffer) {
         this(typeId, null, null, decoFromBuffer);
@@ -53,7 +60,7 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
 
     @Override
     public ResourceLocation getCustomFactoryID() {
-        return factoryID;
+        return id;
     }
 
     @Override
@@ -94,4 +101,13 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
         return hasMarker() ? markerFromWorldFactory.apply(reader, pos) : null;
     }
 
+    @Override
+    public MapBlockMarker<D> getDefaultMarker(BlockPos pos) {
+        if(markerFactory != null){
+            var m = markerFactory.get();
+            m.setPos(pos);
+            return m;
+        }
+        return new DummyMapBlockMarker<>(this, pos);
+    }
 }

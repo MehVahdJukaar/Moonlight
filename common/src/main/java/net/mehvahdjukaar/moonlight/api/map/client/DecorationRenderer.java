@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SpriteCoordinateExpander;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.network.chat.Component;
@@ -17,9 +18,9 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.joml.Matrix4f;
 
 public class DecorationRenderer<T extends CustomMapDecoration> {
-    private final ResourceLocation textureId;
-    private final int mapColor;
-    private final boolean renderOnFrame;
+    protected final ResourceLocation textureId;
+    protected final int mapColor;
+    protected final boolean renderOnFrame;
 
     public DecorationRenderer(ResourceLocation texture,  int mapColor, boolean renderOnFrame){
         this.renderOnFrame = renderOnFrame;
@@ -60,21 +61,26 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
 
             TextureAtlasSprite sprite = MapDecorationClientManager.getAtlasSprite(this.textureId);
             //so we can use local coordinates
-            vertexBuilder = sprite.wrap(vertexBuilder);
+            //idk wy wrap doesnt work, it does the same as here
+            //vertexBuilder = sprite.wrap(vertexBuilder);
+            float u0 = sprite.getU(0);
+            float u1 = sprite.getU(16);
+            float v0 = sprite.getV(0);
+            float v1 = sprite.getV(16);
+            vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u0, v1).uv2(light).endVertex();
+            vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u1, v1).uv2(light).endVertex();
+            vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u1, v0).uv2(light).endVertex();
+            vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u0, v0).uv2(light).endVertex();
 
-            vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F,  index * -0.001F).color(r, g, b, 255).uv(0, 1).uv2(light).endVertex();
-            vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F,  index * -0.001F).color(r, g, b, 255).uv(1, 1).uv2(light).endVertex();
-            vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F,  index * -0.001F).color(r, g, b, 255).uv(1, 0).uv2(light).endVertex();
-            vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F,  index * -0.001F).color(r, g, b, 255).uv(0, 0).uv2(light).endVertex();
             matrixStack.popPose();
             if (decoration.getDisplayName() != null) {
                 Font font = Minecraft.getInstance().font;
                 Component displayName = decoration.getDisplayName();
-                float f6 =  font.width(displayName);
-                float f7 = Mth.clamp(25.0F / f6, 0.0F, 6.0F / 9.0F);
+                float width =  font.width(displayName);
+                float clamped = Mth.clamp(25.0F / width, 0.0F, 6.0F / 9.0F);
                 matrixStack.pushPose();
-                matrixStack.translate( (0.0F + (float) decoration.getX() / 2.0F + 64.0F - f6 * f7 / 2.0F),  (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
-                matrixStack.scale(f7, f7, 1.0F);
+                matrixStack.translate( (0.0F + (float) decoration.getX() / 2.0F + 64.0F - width * clamped / 2.0F),  (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
+                matrixStack.scale(clamped, clamped, 1.0F);
                 matrixStack.translate(0.0D, 0.0D,  -0.1F);
                 font.drawInBatch(displayName, 0.0F, 0.0F, -1, false, matrixStack.last().pose(), buffer, Font.DisplayMode.NORMAL, Integer.MIN_VALUE, light);
                 matrixStack.popPose();

@@ -32,7 +32,7 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
         //run data could give a null minecraft here...
         if (!PlatHelper.isData()) {
             //unused now...
-            ClientHelper.addClientReloadListener(this, this.dynamicPack.resourcePackName);
+            ClientHelper.addClientReloadListener(()->this, this.dynamicPack.resourcePackName);
         }
         MoonlightEventsHelper.addListener(this::addDynamicTranslations, AfterLanguageLoadEvent.class);
     }
