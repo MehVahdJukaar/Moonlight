@@ -22,14 +22,15 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
 
     public static final ResourceLocation LOCATION_MAP_MARKERS = Moonlight.res("textures/atlas/map_markers.png");
     public static final RenderType MAP_MARKERS_RENDER_TYPE = RenderType.text(LOCATION_MAP_MARKERS);
-    public static final MapDecorationClientManager INSTANCE = new MapDecorationClientManager();
+    private static MapDecorationClientManager instance;
 
-    protected MapDecorationClientManager() {
+    public MapDecorationClientManager() {
         super(Minecraft.getInstance().getTextureManager(), LOCATION_MAP_MARKERS, Moonlight.res("map_markers"));
+        instance = this;
     }
 
     public static TextureAtlasSprite getAtlasSprite(ResourceLocation location) {
-        return INSTANCE.getSprite(location);
+        return instance.getSprite(location);
     }
 
     /**

@@ -1,1 +1,1 @@
-- fixed map markers rendering
+- possibly fixed an issue with map markers

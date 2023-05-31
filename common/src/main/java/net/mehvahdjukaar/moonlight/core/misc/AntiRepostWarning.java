@@ -53,7 +53,7 @@ public class AntiRepostWarning {
     private static boolean isFileNameSus(String mod) {
         var path = PlatHelper.getModFilePath(mod);
         if (path == null || path.getFileName() == null) {
-            Moonlight.LOGGER.warn("Failed to get file path of mod {}", mod);
+            Moonlight.LOGGER.warn("Failed to get file path of mod {}: {}", mod, path);
         } else {
             String fileName = path.getFileName().toString();
             if (fileName.contains(".jar")) {

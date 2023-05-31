@@ -47,11 +47,18 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     private final String modId;
     private final String modURL;
 
-
+    @Deprecated(forRemoval = true)
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     ConfigSpec... specs) {
+        this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap((ConfigSpecWrapper[]) specs));
+    }
+
+    public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
+                                    Screen parent,
+                                    BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
+                                    ConfigSpecWrapper... specs) {
         this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap(specs));
     }
 
@@ -89,10 +96,11 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                 new ConfigScreenHandler.ConfigScreenFactory((m, s) -> screenSelectFactory.apply(s)));
     }
 
-    private static Map<ConfigType, Set<IModConfig>> createConfigMap(ConfigSpec... specs) {
+    private static Map<ConfigType, Set<IModConfig>> createConfigMap(ConfigSpecWrapper... specs) {
         Map<ConfigType, Set<IModConfig>> modConfigMap = new EnumMap<>(ConfigType.class);
         for (var s : specs) {
-            var c = new ForgeConfig(((ConfigSpecWrapper) s).getModConfig(),(ForgeConfigSpec) ((ConfigSpecWrapper) s).getModConfig().getSpec());
+            ModConfig modConfig = s.getModConfig();
+            var c = new ForgeConfig(modConfig,(ForgeConfigSpec) modConfig.getSpec());
             var set = modConfigMap.computeIfAbsent(
                     c.getType(), a -> new HashSet<>());
             set.add(c);

@@ -47,7 +47,7 @@ public class RegistryQueue<T> {
 
     static class EntryWrapper<T extends R, R> implements RegSupplier<T> {
         private final ResourceLocation id;
-        private final ResourceKey<? extends Registry<R>> registryKey;
+        private ResourceKey<? extends Registry<R>> registryKey;
         private Supplier<T> regSupplier;
         private T entry;
         private Holder<T> holder;
@@ -80,6 +80,7 @@ public class RegistryQueue<T> {
                     .register(ResourceKey.create(registryKey, id), regSupplier.get(), Lifecycle.stable());
             this.entry = this.holder.value();
             regSupplier = null;
+            registryKey = null;
         }
 
     }

@@ -8,7 +8,7 @@ public class MoonlightClient {
 
     public static void initClient() {
 
-        ClientHelper.addClientReloadListener(() -> SoftFluidParticleColors.INSTANCE, Moonlight.res("soft_fluids"));
-        ClientHelper.addClientReloadListener(() -> MapDecorationClientManager.INSTANCE, Moonlight.res("map_markers"));
+        ClientHelper.addClientReloadListener(SoftFluidParticleColors::new, Moonlight.res("soft_fluids"));
+        ClientHelper.addClientReloadListener(MapDecorationClientManager::new, Moonlight.res("map_markers"));
     }
 }

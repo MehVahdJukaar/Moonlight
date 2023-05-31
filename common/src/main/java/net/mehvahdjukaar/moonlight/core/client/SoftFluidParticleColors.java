@@ -21,11 +21,9 @@ import java.util.List;
 
 public class SoftFluidParticleColors extends GenericSimpleResourceReloadListener {
 
-    public static final SoftFluidParticleColors INSTANCE = new SoftFluidParticleColors();
+    private static final HashMap<ResourceLocation, Integer> PARTICLE_COLORS = new HashMap<>();
 
-    private final HashMap<ResourceLocation, Integer> particleColors = new HashMap<>();
-
-    protected SoftFluidParticleColors() {
+    public SoftFluidParticleColors() {
         super("textures/soft_fluids", ".png"); //unused, just need for color reload
     }
 
@@ -42,19 +40,19 @@ public class SoftFluidParticleColors extends GenericSimpleResourceReloadListener
     }
 
     public static int getParticleColor(SoftFluid s) {
-        return INSTANCE.particleColors.getOrDefault(Utils.getID(s), -1);
+        return PARTICLE_COLORS.getOrDefault(Utils.getID(s), -1);
     }
 
     //TODO: possibly do it for ALL fluids, not only non grayscale ones
-    public void refreshParticleColors() {
+    public static void refreshParticleColors() {
         Minecraft mc = Minecraft.getInstance();
         if (mc == null || mc.level == null) return;
         var v = SoftFluidRegistry.getEntries();
-        particleColors.clear();
+        PARTICLE_COLORS.clear();
         for (var entry : v) {
             SoftFluid s = entry.getValue();
             ResourceLocation key = entry.getKey().location();
-            if (!particleColors.containsKey(key) && !s.isColored()) {
+            if (!PARTICLE_COLORS.containsKey(key) && !s.isColored()) {
                 ResourceLocation location = s.getStillTexture();
                 if (location == null) continue;
                 TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
@@ -65,7 +63,7 @@ public class SoftFluidParticleColors extends GenericSimpleResourceReloadListener
                 } catch (Exception e) {
                     Moonlight.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
                 }
-                particleColors.put(key, averageColor);
+                PARTICLE_COLORS.put(key, averageColor);
             }
         }
     }
