@@ -25,6 +25,24 @@ import java.util.Optional;
 //base type for simple data driven type. Basically a simple version of CustomDecorationType that can be serialized
 public final class JsonDecorationType extends MapDecorationType<CustomMapDecoration, DummyMapBlockMarker<CustomMapDecoration>> {
 
+
+    public static final Codec<JsonDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(JsonDecorationType::getTarget),
+            Codec.STRING.optionalFieldOf("name").forGetter(JsonDecorationType::getName),
+            Codec.FLOAT.optionalFieldOf("rotation", 0f).forGetter(JsonDecorationType::getRotation),
+            Codec.INT.optionalFieldOf("map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
+            RegistryCodecs.homogeneousList(Registries.STRUCTURE).optionalFieldOf("target_structures")
+                    .forGetter(JsonDecorationType::getAssociatedStructure)
+    ).apply(instance, JsonDecorationType::new));
+
+    //we cant reference other datapack registries in network codec...
+    public static final Codec<JsonDecorationType> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(JsonDecorationType::getTarget),
+            Codec.STRING.optionalFieldOf("name").forGetter(JsonDecorationType::getName),
+            Codec.FLOAT.optionalFieldOf("rotation", 0f).forGetter(JsonDecorationType::getRotation),
+            Codec.INT.optionalFieldOf("map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor)
+    ).apply(instance, JsonDecorationType::new));
+
     //using this and not block predicate since it requires a worldLevelGen...
     @Nullable
     private final RuleTest target;
@@ -36,19 +54,13 @@ public final class JsonDecorationType extends MapDecorationType<CustomMapDecorat
     private final int mapColor;
     private final float rotation;
 
-
-    public static final Codec<JsonDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(JsonDecorationType::getTarget),
-            Codec.STRING.optionalFieldOf("name").forGetter(JsonDecorationType::getName),
-            Codec.FLOAT.optionalFieldOf("rotation", 0f).forGetter(JsonDecorationType::getRotation),
-            Codec.INT.optionalFieldOf("map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
-            RegistryCodecs.homogeneousList(Registries.STRUCTURE).optionalFieldOf("target_structures")
-                    .forGetter(JsonDecorationType::getAssociatedStructure)
-    ).apply(instance, JsonDecorationType::new));
-
-
     public JsonDecorationType(Optional<RuleTest> target) {
-        this(target, Optional.empty(), 0, 0, Optional.empty());
+        this(target, Optional.empty(), 0, 0);
+    }
+
+    public JsonDecorationType(Optional<RuleTest> target, Optional<String> name, float rotation,
+                              int mapColor) {
+        this(target, name, rotation, mapColor, Optional.empty());
     }
 
     public JsonDecorationType(Optional<RuleTest> target, Optional<String> name, float rotation,

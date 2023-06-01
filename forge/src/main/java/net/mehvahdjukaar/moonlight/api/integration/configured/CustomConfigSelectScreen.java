@@ -47,19 +47,11 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     private final String modId;
     private final String modURL;
 
-    @Deprecated(forRemoval = true)
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     ConfigSpec... specs) {
         this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap((ConfigSpecWrapper[]) specs));
-    }
-
-    public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
-                                    Screen parent,
-                                    BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
-                                    ConfigSpecWrapper... specs) {
-        this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap(specs));
     }
 
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,

@@ -1,1 +1,1 @@
-- possibly fixed an issue with map markers
+- fixed (another) an issue with map markers on servers. part 2

@@ -27,7 +27,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-public class FabricConfigSpec extends ConfigSpec {
+public final class FabricConfigSpec extends ConfigSpec {
 
     @ApiStatus.Internal
     public static void loadAllConfigs() {

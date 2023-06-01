@@ -27,6 +27,6 @@ public abstract class RegistryDataLoaderMixin {
     private static void addMoonlightRegistries(CallbackInfo ci){
         WORLDGEN_REGISTRIES = new ArrayList<>(WORLDGEN_REGISTRIES);
         WORLDGEN_REGISTRIES.add(new RegistryDataLoader.RegistryData<>(SoftFluidRegistry.KEY, SoftFluid.CODEC));
-        WORLDGEN_REGISTRIES.add(new RegistryDataLoader.RegistryData<>(MapDecorationRegistry.KEY, MapDecorationRegistry.TYPE_CODEC));
+        WORLDGEN_REGISTRIES.add(new RegistryDataLoader.RegistryData<>(MapDecorationRegistry.KEY, MapDecorationRegistry.CODEC));
     }
 }

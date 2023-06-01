@@ -32,8 +32,21 @@ import java.util.function.Function;
 public class MapDecorationRegistry {
 
     //pain
-    public static final Codec<MapDecorationType<?, ?>> TYPE_CODEC =
+    public static final Codec<MapDecorationType<?, ?>> CODEC =
             Codec.either(CustomDecorationType.CODEC, JsonDecorationType.CODEC).xmap(
+                    either -> either.map(s -> s, c -> c),
+                    type -> {
+                        if (type == null) {
+                            Moonlight.LOGGER.error("map decoration type cant be null. how did this happen?");
+                        }
+                        if (type instanceof CustomDecorationType<?, ?> c) {
+                            return Either.left(c);
+                        }
+                        return Either.right((JsonDecorationType) type);
+                    });
+
+    public static final Codec<MapDecorationType<?, ?>> NETROWK_CODEC =
+            Codec.either(CustomDecorationType.CODEC, JsonDecorationType.NETWORK_CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
                         if (type == null) {

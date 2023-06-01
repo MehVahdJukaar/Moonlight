@@ -113,7 +113,7 @@ public class ForgeHelperImpl {
     }
 
     public static double getReachDistance(LivingEntity entity) {
-        return entity.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+        return entity.getAttribute(ForgeMod.BLOCK_REACH.get()).getValue();
     }
 
     public static float getExplosionResistance(BlockState state, Level level, BlockPos pos, Explosion explosion) {
