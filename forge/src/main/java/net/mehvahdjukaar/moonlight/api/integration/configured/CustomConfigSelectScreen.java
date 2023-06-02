@@ -2,15 +2,11 @@ package net.mehvahdjukaar.moonlight.api.integration.configured;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mrcrayfish.configured.Configured;
 import com.mrcrayfish.configured.api.ConfigType;
 import com.mrcrayfish.configured.api.IModConfig;
-import com.mrcrayfish.configured.client.screen.ConfigScreen;
 import com.mrcrayfish.configured.client.screen.ModConfigSelectionScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
-import com.mrcrayfish.configured.client.util.ScreenUtil;
 import com.mrcrayfish.configured.impl.forge.ForgeConfig;
-import com.mrcrayfish.configured.util.ConfigHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
@@ -24,7 +20,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
@@ -52,14 +47,14 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     ConfigSpec... specs) {
-        this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap(specs));
+        this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap((ConfigSpecWrapper[]) specs));
     }
 
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     Map<ConfigType, Set<IModConfig>> configMap) {
-        super(parent,Component.literal(displayName), background, configMap);
+        super(parent, Component.literal(displayName), background, configMap);
         this.configScreenFactory = configScreenFactory;
         this.mainIcon = mainIcon;
         this.modId = modId;
@@ -89,11 +84,11 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                 new ConfigScreenHandler.ConfigScreenFactory((m, s) -> screenSelectFactory.apply(s)));
     }
 
-    private static Map<ConfigType, Set<IModConfig>> createConfigMap(ConfigSpec... specs) {
+    private static Map<ConfigType, Set<IModConfig>> createConfigMap(ConfigSpecWrapper... specs) {
         Map<ConfigType, Set<IModConfig>> modConfigMap = new EnumMap<>(ConfigType.class);
         for (var s : specs) {
-            ModConfig modConfig = ((ConfigSpecWrapper) s).getModConfig();
-            var c = new ForgeConfig(modConfig, (ForgeConfigSpec) modConfig.getSpec());
+            ModConfig modConfig = s.getModConfig();
+            var c = new ForgeConfig(modConfig, s.getSpec());
             var set = modConfigMap.computeIfAbsent(
                     c.getType(), a -> new HashSet<>());
             set.add(c);
@@ -102,11 +97,11 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     }
 
     private static ConfigType getType(ConfigSpecWrapper s) {
-      var t =  s.getConfigType();
-      if(t == net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType.CLIENT)return ConfigType.CLIENT;
-      if(t == net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType.COMMON)return ConfigType.UNIVERSAL;
-      //else if(t == net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType.COMMON)return s.isSynced() ? ConfigType.SERVER_SYNC : ConfigType.SERVER;
-      return ConfigType.UNIVERSAL;
+        var t = s.getConfigType();
+        if (t == net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType.CLIENT) return ConfigType.CLIENT;
+        if (t == net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType.COMMON) return ConfigType.UNIVERSAL;
+        //else if(t == net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType.COMMON)return s.isSynced() ? ConfigType.SERVER_SYNC : ConfigType.SERVER;
+        return ConfigType.UNIVERSAL;
     }
 
     @Override

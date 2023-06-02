@@ -1,1 +1,1 @@
-fixed a rare issue with players in adventure mode
+fixed a possible crash with some config mod
