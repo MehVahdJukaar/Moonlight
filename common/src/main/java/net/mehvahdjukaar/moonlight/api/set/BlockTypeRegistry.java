@@ -133,11 +133,13 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             this.registerBlockType(this.getDefaultType());
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
+            finders.clear();
             for (Block b : Registry.BLOCK) {
                 this.detectTypeFromBlock(b, Utils.getID(b)).ifPresent(t -> {
                     if (!notInclude.contains(t.getId())) this.registerBlockType(t);
                 });
             }
+            notInclude.clear();
             this.finalizeAndFreeze();
         }
     }
