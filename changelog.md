@@ -1,1 +1,1 @@
-fixed a possible crash with some config mod
+no more bugs pls
