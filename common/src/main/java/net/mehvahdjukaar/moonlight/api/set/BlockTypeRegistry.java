@@ -3,9 +3,11 @@ package net.mehvahdjukaar.moonlight.api.set;
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.Util;
+import net.minecraft.client.resources.model.MultiPartBakedModel;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +32,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     protected BlockTypeRegistry(Class<T> typeClass, String name) {
         this.typeClass = typeClass;
         this.name = name;
+        MultiPartBakedModel
     }
 
     public Class<T> getType() {
@@ -139,6 +142,9 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
                     if (!notInclude.contains(t.getId())) this.registerBlockType(t);
                 });
             }
+            ClientHelper.getModel()
+            finders.clear();
+            notInclude.clear();
             this.finalizeAndFreeze();
         }
     }

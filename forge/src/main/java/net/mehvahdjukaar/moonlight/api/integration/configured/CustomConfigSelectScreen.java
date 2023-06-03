@@ -9,6 +9,7 @@ import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.impl.forge.ForgeConfig;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
+import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
@@ -53,7 +54,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     Map<ConfigType, Set<IModConfig>> configMap) {
-        super(parent, Component.literal(displayName), background, configMap);
+         super(parent, Component.literal(displayName), background, configMap);
         this.configScreenFactory = configScreenFactory;
         this.mainIcon = mainIcon;
         this.modId = modId;
