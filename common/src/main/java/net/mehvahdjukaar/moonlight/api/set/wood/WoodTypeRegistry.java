@@ -13,7 +13,9 @@ import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
@@ -45,6 +47,8 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         return OAK_TYPE;
     }
 
+    public static Set<String> IGNORED_MODS = new HashSet<>(Set.of("chipped", "securitycraft", "absentbydesign"));
+
     //returns if this block is the base plank block
     @Override
     public Optional<WoodType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseRes) {
@@ -73,8 +77,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             name = path.substring("plank_".length());
         }
         String namespace = baseRes.getNamespace();
-        if (name != null && !namespace.equals("securitycraft") &&
-                !namespace.equals("absentbydesign")) {
+        if (name != null && !IGNORED_MODS.contains(namespace)) {
 
             BlockState state = baseBlock.defaultBlockState();
             //can't check if the block is a full one, so I do this. Adding some checks here

@@ -1,1 +1,1 @@
-no more bugs pls
+improved wood detections. blacklisted some mods
