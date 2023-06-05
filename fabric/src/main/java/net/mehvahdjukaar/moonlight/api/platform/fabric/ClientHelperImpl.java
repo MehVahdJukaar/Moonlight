@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
+import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
@@ -25,6 +25,7 @@ import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -104,19 +105,18 @@ public class ClientHelperImpl {
     }
 
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation name) {
-        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
-            ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
-                private final PreparableReloadListener inner = listener.get();
-                @Override
-                public ResourceLocation getFabricId() {
-                    return name;
-                }
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
+            private final Supplier<PreparableReloadListener> inner = Suppliers.memoize(listener::get);
 
-                @Override
-                public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-                    return inner.reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
-                }
-            });
+            @Override
+            public ResourceLocation getFabricId() {
+                return name;
+            }
+
+            @Override
+            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+                return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+            }
         });
     }
 
@@ -184,6 +184,10 @@ public class ClientHelperImpl {
             ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, displayName,
                     defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL);
         });
+    }
+
+    public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
+        return null;
     }
 
 }

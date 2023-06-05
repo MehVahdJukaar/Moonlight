@@ -27,18 +27,22 @@ public class VertexUtil {
     public static List<BakedQuad> swapSprite(List<BakedQuad> quads, TextureAtlasSprite sprite) {
         List<BakedQuad> newList = new ArrayList<>();
         for (BakedQuad q : quads) {
-            TextureAtlasSprite oldSprite = q.getSprite();
-            int formatLength = getFormatLength();
-            int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
-            for (int i = 0; i < v.length / formatLength; i++) {
-                float originalU = Float.intBitsToFloat(v[i * formatLength + 4]);
-                float originalV = Float.intBitsToFloat(v[i * formatLength + 5]);
-                v[i * formatLength + 4] = Float.floatToIntBits(originalU - oldSprite.getU0() + sprite.getU0());
-                v[i * formatLength + 5] = Float.floatToIntBits(originalV - oldSprite.getV0() + sprite.getV0());
-            }
-            newList.add(new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade()));
+           newList.add(swapSprite(q, sprite));
         }
         return newList;
+    }
+
+    public static BakedQuad swapSprite( BakedQuad q, TextureAtlasSprite sprite) {
+        TextureAtlasSprite oldSprite = q.getSprite();
+        int formatLength = getFormatLength();
+        int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
+        for (int i = 0; i < v.length / formatLength; i++) {
+            float originalU = Float.intBitsToFloat(v[i * formatLength + 4]);
+            float originalV = Float.intBitsToFloat(v[i * formatLength + 5]);
+            v[i * formatLength + 4] = Float.floatToIntBits(originalU - oldSprite.getU0() + sprite.getU0());
+            v[i * formatLength + 5] = Float.floatToIntBits(originalV - oldSprite.getV0() + sprite.getV0());
+        }
+        return new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade());
     }
 
     public static void transformVertices(int[] v, Matrix3f transform) {

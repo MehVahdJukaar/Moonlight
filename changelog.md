@@ -1,1 +1,1 @@
-- fixed (another) an issue with map markers on servers. part 2
+- fixed a fabric issue with reload listeners

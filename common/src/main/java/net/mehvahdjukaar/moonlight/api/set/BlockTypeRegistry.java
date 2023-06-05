@@ -32,7 +32,6 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     protected BlockTypeRegistry(Class<T> typeClass, String name) {
         this.typeClass = typeClass;
         this.name = name;
-        MultiPartBakedModel
     }
 
     public Class<T> getType() {
@@ -142,7 +141,6 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
                     if (!notInclude.contains(t.getId())) this.registerBlockType(t);
                 });
             }
-            ClientHelper.getModel()
             finders.clear();
             notInclude.clear();
             this.finalizeAndFreeze();

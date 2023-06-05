@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -177,6 +178,11 @@ public class ClientHelper {
 
     @ExpectPlatform
     public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
         throw new AssertionError();
     }
 

@@ -1,0 +1,14 @@
+
+{
+  "variants": {
+    "type=top": {
+      "model": "moonlight:block/remove2"
+    },
+    "type=bottom": {
+      "model": "moonlight:block/remove"
+    },
+    "type=double": {
+      "model": "moonlight:block/remove1"
+    }
+  }
+}

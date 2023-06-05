@@ -47,7 +47,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     ConfigSpec... specs) {
-        this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap((ConfigSpecWrapper[]) specs));
+        this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap( specs));
     }
 
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
@@ -84,9 +84,10 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                 new ConfigScreenHandler.ConfigScreenFactory((m, s) -> screenSelectFactory.apply(s)));
     }
 
-    private static Map<ConfigType, Set<IModConfig>> createConfigMap(ConfigSpecWrapper... specs) {
+    private static Map<ConfigType, Set<IModConfig>> createConfigMap(ConfigSpec... specs) {
         Map<ConfigType, Set<IModConfig>> modConfigMap = new EnumMap<>(ConfigType.class);
-        for (var s : specs) {
+        for (var ss : specs) {
+            ConfigSpecWrapper s = (ConfigSpecWrapper) ss;
             ModConfig modConfig = s.getModConfig();
             var c = new ForgeConfig(modConfig, s.getSpec());
             var set = modConfigMap.computeIfAbsent(

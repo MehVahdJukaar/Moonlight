@@ -1,10 +1,19 @@
 package net.mehvahdjukaar.moonlight.forge;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import net.mehvahdjukaar.moonlight.api.client.model.RetexturedModelLoader;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.fluids.forge.SoftFluidRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.map.forge.MapDecorationRegistryImpl;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
@@ -14,8 +23,19 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.CreativeModeTabRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
@@ -28,6 +48,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -51,8 +72,86 @@ public class MoonlightForge {
             modEventBus.addListener(MoonlightForgeClient::clientSetup);
             MoonlightClient.initClient();
 
+            //ClientHelper.addModelLoaderRegistration(modelLoaderEvent -> {
+            //    modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
+            //});
+
+            //new aa(new DynamicTexturePack(Moonlight.res("test"))).register();
+
         }
 
+    }
+
+    public static class aa extends DynClientResourcesGenerator{
+
+        protected aa(DynamicTexturePack pack) {
+            super(pack);
+            pack.addNamespaces("minecraft");
+        }
+
+        @Override
+        public Logger getLogger() {
+            return Moonlight.LOGGER;
+        }
+
+        @Override
+        public boolean dependsOnLoadedPacks() {
+            return true;
+        }
+
+        @Override
+        public void regenerateDynamicAssets(ResourceManager manager) {
+            for(var b : BuiltInRegistries.BLOCK){
+                if(b instanceof StairBlock){
+                    ResourceLocation id = Utils.getID(b);
+                    if(id.getPath().equals("oak_stairs"))continue;
+                    ResourceLocation location = new ResourceLocation(id.getNamespace(), id.getPath());
+                    dynamicPack.addBlockModel(location, JsonParser.parseString(
+                            """ 
+                                    {
+                                      "loader": "moonlight:lazy_copy",
+                                      "parent_block": "minecraft:oak_stairs",
+                                      "parent_model": "minecraft:block/stairs",
+                                      "textures": {
+                                        "bottom": "minecraft:block/dark_oak_planks",
+                                        "side": "minecraft:block/dark_oak_planks",
+                                        "top": "minecraft:block/dark_oak_planks"
+                                      }
+                                    }
+                                    """.replace("dark_oak", id.getPath().replace("_stairs",""))));
+                    location = new ResourceLocation(id.getNamespace(), id.getPath() + "_inner");
+
+                    dynamicPack.addBlockModel(location, JsonParser.parseString(
+                            """ 
+                                    {
+                                      "loader": "moonlight:lazy_copy",
+                                      "parent_block": "minecraft:oak_stairs",
+                                      "parent_model": "minecraft:block/inner_stairs",
+                                      "textures": {
+                                        "bottom": "minecraft:block/dark_oak_planks",
+                                        "side": "minecraft:block/dark_oak_planks",
+                                        "top": "minecraft:block/dark_oak_planks"
+                                      }
+                                    }
+                                    """.replace("dark_oak", id.getPath().replace("_stairs",""))));
+                    location = new ResourceLocation(id.getNamespace(), id.getPath() + "_outer");
+
+                    dynamicPack.addBlockModel(location, JsonParser.parseString(
+                            """ 
+                                    {
+                                      "loader": "moonlight:lazy_copy",
+                                      "parent_block": "minecraft:oak_stairs",
+                                      "parent_model": "minecraft:block/outer_stairs",
+                                      "textures": {
+                                        "bottom": "minecraft:block/dark_oak_planks",
+                                        "side": "minecraft:block/dark_oak_planks",
+                                        "top": "minecraft:block/dark_oak_planks"
+                                      }
+                                    }
+                                    """.replace("dark_oak", id.getPath().replace("_stairs",""))));
+                }
+            }
+        }
     }
 
     //hacky but eh
