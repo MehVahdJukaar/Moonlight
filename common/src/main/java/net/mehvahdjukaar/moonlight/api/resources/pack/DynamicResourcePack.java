@@ -21,6 +21,7 @@ import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.world.flag.FeatureFlagSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -31,13 +32,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class DynamicResourcePack implements PackResources {
+    private static final List<DynamicResourcePack> INSTANCES = new ArrayList<>();
+
+    @ApiStatus.Internal
+    public static void clearAfterReload(boolean clientSide) {
+        for(var p : DynamicResourcePack.INSTANCES){
+            if(p.packType == PackType.CLIENT_RESOURCES == clientSide){
+                p.clearContent();
+            }
+        }
+    }
+
+
     protected static final Logger LOGGER = LogManager.getLogger();
 
     protected final boolean hidden;
@@ -55,6 +65,10 @@ public abstract class DynamicResourcePack implements PackResources {
 
     //for debug or to generate assets
     protected boolean generateDebugResources;
+    protected boolean canBeCleared;
+    protected Set<ResourceLocation> staticResources = new HashSet<>();
+
+    boolean addToStatic = false;
 
     protected DynamicResourcePack(ResourceLocation name, PackType type) {
         this(name, type, Pack.Position.TOP, false, false);
@@ -74,6 +88,15 @@ public abstract class DynamicResourcePack implements PackResources {
         this.metadata = new PackMetadataSection(component, (SharedConstants.getCurrentVersion().getPackVersion(type)));
         this.info = new Pack.Info(metadata.getDescription(), metadata.getPackFormat(), FeatureFlagSet.of());
         this.generateDebugResources = PlatHelper.isDev();
+    }
+
+
+    public void clearOnReload(boolean canBeCleared) {
+        this.canBeCleared = canBeCleared;
+    }
+
+    public void markNotClearable(ResourceLocation staticResources) {
+        this.staticResources.add(staticResources);
     }
 
     public void setGenerateDebugResources(boolean generateDebugResources) {
@@ -118,6 +141,7 @@ public abstract class DynamicResourcePack implements PackResources {
                         Pack.Position.TOP,
                         this.fixed, // fixed position? no
                         PackSource.BUILT_IN));
+        INSTANCES.add(this);
     }
 
     //@Override
@@ -225,4 +249,13 @@ public abstract class DynamicResourcePack implements PackResources {
         return packType;
     }
 
+    public void clearContent() {
+        if(this.canBeCleared){
+            for(var r : this.resources.keySet()){
+                if(!this.staticResources.contains(r)){
+                    this.resources.remove(r);
+                }
+            }
+        }
+    }
 }

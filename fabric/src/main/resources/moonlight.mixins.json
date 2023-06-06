@@ -18,6 +18,7 @@
     "SelfItemStackRenderer",
     "SelfModFlowingFluidMixin",
     "SelfModFluidRendererPropertiesMixin",
+    "TextureAtlasMixin",
     "TextureAtlasSpriteMixin"
   ],
   "mixins": [

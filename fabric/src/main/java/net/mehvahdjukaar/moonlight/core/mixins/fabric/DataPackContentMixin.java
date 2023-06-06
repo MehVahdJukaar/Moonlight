@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerResources;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,6 +14,6 @@ public abstract class DataPackContentMixin {
 
     @Inject(method = "updateRegistryTags*", at = @At("TAIL"))
     private void onTagReload(RegistryAccess registryAccess, CallbackInfo ci){
-        RegistryAccessJsonReloadListener.runReloads(registryAccess);
+        Moonlight.afterDataReload(registryAccess);
     }
 }
