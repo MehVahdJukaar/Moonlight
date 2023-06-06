@@ -52,6 +52,7 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
 
     public abstract void regenerateDynamicAssets(ResourceManager manager);
 
+    @Deprecated(forRemoval = true)
     public void generateStaticAssetsOnStartup(ResourceManager manager) {
     }
 
@@ -92,7 +93,9 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
 
         if (!this.hasBeenInitialized) {
             this.hasBeenInitialized = true;
+            dynamicPack.addToPersistent = true;
             generateStaticAssetsOnStartup(manager);
+            dynamicPack.addToPersistent = false;
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
             if (!resourcePackSupport) {
                 var pack = this.getRepository();

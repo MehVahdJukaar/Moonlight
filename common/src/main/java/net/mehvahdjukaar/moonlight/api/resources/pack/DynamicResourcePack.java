@@ -20,6 +20,7 @@ import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,6 +40,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class DynamicResourcePack implements PackResources {
+    @ApiStatus.Internal
+    public static final List<DynamicResourcePack> INSTANCES = new ArrayList<>();
     protected static final Logger LOGGER = LogManager.getLogger();
 
     public static final List<ResourceLocation> NO_RESOURCES = Collections.emptyList();
@@ -57,6 +60,9 @@ public abstract class DynamicResourcePack implements PackResources {
 
     //for debug or to generate assets
     public boolean generateDebugResources = false;
+    public boolean canBeCleared = true;
+    public  Set<ResourceLocation> persistentResources = new HashSet<>();
+    boolean addToPersistent = false;
 
     protected DynamicResourcePack(ResourceLocation name, PackType type) {
         this(name, type, Pack.Position.TOP, false, false);
@@ -104,7 +110,7 @@ public abstract class DynamicResourcePack implements PackResources {
      * registers this pack. Call on mod init
      */
     public void registerPack() {
-
+        
         PlatformHelper.registerResourcePack(this.packType, () ->
                 new Pack(
                         this.getName(),    // id
@@ -116,6 +122,7 @@ public abstract class DynamicResourcePack implements PackResources {
                         Pack.Position.TOP,
                         this.fixed, // fixed position? no
                         PackSource.BUILT_IN));
+        INSTANCES.add(this);
     }
 
     //@Override
@@ -192,6 +199,16 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
+    public void clearResources(){
+        if(canBeCleared) {
+            for(var r : this.resources.keySet()){
+                if(!persistentResources.contains(r)){
+                    this.resources.remove(r);
+                }
+            }
+        }
+    }
+
     private FileNotFoundException makeException(String pFileName) {
         return new FileNotFoundException(String.format(Locale.ROOT, "'%s' in ResourcePack '%s'", pFileName, this.resourcePackName));
     }
@@ -199,7 +216,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected void addBytes(ResourceLocation path, byte[] bytes) {
         this.namespaces.add(path.getNamespace());
         this.resources.put(path, bytes);
-
+        if(addToPersistent) this.persistentResources.add(path);
         //debug
         if (generateDebugResources) {
             try {

@@ -4,6 +4,8 @@ package net.mehvahdjukaar.moonlight.forge;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
@@ -12,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -56,6 +59,16 @@ public class MoonlightForgeClient {
             ParticleUtil.particleShader = MoonlightForgeClient::getTranslucentParticle;
         } catch (Exception e) {
             Moonlight.LOGGER.error("Failed to parse shader: " + e);
+        }
+    }
+
+
+    @SubscribeEvent
+    public void onTextureStitch(TextureStitchEvent.Post event) {
+        for (var p : DynamicResourcePack.INSTANCES) {
+            if (p instanceof DynamicTexturePack) {
+                p.clearResources();
+            }
         }
     }
 

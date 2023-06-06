@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 import com.google.gson.JsonElement;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
@@ -139,7 +140,7 @@ public class ClientPlatformHelperImpl {
     }
 
     public static void addSpecialModelRegistration(Consumer<ClientPlatformHelper.SpecialModelEvent> eventListener) {
-        ModelLoadingRegistryImpl.INSTANCE.registerModelProvider((m, loader) -> eventListener.accept(loader::accept));
+        ModelLoadingRegistry.INSTANCE.registerModelProvider((m, loader) -> eventListener.accept(loader::accept));
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientPlatformHelper.TooltipComponentEvent> eventListener) {

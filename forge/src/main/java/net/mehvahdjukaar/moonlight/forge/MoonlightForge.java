@@ -3,6 +3,9 @@ package net.mehvahdjukaar.moonlight.forge;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicDataPack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.util.fake_player.FakePlayerManager;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
@@ -52,7 +55,13 @@ public class MoonlightForge {
     @SubscribeEvent
     public void onTagUpdated(TagsUpdatedEvent event) {
         RegistryAccessJsonReloadListener.runReloads(event.getRegistryAccess());
+        for (var p : DynamicResourcePack.INSTANCES) {
+            if (p instanceof DynamicDataPack) {
+                p.clearResources();
+            }
+        }
     }
+
 
     @Nullable
     private static WeakReference<ICondition.IContext> context = null;
