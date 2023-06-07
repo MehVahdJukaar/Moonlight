@@ -64,6 +64,7 @@ public class MoonlightForge {
 
     }
 
+
     public static class aa extends DynClientResourcesGenerator{
 
         protected aa(DynamicTexturePack pack) {
