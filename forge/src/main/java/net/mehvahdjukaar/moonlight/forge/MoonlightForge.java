@@ -54,87 +54,8 @@ public class MoonlightForge {
             modEventBus.addListener(MoonlightForgeClient::clientSetup);
             MoonlightClient.initClient();
 
-            //ClientHelper.addModelLoaderRegistration(modelLoaderEvent -> {
-            //    modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
-            //});
-
-            //new aa(new DynamicTexturePack(Moonlight.res("test"))).register();
-
         }
 
-    }
-
-
-    public static class aa extends DynClientResourcesGenerator{
-
-        protected aa(DynamicTexturePack pack) {
-            super(pack);
-            pack.addNamespaces("minecraft");
-        }
-
-        @Override
-        public Logger getLogger() {
-            return Moonlight.LOGGER;
-        }
-
-        @Override
-        public boolean dependsOnLoadedPacks() {
-            return true;
-        }
-
-        @Override
-        public void regenerateDynamicAssets(ResourceManager manager) {
-            for(var b : BuiltInRegistries.BLOCK){
-                if(b instanceof StairBlock){
-                    ResourceLocation id = Utils.getID(b);
-                    if(id.getPath().equals("oak_stairs"))continue;
-                    ResourceLocation location = new ResourceLocation(id.getNamespace(), id.getPath());
-                    dynamicPack.addBlockModel(location, JsonParser.parseString(
-                            """ 
-                                    {
-                                      "loader": "moonlight:lazy_copy",
-                                      "parent_block": "minecraft:oak_stairs",
-                                      "parent_model": "minecraft:block/stairs",
-                                      "textures": {
-                                        "bottom": "minecraft:block/dark_oak_planks",
-                                        "side": "minecraft:block/dark_oak_planks",
-                                        "top": "minecraft:block/dark_oak_planks"
-                                      }
-                                    }
-                                    """.replace("dark_oak", id.getPath().replace("_stairs",""))));
-                    location = new ResourceLocation(id.getNamespace(), id.getPath() + "_inner");
-
-                    dynamicPack.addBlockModel(location, JsonParser.parseString(
-                            """ 
-                                    {
-                                      "loader": "moonlight:lazy_copy",
-                                      "parent_block": "minecraft:oak_stairs",
-                                      "parent_model": "minecraft:block/inner_stairs",
-                                      "textures": {
-                                        "bottom": "minecraft:block/dark_oak_planks",
-                                        "side": "minecraft:block/dark_oak_planks",
-                                        "top": "minecraft:block/dark_oak_planks"
-                                      }
-                                    }
-                                    """.replace("dark_oak", id.getPath().replace("_stairs",""))));
-                    location = new ResourceLocation(id.getNamespace(), id.getPath() + "_outer");
-
-                    dynamicPack.addBlockModel(location, JsonParser.parseString(
-                            """ 
-                                    {
-                                      "loader": "moonlight:lazy_copy",
-                                      "parent_block": "minecraft:oak_stairs",
-                                      "parent_model": "minecraft:block/outer_stairs",
-                                      "textures": {
-                                        "bottom": "minecraft:block/dark_oak_planks",
-                                        "side": "minecraft:block/dark_oak_planks",
-                                        "top": "minecraft:block/dark_oak_planks"
-                                      }
-                                    }
-                                    """.replace("dark_oak", id.getPath().replace("_stairs",""))));
-                }
-            }
-        }
     }
 
     //hacky but eh
