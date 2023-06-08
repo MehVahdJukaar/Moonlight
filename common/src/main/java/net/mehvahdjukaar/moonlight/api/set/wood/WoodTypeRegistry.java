@@ -2,13 +2,14 @@ package net.mehvahdjukaar.moonlight.api.set.wood;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -90,10 +91,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             //can't check if the block is a full one, so I do this. Adding some checks here
             if (state.getProperties().size() <= 2 && !(baseBlock instanceof SlabBlock)) {
                 //needs to use wood sound type
-                //if (state.getSoundType() == SoundType.WOOD) { //wood from tcon has diff sounds
-                Material mat = state.getMaterial();
-                //and have correct material
-                if (mat == Material.WOOD || mat == Material.NETHER_WOOD) {
+                if (state.instrument() == NoteBlockInstrument.BASS) {
                     //we do not allow "/" in the wood name
                     name = name.replace("/", "_");
                     ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);

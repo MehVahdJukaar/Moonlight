@@ -32,7 +32,7 @@ public class FallingBlockRendererGeneric<T extends FallingBlockEntity> extends E
     public void render(T entity, float pEntityYaw, float pPartialTicks, PoseStack poseStack, MultiBufferSource buffer, int pPackedLight) {
         BlockState state = entity.getBlockState();
         if (state.getRenderShape() == RenderShape.MODEL) {
-            Level level = entity.getLevel();
+            Level level = entity.level();
             BlockPos pos = entity.blockPosition();
             boolean isJustSpawned = Math.abs(entity.getY() - pos.getY()) < 0.02 && entity.tickCount < 0 && state != level.getBlockState(pos);
             if (!isJustSpawned && state.getRenderShape() != RenderShape.INVISIBLE) {

@@ -14,7 +14,6 @@ import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
-import net.mehvahdjukaar.moonlight.core.fake_player.FakeServerPlayer;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
@@ -39,7 +38,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(SoftFluidRegistry::onDataSyncToPlayer);
         ServerLifecycleEvents.SERVER_STARTED.register((s) -> SoftFluidRegistry.onDataLoad()); //need this too because fabric is stupid
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((a, b, c) -> SoftFluidRegistry.onDataLoad()); //only fire after reload command
-        ServerWorldEvents.UNLOAD.register((s, w) -> FakeServerPlayer.unloadLevel(w));
         ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
 
         ResourceConditionsBridge.init();

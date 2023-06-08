@@ -151,11 +151,7 @@ public class ForgeHelperImpl {
     public static boolean isMultipartEntity(Entity e) {
         return e.isMultipartEntity();
     }
-
-    public static void setPoolName(LootPool.Builder pool, String name) {
-        pool.name(name);
-    }
-
+    
     public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, AbstractMinecart o) {
         return railBlock.getRailDirection(blockstate, level, blockpos, o);
     }

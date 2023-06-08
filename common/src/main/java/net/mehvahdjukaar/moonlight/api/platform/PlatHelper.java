@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.google.gson.JsonElement;
+import com.mojang.authlib.GameProfile;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,6 +11,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -40,7 +42,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -195,7 +196,6 @@ public class PlatHelper {
     }
 
 
-
     @Contract
     @ExpectPlatform
     public static boolean isMobGriefingOn(Level level, Entity entity) {
@@ -226,17 +226,6 @@ public class PlatHelper {
 
     @ExpectPlatform
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static List<CreativeModeTab> getCreativeModeTabs() {
-        throw new AssertionError();
-    }
-
-    @Nullable
-    @ExpectPlatform
-    public static CreativeModeTab getCreativeModeTab(ResourceLocation name) {
         throw new AssertionError();
     }
 
@@ -291,5 +280,9 @@ public class PlatHelper {
         openCustomMenu(player, menuProvider, buf -> buf.writeBlockPos(pos));
     }
 
+    @ExpectPlatform
+    public static Player getFakeServerPlayer(GameProfile id, ServerLevel level) {
+        throw new AssertionError();
+    }
 
 }

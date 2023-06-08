@@ -36,7 +36,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
@@ -223,9 +223,9 @@ public class RegHelperImpl {
     }
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
-        Consumer<CreativeModeTabEvent.BuildContents> eventConsumer = event -> {
+        Consumer<BuildCreativeModeTabContentsEvent> eventConsumer = event -> {
             RegHelper.ItemToTabEvent itemToTabEvent = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
-                if (tab != event.getTab()) return;
+                if (tab != event.getTabKey()) return;
 
                 if (target == null) {
                     event.acceptAll(items);
@@ -270,13 +270,20 @@ public class RegHelperImpl {
     }
 
 
-    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<Object> afterEntries, List<Object> beforeEntries, Consumer<CreativeModeTab.Builder> configurator) {
-        TabSupp tab = new TabSupp();
-        Consumer<CreativeModeTabEvent.Register> eventConsumer = event -> {
-            tab.instance = event.registerCreativeModeTab(name, configurator);
-        };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.HIGH, eventConsumer);
-        return tab;
+    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<ResourceLocation> afterEntries,
+                                                                    List<ResourceLocation> beforeEntries,
+                                                                    Consumer<CreativeModeTab.Builder> configurator) {
+        return register(name, ()->{
+            var b = CreativeModeTab.builder();
+            configurator.accept(b);
+            if(!beforeEntries.isEmpty()){
+                b.withTabsBefore(beforeEntries.toArray(ResourceLocation[]::new));
+            }
+            if(!afterEntries.isEmpty()){
+                b.withTabsBefore(afterEntries.toArray(ResourceLocation[]::new));
+            }
+            return b.build();
+        }, Registries.CREATIVE_MODE_TAB);
     }
 
     private static class TabSupp implements Supplier<CreativeModeTab> {

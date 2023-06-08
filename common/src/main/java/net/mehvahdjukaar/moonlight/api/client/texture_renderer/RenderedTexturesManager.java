@@ -8,10 +8,13 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientManager;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.achievement.StatsScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -120,8 +123,7 @@ public class RenderedTexturesManager {
     public static void drawItem(FrameBufferBackedDynamicTexture tex, ItemStack stack) {
         drawAsInGUI(tex, s -> {
             //render stuff
-            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-            itemRenderer.renderGuiItem(s, stack, 0, 0);
+            RenderUtil.getGuiDummy(s).renderFakeItem(stack, 0, 0);
         });
     }
 
@@ -173,7 +175,7 @@ public class RenderedTexturesManager {
         RenderSystem.backupProjectionMatrix();
         //like this so object center is exactly at 0 0 0
         Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, size, size, 0, -1000.0F, 1000);
-        RenderSystem.setProjectionMatrix(matrix4f);
+        RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 
         //model view stuff
         PoseStack posestack = RenderSystem.getModelViewStack();

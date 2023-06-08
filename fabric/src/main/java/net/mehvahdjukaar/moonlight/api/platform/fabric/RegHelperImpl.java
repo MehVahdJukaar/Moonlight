@@ -219,14 +219,17 @@ public class RegHelperImpl {
         });
     }
 
-    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<Object> beforeEntries, List<Object> afterEntries, Consumer<CreativeModeTab.Builder> configurator) {
-        var builder = FabricItemGroup.builder(name);
-        configurator.accept(builder);
-        CreativeModeTab tab = builder.build();
-        return () -> tab;
+    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<ResourceLocation> beforeEntries,
+                                                                    List<ResourceLocation> afterEntries,
+                                                                    Consumer<CreativeModeTab.Builder> configurator) {
+        return register(name, () -> {
+            var builder = FabricItemGroup.builder();
+            configurator.accept(builder);
+            return builder.build();
+        }, Registries.CREATIVE_MODE_TAB);
     }
 
-    public static void addItemsToTab(CreativeModeTab tab, @Nullable Predicate<ItemStack> addAfter, ItemStack... items) {
+    public static void addItemsToTab(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> addAfter, ItemStack... items) {
         ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
             if (addAfter == null) {
                 entries.acceptAll(List.of(items));

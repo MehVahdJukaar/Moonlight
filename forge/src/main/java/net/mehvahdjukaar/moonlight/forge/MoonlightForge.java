@@ -9,20 +9,20 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
-import net.mehvahdjukaar.moonlight.core.fake_player.FakeServerPlayer;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.event.*;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -65,7 +65,7 @@ public class MoonlightForge {
     }
 
 
-    public static class aa extends DynClientResourcesGenerator{
+    public static class aa extends DynClientResourcesGenerator {
 
         protected aa(DynamicTexturePack pack) {
             super(pack);
@@ -84,10 +84,10 @@ public class MoonlightForge {
 
         @Override
         public void regenerateDynamicAssets(ResourceManager manager) {
-            for(var b : BuiltInRegistries.BLOCK){
-                if(b instanceof StairBlock){
+            for (var b : BuiltInRegistries.BLOCK) {
+                if (b instanceof StairBlock) {
                     ResourceLocation id = Utils.getID(b);
-                    if(id.getPath().equals("oak_stairs"))continue;
+                    if (id.getPath().equals("oak_stairs")) continue;
                     ResourceLocation location = new ResourceLocation(id.getNamespace(), id.getPath());
                     dynamicPack.addBlockModel(location, JsonParser.parseString(
                             """ 
@@ -101,7 +101,7 @@ public class MoonlightForge {
                                         "top": "minecraft:block/dark_oak_planks"
                                       }
                                     }
-                                    """.replace("dark_oak", id.getPath().replace("_stairs",""))));
+                                    """.replace("dark_oak", id.getPath().replace("_stairs", ""))));
                     location = new ResourceLocation(id.getNamespace(), id.getPath() + "_inner");
 
                     dynamicPack.addBlockModel(location, JsonParser.parseString(
@@ -116,7 +116,7 @@ public class MoonlightForge {
                                         "top": "minecraft:block/dark_oak_planks"
                                       }
                                     }
-                                    """.replace("dark_oak", id.getPath().replace("_stairs",""))));
+                                    """.replace("dark_oak", id.getPath().replace("_stairs", ""))));
                     location = new ResourceLocation(id.getNamespace(), id.getPath() + "_outer");
 
                     dynamicPack.addBlockModel(location, JsonParser.parseString(
@@ -131,7 +131,7 @@ public class MoonlightForge {
                                         "top": "minecraft:block/dark_oak_planks"
                                       }
                                     }
-                                    """.replace("dark_oak", id.getPath().replace("_stairs",""))));
+                                    """.replace("dark_oak", id.getPath().replace("_stairs", ""))));
                 }
             }
         }
@@ -185,9 +185,7 @@ public class MoonlightForge {
     public void onDimensionUnload(LevelEvent.Unload event) {
         var level = event.getLevel();
         try {
-            if (level instanceof ServerLevel sl) {
-                FakeServerPlayer.unloadLevel(sl);
-            } else if (level.isClientSide()) {
+            if (level.isClientSide()) {
                 //got to be careful with classloading
                 FPClientAccess.unloadLevel(level);
             }

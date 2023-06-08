@@ -35,7 +35,7 @@ public class VillagerAIInternal {
             if (internal.hasCustomSchedule()) {
                 //finalize schedule
                 brain.setSchedule(internal.buildFinalizedSchedule());
-                brain.updateActivityFromSchedule(villager.level.getDayTime(),villager.level.getGameTime());
+                brain.updateActivityFromSchedule(villager.level().getDayTime(),villager.level().getGameTime());
             }
         }
     }

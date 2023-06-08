@@ -27,12 +27,12 @@ public abstract class BeeGoalMixin {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/Level;levelEvent(ILnet/minecraft/core/BlockPos;I)V",
                     shift = At.Shift.BY, by = -2), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    public void tick(CallbackInfo ci, int k, BlockPos blockpos, BlockState blockstate, Block block, boolean flag, IntegerProperty integerproperty) {
-        if (blockstate.getBlock() instanceof IBeeGrowable beeGrowable) {
-            beeGrowable.getPollinated(this.field_20373.level, blockpos, blockstate);
-            field_20373.level.levelEvent(2005, blockpos, 0);
+    public void tick(CallbackInfo ci, int i, BlockPos blockPos, BlockState blockState, Block block, BlockState blockState2) {
+        if (blockState2.getBlock() instanceof IBeeGrowable beeGrowable) {
+            beeGrowable.getPollinated(this.field_20373.level(), blockPos, blockState2);
+            field_20373.level().levelEvent(2005, blockPos, 0);
             field_20373.incrementNumCropsGrownSincePollination();
             ci.cancel();
-        }
+        } //TODO: check
     }
 }

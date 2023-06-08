@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -285,12 +286,12 @@ public class RegHelper {
 
     @ExpectPlatform
     public static Supplier<CreativeModeTab> registerCreativeModeTab(
-            ResourceLocation name, List<Object> afterTabs, List<Object> beforeTabs, Consumer<CreativeModeTab.Builder> configurator
+            ResourceLocation name, List<ResourceLocation> afterTabs, List<ResourceLocation> beforeTabs, Consumer<CreativeModeTab.Builder> configurator
     ) {
         throw new AssertionError();
     }
 
-    private static final List<Object> DEFAULT_AFTER_ENTRIES = List.of(CreativeModeTabs.SPAWN_EGGS);
+    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = List.of(Utils.getID(CreativeModeTabs.SPAWN_EGGS));
 
     public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
         return registerCreativeModeTab(name, DEFAULT_AFTER_ENTRIES, List.of(), configurator);
@@ -302,30 +303,30 @@ public class RegHelper {
     }
 
     public record ItemToTabEvent(
-            QuadConsumer<CreativeModeTab, @Nullable Predicate<ItemStack>, Boolean, Collection<ItemStack>> action) {
+            QuadConsumer<ResourceKey<CreativeModeTab>, @Nullable Predicate<ItemStack>, Boolean, Collection<ItemStack>> action) {
 
 
-        public void add(CreativeModeTab tab, ItemLike... items) {
+        public void add(ResourceKey<CreativeModeTab> tab, ItemLike... items) {
             addAfter(tab, null, items);
         }
 
-        public void add(CreativeModeTab tab, ItemStack... items) {
+        public void add(ResourceKey<CreativeModeTab> tab, ItemStack... items) {
             addAfter(tab, null, items);
         }
 
-        public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, ItemLike... items) {
+        public void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
             action.accept(tab, target, true, Arrays.stream(items).map(i -> i.asItem().getDefaultInstance()).toList());
         }
 
-        public void addAfter(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
+        public void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
             action.accept(tab, target, true, List.of(items));
         }
 
-        public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, ItemLike... items) {
+        public void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
             action.accept(tab, target, false, Arrays.stream(items).map(i -> i.asItem().getDefaultInstance()).toList());
         }
 
-        public void addBefore(CreativeModeTab tab, Predicate<ItemStack> target, ItemStack... items) {
+        public void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
             action.accept(tab, target, false, List.of(items));
         }
     }

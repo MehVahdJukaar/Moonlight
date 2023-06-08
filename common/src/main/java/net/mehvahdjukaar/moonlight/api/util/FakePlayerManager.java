@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
 import com.mojang.authlib.GameProfile;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
-import net.mehvahdjukaar.moonlight.core.fake_player.FakeServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -17,14 +17,14 @@ public class FakePlayerManager {
             "[ML_Fake_Player]");
 
     public static Player get(GameProfile id, Entity entity) {
-        return get(id, entity.level);
+        return get(id, entity.level());
     }
 
     public static Player get(GameProfile id, Level level) {
         Player fakePlayer;
         try {
             if (level instanceof ServerLevel sl) {
-                fakePlayer = FakeServerPlayer.get(sl, id);
+                fakePlayer = PlatHelper.getFakeServerPlayer(id, sl);
             } else {
                 //class loading hacks
                 fakePlayer = FPClientAccess.get(level, id);
@@ -36,7 +36,7 @@ public class FakePlayerManager {
     }
 
     public static Player get(GameProfile id, Entity copyPosFrom, Entity copyRotFrom) {
-        Player p = get(id, copyPosFrom.level);
+        Player p = get(id, copyPosFrom.level());
         p.setPos(copyPosFrom.getX(), copyPosFrom.getY(), copyPosFrom.getZ());
         p.setYHeadRot(copyRotFrom.getYHeadRot());
         p.setXRot(copyRotFrom.getXRot());

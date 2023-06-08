@@ -2,9 +2,10 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.itemgroup.v1.IdentifiableItemGroup;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -27,11 +28,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -250,17 +253,8 @@ public class PlatHelperImpl {
         return FabricLoader.getInstance().getAllMods().stream().map(m -> m.getMetadata().getId()).toList();
     }
 
-    public static List<CreativeModeTab> getCreativeModeTabs() {
-        return CreativeModeTabs.allTabs();
-    }
-
-    public static CreativeModeTab getCreativeModeTab(ResourceLocation name) {
-        for(var c : getCreativeModeTabs()){
-            if(c.getId().equals(name)){
-                return c;
-            }
-        }
-        return null;
+    public static Player getFakeServerPlayer(GameProfile id, ServerLevel level) {
+       return FakePlayer.get(level, id);
     }
 
 

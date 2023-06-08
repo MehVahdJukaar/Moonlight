@@ -12,7 +12,6 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.ModCriteriaTriggers;
-import net.mehvahdjukaar.moonlight.core.fake_player.FakeServerPlayer;
 import net.mehvahdjukaar.moonlight.core.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.core.loot_pool_entries.ModLootPoolEntries;
 import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
@@ -70,13 +69,11 @@ public class Moonlight {
 
     private static void commonSetup() {
         BlocksColorInternal.setup();
-
-        FakeServerPlayer.init();
     }
 
     @EventCalled
     public static void onPlayerCloned(Player oldPlayer, Player newPlayer, boolean wasDeath) {
-        if (wasDeath && !oldPlayer.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+        if (wasDeath && !oldPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
             var inv = oldPlayer.getInventory();
             int i = 0;
             for (var v : inv.items) {

@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -71,9 +71,10 @@ public class TextUtil {
     /**
      * Render a line in a GUI
      */
-    public static void renderGuiLine(RenderTextProperties properties, String string, Font font, PoseStack poseStack,
+    public static void renderGuiLine(RenderTextProperties properties, String string, Font font, GuiGraphics graphics,
                                      MultiBufferSource.BufferSource buffer,
                                      int cursorPos, int selectionPos, boolean isSelected, boolean blink, int yOffset) {
+        PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
         Matrix4f matrix4f = poseStack.last().pose();
 
@@ -101,7 +102,7 @@ public class TextUtil {
 
                 //highlight
                 if (blink && cursorPos < string.length()) {
-                    GuiComponent.fill(poseStack, pX, yOffset - 1, pX + 1, yOffset + 9, -16777216 | properties.textColor);
+                    graphics.fill(pX, yOffset - 1, pX + 1, yOffset + 9, -16777216 | properties.textColor);
                 }
 
                 if (selectionPos != cursorPos) {
@@ -115,7 +116,7 @@ public class TextUtil {
 
                     RenderSystem.enableColorLogicOp();
                     RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-                    Gui.fill(poseStack, startX, startY, yOffset, (yOffset + 9), -16776961);
+                    graphics.fill(startX, startY, yOffset, (yOffset + 9), -16776961);
                     RenderSystem.disableColorLogicOp();
 
                 }
@@ -129,7 +130,7 @@ public class TextUtil {
     /**
      * Renders multiple lines in a GUI
      */
-    public static void renderGuiText(RenderTextProperties properties, String[] guiLines, Font font, PoseStack poseStack,
+    public static void renderGuiText(RenderTextProperties properties, String[] guiLines, Font font, GuiGraphics graphics,
                                      MultiBufferSource.BufferSource buffer,
                                      int cursorPos, int selectionPos, int currentLine, boolean blink, int lineSpacing) {
 
@@ -137,7 +138,7 @@ public class TextUtil {
 
         for (int line = 0; line < nOfLines; ++line) {
             int yOffset = line * lineSpacing - nOfLines * 5;
-            renderGuiLine(properties, guiLines[line], font, poseStack, buffer, cursorPos, selectionPos,
+            renderGuiLine(properties, guiLines[line], font, graphics, buffer, cursorPos, selectionPos,
                     line == currentLine, blink, yOffset);
         }
     }

@@ -28,8 +28,8 @@ public abstract class LightningEntityMixin extends Entity {
     @Inject(method = "powerLightningRod", at = @At("HEAD"))
     private void powerLightningRod(CallbackInfo ci) {
         BlockPos blockPos = this.getStrikePosition();
-        BlockState blockState = this.level.getBlockState(blockPos);
-        var event = ILightningStruckBlockEvent.create(blockState, level, blockPos, (LightningBolt) (Object) this);
+        BlockState blockState = this.level().getBlockState(blockPos);
+        var event = ILightningStruckBlockEvent.create(blockState, level(), blockPos, (LightningBolt) (Object) this);
         MoonlightEventsHelper.postEvent(event, ILightningStruckBlockEvent.class);
     }
 }

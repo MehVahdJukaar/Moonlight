@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
@@ -72,7 +71,7 @@ public class RenderUtil {
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         poseStack.pushPose();
-        poseStack.translate(x, y, 100.0F  + 50.0F);
+        poseStack.translate(x, y, 100.0F + 50.0F);
         poseStack.translate(8.0D, 8.0D, 0.0D);
         poseStack.scale(1.0F, -1.0F, 1.0F);
         poseStack.scale(16.0F, 16.0F, 16.0F);
@@ -82,7 +81,7 @@ public class RenderUtil {
         boolean flag = !model.usesBlockLight();
         if (flag) {
             Lighting.setupForFlatItems();
-        }else{
+        } else {
             Lighting.setupFor3DItems();
         }
 
@@ -130,28 +129,10 @@ public class RenderUtil {
         throw new ArrayStoreException();
     }
 
-    /**
-     * Renders the given sprite or sprite section. Meant for GUI
-     *
-     * @param x      x position
-     * @param y      y position
-     * @param w      width
-     * @param h      height
-     * @param u      sprite local u
-     * @param v      sprite local v
-     * @param uW     sprite section width
-     * @param vH     sprite section height
-     * @param sprite can be grabbed from a material
-     */
-    public static void blitSprite(PoseStack matrixStack, int x, int y, int w, int h,
-                                  float u, float v, int uW, int vH, TextureAtlasSprite sprite) {
-        RenderSystem.setShaderTexture(0, sprite.atlasLocation());
-        var c = sprite.contents();
-        int width = (int) (c.width() / (sprite.getU1() - sprite.getU0()));
-        int height = (int) (c.height() / (sprite.getV1() - sprite.getV0()));
-        GuiComponent.blit(matrixStack, x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
+    public static GuiGraphics getGuiDummy(PoseStack poseStack) {
+        var mc = Minecraft.getInstance();
+        return new GuiGraphics(mc,poseStack, mc.renderBuffers().bufferSource());
     }
-
 
 }
 

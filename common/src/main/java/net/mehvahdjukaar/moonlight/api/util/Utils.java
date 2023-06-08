@@ -23,6 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -36,34 +37,35 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.function.Supplier;
 
 
 public class Utils {
 
     public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem, boolean bothSides) {
-        if (!player.level.isClientSide || bothSides)
+        if (!player.level().isClientSide || bothSides)
             player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem, player.isCreative()));
     }
 
     public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem) {
-        if (!player.level.isClientSide)
+        if (!player.level().isClientSide)
             player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem, player.isCreative()));
     }
 
     public static void swapItemNBT(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem) {
-        if (!player.level.isClientSide)
+        if (!player.level().isClientSide)
             player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem, false));
     }
 
     public static void swapItem(Player player, InteractionHand hand, ItemStack newItem) {
-        if (!player.level.isClientSide)
+        if (!player.level().isClientSide)
             player.setItemInHand(hand, ItemUtils.createFilledResult(player.getItemInHand(hand).copy(), player, newItem, player.isCreative()));
     }
 
@@ -137,6 +139,10 @@ public class Utils {
         return BuiltInRegistries.MOB_EFFECT.getKey(object);
     }
 
+    public static ResourceLocation getID(CreativeModeTab object) {
+        return BuiltInRegistries.CREATIVE_MODE_TAB.getKey(object);
+    }
+
     public static ResourceLocation getID(Object object) {
         if (object instanceof Block b) return getID(b);
         if (object instanceof Item b) return getID(b);
@@ -151,6 +157,7 @@ public class Utils {
         if (object instanceof Supplier<?> s) return getID(s.get());
         if (object instanceof SoftFluid s) return getID(s);
         if (object instanceof MapDecorationType<?, ?> s) return getID(s);
+        if (object instanceof CreativeModeTab t) return getID(t);
         throw new UnsupportedOperationException("Unknown class type " + object.getClass());
     }
 
@@ -176,11 +183,13 @@ public class Utils {
     /**
      * Copies block properties without keeping stupid lambdas that could include references to the wrong blockstate properties
      */
-    public static BlockBehaviour.Properties copyPropertySafe(BlockBehaviour blockBehaviour) {
+    public static BlockBehaviour.Properties copyPropertySafe(Block blockBehaviour) {
         var p = BlockBehaviour.Properties.copy(blockBehaviour);
-        p.lightLevel(s -> 0);
+        BlockState state = blockBehaviour.defaultBlockState();
+        p.lightLevel(s -> state.getLightEmission());
         p.offsetType(BlockBehaviour.OffsetType.NONE);
-        p.color(blockBehaviour.defaultMaterialColor());
+        p.isValidSpawn((blockState, blockGetter, blockPos, object) -> false);
+        //TODO: this isnt safe anymore...
         return p;
     }
 
@@ -209,9 +218,9 @@ public class Utils {
     public static boolean mayBuild(Player player, BlockPos pos) {
         if (player.getAbilities().mayBuild) return true; //Exit early
         if (player instanceof ServerPlayer sp) {
-            return !player.blockActionRestricted(player.level, pos, sp.gameMode.getGameModeForPlayer());
+            return !player.blockActionRestricted(player.level(), pos, sp.gameMode.getGameModeForPlayer());
         } else {
-            return !player.blockActionRestricted(player.level, pos, Minecraft.getInstance().gameMode.getPlayerMode());
+            return !player.blockActionRestricted(player.level(), pos, Minecraft.getInstance().gameMode.getPlayerMode());
         }
     }
 

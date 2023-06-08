@@ -187,7 +187,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
 
     @EventCalled
     protected void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity().level.isClientSide) {
+        if (event.getEntity().level().isClientSide) {
             onRefresh();
         }
     }

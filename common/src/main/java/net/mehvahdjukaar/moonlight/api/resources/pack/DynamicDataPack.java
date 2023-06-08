@@ -11,9 +11,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTables;
+import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
@@ -66,7 +64,7 @@ public class DynamicDataPack extends DynamicResourcePack {
     }
 
     public void addLootTable(ResourceLocation id, LootTable table){
-        this.addJson(id, LootTables.serialize(table), ResType.LOOT_TABLES);
+        this.addJson(id, LootDataType.TABLE.parser().toJsonTree(table), ResType.LOOT_TABLES);
     }
 
     protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {

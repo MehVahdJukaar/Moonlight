@@ -72,7 +72,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     }
 
     public boolean isNoPhysics() {
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             return this.noPhysics;
         } else {
             return (this.entityData.get(ID_FLAGS) & 2) != 0;
@@ -110,10 +110,11 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         boolean noPhysics = this.isNoPhysics();
 
         BlockPos blockpos = this.blockPosition();
-        BlockState blockstate = this.level.getBlockState(blockpos);
+        Level level = this.level();
+        BlockState blockstate = level.getBlockState(blockpos);
         //sets on ground
         if (!blockstate.isAir() && !noPhysics) {
-            VoxelShape voxelshape = blockstate.getCollisionShape(this.level, blockpos);
+            VoxelShape voxelshape = blockstate.getCollisionShape(level, blockpos);
             if (!voxelshape.isEmpty()) {
                 Vec3 vector3d1 = this.position();
 
@@ -139,11 +140,11 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
             this.updateRotation();
 
             Vec3 pos = this.position();
-            boolean client = this.level.isClientSide;
+            boolean client = level.isClientSide;
 
             Vec3 newPos = pos.add(movement);
 
-            HitResult blockHitResult = this.level.clip(new ClipContext(pos, newPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+            HitResult blockHitResult = level.clip(new ClipContext(pos, newPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
             if (blockHitResult.getType() != HitResult.Type.MISS) {
                 //get correct land pos
                 if (!noPhysics) {
@@ -171,7 +172,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                 if (client) {
                     for (int j = 0; j < 4; ++j) {
                         double pY = posY + this.getBbHeight() / 2d;
-                        this.level.addParticle(ParticleTypes.BUBBLE, posX - velX * 0.25D, pY - velY * 0.25D, posZ - velZ * 0.25D, velX, velY, velZ);
+                        level.addParticle(ParticleTypes.BUBBLE, posX - velX * 0.25D, pY - velY * 0.25D, posZ - velZ * 0.25D, velX, velY, velZ);
                     }
                 }
                 deceleration = this.waterDeceleration;
@@ -201,13 +202,13 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                 } else if (type == HitResult.Type.BLOCK) {
                     //portals. done here and not in onBlockHit to prevent any further calls
                     BlockPos hitPos = ((BlockHitResult) blockHitResult).getBlockPos();
-                    BlockState hitState = this.level.getBlockState(hitPos);
+                    BlockState hitState = level.getBlockState(hitPos);
 
                     if (hitState.is(Blocks.NETHER_PORTAL)) {
                         this.handleInsidePortal(hitPos);
                         portalHit = true;
                     } else if (hitState.is(Blocks.END_GATEWAY)) {
-                        if (this.level.getBlockEntity(hitPos) instanceof TheEndGatewayBlockEntity tile && TheEndGatewayBlockEntity.canEntityTeleport(this)) {
+                        if (level.getBlockEntity(hitPos) instanceof TheEndGatewayBlockEntity tile && TheEndGatewayBlockEntity.canEntityTeleport(this)) {
                             TheEndGatewayBlockEntity.teleportEntity(level, hitPos, hitState, this, tile);
                         }
                         portalHit = true;
@@ -247,7 +248,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
     @Nullable
     protected EntityHitResult findHitEntity(Vec3 oPos, Vec3 pos) {
-        return ProjectileUtil.getEntityHitResult(this.level, this, oPos, pos, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity);
+        return ProjectileUtil.getEntityHitResult(this.level(), this, oPos, pos, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity);
     }
 
     public void spawnTrailParticles(Vec3 currentPos, Vec3 newPos) {

@@ -20,6 +20,8 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -197,12 +199,12 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     public abstract void onSave();
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(graphics, mouseX, mouseY, partialTicks);
 
         int titleWidth = this.font.width(this.title) + 35;
-        this.itemRenderer.renderAndDecorateFakeItem(poseStack, mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2);
-        this.itemRenderer.renderAndDecorateFakeItem(poseStack, mainIcon, (this.width / 2) - titleWidth / 2, 2);
+        graphics.renderFakeItem(mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2);
+        graphics.renderFakeItem(mainIcon, (this.width / 2) - titleWidth / 2, 2);
     }
 
     private int ticks = 0;
@@ -300,7 +302,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         }
 
         @Override
-        public void render(PoseStack matrixStack, int x, int top, int left, int width, int height,
+        public void render(GuiGraphics graphics, int x, int top, int left, int width, int height,
                            int mouseX, int mouseY, boolean hovered, float partialTicks) {
 
             int light = this.light ? LightTexture.FULL_BRIGHT : 0;
@@ -315,17 +317,17 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             this.button.setX(left - 1);
             this.button.setY(top);
             this.button.setWidth(width);
-            this.button.render(matrixStack, mouseX, mouseY, partialTicks);
+            this.button.render(graphics, mouseX, mouseY, partialTicks);
 
             int center = this.button.getX() + width / 2;
 
-            ItemRenderer renderer = CustomConfigScreen.this.itemRenderer;
+            ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
 
-            RenderUtil.renderGuiItemRelative(matrixStack, this.icon, center + 95 - 17, top + 2, renderer,
+            RenderUtil.renderGuiItemRelative(graphics.pose(), this.icon, center + 95 - 17, top + 2, renderer,
                     (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
 
 
-            RenderUtil.renderGuiItemRelative(matrixStack, this.icon, center - 95, top + 2, renderer,
+            RenderUtil.renderGuiItemRelative(graphics.pose(), this.icon, center - 95, top + 2, renderer,
                     (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
 
         }
@@ -394,9 +396,10 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         }
 
         @Override
-        public void render(PoseStack poseStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovered, float partialTicks) {
+        public void render(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovered, float partialTicks) {
             this.button.setMessage(Component.literal(""));
-            super.render(poseStack, index, top, left, width, height, mouseX, mouseY, hovered, partialTicks);
+            //TODO: 1.20 add back
+            //super.render(graphics, index, top, left, width, height, mouseX, mouseY, hovered, partialTicks);
             //hovered concerns the entire entry not just the button
             hovered = this.button.isMouseOver(mouseX, mouseY);
             if (lastTick < CustomConfigScreen.this.ticks) {
@@ -408,9 +411,8 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
             //world restart stuff for forge values
             if (doesNeedsGameRestart) {
-                RenderSystem.setShaderTexture(0, IconButton.ICONS);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                Screen.blit(poseStack, left - 18, top + 5, 11, 11, 51.0F, 22.0F, 11, 11, 64, 64);
+                graphics.blit(IconButton.ICONS, left - 18, top + 5, 11, 11, 51.0F, 22.0F, 11, 11, 64, 64);
                 if (MthUtils.isWithinRectangle(left - 18, top + 5, 11, 11, mouseX, mouseY)) {
                     String translationKey = "configured.gui.requires_game_restart";
                     int outline = -1438090048;
@@ -419,7 +421,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             }
 
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-            RenderSystem.setShaderTexture(0, CustomConfigSelectScreen.MISC_ICONS);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1);
             RenderSystem.enableDepthTest();
             RenderSystem.enableBlend();
@@ -433,16 +434,16 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
             int u = on ? ICON_SIZE : 0;
 
-            blit(poseStack, iconX, iconY, 0, u, 0, ICON_SIZE, ICON_SIZE, 64, 64);
+            graphics.blit(CustomConfigSelectScreen.MISC_ICONS, iconX, iconY, 0, u, 0, ICON_SIZE, ICON_SIZE, 64, 64);
 
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1);
 
             if (!item.isEmpty()) {
                 int light = on ? LightTexture.FULL_BRIGHT : 0;
                 int center = (int) (this.button.getX() + this.button.getWidth() / 2f);
-                ItemRenderer renderer = CustomConfigScreen.this.itemRenderer;
+                ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
 
-                RenderUtil.renderGuiItemRelative(poseStack, this.item, center - 8 - iconOffset, top + 2, renderer,
+                RenderUtil.renderGuiItemRelative(graphics.pose(), this.item, center - 8 - iconOffset, top + 2, renderer,
                         (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
             }
         }

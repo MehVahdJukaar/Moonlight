@@ -25,6 +25,8 @@ import java.util.function.Function;
 
 public class ChannelHandlerImpl extends ChannelHandler {
 
+    private static final Map<Class<?>, ResourceLocation> ID_MAP = new HashMap<>();
+
     public static ChannelHandler createChannel(ResourceLocation channelMame) {
         return new ChannelHandlerImpl(channelMame);
     }
@@ -34,8 +36,6 @@ public class ChannelHandlerImpl extends ChannelHandler {
     public ChannelHandlerImpl(ResourceLocation channelName) {
         super(channelName);
     }
-
-    public static Map<Class<?>, ResourceLocation> ID_MAP = new HashMap<>();
 
     @Override
     public <M extends Message> void register(
@@ -123,14 +123,14 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
     @Override
     public void sentToAllClientPlayersTrackingEntity(Entity target, Message message) {
-        if (target.level instanceof ServerLevel serverLevel) {
+        if (target.level() instanceof ServerLevel serverLevel) {
             serverLevel.getChunkSource().broadcast(target, toVanillaPacket(message));
         }
     }
 
     @Override
     public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
-        if (target.level instanceof ServerLevel serverLevel) {
+        if (target.level() instanceof ServerLevel serverLevel) {
             var p = toVanillaPacket(message);
             serverLevel.getChunkSource().broadcast(target, p);
             if (target instanceof ServerPlayer player) {

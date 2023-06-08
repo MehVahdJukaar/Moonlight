@@ -1,15 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.set.leaves;
 
-import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -56,16 +53,9 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         }
         if (name != null && !baseRes.getNamespace().equals("securitycraft")) {
             if (baseBlock instanceof LeavesBlock) {
-                BlockState state = baseBlock.defaultBlockState();
-                Material mat = state.getMaterial();
-                //and have correct material
-                if (mat == Material.LEAVES) {
-                    ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
-
-                    return Optional.of(new LeavesType(id, baseBlock));
-                }
+                ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
+                return Optional.of(new LeavesType(id, baseBlock));
             }
-            //}
         }
         return Optional.empty();
     }

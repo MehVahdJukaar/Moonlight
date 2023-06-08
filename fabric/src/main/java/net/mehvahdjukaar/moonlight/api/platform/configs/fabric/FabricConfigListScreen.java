@@ -1,19 +1,16 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -71,16 +68,16 @@ public class FabricConfigListScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        super.render(poseStack, mouseX, mouseY, partialTick);
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
 
         if (modURL != null && isMouseWithin((this.width / 2) - 90, 2 + 6, 180, 16 + 2, mouseX, mouseY)) {
-            this.renderTooltip(poseStack, this.font.split(Component.translatable("gui.moonlight.open_mod_page", this.modId), 200), mouseX, mouseY);
+            graphics.renderTooltip(this.font, this.font.split(Component.translatable("gui.moonlight.open_mod_page", this.modId), 200), mouseX, mouseY);
         }
         int titleWidth = this.font.width(this.title) + 35;
-        this.itemRenderer.renderAndDecorateFakeItem(poseStack, this.mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2 + 8);
-        this.itemRenderer.renderAndDecorateFakeItem(poseStack, this.mainIcon, (this.width / 2) - titleWidth / 2, 2 + 8);
+        graphics.renderFakeItem(this.mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2 + 8);
+        graphics.renderFakeItem(this.mainIcon, (this.width / 2) - titleWidth / 2, 2 + 8);
     }
 
     private boolean isMouseWithin(int x, int y, int width, int height, int mouseX, int mouseY) {
@@ -132,8 +129,8 @@ public class FabricConfigListScreen extends Screen {
         }*/
 
         @Override
-        public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-            this.renderBackground(poseStack);
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            this.renderBackground(graphics);
 
             var background = FabricConfigListScreen.this.background;
 
@@ -141,49 +138,44 @@ public class FabricConfigListScreen extends Screen {
             int j = i + 6;
             //this.hovered = this.isMouseOver((double)mouseX, (double)mouseY) ? this.getEntryAtPosition((double)mouseX, (double)mouseY) : null;
             if (true) {
-                RenderSystem.setShaderTexture(0, background);
                 RenderSystem.setShaderColor(0.125F, 0.125F, 0.125F, 1.0F);
-                int k = 32;
-                blit(poseStack, this.x0, this.y0, this.x1, (this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32);
+                graphics.blit(background, this.x0, this.y0, this.x1, (this.y1 + (int) this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             }
 
             int k = this.getRowLeft();
-            int l = this.y0 + 4 - (int)this.getScrollAmount();
-            this.enableScissor();
+            int l = this.y0 + 4 - (int) this.getScrollAmount();
+            this.enableScissor(graphics);
             if (true) {
-                this.renderHeader(poseStack, k, l);
+                this.renderHeader(graphics, k, l);
             }
 
-            this.renderList(poseStack, mouseX, mouseY, partialTick);
-            disableScissor();
+            this.renderList(graphics, mouseX, mouseY, partialTick);
+            graphics.disableScissor();
             if (true) {
-                RenderSystem.setShaderTexture(0, background);
-                int m = 32;
                 RenderSystem.setShaderColor(0.25F, 0.25F, 0.25F, 1.0F);
-                blit(poseStack, this.x0, 0, 0.0F, 0.0F, this.width, this.y0, 32, 32);
-                blit(poseStack, this.x0, this.y1, 0.0F, this.y1, this.width, this.height - this.y1, 32, 32);
+                graphics.blit(background, this.x0, 0, 0.0F, 0.0F, this.width, this.y0, 32, 32);
+                graphics.blit(background, this.x0, this.y1, 0.0F, this.y1, this.width, this.height - this.y1, 32, 32);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                int n = 4;
-                fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
-                fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
+                graphics.fillGradient(this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
+                graphics.fillGradient(this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
             }
 
             int m = this.getMaxScroll();
             if (m > 0) {
-                int n = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
+                int n = (int) ((float) ((this.y1 - this.y0) * (this.y1 - this.y0)) / (float) this.getMaxPosition());
                 n = Mth.clamp(n, 32, this.y1 - this.y0 - 8);
-                int o = (int)this.getScrollAmount() * (this.y1 - this.y0 - n) / m + this.y0;
+                int o = (int) this.getScrollAmount() * (this.y1 - this.y0 - n) / m + this.y0;
                 if (o < this.y0) {
                     o = this.y0;
                 }
 
-                fill(poseStack, i, this.y0, j, this.y1, -16777216);
-                fill(poseStack, i, o, j, o + n, -8355712);
-                fill(poseStack, i, o, j - 1, o + n - 1, -4144960);
+                graphics.fill(i, this.y0, j, this.y1, -16777216);
+                graphics.fill(i, o, j, o + n, -8355712);
+                graphics.fill(i, o, j - 1, o + n - 1, -4144960);
             }
 
-            this.renderDecorations(poseStack, mouseX, mouseY);
+            this.renderDecorations(graphics, mouseX, mouseY);
             RenderSystem.disableBlend();
         }
     }
@@ -203,10 +195,10 @@ public class FabricConfigListScreen extends Screen {
         }
 
         @Override
-        public void render(PoseStack poseStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
+        public void render(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
             this.children.forEach((button) -> {
                 button.setY(top);
-                button.render(poseStack, mouseX, mouseY, partialTick);
+                button.render(graphics, mouseX, mouseY, partialTick);
             });
         }
 

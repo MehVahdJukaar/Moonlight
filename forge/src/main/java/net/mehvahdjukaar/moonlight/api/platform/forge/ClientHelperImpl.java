@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -160,8 +161,8 @@ public class ClientHelperImpl {
             eventListener.accept((i, l) -> {
                 IItemDecorator deco = new IItemDecorator() {
                     @Override
-                    public boolean render(PoseStack poseStack, Font font, ItemStack stack, int xOffset, int yOffset) {
-                        return l.render(poseStack, font, stack, xOffset, yOffset);
+                    public boolean render(GuiGraphics graphics, Font font, ItemStack stack, int xOffset, int yOffset) {
+                        return l.render(graphics, font, stack, xOffset, yOffset);
                     }
                 };
                 event.register(i, deco);

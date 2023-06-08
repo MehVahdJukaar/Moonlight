@@ -26,7 +26,7 @@ public class OptionalAdvancementTrigger extends SimpleCriterionTrigger<OptionalA
     }
 
     @Override
-    public Instance createInstance(JsonObject json, EntityPredicate.Composite predicate, DeserializationContext deserializationContext) {
+    public Instance createInstance(JsonObject json, ContextAwarePredicate predicate, DeserializationContext deserializationContext) {
         String condition = json.get("flag").getAsString();
         return new Instance(predicate, condition);
     }
@@ -38,7 +38,7 @@ public class OptionalAdvancementTrigger extends SimpleCriterionTrigger<OptionalA
     protected class Instance extends AbstractCriterionTriggerInstance {
         private final String condition;
 
-        public Instance(EntityPredicate.Composite composite, String condition) {
+        public Instance(ContextAwarePredicate composite, String condition) {
             super(OptionalAdvancementTrigger.this.id, composite);
             this.condition = condition;
         }

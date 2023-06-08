@@ -17,7 +17,7 @@ public class GrindItemTrigger extends SimpleCriterionTrigger<GrindItemTrigger.In
     }
 
     @Override
-    public Instance createInstance(JsonObject json, EntityPredicate.Composite predicate, DeserializationContext deserializationContext) {
+    public Instance createInstance(JsonObject json, ContextAwarePredicate predicate, DeserializationContext deserializationContext) {
         ItemPredicate itempredicate = ItemPredicate.fromJson(json.get("item"));
         return new Instance(predicate, itempredicate);
     }
@@ -29,10 +29,11 @@ public class GrindItemTrigger extends SimpleCriterionTrigger<GrindItemTrigger.In
     protected static class Instance extends AbstractCriterionTriggerInstance {
         private final ItemPredicate item;
 
-        public Instance(EntityPredicate.Composite composite, ItemPredicate item) {
-            super(GrindItemTrigger.ID, composite);
+        public Instance(ContextAwarePredicate contextAwarePredicate, ItemPredicate item) {
+            super(GrindItemTrigger.ID, contextAwarePredicate);
             this.item = item;
         }
+
 
         public boolean matches(ItemStack stack) {
             return this.item.matches(stack);

@@ -16,8 +16,8 @@ public abstract class MapExtendingRecipeMixin {
     @Redirect(method = "matches*",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
-                    ordinal = 1))
-    private boolean matches(ItemStack original, CraftingContainer inventory, Level world) {
+                    ordinal = 0))
+    private boolean preventsExpandingCustomExplorationMaps(ItemStack original, CraftingContainer inventory, Level world) {
         CompoundTag tag = original.getTag();
         if (tag != null && tag.contains("CustomDecorations", 9)) {
             return true;

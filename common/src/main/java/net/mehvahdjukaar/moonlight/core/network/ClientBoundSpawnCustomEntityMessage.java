@@ -97,7 +97,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
     public void handle(ChannelHandler.Context context) {
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.byId(this.typeId);
 
-        Level world = context.getSender().getLevel();
+        Level world = context.getSender().level();
         Entity e = type.create(world);
         if (e != null) {
             e.syncPacketPositionCodec(this.posX, this.posY, this.posZ);

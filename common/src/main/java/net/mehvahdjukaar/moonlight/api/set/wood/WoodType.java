@@ -7,12 +7,12 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +30,6 @@ public class WoodType extends BlockType {
             },
             t -> DataResult.success(t.id));
 
-    public final Material material;
     public final Block planks;
     public final Block log;
 
@@ -44,9 +43,6 @@ public class WoodType extends BlockType {
         super(id);
         this.planks = baseBlock;
         this.log = logBlock;
-        this.material = baseBlock.defaultBlockState().getMaterial();
-
-
     }
 
     @Nullable
@@ -77,10 +73,6 @@ public class WoodType extends BlockType {
         return found;
     }
 
-    public Material getMaterial() {
-        return material;
-    }
-
     @Override
     public ItemLike mainChild() {
         return planks;
@@ -103,11 +95,11 @@ public class WoodType extends BlockType {
     }
 
     public boolean canBurn() {
-        return this.material.isFlammable();
+        return this.planks.defaultBlockState().ignitedByLava();
     }
 
-    public MaterialColor getColor() {
-        return this.material.getColor();
+    public MapColor getColor() {
+        return this.planks.defaultMapColor();
     }
 
     @Override
