@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.util;
+package net.mehvahdjukaar.moonlight.api.entity;
 
 import com.google.common.collect.ImmutableList;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -9,8 +9,7 @@ import net.minecraft.world.entity.npc.Villager;
 
 import java.util.function.Consumer;
 
-//TODO: move to entity
-public class VillagerAIManager {
+public class VillagerAIHooks {
 
     /**
      * Register an event listener for the villager brain event.

@@ -291,7 +291,7 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = List.of(Utils.getID(CreativeModeTabs.SPAWN_EGGS));
+    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = List.of(CreativeModeTabs.SPAWN_EGGS.location());
 
     public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
         return registerCreativeModeTab(name, DEFAULT_AFTER_ENTRIES, List.of(), configurator);

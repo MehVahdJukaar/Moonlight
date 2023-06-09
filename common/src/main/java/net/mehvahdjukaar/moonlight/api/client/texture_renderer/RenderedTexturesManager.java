@@ -203,7 +203,4 @@ public class RenderedTexturesManager {
     }
 
 
-    //TODO: Stitch on an atlas
-    //unused
-
 }

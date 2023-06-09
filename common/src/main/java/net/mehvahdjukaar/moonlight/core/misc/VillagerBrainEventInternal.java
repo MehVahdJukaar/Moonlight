@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.api.util.VillagerAIManager;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.BrainAccessor;
 import net.minecraft.world.entity.ai.Brain;

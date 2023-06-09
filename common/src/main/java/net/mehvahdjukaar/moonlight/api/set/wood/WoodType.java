@@ -7,11 +7,11 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -184,5 +184,13 @@ public class WoodType extends BlockType {
         }
     }
 
+    //just copies base properties without calling copy
+    public BlockBehaviour.Properties copyProperties() {
+        var p = BlockBehaviour.Properties.of();
+        p.mapColor(this.getColor());
+        if (this.canBurn()) p.ignitedByLava();
+        p.sound(this.getSound());
+        return p;
+    }
 
 }

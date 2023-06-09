@@ -1,7 +1,9 @@
 package net.mehvahdjukaar.moonlight.forge;
 
 import com.google.gson.JsonParser;
+import net.mehvahdjukaar.moonlight.api.client.model.RetexturedModelLoader;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
@@ -54,9 +56,9 @@ public class MoonlightForge {
             modEventBus.addListener(MoonlightForgeClient::clientSetup);
             MoonlightClient.initClient();
 
-            //ClientHelper.addModelLoaderRegistration(modelLoaderEvent -> {
-            //    modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
-            //});
+            ClientHelper.addModelLoaderRegistration(modelLoaderEvent -> {
+                modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
+            });
 
             //new aa(new DynamicTexturePack(Moonlight.res("test"))).register();
 

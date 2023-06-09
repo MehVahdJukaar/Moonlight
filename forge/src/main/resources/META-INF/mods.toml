@@ -26,7 +26,7 @@ issueTrackerURL = "https://github.com/MehVahdJukaar/Moonlight/issues" #optional
 [[dependencies.moonlight]]
     modId = "minecraft"
     mandatory = true
-    versionRange = "[1.19.4,)"
+    versionRange = "[1.20,)"
     ordering = "NONE"
     side = "BOTH"
 
