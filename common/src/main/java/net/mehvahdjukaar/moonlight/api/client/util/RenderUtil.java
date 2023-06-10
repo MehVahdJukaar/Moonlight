@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
@@ -134,5 +135,25 @@ public class RenderUtil {
         return new GuiGraphics(mc,poseStack, mc.renderBuffers().bufferSource());
     }
 
+    /**
+     * Renders the given sprite or sprite section. Meant for GUI
+     *
+     * @param x      x position
+     * @param y      y position
+     * @param w      width
+     * @param h      height
+     * @param u      sprite local u
+     * @param v      sprite local v
+     * @param uW     sprite section width
+     * @param vH     sprite section height
+     * @param sprite can be grabbed from a material
+     */
+    public static void blitSpriteSection(GuiGraphics graphics, int x, int y, int w, int h,
+                                  float u, float v, int uW, int vH, TextureAtlasSprite sprite) {
+        var c= sprite.contents();
+        int width = (int) (c.width() / (sprite.getU1() - sprite.getU0()));
+        int height = (int) (c.height() / (sprite.getV1() - sprite.getV0()));
+        graphics.blit(sprite.atlasLocation(), x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
+    }
 }
 

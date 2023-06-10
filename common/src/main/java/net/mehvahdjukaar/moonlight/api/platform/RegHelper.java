@@ -285,7 +285,7 @@ public class RegHelper {
     }
 
     @ExpectPlatform
-    public static Supplier<CreativeModeTab> registerCreativeModeTab(
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(
             ResourceLocation name, List<ResourceLocation> afterTabs, List<ResourceLocation> beforeTabs, Consumer<CreativeModeTab.Builder> configurator
     ) {
         throw new AssertionError();

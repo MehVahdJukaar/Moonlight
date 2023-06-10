@@ -219,7 +219,7 @@ public class RegHelperImpl {
         });
     }
 
-    public static Supplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<ResourceLocation> beforeEntries,
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<ResourceLocation> beforeEntries,
                                                                     List<ResourceLocation> afterEntries,
                                                                     Consumer<CreativeModeTab.Builder> configurator) {
         return register(name, () -> {
