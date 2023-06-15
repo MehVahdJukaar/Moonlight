@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
+import net.mehvahdjukaar.moonlight.api.set.BlocksColorAPI;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -19,8 +20,11 @@ public interface IColored {
     /**
      * @return the associated item to this block or item with the given color. Null if it fails
      */
+    @Deprecated
     @Nullable
-    Item changeItemColor(@Nullable DyeColor color);
+    default Item changeItemColor(@Nullable DyeColor color){
+      return BlocksColorAPI.changeColor(((ItemLike)this).asItem(), color);
+    }
 
     /**
      * If this kind of block can have a null color, similar to shulker boxes

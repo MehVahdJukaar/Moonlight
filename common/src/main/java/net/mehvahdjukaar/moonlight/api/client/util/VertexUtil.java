@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
+import net.mehvahdjukaar.moonlight.api.block.IColored;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -21,7 +22,6 @@ public class VertexUtil {
     private static int getFormatLength() {
         return DefaultVertexFormat.BLOCK.getIntegerSize();
     }
-
 
     /**
      * Replaces all the texture in te given model with the given sprite

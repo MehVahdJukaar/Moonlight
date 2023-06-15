@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -38,6 +39,49 @@ public class ModLootModifiers {
         public static final Supplier<Codec<AddItemModifier>> CODEC = Suppliers.memoize(() ->
                 RecordCodecBuilder.create(inst -> codecStart(inst).and(
                         ItemStack.CODEC.fieldOf("item").forGetter(m -> m.addedItemStack)
+                ).apply(inst, AddItemModifier::new)));
+
+        private final ItemStack addedItemStack;
+
+
+        protected AddItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
+            super(conditionsIn);
+            this.addedItemStack = addedItemStack;
+        }
+
+        @Nonnull
+        @Override
+        protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
+            ItemStack addedStack = addedItemStack.copy();
+
+            if (addedStack.getCount() < addedStack.getMaxStackSize()) {
+                generatedLoot.add(addedStack);
+            } else {
+                int i = addedStack.getCount();
+
+                while (i > 0) {
+                    ItemStack subStack = addedStack.copy();
+                    subStack.setCount(Math.min(addedStack.getMaxStackSize(), i));
+                    i -= subStack.getCount();
+                    generatedLoot.add(subStack);
+                }
+            }
+            return generatedLoot;
+        }
+
+
+        @Override
+        public Codec<? extends IGlobalLootModifier> codec() {
+            return CODEC.get();
+        }
+    }
+
+
+    public static class AddExtraTable extends LootModifier {
+
+        public static final Supplier<Codec<AddItemModifier>> CODEC = Suppliers.memoize(() ->
+                RecordCodecBuilder.create(inst -> codecStart(inst).and(
+                        ResourceLocation.CODEC.fieldOf("loot_table_reference").forGetter(m -> m.lootTableInject)
                 ).apply(inst, AddItemModifier::new)));
 
         private final ItemStack addedItemStack;
