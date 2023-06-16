@@ -8,6 +8,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -20,6 +21,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -34,13 +36,28 @@ public class RenderUtil {
     static final ModelResourceLocation TRIDENT_MODEL = ModelResourceLocation.vanilla("trident", "inventory");
     static final ModelResourceLocation SPYGLASS_MODEL = ModelResourceLocation.vanilla("spyglass", "inventory");
 
+
     @ExpectPlatform
-    public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate, Level world, BlockPos blockpos, BlockRenderDispatcher blockRenderer) {
+    public static void renderBlock(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
+                                   Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
         throw new AssertionError();
     }
 
-    //from resource location
+    public static void renderBlock(long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
+                                   Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
+        BakedModel model = dispatcher.getBlockModel(state);
+        renderBlock(model, seed, poseStack, buffer, state, level, pos, dispatcher);
+    }
+
+    @Deprecated(forRemoval = true)
     public static void renderBlockModel(ResourceLocation modelLocation, PoseStack matrixStack, MultiBufferSource buffer,
+                                        BlockRenderDispatcher blockRenderer, int light, int overlay, boolean cutout) {
+        renderModel(modelLocation, matrixStack, buffer, blockRenderer, light, overlay, cutout);
+    }
+
+    //should be a weaker version of what's above as it doesnt take in level so stuff like offset isnt there
+    //from resource location
+    public static void renderModel(ResourceLocation modelLocation, PoseStack matrixStack, MultiBufferSource buffer,
                                         BlockRenderDispatcher blockRenderer, int light, int overlay, boolean cutout) {
 
         blockRenderer.getModelRenderer().renderModel(matrixStack.last(),

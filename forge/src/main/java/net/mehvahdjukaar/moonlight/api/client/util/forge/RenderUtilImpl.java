@@ -23,10 +23,8 @@ import net.minecraftforge.client.model.data.ModelData;
 public class RenderUtilImpl {
 
 
-    public static void renderBlock(long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate,
+    public static void renderBlock(BakedModel model, long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate,
                                    Level level, BlockPos blockpos, BlockRenderDispatcher dispatcher) {
-
-        BakedModel model = dispatcher.getBlockModel(blockstate);
         for (var renderType : model.getRenderTypes(blockstate, RandomSource.create(seed), ModelData.EMPTY)) {
             dispatcher.getModelRenderer().tesselateBlock(level, model, blockstate, blockpos, matrixStack, buffer.getBuffer(renderType), false, RandomSource.create(), seed,
                     OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);

@@ -1,2 +1,2 @@
-- added back loot table injects
-- fixed some misc issues when reloading packs
+- 1.20.1
+- added some mixins and renders utils
