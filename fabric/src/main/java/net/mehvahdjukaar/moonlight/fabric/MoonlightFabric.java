@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -41,6 +42,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
 
         ResourceConditionsBridge.init();
+
     }
 
     //called after all other mod initialize have been called.

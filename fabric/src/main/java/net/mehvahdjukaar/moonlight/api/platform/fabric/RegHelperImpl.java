@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
@@ -38,6 +39,9 @@ import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,6 +49,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 public class RegHelperImpl {
 
@@ -229,14 +234,17 @@ public class RegHelperImpl {
         }, Registries.CREATIVE_MODE_TAB);
     }
 
-    public static void addItemsToTab(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> addAfter, ItemStack... items) {
-        ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
-            if (addAfter == null) {
-                entries.acceptAll(List.of(items));
-            } else {
-                entries.addAfter(addAfter, Arrays.stream(items).toList(), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-            }
-        });
+    private record LootInjectEventImpl(ResourceLocation getTable, LootTable.Builder builder) implements RegHelper.LootInjectEvent{
+        @Override
+        public void addTableReference(ResourceLocation targetId) {
+            LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();
+            builder.pool(pool);
+        }
+    }
+
+    public static void addLootTableInjects(Consumer<RegHelper.LootInjectEvent> eventListener) {
+        LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) ->
+                eventListener.accept(new LootInjectEventImpl(id, tableBuilder)));
     }
 
 

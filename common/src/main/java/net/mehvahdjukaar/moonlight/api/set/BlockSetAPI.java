@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
+import net.mehvahdjukaar.moonlight.api.block.IColored;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;

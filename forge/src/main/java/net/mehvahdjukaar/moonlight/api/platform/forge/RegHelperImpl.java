@@ -4,11 +4,13 @@ import com.google.common.collect.Lists;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
+import net.mehvahdjukaar.moonlight.core.mixins.forge.LootTableHackMixin;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -33,10 +35,14 @@ import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
@@ -54,11 +60,13 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 
 public class RegHelperImpl {
@@ -286,15 +294,20 @@ public class RegHelperImpl {
         }, Registries.CREATIVE_MODE_TAB);
     }
 
-    private static class TabSupp implements Supplier<CreativeModeTab> {
 
-        private CreativeModeTab instance;
-
+    private record LootInjectEventImpl(ResourceLocation getTable, LootTable table) implements RegHelper.LootInjectEvent{
         @Override
-        public CreativeModeTab get() {
-            if (instance != null) return instance;
-            throw new UnsupportedOperationException("Tried to access creative tab before it was registered");
+        public void addTableReference(ResourceLocation targetId) {
+            LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();
+            pool.freeze();
+            ((LootTableHackMixin) table).getPools().add(pool);
         }
+    }
+
+    public static void addLootTableInjects(Consumer<RegHelper.LootInjectEvent> eventListener) {
+        Consumer<LootTableLoadEvent> eventConsumer = event ->
+                eventListener.accept(new LootInjectEventImpl(event.getName(), event.getTable()));
+        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
     }
 
 }

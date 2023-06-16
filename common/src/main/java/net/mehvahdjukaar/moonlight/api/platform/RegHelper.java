@@ -9,7 +9,7 @@ import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -50,6 +50,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -120,29 +121,6 @@ public class RegHelper {
         return registerAsync(name, feature, Registries.STRUCTURE_TYPE);
     }
 
-    /*
-    public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<PlacedFeature> registerPlacedFeature(
-            ResourceLocation name, RegSupplier<ConfiguredFeature<C, F>> feature, Supplier<List<PlacementModifier>> modifiers) {
-        return registerPlacedFeature(name, () -> new PlacedFeature(hackyErase(feature.getHolder()), modifiers.get()));
-    }
-
-    static <T> Holder<T> hackyErase(Holder<? extends T> holder) {
-        return (Holder<T>) holder;
-    }
-
-    public static RegSupplier<PlacedFeature> registerPlacedFeature(ResourceLocation name, Supplier<PlacedFeature> featureSupplier) {
-        return register(name, featureSupplier, Registries.PLACED_FEATURE);
-    }
-
-    public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<ConfiguredFeature<C, F>> registerConfiguredFeature(
-            ResourceLocation name, Supplier<F> feature, Supplier<C> featureConfiguration) {
-        return registerConfiguredFeature(name, () -> new ConfiguredFeature<>(feature.get(), featureConfiguration.get()));
-    }
-
-    public static <C extends FeatureConfiguration, F extends Feature<C>> RegSupplier<ConfiguredFeature<C, F>> registerConfiguredFeature(
-            ResourceLocation name, Supplier<ConfiguredFeature<C, F>> featureSupplier) {
-        return register(name, featureSupplier, Registries.CONFIGURED_FEATURE);
-    }*/
 
     public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> sound) {
         return register(name, sound, Registries.SOUND_EVENT);
@@ -293,7 +271,7 @@ public class RegHelper {
 
     private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = List.of(CreativeModeTabs.SPAWN_EGGS.location());
 
-    public static RegSupplier <CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
         return registerCreativeModeTab(name, DEFAULT_AFTER_ENTRIES, List.of(), configurator);
     }
 
@@ -409,7 +387,7 @@ public class RegHelper {
      */
     public static EnumMap<VariantType, Supplier<Block>> registerReducedBlockSet(
             ResourceLocation baseName, BlockBehaviour.Properties properties) {
-        return registerBlockSet(new VariantType[]{VariantType.BLOCK,VariantType.STAIRS, VariantType.SLAB}, baseName, properties);
+        return registerBlockSet(new VariantType[]{VariantType.BLOCK, VariantType.STAIRS, VariantType.SLAB}, baseName, properties);
     }
 
     public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
@@ -457,6 +435,22 @@ public class RegHelper {
             map.put(type, block);
         }
         return map;
+    }
+
+    public interface LootInjectEvent {
+        ResourceLocation getTable();
+
+        void addTableReference(ResourceLocation targetId);
+    }
+
+    /**
+     * This uses fabric loot modify event and something equivalent to the old forge loot modift event.
+     * It simply adds a loot table reference pool to the target table
+     * @param eventListener function that takes in the original table id and spits out the table reference id. Return null for no op
+     */
+    @ExpectPlatform
+    public static void addLootTableInjects(Consumer<LootInjectEvent> eventListener) {
+        throw new AssertionError();
     }
 
 }

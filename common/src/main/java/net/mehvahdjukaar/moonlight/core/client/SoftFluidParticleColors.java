@@ -30,7 +30,7 @@ public class SoftFluidParticleColors extends GenericSimpleResourceReloadListener
     //adds all textures in this folder
     @Override
     public void apply(List<ResourceLocation> locations, ResourceManager manager, ProfilerFiller filler) {
-        refreshParticleColors();
+        PARTICLE_COLORS.clear();
 
         //also using this to reset texture cache
         RenderedTexturesManager.clearCache();
@@ -40,16 +40,19 @@ public class SoftFluidParticleColors extends GenericSimpleResourceReloadListener
     }
 
     public static int getParticleColor(SoftFluid s) {
+        if(PARTICLE_COLORS.isEmpty()){
+            refreshParticleColors();
+        }
         return PARTICLE_COLORS.getOrDefault(Utils.getID(s), -1);
     }
 
     //TODO: possibly do it for ALL fluids, not only non grayscale ones
-    public static void refreshParticleColors() {
+    private static void refreshParticleColors() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc == null || mc.level == null) return;
-        var v = SoftFluidRegistry.getEntries();
-        PARTICLE_COLORS.clear();
-        for (var entry : v) {
+        if (mc.level == null) return;
+        var fluids = SoftFluidRegistry.getRegistry(mc.level.registryAccess()).entrySet();
+
+        for (var entry : fluids) {
             SoftFluid s = entry.getValue();
             ResourceLocation key = entry.getKey().location();
             if (!PARTICLE_COLORS.containsKey(key) && !s.isColored()) {

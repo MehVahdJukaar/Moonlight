@@ -136,7 +136,6 @@ public class SoftFluidRegistry {
     @ApiStatus.Internal
     public static void postInitClient() {
         populateSlaveMaps();
-        SoftFluidParticleColors.refreshParticleColors();
     }
 
     @ApiStatus.Internal

@@ -1,1 +1,2 @@
-1.20 fixes
+- added back loot table injects
+- fixed some misc issues when reloading packs
