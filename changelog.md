@@ -1,2 +1,2 @@
-- 1.20.1
-- added some mixins and renders utils
+- fixed wood type ordering
+- cleanups

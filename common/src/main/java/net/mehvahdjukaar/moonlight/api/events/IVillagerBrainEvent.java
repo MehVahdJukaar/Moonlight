@@ -11,6 +11,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;
 import java.util.Optional;
@@ -72,6 +73,7 @@ public interface IVillagerBrainEvent extends SimpleEvent {
     <P extends Pair<Integer, ? extends Behavior<Villager>>> boolean addTaskToActivity(Activity activity, P task);
 
     //do not call
+    @ApiStatus.Internal
     VillagerBrainEventInternal getInternal();
 
 }

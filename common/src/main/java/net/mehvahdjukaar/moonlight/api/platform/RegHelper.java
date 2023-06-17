@@ -165,6 +165,10 @@ public class RegHelper {
         return register(name, activity, Registries.ACTIVITY);
     }
 
+    public static RegSupplier<Activity> registerActivity(ResourceLocation name) {
+        return registerActivity(name, () -> new Activity(name.getPath()));
+    }
+
     public static <T extends Schedule> RegSupplier<T> registerSchedule(ResourceLocation name, Supplier<T> schedule) {
         return register(name, schedule, Registries.SCHEDULE);
     }
@@ -446,6 +450,7 @@ public class RegHelper {
     /**
      * This uses fabric loot modify event and something equivalent to the old forge loot modift event.
      * It simply adds a loot table reference pool to the target table
+     *
      * @param eventListener function that takes in the original table id and spits out the table reference id. Return null for no op
      */
     @ExpectPlatform

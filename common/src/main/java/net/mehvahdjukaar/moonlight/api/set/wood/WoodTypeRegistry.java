@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.set.wood;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -145,5 +144,37 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     void mapVanillaWood(WoodType woodType) {
         var v = woodType.toVanilla();
         if (v != null) fromVanilla.put(v, woodType);
+    }
+
+    private static final List<net.minecraft.world.level.block.state.properties.WoodType> VANILLA_ORDER = List.of(
+            net.minecraft.world.level.block.state.properties.WoodType.OAK,
+            net.minecraft.world.level.block.state.properties.WoodType.SPRUCE,
+            net.minecraft.world.level.block.state.properties.WoodType.BIRCH,
+            net.minecraft.world.level.block.state.properties.WoodType.JUNGLE,
+            net.minecraft.world.level.block.state.properties.WoodType.ACACIA,
+            net.minecraft.world.level.block.state.properties.WoodType.DARK_OAK,
+            net.minecraft.world.level.block.state.properties.WoodType.MANGROVE,
+            net.minecraft.world.level.block.state.properties.WoodType.CHERRY,
+            net.minecraft.world.level.block.state.properties.WoodType.BAMBOO,
+            net.minecraft.world.level.block.state.properties.WoodType.CRIMSON,
+            net.minecraft.world.level.block.state.properties.WoodType.WARPED
+    );
+
+    @Override
+    protected void finalizeAndFreeze() {
+        List<WoodType> temp = new ArrayList<>(builder);
+        builder.clear();
+        outer:
+        for (var v : VANILLA_ORDER) {
+            for (var t : temp) {
+                if (t.toVanilla() == v) {
+                    builder.add(t);
+                    temp.remove(t);
+                    continue outer;
+                }
+            }
+        }
+        builder.addAll(temp);
+        super.finalizeAndFreeze();
     }
 }
