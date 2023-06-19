@@ -5,19 +5,17 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -71,7 +69,7 @@ public class TextUtil {
     /**
      * Render a line in a GUI
      */
-    public static void renderGuiLine(RenderTextProperties properties, String string, Font font, GuiGraphics graphics,
+    public static void renderGuiLine(RenderProperties properties, String string, Font font, GuiGraphics graphics,
                                      MultiBufferSource.BufferSource buffer,
                                      int cursorPos, int selectionPos, boolean isSelected, boolean blink, int yOffset) {
         PoseStack poseStack = graphics.pose();
@@ -130,7 +128,7 @@ public class TextUtil {
     /**
      * Renders multiple lines in a GUI
      */
-    public static void renderGuiText(RenderTextProperties properties, String[] guiLines, Font font, GuiGraphics graphics,
+    public static void renderGuiText(RenderProperties properties, String[] guiLines, Font font, GuiGraphics graphics,
                                      MultiBufferSource.BufferSource buffer,
                                      int cursorPos, int selectionPos, int currentLine, boolean blink, int lineSpacing) {
 
@@ -147,7 +145,7 @@ public class TextUtil {
      * Render text line in world
      */
     public static void renderLine(FormattedCharSequence formattedCharSequences, Font font, float yOffset, PoseStack poseStack,
-                                  MultiBufferSource buffer, RenderTextProperties properties) {
+                                  MultiBufferSource buffer, RenderProperties properties) {
         if (formattedCharSequences == null) return;
         float x = -font.width(formattedCharSequences) / 2f;
         renderLineInternal(formattedCharSequences, font, x, yOffset, poseStack.last().pose(), buffer, properties);
@@ -157,14 +155,14 @@ public class TextUtil {
      * Renders multiple lines in world
      */
     public static void renderAllLines(FormattedCharSequence[] charSequences, int ySeparation, Font font, PoseStack poseStack,
-                                      MultiBufferSource buffer, RenderTextProperties properties) {
+                                      MultiBufferSource buffer, RenderProperties properties) {
         for (int i = 0; i < charSequences.length; i++) {
             renderLine(charSequences[i], font, ySeparation * i, poseStack, buffer, properties);
         }
     }
 
     private static void renderLineInternal(FormattedCharSequence formattedCharSequences, Font font, float xOffset, float yOffset,
-                                           Matrix4f matrix4f, MultiBufferSource buffer, RenderTextProperties properties) {
+                                           Matrix4f matrix4f, MultiBufferSource buffer, RenderProperties properties) {
         if (properties.glowing) {
             font.drawInBatch8xOutline(formattedCharSequences, xOffset, yOffset, properties.textColor, properties.darkenedColor,
                     matrix4f, buffer, properties.light);
@@ -177,28 +175,32 @@ public class TextUtil {
 
     private static int getDarkenedColor(int color, boolean glowing) {
         if (color == DyeColor.BLACK.getTextColor() && glowing) return 0xFFF0EBCC;
-        return getDarkenedColor(color, 0.4f);
+        return ColorUtil.multiply(color, 0.4f);
     }
 
-    private static int getDarkenedColor(int color, float amount) {
-        int j = (int) ((double) FastColor.ABGR32.red(color) * amount);
-        int k = (int) ((double) FastColor.ABGR32.green(color) * amount);
-        int l = (int) ((double) FastColor.ABGR32.blue(color) * amount);
-        return FastColor.ABGR32.color(0, l, k, j);
-    }
+    //TODO: account for light. text doesnt account for light direction
 
     /**
      * bundles all data needed to render a generic text line. Useful for signs like blocks
      */
-    public record RenderTextProperties(int textColor, int darkenedColor, boolean glowing, int light, Style style) {
+    public record RenderProperties(int textColor, int darkenedColor, boolean glowing, int light, Style style) {
 
-        public RenderTextProperties(DyeColor color, boolean glowing, int combinedLight, Style style, BooleanSupplier isVeryNear) {
+        @Deprecated(forRemoval = true)
+        public RenderProperties(DyeColor color, boolean glowing, int combinedLight, Style style, BooleanSupplier isVeryNear) {
             this(color.getTextColor(),
                     getDarkenedColor(color.getTextColor(), glowing),
                     glowing && (isVeryNear.getAsBoolean() || color == DyeColor.BLACK),
                     glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
-
         }
     }
+
+    public static RenderProperties renderProperties(DyeColor dyeColor, boolean glowing, int combinedLight, Style style, Vector3f normal, BooleanSupplier isVeryNear) {
+        int color = ColorUtil.shadeColor(normal, dyeColor.getTextColor());
+
+        return new RenderProperties(color, getDarkenedColor(color, glowing),
+                glowing && (dyeColor == DyeColor.BLACK || isVeryNear.getAsBoolean()),
+                glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
+    }
+
 
 }

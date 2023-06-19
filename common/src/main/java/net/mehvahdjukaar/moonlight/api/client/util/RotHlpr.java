@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RotHlpr {
-
+    //TODO: merge with math helper
     public static final Quaternionf Y180 = Axis.YP.rotationDegrees(180);
     public static final Quaternionf Y90 = Axis.YP.rotationDegrees(90);
     public static final Quaternionf Y45 = Axis.YP.rotationDegrees(45);

@@ -8,6 +8,9 @@ transitive-accessible method net/minecraft/client/gui/screens/MenuScreens regist
 
 transitive-accessible field net/minecraft/world/entity/LivingEntity dead Z
 
+#shader stuff
+accessible field com/mojang/blaze3d/systems/RenderSystem shaderLightDirections [Lorg/joml/Vector3f;
+
 #tabs
 transitive-accessible field net/minecraft/world/item/CreativeModeTabs BUILDING_BLOCKS Lnet/minecraft/resources/ResourceKey;
 transitive-accessible field net/minecraft/world/item/CreativeModeTabs SPAWN_EGGS Lnet/minecraft/resources/ResourceKey;

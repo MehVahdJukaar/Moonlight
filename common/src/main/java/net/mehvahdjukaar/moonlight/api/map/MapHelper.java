@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.integration.MapAtlasCompat;
+import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

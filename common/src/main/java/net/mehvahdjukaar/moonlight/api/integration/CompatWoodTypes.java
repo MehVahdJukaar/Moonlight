@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.integration;
+package net.mehvahdjukaar.moonlight.api.integration;
 
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;

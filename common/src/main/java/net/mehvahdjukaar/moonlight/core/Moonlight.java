@@ -12,7 +12,7 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.ModCriteriaTriggers;
-import net.mehvahdjukaar.moonlight.core.integration.CompatWoodTypes;
+import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.core.loot_pool_entries.ModLootPoolEntries;
 import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;

@@ -466,12 +466,11 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
     private static void rotateItem(int ticks, float partialTicks, PoseStack s, BakedModel m) {
         if (ticks != 0) {
-            float p = (float) (Math.PI / 180f);
             if (m.usesBlockLight()) {
-                s.mulPose(Axis.YP.rotation((ticks + partialTicks) * p * 10f));
+                s.mulPose(Axis.YP.rotation((ticks + partialTicks) * Mth.DEG_TO_RAD * 10f));
 
             } else {
-                float scale = 1 + 0.1f * Mth.sin((ticks + partialTicks) * p * 20);
+                float scale = 1 + 0.1f * Mth.sin((ticks + partialTicks) * Mth.DEG_TO_RAD * 20);
                 s.scale(scale, scale, scale);
             }
         }
