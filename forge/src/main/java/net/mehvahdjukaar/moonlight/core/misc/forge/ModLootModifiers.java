@@ -77,47 +77,6 @@ public class ModLootModifiers {
     }
 
 
-    public static class AddExtraTable extends LootModifier {
-
-        public static final Supplier<Codec<AddItemModifier>> CODEC = Suppliers.memoize(() ->
-                RecordCodecBuilder.create(inst -> codecStart(inst).and(
-                        ResourceLocation.CODEC.fieldOf("loot_table_reference").forGetter(m -> m.lootTableInject)
-                ).apply(inst, AddItemModifier::new)));
-
-        private final ItemStack addedItemStack;
-
-
-        protected AddItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
-            super(conditionsIn);
-            this.addedItemStack = addedItemStack;
-        }
-
-        @Nonnull
-        @Override
-        protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
-            ItemStack addedStack = addedItemStack.copy();
-
-            if (addedStack.getCount() < addedStack.getMaxStackSize()) {
-                generatedLoot.add(addedStack);
-            } else {
-                int i = addedStack.getCount();
-
-                while (i > 0) {
-                    ItemStack subStack = addedStack.copy();
-                    subStack.setCount(Math.min(addedStack.getMaxStackSize(), i));
-                    i -= subStack.getCount();
-                    generatedLoot.add(subStack);
-                }
-            }
-            return generatedLoot;
-        }
-
-
-        @Override
-        public Codec<? extends IGlobalLootModifier> codec() {
-            return CODEC.get();
-        }
-    }
 
     public static class ReplaceItemModifier extends LootModifier {
 
