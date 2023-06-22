@@ -26,7 +26,7 @@ public class WoodType extends BlockType {
     public final Block log;
 
     private final Supplier<net.minecraft.world.level.block.state.properties.WoodType> vanillaType = Suppliers.memoize(() -> {
-        String i = id.getNamespace().equals("minecraft") ? "" : id.toString();
+        String i = id.getNamespace().equals("minecraft") ? id.getPath() : id.toString();
         var o = net.minecraft.world.level.block.state.properties.WoodType.values().filter(v -> v.name().equals(i)).findAny();
         return o.orElse(null);
     });
