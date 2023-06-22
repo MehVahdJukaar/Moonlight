@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
@@ -174,9 +173,13 @@ public class TextUtil {
     }
 
 
-    private static int getDarkenedColor(int color, boolean glowing) {
+    private static int getDarkenedColor(int color, boolean glowing, float mult) {
         if (color == DyeColor.BLACK.getTextColor() && glowing) return 0xFFF0EBCC;
-        return ColorUtil.multiply(color, 0.4f);
+        return ColorUtil.multiply(color, 0.4f * (glowing ? 1 : mult));
+    }
+
+    private static int getDarkenedColor(int color, boolean glowing) {
+        return getDarkenedColor(color, glowing, 1);
     }
 
     //TODO: account for light. text doesnt account for light direction
@@ -195,18 +198,24 @@ public class TextUtil {
         }
     }
 
-    public static RenderProperties renderProperties(DyeColor dyeColor, boolean glowing, int combinedLight, Style style, Vector3f normal, BooleanSupplier isVeryNear) {
+    public static RenderProperties renderProperties(DyeColor dyeColor, boolean glowing,
+                                                    int combinedLight, Style style, Vector3f normal, BooleanSupplier isVeryNear) {
+        return renderProperties(dyeColor, glowing, 1, combinedLight, style, normal, isVeryNear);
+    }
+
+    public static RenderProperties renderProperties(DyeColor dyeColor, boolean glowing, float darkColorMult,
+                                                    int combinedLight, Style style, Vector3f normal, BooleanSupplier isVeryNear) {
         boolean outline = glowing && (dyeColor == DyeColor.BLACK || isVeryNear.getAsBoolean());
 
         int textColor = dyeColor.getTextColor();
         int color = glowing ? textColor : adjustTextColor(textColor, normal);
         int dark;
-        if(!glowing || outline){
-            dark = getDarkenedColor(color, glowing);
-        }else {
+        if (!glowing || outline) {
+            dark = getDarkenedColor(color, glowing, darkColorMult);
+        } else {
             dark = color;
         }
-        return new RenderProperties(color,  dark, outline, glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
+        return new RenderProperties(color, dark, outline, glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
     }
 
     /**

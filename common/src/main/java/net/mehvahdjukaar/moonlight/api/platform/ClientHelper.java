@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
@@ -164,6 +165,10 @@ public class ClientHelper {
     @FunctionalInterface
     public interface ModelLoaderEvent {
         void register(ResourceLocation id, CustomModelLoader loader);
+
+        default void register(ResourceLocation id, Supplier<CustomBakedModel> bakedModelFactory){
+            register(id,(json, context) -> (modelBaker, spriteGetter, transform, location) -> bakedModelFactory.get());
+        }
     }
 
     @ExpectPlatform

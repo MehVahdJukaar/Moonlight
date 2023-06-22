@@ -1,1 +1,1 @@
-- improved dynamic resources generation to work better with modern fix
+- fixed messup. whoops

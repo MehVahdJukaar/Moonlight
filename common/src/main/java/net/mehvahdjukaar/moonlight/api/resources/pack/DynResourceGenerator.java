@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
+import net.mehvahdjukaar.moonlight.api.client.util.TextUtil;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
