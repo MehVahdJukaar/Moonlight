@@ -1,11 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
+import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -32,7 +32,7 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
         //run data could give a null minecraft here...
         if (!PlatHelper.isData()) {
             //unused now...
-            ClientHelper.addClientReloadListener(()->this, this.dynamicPack.resourcePackName);
+            ClientHelper.addClientReloadListener(() -> this, this.dynamicPack.resourcePackName);
         }
         MoonlightEventsHelper.addListener(this::addDynamicTranslations, AfterLanguageLoadEvent.class);
     }

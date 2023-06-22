@@ -1,1 +1,1 @@
-fixed a crash due to refactors and missing classes in platform packages
+- improved dynamic resources generation to work better with modern fix

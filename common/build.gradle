@@ -14,6 +14,7 @@ dependencies {
     //modApi "dev.architectury:architectury:${rootProject.architectury_version}"
 
     modCompileOnly("curse.maven:yacl-667299:4523734")
+    modCompileOnly("curse.maven:modernfix-790626:4599353")
 
 }
 

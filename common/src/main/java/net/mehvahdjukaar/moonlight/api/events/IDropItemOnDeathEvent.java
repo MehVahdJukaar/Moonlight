@@ -29,6 +29,9 @@ public interface IDropItemOnDeathEvent extends SimpleEvent {
 
     boolean isCanceled();
 
+    /**
+     * Sets the stack to return to the player
+     */
     void setReturnItemStack(ItemStack stack);
 
     ItemStack getReturnItemStack();

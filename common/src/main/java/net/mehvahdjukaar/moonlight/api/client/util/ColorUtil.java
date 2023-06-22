@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
 import org.joml.Vector3f;
@@ -32,9 +31,9 @@ public class ColorUtil {
     //component wise multiplication
     public static int multiply(int color, float amount) {
         if (amount == 1) return color;
-        int j = (int) (FastColor.ABGR32.red(color) * amount);
-        int k = (int) (FastColor.ABGR32.green(color) * amount);
-        int l = (int) (FastColor.ABGR32.blue(color) * amount);
+        int j = Math.min(255, (int) (FastColor.ABGR32.red(color) * amount));
+        int k = Math.min(255, (int) (FastColor.ABGR32.green(color) * amount));
+        int l = Math.min(255, (int) (FastColor.ABGR32.blue(color) * amount));
         return FastColor.ABGR32.color(0, l, k, j);
     }
 

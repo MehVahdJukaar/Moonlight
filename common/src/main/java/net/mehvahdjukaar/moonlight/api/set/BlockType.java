@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import net.mehvahdjukaar.moonlight.api.client.util.LOD;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;

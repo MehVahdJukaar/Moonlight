@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.set.forge;
 
-import net.mehvahdjukaar.moonlight.api.block.ModLiquidBlock;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
@@ -9,9 +8,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;

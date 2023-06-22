@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
@@ -163,7 +164,7 @@ public class TextUtil {
 
     private static void renderLineInternal(FormattedCharSequence formattedCharSequences, Font font, float xOffset, float yOffset,
                                            Matrix4f matrix4f, MultiBufferSource buffer, RenderProperties properties) {
-        if (properties.glowing) {
+        if (properties.outline) {
             font.drawInBatch8xOutline(formattedCharSequences, xOffset, yOffset, properties.textColor, properties.darkenedColor,
                     matrix4f, buffer, properties.light);
         } else {
@@ -183,24 +184,42 @@ public class TextUtil {
     /**
      * bundles all data needed to render a generic text line. Useful for signs like blocks
      */
-    public record RenderProperties(int textColor, int darkenedColor, boolean glowing, int light, Style style) {
+    public record RenderProperties(int textColor, int darkenedColor, boolean outline, int light, Style style) {
 
         @Deprecated(forRemoval = true)
-        public RenderProperties(DyeColor color, boolean glowing, int combinedLight, Style style, BooleanSupplier isVeryNear) {
+        public RenderProperties(DyeColor color, boolean outline, int combinedLight, Style style, BooleanSupplier isVeryNear) {
             this(color.getTextColor(),
-                    getDarkenedColor(color.getTextColor(), glowing),
-                    glowing && (isVeryNear.getAsBoolean() || color == DyeColor.BLACK),
-                    glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
+                    getDarkenedColor(color.getTextColor(), outline),
+                    outline && (isVeryNear.getAsBoolean() || color == DyeColor.BLACK),
+                    outline ? combinedLight : LightTexture.FULL_BRIGHT, style);
         }
     }
 
     public static RenderProperties renderProperties(DyeColor dyeColor, boolean glowing, int combinedLight, Style style, Vector3f normal, BooleanSupplier isVeryNear) {
-        int color = ColorUtil.shadeColor(normal, dyeColor.getTextColor());
+        boolean outline = glowing && (dyeColor == DyeColor.BLACK || isVeryNear.getAsBoolean());
 
-        return new RenderProperties(color, getDarkenedColor(color, glowing),
-                glowing && (dyeColor == DyeColor.BLACK || isVeryNear.getAsBoolean()),
-                glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
+        int textColor = dyeColor.getTextColor();
+        int color = glowing ? textColor : adjustTextColor(textColor, normal);
+        int dark;
+        if(!glowing || outline){
+            dark = getDarkenedColor(color, glowing);
+        }else {
+            dark = color;
+        }
+        return new RenderProperties(color,  dark, outline, glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
     }
+
+    /**
+     * Shade text color and optionally makes it overall brighter to remain legible. configure it by setting that static field
+     */
+    public static int adjustTextColor(int dyeColor, Vector3f normal) {
+        float mult = dyeColor != DyeColor.WHITE.getTextColor() ? TEXT_COLOR_MULTIPLIER : 1;
+        float shading = ColorUtil.getShading(normal) * mult;
+        return ColorUtil.multiply(dyeColor, shading);
+    }
+
+    //access and set directly. Makes text color brighter
+    public static float TEXT_COLOR_MULTIPLIER = 1;
 
 
 }

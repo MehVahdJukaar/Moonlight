@@ -9,6 +9,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public class LOD {
+    public static final LOD MAX = new LOD(0);
+
     private final double distSq;
 
     private LOD(double distance) {

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.client.util.TextUtil;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;

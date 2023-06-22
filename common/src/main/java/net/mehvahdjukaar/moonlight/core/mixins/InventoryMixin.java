@@ -32,7 +32,7 @@ public class InventoryMixin {
         if(this.player.isDeadOrDying() || this.player.dead){
             ItemStack stack = list.get(i);
             IDropItemOnDeathEvent event = IDropItemOnDeathEvent.create(stack, player, true);
-            MoonlightEventsHelper.postEvent( event,IDropItemOnDeathEvent.class);
+            MoonlightEventsHelper.postEvent( event, IDropItemOnDeathEvent.class);
             if(event.isCanceled()){
                 list.set(i, ItemStack.EMPTY);
                 toRestore = event.getReturnItemStack();

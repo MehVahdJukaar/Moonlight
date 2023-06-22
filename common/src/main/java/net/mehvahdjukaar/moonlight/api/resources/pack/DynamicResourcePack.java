@@ -212,7 +212,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected void addBytes(ResourceLocation path, byte[] bytes) {
         this.namespaces.add(path.getNamespace());
         this.resources.put(path, bytes);
-
+        if (addToStatic) markNotClearable(path);
         //debug
         if (generateDebugResources) {
             try {

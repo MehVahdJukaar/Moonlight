@@ -55,8 +55,7 @@ public class Utils {
     }
 
     public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem) {
-        if (!player.level().isClientSide)
-            player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem, player.isCreative()));
+        swapItem(player, hand, oldItem, newItem, false);
     }
 
     public static void swapItemNBT(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem) {
@@ -65,17 +64,24 @@ public class Utils {
     }
 
     public static void swapItem(Player player, InteractionHand hand, ItemStack newItem) {
-        if (!player.level().isClientSide)
-            player.setItemInHand(hand, ItemUtils.createFilledResult(player.getItemInHand(hand).copy(), player, newItem, player.isCreative()));
+       swapItem(player, hand, player.getItemInHand(hand), newItem);
     }
-
-    public static void addStackToExisting(Player player, ItemStack stack) {
+//TODO: add more stuff from item utils
+    public static void addStackToExisting(Player player, ItemStack stack, boolean avoidHands) {
         var inv = player.getInventory();
         boolean added = false;
         for (int j = 0; j < inv.items.size(); j++) {
             if (inv.getItem(j).is(stack.getItem()) && inv.add(j, stack)) {
                 added = true;
                 break;
+            }
+        }
+        if(avoidHands && !added){
+            for (int j = 0; j < inv.items.size(); j++) {
+                if (inv.getItem(j).isEmpty() && j != inv.selected && inv.add(j, stack)) {
+                    added = true;
+                    break;
+                }
             }
         }
         if (!added && inv.add(stack)) {

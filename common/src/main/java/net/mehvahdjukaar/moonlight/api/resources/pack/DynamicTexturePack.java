@@ -2,10 +2,10 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
-import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -14,6 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class DynamicTexturePack extends DynamicResourcePack {
+
+    boolean addJsonsToStatic; //for modern fix
 
     public DynamicTexturePack(ResourceLocation name, Pack.Position position, boolean fixed, boolean hidden) {
         super(name, PackType.CLIENT_RESOURCES, position, fixed, hidden);
@@ -64,5 +66,13 @@ public class DynamicTexturePack extends DynamicResourcePack {
 
     public void addLang(ResourceLocation langName, LangBuilder builder) {
         this.addJson(langName, builder.build(), ResType.LANG);
+    }
+
+    @Override
+    public void addJson(ResourceLocation location, JsonElement json, ResType resType) {
+        super.addJson(location, json, resType);
+        if (addJsonsToStatic) {
+            markNotClearable(location);
+        }
     }
 }

@@ -3,12 +3,14 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.VanillaResourceManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -23,6 +25,8 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 public abstract class DynResourceGenerator<T extends DynamicResourcePack> implements PreparableReloadListener {
+
+    private static final boolean MODERN_FIX = PlatHelper.isModLoaded("modernfix");
 
     public final T dynamicPack;
     private boolean hasBeenInitialized;
@@ -88,6 +92,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
     protected final void reloadResources(ResourceManager manager) {
         Stopwatch watch = Stopwatch.createStarted();
+        //all pretty ugly here
+        if(dynamicPack instanceof DynamicTexturePack tp && MODERN_FIX){
+            tp.addJsonsToStatic = ModernFixCompat.areLazyResourcesOn();
+        }
 
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
 
@@ -95,7 +103,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             this.hasBeenInitialized = true;
             this.dynamicPack.addToStatic = true;
             generateStaticAssetsOnStartup(manager);
-            this.dynamicPack.addToStatic = false;
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
             if (!resourcePackSupport) {
                 var pack = this.getRepository();
@@ -107,6 +114,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                     this.regenerateDynamicAssets(manager);
                 }
             }
+            this.dynamicPack.addToStatic = false;
         }
 
         //generate textures

@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.impl.client.indigo.renderer.IndigoRenderer;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -106,9 +107,15 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     }
 
     @Override
+    public BakedQuadBuilder fromVanilla(BakedQuad quad){
+        inner.fromVanilla(quad, IndigoRenderer.MATERIAL_STANDARD, null);
+        return null;
+    }
+
+    @Override
     public BakedQuad build() {
         Preconditions.checkNotNull(sprite, "sprite cannot be null");
-        return inner.toBakedQuad(0, sprite, false);
+        return inner.toBakedQuad( sprite);
     }
 }
 

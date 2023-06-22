@@ -55,6 +55,9 @@ public interface BakedQuadBuilder {
 
     BakedQuadBuilder endVertex();
 
+    BakedQuadBuilder fromVanilla(BakedQuad quad);
+
     BakedQuad build();
+
 
 }

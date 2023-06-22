@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraftforge.client.model.IQuadTransformer;
 import net.minecraftforge.client.model.QuadTransformers;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 import org.jetbrains.annotations.Nullable;
@@ -90,6 +89,11 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuadBuilder endVertex() {
         inner.endVertex();
+        return this;
+    }
+
+    public BakedQuadBuilder fromVanilla(BakedQuad quad){
+        output = quad;
         return this;
     }
 
