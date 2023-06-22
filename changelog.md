@@ -1,1 +1,1 @@
-- dynamic resource packs will not clear themselves after evert relload. This will slightly increase some successive reload time but in turn will free up all the ram taken by these packs
+- improved compat between dynamic resources and modern fix lazy model loading

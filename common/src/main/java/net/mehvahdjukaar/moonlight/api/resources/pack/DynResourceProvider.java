@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 
 public abstract class DynResourceProvider<T extends DynamicResourcePack> implements PreparableReloadListener {
 
+    private static final boolean MODERN_FIX = PlatformHelper.isModLoaded("modernfix");
     public final T dynamicPack;
     private boolean hasBeenInitialized;
 
@@ -91,11 +93,14 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
 
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
 
+        if(dynamicPack instanceof DynamicTexturePack tp && MODERN_FIX){
+            tp.addJsonsToStatic = ModernFixCompat.areLazyResourcesOn();
+        }
+
         if (!this.hasBeenInitialized) {
             this.hasBeenInitialized = true;
             dynamicPack.addToPersistent = true;
             generateStaticAssetsOnStartup(manager);
-            dynamicPack.addToPersistent = false;
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
             if (!resourcePackSupport) {
                 var pack = this.getRepository();
@@ -107,6 +112,7 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
                     this.regenerateDynamicAssets(manager);
                 }
             }
+            dynamicPack.addToPersistent = false;
         }
 
         //generate textures
