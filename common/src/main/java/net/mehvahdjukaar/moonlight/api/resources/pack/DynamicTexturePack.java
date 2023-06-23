@@ -70,9 +70,9 @@ public class DynamicTexturePack extends DynamicResourcePack {
 
     @Override
     public void addJson(ResourceLocation location, JsonElement json, ResType resType) {
+        boolean old = addToPersistent;
+        if (addJsonsToStatic) addToPersistent = true;
         super.addJson(location, json, resType);
-        if(addJsonsToStatic){
-            persistentResources.add(location);
-        }
+        this.addToPersistent = old;
     }
 }

@@ -1,1 +1,2 @@
-- improved compat between dynamic resources and modern fix lazy model loading
+- fixed dynamic resources not being cleared (forge)
+- fixed dynamic resources getting cleared too much (fabric)

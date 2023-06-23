@@ -63,8 +63,7 @@ public class MoonlightForgeClient {
     }
 
 
-    @SubscribeEvent
-    public void onTextureStitch(TextureStitchEvent.Post event) {
+    public static void onTextureStitch(TextureStitchEvent.Post event) {
         for (var p : DynamicResourcePack.INSTANCES) {
             if (p instanceof DynamicTexturePack) {
                 p.clearResources();

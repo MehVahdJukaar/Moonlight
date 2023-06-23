@@ -21,6 +21,7 @@ import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -41,8 +42,9 @@ public class MoonlightForge {
         ModLootModifiers.register();
         ModLootConditions.register();
         if (PlatformHelper.getEnv().isClient()) {
-            FMLJavaModLoadingContext.get().getModEventBus()
-                    .addListener(MoonlightForgeClient::registerShader);
+            IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+            modEventBus.addListener(MoonlightForgeClient::registerShader);
+            modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
         }
     }
 
