@@ -208,27 +208,16 @@ public class TextUtil {
         boolean outline = glowing && (dyeColor == DyeColor.BLACK || isVeryNear.getAsBoolean());
 
         int textColor = dyeColor.getTextColor();
-        int color = glowing ? textColor : adjustTextColor(textColor, normal);
+        float shading = ColorUtil.getShading(normal);
+        int color = glowing ? textColor : ColorUtil.multiply(textColor, shading);
         int dark;
         if (!glowing || outline) {
-            dark = getDarkenedColor(color, glowing, darkColorMult);
+            dark = getDarkenedColor(textColor, glowing, darkColorMult * shading);
         } else {
             dark = color;
         }
         return new RenderProperties(color, dark, outline, glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
     }
-
-    /**
-     * Shade text color and optionally makes it overall brighter to remain legible. configure it by setting that static field
-     */
-    public static int adjustTextColor(int dyeColor, Vector3f normal) {
-        float mult = dyeColor != DyeColor.WHITE.getTextColor() ? TEXT_COLOR_MULTIPLIER : 1;
-        float shading = ColorUtil.getShading(normal) * mult;
-        return ColorUtil.multiply(dyeColor, shading);
-    }
-
-    //access and set directly. Makes text color brighter
-    public static float TEXT_COLOR_MULTIPLIER = 1;
 
 
 }

@@ -15,7 +15,7 @@ import java.nio.file.Path;
 
 public class DynamicTexturePack extends DynamicResourcePack {
 
-    boolean addJsonsToStatic; //for modern fix
+    boolean addJsonsToStatic = true; //for modern fix
 
     public DynamicTexturePack(ResourceLocation name, Pack.Position position, boolean fixed, boolean hidden) {
         super(name, PackType.CLIENT_RESOURCES, position, fixed, hidden);
@@ -70,9 +70,9 @@ public class DynamicTexturePack extends DynamicResourcePack {
 
     @Override
     public void addJson(ResourceLocation location, JsonElement json, ResType resType) {
+        boolean old = addToStatic;
+        if (addJsonsToStatic) addToStatic = true;
         super.addJson(location, json, resType);
-        if (addJsonsToStatic) {
-            markNotClearable(location);
-        }
+        this.addToStatic = old;
     }
 }

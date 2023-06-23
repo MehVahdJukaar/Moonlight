@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
-import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
@@ -60,13 +59,11 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 
 public class RegHelperImpl {
@@ -274,20 +271,20 @@ public class RegHelperImpl {
             });
             eventListener.accept(itemToTabEvent);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.LOW, eventConsumer);
     }
 
 
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<ResourceLocation> afterEntries,
-                                                                    List<ResourceLocation> beforeEntries,
-                                                                    Consumer<CreativeModeTab.Builder> configurator) {
-        return register(name, ()->{
+                                                                       List<ResourceLocation> beforeEntries,
+                                                                       Consumer<CreativeModeTab.Builder> configurator) {
+        return register(name, () -> {
             var b = CreativeModeTab.builder();
             configurator.accept(b);
-            if(!beforeEntries.isEmpty()){
+            if (!beforeEntries.isEmpty()) {
                 b.withTabsBefore(beforeEntries.toArray(ResourceLocation[]::new));
             }
-            if(!afterEntries.isEmpty()){
+            if (!afterEntries.isEmpty()) {
                 b.withTabsBefore(afterEntries.toArray(ResourceLocation[]::new));
             }
             return b.build();
@@ -295,7 +292,8 @@ public class RegHelperImpl {
     }
 
 
-    private record LootInjectEventImpl(ResourceLocation getTable, LootTable table) implements RegHelper.LootInjectEvent{
+    private record LootInjectEventImpl(ResourceLocation getTable,
+                                       LootTable table) implements RegHelper.LootInjectEvent {
         @Override
         public void addTableReference(ResourceLocation targetId) {
             LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();

@@ -65,7 +65,7 @@ public abstract class DynamicResourcePack implements PackResources {
 
     //for debug or to generate assets
     protected boolean generateDebugResources;
-    protected boolean canBeCleared;
+    protected boolean canBeCleared = true;
     protected Set<ResourceLocation> staticResources = new HashSet<>();
 
     boolean addToStatic = false;
