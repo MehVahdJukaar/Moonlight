@@ -63,7 +63,7 @@ public class MoonlightForge {
                 modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
             });
 
-            new aa(new DynamicTexturePack(Moonlight.res("test"))).register();
+            //new aa(new DynamicTexturePack(Moonlight.res("test"))).register();
 
         }
 

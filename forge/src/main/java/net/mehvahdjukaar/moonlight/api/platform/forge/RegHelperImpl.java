@@ -9,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
-import net.mehvahdjukaar.moonlight.core.mixins.forge.LootTableHackMixin;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -297,8 +296,7 @@ public class RegHelperImpl {
         @Override
         public void addTableReference(ResourceLocation targetId) {
             LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();
-            pool.freeze();
-            ((LootTableHackMixin) table).getPools().add(pool);
+            table.addPool(pool);
         }
     }
 
