@@ -13,8 +13,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 
 public class BlocksColorInternal {
@@ -24,8 +24,8 @@ public class BlocksColorInternal {
     private static final Map<String, ColoredSet<Block>> BLOCK_COLOR_SETS = new HashMap<>();
     private static final Map<String, ColoredSet<Item>> ITEM_COLOR_SETS = new HashMap<>();
 
-    private static final Object2ObjectOpenHashMap<Object, DyeColor> BLOCK_TO_COLORS = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectOpenHashMap<Object, String> BLOCK_TO_TYPE = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectOpenHashMap<Object, DyeColor> OBJ_TO_COLORS = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectOpenHashMap<Object, String> OBJ_TO_TYPE = new Object2ObjectOpenHashMap<>();
 
 
     public static void setup() {
@@ -86,22 +86,23 @@ public class BlocksColorInternal {
                 var set = new ColoredSet<>(id, map, registry);
                 colorSetMap.put(id.toString(), set);
 
-                for (var v : set.colorsToBlock.entrySet()) {
-                    BLOCK_TO_COLORS.put(v.getValue(), v.getKey());
-                    BLOCK_TO_TYPE.put(v.getValue(), id.toString());
+                for (var v : set.colorsToObj.entrySet()) {
+                    OBJ_TO_COLORS.put(v.getValue(), v.getKey());
+                    OBJ_TO_TYPE.put(v.getValue(), id.toString());
                 }
+                OBJ_TO_TYPE.put(set.defaultObj, id.toString());
             }
         }
     }
 
     @Nullable
     public static DyeColor getColor(Block block) {
-        return BLOCK_TO_COLORS.get(block);
+        return OBJ_TO_COLORS.get(block);
     }
 
     @Nullable
     public static DyeColor getColor(Item item) {
-        return BLOCK_TO_COLORS.get(item);
+        return OBJ_TO_COLORS.get(item);
     }
 
     @Nullable
@@ -168,12 +169,12 @@ public class BlocksColorInternal {
 
     @Nullable
     public static String getKey(Block block) {
-        return BLOCK_TO_TYPE.get(block);
+        return OBJ_TO_TYPE.get(block);
     }
 
     @Nullable
     public static String getKey(Item item) {
-        return BLOCK_TO_TYPE.get(item);
+        return OBJ_TO_TYPE.get(item);
     }
 
     @Nullable
@@ -212,15 +213,15 @@ public class BlocksColorInternal {
     private static class ColoredSet<T> {
 
         private final ResourceLocation id;
-        private final Map<DyeColor, T> colorsToBlock;
-        private final T defaultBlock;
+        private final Map<DyeColor, T> colorsToObj;
+        private final T defaultObj;
 
         private ColoredSet(ResourceLocation id, EnumMap<DyeColor, T> map, Registry<T> registry) {
             this(id, map, registry, null);
         }
 
         private ColoredSet(ResourceLocation id, EnumMap<DyeColor, T> map, Registry<T> registry, @Nullable T defBlock) {
-            this.colorsToBlock = map;
+            this.colorsToObj = map;
             this.id = id;
 
             //fill optional
@@ -233,14 +234,14 @@ public class BlocksColorInternal {
                 for (var s : new String[]{namespace + ":" + path + "_%s", namespace + ":%s_" + path, mod + ":" + path + "_%s", mod + ":%s_" + path}) {
                     var o = registry.getOptional(new ResourceLocation(String.format(s, c.getName())));
                     if (o.isPresent()) {
-                        colorsToBlock.put(c, o.get());
+                        colorsToObj.put(c, o.get());
                         continue colors;
                     }
                 }
             }
 
             //fill default
-            this.defaultBlock = defBlock == null ? computeDefault(id, registry) : defBlock;
+            this.defaultObj = defBlock == null ? computeDefault(id, registry) : defBlock;
         }
 
         private T computeDefault(ResourceLocation id, Registry<T> registry) {
@@ -259,7 +260,7 @@ public class BlocksColorInternal {
             var o = registry.getOptional(id);
             if (o.isEmpty()) {
                 return registry.getOptional(new ResourceLocation(finalId.getPath()))
-                        .orElseGet(() -> colorsToBlock.get(DyeColor.WHITE));
+                        .orElseGet(() -> colorsToObj.get(DyeColor.WHITE));
             } else {
                 return o.get();
             }
@@ -279,7 +280,7 @@ public class BlocksColorInternal {
             if (v.isPresent()) {
                 var tag = v.get();
                 boolean success = true;
-                for (var t : colorsToBlock.values()) {
+                for (var t : colorsToObj.values()) {
                     if (!tag.contains(registry.getHolderOrThrow(registry.getResourceKey(t).get()))) {
                         success = false;
                         break;
@@ -288,7 +289,7 @@ public class BlocksColorInternal {
                 if (success) return tag;
             }
             return HolderSet.direct(t -> registry.getHolderOrThrow(registry.getResourceKey(t).get()),
-                    new ArrayList<>(colorsToBlock.values()));
+                    new ArrayList<>(colorsToObj.values()));
         }
 
         /**
@@ -297,8 +298,8 @@ public class BlocksColorInternal {
          */
         @Nullable
         private T with(@Nullable DyeColor newColor) {
-            if (newColor != null && !colorsToBlock.containsKey(newColor)) return null;
-            return colorsToBlock.getOrDefault(newColor, defaultBlock);
+            if (newColor != null && !colorsToObj.containsKey(newColor)) return null;
+            return colorsToObj.getOrDefault(newColor, defaultObj);
         }
 
     }
