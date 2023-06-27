@@ -11,7 +11,7 @@ public class MapDecorationRegistryImpl {
 
     @SubscribeEvent
     public static void registerDataPackRegistry(DataPackRegistryEvent.NewRegistry event) {
-        event.dataPackRegistry(KEY, MapDecorationRegistry.CODEC, MapDecorationRegistry.NETROWK_CODEC);
+        event.dataPackRegistry(KEY, MapDecorationRegistry.CODEC, MapDecorationRegistry.NETWORK_CODEC);
     }
 
     public static void init() {

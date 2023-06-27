@@ -163,15 +163,13 @@ public abstract class BlockType {
      * Runs right after all blocks registration has run but before any dynamic block registration is run.
      * Use to add existing vanilla or modded blocks
      */
-    @ApiStatus.Internal
-    public abstract void initializeChildrenBlocks();
+    protected void initializeChildrenBlocks(){};
 
     /**
      * Runs right after all items registration has run but before any dynamic block registration is run.
      * Use to add existing vanilla or modded blocks
      */
-    @ApiStatus.Internal
-    public abstract void initializeChildrenItems();
+    protected void initializeChildrenItems(){};
 
     /**
      * base block that this type originates from. Has to be an ItemLike

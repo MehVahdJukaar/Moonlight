@@ -34,7 +34,7 @@ public abstract class RegistryAccessMixin {
         if (!initializedMlReg && key.registry().equals(Registries.DAMAGE_TYPE.registry())) {
             initializedMlReg = true;
             put(builder, SoftFluidRegistry.KEY, SoftFluid.CODEC);
-            put(builder, MapDecorationRegistry.KEY, MapDecorationRegistry.NETROWK_CODEC);
+            put(builder, MapDecorationRegistry.KEY, MapDecorationRegistry.NETWORK_CODEC);
         }
     }
 

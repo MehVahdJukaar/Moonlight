@@ -45,7 +45,7 @@ public class MapDecorationRegistry {
                         return Either.right((JsonDecorationType) type);
                     });
 
-    public static final Codec<MapDecorationType<?, ?>> NETROWK_CODEC =
+    public static final Codec<MapDecorationType<?, ?>> NETWORK_CODEC =
             Codec.either(CustomDecorationType.CODEC, JsonDecorationType.NETWORK_CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
