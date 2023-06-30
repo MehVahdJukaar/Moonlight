@@ -25,7 +25,6 @@ import java.util.function.Function;
 
 public abstract class DynResourceProvider<T extends DynamicResourcePack> implements PreparableReloadListener {
 
-    private static final boolean MODERN_FIX = PlatformHelper.isModLoaded("modernfix");
     public final T dynamicPack;
     private boolean hasBeenInitialized;
 
@@ -92,10 +91,6 @@ public abstract class DynResourceProvider<T extends DynamicResourcePack> impleme
         Stopwatch watch = Stopwatch.createStarted();
 
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
-
-        if(dynamicPack instanceof DynamicTexturePack tp && MODERN_FIX){
-            tp.addJsonsToStatic = ModernFixCompat.areLazyResourcesOn();
-        }
 
         if (!this.hasBeenInitialized) {
             this.hasBeenInitialized = true;

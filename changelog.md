@@ -1,2 +1,1 @@
-- fixed dynamic resources not being cleared (forge)
-- fixed dynamic resources getting cleared too much (fabric)
+Actually fixed compat with Modern Fix (this time for real)

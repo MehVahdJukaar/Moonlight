@@ -2,11 +2,15 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
+import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
@@ -18,6 +22,12 @@ import net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -202,9 +212,10 @@ public abstract class DynamicResourcePack implements PackResources {
     public void clearResources(){
         if(canBeCleared) {
             for(var r : this.resources.keySet()){
+                Moonlight.LOGGER.info(this.persistentResources);
                 if(!persistentResources.contains(r)){
                     this.resources.remove(r);
-                }
+                }else Moonlight.LOGGER.info("Not reloading resources {}", r);
             }
         }
     }
@@ -214,9 +225,10 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     protected void addBytes(ResourceLocation path, byte[] bytes) {
+
         this.namespaces.add(path.getNamespace());
         this.resources.put(path, bytes);
-        if(addToPersistent) this.persistentResources.add(path);
+        if(addToPersistent || modernFixHack(path)) this.persistentResources.add(path);
         //debug
         if (generateDebugResources) {
             try {
@@ -251,5 +263,22 @@ public abstract class DynamicResourcePack implements PackResources {
     public PackType getPackType() {
         return packType;
     }
+
+
+
+    private static final boolean MODERN_FIX = PlatformHelper.isModLoaded("modernfix")
+            && ModernFixCompat.areLazyResourcesOn();
+
+    //if clearing should not be applied
+    private boolean modernFixHack(ResourceLocation path) {
+        if(MODERN_FIX){
+            String p = path.getPath();
+            return p.startsWith("model") || p.startsWith("blockstate");
+        }
+        return false;
+    }
+
+
+
 
 }

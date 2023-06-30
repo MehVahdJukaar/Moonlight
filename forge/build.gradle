@@ -44,6 +44,7 @@ dependencies {
    //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
 
    // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
+    modImplementation("curse.maven:modernfix-790626:4599361")
 
 
 }
