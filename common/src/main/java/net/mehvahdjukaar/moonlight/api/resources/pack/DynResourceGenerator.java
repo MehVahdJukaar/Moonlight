@@ -27,8 +27,6 @@ import java.util.function.Function;
 
 public abstract class DynResourceGenerator<T extends DynamicResourcePack> implements PreparableReloadListener {
 
-    private static final boolean MODERN_FIX = PlatHelper.isModLoaded("modernfix");
-
     public final T dynamicPack;
     private boolean hasBeenInitialized;
 

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
+import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
@@ -40,8 +41,8 @@ public abstract class DynamicResourcePack implements PackResources {
 
     @ApiStatus.Internal
     public static void clearAfterReload(boolean clientSide) {
-        for(var p : DynamicResourcePack.INSTANCES){
-            if(p.packType == PackType.CLIENT_RESOURCES == clientSide){
+        for (var p : DynamicResourcePack.INSTANCES) {
+            if (p.packType == PackType.CLIENT_RESOURCES == clientSide) {
                 p.clearContent();
             }
         }
@@ -250,12 +251,21 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     public void clearContent() {
-        if(this.canBeCleared){
-            for(var r : this.resources.keySet()){
-                if(!this.staticResources.contains(r)){
+        if (this.canBeCleared) {
+            boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
+            for (var r : this.resources.keySet()) {
+                if (mf && modernFixHack(r)) continue;
+                if (!this.staticResources.contains(r)) {
                     this.resources.remove(r);
                 }
             }
         }
+    }
+
+    private static final boolean MODERN_FIX = PlatHelper.isModLoaded("modernfix") && ModernFixCompat.areLazyResourcesOn();
+
+    private boolean modernFixHack(ResourceLocation r) {
+        String s = r.getPath();
+        return s.startsWith("model") || s.startsWith("blockstate");
     }
 }
