@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import net.mehvahdjukaar.moonlight.api.client.util.LOD;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
@@ -13,8 +12,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -163,13 +160,13 @@ public abstract class BlockType {
      * Runs right after all blocks registration has run but before any dynamic block registration is run.
      * Use to add existing vanilla or modded blocks
      */
-    protected void initializeChildrenBlocks(){};
+    protected abstract void initializeChildrenBlocks();
 
     /**
      * Runs right after all items registration has run but before any dynamic block registration is run.
      * Use to add existing vanilla or modded blocks
      */
-    protected void initializeChildrenItems(){};
+    protected abstract void initializeChildrenItems();
 
     /**
      * base block that this type originates from. Has to be an ItemLike
@@ -237,10 +234,11 @@ public abstract class BlockType {
         return null;
     }
 
-    public SoundType getSound(){
-        if(this.mainChild() instanceof Block b){
+    public SoundType getSound() {
+        if (this.mainChild() instanceof Block b) {
             return b.getSoundType(b.defaultBlockState());
-        }return SoundType.STONE;
+        }
+        return SoundType.STONE;
     }
 
 }

@@ -80,14 +80,16 @@ public class RPUtils {
             JsonElement bsElement = RPUtils.deserializeJson(bsStream);
 
             //grabs the first resource location of a model
-            String modelPath = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"))
-                    .stream().findAny().get();
+            Set<String> models = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"));
 
-            List<String> textures = findAllTexturesInModelRecursive(manager, modelPath);
+            for(var modelPath : models) {
 
-            for (var t : textures) {
-                TextureCache.add(block, t);
-                if (texturePredicate.test(t)) return new ResourceLocation(t);
+                List<String> textures = findAllTexturesInModelRecursive(manager, modelPath);
+
+                for (var t : textures) {
+                    TextureCache.add(block, t);
+                    if (texturePredicate.test(t)) return new ResourceLocation(t);
+                }
             }
         } catch (Exception ignored) {
         }

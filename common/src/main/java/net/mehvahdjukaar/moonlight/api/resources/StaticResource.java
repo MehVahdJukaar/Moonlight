@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources;
 
+import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -60,5 +62,14 @@ public class StaticResource {
 
     public static StaticResource getOrFail(ResourceManager manager, ResourceLocation location) throws NoSuchElementException {
         return of(manager.getResource(location).get(), location);
+    }
+
+    public JsonObject toJson(){
+        try(var s = new ByteArrayInputStream(data)){
+            return RPUtils.deserializeJson(s);
+        }
+        catch (Exception e){
+            throw  new RuntimeException(e);
+        }
     }
 }
