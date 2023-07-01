@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
+import net.mehvahdjukaar.moonlight.api.client.model.fabric.ExtraModelDataImpl;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.SlaveModel;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -29,12 +30,15 @@ public interface SelfCustomBakedModel extends FabricBakedModel, CustomBakedModel
     default void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
         // Object attachment = ((RenderAttachedBlockView)blockView).getBlockEntityRenderAttachment(pos);
         var tile = blockView.getBlockEntity(pos);
+        ExtraModelDataImpl data = (ExtraModelDataImpl) ExtraModelData.EMPTY;
         if (tile instanceof IExtraModelDataProvider provider) {
-            //SlaveModel inner = SlaveModel.INSTANCE;
-            //creating a new instance because indium doesn't like it...
-            SlaveModel inner = new SlaveModel(this, provider.getExtraModelData());
-            context.fallbackConsumer().accept(inner);
+           data = (ExtraModelDataImpl) provider.getExtraModelData();
         }
+        data = (ExtraModelDataImpl) this.getModelData(data, pos, state, blockView);
+        SlaveModel inner = new SlaveModel(this, data);
+                //SlaveModel inner = SlaveModel.INSTANCE;
+        //creating a new instance because indium doesn't like it...
+        context.fallbackConsumer().accept(inner);
     }
 
     @Override

@@ -24,6 +24,10 @@ public interface ExtraModelData {
         ExtraModelData build();
     }
 
+    default boolean isEmpty(){
+        return this == EMPTY;
+    }
+
 }
 
 
