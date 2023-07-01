@@ -212,10 +212,9 @@ public abstract class DynamicResourcePack implements PackResources {
     public void clearResources(){
         if(canBeCleared) {
             for(var r : this.resources.keySet()){
-                Moonlight.LOGGER.info(this.persistentResources);
                 if(!persistentResources.contains(r)){
                     this.resources.remove(r);
-                }else Moonlight.LOGGER.info("Not reloading resources {}", r);
+                }
             }
         }
     }
