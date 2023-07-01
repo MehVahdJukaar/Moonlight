@@ -91,10 +91,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
     protected final void reloadResources(ResourceManager manager) {
         Stopwatch watch = Stopwatch.createStarted();
-        //all pretty ugly here
-        if(dynamicPack instanceof DynamicTexturePack tp && MODERN_FIX){
-            tp.addJsonsToStatic = ModernFixCompat.areLazyResourcesOn();
-        }
 
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
 
