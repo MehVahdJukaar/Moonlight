@@ -15,8 +15,7 @@ public interface ExtraModelData {
         throw new AssertionError();
     }
 
-    @Nullable
-    <T> T get(ModelDataKey<T> key);
+    @Nullable <T> T get(ModelDataKey<T> key);
 
     interface Builder {
         <A> Builder with(ModelDataKey<A> key, A data);
@@ -24,6 +23,9 @@ public interface ExtraModelData {
         ExtraModelData build();
     }
 
+    default boolean isEmpty() {
+        return this == EMPTY;
+    }
 }
 
 

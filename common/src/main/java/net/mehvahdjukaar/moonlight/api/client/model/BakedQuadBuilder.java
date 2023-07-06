@@ -1,28 +1,38 @@
 package net.mehvahdjukaar.moonlight.api.client.model;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Transformation;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.client.util.VertexUtil;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 /**
  * Cross loader utility to create baked quad
  */
-public interface BakedQuadBuilder {
+public interface BakedQuadBuilder extends VertexConsumer {
 
-    static BakedQuadBuilder create() {
-        return create(null);
+    static BakedQuadBuilder create(TextureAtlasSprite sprite) {
+        return create(sprite,(Matrix4f) null);
+    }
+
+    static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Transformation transformation) {
+        return create(sprite, transformation == null ? null : new Matrix4f().translate(0.5f, 0.5f, 0.5f)
+                .mul(transformation.getMatrix())
+                .translate(-0.5f, -0.5f, -0.5f));
     }
 
     @ExpectPlatform
-    static BakedQuadBuilder create(@Nullable Transformation transformation) {
+    static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
         throw new AssertionError();
     }
 
-    BakedQuadBuilder setSprite(TextureAtlasSprite sprite);
+
+    BakedQuadBuilder setAutoDirection();
 
     BakedQuadBuilder setDirection(Direction direction);
 
@@ -30,34 +40,24 @@ public interface BakedQuadBuilder {
 
     BakedQuadBuilder setShade(boolean shade);
 
-    BakedQuadBuilder pos(float x, float y, float z);
-
-    default BakedQuadBuilder pos(Vector3f vec3) {
-        return pos(vec3.x(), vec3.y(), vec3.z());
-    }
-
-    BakedQuadBuilder normal(float x, float y, float z);
-
-    default BakedQuadBuilder normal(Vector3f vector3f) {
-        return normal(vector3f.x(), vector3f.y(), vector3f.z());
-    }
-
-    BakedQuadBuilder color(int rgba);
-
-
-    BakedQuadBuilder uv(float u, float v);
-
-    default BakedQuadBuilder spriteUV(TextureAtlasSprite sprite, float u, float v) {
-        return uv(sprite.getU(u), sprite.getV(v)).setSprite(sprite);
-    }
-
     BakedQuadBuilder lightEmission(int light);
 
-    BakedQuadBuilder endVertex();
-
     BakedQuadBuilder fromVanilla(BakedQuad quad);
+
+    BakedQuadBuilder setTint(int tintIndex);
 
     BakedQuad build();
 
 
+    @Override
+    default BakedQuadBuilder vertex(Matrix4f matrix, float x, float y, float z) {
+        VertexConsumer.super.vertex(matrix, x, y, z);
+        return this;
+    }
+
+    @Override
+    default BakedQuadBuilder normal(Matrix3f matrix, float x, float y, float z) {
+        VertexConsumer.super.normal(matrix, x, y, z);
+        return this;
+    }
 }

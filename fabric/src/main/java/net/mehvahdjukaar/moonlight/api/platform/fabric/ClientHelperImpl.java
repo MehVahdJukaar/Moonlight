@@ -54,8 +54,8 @@ import java.util.function.Supplier;
 
 public class ClientHelperImpl {
 
-    public static void registerRenderType(Block block, RenderType type) {
-        BlockRenderLayerMap.INSTANCE.putBlock(block, type);
+    public static void registerRenderType(Block block, RenderType ...type) {
+        BlockRenderLayerMap.INSTANCE.putBlock(block, type[0]);
     }
 
     public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {

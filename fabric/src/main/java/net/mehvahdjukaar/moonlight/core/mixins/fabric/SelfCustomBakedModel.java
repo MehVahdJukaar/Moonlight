@@ -29,12 +29,15 @@ public interface SelfCustomBakedModel extends FabricBakedModel, CustomBakedModel
     default void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
         // Object attachment = ((RenderAttachedBlockView)blockView).getBlockEntityRenderAttachment(pos);
         var tile = blockView.getBlockEntity(pos);
+        ExtraModelData data = ExtraModelData.EMPTY;
         if (tile instanceof IExtraModelDataProvider provider) {
             //SlaveModel inner = SlaveModel.INSTANCE;
             //creating a new instance because indium doesn't like it...
-            SlaveModel inner = new SlaveModel(this, provider.getExtraModelData());
-            context.fallbackConsumer().accept(inner);
+            data = provider.getExtraModelData();
         }
+
+        SlaveModel inner = new SlaveModel(this, getModelData(data, pos, state, blockView));
+        context.fallbackConsumer().accept(inner);
     }
 
     @Override

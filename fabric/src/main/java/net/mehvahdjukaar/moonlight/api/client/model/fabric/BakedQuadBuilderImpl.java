@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
 import com.google.common.base.Preconditions;
-import com.mojang.math.Transformation;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
@@ -13,46 +12,60 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
-    public static BakedQuadBuilder create(@Nullable Transformation transformation) {
-        return new BakedQuadBuilderImpl(transformation == null ? null : transformation.getMatrix());
+    public static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
+        return new BakedQuadBuilderImpl(sprite, transformation);
     }
 
     private final QuadEmitter inner;
+    private final TextureAtlasSprite sprite;
+    private final Matrix4f globalTransform;
+    private final Matrix3f normalTransf;
     private int vertexIndex = 0;
-    private Matrix4f transform;
-    TextureAtlasSprite sprite = null;
+    private boolean autoDirection = false;
 
-    private BakedQuadBuilderImpl(@Nullable Matrix4f transform) {
+    private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transform) {
         MeshBuilder meshBuilder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
         this.inner = meshBuilder.getEmitter();
-        this.transform = transform;
-    }
-
-    @Override
-    public BakedQuadBuilder setSprite(TextureAtlasSprite sprite) {
+        this.globalTransform = transform;
         this.sprite = sprite;
-        inner.spriteBake(0, sprite, MutableQuadView.BAKE_LOCK_UV);
-        return null;
+        inner.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
+        this.normalTransf = transform == null ? null :
+                new Matrix3f(transform).invert().transpose(); //forge uses this in quad transform. idk how it works
     }
 
     @Override
-    public BakedQuadBuilder setShade(boolean shade) {
+    public BakedQuadBuilder setTint(int tintIndex) {
+        inner.colorIndex(tintIndex);
         return this;
     }
 
     @Override
-    public BakedQuadBuilder setAmbientOcclusion(boolean ambientOcclusion) {
+    public BakedQuadBuilderImpl setAutoDirection() {
+        this.autoDirection = true;
         return this;
     }
 
-    public BakedQuadBuilder setDirection(Direction direction) {
-        if (transform != null) {
-            direction = RotHlpr.rotateDirection(direction, transform);
+    @Override
+    public BakedQuadBuilderImpl setShade(boolean shade) {
+        //cant do this on fabric
+        return this;
+    }
+
+    @Override
+    public BakedQuadBuilderImpl setAmbientOcclusion(boolean ambientOcclusion) {
+        return this;
+    }
+
+    public BakedQuadBuilderImpl setDirection(Direction direction) {
+        if (globalTransform != null) {
+            direction = RotHlpr.rotateDirection(direction, globalTransform);
         }
         inner.nominalFace(direction);
         return this;
@@ -60,54 +73,79 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
 
     @Override
-    public BakedQuadBuilder pos(float x, float y, float z) {
-        if (transform != null) {
-            var v = RotHlpr.rotateVertexOnCenterBy(x, y, z, transform);
+    public BakedQuadBuilderImpl vertex(double x, double y, double z) {
+        if (globalTransform != null) {
+            Vector4f v = globalTransform.transform(new Vector4f((float) x, (float) y, (float) z, 1.0F));
             inner.pos(vertexIndex, v.x(), v.y(), v.z());
             return this;
         }
-        inner.pos(vertexIndex, x, y, z);
+        inner.pos(vertexIndex, (float) x, (float) y, (float) z);
         return this;
     }
 
+
     @Override
-    public BakedQuadBuilder normal(float x, float y, float z) {
-        if (transform != null) {
-            Vector3f normal = new Vector3f(x, y, z);
-            RotHlpr.rotateVertexBy(normal, new Vector3f(), transform);
+    public BakedQuadBuilderImpl normal(float x, float y, float z) {
+        if (globalTransform != null) {
+            Vector3f normal = normalTransf.transform(new Vector3f(x, y, z));
+            normal.normalize();
             inner.normal(vertexIndex, normal.x(), normal.y(), normal.z());
-            return this;
+        } else inner.normal(vertexIndex, x, y, z);
+        if (autoDirection) {
+            this.setDirection(Direction.getNearest(x, y, z));
         }
-        inner.normal(vertexIndex, x, y, z);
         return this;
     }
 
     @Override
-    public BakedQuadBuilder color(int rgba) {
-        inner.spriteColor(vertexIndex, 0, rgba);
+    public BakedQuadBuilderImpl color(int rgba) {
+        inner.color(vertexIndex, rgba);
         return this;
     }
 
     @Override
-    public BakedQuadBuilder uv(float u, float v) {
-        inner.sprite(vertexIndex, 0, u, v);
+    public BakedQuadBuilderImpl color(int red, int green, int blue, int alpha) {
+        inner.color(red, green, blue, alpha);
         return this;
     }
 
     @Override
-    public BakedQuadBuilder lightEmission(int lightLevel) {
-        inner.material(RendererAccess.INSTANCE.getRenderer().materialFinder().emissive(0, true).find());
+    public BakedQuadBuilderImpl uv(float u, float v) {
+        inner.uv(vertexIndex, sprite.getU(u * 16), sprite.getV(v * 16));
         return this;
     }
 
     @Override
-    public BakedQuadBuilder endVertex() {
+    public BakedQuadBuilderImpl overlayCoords(int u, int v) {
+        return this;
+    }
+
+    @Override
+    public BakedQuadBuilderImpl uv2(int u, int v) {
+        return this;
+    }
+
+    @Override
+    public BakedQuadBuilderImpl lightEmission(int lightLevel) {
+        inner.material(RendererAccess.INSTANCE.getRenderer().materialFinder().emissive(true).find());
+        return this;
+    }
+
+    @Override
+    public void endVertex() {
         vertexIndex++;
-        return this;
     }
 
     @Override
-    public BakedQuadBuilder fromVanilla(BakedQuad quad){
+    public void defaultColor(int defaultR, int defaultG, int defaultB, int defaultA) {
+    }
+
+    @Override
+    public void unsetDefaultColor() {
+    }
+
+    @Override
+    public BakedQuadBuilder fromVanilla(BakedQuad quad) {
         inner.fromVanilla(quad, IndigoRenderer.MATERIAL_STANDARD, null);
         return null;
     }
@@ -115,7 +153,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuad build() {
         Preconditions.checkNotNull(sprite, "sprite cannot be null");
-        return inner.toBakedQuad( sprite);
+        return inner.toBakedQuad(sprite);
     }
 }
 

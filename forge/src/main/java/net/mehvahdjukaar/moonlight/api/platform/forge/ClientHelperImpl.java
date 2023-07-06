@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.mehvahdjukaar.moonlight.api.client.model.NestedModelLoader;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.client.color.block.BlockColor;
@@ -47,15 +48,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ClientHelperImpl {
 
-    public static void registerRenderType(Block block, RenderType type) {
+    public static void registerRenderType(Block block, RenderType... types) {
         //from 0.64 we should register render types in out model json
-        ItemBlockRenderTypes.setRenderLayer(block, type);
+        if(types.length == 1) {
+            ItemBlockRenderTypes.setRenderLayer(block, types[0]);
+        }else {
+            var l = List.of(types);
+            ItemBlockRenderTypes.setRenderLayer(block, l::contains);
+        }
     }
 
     public static void registerFluidRenderType(Fluid fluid, RenderType type) {

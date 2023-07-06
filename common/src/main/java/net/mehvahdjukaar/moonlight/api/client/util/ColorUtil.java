@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
 import org.joml.Vector3f;
@@ -18,8 +19,8 @@ public class ColorUtil {
 
     public static float getShading(Vector3f normal) {
         if (normal.equals(Direction.UP.step())) return 1;
-        Vector3f lightDir0 = DIFFUSE_LIGHT_0;//RenderSystem.shaderLightDirections[0];
-        Vector3f lightDir1 = DIFFUSE_LIGHT_1;//RenderSystem.shaderLightDirections[1];
+        Vector3f lightDir0 = RenderSystem.shaderLightDirections[0];
+        Vector3f lightDir1 = RenderSystem.shaderLightDirections[1];
         lightDir0.normalize();
         lightDir1.normalize();
         float light0 = Math.max(0.0f, lightDir0.dot(normal));
@@ -37,5 +38,15 @@ public class ColorUtil {
         return FastColor.ABGR32.color(0, l, k, j);
     }
 
+    //ARGB to ABGR and vice versa
+    public static int swapFormat(int argb) {
+        return (argb & 0xFF00FF00)
+                | ((argb >> 16) & 0x000000FF)
+                | ((argb << 16) & 0x00FF0000);
+    }
+
+    public static int pack(float[] rgb) {
+        return FastColor.ARGB32.color(255, (int) (rgb[0] * 255), (int) (rgb[1] * 255), (int) (rgb[2] * 255));
+    }
 
 }

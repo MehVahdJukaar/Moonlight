@@ -60,7 +60,7 @@ public class ClientHelper {
     }
 
     @ExpectPlatform
-    public static void registerRenderType(Block block, RenderType type) {
+    public static void registerRenderType(Block block, RenderType... types) {
         throw new AssertionError();
     }
 

@@ -6,8 +6,10 @@ import net.mehvahdjukaar.moonlight.api.client.model.forge.ExtraModelDataImpl;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.ModelData;
@@ -34,5 +36,13 @@ public interface SelfCustomBakedModel extends IDynamicBakedModel, CustomBakedMod
     @Override
     default TextureAtlasSprite getParticleIcon(@NotNull ModelData data) {
         return getBlockParticle(new ExtraModelDataImpl(data));
+    }
+
+    @Override
+    @NotNull
+    default ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
+        ExtraModelData d = modelData == ModelData.EMPTY ? ExtraModelDataImpl.EMPTY : new ExtraModelDataImpl(modelData);
+        ExtraModelDataImpl wrapped = (ExtraModelDataImpl) getModelData(d, pos, state, level);
+        return wrapped.data();
     }
 }

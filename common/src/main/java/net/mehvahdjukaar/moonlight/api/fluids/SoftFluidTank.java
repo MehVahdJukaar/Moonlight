@@ -16,6 +16,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import org.jetbrains.annotations.NotNull;
@@ -562,17 +563,17 @@ public abstract class SoftFluidTank {
      * @return tint color to be applied on the fluid texture
      */
     //works on both side
-    public abstract int getTintColor(@Nullable LevelReader world, @Nullable BlockPos pos);
+    public abstract int getTintColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos);
 
     /**
      * @return tint color to be applied on the fluid texture
      */
-    public abstract int getFlowingTint(@Nullable LevelReader world, @Nullable BlockPos pos);
+    public abstract int getFlowingTint(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos);
 
     /**
      * @return tint color to be used on particle. Differs from getTintColor since it returns an mixWith color extrapolated from their fluid textures
      */
-    public abstract int getParticleColor(@Nullable LevelReader world, @Nullable BlockPos pos);
+    public abstract int getParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos);
 
     /**
      * @return true if contained fluid has associated food
