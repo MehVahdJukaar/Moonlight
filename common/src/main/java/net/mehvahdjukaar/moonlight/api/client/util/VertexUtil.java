@@ -3,13 +3,11 @@ package net.mehvahdjukaar.moonlight.api.client.util;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -107,8 +105,12 @@ public class VertexUtil {
     //inplace recolor
     public static void recolorVertices(int[] v, IntUnaryOperator indexToABGR) {
         int stride = getStride();
-        for (int i = 0; i < 4; i++)
-            v[i * stride + COLOR] = indexToABGR.applyAsInt(i);
+        boolean fabricFuckery = !PlatHelper.getPlatform().isForge();
+        for (int i = 0; i < 4; i++) {
+            int i1 = indexToABGR.applyAsInt(i);
+            if (fabricFuckery) i1 = ColorUtil.swapFormat(i1);
+            v[i * stride + COLOR] = i1;
+        }
     }
 
     public static void recolorVertices(int[] v, int ABGR) {
@@ -120,8 +122,6 @@ public class VertexUtil {
     private static final int COLOR = 3;
     private static final int UV0 = 4;
     private static final int NORMAL = 7;
-
-
 
 
     public static void addCube(VertexConsumer builder, PoseStack poseStack,
@@ -157,7 +157,7 @@ public class VertexUtil {
 
         int lu = combinedLightIn & '\uffff';
         int lv = combinedLightIn >> 16 & '\uffff';
-        float minV2 =  maxV - w ;
+        float minV2 = maxV - w;
 
         int r = FastColor.ARGB32.red(color);
         int g = FastColor.ARGB32.green(color);
@@ -244,9 +244,9 @@ public class VertexUtil {
     }
 
     private static void vertF(VertexConsumer builder, PoseStack poseStack, float x, float y, float z,
-                             float u, float v,
-                             int r, int g, int b, int a,
-                             int lu, int lv, float nx, float ny, float nz) {
+                              float u, float v,
+                              int r, int g, int b, int a,
+                              int lu, int lv, float nx, float ny, float nz) {
         //not chained because of MC263524
         builder.vertex(poseStack.last().pose(), x, y, z);
         builder.color(r, g, b, a);

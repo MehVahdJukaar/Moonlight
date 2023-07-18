@@ -64,6 +64,10 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
+    public static void registerRenderType(Block block, RenderType type) {
+        registerRenderType(block, new RenderType[]{type});
+    }
+
     @ExpectPlatform
     public static void registerFluidRenderType(Fluid fluid, RenderType type) {
         throw new AssertionError();

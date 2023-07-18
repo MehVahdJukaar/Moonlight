@@ -1,1 +1,1 @@
-major render helpers rewrite and cleanups
+fixed an issue with quad builder having inverted colors for fabric

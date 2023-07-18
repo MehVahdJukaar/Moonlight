@@ -14,6 +14,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
@@ -30,9 +31,11 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     private int emissivity = 0;
     private BakedQuad output;
     private boolean autoDirection = false;
+    private Consumer<BakedQuad> quadConsumer = s -> output = s;
+
 
     private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
-        this.inner = new QuadBakingVertexConsumer(s -> this.output = s);
+        this.inner = new QuadBakingVertexConsumer(s -> quadConsumer.accept(s));
         this.globalTransform = transformation;
         this.sprite = sprite;
         inner.setShade(true);
@@ -49,6 +52,12 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
             QuadTransformers.settingEmissivity(emissivity).processInPlace(output);
         }
         return output;
+    }
+
+    @Override
+    public BakedQuadBuilderImpl setAutoBuild(Consumer<BakedQuad> quadConsumer) {
+        this.quadConsumer = quadConsumer;
+        return this;
     }
 
     @Override

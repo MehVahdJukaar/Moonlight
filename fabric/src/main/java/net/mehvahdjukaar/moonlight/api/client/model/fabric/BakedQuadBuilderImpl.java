@@ -17,7 +17,10 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.util.function.Consumer;
+
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
+
 
     public static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
         return new BakedQuadBuilderImpl(sprite, transformation);
@@ -27,7 +30,8 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     private final TextureAtlasSprite sprite;
     private final Matrix4f globalTransform;
     private final Matrix3f normalTransf;
-    private int vertexIndex = 0;
+    private Consumer<BakedQuad> quadConsumer;
+    private int vertexIndex = 1;
     private boolean autoDirection = false;
 
     private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transform) {
@@ -38,6 +42,12 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         inner.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
         this.normalTransf = transform == null ? null :
                 new Matrix3f(transform).invert().transpose(); //forge uses this in quad transform. idk how it works
+    }
+
+    @Override
+    public BakedQuadBuilder setAutoBuild(Consumer<BakedQuad> quadConsumer) {
+        this.quadConsumer = quadConsumer;
+        return this;
     }
 
     @Override
@@ -134,6 +144,12 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public void endVertex() {
         vertexIndex++;
+        if (vertexIndex == 4) {
+            vertexIndex = 0;
+            if (quadConsumer != null) {
+                quadConsumer.accept(this.build());
+            }
+        }
     }
 
     @Override
@@ -146,7 +162,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     @Override
     public BakedQuadBuilder fromVanilla(BakedQuad quad) {
-        inner.fromVanilla(quad, IndigoRenderer.MATERIAL_STANDARD, null);
+        inner.fromVanilla(quad, RendererAccess.INSTANCE.getRenderer().materialFinder().find(), null);
         return null;
     }
 

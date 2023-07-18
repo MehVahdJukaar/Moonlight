@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
+import java.util.function.Consumer;
+
 /**
  * Cross loader utility to create baked quad
  */
@@ -47,6 +49,8 @@ public interface BakedQuadBuilder extends VertexConsumer {
     BakedQuadBuilder setTint(int tintIndex);
 
     BakedQuad build();
+
+    BakedQuadBuilder setAutoBuild(Consumer<BakedQuad> quadConsumer);
 
 
     @Override
