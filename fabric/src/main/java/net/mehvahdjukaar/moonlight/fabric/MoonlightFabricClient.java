@@ -14,10 +14,13 @@ public class MoonlightFabricClient implements ClientModInitializer {
         MLFabricSetupCallbacks.CLIENT_SETUP.forEach(Runnable::run);
         MLFabricSetupCallbacks.CLIENT_SETUP.clear();
 
+        PRE_CLIENT_SETUP_WORK.forEach(Runnable::run);
         CLIENT_SETUP_WORK.forEach(Runnable::run);
+        PRE_CLIENT_SETUP_WORK.clear();
         CLIENT_SETUP_WORK.clear();
     }
 
     public static Queue<Runnable> CLIENT_SETUP_WORK = new ConcurrentLinkedQueue<>();
+    public static Queue<Runnable> PRE_CLIENT_SETUP_WORK = new ConcurrentLinkedQueue<>();
 
 }

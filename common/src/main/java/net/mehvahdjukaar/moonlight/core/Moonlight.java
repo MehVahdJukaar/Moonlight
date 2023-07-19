@@ -98,7 +98,10 @@ public class Moonlight {
 
     public static void assertInitPhase(){
         if(!PlatHelper.isInitializing()){
-            throw new AssertionError("Method has to be called during mod initialization phase");
+            //TODO: re add once all mods are updated
+            if(PlatHelper.isDev()) {
+                throw new AssertionError("Method has to be called during mod initialization phase");
+            }
         }
     }
 

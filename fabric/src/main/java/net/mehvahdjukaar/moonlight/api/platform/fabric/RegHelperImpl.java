@@ -163,14 +163,10 @@ public class RegHelperImpl {
     }
 
     public static void registerItemBurnTime(Item item, int burnTime) {
-        Moonlight.assertInitPhase();
-
         FuelRegistry.INSTANCE.add(item, burnTime);
     }
 
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
-        Moonlight.assertInitPhase();
-
         FlammableBlockRegistry.getDefaultInstance().add(item, fireSpread, flammability);
     }
 
