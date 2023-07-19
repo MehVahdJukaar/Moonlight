@@ -70,6 +70,14 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    /**
+     * If loaders are during standard mod init phase
+     */
+    @ExpectPlatform
+    public static boolean isInitializing(){
+        throw new AssertionError();
+    }
+
     @ExpectPlatform
     public static boolean evaluateRecipeCondition(JsonElement jo) {
         throw new AssertionError();

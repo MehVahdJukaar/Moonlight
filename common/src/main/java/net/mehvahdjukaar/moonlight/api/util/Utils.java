@@ -44,6 +44,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 
@@ -230,5 +232,20 @@ public class Utils {
         }
     }
 
+
+    public static boolean isMethodImplemented(Class<?> original, Class<?> subclass, String name) {
+        Method declaredMethod = findMethodWithMatchingName(subclass, name);
+        Method modMethod = findMethodWithMatchingName(original, name);
+        return declaredMethod != null && modMethod != null && Arrays.equals(declaredMethod.getParameterTypes(), modMethod.getParameterTypes());
+    }
+
+    private static Method findMethodWithMatchingName(Class<?> clazz, String name) {
+        for (Method method : clazz.getDeclaredMethods()) {
+            if (method.getName().equals(name)) {
+                return method;
+            }
+        }
+        return null;
+    }
 
 }

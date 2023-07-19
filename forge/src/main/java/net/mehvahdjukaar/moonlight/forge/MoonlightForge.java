@@ -1,13 +1,9 @@
 package net.mehvahdjukaar.moonlight.forge;
 
-import com.google.gson.JsonArray;
 import net.mehvahdjukaar.moonlight.api.client.model.RetexturedModelLoader;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.resources.ResType;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
@@ -16,7 +12,6 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -27,9 +22,9 @@ import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -44,53 +39,23 @@ public class MoonlightForge {
     public MoonlightForge() {
 
         Moonlight.commonInit();
-        MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(MoonlightForge.class);
         ModLootModifiers.register();
         ModLootConditions.register();
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         if (PlatHelper.getPhysicalSide().isClient()) {
-            modEventBus.addListener(MoonlightForgeClient::registerShader);
-            modEventBus.addListener(MoonlightForgeClient::clientSetup);
-            modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
+            MoonlightForgeClient.init();
             MoonlightClient.initClient();
 
             ClientHelper.addModelLoaderRegistration(modelLoaderEvent -> {
                 modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
             });
-
-            //new aa(new DynamicTexturePack(Moonlight.res("test"))).register();
-
-        }
-
-    }
-
-
-    public static class aa extends DynClientResourcesGenerator {
-
-        protected aa(DynamicTexturePack pack) {
-            super(pack);
-            pack.addNamespaces("minecraft");
-        }
-
-        @Override
-        public Logger getLogger() {
-            return Moonlight.LOGGER;
-        }
-
-        @Override
-        public boolean dependsOnLoadedPacks() {
-            return true;
-        }
-
-        @Override
-        public void regenerateDynamicAssets(ResourceManager manager) {
-            dynamicPack.addJson(Moonlight.res("test"), new JsonArray(), ResType.BLOCKSTATES);
         }
     }
+
 
     //hacky but eh
     @SubscribeEvent
-    public void onTagUpdated(TagsUpdatedEvent event) {
+    public static void onTagUpdated(TagsUpdatedEvent event) {
         Moonlight.afterDataReload(event.getRegistryAccess());
     }
 
@@ -104,12 +69,12 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
-    public void onResourceReload(AddReloadListenerEvent event) {
+    public static void onResourceReload(AddReloadListenerEvent event) {
         context = new WeakReference<>(event.getConditionContext());
     }
 
     @SubscribeEvent
-    public void onDataSync(OnDatapackSyncEvent event) {
+    public static void onDataSync(OnDatapackSyncEvent event) {
         SoftFluidRegistry.onDataLoad();
         //send syncing packets
         if (event.getPlayer() != null) {
@@ -122,7 +87,7 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
-    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             try {
                 ModMessages.CHANNEL.sendToClientPlayer(player,
@@ -133,7 +98,7 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onDimensionUnload(LevelEvent.Unload event) {
+    public static void onDimensionUnload(LevelEvent.Unload event) {
         var level = event.getLevel();
         try {
             if (level.isClientSide()) {
@@ -145,7 +110,7 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
-    public void onPlayerClone(PlayerEvent.Clone event) {
+    public static void onPlayerClone(PlayerEvent.Clone event) {
         Moonlight.onPlayerCloned(event.getOriginal(), event.getEntity(), event.isWasDeath());
     }
 

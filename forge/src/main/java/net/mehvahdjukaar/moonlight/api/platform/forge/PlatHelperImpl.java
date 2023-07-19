@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -49,6 +50,7 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -126,19 +128,7 @@ public class PlatHelperImpl {
     }
 
 
-    public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
-        if (packSupplier == null) return;
-        var bus = FMLJavaModLoadingContext.get().getModEventBus();
-        Consumer<AddPackFindersEvent> consumer = event -> {
-            if (event.getPackType() == packType) {
-                var p = packSupplier.get();
-                if (p != null) {
-                    event.addRepositorySource(infoConsumer -> infoConsumer.accept(packSupplier.get()));
-                }
-            }
-        };
-        bus.addListener(consumer);
-    }
+
 
     public static int getBurnTime(ItemStack stack) {
         return ForgeHooks.getBurnTime(stack, null);
@@ -197,22 +187,14 @@ public class PlatHelperImpl {
                 .setShouldReceiveVelocityUpdates(velocityUpdates).updateInterval(updateInterval).build(name);
     }
 
-    public static void addServerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
-        Consumer<AddReloadListenerEvent> eventConsumer = event -> event.addListener(listener);
-        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
-    }
 
-    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataProvider) {
-        NetworkHooks.openScreen(player, menuProvider, extraDataProvider);
-    }
 
     public static boolean isModLoadingValid() {
         return ModLoader.isLoadingStateValid();
     }
 
-    public static void addCommonSetup(Runnable commonSetup) {
-        Consumer<FMLCommonSetupEvent> eventConsumer = event -> event.enqueueWork(commonSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataProvider) {
+        NetworkHooks.openScreen(player, menuProvider, extraDataProvider);
     }
 
     public static boolean evaluateRecipeCondition(JsonElement jo) {
@@ -225,6 +207,43 @@ public class PlatHelperImpl {
 
     public static Player getFakeServerPlayer(GameProfile id, ServerLevel level) {
         return FakePlayerFactory.get(level, id);
+    }
+
+    public static boolean isInitializing() {
+        return ModLoadingContext.get().getActiveNamespace().equals("minecraft");
+    }
+
+    public static void addCommonSetup(Runnable commonSetup) {
+        Moonlight.assertInitPhase();
+
+        Consumer<FMLCommonSetupEvent> eventConsumer = event -> event.enqueueWork(commonSetup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+
+    //maybe move these
+
+    public static void addServerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
+        Moonlight.assertInitPhase();
+
+        Consumer<AddReloadListenerEvent> eventConsumer = event -> event.addListener(listener);
+        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+    }
+
+    public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
+        Moonlight.assertInitPhase();
+
+        if (packSupplier == null) return;
+        var bus = FMLJavaModLoadingContext.get().getModEventBus();
+        Consumer<AddPackFindersEvent> consumer = event -> {
+            if (event.getPackType() == packType) {
+                var p = packSupplier.get();
+                if (p != null) {
+                    event.addRepositorySource(infoConsumer -> infoConsumer.accept(packSupplier.get()));
+                }
+            }
+        };
+        bus.addListener(consumer);
     }
 
 }

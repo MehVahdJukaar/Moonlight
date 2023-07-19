@@ -16,20 +16,25 @@ import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod.EventBusSubscriber(modid = MoonlightForge.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class MoonlightForgeClient {
+
+    public static void init(){
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.addListener(MoonlightForgeClient::registerShader);
+        modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
+    }
 
     private static ShaderInstance translucentParticle;
 
     public static ShaderInstance getTranslucentParticle() {
         return translucentParticle;
-    }
-
-    public static void clientSetup(FMLClientSetupEvent event) {
     }
 
     public static void registerShader(RegisterShadersEvent event) {

@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.jetbrains.annotations.ApiStatus;
+import pepjebs.mapatlases.config.MapAtlasesConfig;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +52,7 @@ public final class FabricConfigSpec extends ConfigSpec {
     private boolean initialized = false;
 
     public FabricConfigSpec(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, boolean synced, Runnable changeCallback) {
-        super(name, FabricLoader.getInstance().getConfigDir(), type, synced, changeCallback);
+        super(name.getNamespace(), name.getNamespace() + "-" + name.getPath() + ".json", FabricLoader.getInstance().getConfigDir(), type, synced, changeCallback);
         this.file = this.getFullPath().toFile();
         this.mainEntry = mainEntry;
         this.res = name;

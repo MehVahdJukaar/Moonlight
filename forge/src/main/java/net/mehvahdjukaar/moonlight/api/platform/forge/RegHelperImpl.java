@@ -34,7 +34,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
@@ -151,14 +150,46 @@ public class RegHelperImpl {
                 .sized(width, height).build(name.toString()), Registries.ENTITY_TYPE);
     }
 
+    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
+        var f = register(name, fluid, Registries.FLUID);
+        //register fluid type
+        register(name, () -> f.get().getFluidType(), ForgeRegistries.Keys.FLUID_TYPES);
+        return f;
+    }
+
+    public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
+        return RegHelper.registerRecipeSerializer(name, () -> new SimpleCraftingRecipeSerializer<>(factory));
+    }
+
+
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<ResourceLocation> afterEntries,
+                                                                       List<ResourceLocation> beforeEntries,
+                                                                       Consumer<CreativeModeTab.Builder> configurator) {
+        return register(name, () -> {
+            var b = CreativeModeTab.builder();
+            configurator.accept(b);
+            if (!beforeEntries.isEmpty()) {
+                b.withTabsBefore(beforeEntries.toArray(ResourceLocation[]::new));
+            }
+            if (!afterEntries.isEmpty()) {
+                b.withTabsBefore(afterEntries.toArray(ResourceLocation[]::new));
+            }
+            return b.build();
+        }, Registries.CREATIVE_MODE_TAB);
+    }
+
+
     public static void registerItemBurnTime(Item item, int burnTime) {
     }
 
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
     }
 
+    //TODO change these 2
     public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<
             List<VillagerTrades.ItemListing>> factories) {
+        Moonlight.assertInitPhase();
+
         Consumer<VillagerTradesEvent> eventConsumer = event -> {
             if (event.getType() == profession) {
                 var list = event.getTrades().get(level);
@@ -170,6 +201,8 @@ public class RegHelperImpl {
 
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>>
             factories) {
+        Moonlight.assertInitPhase();
+
         //0 = common, 1 = rare
         Consumer<WandererTradesEvent> eventConsumer = event -> {
             if (level == 0) {
@@ -182,6 +215,8 @@ public class RegHelperImpl {
     }
 
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<EntityAttributeCreationEvent> eventConsumer = event -> {
             eventListener.accept((e, b) -> event.put(e, b.build()));
         };
@@ -189,6 +224,8 @@ public class RegHelperImpl {
     }
 
     public static void addCommandRegistration(RegHelper.CommandRegistration eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<RegisterCommandsEvent> eventConsumer = event -> {
             eventListener.accept(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
         };
@@ -204,6 +241,8 @@ public class RegHelperImpl {
     }
 
     public static void addSpawnPlacementsRegistration(Consumer<RegHelper.SpawnPlacementEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<SpawnPlacementRegisterEvent> eventConsumer = event -> {
             RegHelper.SpawnPlacementEvent spawnPlacementEvent = new PlacementEventImpl(event);
             eventListener.accept(spawnPlacementEvent);
@@ -212,21 +251,14 @@ public class RegHelperImpl {
     }
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
+        Moonlight.assertInitPhase();
+
         CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
     }
 
-    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
-        var f = register(name, fluid, Registries.FLUID);
-        //register fluid type
-        register(name, () -> f.get().getFluidType(), ForgeRegistries.Keys.FLUID_TYPES);
-        return f;
-    }
-
-    public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
-        return RegHelper.registerRecipeSerializer(name, () -> new SimpleCraftingRecipeSerializer<>(factory));
-    }
-
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<BuildCreativeModeTabContentsEvent> eventConsumer = event -> {
             RegHelper.ItemToTabEvent itemToTabEvent = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
                 if (tab != event.getTabKey()) return;
@@ -274,35 +306,22 @@ public class RegHelperImpl {
     }
 
 
-    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<ResourceLocation> afterEntries,
-                                                                       List<ResourceLocation> beforeEntries,
-                                                                       Consumer<CreativeModeTab.Builder> configurator) {
-        return register(name, () -> {
-            var b = CreativeModeTab.builder();
-            configurator.accept(b);
-            if (!beforeEntries.isEmpty()) {
-                b.withTabsBefore(beforeEntries.toArray(ResourceLocation[]::new));
-            }
-            if (!afterEntries.isEmpty()) {
-                b.withTabsBefore(afterEntries.toArray(ResourceLocation[]::new));
-            }
-            return b.build();
-        }, Registries.CREATIVE_MODE_TAB);
-    }
-
-
-    private record LootInjectEventImpl(ResourceLocation getTable,
-                                       LootTable table) implements RegHelper.LootInjectEvent {
-        @Override
-        public void addTableReference(ResourceLocation targetId) {
-            LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();
-            table.addPool(pool);
-        }
-    }
-
     public static void addLootTableInjects(Consumer<RegHelper.LootInjectEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<LootTableLoadEvent> eventConsumer = event ->
-                eventListener.accept(new LootInjectEventImpl(event.getName(), event.getTable()));
+                eventListener.accept(new RegHelper.LootInjectEvent() {
+                    @Override
+                    public ResourceLocation getTable() {
+                        return event.getName();
+                    }
+
+                    @Override
+                    public void addTableReference(ResourceLocation targetId) {
+                        LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();
+                        event.getTable().addPool(pool);
+                    }
+                });
         MinecraftForge.EVENT_BUS.addListener(eventConsumer);
     }
 

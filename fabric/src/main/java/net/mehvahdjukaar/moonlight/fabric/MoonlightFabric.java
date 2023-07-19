@@ -2,17 +2,15 @@ package net.mehvahdjukaar.moonlight.fabric;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
+import net.mehvahdjukaar.moonlight.api.platform.setup.fabric.SetupHelperImpl;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
@@ -20,7 +18,13 @@ import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 public class MoonlightFabric implements ModInitializer, DedicatedServerModInitializer {
+
+    private static boolean isInit = true;
+    private static MinecraftServer currentServer;
 
     @Override
     public void onInitialize() {
@@ -42,27 +46,43 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
 
         ResourceConditionsBridge.init();
-
     }
 
     //called after all other mod initialize have been called.
     // we can register extra stuff here that depends on those before client and server common setup is fired
     static void commonSetup() {
+        isInit = false;
+
         RegHelperImpl.lateRegisterEntries();
         FabricConfigSpec.loadAllConfigs();
-        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.forEach(Runnable::run);
         MLFabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
-
-        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.clear();
         MLFabricSetupCallbacks.COMMON_SETUP.clear();
+
+        PRE_SETUP_WORK.forEach(Runnable::run);
+        COMMON_SETUP_WORK.forEach(Runnable::run);
+        PRE_SETUP_WORK.clear();
+        COMMON_SETUP_WORK.clear();
+
+        SetupHelperImpl.run();
     }
-
-    public static MinecraftServer currentServer;
-
 
     @Override
     public void onInitializeServer() {
         commonSetup();
     }
+
+
+    public static MinecraftServer getCurrentServer() {
+        return currentServer;
+    }
+
+    public static boolean isInitializing() {
+        return isInit;
+    }
+
+    public static final Queue<Runnable> COMMON_SETUP_WORK = new ConcurrentLinkedQueue<>();
+    public static final Queue<Runnable> PRE_SETUP_WORK = new ConcurrentLinkedQueue <>();
+
+
 
 }

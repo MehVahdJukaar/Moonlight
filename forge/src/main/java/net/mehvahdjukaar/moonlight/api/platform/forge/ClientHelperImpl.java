@@ -1,10 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.gson.JsonElement;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.mehvahdjukaar.moonlight.api.client.model.NestedModelLoader;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.Font;
@@ -12,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
@@ -70,32 +70,42 @@ public class ClientHelperImpl {
     }
 
     public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<RegisterParticleProvidersEvent> eventConsumer = event -> {
-            W w = new W(event);
-            eventListener.accept(w::register);
+            eventListener.accept(new ParticleEventImpl(event));
         };
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
-    private record W(RegisterParticleProvidersEvent event) {
-        public <T extends ParticleOptions> void register(ParticleType<T> type, ClientHelper.ParticleFactory<T> provider) {
+    private record ParticleEventImpl(RegisterParticleProvidersEvent event) implements ClientHelper.ParticleEvent {
+
+        @Override
+        public <P extends ParticleType<T>, T extends ParticleOptions> void register(P type, ClientHelper.ParticleFactory<T> provider) {
             this.event.registerSpriteSet(type, provider::create);
+
         }
     }
 
     public static void addEntityRenderersRegistration(Consumer<ClientHelper.EntityRendererEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerEntityRenderer);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerBlockEntityRenderer);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static void addBlockColorsRegistration(Consumer<ClientHelper.BlockColorEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<RegisterColorHandlersEvent.Block> eventConsumer = event -> {
             eventListener.accept(new ClientHelper.BlockColorEvent() {
                 @Override
@@ -113,6 +123,8 @@ public class ClientHelperImpl {
     }
 
     public static void addItemColorsRegistration(Consumer<ClientHelper.ItemColorEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<RegisterColorHandlersEvent.Item> eventConsumer = event -> {
             eventListener.accept(new ClientHelper.ItemColorEvent() {
                 @Override
@@ -131,11 +143,15 @@ public class ClientHelperImpl {
 
     @SuppressWarnings("ConstantConditions")
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation location) {
+        Moonlight.assertInitPhase();
+
         Consumer<RegisterClientReloadListenersEvent> eventConsumer = event -> event.registerReloadListener(listener.get());
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static void addModelLayerRegistration(Consumer<ClientHelper.ModelLayerEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<EntityRenderersEvent.RegisterLayerDefinitions> eventConsumer = event -> {
             eventListener.accept(event::registerLayerDefinition);
         };
@@ -143,6 +159,8 @@ public class ClientHelperImpl {
     }
 
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<ModelEvent.RegisterAdditional> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
@@ -150,6 +168,8 @@ public class ClientHelperImpl {
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<RegisterClientTooltipComponentFactoriesEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
@@ -157,6 +177,8 @@ public class ClientHelperImpl {
     }
 
     public static void addModelLoaderRegistration(Consumer<ClientHelper.ModelLoaderEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<ModelEvent.RegisterGeometryLoaders> eventConsumer = event -> {
             eventListener.accept((i, l) -> event.register(i.getPath(), (IGeometryLoader<?>) l));
         };
@@ -164,6 +186,8 @@ public class ClientHelperImpl {
     }
 
     public static void addItemDecoratorsRegistration(Consumer<ClientHelper.ItemDecoratorEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<RegisterItemDecorationsEvent> eventConsumer = event -> {
             eventListener.accept((i, l) -> {
                 IItemDecorator deco = new IItemDecorator() {
@@ -179,6 +203,8 @@ public class ClientHelperImpl {
     }
 
     public static void addKeyBindRegistration(Consumer<ClientHelper.KeyBindEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         Consumer<RegisterKeyMappingsEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
@@ -217,11 +243,15 @@ public class ClientHelperImpl {
     }
 
     public static void addClientSetup(Runnable clientSetup) {
+        Moonlight.assertInitPhase();
+
         Consumer<FMLClientSetupEvent> eventConsumer = event -> event.enqueueWork(clientSetup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
     public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
+        Moonlight.assertInitPhase();
+
         PlatHelper.registerResourcePack(PackType.CLIENT_RESOURCES,
                 () -> {
                     IModFile file = ModList.get().getModFileById(folderName.getNamespace()).getFile();

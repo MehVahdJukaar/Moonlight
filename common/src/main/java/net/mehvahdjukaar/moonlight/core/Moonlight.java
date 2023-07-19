@@ -95,4 +95,11 @@ public class Moonlight {
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
         DynamicResourcePack.clearAfterReload(false);
     }
+
+    public static void assertInitPhase(){
+        if(!PlatHelper.isInitializing()){
+            throw new AssertionError("Method has to be called during mod initialization phase");
+        }
+    }
+
 }

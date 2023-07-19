@@ -14,14 +14,16 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.MLFabricModelLoaderRegistry;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ModelManagerAccessor;
-import net.mehvahdjukaar.moonlight.fabric.MLFabricSetupCallbacks;
+import net.mehvahdjukaar.moonlight.fabric.MoonlightFabricClient;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
@@ -59,6 +61,8 @@ public class ClientHelperImpl {
     }
 
     public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         eventListener.accept(ClientHelperImpl::registerParticle);
     }
 
@@ -67,14 +71,20 @@ public class ClientHelperImpl {
     }
 
     public static void addEntityRenderersRegistration(Consumer<ClientHelper.EntityRendererEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         eventListener.accept(EntityRendererRegistry::register);
     }
 
     public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {
-        eventListener.accept(BlockEntityRendererRegistry::register);
+        Moonlight.assertInitPhase();
+
+        eventListener.accept(BlockEntityRenderers::register);
     }
 
     public static void addBlockColorsRegistration(Consumer<ClientHelper.BlockColorEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         eventListener.accept(new ClientHelper.BlockColorEvent() {
             @Override
             public void register(BlockColor color, Block... block) {
@@ -90,6 +100,8 @@ public class ClientHelperImpl {
     }
 
     public static void addItemColorsRegistration(Consumer<ClientHelper.ItemColorEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         eventListener.accept(new ClientHelper.ItemColorEvent() {
             @Override
             public void register(ItemColor color, ItemLike... items) {
@@ -105,6 +117,8 @@ public class ClientHelperImpl {
     }
 
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation name) {
+        Moonlight.assertInitPhase();
+
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
             private final Supplier<PreparableReloadListener> inner = Suppliers.memoize(listener::get);
 
@@ -123,19 +137,27 @@ public class ClientHelperImpl {
     public static final Map<ItemLike, IItemDecoratorRenderer> ITEM_DECORATORS = new IdentityHashMap<>();
 
     public static void addItemDecoratorsRegistration(Consumer<ClientHelper.ItemDecoratorEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         eventListener.accept(ITEM_DECORATORS::put);
     }
 
 
     public static void addModelLayerRegistration(Consumer<ClientHelper.ModelLayerEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         eventListener.accept((a, b) -> EntityModelLayerRegistry.registerModelLayer(a, b::get));
     }
 
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         ModelLoadingRegistry.INSTANCE.registerModelProvider((m, loader) -> eventListener.accept(loader::accept));
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         eventListener.accept(ClientHelperImpl::tooltipReg);
     }
 
@@ -172,7 +194,9 @@ public class ClientHelperImpl {
     }
 
     public static void addClientSetup(Runnable clientSetup) {
-        MLFabricSetupCallbacks.CLIENT_SETUP.add(clientSetup);
+        Moonlight.assertInitPhase();
+
+        MoonlightFabricClient.CLIENT_SETUP_WORK.add(clientSetup);
     }
 
     public static void registerFluidRenderType(Fluid fluid, RenderType type) {
@@ -180,6 +204,8 @@ public class ClientHelperImpl {
     }
 
     public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
+        Moonlight.assertInitPhase();
+
         FabricLoader.getInstance().getModContainer(folderName.getNamespace()).ifPresent(c -> {
             ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, displayName,
                     defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL);

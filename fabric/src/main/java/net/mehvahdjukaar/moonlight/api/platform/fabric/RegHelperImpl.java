@@ -17,7 +17,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
-import net.mehvahdjukaar.moonlight.fabric.MLFabricSetupCallbacks;
+import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -32,7 +32,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
@@ -40,23 +39,19 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 public class RegHelperImpl {
 
     public static final Map<ResourceKey<? extends Registry<?>>, Map<String, RegistryQueue<?>>> REGISTRIES = new LinkedHashMap<>();
-
-    private static final List<Consumer<RegHelper.AttributeEvent>> ATTRIBUTE_REGISTRATIONS = new ArrayList<>();
-    private static final List<Consumer<RegHelper.SpawnPlacementEvent>> SPAWN_PLACEMENT_REGISTRATIONS = new ArrayList<>();
 
 
     public static final List<ResourceKey<? extends Registry<?>>> REG_PRIORITY = List.of(
@@ -91,9 +86,6 @@ public class RegHelperImpl {
                 BlockSetInternalImpl.registerEntries();
             }
         }
-        //register entities attributes now
-        ATTRIBUTE_REGISTRATIONS.forEach(e -> e.accept(FabricDefaultAttributeRegistry::register));
-        SPAWN_PLACEMENT_REGISTRATIONS.forEach(e -> e.accept(new SpawnPlacementsImpl()));
     }
 
     static class SpawnPlacementsImpl implements RegHelper.SpawnPlacementEvent {
@@ -150,6 +142,15 @@ public class RegHelperImpl {
         registry.add(eventListener);
     }
 
+
+    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
+        return register(name, fluid, Registries.FLUID);
+    }
+
+    public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
+        return RegHelper.registerRecipeSerializer(name, () -> new SimpleCraftingRecipeSerializer<>(factory));
+    }
+
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
@@ -162,51 +163,56 @@ public class RegHelperImpl {
     }
 
     public static void registerItemBurnTime(Item item, int burnTime) {
+        Moonlight.assertInitPhase();
+
         FuelRegistry.INSTANCE.add(item, burnTime);
     }
 
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
+        Moonlight.assertInitPhase();
+
         FlammableBlockRegistry.getDefaultInstance().add(item, fireSpread, flammability);
     }
 
     public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.add(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
+        Moonlight.assertInitPhase();
+
+        MoonlightFabric.PRE_SETUP_WORK.add(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
     }
 
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         //this just runs immediately... needs to run on mod setup instead
-        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.add(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
+        MoonlightFabric.PRE_SETUP_WORK.add(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
     }
 
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
-        ATTRIBUTE_REGISTRATIONS.add(eventListener);
+        Moonlight.assertInitPhase();
+
+        MoonlightFabric.PRE_SETUP_WORK.add(() -> eventListener.accept(FabricDefaultAttributeRegistry::register));
     }
 
     public static void addSpawnPlacementsRegistration(Consumer<RegHelper.SpawnPlacementEvent> eventListener) {
-        SPAWN_PLACEMENT_REGISTRATIONS.add(eventListener);
+        Moonlight.assertInitPhase();
+
+        MoonlightFabric.PRE_SETUP_WORK.add(() -> eventListener.accept(new SpawnPlacementsImpl()));
     }
 
     public static void addCommandRegistration(RegHelper.CommandRegistration eventListener) {
+        Moonlight.assertInitPhase();
+
         CommandRegistrationCallback.EVENT.register(eventListener::accept);
     }
 
-
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
+        Moonlight.assertInitPhase();
+
         ResourceConditionsBridge.registerSimple(id, predicate);
     }
 
-
-    public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
-        return RegHelper.registerRecipeSerializer(name, () -> new SimpleCraftingRecipeSerializer<>(factory));
-    }
-
-    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
-        return register(name, fluid, Registries.FLUID);
-    }
-
-
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
-        MLFabricSetupCallbacks.BEFORE_COMMON_SETUP.add(() -> {
+        Moonlight.assertInitPhase();
+
+        MoonlightFabric.PRE_SETUP_WORK.add(() -> {
             RegHelper.ItemToTabEvent event = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
                 ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
                     if (target == null) {
@@ -225,8 +231,8 @@ public class RegHelperImpl {
     }
 
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<ResourceLocation> beforeEntries,
-                                                                    List<ResourceLocation> afterEntries,
-                                                                    Consumer<CreativeModeTab.Builder> configurator) {
+                                                                       List<ResourceLocation> afterEntries,
+                                                                       Consumer<CreativeModeTab.Builder> configurator) {
         return register(name, () -> {
             var builder = FabricItemGroup.builder();
             configurator.accept(builder);
@@ -234,17 +240,22 @@ public class RegHelperImpl {
         }, Registries.CREATIVE_MODE_TAB);
     }
 
-    private record LootInjectEventImpl(ResourceLocation getTable, LootTable.Builder builder) implements RegHelper.LootInjectEvent{
-        @Override
-        public void addTableReference(ResourceLocation targetId) {
-            LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();
-            builder.pool(pool);
-        }
-    }
-
     public static void addLootTableInjects(Consumer<RegHelper.LootInjectEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
         LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) ->
-                eventListener.accept(new LootInjectEventImpl(id, tableBuilder)));
+                eventListener.accept(new RegHelper.LootInjectEvent() {
+                    @Override
+                    public ResourceLocation getTable() {
+                        return id;
+                    }
+
+                    @Override
+                    public void addTableReference(ResourceLocation targetId) {
+                        LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();
+                        tableBuilder.pool(pool);
+                    }
+                }));
     }
 
 

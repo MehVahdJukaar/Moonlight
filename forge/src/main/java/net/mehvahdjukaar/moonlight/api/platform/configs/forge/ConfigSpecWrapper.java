@@ -54,7 +54,8 @@ public final class ConfigSpecWrapper extends ConfigSpec {
 
     public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced,
                              @Nullable Runnable onChange, List<ForgeConfigSpec.ConfigValue<?>> requireRestart) {
-        super(name, FMLPaths.CONFIGDIR.get(), type, synced, onChange);
+        super(name.getNamespace(), name.getNamespace() + "-" + name.getPath() + ".toml",
+                FMLPaths.CONFIGDIR.get(), type, synced, onChange);
         this.spec = spec;
 
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -69,7 +70,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
 
         this.modContainer = ModLoadingContext.get().getActiveContainer();
 
-        this.modConfig = new ModConfig(t, spec, modContainer, name.getNamespace() + "-" + name.getPath() + ".toml");
+        this.modConfig = new ModConfig(t, spec, modContainer, this.getFileName());
         //for event
         ConfigSpec.addTrackedSpec(this);
 

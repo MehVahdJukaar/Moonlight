@@ -161,4 +161,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public ConfigBuilder worldReload() {
         return this;
     }
+
+    @Override
+    public ConfigBuilder comment(String comment) {
+        return super.comment(comment);
+    }
 }

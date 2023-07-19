@@ -15,20 +15,18 @@ import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
-import net.fabricmc.fabric.impl.itemgroup.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
-import net.mehvahdjukaar.moonlight.fabric.MLFabricSetupCallbacks;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -65,7 +63,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -128,7 +125,7 @@ public class PlatHelperImpl {
 
     @Nullable
     public static MinecraftServer getCurrentServer() {
-        return MoonlightFabric.currentServer;
+        return MoonlightFabric.getCurrentServer();
     }
 
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
@@ -145,6 +142,8 @@ public class PlatHelperImpl {
     private static final Map<PackType, List<Supplier<Pack>>> EXTRA_PACKS = new EnumMap<>(PackType.class);
 
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+        Moonlight.assertInitPhase();
+
         EXTRA_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
         if (packType == PackType.CLIENT_RESOURCES && PlatHelper.getPhysicalSide().isClient()) {
             if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
@@ -219,6 +218,8 @@ public class PlatHelperImpl {
     }
 
     public static void addServerReloadListener(PreparableReloadListener listener, ResourceLocation name) {
+        Moonlight.assertInitPhase();
+
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
             @Override
             public ResourceLocation getFabricId() {
@@ -241,7 +242,9 @@ public class PlatHelperImpl {
     }
 
     public static void addCommonSetup(Runnable clientSetup) {
-        MLFabricSetupCallbacks.COMMON_SETUP.add(clientSetup);
+        Moonlight.assertInitPhase();
+
+        MoonlightFabric.COMMON_SETUP_WORK.add(clientSetup);
     }
 
     public static boolean evaluateRecipeCondition(JsonElement jo) {
@@ -255,6 +258,10 @@ public class PlatHelperImpl {
 
     public static Player getFakeServerPlayer(GameProfile id, ServerLevel level) {
        return FakePlayer.get(level, id);
+    }
+
+    public static boolean isInitializing() {
+        return MoonlightFabric.isInitializing();
     }
 
 

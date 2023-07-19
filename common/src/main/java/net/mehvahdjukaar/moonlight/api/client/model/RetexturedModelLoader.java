@@ -14,10 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.Block;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -52,7 +49,7 @@ public class RetexturedModelLoader implements CustomModelLoader {
             BlockModel myModel = (BlockModel) modelBaker.getModel(location); // cursed
             UnbakedModel parentModel = modelBaker.getModel(parentLoc);
             parentModel.resolveParents(modelBaker::getModel);
-            Map<Direction, List<String>> spriteOrder = new HashMap<>();
+            Map<Direction, List<String>> spriteOrder = new EnumMap<>(Direction.class);
             if (parentModel instanceof BlockModel bm) {
                 for (BlockElement blockElement : bm.getElements()) {
                     for (Direction direction : blockElement.faces.keySet()) {
