@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.selene.block_set.BlockTypeRegistry;
 import net.mehvahdjukaar.selene.resourcepack.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.selene.resourcepack.DynamicLanguageManager;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.level.block.Block;
@@ -67,6 +68,18 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         String name = null;
         String path = baseRes.getPath();
         //needs to contain planks in its name
+        //stuff for tfc
+        if(baseRes.getNamespace().equals("tfc")){
+            if(path.contains("wood/planks/")){
+                var log = Registry.BLOCK.getOptional(
+                        new ResourceLocation(baseRes.getNamespace(),path.replace("planks","log")));
+                if(log.isPresent()){
+                    ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), path.replace("wood/planks/",""));
+                    return Optional.of(new WoodType(id, baseBlock, log.get()));
+                }
+            }
+            return Optional.empty();
+        }
         if (path.endsWith("_planks")) {
             name = path.substring(0, path.length() - "_planks".length());
         } else if (path.startsWith("planks_")) {
