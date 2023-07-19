@@ -81,11 +81,6 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     }
 
     @Override
-    public String getFileName() {
-        return modConfig.getFileName();
-    }
-
-    @Override
     public Component getName() {
         return Component.literal(getFileName());
     }

@@ -60,8 +60,10 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
         PRE_SETUP_WORK.forEach(Runnable::run);
         COMMON_SETUP_WORK.forEach(Runnable::run);
+        AFTER_SETUP_WORK.forEach(Runnable::run);
         PRE_SETUP_WORK.clear();
         COMMON_SETUP_WORK.clear();
+        AFTER_SETUP_WORK.clear();
 
         SetupHelperImpl.run();
     }
@@ -82,7 +84,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
     public static final Queue<Runnable> COMMON_SETUP_WORK = new ConcurrentLinkedQueue<>();
     public static final Queue<Runnable> PRE_SETUP_WORK = new ConcurrentLinkedQueue <>();
-
+    public static final Queue<Runnable> AFTER_SETUP_WORK = new ConcurrentLinkedQueue <>();
 
 
 }

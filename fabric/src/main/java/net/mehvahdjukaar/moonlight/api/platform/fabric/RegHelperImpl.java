@@ -208,7 +208,7 @@ public class RegHelperImpl {
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
         Moonlight.assertInitPhase();
 
-        MoonlightFabric.PRE_SETUP_WORK.add(() -> {
+        MoonlightFabric.AFTER_SETUP_WORK.add(() -> {
             RegHelper.ItemToTabEvent event = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
                 ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
                     if (target == null) {

@@ -210,7 +210,7 @@ public class PlatHelperImpl {
     }
 
     public static boolean isInitializing() {
-        return ModLoadingContext.get().getActiveNamespace().equals("minecraft");
+        return !ModLoadingContext.get().getActiveNamespace().equals("minecraft");
     }
 
     public static void addCommonSetup(Runnable commonSetup) {

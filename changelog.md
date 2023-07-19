@@ -1,1 +1,1 @@
-fixed an issue with quad builder having inverted colors for fabric
+quite some internal refactors and cleanups. Fixed some inconsistencies with configs
