@@ -106,6 +106,7 @@ public final class FabricConfigSpec extends ConfigSpec {
              Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
 
             JsonObject jo = new JsonObject();
+            jo.addProperty("#README","This config file does not support comments. To see them configure it in-game using YACL or Cloth Config");
             mainEntry.getEntries().forEach(e -> e.saveToJson(jo));
 
             GSON.toJson(jo, writer);

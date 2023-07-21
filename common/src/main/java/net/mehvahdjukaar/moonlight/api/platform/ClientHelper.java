@@ -60,6 +60,11 @@ public class ClientHelper {
     }
 
     @ExpectPlatform
+    public static void addClientSetupAsync(Runnable clientSetup) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static void registerRenderType(Block block, RenderType... types) {
         throw new AssertionError();
     }

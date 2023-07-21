@@ -55,11 +55,4 @@ public class SoftFluidRegistryImpl {
         reg.freeze();
     }
 
-    public static void bootstrap(BootstapContext<SoftFluid> bootstapContext) {
-        bootstapContext.register(ResourceKey.create(KEY, SoftFluidRegistry.EMPTY_ID),
-                new SoftFluid.Builder(new ResourceLocation(""), new ResourceLocation("")).build());
-    }
-
-
-
 }

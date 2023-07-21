@@ -1,1 +1,1 @@
-quite some internal refactors and cleanups. Fixed some inconsistencies with configs
+- now uses new datapack registries added by fabric api. removed related mixins

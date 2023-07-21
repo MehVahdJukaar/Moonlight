@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
+import com.google.common.base.Preconditions;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -542,10 +543,8 @@ public abstract class SoftFluidTank {
 
     //called when it goes from empty to full
     public void setFluid(@NotNull SoftFluid fluid, @Nullable CompoundTag nbt) {
+        Preconditions.checkNotNull(fluid,"Tried to add a null fluid. How?");
         this.fluid = fluid;
-        if (fluid == null) {
-            int a = 1;
-        }
         this.nbt = null;
         if (nbt != null) {
             this.nbt = nbt.copy();
@@ -595,8 +594,6 @@ public abstract class SoftFluidTank {
             SoftFluid sf = SoftFluidRegistry.get(id);
             this.setFluid(sf, cmp.getCompound("NBT"));
         }
-        //failsafe
-        if (this.fluid == null) this.fluid = SoftFluidRegistry.getEmpty();
     }
 
     /**
@@ -607,8 +604,8 @@ public abstract class SoftFluidTank {
      */
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
-        cmp.putInt("Count", (int) this.count);
-        if (this.fluid == null) this.fluid = SoftFluidRegistry.getEmpty();
+        cmp.putInt("Count", this.count);
+        if (this.fluid == null) this.fluid = BuiltInSoftFluids.EMPTY.get();
         var id = Utils.getID(fluid);
         if (id == null) {
             Moonlight.LOGGER.warn("Failed to save fluid in container: {} is not registered", fluid);

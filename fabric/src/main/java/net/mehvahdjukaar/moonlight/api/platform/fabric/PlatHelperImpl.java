@@ -241,10 +241,14 @@ public class PlatHelperImpl {
         return true;
     }
 
-    public static void addCommonSetup(Runnable clientSetup) {
+    public static void addCommonSetup(Runnable setup) {
         Moonlight.assertInitPhase();
 
-        MoonlightFabric.COMMON_SETUP_WORK.add(clientSetup);
+        MoonlightFabric.COMMON_SETUP_WORK.add(setup);
+    }
+
+    public static void addCommonSetupAsync(Runnable setup) {
+        addCommonSetup(setup);
     }
 
     public static boolean evaluateRecipeCondition(JsonElement jo) {

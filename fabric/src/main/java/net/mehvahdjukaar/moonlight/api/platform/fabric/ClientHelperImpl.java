@@ -4,7 +4,7 @@ import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
@@ -141,7 +141,9 @@ public class ClientHelperImpl {
             }
 
             @Override
-            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
+                                                  ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
+                                                  Executor backgroundExecutor, Executor gameExecutor) {
                 return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
             }
         });
@@ -168,9 +170,8 @@ public class ClientHelperImpl {
 
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
         Moonlight.assertInitPhase();
-
-        MoonlightFabricClient.PRE_CLIENT_SETUP_WORK.add(() -> {
-            ModelLoadingRegistry.INSTANCE.registerModelProvider((m, loader) -> eventListener.accept(loader::accept));
+        ModelLoadingPlugin.register(pluginContext -> {
+            eventListener.accept(pluginContext::addModels);
         });
     }
 
@@ -227,6 +228,12 @@ public class ClientHelperImpl {
 
         MoonlightFabricClient.CLIENT_SETUP_WORK.add(clientSetup);
     }
+
+
+    public static void addClientSetupAsync(Runnable clientSetup) {
+        addClientSetup(clientSetup);
+    }
+
 
     public static void registerFluidRenderType(Fluid fluid, RenderType type) {
         BlockRenderLayerMap.INSTANCE.putFluid(fluid, type);

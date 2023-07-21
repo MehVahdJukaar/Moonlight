@@ -29,10 +29,7 @@
     "MenuTypeAccessor",
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
-    "RegistryAccessMixin",
-    "RegistryDataLoaderMixin",
-    "ServerPlayerAccessor",
-    "VanillaRegistriesMixin"
+    "ServerPlayerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

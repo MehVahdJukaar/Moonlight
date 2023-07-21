@@ -221,6 +221,14 @@ public class PlatHelperImpl {
     }
 
 
+    public static void addCommonSetupAsync(Runnable commonSetup) {
+        Moonlight.assertInitPhase();
+
+        Consumer<FMLCommonSetupEvent> eventConsumer = event -> commonSetup.run();
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+
     //maybe move these
 
     public static void addServerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
@@ -245,5 +253,6 @@ public class PlatHelperImpl {
         };
         bus.addListener(consumer);
     }
+
 
 }

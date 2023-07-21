@@ -23,8 +23,7 @@ import java.util.*;
 //TODO: maybe split into api/core?
 public class SoftFluidRegistry {
 
-    public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(
-            Moonlight.res((PlatHelper.getPlatform().isFabric() ? "moonlight/" : "") + "soft_fluids"));
+    public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(Moonlight.res("soft_fluids"));
 
     public static final ResourceLocation EMPTY_ID = Moonlight.res("empty");
 

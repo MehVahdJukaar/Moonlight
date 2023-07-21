@@ -249,6 +249,14 @@ public class ClientHelperImpl {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
     }
 
+    public static void addClientSetupAsync(Runnable clientSetup) {
+        Moonlight.assertInitPhase();
+
+        Consumer<FMLClientSetupEvent> eventConsumer = event -> clientSetup.run();
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
+
+
     public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
         Moonlight.assertInitPhase();
 
@@ -281,6 +289,7 @@ public class ClientHelperImpl {
     public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
         return modelManager.getModelBakery().getModel(modelLocation);
     }
+
 
 
 }

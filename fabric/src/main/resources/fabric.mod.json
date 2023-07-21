@@ -30,7 +30,7 @@
     "${mod_id}-common.mixins.json"
   ],
   "depends": {
-    "fabric": "*",
+    "fabric": ">=0.86.0",
     "minecraft": ">=1.20"
   },
   "custom": {

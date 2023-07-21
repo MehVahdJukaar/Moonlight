@@ -4,8 +4,12 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.fluids.fabric.SoftFluidRegistryImpl;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
@@ -28,6 +32,10 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
     @Override
     public void onInitialize() {
+
+        DynamicRegistries.registerSynced(SoftFluidRegistry.KEY, SoftFluid.CODEC,SoftFluid.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
+        DynamicRegistries.registerSynced(MapDecorationRegistry.KEY, MapDecorationRegistry.CODEC, MapDecorationRegistry.NETWORK_CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
+
         Moonlight.commonInit();
         //client init
         if (PlatHelper.getPhysicalSide().isClient()) {
@@ -51,12 +59,14 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     //called after all other mod initialize have been called.
     // we can register extra stuff here that depends on those before client and server common setup is fired
     static void commonSetup() {
-        isInit = false;
+
 
         RegHelperImpl.lateRegisterEntries();
         FabricConfigSpec.loadAllConfigs();
         MLFabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
         MLFabricSetupCallbacks.COMMON_SETUP.clear();
+
+        isInit = false;
 
         PRE_SETUP_WORK.forEach(Runnable::run);
         COMMON_SETUP_WORK.forEach(Runnable::run);

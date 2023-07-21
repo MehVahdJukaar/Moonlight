@@ -56,6 +56,11 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
+    public static void addCommonSetupAsync(Runnable commonSetup) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static boolean isDev() {
         throw new AssertionError();
     }
