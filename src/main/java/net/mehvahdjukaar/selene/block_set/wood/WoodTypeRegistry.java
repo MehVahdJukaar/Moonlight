@@ -67,9 +67,9 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         ResourceLocation baseRes = baseBlock.getRegistryName();
         String name = null;
         String path = baseRes.getPath();
-        //needs to contain planks in its name
-        //stuff for tfc
+        // Support TFC aka TerraFirmaCraft
         if(baseRes.getNamespace().equals("tfc")){
+            //needs to contain planks in its name
             if(path.contains("wood/planks/")){
                 var log = Registry.BLOCK.getOptional(
                         new ResourceLocation(baseRes.getNamespace(),path.replace("planks","log")));
