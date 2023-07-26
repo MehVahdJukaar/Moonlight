@@ -29,10 +29,10 @@ public class WoodType extends IBlockType {
     public final Block planks;
     public final Block log;
 
-//    @Deprecated(forRemoval = true)
-//    public final Block strippedLog;
-//    @Deprecated(forRemoval = true)
-//    public final Block leaves;
+    @Deprecated(forRemoval = true)
+    public final Block strippedLog;
+    @Deprecated(forRemoval = true)
+    public final Block leaves;
 
     @Deprecated(forRemoval = true)
     public final Lazy<Item> signItem; //used for item textures
@@ -54,6 +54,8 @@ public class WoodType extends IBlockType {
 
         this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
         this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
+        leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);      
+        strippedLog = this.findLogRelatedBlock("stripped", "log");
     }
 
     @Nullable
@@ -132,9 +134,7 @@ public class WoodType extends IBlockType {
     protected void initializeChildren() {
 
         Block strippedWood = this.findLogRelatedBlock("stripped", "wood");
-        Block strippedLog = this.findLogRelatedBlock("stripped", "log");
         Block wood = this.findRelatedEntry("wood", ForgeRegistries.BLOCKS);
-        Block leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
         Block slab = this.findRelatedEntry("slab", ForgeRegistries.BLOCKS);
         Block stairs = this.findRelatedEntry("stairs", ForgeRegistries.BLOCKS);
         Block fence = this.findRelatedEntry("fence", ForgeRegistries.BLOCKS);
