@@ -29,10 +29,10 @@ public class WoodType extends IBlockType {
     public final Block planks;
     public final Block log;
 
-    @Deprecated(forRemoval = true)
-    public final Block strippedLog;
-    @Deprecated(forRemoval = true)
-    public final Block leaves;
+//    @Deprecated(forRemoval = true)
+//    public final Block strippedLog;
+//    @Deprecated(forRemoval = true)
+//    public final Block leaves;
 
     @Deprecated(forRemoval = true)
     public final Lazy<Item> signItem; //used for item textures
@@ -54,8 +54,6 @@ public class WoodType extends IBlockType {
 
         this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
         this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
-         strippedLog = this.findLogRelatedBlock("stripped", "log");
-         leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
     }
 
     @Nullable
@@ -64,6 +62,8 @@ public class WoodType extends IBlockType {
         var id = this.getId();
         String log = this.log.getRegistryName().getPath();
         ResourceLocation[] targets = {
+                // Unique ID: tfc:wood/stripped_log/<TYPE>
+                new ResourceLocation(id.getNamespace(), "wood/" + append + post + "/" + id.getPath()), //Support TFC
                 new ResourceLocation(id.getNamespace(), log + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + log + post),
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
@@ -132,7 +132,9 @@ public class WoodType extends IBlockType {
     protected void initializeChildren() {
 
         Block strippedWood = this.findLogRelatedBlock("stripped", "wood");
+        Block strippedLog = this.findLogRelatedBlock("stripped", "log");
         Block wood = this.findRelatedEntry("wood", ForgeRegistries.BLOCKS);
+        Block leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
         Block slab = this.findRelatedEntry("slab", ForgeRegistries.BLOCKS);
         Block stairs = this.findRelatedEntry("stairs", ForgeRegistries.BLOCKS);
         Block fence = this.findRelatedEntry("fence", ForgeRegistries.BLOCKS);
@@ -141,12 +143,14 @@ public class WoodType extends IBlockType {
         Block trapdoor = this.findRelatedEntry("trapdoor", ForgeRegistries.BLOCKS);
         Block button = this.findRelatedEntry("button", ForgeRegistries.BLOCKS);
         Block pressurePlate = this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS);
-        this.addChild("planks", this.planks);
+        Block twig = this.findRelatedEntry("twig", ForgeRegistries.BLOCKS); // TFC only
+
         this.addChild("log", this.log);
+        this.addChild("planks", this.planks);
+        this.addChild("wood", wood);
         this.addChild("leaves", leaves);
         this.addChild("stripped_log", strippedLog);
         this.addChild("stripped_wood", strippedWood);
-        this.addChild("wood", wood);
         this.addChild("slab", slab);
         this.addChild("stairs", stairs);
         this.addChild("fence", fence);
@@ -157,6 +161,8 @@ public class WoodType extends IBlockType {
         this.addChild("pressure_plate", pressurePlate);
         this.addChild("sign", signItem.get());
         this.addChild("boat", boatItem.get());
+        this.addChild("stick", twig); // TFC only
+
     }
 
     public static class Finder extends SetFinder<WoodType> {
