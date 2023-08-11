@@ -33,12 +33,18 @@ public class DynamicTexturePack extends DynamicResourcePack {
         }
     }
 
+    public void addAndCloseTexture(ResourceLocation path, TextureImage image) {
+        addAndCloseTexture(path, image, true);
+    }
+
     /**
      * Adds a new textures and closes the passed native image
+     * last boolean is for textures that arent stitched so wont be cleared
      */
-    public void addAndCloseTexture(ResourceLocation path, TextureImage image) {
+    public void addAndCloseTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
         try (image) {
             this.addBytes(path, image.getImage().asByteArray(), ResType.TEXTURES);
+            if (!isOnAtlas) this.markNotClearable(ResType.TEXTURES.getPath(path));
             JsonObject mcmeta = image.serializeMcMeta();
             if (mcmeta != null) this.addJson(path, mcmeta, ResType.MCMETA);
         } catch (Exception e) {

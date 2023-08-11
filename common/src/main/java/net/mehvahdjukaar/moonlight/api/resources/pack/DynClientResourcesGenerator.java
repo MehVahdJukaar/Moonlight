@@ -46,8 +46,10 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
         return alreadyHasAssetAtLocation(manager, res, ResType.TEXTURES);
     }
 
-
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier) {
+        addTextureIfNotPresent(manager, relativePath, textureSupplier, true);
+    }
+    public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier, boolean isOnAtlas) {
 
         ResourceLocation res = relativePath.contains(":") ? new ResourceLocation(relativePath) :
                 new ResourceLocation(this.dynamicPack.mainNamespace, relativePath);
@@ -61,7 +63,7 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
             if (textureImage == null) {
                 getLogger().warn("Could not generate texture {}", res);
             } else {
-                this.dynamicPack.addAndCloseTexture(res, textureImage);
+                this.dynamicPack.addAndCloseTexture(res, textureImage, isOnAtlas);
             }
         }
     }

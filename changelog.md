@@ -1,1 +1,2 @@
-- now uses new datapack registries added by fabric api. removed related mixins
+- fixed some rare crash on fabric related to maps
+- some improvements to texture generation
