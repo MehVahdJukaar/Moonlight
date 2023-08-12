@@ -105,10 +105,10 @@ public class VertexUtil {
     //inplace recolor
     public static void recolorVertices(int[] v, IntUnaryOperator indexToABGR) {
         int stride = getStride();
-        boolean fabricFuckery = !PlatHelper.getPlatform().isForge();
+       // boolean fabricFuckery = !PlatHelper.getPlatform().isForge();
         for (int i = 0; i < 4; i++) {
             int i1 = indexToABGR.applyAsInt(i);
-            if (fabricFuckery) i1 = ColorUtil.swapFormat(i1);
+           // if (fabricFuckery) i1 = ColorUtil.swapFormat(i1);
             v[i * stride + COLOR] = i1;
         }
     }

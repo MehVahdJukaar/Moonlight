@@ -7,6 +7,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -37,5 +38,9 @@ public interface CustomBakedModel extends BakedModel {
 
     default ExtraModelData getModelData(@NotNull ExtraModelData tileData, BlockPos pos, BlockState state, BlockAndTintGetter level) {
         return tileData;
+    }
+
+    default ExtraModelData getModelData(@NotNull ExtraModelData originalData, ItemStack stack) {
+        return originalData;
     }
 }

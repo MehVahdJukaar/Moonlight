@@ -1,2 +1,1 @@
-- fixed some rare crash on fabric related to maps
-- some improvements to texture generation
+- added AdditionalItemPlacementsAPI to easily make any item placeable

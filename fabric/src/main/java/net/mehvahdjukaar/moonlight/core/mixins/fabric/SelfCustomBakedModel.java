@@ -2,11 +2,10 @@ package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
-import net.mehvahdjukaar.moonlight.api.client.model.fabric.SlaveModel;
+import net.mehvahdjukaar.moonlight.api.client.model.fabric.ModelWrapper;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -36,14 +35,17 @@ public interface SelfCustomBakedModel extends FabricBakedModel, CustomBakedModel
             data = provider.getExtraModelData();
         }
 
-        SlaveModel inner = new SlaveModel(this, getModelData(data, pos, state, blockView));
-        context.fallbackConsumer().accept(inner);
+        ModelWrapper inner = new ModelWrapper(this, getModelData(data, pos, state, blockView));
+        inner.emitBlockQuads(blockView, state, pos, randomSupplier, context);
     }
 
     @Override
     default void emitItemQuads(ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        // var list = this.getItemQuads(stack,randomSupplier.get());
-        //TODO: now what?
+        // Object attachment = ((RenderAttachedBlockView)blockView).getBlockEntityRenderAttachment(pos);
+        ExtraModelData data = ExtraModelData.EMPTY;
+
+        ModelWrapper inner = new ModelWrapper(this, getModelData(data, stack));
+        inner.emitItemQuads(stack,randomSupplier, context );
     }
 
 

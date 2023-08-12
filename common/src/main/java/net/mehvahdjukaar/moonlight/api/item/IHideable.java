@@ -5,6 +5,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 
+@Deprecated(forRemoval = true)
 public interface IHideable extends FeatureElement {
 
     boolean isHidden();

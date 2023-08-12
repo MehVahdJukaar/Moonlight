@@ -12,10 +12,12 @@
   ],
   "mixins": [
     "BeeGoalMixin",
+    "BlockItemMixin",
     "EntityMixin",
     "FixBlockPlaceContextMixin",
     "GrindstoneMenuSlotMixin",
     "InventoryMixin",
+    "ItemMixin",
     "LevelChunkMixin",
     "LightningEntityMixin",
     "MapDataMixin",

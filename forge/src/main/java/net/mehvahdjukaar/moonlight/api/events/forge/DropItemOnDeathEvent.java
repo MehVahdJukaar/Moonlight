@@ -3,8 +3,11 @@ package net.mehvahdjukaar.moonlight.api.events.forge;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
+@Cancelable
 public class DropItemOnDeathEvent extends Event implements IDropItemOnDeathEvent {
     private final ItemStack itemStack;
     private final Player player;

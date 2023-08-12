@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.minecraft.client.renderer.RenderType;
@@ -10,24 +11,25 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 //needed cause fabric
-public final class SlaveModel implements BakedModel {
+public final class ModelWrapper implements BakedModel {
 
     private final CustomBakedModel father;
 
     @Nullable
     private final ExtraModelData data;
 
-    public SlaveModel(CustomBakedModel father, @Nullable ExtraModelData data) {
+    public ModelWrapper(CustomBakedModel father, @Nullable ExtraModelData data) {
         this.father = father;
         this.data = data;
     }
-
 
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, RandomSource randomSource) {

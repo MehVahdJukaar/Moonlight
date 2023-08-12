@@ -10,7 +10,7 @@ public class DropItemOnDeathEvent implements IDropItemOnDeathEvent  {
     private final Player player;
     private boolean canceled = false;
     private ItemStack returnStack;
-    private boolean isBeforeDrop;
+    private final boolean isBeforeDrop;
 
     public DropItemOnDeathEvent(ItemStack itemStack, Player player, boolean beforeDrop) {
         this.itemStack = itemStack;
