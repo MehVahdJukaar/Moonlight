@@ -30,7 +30,7 @@ public class MLFabricModelLoaderRegistry {
                                              BlockModel original) {
         var d = DESERIALIZER_MAP.get(loader);
         if (d == null) {
-            Moonlight.LOGGER.error("Unknown model loader: {}", loader);
+           // Moonlight.LOGGER.error("Unknown model loader: {}", loader);
             return null;
         }
         return new UnbakedModelWrapper(original, d.deserialize(jsonobject,context));
