@@ -352,5 +352,13 @@ public class TextureImage implements AutoCloseable {
         mask.close();
     }
 
+    public int getFramePixel(int frameIndex, int x, int y) {
+        return image.getPixelRGBA(getFrameX(frameIndex) + x, getFrameY(frameIndex) + y);
+    }
+
+    public void setFramePixel(int frameIndex, int x, int y, int color) {
+        image.setPixelRGBA(getFrameX(frameIndex) + x, getFrameY(frameIndex) + y, color);
+    }
+
 }
 
