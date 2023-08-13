@@ -46,6 +46,7 @@ public class AdditionalItemPlacementsAPI {
     }
 
 
+    //needed as all items have to be registered before we can add them to maps. ALso better to do this asap
     @ApiStatus.Internal
     public static void afterItemReg() {
         if (blockToItemsMap.get() == null) {

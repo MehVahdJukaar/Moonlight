@@ -19,8 +19,8 @@ public class ColorUtil {
 
     public static float getShading(Vector3f normal) {
         if (normal.equals(Direction.UP.step())) return 1;
-        Vector3f lightDir0 = RenderSystem.shaderLightDirections[0];
-        Vector3f lightDir1 = RenderSystem.shaderLightDirections[1];
+        Vector3f lightDir0 = DIFFUSE_LIGHT_0;//RenderSystem.shaderLightDirections[0];
+        Vector3f lightDir1 = DIFFUSE_LIGHT_1;//RenderSystem.shaderLightDirections[1];
         lightDir0.normalize();
         lightDir1.normalize();
         float light0 = Math.max(0.0f, lightDir0.dot(normal));

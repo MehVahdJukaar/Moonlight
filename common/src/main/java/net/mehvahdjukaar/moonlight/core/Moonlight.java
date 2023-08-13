@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
@@ -44,6 +45,7 @@ public class Moonlight {
         BlockSetInternal.registerBlockSetDefinition(LeavesTypeRegistry.INSTANCE);
         //MoonlightEventsHelper.addListener( BlockSetInternal::addTranslations, AfterLanguageLoadEvent.class);
         CompatWoodTypes.init();
+        MoonlightRegistry.init();
 
         ModMessages.registerMessages();
 

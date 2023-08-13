@@ -1,2 +1,2 @@
-- added AdditionalItemPlacementsAPI to easily make any item placeable
-- fixed a crash
+- fixed an issue with colors shading being incorrect
+- improved newly added api

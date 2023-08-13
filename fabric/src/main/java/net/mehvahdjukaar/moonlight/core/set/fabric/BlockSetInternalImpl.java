@@ -6,6 +6,8 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 
 import java.util.*;
 
@@ -29,24 +31,31 @@ public class BlockSetInternalImpl {
         r.add(registrationFunction);
     }
 
-    public static void registerEntries() {
+    public static void initializeBlockSets(){
         BlockSetInternal.initializeBlockSets();
         //init items immediately as this happens after all registries have fired
         BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
+        hasFilledBlockSets = true;
+    }
 
+    public static void registerDynamicEntries(ResourceKey<? extends Registry<?>> id) {
+      Registry<?> registry = BuiltInRegistries.REGISTRY.get(id.registry());
+        var q = QUEUES.get(registry);
+        if (q != null) {
+            for (var e : q.entrySet()) {
+                e.getValue().registerEntries();
+            }
+            QUEUES.remove(registry);
+        }
+    }
 
-        List<Registry<?>> available = new ArrayList<>(QUEUES.keySet().stream().toList());
-        available.sort(Comparator.comparingInt((a) -> RegHelperImpl.REG_PRIORITY.indexOf(a.key())));
-        for (var r : available) {
-            var blockQueue = QUEUES.get(r);
-            if (blockQueue != null) {
-                for (var e : blockQueue.entrySet()) {
-                    e.getValue().registerEntries();
-                }
-                QUEUES.remove(r);
+    public static void finish(){
+        for(var q : QUEUES.values()){
+            for (var e : q.entrySet()) {
+                e.getValue().registerEntries();
             }
         }
-        hasFilledBlockSets = true;
+        QUEUES.clear();
     }
 
     private static class LateRegQueue<T extends BlockType, E> {

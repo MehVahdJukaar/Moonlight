@@ -83,9 +83,11 @@ public class RegHelperImpl {
             }
             if (m.getKey() == Registries.BLOCK) {
                 //dynamic block registration after all blocks
-                BlockSetInternalImpl.registerEntries();
+                BlockSetInternalImpl.initializeBlockSets();
             }
+            BlockSetInternalImpl.registerDynamicEntries(m.getKey());
         }
+        BlockSetInternalImpl.finish();
     }
 
     static class SpawnPlacementsImpl implements RegHelper.SpawnPlacementEvent {
