@@ -50,6 +50,7 @@ public class MoonlightForge {
                 modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
             });
         }
+
     }
 
 

@@ -21,7 +21,7 @@ public abstract class BlockItemMixin extends Item implements IExtendedItem {
 
     @Inject(method = "getPlacementState", at = @At("HEAD"), cancellable = true)
     private void getPlacementState(BlockPlaceContext pContext, CallbackInfoReturnable<BlockState> cir) {
-        AdditionalItemPlacement behavior = this.moonlight_multi$getAdditionalBehavior();
+        AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
             BlockState overrideBlockState = behavior.overrideGetPlacementState(pContext);
             if (overrideBlockState != null ) {
@@ -32,7 +32,7 @@ public abstract class BlockItemMixin extends Item implements IExtendedItem {
 
     @Inject(method = "place", at = @At("HEAD"), cancellable = true)
     private void place(BlockPlaceContext pContext, CallbackInfoReturnable<InteractionResult> cir) {
-        AdditionalItemPlacement behavior = this.moonlight_multi$getAdditionalBehavior();
+        AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
             var result = behavior.overridePlace(pContext);
             if (result.consumesAction()) {
@@ -43,7 +43,7 @@ public abstract class BlockItemMixin extends Item implements IExtendedItem {
 
     @Inject(method = "updatePlacementContext", at = @At("HEAD"), cancellable = true)
     private void updatePlacementContext(BlockPlaceContext pContext, CallbackInfoReturnable<BlockPlaceContext> cir) {
-        AdditionalItemPlacement behavior = this.moonlight_multi$getAdditionalBehavior();
+        AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
             var result = behavior.overrideUpdatePlacementContext(pContext);
             if(result != null){

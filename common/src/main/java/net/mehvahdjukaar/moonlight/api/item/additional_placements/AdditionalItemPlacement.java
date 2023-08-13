@@ -27,21 +27,21 @@ public class AdditionalItemPlacement{
         this.placeable = placeable;
     }
 
-    public static BlockPlacerItem getBlockPlacerMimic(){
-        return Moonlight.BLOCK_PLACER.get();
+    public static BlockPlacerItem getBlockPlacer(){
+        return BlockPlacerItem.get();
     }
 
     @Nullable
     public BlockState overrideGetPlacementState(BlockPlaceContext pContext) {
-        return getBlockPlacerMimic().mimicGetPlacementState(pContext, placeable);
+        return getBlockPlacer().mimicGetPlacementState(pContext, placeable);
     }
 
     public InteractionResult overrideUseOn(UseOnContext pContext, FoodProperties foodProperties) {
-        return getBlockPlacerMimic().mimicUseOn(pContext, placeable, foodProperties);
+        return getBlockPlacer().mimicUseOn(pContext, placeable, foodProperties);
     }
 
     public InteractionResult overridePlace(BlockPlaceContext pContext) {
-        return getBlockPlacerMimic().mimicPlace(pContext, placeable, null);
+        return getBlockPlacer().mimicPlace(pContext, placeable, null);
     }
 
     @Nullable

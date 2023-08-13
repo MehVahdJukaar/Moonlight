@@ -4,37 +4,28 @@ import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
+import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
+import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
+import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
-import net.mehvahdjukaar.moonlight.core.criteria_triggers.ModCriteriaTriggers;
-import net.mehvahdjukaar.moonlight.core.loot_pool_entries.ModLootPoolEntries;
-import net.mehvahdjukaar.moonlight.api.item.additional_placements.BlockPlacerItem;
-import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.function.Supplier;
 
 public class Moonlight {
 
@@ -42,15 +33,6 @@ public class Moonlight {
 
     public static final Logger LOGGER = LogManager.getLogger("Moonlight");
     public static final boolean HAS_BEEN_INIT = true;
-
-    public static final TagKey<Block> SHEARABLE_TAG = TagKey.create(Registries.BLOCK, new ResourceLocation("mineable/shear"));
-
-    public static final Supplier<PlacementModifierType<CaveFilter>> CAVE_MODIFIER = RegHelper.register(
-            res("below_heightmaps"), CaveFilter.Type::new, Registries.PLACEMENT_MODIFIER_TYPE);
-
-    public static final Supplier<BlockPlacerItem> BLOCK_PLACER = RegHelper.registerItem(
-            res("placeable_item"), () -> new BlockPlacerItem(
-                    Blocks.VOID_AIR, new Item.Properties()));
 
     public static ResourceLocation res(String name) {
         return new ResourceLocation(MOD_ID, name);
@@ -64,14 +46,16 @@ public class Moonlight {
         CompatWoodTypes.init();
 
         ModMessages.registerMessages();
-        ModCriteriaTriggers.register();
-        ModLootPoolEntries.register();
 
         VillagerAIInternal.init();
         MapDecorationRegistry.init();
         SoftFluidRegistry.init();
 
         PlatHelper.addCommonSetup(Moonlight::commonSetup);
+
+        //hack
+        BlockSetAPI.addDynamicRegistration((reg, wood) -> AdditionalItemPlacementsAPI.afterItemReg(),
+                WoodType.class, BuiltInRegistries.BLOCK_ENTITY_TYPE);
     }
 
     private static void commonSetup() {

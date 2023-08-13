@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 
-import net.mehvahdjukaar.moonlight.core.criteria_triggers.ModCriteriaTriggers;
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,7 +16,7 @@ public abstract class GrindstoneMenuSlotMixin {
     @Inject(method = {"onTake"}, at = @At("RETURN"))
     private void onTake(Player player, ItemStack stack, CallbackInfo ci) {
         if(player instanceof ServerPlayer serverPlayer)
-            ModCriteriaTriggers.GRIND.trigger(serverPlayer, stack.copy());
+            MoonlightRegistry.GRIND_TRIGGER.trigger(serverPlayer, stack.copy());
     }
 
 }

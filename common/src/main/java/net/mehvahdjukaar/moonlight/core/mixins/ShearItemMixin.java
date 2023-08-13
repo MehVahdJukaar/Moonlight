@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,16 +18,16 @@ public class ShearItemMixin {
 
     @Inject(method = "mineBlock", at = @At("HEAD"), cancellable = true)
     public void mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity miningEntity, CallbackInfoReturnable<Boolean> cir) {
-        if (state.is(Moonlight.SHEARABLE_TAG)) cir.setReturnValue(true);
+        if (state.is(MoonlightRegistry.SHEARABLE_TAG)) cir.setReturnValue(true);
     }
 
     @Inject(method = "isCorrectToolForDrops", at = @At("HEAD"), cancellable = true)
     public void isCorrectToolForDrops(BlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if (state.is(Moonlight.SHEARABLE_TAG)) cir.setReturnValue(true);
+        if (state.is(MoonlightRegistry.SHEARABLE_TAG)) cir.setReturnValue(true);
     }
 
     @Inject(method = "getDestroySpeed", at = @At("HEAD"), cancellable = true)
     public void getDestroySpeed(ItemStack stack, BlockState state, CallbackInfoReturnable<Float> cir) {
-        if (state.is(Moonlight.SHEARABLE_TAG)) cir.setReturnValue(2f);
+        if (state.is(MoonlightRegistry.SHEARABLE_TAG)) cir.setReturnValue(2f);
     }
 }

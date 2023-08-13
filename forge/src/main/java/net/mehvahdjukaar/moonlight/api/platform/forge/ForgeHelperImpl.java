@@ -187,5 +187,9 @@ public class ForgeHelperImpl {
     public static boolean canItemStack(ItemStack selected, ItemStack item) {
         return ItemHandlerHelper.canItemStacksStack(selected,item);
     }
+
+    public static int getLightEmission(BlockState state, Level level, BlockPos pos) {
+        return state.getLightEmission(level, pos);
+    }
 }
 

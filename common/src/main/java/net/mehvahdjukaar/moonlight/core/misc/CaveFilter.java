@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.misc;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
@@ -58,7 +59,7 @@ public class CaveFilter extends PlacementFilter {
 
     @Override
     public PlacementModifierType<?> type() {
-        return Moonlight.CAVE_MODIFIER.get();
+        return MoonlightRegistry.CAVE_MODIFIER.get();
     }
 
 

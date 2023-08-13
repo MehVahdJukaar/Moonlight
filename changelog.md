@@ -1,1 +1,2 @@
 - added AdditionalItemPlacementsAPI to easily make any item placeable
+- fixed a crash

@@ -1,11 +1,11 @@
-package net.mehvahdjukaar.moonlight.core.loot_pool_entries;
+package net.mehvahdjukaar.moonlight.core.loot;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -58,7 +58,7 @@ public class OptionalItemPool extends LootPoolSingletonContainer {
     }
 
     public LootPoolEntryType getType() {
-        return  ModLootPoolEntries.LAZY_ITEM.get();
+        return  MoonlightRegistry.LAZY_ITEM.get();
     }
 
     public void createItemStack(Consumer<ItemStack> stackConsumer, LootContext lootContext) {

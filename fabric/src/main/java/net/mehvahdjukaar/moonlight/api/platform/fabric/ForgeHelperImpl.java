@@ -159,4 +159,8 @@ public class ForgeHelperImpl {
     public static boolean canItemStack(ItemStack i, ItemStack i1) {
         return ItemStack.isSameItemSameTags(i, i1);
     }
+
+    public static int getLightEmission(BlockState state, Level level, BlockPos pos) {
+        return state.getLightEmission();
+    }
 }

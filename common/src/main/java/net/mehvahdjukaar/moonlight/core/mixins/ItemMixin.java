@@ -38,7 +38,7 @@ public abstract class ItemMixin implements IExtendedItem {
     //delegates stuff to internal blockItem
     @Inject(method = "useOn", at = @At("HEAD"), cancellable = true)
     private void onUseOnBlock(UseOnContext pContext, CallbackInfoReturnable<InteractionResult> cir) {
-        AdditionalItemPlacement behavior = this.moonlight_multi$getAdditionalBehavior();
+        AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
             var result = behavior.overrideUseOn(pContext, foodProperties);
             if (result.consumesAction()) cir.setReturnValue(result);
@@ -48,7 +48,7 @@ public abstract class ItemMixin implements IExtendedItem {
     //delegates stuff to internal blockItem
     @Inject(method = "appendHoverText", at = @At("HEAD"))
     private void appendHoverText(ItemStack pStack, Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced, CallbackInfo ci) {
-        AdditionalItemPlacement behavior = this.moonlight_multi$getAdditionalBehavior();
+        AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
             behavior.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
         }
