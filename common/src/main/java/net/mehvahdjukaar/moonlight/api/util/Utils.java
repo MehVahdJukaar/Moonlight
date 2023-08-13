@@ -167,6 +167,7 @@ public class Utils {
         if (!PlatformHelper.getEnv().isServer()) {
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
+            throw new UnsupportedOperationException("Failed to get registry access: Minecraft level was null");
         }
         throw new UnsupportedOperationException("Failed to get registry access. This is a bug");
     }
