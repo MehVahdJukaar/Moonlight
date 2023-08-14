@@ -1,19 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
-import net.mehvahdjukaar.moonlight.api.block.IColored;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 
 //Interface for Modders!
@@ -95,7 +91,7 @@ public class BlockSetAPI {
     }
 
     @Nullable
-    public static BlockTypeRegistry<?> getTypeRegistry(Class<? extends BlockType> typeClass) {
+    public static<T extends BlockType> BlockTypeRegistry<T> getTypeRegistry(Class<T> typeClass) {
         return BlockSetInternal.getRegistry(typeClass);
     }
 

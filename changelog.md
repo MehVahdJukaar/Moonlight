@@ -1,2 +1,1 @@
-- fixed an issue with colors shading being incorrect
-- improved newly added api
+fixed some bugs with the newly added system

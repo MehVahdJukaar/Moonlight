@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.item.additional_placements;
 
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.food.FoodProperties;
@@ -14,7 +13,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.ref.WeakReference;
 import java.util.Map;
 
 //hacky registered item that handles placing placeable stuff
@@ -34,8 +32,10 @@ public final class BlockPlacerItem extends BlockItem {
 
     @Override
     public void registerBlocks(Map<Block, Item> pBlockToItemMap, Item pItem) {
-        AdditionalItemPlacementsAPI.blockToItemsMap = new WeakReference<>(pBlockToItemMap);
+      AdditionalItemPlacementsAPI.  onRegistryCallback(pBlockToItemMap);
     }
+
+
 
     @Nullable
     public BlockState mimicGetPlacementState(BlockPlaceContext pContext, Block toPlace) {

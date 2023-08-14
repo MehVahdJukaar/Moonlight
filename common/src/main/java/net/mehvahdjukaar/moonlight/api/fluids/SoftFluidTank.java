@@ -42,13 +42,18 @@ public abstract class SoftFluidTank {
     protected final int capacity;
     @Nullable
     protected CompoundTag nbt = null;
-    protected SoftFluid fluid = BuiltInSoftFluids.EMPTY.get(); //not null
+    @NotNull
+    protected SoftFluid fluid = Preconditions.checkNotNull(BuiltInSoftFluids.EMPTY.get()); //not null
     //special tint color. Used for dynamic tint fluids like water and potions
     protected int specialColor = 0;
     protected boolean needsColorRefresh = true;
 
     protected SoftFluidTank(int capacity) {
         this.capacity = capacity;
+        //sanity check cause we keep getting empty shit
+        if(fluid == null){
+            throw new IllegalStateException("Empty fluid returned null. How?");
+        }
     }
 
     @ExpectPlatform
@@ -605,7 +610,10 @@ public abstract class SoftFluidTank {
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
         cmp.putInt("Count", this.count);
-        if (this.fluid == null) this.fluid = BuiltInSoftFluids.EMPTY.get();
+        if (this.fluid == null){
+            this.fluid = BuiltInSoftFluids.EMPTY.get();
+            Moonlight.LOGGER.error("Null fluid detected in tank. Hod did this happen?"+BuiltInSoftFluids.EMPTY.get());
+        }
         var id = Utils.getID(fluid);
         if (id == null) {
             Moonlight.LOGGER.warn("Failed to save fluid in container: {} is not registered", fluid);

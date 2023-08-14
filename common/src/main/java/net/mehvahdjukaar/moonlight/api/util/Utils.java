@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.HitResult;
@@ -225,6 +226,13 @@ public class Utils {
     public static BlockState readBlockState(CompoundTag compound, @Nullable Level level) {
         HolderGetter<Block> holderGetter = level != null ? level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK.asLookup();
         return NbtUtils.readBlockState(holderGetter, compound);
+    }
+
+    public static <T extends Comparable<T>, A extends Property<T>> BlockState replaceProperty(BlockState from, BlockState to, A property) {
+        if (from.hasProperty(property)) {
+            return to.setValue(property, from.getValue(property));
+        }
+        return to;
     }
 
     /**
