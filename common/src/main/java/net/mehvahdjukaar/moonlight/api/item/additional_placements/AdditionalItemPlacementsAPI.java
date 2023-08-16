@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.item.additional_placements;
 
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -25,7 +24,7 @@ public class AdditionalItemPlacementsAPI {
     private static boolean isAfterRegistration = false;
     private static WeakReference<Map<Block, Item>> blockToItemsMap = new WeakReference<>(null);
     private static final List<Pair<Supplier<? extends AdditionalItemPlacement>, Supplier<? extends Item>>> PLACEMENTS = new ArrayList<>();
-    private static final List<Triplet<Function<Block, ? extends AdditionalItemPlacement>, Predicate<Block>, Supplier<? extends Item>>> PLACEMENTS_GENERIC = new ArrayList<>();
+    private static final List<Pair<Function<Item, ? extends AdditionalItemPlacement>, Predicate<Item>>> PLACEMENTS_GENERIC = new ArrayList<>();
 
     /**
      * Adds a behavior to an existing block. can be called at any time but ideally before registration. Less ideally during mod setup
@@ -37,12 +36,11 @@ public class AdditionalItemPlacementsAPI {
         PLACEMENTS.add(Pair.of(placement, itemSupplier));
     }
 
-    public static void register(Function<Block, ? extends AdditionalItemPlacement> placement,
-                                Supplier<? extends Item> itemSupplier, Predicate<Block> blockPredicate) {
+    public static void register(Function<Item, ? extends AdditionalItemPlacement> placement, Predicate<Item> itemPredicate) {
         if (PlatHelper.isDev() && isAfterRegistration) {
             throw new IllegalStateException("Attempted to add placeable behavior after registration");
         }
-        PLACEMENTS_GENERIC.add(Triplet.of(placement, blockPredicate, itemSupplier));
+        PLACEMENTS_GENERIC.add(Pair.of(placement, itemPredicate));
     }
 
     public static void registerSimple(Supplier<? extends Block> block, Supplier<? extends Item> itemSupplier) {
@@ -77,11 +75,11 @@ public class AdditionalItemPlacementsAPI {
         Map<Block, Item> map = blockToItemsMap.get();
         if (map != null) {
 
-            for (Block block : BuiltInRegistries.BLOCK) {
+            for (Item item : BuiltInRegistries.ITEM) {
                 for (var v : PLACEMENTS_GENERIC) {
-                    var predicate = v.middle();
-                    if (predicate.test(block)) {
-                        PLACEMENTS.add(Pair.of(() -> v.left().apply(block), v.right()));
+                    var predicate = v.getSecond();
+                    if (predicate.test(item)) {
+                        PLACEMENTS.add(Pair.of(() -> v.getFirst().apply(item), () -> item));
                     }
                 }
             }

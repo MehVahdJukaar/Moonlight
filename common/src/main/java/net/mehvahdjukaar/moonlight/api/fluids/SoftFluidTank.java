@@ -19,10 +19,8 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import org.jetbrains.annotations.NotNull;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
@@ -186,7 +184,7 @@ public abstract class SoftFluidTank {
             int amount = category.getAmount();
             if (this.canAddSoftFluid(s, amount, newCom)) {
                 if (simulate) return ItemStack.EMPTY;
-                this.grow(amount);
+                addFluidOntoExisting(s, amount, newCom);
 
                 SoundEvent sound = category.getEmptySound();
                 if (sound != null && world != null && pos != null)
@@ -196,6 +194,14 @@ public abstract class SoftFluidTank {
             }
         }
         return null;
+    }
+
+    /**
+     * Called when talk is not empty and a new fluid is added. For most uses just increments the existing one but could alter the fluid content
+     * You can assume that canAddSoftFluid has been called before
+     */
+    protected void addFluidOntoExisting(SoftFluid incoming, int amount, @Nullable CompoundTag tag) {
+        this.grow(amount);
     }
 
     public ItemStack tryFillingItem(Item emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
@@ -310,7 +316,7 @@ public abstract class SoftFluidTank {
                 this.setCount(count);
                 return true;
             } else if (this.isSameFluidAs(s, com)) {
-                this.grow(count);
+                addFluidOntoExisting(s, count, com);
                 return true;
             }
         }
@@ -368,7 +374,7 @@ public abstract class SoftFluidTank {
      * @param n bottles amount
      * @return can remove
      */
-    public boolean canRemove(int n) {
+    protected boolean canRemove(int n) {
         return this.count >= n && !this.isEmpty();
     }
 
@@ -378,7 +384,7 @@ public abstract class SoftFluidTank {
      * @param n bottles amount
      * @return can add
      */
-    public boolean canAdd(int n) {
+    protected boolean canAdd(int n) {
         return this.count + n <= this.capacity;
     }
 

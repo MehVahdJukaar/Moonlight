@@ -33,7 +33,6 @@ public abstract class SimpleMixinPlugin implements IMixinConfigPlugin {
         if (node != null && node.invisibleAnnotations != null) {
             for (AnnotationNode annotationNode : node.invisibleAnnotations) {
                 if (annotationNode.desc.equals("L" + OptionalMixin.class.getName().replace('.', '/') + ";")) {
-                    // Access the annotation's values and attributes
                     List<Object> values = annotationNode.values;
                     boolean needsClass = values.size() < 4 || (Boolean) values.get(3);
                     try {
@@ -41,7 +40,6 @@ public abstract class SimpleMixinPlugin implements IMixinConfigPlugin {
                         MixinService.getService().getBytecodeProvider().getClassNode(name);
                         if (!needsClass) return false;
                     } catch (Exception e) {
-                        // not present
                         if (needsClass) return false;
                     }
                 }

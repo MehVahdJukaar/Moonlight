@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Only load this mixin if the target class is loaded
+ * Use @Pseudo instead when you can
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
