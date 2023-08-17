@@ -45,7 +45,8 @@
   "preserved_tags_from_item": [
     "Potion",
     "Bottle",
-    "CustomPotionEffects"
+    "CustomPotionEffects",
+    "CustomPotionColor"
   ],
   "still_texture": "moonlight:block/soft_fluids/potion_still",
   "translation_key": "item.minecraft.potion",

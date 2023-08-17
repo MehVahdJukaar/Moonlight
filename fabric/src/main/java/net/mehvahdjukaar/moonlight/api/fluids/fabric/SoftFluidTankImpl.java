@@ -64,7 +64,11 @@ public class SoftFluidTankImpl extends SoftFluidTank {
 
     //grabs world/ fluid stack dependent tint color if fluid has associated forge fluid. overrides normal tint color
     private void refreshSpecialColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-
+        //yay hardcoding
+        //at least this works for any fluid
+        if(this.nbt != null && this.nbt.contains("color")){
+            this.specialColor = this.nbt.getInt("color");
+        }
         if (fluid == BuiltInSoftFluids.POTION.get()) {
             this.specialColor = PotionNBTHelper.getColorFromNBT(this.nbt);
         } else {

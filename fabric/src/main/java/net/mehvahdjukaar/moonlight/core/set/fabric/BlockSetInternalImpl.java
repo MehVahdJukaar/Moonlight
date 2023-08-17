@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.set.fabric;
 
-import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
@@ -31,15 +30,15 @@ public class BlockSetInternalImpl {
         r.add(registrationFunction);
     }
 
-    public static void initializeBlockSets(){
+    public static void initializeBlockSets() {
         BlockSetInternal.initializeBlockSets();
         //init items immediately as this happens after all registries have fired
         BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
         hasFilledBlockSets = true;
     }
 
-    public static void registerDynamicEntries(ResourceKey<? extends Registry<?>> id) {
-      Registry<?> registry = BuiltInRegistries.REGISTRY.get(id.registry());
+    public static <T extends Registry<?>> void registerDynamicEntries(ResourceKey<? extends T> id) {
+        Registry<T> registry = BuiltInRegistries.REGISTRY.get((ResourceKey) id);
         var q = QUEUES.get(registry);
         if (q != null) {
             for (var e : q.entrySet()) {
@@ -49,8 +48,8 @@ public class BlockSetInternalImpl {
         }
     }
 
-    public static void finish(){
-        for(var q : QUEUES.values()){
+    public static void finish() {
+        for (var q : QUEUES.values()) {
             for (var e : q.entrySet()) {
                 e.getValue().registerEntries();
             }

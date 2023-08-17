@@ -84,7 +84,7 @@ public class PotionNBTHelper {
         if (com != null && com.contains("CustomPotionColor", 99)) {
             return com.getInt("CustomPotionColor");
         } else {
-            return getPotion(com) == Potions.EMPTY ? 16253176 : getColor(getAllEffects(com));
+            return getColor(getAllEffects(com));
         }
     }
 }

@@ -297,7 +297,13 @@ public class RegHelper {
         }
 
         public void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
-            action.accept(tab, target, true, Arrays.stream(items).map(i -> i.asItem().getDefaultInstance()).toList());
+            List<ItemStack> stacks = new ArrayList<>();
+            for(var i : items){
+                if(i.asItem().getDefaultInstance().isEmpty()){
+                    if(PlatHelper.isDev())throw new IllegalStateException("Attempted to add empty item "+i+" to item tabs");
+                }else stacks.add(i.asItem().getDefaultInstance());
+            }
+            action.accept(tab, target, true, stacks);
         }
 
         public void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
@@ -305,7 +311,13 @@ public class RegHelper {
         }
 
         public void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
-            action.accept(tab, target, false, Arrays.stream(items).map(i -> i.asItem().getDefaultInstance()).toList());
+            List<ItemStack> stacks = new ArrayList<>();
+            for(var i : items){
+                if(i.asItem().getDefaultInstance().isEmpty()){
+                    if(PlatHelper.isDev())throw new IllegalStateException("Attempted to add empty item "+i+" to item tabs");
+                }else stacks.add(i.asItem().getDefaultInstance());
+            }
+            action.accept(tab, target, false, stacks);
         }
 
         public void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {

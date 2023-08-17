@@ -1,1 +1,1 @@
-more minor fixes to new system. added more hooks to fluid tank code
+fixed an issue with registration

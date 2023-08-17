@@ -102,4 +102,5 @@ public class ModFluidRenderProperties {
     public int getTintColor(FluidState state, BlockAndTintGetter getter, BlockPos pos) {
         return this.getTintColor();
     }
+
 }
