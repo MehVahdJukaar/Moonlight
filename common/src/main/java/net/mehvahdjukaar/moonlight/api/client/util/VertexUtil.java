@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.client.util;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -26,7 +26,9 @@ public class VertexUtil {
 
     /**
      * Replaces all the texture in te given model with the given sprite
+     * returns a new list
      */
+    @Deprecated(forRemoval = true)
     public static List<BakedQuad> swapSprite(List<BakedQuad> quads, TextureAtlasSprite sprite) {
         List<BakedQuad> newList = new ArrayList<>();
         for (BakedQuad q : quads) {
@@ -35,6 +37,7 @@ public class VertexUtil {
         return newList;
     }
 
+    @Deprecated(forRemoval = true)
     public static BakedQuad swapSprite(BakedQuad q, TextureAtlasSprite sprite) {
         TextureAtlasSprite oldSprite = q.getSprite();
         int stride = getStride();
@@ -57,6 +60,10 @@ public class VertexUtil {
         return new BakedQuad(v, q.getTintIndex(), q.getDirection(), sprite, q.isShade());
     }
 
+    /**
+     * Same as below but returns a list of new quads
+     */
+    @Deprecated(forRemoval = true)
     public static void transformVertices(int[] v, Matrix3f transform) {
         Matrix4f transform4 = new Matrix4f();
         transform4.set(transform);
@@ -64,6 +71,7 @@ public class VertexUtil {
     }
 
     //note that vertices will be rotated among their block center
+    @Deprecated(forRemoval = true)
     public static void transformVertices(int[] v, Matrix4f transform) {
         int stride = getStride();
         for (int i = 0; i < 4; i++) {
@@ -103,6 +111,7 @@ public class VertexUtil {
     }
 
     //inplace recolor
+    @Deprecated(forRemoval = true)
     public static void recolorVertices(int[] v, IntUnaryOperator indexToABGR) {
         int stride = getStride();
        // boolean fabricFuckery = !PlatHelper.getPlatform().isForge();
@@ -113,6 +122,7 @@ public class VertexUtil {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public static void recolorVertices(int[] v, int ABGR) {
         recolorVertices(v, i -> ABGR);
     }

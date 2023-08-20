@@ -10,6 +10,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +27,7 @@ public interface CustomBakedModel extends BakedModel {
     TextureAtlasSprite getBlockParticle(ExtraModelData extraModelData);
 
     // do not implement
+    @ApiStatus.Internal
     @Override
     default List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, RandomSource randomSource) {
         return List.of();
@@ -36,6 +38,10 @@ public interface CustomBakedModel extends BakedModel {
         return getBlockParticle(ExtraModelData.EMPTY);
     }
 
+    /**
+     * you can override this method to get the data of your block.
+     * By default, the implementation just grabs it from the tile entity at pos if it implements IExtraModelDataProvider
+     */
     default ExtraModelData getModelData(@NotNull ExtraModelData tileData, BlockPos pos, BlockState state, BlockAndTintGetter level) {
         return tileData;
     }

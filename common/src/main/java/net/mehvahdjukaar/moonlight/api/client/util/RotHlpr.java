@@ -3,8 +3,8 @@ package net.mehvahdjukaar.moonlight.api.client.util;
 import com.google.common.base.Functions;
 import com.google.common.collect.Maps;
 import com.mojang.math.Axis;
-import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import org.joml.*;
 
 import java.util.Arrays;
@@ -66,6 +66,7 @@ public class RotHlpr {
         pPos.set(vector4f.x() + pOrigin.x(), vector4f.y() + pOrigin.y(), vector4f.z() + pOrigin.z());
     }
 
+    @Deprecated(forRemoval = true)
     public static Direction rotateDirection(Direction direction, Matrix4f transform) {
         var d = direction.getNormal();
         var normal = new Vector3f(d.getX(), d.getY(), d.getZ());

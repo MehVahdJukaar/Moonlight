@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 /**
  * Cross loader utility to create baked quad
+ * On forge just wraps its own baked quad builder. Can also be fed to render calls as it implements vertex consumer
  */
 public interface BakedQuadBuilder extends VertexConsumer {
 
@@ -44,6 +45,7 @@ public interface BakedQuadBuilder extends VertexConsumer {
 
     BakedQuadBuilder lightEmission(int light);
 
+    @Deprecated(forRemoval = true)
     BakedQuadBuilder fromVanilla(BakedQuad quad);
 
     BakedQuadBuilder setTint(int tintIndex);

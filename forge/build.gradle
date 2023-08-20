@@ -76,6 +76,8 @@ remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     classifier "forge"
+
+    exclude('net/mehvahdjukaar/moonlight/example/**')
 }
 
 task updateJson {
@@ -89,8 +91,6 @@ task updateJson {
 
 jar {
     classifier "dev"
-
-    exclude('net/mehvahdjukaar/example/**')
 }
 
 sourcesJar {

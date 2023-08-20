@@ -36,7 +36,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
         this.inner = new QuadBakingVertexConsumer(s -> quadConsumer.accept(s));
-        this.globalTransform = transformation;
+        this.globalTransform = new Matrix4f(new Matrix3f(transformation)); //gets rid of translation
         this.sprite = sprite;
         inner.setShade(true);
         inner.setHasAmbientOcclusion(true);
@@ -133,7 +133,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuadBuilder setDirection(Direction direction) {
         if (globalTransform != null) {
-            direction = RotHlpr.rotateDirection(direction, globalTransform);
+            direction = Direction.rotate(globalTransform, direction);
         }
         this.inner.setDirection(direction);
         return this;

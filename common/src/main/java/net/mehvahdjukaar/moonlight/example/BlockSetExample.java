@@ -17,12 +17,12 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import java.util.Collection;
 import java.util.Optional;
 
-public class BlockTypeExample {
+public class BlockSetExample {
 
     // call this on mod init
     public static void init() {
         BlockSetAPI.registerBlockSetDefinition(new FlowerTypeRegistry());
-        BlockSetAPI.addDynamicBlockRegistration(BlockTypeExample::registerFlowerTypeBlocks, FlowerType.class);
+        BlockSetAPI.addDynamicBlockRegistration(BlockSetExample::registerFlowerTypeBlocks, FlowerType.class);
     }
 
     private static void registerFlowerTypeBlocks(Registrator<Block> event, Collection<FlowerType> flowerTypes) {

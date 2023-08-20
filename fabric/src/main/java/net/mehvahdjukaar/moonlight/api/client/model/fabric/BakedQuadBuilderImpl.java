@@ -37,7 +37,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transform) {
         MeshBuilder meshBuilder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
         this.inner = meshBuilder.getEmitter();
-        this.globalTransform = transform;
+        this.globalTransform = new Matrix4f(new Matrix3f(transform));
         this.sprite = sprite;
         inner.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
         this.normalTransf = transform == null ? null :
@@ -75,7 +75,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     public BakedQuadBuilderImpl setDirection(Direction direction) {
         if (globalTransform != null) {
-            direction = RotHlpr.rotateDirection(direction, globalTransform);
+            direction = Direction.rotate(globalTransform, direction);
         }
         inner.nominalFace(direction);
         return this;

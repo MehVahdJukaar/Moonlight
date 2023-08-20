@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.example;
 
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
@@ -58,8 +59,12 @@ public class DynamicResourcesExample {
 
             // helper method to add similar resources, just string replaces its content. You can also do more complex operations
             this.addSimilarJsonResource(manager, resource, "stone_bricks", "sturdy_stone_bricks");
-
         }
 
+        @Override
+        public void addDynamicTranslations(AfterLanguageLoadEvent languageEvent) {
+            // useful to add translation for dynamic blocks. See BlockSetExample
+            languageEvent.addEntry("moonlight.test.translation", "Hello World!");
+        }
     }
 }
