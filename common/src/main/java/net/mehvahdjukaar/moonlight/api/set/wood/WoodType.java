@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -81,6 +82,13 @@ public class WoodType extends BlockType {
     @Nullable
     public net.minecraft.world.level.block.state.properties.WoodType toVanilla() {
         return this.vanillaType.get();
+    }
+
+    @NotNull
+    public net.minecraft.world.level.block.state.properties.WoodType toVanillaOrOak() {
+        var v = toVanilla();
+        if (v != null) return v;
+        return net.minecraft.world.level.block.state.properties.WoodType.OAK;
     }
 
     /**

@@ -71,6 +71,11 @@ public class RegistryQueue<T> {
         }
 
         @Override
+        public ResourceKey<T> getKey() {
+            return holder.unwrapKey().get();
+        }
+
+        @Override
         public Holder<T> getHolder() {
             return holder;
         }

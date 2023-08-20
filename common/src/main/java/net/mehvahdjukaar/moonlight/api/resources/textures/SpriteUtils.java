@@ -71,25 +71,29 @@ public final class SpriteUtils {
         List<Palette> newPalettes = new ArrayList<>();
         List<Palette> oakPalettes = Palette.fromAnimatedImage(planksTexture, null, 1 / 300f);
         for (Palette palette : oakPalettes) {
-            int size = palette.size();
-            if (size == 7) {
-                PaletteColor color = palette.get(size - 3);
-                HSVColor hsv = color.rgb().asHSV();
-                //just saturates last color
-                float satIncrease = 1 / 0.94f;
-                float brightnessIncrease = 1 / 0.94f;
-                HSVColor newCol = new HSVColor(hsv.hue(),
-                        Mth.clamp(hsv.saturation() * satIncrease, 0, 1),
-                        Mth.clamp(hsv.value() * brightnessIncrease, 0, 1),
-                        hsv.alpha());
-                PaletteColor newP = new PaletteColor(newCol);
-                newP.setOccurrence(color.getOccurrence());
-                palette.set(size - 1, newP);
-                palette.remove(size - 2);
-            }
+            extrapolateSignBlockPalette(palette);
             newPalettes.add(palette);
         }
         return newPalettes;
+    }
+
+    public static void extrapolateSignBlockPalette(Palette palette) {
+        int size = palette.size();
+        if (size == 7) {
+            PaletteColor color = palette.get(size - 3);
+            HSVColor hsv = color.rgb().asHSV();
+            //just saturates last color
+            float satIncrease = 1 / 0.94f;
+            float brightnessIncrease = 1 / 0.94f;
+            HSVColor newCol = new HSVColor(hsv.hue(),
+                    Mth.clamp(hsv.saturation() * satIncrease, 0, 1),
+                    Mth.clamp(hsv.value() * brightnessIncrease, 0, 1),
+                    hsv.alpha());
+            PaletteColor newP = new PaletteColor(newCol);
+            newP.setOccurrence(color.getOccurrence());
+            palette.set(size - 1, newP);
+            palette.remove(size - 2);
+        }
     }
 
     //
@@ -103,6 +107,11 @@ public final class SpriteUtils {
      */
     public static Palette extrapolateWoodItemPalette(TextureImage planksTexture) {
         Palette palette = Palette.fromAnimatedImage(planksTexture, null).get(0);
+        extrapolateWoodItemPalette(palette);
+        return palette;
+    }
+
+    public static void extrapolateWoodItemPalette(Palette palette) {
         PaletteColor color = palette.get(0);
         HSVColor hsv = color.rgb().asHSV();
         //just saturates last color
@@ -115,7 +124,6 @@ public final class SpriteUtils {
         PaletteColor newP = new PaletteColor(newCol);
         newP.setOccurrence(color.getOccurrence());
         palette.set(0, newP);
-        return palette;
     }
 
 

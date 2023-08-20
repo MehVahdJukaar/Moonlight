@@ -78,6 +78,11 @@ public class RegHelperImpl {
         }
 
         @Override
+        public ResourceKey<T> getKey() {
+            return registryObject.getKey();
+        }
+
+        @Override
         public Holder<T> getHolder() {
             return registryObject.getHolder().get();
         }
@@ -162,7 +167,9 @@ public class RegHelperImpl {
     }
 
 
-    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, List<ResourceLocation> afterEntries,
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name,
+                                                                       boolean hasSearchBar,
+                                                                       List<ResourceLocation> afterEntries,
                                                                        List<ResourceLocation> beforeEntries,
                                                                        Consumer<CreativeModeTab.Builder> configurator) {
         return register(name, () -> {
@@ -174,6 +181,7 @@ public class RegHelperImpl {
             if (!afterEntries.isEmpty()) {
                 b.withTabsBefore(afterEntries.toArray(ResourceLocation[]::new));
             }
+            if(hasSearchBar)b.withSearchBar();
             return b.build();
         }, Registries.CREATIVE_MODE_TAB);
     }

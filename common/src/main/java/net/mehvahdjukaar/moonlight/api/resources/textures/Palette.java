@@ -154,11 +154,19 @@ public class Palette implements Set<PaletteColor> {
     }
 
     public PaletteColor getDarkest() {
-        return get(0);
+        return getDarkest(0);
+    }
+
+    public PaletteColor getDarkest(int offset) {
+        return get(offset);
     }
 
     public PaletteColor getLightest() {
-        return get(internal.size() - 1);
+        return getLightest(0);
+    }
+
+    public PaletteColor getLightest(int offset) {
+        return get(internal.size() - 1 - offset);
     }
 
     /**
@@ -409,7 +417,11 @@ public class Palette implements Set<PaletteColor> {
         List<Float> list = getLuminanceSteps();
         float total = 0;
         for (var v : list) total += v;
-        return total / (float) list.size();
+        return total / list.size();
+    }
+
+    public float getLuminanceSpan(){
+        return this.getLightest().luminance() - this.getDarkest().luminance();
     }
 
     /**

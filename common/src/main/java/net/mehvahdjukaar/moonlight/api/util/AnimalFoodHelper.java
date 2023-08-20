@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -11,22 +12,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+// move to RegHelper?
+@Deprecated(forRemoval = true)
 public class AnimalFoodHelper {
 
+    @Deprecated(forRemoval = true)
     public static void addChickenFood(ItemLike... food) {
-        List<ItemStack> chickenFood = new ArrayList<>(List.of(Chicken.FOOD_ITEMS.getItems()));
-        Arrays.stream(food).forEach(f -> chickenFood.add(f.asItem().getDefaultInstance()));
-        Chicken.FOOD_ITEMS = Ingredient.of(chickenFood.stream());
+        RegHelper.registerChickenFood(food);
     }
 
+    @Deprecated(forRemoval = true)
     public static void addHorseFood(ItemLike... food) {
-        List<ItemStack> horseFood = new ArrayList<>(List.of(AbstractHorse.FOOD_ITEMS.getItems()));
-        Arrays.stream(food).forEach(f -> horseFood.add(f.asItem().getDefaultInstance()));
-        AbstractHorse.FOOD_ITEMS = Ingredient.of(horseFood.stream());
+        RegHelper.registerHorseFood(food);
     }
 
+    @Deprecated(forRemoval = true)
     public static void addParrotFood(ItemLike... food) {
-        Arrays.stream(food).forEach(f -> Parrot.TAME_FOOD.add(f.asItem()));
+        RegHelper.registerParrotFood(food);
     }
 
 }

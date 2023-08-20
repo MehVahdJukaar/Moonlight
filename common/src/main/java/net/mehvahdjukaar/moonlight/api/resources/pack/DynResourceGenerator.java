@@ -51,13 +51,12 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         return dynamicPack;
     }
 
+    /**
+     * @return if this pack assets can depend on other loaded resource packs, aka we need to access some textures that arent strictly the vanilla ones
+     */
     public abstract boolean dependsOnLoadedPacks();
 
     public abstract void regenerateDynamicAssets(ResourceManager manager);
-
-    @Deprecated(forRemoval = true)
-    public void generateStaticAssetsOnStartup(ResourceManager manager) {
-    }
 
     @Override
     public final CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
@@ -97,7 +96,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         if (!this.hasBeenInitialized) {
             this.hasBeenInitialized = true;
             this.dynamicPack.addToStatic = true;
-            generateStaticAssetsOnStartup(manager);
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
             if (!resourcePackSupport) {
                 var pack = this.getRepository();

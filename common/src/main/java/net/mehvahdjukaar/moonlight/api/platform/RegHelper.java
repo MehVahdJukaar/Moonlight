@@ -26,6 +26,9 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.animal.Parrot;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -268,7 +271,9 @@ public class RegHelper {
 
     @ExpectPlatform
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(
-            ResourceLocation name, List<ResourceLocation> afterTabs, List<ResourceLocation> beforeTabs, Consumer<CreativeModeTab.Builder> configurator
+            ResourceLocation name,
+            boolean searchBar,
+            List<ResourceLocation> afterTabs, List<ResourceLocation> beforeTabs, Consumer<CreativeModeTab.Builder> configurator
     ) {
         throw new AssertionError();
     }
@@ -276,7 +281,11 @@ public class RegHelper {
     private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = List.of(CreativeModeTabs.SPAWN_EGGS.location());
 
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
-        return registerCreativeModeTab(name, DEFAULT_AFTER_ENTRIES, List.of(), configurator);
+        return registerCreativeModeTab(name, false, configurator);
+    }
+
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, boolean searchBar, Consumer<CreativeModeTab.Builder> configurator) {
+        return registerCreativeModeTab(name, searchBar, DEFAULT_AFTER_ENTRIES, List.of(), configurator);
     }
 
     @ExpectPlatform
@@ -468,6 +477,25 @@ public class RegHelper {
     @ExpectPlatform
     public static void addLootTableInjects(Consumer<LootInjectEvent> eventListener) {
         throw new AssertionError();
+    }
+
+
+    // Animal food stuff
+
+    public static void registerChickenFood(ItemLike... food) {
+        List<ItemStack> chickenFood = new ArrayList<>(List.of(Chicken.FOOD_ITEMS.getItems()));
+        Arrays.stream(food).forEach(f -> chickenFood.add(f.asItem().getDefaultInstance()));
+        Chicken.FOOD_ITEMS = Ingredient.of(chickenFood.stream());
+    }
+
+    public static void registerHorseFood(ItemLike... food) {
+        List<ItemStack> horseFood = new ArrayList<>(List.of(AbstractHorse.FOOD_ITEMS.getItems()));
+        Arrays.stream(food).forEach(f -> horseFood.add(f.asItem().getDefaultInstance()));
+        AbstractHorse.FOOD_ITEMS = Ingredient.of(horseFood.stream());
+    }
+
+    public static void registerParrotFood(ItemLike... food) {
+        Arrays.stream(food).forEach(f -> Parrot.TAME_FOOD.add(f.asItem()));
     }
 
 }

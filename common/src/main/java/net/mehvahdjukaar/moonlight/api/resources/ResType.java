@@ -29,7 +29,9 @@ public enum ResType {
     ITEM_MODELS("models/item/%s.json"),
     BLOCKSTATES("blockstates/%s.json"),
     PARTICLES("particles/%s.json"),
-    MOB_EFFECT_TEXTURES("mob_effect/%s.json");
+    MOB_EFFECT_TEXTURES("mob_effect/%s.json"),
+    JSON("%s.json"),
+    PNG("%s.png");
 
     private final String loc;
 

@@ -202,6 +202,7 @@ public class Utils {
         p.lightLevel(s -> state.getLightEmission());
         p.offsetType(BlockBehaviour.OffsetType.NONE);
         p.isValidSpawn((blockState, blockGetter, blockPos, object) -> false);
+        p.mapColor(blockBehaviour.defaultMapColor());
         //TODO: this isnt safe anymore...
         return p;
     }

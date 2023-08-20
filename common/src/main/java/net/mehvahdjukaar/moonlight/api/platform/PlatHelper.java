@@ -46,7 +46,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Helper class dedicated to platform independent common utility methods
+ * Helper class dedicated to platform independent common utility methods that require a different implementation for each loader
+ * Forge specific methods that dont have a fabric equivalent are located in ForgeHelper
  */
 public class PlatHelper {
 

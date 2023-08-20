@@ -73,6 +73,8 @@ remapJar {
 
 jar {
     classifier "dev"
+
+    exclude('net/mehvahdjukaar/example/**')
 }
 
 sourcesJar {
