@@ -1,5 +1,3 @@
-package net.mehvahdjukaar.moonlight.example;
-
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.textures.ImageTransformer;
 import net.mehvahdjukaar.moonlight.api.resources.textures.Palette;

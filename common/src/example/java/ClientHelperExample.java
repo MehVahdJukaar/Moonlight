@@ -1,5 +1,3 @@
-package net.mehvahdjukaar.moonlight.example;
-
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.renderer.RenderType;

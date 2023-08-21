@@ -1,10 +1,6 @@
-package net.mehvahdjukaar.moonlight.example;
-
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.world.item.Items;
-
-import java.lang.annotation.Documented;
 
 // PlatHelper is a helper class which contains many wrapper methods for platform specific functions which differ enough to require a
 // different implementation for both platforms. More forge specific calls that dont have a fabric equivalent are in ForgeHelper

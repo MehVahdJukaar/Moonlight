@@ -1,1 +1,1 @@
-fixed an issue with registration
+- fixeed messup of previous update

@@ -42,5 +42,19 @@ public class NestedModelLoader implements CustomModelLoader {
     }
 
 
-
+    // helper function you'll likely only need here
+    @Deprecated(forRemoval = true)
+   public static BakedModel parseModel(JsonElement j, ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
+        BlockModel model;
+        if (j.isJsonPrimitive()) {
+            model = (BlockModel) modelBaker.getModel(ResourceLocation.tryParse(j.getAsString()));
+        } else {
+            model = ClientHelper.parseBlockModel(j);
+        }
+        model.resolveParents(modelBaker::getModel);
+        if (model == modelBaker.getModel(ModelBakery.MISSING_MODEL_LOCATION)) {
+            throw new JsonParseException("Found missing model while parsing nested model " + location);
+        }
+        return model.bake(modelBaker, model, spriteGetter, transform, location, true);
+    }
 }

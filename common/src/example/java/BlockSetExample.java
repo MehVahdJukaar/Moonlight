@@ -1,5 +1,3 @@
-package net.mehvahdjukaar.moonlight.example;
-
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;

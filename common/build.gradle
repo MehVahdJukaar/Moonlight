@@ -4,7 +4,15 @@ architectury {
 
 loom {
     accessWidenerPath = file("src/main/resources/moonlight.accesswidener")
+
 }
+
+sourceSets.create("example"){
+    var main = sourceSets.main
+    compileClasspath += main.compileClasspath + main.output
+    runtimeClasspath += main.runtimeClasspath + main.output
+}
+
 
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies

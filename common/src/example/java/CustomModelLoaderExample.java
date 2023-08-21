@@ -1,5 +1,3 @@
-package net.mehvahdjukaar.moonlight.example;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

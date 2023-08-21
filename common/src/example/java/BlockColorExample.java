@@ -1,5 +1,3 @@
-package net.mehvahdjukaar.moonlight.example;
-
 import net.mehvahdjukaar.moonlight.api.set.BlocksColorAPI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.DyeColor;
@@ -23,7 +21,7 @@ public class BlockColorExample {
         }
     }
 
-    // gets colored terracotta from dye. Works with any modded item as well
+    // Gets colored terracotta from dye. Works with any modded item as well
     public static Item getColoredTerracotta(DyeColor color) {
         return BlocksColorAPI.getColoredItem("terracotta", color);
     }

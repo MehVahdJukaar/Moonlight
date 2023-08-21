@@ -1,5 +1,3 @@
-package net.mehvahdjukaar.moonlight.example;
-
 import net.mehvahdjukaar.moonlight.api.util.math.colors.LABColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 

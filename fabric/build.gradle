@@ -74,6 +74,7 @@ remapJar {
 }
 
 jar {
+
     classifier "dev"
 }
 

@@ -1,5 +1,3 @@
-package net.mehvahdjukaar.moonlight.example;
-
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
