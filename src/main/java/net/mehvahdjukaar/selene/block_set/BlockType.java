@@ -90,10 +90,10 @@ public abstract class   BlockType {
         String post = postpend.isEmpty() ? "" : "_" + postpend;
         var id = this.getId();
         ResourceLocation[] targets = {
-                // Unqiue ID: tfc:wood/planks/<TYPE>_append
-            new ResourceLocation(id.getNamespace(), "wood/planks/" + id.getPath() + "_" + append), //Support TFC
-                // TFC's twig only: tfc:wood/twig/<TYPE>, Similar to "stick"
-            new ResourceLocation(id.getNamespace(), "wood/" + append + "/" + id.getPath()), //Support TFC
+                // MODname:wood/planks/<woodTYPE>_append to include children of wood_type
+            new ResourceLocation(id.getNamespace(), "wood/planks/" + id.getPath() + "_" + append), //Support TFC & AFC
+                // TFC's twig only: MODname:wood/twig/<woodTYPEe>, Similar to "stick"
+            new ResourceLocation(id.getNamespace(), "wood/" + append + "/" + id.getPath()), //Support TFC & AFC
             new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
             new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post),
             new ResourceLocation(id.getNamespace(), id.getPath() + "_planks_" + append + post),
