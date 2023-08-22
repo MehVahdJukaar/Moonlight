@@ -64,8 +64,8 @@ public class WoodType extends IBlockType {
         var id = this.getId();
         String log = this.log.getRegistryName().getPath();
         ResourceLocation[] targets = {
-                // Unique ID: tfc:wood/stripped_log/<TYPE>
-                new ResourceLocation(id.getNamespace(), "wood/" + append + post + "/" + id.getPath()), //Support TFC
+                // MOD_NAME:wood/stripped_log/<WoodType> to include stripped_log
+                new ResourceLocation(id.getNamespace(), "wood/" + append + post + "/" + id.getPath()), //Support TFC & AFC
                 new ResourceLocation(id.getNamespace(), log + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + log + post),
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
@@ -161,7 +161,7 @@ public class WoodType extends IBlockType {
         this.addChild("pressure_plate", pressurePlate);
         this.addChild("sign", signItem.get());
         this.addChild("boat", boatItem.get());
-        this.addChild("stick", twig); // TFC only
+        this.addChild("stick", twig); // TFC & AFC only
 
     }
 
