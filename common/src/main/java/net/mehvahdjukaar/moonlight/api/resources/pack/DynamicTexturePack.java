@@ -16,10 +16,6 @@ import java.nio.file.Path;
 
 public class DynamicTexturePack extends DynamicResourcePack {
 
-    public DynamicTexturePack(ResourceLocation name, Pack.Position position, boolean fixed, boolean hidden, Component description) {
-        super(name, PackType.CLIENT_RESOURCES, position, fixed, hidden, description);
-    }
-
     public DynamicTexturePack(ResourceLocation name, Pack.Position position, boolean fixed, boolean hidden) {
         super(name, PackType.CLIENT_RESOURCES, position, fixed, hidden);
     }
@@ -53,7 +49,7 @@ public class DynamicTexturePack extends DynamicResourcePack {
             JsonObject mcmeta = image.serializeMcMeta();
             if (mcmeta != null) this.addJson(path, mcmeta, ResType.MCMETA);
         } catch (Exception e) {
-            LOGGER.warn("Failed to add image {} to resource pack {}.", path, this.resourcePackName, e);
+            LOGGER.warn("Failed to add image {} to resource pack {}.", path, this, e);
         }
     }
 

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
+import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
@@ -35,6 +36,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public abstract class DynamicResourcePack implements PackResources {
     private static final List<DynamicResourcePack> INSTANCES = new ArrayList<>();
@@ -55,8 +57,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final boolean fixed;
     protected final Pack.Position position;
     protected final PackType packType;
-    protected final Pack.Info info;
-    protected final PackMetadataSection metadata;
+    protected final Supplier<PackMetadataSection> metadata;
     protected final Component title;
     protected final ResourceLocation resourcePackName;
     protected final Set<String> namespaces = new HashSet<>();
@@ -75,13 +76,7 @@ public abstract class DynamicResourcePack implements PackResources {
         this(name, type, Pack.Position.TOP, false, false);
     }
 
-    protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden){
-        this(name, type, position, fixed, hidden,
-                Component.translatable(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources")));
-    }
-
-    protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden,
-                                  Component description) {
+    protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
         this.packType = type;
         this.resourcePackName = name;
         this.mainNamespace = name.getNamespace();
@@ -91,11 +86,14 @@ public abstract class DynamicResourcePack implements PackResources {
         this.position = position;
         this.fixed = fixed;
         this.hidden = hidden; //UNUSED. TODO: re add (forge)
-        this.metadata = new PackMetadataSection(description, (SharedConstants.getCurrentVersion().getPackVersion(type)));
-        this.info = new Pack.Info(metadata.getDescription(), metadata.getPackFormat(), FeatureFlagSet.of());
+        this.metadata = Suppliers.memoize(()-> new PackMetadataSection(this.makeDescription(),
+                        SharedConstants.getCurrentVersion().getPackVersion(type)));
         this.generateDebugResources = PlatHelper.isDev();
     }
 
+    public Component makeDescription(){
+        return Component.translatable(LangBuilder.getReadableName(mainNamespace + "_dynamic_resources"));
+    }
 
     public void clearOnReload(boolean canBeCleared) {
         this.canBeCleared = canBeCleared;
@@ -126,6 +124,10 @@ public abstract class DynamicResourcePack implements PackResources {
         return title.getString();
     }
 
+    public ResourceLocation id(){
+        return resourcePackName;
+    }
+
     @Override
     public String toString() {
         return packId();
@@ -143,7 +145,7 @@ public abstract class DynamicResourcePack implements PackResources {
                             this.getTitle(), // title
                             true,    // required -- this MAY need to be true for the pack to be enabled by default
                             (s) -> this, // pack supplier
-                            this.info, // description
+                            new Pack.Info(metadata.get().getDescription(), metadata.get().getPackFormat(), FeatureFlagSet.of()), // description
                             this.packType,
                             Pack.Position.TOP,
                             this.fixed, // fixed position? no

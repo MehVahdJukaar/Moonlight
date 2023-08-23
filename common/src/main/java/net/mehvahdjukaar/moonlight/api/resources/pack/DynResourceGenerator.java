@@ -1,17 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
-import net.mehvahdjukaar.moonlight.api.client.util.TextUtil;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
-import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.VanillaResourceManager;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -28,11 +26,13 @@ import java.util.function.Function;
 public abstract class DynResourceGenerator<T extends DynamicResourcePack> implements PreparableReloadListener {
 
     public final T dynamicPack;
+    protected final String modId;
     private boolean hasBeenInitialized;
 
     //creates this object and registers it
-    protected DynResourceGenerator(T pack) {
+    protected DynResourceGenerator(T pack, String modId) {
         this.dynamicPack = pack;
+        this.modId = modId;
     }
 
     /**
@@ -114,10 +114,11 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         if (resourcePackSupport) {
             this.regenerateDynamicAssets(manager);
         }
-        getLogger().info("Generated runtime {} for pack {} in: {} ms" +
+        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms" +
                         (this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : ""),
                 this.dynamicPack.getPackType(),
                 this.dynamicPack.packId(),
+                this.modId,
                 watch.elapsed().toMillis());
     }
 
@@ -165,7 +166,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             } else builder.append(partial[i]);
         }
         //adds modified under my namespace
-        ResourceLocation newRes = new ResourceLocation(this.dynamicPack.resourcePackName.getNamespace(), builder.toString());
+        ResourceLocation newRes = new ResourceLocation(this.modId, builder.toString());
         if (!alreadyHasAssetAtLocation(manager, newRes)) {
 
             String fullText = new String(resource.data, StandardCharsets.UTF_8);

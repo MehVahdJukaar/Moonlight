@@ -1,12 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
-import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -16,12 +16,11 @@ import java.util.function.Supplier;
 
 /**
  * Class responsible to generate assets and manage your dynamic resource texture pack (client)
- * Handles and registers your dynamic pack instance which needs to be provides
+ * Handles and registers your dynamic pack instance, which needs to be provided
  */
 public abstract class DynClientResourcesGenerator extends DynResourceGenerator<DynamicTexturePack> {
-
     protected DynClientResourcesGenerator(DynamicTexturePack pack) {
-        super(MoonlightClient.maybeMergePack(pack));
+        super(MoonlightClient.maybeMergePack(pack), pack.mainNamespace);
     }
 
     /**
@@ -33,7 +32,7 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
         //run data could give a null minecraft here...
         if (!PlatHelper.isData()) {
             //unused now...
-            ClientHelper.addClientReloadListener(() -> this, this.dynamicPack.resourcePackName);
+            ClientHelper.addClientReloadListener(() -> this, this.dynamicPack.id());
         }
         MoonlightEventsHelper.addListener(this::addDynamicTranslations, AfterLanguageLoadEvent.class);
     }
@@ -53,7 +52,7 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier, boolean isOnAtlas) {
 
         ResourceLocation res = relativePath.contains(":") ? new ResourceLocation(relativePath) :
-                new ResourceLocation(this.dynamicPack.mainNamespace, relativePath);
+                new ResourceLocation(this.modId, relativePath);
         if (!alreadyHasTextureAtLocation(manager, res)) {
             TextureImage textureImage = null;
             try {
