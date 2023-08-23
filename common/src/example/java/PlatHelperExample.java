@@ -6,32 +6,28 @@ import net.minecraft.world.item.Items;
 // different implementation for both platforms. More forge specific calls that dont have a fabric equivalent are in ForgeHelper
 public class PlatHelperExample {
 
-    // call on mod init
-    public static void init(){
-        // you can add this line in your mod init to add a common setup method
+    // Call on mod init
+    public static void init() {
+        // Adding a Common Setup step, called after registration. Equivalent of Forge one
         PlatHelper.addCommonSetup(PlatHelperExample::setup);
 
-        if(PlatHelper.getPhysicalSide().isClient()){
-            //from here we also initialize client stuff. No need for 2 separate initializer with this
+        if (PlatHelper.getPhysicalSide().isClient()) {
+            // From here we also initialize client stuff. No need for two separate initializers with this
             ClientHelperExample.init();
         }
-        //the above code will be the basics for any mod that uses this lib
+        // The above code will be the basics for any mod that uses this lib
     }
 
+    // Setup will run after all registrations are done
     private static void setup() {
-        // setup work. will run after all registration is done
-        if(PlatHelper.isDev()) {
-            // adding some animal food only if we are in dev environment
-            RegHelper.registerParrotFood(Items.APPLE);
+        // Adding some animal foods
+        RegHelper.registerParrotFood(Items.APPLE);
 
-            if(PlatHelper.isModLoaded("jei")){
-                // note that this call is fabric only. for forge you should override getBurnTime in your item
-                RegHelper.registerItemBurnTime(Items.SKELETON_SKULL, 2);
-            }
+        // Showcasing some other PlatHelper functions
+        if (PlatHelper.isModLoaded("jei") && !PlatHelper.isDev()) {
+            // Note that this call is fabric only. For Forge, you should override getBurnTime in your item
+            RegHelper.registerItemBurnTime(Items.SKELETON_SKULL, 2);
         }
-
-
-
     }
 
 }

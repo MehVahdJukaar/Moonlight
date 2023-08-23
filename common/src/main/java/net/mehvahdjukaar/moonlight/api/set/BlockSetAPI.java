@@ -105,7 +105,7 @@ public class BlockSetAPI {
 
 
     /**
-     * Tries changing object block type. returns null if it fails
+     * Tries changing an object block type. Returns null if it fails
      *
      * @param current        target item
      * @param originalMat    material from which the target item is made of

@@ -14,6 +14,7 @@ import java.util.function.Function;
 /**
  * Your main network channel instance.
  */
+//TODO: rename
 public abstract class ChannelHandler {
 
     @ExpectPlatform
@@ -39,7 +40,6 @@ public abstract class ChannelHandler {
 
         Player getSender();
     }
-
 
 
     public abstract void sendToClientPlayer(ServerPlayer serverPlayer, Message message);

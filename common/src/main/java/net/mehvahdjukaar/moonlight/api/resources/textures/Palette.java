@@ -339,7 +339,7 @@ public class Palette implements Set<PaletteColor> {
     }
 
     /**
-     * Same as before but merges these 2 colors
+     * Same as before but merges these two colors
      *
      * @return newly added color
      */

@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -20,7 +21,7 @@ import java.util.function.Supplier;
 public abstract class DynClientResourcesGenerator extends DynResourceGenerator<DynamicTexturePack> {
 
     protected DynClientResourcesGenerator(DynamicTexturePack pack) {
-        super(pack);
+        super(MoonlightClient.maybeMergePack(pack));
     }
 
     /**

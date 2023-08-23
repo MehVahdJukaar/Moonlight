@@ -132,13 +132,14 @@ public class WoodType extends BlockType {
         this.addChild("button", this.findRelatedEntry("button", BuiltInRegistries.BLOCK));
         this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", BuiltInRegistries.BLOCK));
         this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign", BuiltInRegistries.BLOCK));
+        this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.BLOCK));
+
         WoodTypeRegistry.INSTANCE.mapVanillaWood(this);
     }
 
     @Override
     public void initializeChildrenItems() {
         this.addChild("boat", this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
-        this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.ITEM));
     }
 
     public static class Finder implements SetFinder<WoodType> {

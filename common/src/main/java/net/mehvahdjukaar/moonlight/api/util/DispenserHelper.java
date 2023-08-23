@@ -76,8 +76,8 @@ public class DispenserHelper {
          *
          * @param source dispenser block
          * @param stack  stack to dispense
-         * @return return ActionResult.SUCCESS / CONSUME for success, FAIL to do nothing and PASS to fallback to vanilla/previously registered behavior will be used. <br>
-         * Type parameter is return item stack. If item in itemstack is different than initially provided, such itemstack will be added to dispenser, otherwise will replace existing itemstack
+         * @return return ActionResult.SUCCESS / CONSUME for success, FAIL to do nothing and PASS to fall back to vanilla/previously registered behavior will be used. <br>
+         * Type parameter is return item stack. If item in itemstack is different from initially provided, such itemstack will be added to dispenser, otherwise will replace existing itemstack
          */
         protected abstract InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack);
 

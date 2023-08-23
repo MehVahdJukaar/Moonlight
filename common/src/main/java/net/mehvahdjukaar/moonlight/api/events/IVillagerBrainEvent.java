@@ -19,8 +19,10 @@ import java.util.Optional;
 public interface IVillagerBrainEvent extends SimpleEvent {
 
     /**
-     * If possible do not access the villager brain directly. The whole porpouse of this is to makde adding activities work better
-     * between mods without modifying the brain directly. Use the methods below
+     * If possible, do not access the villager brain directly.
+     * The whole purpose of this is to make adding activities work better
+     * between mods without modifying the brain directly.
+     * Use the methods below
      *
      * @return villager entity
      */
@@ -35,8 +37,9 @@ public interface IVillagerBrainEvent extends SimpleEvent {
     Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> getMemories();
 
     /**
-     * add an activity to the brain.
-     * However this isn't recommended since it doesn't completely clear its previous requirements from the requirements map. This might not be an issue tho
+     * Add an activity to the brain.
+     * However, this isn't recommended as it doesn't completely clear its previous requirements from the requirement map.
+     * This might not be an issue tho
      * Try to use addTaskToActivity instead if you just want to add a task to an existing activity without completely overriding it
      *
      * @param activity        the identifier of the activity
@@ -45,9 +48,10 @@ public interface IVillagerBrainEvent extends SimpleEvent {
     void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> activityPackage);
 
     /**
-     * Adds an activity to the schedule. will override any activity that is in that specified time window
+     * Adds an activity to the schedule.
+     * Will override any activity that is in that specified time window
      * Note that subsequent call to this from other mods in later event execution might override your activity if the time window is the same
-     * If it's not it might be shortened or cut in two
+     * If it's not, it might be shortened or cut in two
      *
      * @param activity  activity to register
      * @param startTime day time at which activity will start
@@ -63,8 +67,9 @@ public interface IVillagerBrainEvent extends SimpleEvent {
     void addSensor(SensorType<? extends Sensor<Villager>> newSensor);
 
     /**
-     * Used to add a single task to an existing activity. Useful so you can add to existing activities without overriding or having to override the entire activity.
-     * Alternatively you can define your own activity and add it to the villager schedule using scheduleActivity
+     * Used to add a single task to an existing activity.
+     * Useful so you can add to existing activities without overriding or having to override the entire activity.
+     * Alternatively, you can define your own activity and add it to the villager schedule using scheduleActivity
      *
      * @param activity activity you want to add a task to
      * @param task     task to add with its priority

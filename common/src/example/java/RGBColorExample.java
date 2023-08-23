@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 public class RGBColorExample {
 
 
-    // Here some uses of the BaseColor class is shown
+    // Here some uses of the BaseColor class are shown
     public static RGBColor modifyColor(RGBColor color){
         // we can convert colors into many color spaces depending on our needs
         LABColor lab = color.asLAB();

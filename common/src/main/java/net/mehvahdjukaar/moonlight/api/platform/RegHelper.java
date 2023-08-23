@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
+import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
@@ -9,7 +10,6 @@ import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -26,6 +26,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -49,11 +50,11 @@ import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -104,6 +105,21 @@ public class RegHelper {
         });
         return block;
     }
+
+    public static RegSupplier<PoiType> registerPOI(ResourceLocation name, Supplier<PoiType> block) {
+        return register(name, block, Registries.POINT_OF_INTEREST_TYPE);
+    }
+
+    public static RegSupplier<PoiType> registerPOI(ResourceLocation name, int searchDistance, int maxTickets, Block... blocks) {
+        return registerPOI(name, () -> {
+            ImmutableSet.Builder<BlockState> builder = ImmutableSet.builder();
+            for (Block block : blocks) {
+                builder.addAll(block.getStateDefinition().getPossibleStates());
+            }
+            return new PoiType(builder.build(), searchDistance, maxTickets);
+        });
+    }
+
 
     @ExpectPlatform
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
@@ -278,7 +294,7 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = List.of(CreativeModeTabs.SPAWN_EGGS.location());
+    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = java.util.List.of(CreativeModeTabs.SPAWN_EGGS.location());
 
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
         return registerCreativeModeTab(name, false, configurator);
@@ -307,30 +323,32 @@ public class RegHelper {
 
         public void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
             List<ItemStack> stacks = new ArrayList<>();
-            for(var i : items){
-                if(i.asItem().getDefaultInstance().isEmpty()){
-                    if(PlatHelper.isDev())throw new IllegalStateException("Attempted to add empty item "+i+" to item tabs");
-                }else stacks.add(i.asItem().getDefaultInstance());
+            for (var i : items) {
+                if (i.asItem().getDefaultInstance().isEmpty()) {
+                    if (PlatHelper.isDev())
+                        throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs");
+                } else stacks.add(i.asItem().getDefaultInstance());
             }
             action.accept(tab, target, true, stacks);
         }
 
         public void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
-            action.accept(tab, target, true, List.of(items));
+            action.accept(tab, target, true, java.util.List.of(items));
         }
 
         public void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
             List<ItemStack> stacks = new ArrayList<>();
-            for(var i : items){
-                if(i.asItem().getDefaultInstance().isEmpty()){
-                    if(PlatHelper.isDev())throw new IllegalStateException("Attempted to add empty item "+i+" to item tabs");
-                }else stacks.add(i.asItem().getDefaultInstance());
+            for (var i : items) {
+                if (i.asItem().getDefaultInstance().isEmpty()) {
+                    if (PlatHelper.isDev())
+                        throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs");
+                } else stacks.add(i.asItem().getDefaultInstance());
             }
             action.accept(tab, target, false, stacks);
         }
 
         public void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
-            action.accept(tab, target, false, List.of(items));
+            action.accept(tab, target, false, java.util.List.of(items));
         }
     }
 

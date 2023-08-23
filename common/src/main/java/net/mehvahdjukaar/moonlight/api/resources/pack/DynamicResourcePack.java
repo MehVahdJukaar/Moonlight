@@ -75,9 +75,14 @@ public abstract class DynamicResourcePack implements PackResources {
         this(name, type, Pack.Position.TOP, false, false);
     }
 
-    protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
+    protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden){
+        this(name, type, position, fixed, hidden,
+                Component.translatable(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources")));
+    }
+
+    protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden,
+                                  Component description) {
         this.packType = type;
-        var component = Component.translatable(LangBuilder.getReadableName(name.getNamespace() + "_dynamic_resources"));
         this.resourcePackName = name;
         this.mainNamespace = name.getNamespace();
         this.namespaces.add(name.getNamespace());
@@ -86,7 +91,7 @@ public abstract class DynamicResourcePack implements PackResources {
         this.position = position;
         this.fixed = fixed;
         this.hidden = hidden; //UNUSED. TODO: re add (forge)
-        this.metadata = new PackMetadataSection(component, (SharedConstants.getCurrentVersion().getPackVersion(type)));
+        this.metadata = new PackMetadataSection(description, (SharedConstants.getCurrentVersion().getPackVersion(type)));
         this.info = new Pack.Info(metadata.getDescription(), metadata.getPackFormat(), FeatureFlagSet.of());
         this.generateDebugResources = PlatHelper.isDev();
     }
@@ -127,22 +132,24 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     /**
-     * registers this pack. Call on mod init
+     * Registers this pack. Call on mod init
      */
     public void registerPack() {
 
-        PlatHelper.registerResourcePack(this.packType, () ->
-                Pack.create(
-                        this.packId(),    // id
-                        this.getTitle(), // title
-                        true,    // required -- this MAY need to be true for the pack to be enabled by default
-                        (s) -> this, // pack supplier
-                        this.info, // description
-                        this.packType,
-                        Pack.Position.TOP,
-                        this.fixed, // fixed position? no
-                        PackSource.BUILT_IN));
-        INSTANCES.add(this);
+        if(!INSTANCES.contains(this)) {
+            PlatHelper.registerResourcePack(this.packType, () ->
+                    Pack.create(
+                            this.packId(),    // id
+                            this.getTitle(), // title
+                            true,    // required -- this MAY need to be true for the pack to be enabled by default
+                            (s) -> this, // pack supplier
+                            this.info, // description
+                            this.packType,
+                            Pack.Position.TOP,
+                            this.fixed, // fixed position? no
+                            PackSource.BUILT_IN));
+            INSTANCES.add(this);
+        }
     }
 
     //@Override

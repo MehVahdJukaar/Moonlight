@@ -13,26 +13,16 @@ public class DynamicResourcesExample {
 
     // call during mod init
     public static void init() {
-        ClientAssets generator = new ClientAssets();
+        ClientAssetsGenerator generator = new ClientAssetsGenerator();
         generator.register();
     }
 
-    public static class ClientAssets extends DynClientResourcesGenerator {
+    // Class responsible to generate assets into your dynamic pack
+    public static class ClientAssetsGenerator extends DynClientResourcesGenerator {
 
-        protected ClientAssets() {
+        protected ClientAssetsGenerator() {
             //here you pass the dynamic texture pack instance
             super(new DynamicTexturePack(Moonlight.res("generated_pack"), Pack.Position.TOP, false, false));
-        }
-
-        @Override
-        public Logger getLogger() {
-            return Moonlight.LOGGER;
-        }
-
-        //
-        @Override
-        public boolean dependsOnLoadedPacks() {
-            return true;
         }
 
         // generate here your assets
@@ -45,24 +35,34 @@ public class DynamicResourcesExample {
             this.dynamicPack.addItemModel(Moonlight.res("sturdy_stone_bricks"), json);
 
             ResourceLocation textureRes = Moonlight.res("entity/entity_texture");
-            // we create another example texture and add it. Last parameter must be false for non atlas textures
+            // We create another example texture and add it. The last parameter must be false for non-atlas textures
             this.dynamicPack.addAndCloseTexture(textureRes, TextureUtilsExample.createTransformedTexture(manager), false);
 
-            // helper method to only add a texture if its not already there added by some pack
+            // Helper method to only add a texture if it's not already there added by some pack
             this.addTextureIfNotPresent(manager, "moonlight:block/sturdy_stone_bricks",
                     () -> TextureUtilsExample.createRecoloredTexture(manager));
 
-            // helper object to handle resources multiple times
+            // Helper object to handle resources multiple times
             StaticResource resource = StaticResource.getOrFail(manager, new ResourceLocation("models/block/stone_bricks.json"));
 
-            // helper method to add similar resources, just string replaces its content. You can also do more complex operations
+            // Helper method to add similar resources, just string replaces its content. You can also do more complex operations
             this.addSimilarJsonResource(manager, resource, "stone_bricks", "sturdy_stone_bricks");
         }
 
         @Override
         public void addDynamicTranslations(AfterLanguageLoadEvent languageEvent) {
-            // useful to add translation for dynamic blocks. See BlockSetExample
+            // Useful to add translation for dynamic blocks. See BlockSetExample
             languageEvent.addEntry("moonlight.test.translation", "Hello World!");
+        }
+
+        @Override
+        public Logger getLogger() {
+            return Moonlight.LOGGER;
+        }
+
+        @Override
+        public boolean dependsOnLoadedPacks() {
+            return true;
         }
     }
 }

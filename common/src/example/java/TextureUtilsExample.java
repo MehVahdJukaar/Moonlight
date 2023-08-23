@@ -11,7 +11,7 @@ public class TextureUtilsExample {
 
     public static TextureImage createRecoloredTexture(ResourceManager manager) {
 
-        // we start by creating textureImages, helper objects that we use to transform images
+        // We start by creating textureImages, helper objects that we use to transform images
         try (TextureImage stone = TextureImage.open(manager, new ResourceLocation("block/stone"));
              TextureImage deepslate = TextureImage.open(manager, new ResourceLocation("block/deepslate"))) {
 
@@ -20,10 +20,10 @@ public class TextureUtilsExample {
 
             Palette deepslatePalette = PaletteExample.modifyPaletteExample(deepslate);
 
-            // respriter object is used to create a new texture (which must be closed)
+            // Respriter object is used to create a new texture (which must be closed)
             TextureImage newImage = respriter.recolor(deepslatePalette);
 
-            // we can alter the texture directly
+            // We can alter the texture directly
             newImage.setFramePixel(0, 1, 1, 0xff0000ff);
 
 
@@ -37,22 +37,22 @@ public class TextureUtilsExample {
     public static TextureImage createTransformedTexture(ResourceManager manager) {
 
         try {
-            // helper to get the first texture of a block
+            // Helper to get the first texture of a block
             ResourceLocation diamondRes = RPUtils.findFirstBlockTextureLocation(manager, Blocks.DIAMOND_BLOCK);
             try (TextureImage diamond = TextureImage.open(manager, diamondRes);
                  TextureImage pick = TextureImage.open(manager, new ResourceLocation("item/diamond_pickaxe"));
                  TextureImage emerald = TextureImage.open(manager, new ResourceLocation("block/emerald"))) {
 
-                // new image is created so we can keep using old ones
+                // New image is created, so we can keep using old ones
                 TextureImage newImage = diamond.makeCopy();
                 // grayscale the image
                 newImage.toGrayscale();
 
-                // we apply an overlay to the texture, drawing a diamond pick on it
+                // We apply an overlay to the texture, drawing a diamond pick on it
                 newImage.applyOverlay(pick);
 
-                // here an image transformer object is created. It can copy parts of a texture onto another
-                // in this case it will copy a square from the center of the emerald textures to the 2 upper cornets of our one
+                // Here an image transformer object is created; It can copy parts of a texture onto another
+                // In this case it will copy a square from the center of the emerald textures to the two upper cornets of our one
                 ImageTransformer transformer = ImageTransformer.builder(16, 16, 16, 16)
                         .copyRect(6, 6, 4, 4, 12, 0)
                         .copyRect(6, 6, 4, 4, 0, 0)

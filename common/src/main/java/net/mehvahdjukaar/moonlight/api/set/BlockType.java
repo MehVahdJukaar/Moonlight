@@ -3,8 +3,8 @@ package net.mehvahdjukaar.moonlight.api.set;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
-import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -183,7 +183,7 @@ public abstract class BlockType {
     }
 
     /**
-     * Tries changing an item block type. returns null if it fails
+     * Tries changing an item block type. Returns null if it fails
      *
      * @param current        target item
      * @param originalMat    material from which the target item is made of
@@ -213,7 +213,13 @@ public abstract class BlockType {
                 }
             }
         }
-        if (changed instanceof ItemLike il) return il.asItem();
+        if (changed instanceof ItemLike il) {
+            if (il.asItem() == current) {
+                Moonlight.LOGGER.error("Somehow changed an item type into itself. How? Target mat {}, destination map {}, item {}",
+                        destinationMat, originalMat, il);
+            }
+            return il.asItem();
+        }
         return null;
     }
 

@@ -20,7 +20,9 @@ public class VillagerAIHooks {
     }
 
     /**
-     * adds a memory module to the villager brain when it's created. Add here and not in the event if that memory needs to be saved, otherwise it will not be loaded since the event is called after the brain is deserialized from tag
+     * Adds a memory module to the villager brain when it's created.
+     * Add here and not in the event if that memory needs to be saved,
+     * otherwise it will not be loaded since the event is called after the brain is deserialized from tag
      */
     public static void registerMemory(MemoryModuleType<?> memoryModuleType) {
 
