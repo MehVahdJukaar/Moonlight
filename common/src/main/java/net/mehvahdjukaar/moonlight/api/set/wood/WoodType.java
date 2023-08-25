@@ -127,6 +127,7 @@ public class WoodType extends BlockType {
     @Override
     public void initializeChildrenItems() {
         this.addChild("boat",(Object) this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
+        this.addChild("chest_boat",(Object) this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
         this.addChild("sign",(Object) this.findRelatedEntry("sign", BuiltInRegistries.ITEM));
     }
 
