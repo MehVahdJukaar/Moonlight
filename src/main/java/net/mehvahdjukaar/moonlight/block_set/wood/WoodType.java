@@ -115,6 +115,7 @@ public class WoodType extends BlockType {
         this.addChild("button", this.findRelatedEntry("button", ForgeRegistries.BLOCKS));
         this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS));
         this.addChild("boat", this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
+        this.addChild("chest_boat", this.findRelatedEntry("chest_boat", ForgeRegistries.ITEMS));
         this.addChild("sign", this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
     }
 
