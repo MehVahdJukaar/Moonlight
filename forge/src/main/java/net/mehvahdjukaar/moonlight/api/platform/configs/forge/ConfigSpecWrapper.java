@@ -51,15 +51,17 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     private final ModContainer modContainer;
 
     private final Map<ForgeConfigSpec.ConfigValue<?>, Object> requireRestartValues;
+    private final List<ConfigBuilderImpl.SpecialValue<?,?>> specialValues;
 
     public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced,
-                             @Nullable Runnable onChange, List<ForgeConfigSpec.ConfigValue<?>> requireRestart) {
+                             @Nullable Runnable onChange, List<ForgeConfigSpec.ConfigValue<?>> requireRestart,
+                             List<ConfigBuilderImpl.SpecialValue<?,?>> specialValues) {
         super(name.getNamespace(), name.getNamespace() + "-" + name.getPath() + ".toml",
                 FMLPaths.CONFIGDIR.get(), type, synced, onChange);
         this.spec = spec;
 
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
-        if (onChange != null || this.isSynced()) bus.addListener(this::onConfigChange);
+        if (onChange != null || this.isSynced() || !specialValues.isEmpty()) bus.addListener(this::onConfigChange);
         if (this.isSynced()) {
 
             MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
@@ -77,6 +79,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         if (!requireRestart.isEmpty()) {
             loadFromFile(); //early load if this has world reload ones
         }
+        this.specialValues = specialValues;
         this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ForgeConfigSpec.ConfigValue::get));
     }
 
@@ -194,6 +197,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
             //send this configuration to connected clients if on server
             if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()) sendSyncedConfigsToAllPlayers();
             onRefresh();
+            specialValues.forEach(ConfigBuilderImpl.SpecialValue::clearCache);
         }
     }
 

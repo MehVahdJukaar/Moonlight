@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -115,6 +116,10 @@ public class Utils {
         return hackyGetRegistry(Registries.BIOME).getKey(object);
     }
 
+    public static ResourceLocation getID(DamageType type){
+        return hackyGetRegistry(Registries.DAMAGE_TYPE).getKey(type);
+    }
+
     public static ResourceLocation getID(ConfiguredFeature<?, ?> object) {
         return hackyGetRegistry(Registries.CONFIGURED_FEATURE).getKey(object);
     }
@@ -170,6 +175,7 @@ public class Utils {
         if (object instanceof SoftFluid s) return getID(s);
         if (object instanceof MapDecorationType<?, ?> s) return getID(s);
         if (object instanceof CreativeModeTab t) return getID(t);
+        if (object instanceof DamageType t) return getID(t);
         throw new UnsupportedOperationException("Unknown class type " + object.getClass());
     }
 

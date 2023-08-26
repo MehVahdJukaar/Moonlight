@@ -2,12 +2,18 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
+import net.mehvahdjukaar.moonlight.api.client.util.ColorUtil;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -23,6 +29,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private final List<ForgeConfigSpec.ConfigValue<?>> requireGameRestart = new ArrayList<>();
     private boolean currentGameRestart;
     private ForgeConfigSpec.ConfigValue<?> currentValue;
+    private final List<SpecialValue<?,?>> specialValues = new ArrayList<>();
 
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         return new ConfigBuilderImpl(name, type);
@@ -46,7 +53,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public ConfigSpecWrapper build() {
         return new ConfigSpecWrapper(this.getName(), this.builder.build(), this.type, this.synced,
-                this.changeCallback, this.requireGameRestart);
+                this.changeCallback, this.requireGameRestart, specialValues);
     }
 
     @Override
@@ -95,11 +102,25 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public Supplier<Integer> defineColor(String name, int defaultValue) {
         maybeAddTranslationString(name);
-        var stringConfig = builder.define(name, Integer.toHexString(defaultValue), ConfigBuilder.COLOR_CHECK);
-        this.currentValue = stringConfig;
+        String def = ColorUtil.CODEC.encodeStart(JsonOps.INSTANCE, defaultValue)
+                .result().get().getAsString();
+        var value = builder.define(name, def,
+                o -> o instanceof String s && ColorUtil.isValidString(s));
+
+        this.currentValue = value;
         maybeAddGameRestart();
-        return () -> Integer.parseUnsignedInt(stringConfig.get().replace("0x", ""), 16);
+
+        var wrapper = new SpecialValue<Integer, String>(value){
+            @Override
+            Integer map(String value) {
+                return ColorUtil.CODEC.decode(JsonOps.INSTANCE, new JsonPrimitive(value))
+                        .get().left().get().getFirst();
+            }
+        };
+        specialValues.add(wrapper);
+        return wrapper;
     }
+
 
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
@@ -139,6 +160,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return super.defineObjectList(name, defaultSupplier, codec);
     }
 
+    @Deprecated(forRemoval = true)
     private static class StringCodecConfigValue<T> implements Supplier<T> {
 
         private final StringJsonConfigValue inner;
@@ -146,7 +168,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         private T cache;
 
         public static <T> StringCodecConfigValue<T> define(ConfigBuilderImpl cfg, String name, Supplier<T> defaultValueSupplier, Codec<T> codec) {
-            Supplier<JsonElement> jsonSupplier = ()->{
+            Supplier<JsonElement> jsonSupplier = () -> {
                 var e = codec.encodeStart(JsonOps.INSTANCE, defaultValueSupplier.get());
                 var json = e.resultOrPartial(s -> {
                     throw new RuntimeException("Invalid default value for config " + name + ": " + s);
@@ -275,5 +297,28 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         builder.comment(comment); //.translationKey(getTranslationName());
         //TODO: choose. either add a translation or a comment literal not both
         return super.comment(comment);
+    }
+
+    // wrapper class for special configs. ugly and hacky just to allow cachind as defualt config entries arent extendable
+    abstract class SpecialValue<T, C> implements Supplier<T> {
+        private final ForgeConfigSpec.ConfigValue<C> original;
+        private T cachedValue = null;
+
+        SpecialValue(ForgeConfigSpec.ConfigValue<C> original) {
+            this.original = original;
+        }
+
+        abstract T map(C value);
+
+        public void clearCache() {
+            cachedValue = null;
+        }
+
+        public T get() {
+            if (cachedValue == null) {
+                cachedValue = map(original.get());
+            }
+            return cachedValue;
+        }
     }
 }

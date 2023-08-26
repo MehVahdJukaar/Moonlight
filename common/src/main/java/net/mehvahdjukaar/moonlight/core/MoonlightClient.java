@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Set;

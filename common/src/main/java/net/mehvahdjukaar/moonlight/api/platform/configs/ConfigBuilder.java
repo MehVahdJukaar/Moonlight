@@ -196,16 +196,4 @@ public abstract class ConfigBuilder {
         return false;
     };
 
-    public static final Predicate<Object> COLOR_CHECK = s -> {
-        try {
-            stringColorToInt((String) s);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    };
-
-    public static int stringColorToInt(String s) {
-        return Integer.parseUnsignedInt(s.replace("0x", ""), 16);
-    }
 }
