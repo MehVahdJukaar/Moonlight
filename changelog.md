@@ -1,1 +1,1 @@
-improved color configs and color utils
+fixed a crash with configs when loaded early using new color configs

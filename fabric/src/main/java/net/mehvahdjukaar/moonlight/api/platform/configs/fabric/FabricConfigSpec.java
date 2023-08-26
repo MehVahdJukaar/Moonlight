@@ -91,7 +91,7 @@ public final class FabricConfigSpec extends ConfigSpec {
         }
 
         if (config instanceof JsonObject jo) {
-            //don't call load directly, so we skip the main category name
+            //don't call a load directly, so we skip the main category name
             mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
         }
         if(!initialized){

@@ -59,6 +59,7 @@ public class Moonlight {
         BlockSetAPI.addDynamicRegistration((reg, wood) -> AdditionalItemPlacementsAPI.afterItemReg(),
                 WoodType.class, BuiltInRegistries.BLOCK_ENTITY_TYPE);
     }
+    //TODO: refactor respriter and palette to better acocunt for animated stuff
 
     private static void commonSetup() {
         BlocksColorInternal.setup();

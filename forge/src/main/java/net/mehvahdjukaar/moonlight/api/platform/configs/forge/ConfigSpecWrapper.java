@@ -59,6 +59,13 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         super(name.getNamespace(), name.getNamespace() + "-" + name.getPath() + ".toml",
                 FMLPaths.CONFIGDIR.get(), type, synced, onChange);
         this.spec = spec;
+        this.specialValues = specialValues;
+        this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ForgeConfigSpec.ConfigValue::get));
+
+        ModConfig.Type t = this.getConfigType() == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
+
+        this.modContainer = ModLoadingContext.get().getActiveContainer();
+        this.modConfig = new ModConfig(t, spec, modContainer, this.getFileName());
 
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         if (onChange != null || this.isSynced() || !specialValues.isEmpty()) bus.addListener(this::onConfigChange);
@@ -67,20 +74,12 @@ public final class ConfigSpecWrapper extends ConfigSpec {
             MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
             MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         }
-
-        ModConfig.Type t = this.getConfigType() == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
-
-        this.modContainer = ModLoadingContext.get().getActiveContainer();
-
-        this.modConfig = new ModConfig(t, spec, modContainer, this.getFileName());
         //for event
         ConfigSpec.addTrackedSpec(this);
 
         if (!requireRestart.isEmpty()) {
             loadFromFile(); //early load if this has world reload ones
         }
-        this.specialValues = specialValues;
-        this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ForgeConfigSpec.ConfigValue::get));
     }
 
     @Override

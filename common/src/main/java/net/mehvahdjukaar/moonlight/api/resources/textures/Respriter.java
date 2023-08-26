@@ -15,6 +15,9 @@ public class Respriter {
     private final TextureImage imageToRecolor;
     //one palette for each frame. frame order will be the same
     private final List<Palette> originalPalettes;
+    //if respriter is not provided a texture list for an animated image, it will use the first palette for all images,
+    //keeping recolors consistent
+    private final boolean useMergedPalette;
 
     /**
      * Base respriter. Automatically grabs a palette from this image and swaps it in recolorImage with the other one provided
@@ -31,7 +34,7 @@ public class Respriter {
      * @param imageToRecolor base image that needs to be recolored
      */
     public static Respriter masked(TextureImage imageToRecolor, TextureImage colorMask) {
-        return new Respriter(imageToRecolor, Palette.fromAnimatedImage(imageToRecolor, colorMask, 0));
+        return new Respriter(imageToRecolor, List.of(Palette.fromImage(imageToRecolor, colorMask, 0)));
     }
 
     public static Respriter ofPalette(TextureImage imageToRecolor, List<Palette> colorsToSwap) {
@@ -54,30 +57,33 @@ public class Respriter {
      *
      * @param imageToRecolor template image that you wish to recolor
      * @param colorsToSwap   list fo colors that need to be changed. Each entry maps to the relative animated image frame.
-     *                       If the provided list is less than the animation strip length only the first provided palette will be used on the whole image
+     *                       If the provided list is less than the animation strip length,
+     *                       only the first provided palette will be used on the whole image keeping colors consistent among different frames
      */
     private Respriter(TextureImage imageToRecolor, List<Palette> colorsToSwap) {
         if (colorsToSwap.size() == 0)
             throw new UnsupportedOperationException("Respriter must have a non empty target palette");
-        //assures that frames size and palette size match
+        // assures that frame size and palette size match
         if (imageToRecolor.frameCount() > colorsToSwap.size()) {
             //if it does not have enough colors just uses the first one
             var firstPalette = colorsToSwap.get(0);
             for (int i = 0; i < imageToRecolor.frameCount(); i++) {
                 colorsToSwap.set(i, firstPalette);
             }
-        }
+            this.useMergedPalette = true;
+        } else this.useMergedPalette = false;
         this.imageToRecolor = imageToRecolor;
         this.originalPalettes = colorsToSwap;
     }
 
 
     /**
-     * Move powerful method that recolors an image using the palette from the provided image and using its animation data
+     * Move powerful method that recolors an image using the palette from the provided image,
+     * and uses its animation data
      * Does not modify any of the given palettes
      */
     public TextureImage recolorWithAnimationOf(TextureImage textureImage) {
-        return recolorWithAnimation(Palette.fromAnimatedImage(textureImage), textureImage.getMetadata());
+        return recolorWithAnimation(List.of(Palette.fromImage(textureImage)), textureImage.getMetadata());
     }
 
     //TODO: generalize and merge these two
@@ -86,7 +92,9 @@ public class Respriter {
      * Move powerful method that recolors an image using the palette provided and the animation data provided.
      * It will merge a new animation strip made of the first frame of the original image colored with the given colors
      * Does not modify any of the given palettes
+     * In short turns a non-animated texture into an animated one
      */
+    // this should only be used when you go from non-animated to animated
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable AnimationMetadataSection targetAnimationData) {
         if (targetAnimationData == null) return recolor(targetPalettes);
         //is restricted to use only first original palette since it must merge a new animation following the given one
@@ -99,9 +107,11 @@ public class Respriter {
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
         texture.forEachFrame((ind, x, y) -> {
+            int finalInd = useMergedPalette ? 0 : ind;
+
             //caches these for each palette
-            ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(ind, i -> {
-                Palette toPalette = targetPalettes.get(ind);
+            ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(finalInd, i -> {
+                Palette toPalette = targetPalettes.get(finalInd);
 
                 return ColorToColorMap.create(originalPalette, toPalette);
             });
@@ -144,9 +154,11 @@ public class Respriter {
 
         texture.forEachFrame((ind, x, y) -> {
             //caches these for each palette
+
+            int finalInd = useMergedPalette ? 0 : ind;
             ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(ind, i -> {
-                Palette toPalette = onlyUseFirst ? targetPalettes.get(0) : targetPalettes.get(ind);
-                Palette originalPalette = originalPalettes.get(ind);
+                Palette toPalette = onlyUseFirst ? targetPalettes.get(0) : targetPalettes.get(finalInd);
+                Palette originalPalette = originalPalettes.get(finalInd);
 
                 return ColorToColorMap.create(originalPalette, toPalette);
             });
@@ -177,14 +189,14 @@ public class Respriter {
 
         @Nullable
         public static ColorToColorMap create(Palette originalPalette, Palette toPalette) {
-            //we don't want to modify original palette for later use here, so we make a copy
+            //we don't want to modify the original palette for later use here, so we make a copy
             Palette copy = toPalette.copy();
             copy.matchSize(originalPalette.size(), originalPalette.getAverageLuminanceStep());
             if (copy.size() != originalPalette.size()) {
                 //provided swap palette had too little colors
                 return null;
             }
-            //now they should be same size
+            //now they should be the same size
             return new ColorToColorMap(zipToMap(originalPalette.getValues(), copy.getValues()));
         }
 

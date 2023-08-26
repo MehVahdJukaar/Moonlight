@@ -589,7 +589,8 @@ public class Palette implements Set<PaletteColor> {
      * @param tolerance    tolerance parameter which determines how close similar colors can be without being merged
      * @return new palette
      */
-    public static List<Palette> fromAnimatedImage(TextureImage textureImage, @Nullable TextureImage textureMask, float tolerance) {
+    public static List<Palette> fromAnimatedImage(TextureImage textureImage, @Nullable TextureImage textureMask,
+                                                  float tolerance) {
         if (textureMask != null &&
                 (textureImage.frameCount() != textureMask.frameCount() ||
                         textureMask.frameWidth() < textureImage.frameWidth() ||
@@ -605,7 +606,7 @@ public class Palette implements Set<PaletteColor> {
         List<Map<Integer, PaletteColor>> paletteBuilders = new ArrayList<>();
 
         textureImage.forEachFrame((index, x, y) -> {
-            //when index changes we add a completed palette
+            //when index changes, we add a completed palette
             if (paletteBuilders.size() <= index) {
                 paletteBuilders.add(new HashMap<>());
             }
