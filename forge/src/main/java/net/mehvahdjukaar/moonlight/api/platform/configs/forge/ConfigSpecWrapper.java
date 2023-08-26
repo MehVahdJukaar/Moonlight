@@ -60,7 +60,6 @@ public final class ConfigSpecWrapper extends ConfigSpec {
                 FMLPaths.CONFIGDIR.get(), type, synced, onChange);
         this.spec = spec;
         this.specialValues = specialValues;
-        this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ForgeConfigSpec.ConfigValue::get));
 
         ModConfig.Type t = this.getConfigType() == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
 
@@ -78,8 +77,10 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         ConfigSpec.addTrackedSpec(this);
 
         if (!requireRestart.isEmpty()) {
-            loadFromFile(); //early load if this has world reload ones
+            loadFromFile(); //Early load if this has world reload ones as we need to get their current values. Isn't there a better way?
         }
+        this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ForgeConfigSpec.ConfigValue::get));
+
     }
 
     @Override
