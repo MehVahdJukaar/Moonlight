@@ -35,6 +35,10 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         INSTANCE = this;
     }
 
+    public static @Nullable WoodType getValue(ResourceLocation name) {
+        return (WoodType)INSTANCE.get(name);
+    }
+
     public static WoodType fromNBT(String name) {
         return WOOD_TYPES.getOrDefault(new ResourceLocation(name), WoodType.OAK_WOOD_TYPE);
     }
@@ -67,12 +71,12 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         ResourceLocation baseRes = baseBlock.getRegistryName();
         String name = null;
         String path = baseRes.getPath();
-        //needs to contain planks in its name
-        //stuff for tfc
-        if(baseRes.getNamespace().equals("tfc")){
+        // Support TerraFirmaCraft (TFC) && ArborFirmaCraft (AFC)
+        if(baseRes.getNamespace().equals("tfc") || baseRes.getNamespace().equals("afc")) {
+            //needs to contain planks in its name
             if(path.contains("wood/planks/")){
                 var log = Registry.BLOCK.getOptional(
-                        new ResourceLocation(baseRes.getNamespace(),path.replace("planks","log")));
+                        new ResourceLocation(baseRes.getNamespace(), path.replace("planks","log")));
                 if(log.isPresent()){
                     ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), path.replace("wood/planks/",""));
                     return Optional.of(new WoodType(id, baseBlock, log.get()));
@@ -80,6 +84,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             }
             return Optional.empty();
         }
+        // DEFAULT
         if (path.endsWith("_planks")) {
             name = path.substring(0, path.length() - "_planks".length());
         } else if (path.startsWith("planks_")) {

@@ -54,8 +54,8 @@ public class WoodType extends IBlockType {
 
         this.signItem = Lazy.of(() -> this.findRelatedEntry("sign", ForgeRegistries.ITEMS));
         this.boatItem = Lazy.of(() -> this.findRelatedEntry("boat", ForgeRegistries.ITEMS));
-         strippedLog = this.findLogRelatedBlock("stripped", "log");
-         leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);
+        leaves = this.findRelatedEntry("leaves", ForgeRegistries.BLOCKS);      
+        strippedLog = this.findLogRelatedBlock("stripped", "log");
     }
 
     @Nullable
@@ -64,6 +64,8 @@ public class WoodType extends IBlockType {
         var id = this.getId();
         String log = this.log.getRegistryName().getPath();
         ResourceLocation[] targets = {
+                // MOD_NAME:wood/stripped_log/<WoodType> to include stripped_log
+                new ResourceLocation(id.getNamespace(), "wood/" + append + post + "/" + id.getPath()), //Support TFC & AFC
                 new ResourceLocation(id.getNamespace(), log + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + log + post),
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
@@ -141,12 +143,14 @@ public class WoodType extends IBlockType {
         Block trapdoor = this.findRelatedEntry("trapdoor", ForgeRegistries.BLOCKS);
         Block button = this.findRelatedEntry("button", ForgeRegistries.BLOCKS);
         Block pressurePlate = this.findRelatedEntry("pressure_plate", ForgeRegistries.BLOCKS);
-        this.addChild("planks", this.planks);
+        Block twig = this.findRelatedEntry("twig", ForgeRegistries.BLOCKS); // TFC only
+
         this.addChild("log", this.log);
+        this.addChild("planks", this.planks);
+        this.addChild("wood", wood);
         this.addChild("leaves", leaves);
         this.addChild("stripped_log", strippedLog);
         this.addChild("stripped_wood", strippedWood);
-        this.addChild("wood", wood);
         this.addChild("slab", slab);
         this.addChild("stairs", stairs);
         this.addChild("fence", fence);
@@ -157,6 +161,8 @@ public class WoodType extends IBlockType {
         this.addChild("pressure_plate", pressurePlate);
         this.addChild("sign", signItem.get());
         this.addChild("boat", boatItem.get());
+        this.addChild("stick", twig); // TFC & AFC only
+
     }
 
     public static class Finder extends SetFinder<WoodType> {
