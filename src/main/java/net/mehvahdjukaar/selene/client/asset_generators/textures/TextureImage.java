@@ -141,24 +141,29 @@ public class TextureImage implements AutoCloseable {
      */
     public static TextureImage open(ResourceManager manager, ResourceLocation relativePath) throws IOException {
         ResourceLocation textureLoc = ResType.TEXTURES.getPath(relativePath);
-        NativeImage i = SpriteUtils.readImage(manager, textureLoc);
-        //try getting metadata for animated textures
-        ResourceLocation metadataLoc = ResType.MCMETA.getPath(relativePath);
-        AnimationMetadataSection metadata = null;
+        try {
+            NativeImage i = SpriteUtils.readImage(manager, textureLoc);
+            //try getting metadata for animated textures
+            ResourceLocation metadataLoc = ResType.MCMETA.getPath(relativePath);
+            AnimationMetadataSection metadata;
 
-        try (InputStream metadataStream = manager.getResource(metadataLoc).getInputStream()) {
-            metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
+            try (InputStream metadataStream = manager.getResource(metadataLoc).getInputStream()) {
+                metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
 
-        } catch (Exception ignored) {
+            } catch (Exception ignored) {
+                throw new IOException("Failed to read mcmeta file for texture "+ relativePath);
+            }
+            return new TextureImage(i, metadata);
+        }catch (Exception e){
+            throw new IOException("Could not find texture at path "+relativePath);
         }
-        return new TextureImage(i, metadata);
     }
 
-    //you shouldnt have to use this
+    //you shouldn't have to use this
     public static TextureImage createNew(int width, int height, @Nullable AnimationMetadataSection animation) {
         return new TextureImage(new NativeImage(width, height, false), animation);
     }
-    //you shouldnt have to use this
+    //you shouldn't have to use this
     public static TextureImage of(NativeImage image, @Nullable AnimationMetadataSection animation) {
         return new TextureImage(image, animation);
     }
