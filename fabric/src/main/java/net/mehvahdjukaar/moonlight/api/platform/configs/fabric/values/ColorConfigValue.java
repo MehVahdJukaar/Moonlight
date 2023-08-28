@@ -39,7 +39,8 @@ public class ColorConfigValue extends IntConfigValue {
     @Override
     public void saveToJson(JsonObject object) {
         if (this.value == null) this.value = defaultValue;
-        object.addProperty(this.name, Integer.toHexString(this.value));
+        object.addProperty(this.name, ColorUtil.CODEC.encodeStart(JsonOps.INSTANCE, this.value)
+                .result().get().getAsString());
     }
 
 

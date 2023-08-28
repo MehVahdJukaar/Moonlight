@@ -1,1 +1,1 @@
-fixed a crash with configs when loaded early using new color configs
+- fixed an issue with optional loot condition

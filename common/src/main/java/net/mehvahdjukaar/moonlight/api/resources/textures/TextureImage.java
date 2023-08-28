@@ -154,22 +154,27 @@ public class TextureImage implements AutoCloseable {
      * @param relativePath relative texture path (does not include /textures)
      */
     public static TextureImage open(ResourceManager manager, ResourceLocation relativePath) throws IOException {
-        ResourceLocation textureLoc = ResType.TEXTURES.getPath(relativePath);
-        NativeImage i = SpriteUtils.readImage(manager, textureLoc);
-        //try getting metadata for animated textures
-        ResourceLocation metadataLoc = ResType.MCMETA.getPath(relativePath);
-        AnimationMetadataSection metadata = null;
+        try {
+            ResourceLocation textureLoc = ResType.TEXTURES.getPath(relativePath);
+            NativeImage i = SpriteUtils.readImage(manager, textureLoc);
+            //try getting metadata for animated textures
+            ResourceLocation metadataLoc = ResType.MCMETA.getPath(relativePath);
+            AnimationMetadataSection metadata = null;
 
-        var res = manager.getResource(metadataLoc);
-        if (res.isPresent()) {
-            try (InputStream metadataStream = res.get().open()) {
-                metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
+            var res = manager.getResource(metadataLoc);
+            if (res.isPresent()) {
+                try (InputStream metadataStream = res.get().open()) {
+                    metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
 
-            } catch (Exception ignored) {
+                } catch (Exception ignored) {
+                    throw new IOException("Failed to open mcmeta file at location "+metadataLoc);
+                }
             }
-        }
 
-        return new TextureImage(i, metadata);
+            return new TextureImage(i, metadata);
+        }catch (Exception e){
+            throw new IOException("Failed to open texture at location "+relativePath+": no such file");
+        }
     }
 
     public static TextureImage createNew(int width, int height, @Nullable AnimationMetadataSection animation) {

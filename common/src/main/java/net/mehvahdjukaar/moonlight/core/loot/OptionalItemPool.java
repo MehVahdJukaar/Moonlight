@@ -78,7 +78,7 @@ public class OptionalItemPool extends LootPoolSingletonContainer {
         @Override
         public void serializeCustom(JsonObject object, OptionalItemPool context, JsonSerializationContext conditions) {
             super.serializeCustom(object, context, conditions);
-            object.addProperty("name", context.res.toString());
+            object.addProperty("name", context.res);
         }
 
         protected OptionalItemPool deserialize(

@@ -203,7 +203,7 @@ public abstract class BlockType {
     @Nullable
     public static Item changeItemType(Item current, BlockType originalMat, BlockType destinationMat) {
         Object changed = changeType(current, originalMat, destinationMat);
-        //if item swap fails try to swap blocks instead
+        //if item swap fails, try to swap blocks instead
         if (changed == null) {
             if (current instanceof BlockItem bi) {
                 var blockChanged = changeType(bi.getBlock(), originalMat, destinationMat);
@@ -227,7 +227,7 @@ public abstract class BlockType {
     @Nullable
     public static Block changeBlockType(@NotNull Block current, BlockType originalMat, BlockType destinationMat) {
         Object changed = changeType(current, originalMat, destinationMat);
-        //if block swap fails try to swap items instead
+        //if block swap fails, try to swap items instead
         if (changed == null) {
             if (current.asItem() != Items.AIR) {
                 var itemChanged = changeType(current.asItem(), originalMat, destinationMat);

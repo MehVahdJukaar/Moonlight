@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -19,7 +18,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
@@ -64,13 +62,14 @@ public class OptionalPropertyCondition implements LootItemCondition {
         public OptionalPropertyCondition deserialize(JsonObject jsonObject, JsonDeserializationContext context) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
             Block block = BuiltInRegistries.BLOCK.getOptional(resourceLocation).orElse(null);
-            StatePropertiesPredicate predicate = null;
+            StatePropertiesPredicate predicate = StatePropertiesPredicate.ANY;
             if (block != null) {
                 predicate = StatePropertiesPredicate.fromJson(jsonObject.get("properties"));
                 predicate.checkState(block.getStateDefinition(), string -> {
                     throw new JsonSyntaxException("Block " + block + " has no property " + string);
                 });
             }
+
             return new OptionalPropertyCondition(resourceLocation, block, predicate);
         }
 
