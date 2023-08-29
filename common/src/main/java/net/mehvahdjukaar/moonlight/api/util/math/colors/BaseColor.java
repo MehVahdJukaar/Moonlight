@@ -1,13 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import net.mehvahdjukaar.moonlight.api.client.util.ColorUtil;
+import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.util.Mth;
 
 import java.util.List;
-import java.util.Locale;
 
 public abstract class BaseColor<T extends BaseColor<T>> {
 
@@ -113,5 +110,5 @@ public abstract class BaseColor<T extends BaseColor<T>> {
 
     //utility codec that serializes either a string or an integer
     @Deprecated(forRemoval = true)
-    public static final Codec<Integer> CODEC = ColorUtil.CODEC;
+    public static final Codec<Integer> CODEC = ColorUtils.CODEC;
 }

@@ -40,8 +40,6 @@ dependencies {
     modCompileOnly ("curse.maven:configured-457570:4462894")
     modRuntimeOnly("curse.maven:yacl-667299:4523736")
 
-    modCompileOnly ("curse.maven:map-atlases-forge-519759:3949437")
-
     modCompileOnly("curse.maven:autoreglib-250363:3857246")
     modCompileOnly("curse.maven:quark-oddities-301051:3575623")
     modCompileOnly("curse.maven:quark-243121:4463411")

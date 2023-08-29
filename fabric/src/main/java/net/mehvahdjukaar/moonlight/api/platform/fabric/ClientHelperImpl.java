@@ -130,8 +130,6 @@ public class ClientHelperImpl {
     }
 
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation name) {
-        Moonlight.assertInitPhase();
-
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
             private final Supplier<PreparableReloadListener> inner = Suppliers.memoize(listener::get);
 

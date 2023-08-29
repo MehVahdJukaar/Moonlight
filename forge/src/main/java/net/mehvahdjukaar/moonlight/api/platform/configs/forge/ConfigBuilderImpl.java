@@ -2,18 +2,14 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import net.mehvahdjukaar.moonlight.api.client.util.ColorUtil;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
-import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
+import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -29,7 +25,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private final List<ForgeConfigSpec.ConfigValue<?>> requireGameRestart = new ArrayList<>();
     private boolean currentGameRestart;
     private ForgeConfigSpec.ConfigValue<?> currentValue;
-    private final List<SpecialValue<?,?>> specialValues = new ArrayList<>();
+    private final List<SpecialValue<?, ?>> specialValues = new ArrayList<>();
 
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         return new ConfigBuilderImpl(name, type);
@@ -102,18 +98,18 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public Supplier<Integer> defineColor(String name, int defaultValue) {
         maybeAddTranslationString(name);
-        String def = ColorUtil.CODEC.encodeStart(JsonOps.INSTANCE, defaultValue)
+        String def = ColorUtils.CODEC.encodeStart(JsonOps.INSTANCE, defaultValue)
                 .result().get().getAsString();
         var value = builder.define(name, def,
-                o -> o instanceof String s && ColorUtil.isValidString(s));
+                o -> o instanceof String s && ColorUtils.isValidString(s));
 
         this.currentValue = value;
         maybeAddGameRestart();
 
-        var wrapper = new SpecialValue<Integer, String>(value){
+        var wrapper = new SpecialValue<Integer, String>(value) {
             @Override
             Integer map(String value) {
-                return ColorUtil.CODEC.decode(JsonOps.INSTANCE, new JsonPrimitive(value))
+                return ColorUtils.CODEC.decode(JsonOps.INSTANCE, new JsonPrimitive(value))
                         .get().left().get().getFirst();
             }
         };
@@ -151,7 +147,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
         if (usesDataBuddy) return ConfigHelper.defineObject(builder, name, codec, defaultSupplier); //actual toml parse
-        return StringCodecConfigValue.define(this, name, defaultSupplier, codec); //string based config
+        return StringCodecConfigValue.define(this, name, defaultSupplier, codec); //string-based config
     }
 
     @Override

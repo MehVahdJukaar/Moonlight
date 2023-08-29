@@ -1,15 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
-import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.client.util.ColorUtil;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
+import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryFileCodec;
@@ -533,7 +530,7 @@ public class SoftFluid {
             Codec.STRING.optionalFieldOf("from_mod").forGetter(getHackyOptional(SoftFluid::getFromMod)),
             Codec.STRING.optionalFieldOf("translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
             Codec.intRange(0, 15).optionalFieldOf("luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
-            ColorUtil.CODEC.optionalFieldOf("color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
+            ColorUtils.CODEC.optionalFieldOf("color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
             TintMethod.CODEC.optionalFieldOf("tint_method").forGetter(getHackyOptional(SoftFluid::getTintMethod)),
             FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
             Codec.STRING.listOf().optionalFieldOf("preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
