@@ -23,7 +23,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.jetbrains.annotations.ApiStatus;
-import pepjebs.mapatlases.config.MapAtlasesConfig;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

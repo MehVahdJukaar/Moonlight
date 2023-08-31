@@ -1,12 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -32,10 +32,14 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
         //run data could give a null minecraft here...
         if (!PlatHelper.isData()) {
             //unused now...
-            ClientHelper.addClientReloadListener(() -> this, this.dynamicPack.id());
+            ClientHelper.addClientReloadListener(() -> this,
+                    new ResourceLocation(this.modId, "dyn_resources_generator_" + index++));
         }
         MoonlightEventsHelper.addListener(this::addDynamicTranslations, AfterLanguageLoadEvent.class);
     }
+
+    //hack for fabric id
+    private static Integer index = 0;
 
     @Override
     protected PackRepository getRepository() {
@@ -49,6 +53,7 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier) {
         addTextureIfNotPresent(manager, relativePath, textureSupplier, true);
     }
+
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier, boolean isOnAtlas) {
 
         ResourceLocation res = relativePath.contains(":") ? new ResourceLocation(relativePath) :

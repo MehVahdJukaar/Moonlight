@@ -1,1 +1,1 @@
-- fixed an issue with optional loot condition
+fixed an issue with fabric and new default config

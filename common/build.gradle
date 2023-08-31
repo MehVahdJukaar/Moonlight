@@ -24,6 +24,8 @@ dependencies {
     modCompileOnly("curse.maven:yacl-667299:4523734")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modImplementation("curse.maven:map-atlases-436298:4592038")
+    //modImplementation("curse.maven:map-atlases-forge-519759:4728634")
+
 
 }
 

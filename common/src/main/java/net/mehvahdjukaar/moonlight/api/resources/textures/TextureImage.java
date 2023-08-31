@@ -32,9 +32,8 @@ public class TextureImage implements AutoCloseable {
     private final NativeImage image;
     //width of a frame
     private final FrameSize frameSize;
-    //all frames. Includes unused ones
+    //All frames. Includes unused ones
     private final int frameCount;
-
     private final int frameScale;
 
 
@@ -167,13 +166,13 @@ public class TextureImage implements AutoCloseable {
                     metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
 
                 } catch (Exception ignored) {
-                    throw new IOException("Failed to open mcmeta file at location "+metadataLoc);
+                    throw new IOException("Failed to open mcmeta file at location " + metadataLoc);
                 }
             }
 
             return new TextureImage(i, metadata);
-        }catch (Exception e){
-            throw new IOException("Failed to open texture at location "+relativePath+": no such file");
+        } catch (Exception e) {
+            throw new IOException("Failed to open texture at location " + relativePath + ": no such file");
         }
     }
 

@@ -69,8 +69,9 @@ public class RetexturedModel implements CustomBakedModel {
                     int i = 0;
                     for (var q : originalQuads) {
                         var textureName = list.get(i);
-
-                        quads.add(VertexUtil.swapSprite(q, newSpriteGetter.apply(textureName)));
+                        BakedQuadsTransformer transformer = BakedQuadsTransformer.create()
+                                .applyingSprite(newSpriteGetter.apply(textureName));
+                        quads.add(transformer.transform(q));
                         i++;
                     }
                 }
