@@ -156,7 +156,8 @@ public abstract class DynamicResourcePack implements PackResources {
     @Nullable
     @Override
     public InputStream getRootResource(String pFileName) {
-        return new ByteArrayInputStream(this.rootResources.get(pFileName));
+        byte[] resource = this.rootResources.get(pFileName);
+        return resource == null ? null : new ByteArrayInputStream(resource);
     }
 
     @Override
