@@ -24,18 +24,13 @@ import java.util.Map;
 
 public class ClientBoundSyncCustomMapDecorationMessage implements Message {
     private final int mapId;
-    private final byte scale;
-    private final boolean locked;
 
     private final CustomMapDecoration[] customDecorations;
     private final CustomDataHolder.Instance<?>[] customData;
 
-    public ClientBoundSyncCustomMapDecorationMessage(
-            int mapId, byte pScale, boolean pLocked,
+    public ClientBoundSyncCustomMapDecorationMessage(int mapId,
             CustomMapDecoration[] customDecorations, CustomDataHolder.Instance<?>[] customData) {
         this.mapId = mapId;
-        this.scale = pScale;
-        this.locked = pLocked;
 
         this.customData = customData;
         this.customDecorations = customDecorations;
@@ -43,8 +38,6 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
 
     public void writeToBuffer(FriendlyByteBuf buffer) {
         buffer.writeVarInt(this.mapId);
-        buffer.writeByte(this.scale);
-        buffer.writeBoolean(this.locked);
 
         buffer.writeVarInt(this.customDecorations.length);
 
@@ -64,8 +57,6 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
     //receivers
     public ClientBoundSyncCustomMapDecorationMessage(FriendlyByteBuf pBuffer) {
         this.mapId = pBuffer.readVarInt();
-        this.scale = pBuffer.readByte();
-        this.locked = pBuffer.readBoolean();
 
         this.customDecorations = new CustomMapDecoration[pBuffer.readVarInt()];
 

@@ -90,6 +90,17 @@ transitive-accessible method net/minecraft/world/level/block/TorchBlock <init> (
 transitive-accessible method net/minecraft/world/level/block/WallTorchBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/core/particles/ParticleOptions;)V
 transitive-accessible method net/minecraft/world/level/block/IronBarsBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
 
+#explosion stuff
+transitive-accessible field net/minecraft/world/level/Explosion damageCalculator Lnet/minecraft/world/level/ExplosionDamageCalculator;
+transitive-accessible field net/minecraft/world/level/Explosion level Lnet/minecraft/world/level/Level;
+transitive-accessible field net/minecraft/world/level/Explosion radius F
+transitive-accessible field net/minecraft/world/level/Explosion x D
+transitive-accessible field net/minecraft/world/level/Explosion y D
+transitive-accessible field net/minecraft/world/level/Explosion z D
+transitive-accessible field net/minecraft/world/level/Explosion damageSource Lnet/minecraft/world/damagesource/DamageSource;
+transitive-mutable field net/minecraft/world/level/Explosion damageSource Lnet/minecraft/world/damagesource/DamageSource;
+transitive-accessible field net/minecraft/world/level/Explosion blockInteraction Lnet/minecraft/world/level/Explosion$BlockInteraction;
+transitive-extendable method net/minecraft/world/level/Explosion addBlockDrops (Lit/unimi/dsi/fastutil/objects/ObjectArrayList;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/BlockPos;)V
 
 #flute renderer fabric
 transitive-accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V

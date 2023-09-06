@@ -210,7 +210,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             if (player instanceof ServerPlayer serverPlayer && mapId != null) {
 
                 ModMessages.CHANNEL.sendToClientPlayer(serverPlayer,
-                        new ClientBoundSyncCustomMapDecorationMessage(mapId, this.scale, this.locked,
+                        new ClientBoundSyncCustomMapDecorationMessage(mapId,
                                 this.customDecorations.values().toArray(new CustomMapDecoration[0]),
                                 this.customData.values().toArray(new CustomDataHolder.Instance[0])));
             }

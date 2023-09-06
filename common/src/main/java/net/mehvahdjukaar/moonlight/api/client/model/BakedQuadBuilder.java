@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.client.model;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Transformation;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.client.util.VertexUtil;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -20,7 +19,7 @@ import java.util.function.Consumer;
 public interface BakedQuadBuilder extends VertexConsumer {
 
     static BakedQuadBuilder create(TextureAtlasSprite sprite) {
-        return create(sprite,(Matrix4f) null);
+        return create(sprite, (Matrix4f) null);
     }
 
     static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Transformation transformation) {
@@ -29,6 +28,7 @@ public interface BakedQuadBuilder extends VertexConsumer {
                 .translate(-0.5f, -0.5f, -0.5f));
     }
 
+    //
     @ExpectPlatform
     static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
         throw new AssertionError();

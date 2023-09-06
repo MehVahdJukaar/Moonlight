@@ -21,7 +21,7 @@ import java.util.Optional;
 
 public class MapHelper {
 
-    private static final boolean MAP_ATLASES = PlatHelper.isModLoaded("map_atlases");
+    public static final boolean MAP_ATLASES = PlatHelper.isModLoaded("map_atlases");
 
     @Nullable
     public static MapItemSavedData getMapData(ItemStack stack, Level level, @Nullable Player player) {

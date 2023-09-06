@@ -37,7 +37,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transform) {
         MeshBuilder meshBuilder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
         this.inner = meshBuilder.getEmitter();
-        this.globalTransform = transform == null ? null : new Matrix4f(new Matrix3f(transform));
+        this.globalTransform = transform; //new Matrix4f(new Matrix3f(transform));
         this.sprite = sprite;
         inner.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
         this.normalTransf = transform == null ? null :

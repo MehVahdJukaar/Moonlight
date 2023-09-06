@@ -1,7 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.integration;
 
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -9,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
-import pepjebs.mapatlases.item.MapAtlasItem;
+import pepjebs.mapatlases.client.MapAtlasesClient;
 import pepjebs.mapatlases.item.MapAtlasItem;
 import pepjebs.mapatlases.utils.MapAtlasesAccessUtils;
 
@@ -48,5 +50,11 @@ public class MapAtlasCompat {
         } catch (Exception ignored) {
         }
         return null;
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void scaleDecoration(PoseStack poseStack) {
+        float multiplier = MapAtlasesClient.getWorldMapZoomLevel();
+        poseStack.scale(multiplier, multiplier, 1);
     }
 }

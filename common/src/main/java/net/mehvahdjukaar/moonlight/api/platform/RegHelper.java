@@ -13,6 +13,7 @@ import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
@@ -223,6 +224,11 @@ public class RegHelper {
 
     public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(ResourceLocation name, Supplier<T> blockEntity) {
         return register(name, blockEntity, Registries.BLOCK_ENTITY_TYPE);
+    }
+
+    public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(
+            ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Block... block) {
+        return (RegSupplier<T>) registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply, block));
     }
 
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {

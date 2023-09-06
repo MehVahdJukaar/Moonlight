@@ -1,1 +1,2 @@
-fixed an issue with fabric and new default config
+actualy fixed baked models
+improved map atlas integration

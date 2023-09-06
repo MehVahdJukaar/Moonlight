@@ -3,13 +3,13 @@ package net.mehvahdjukaar.moonlight.api.map.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.MapHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.SpriteCoordinateExpander;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
@@ -48,6 +48,9 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             matrixStack.translate(0.0F + (float) decoration.getX() / 2.0F + 64.0F, 0.0F + (float) decoration.getY() / 2.0F + 64.0F, -0.02F);
             matrixStack.mulPose(Axis.ZP.rotationDegrees((float) (decoration.getRot() * 360) / 16.0F));
             matrixStack.scale(4.0F, 4.0F, 3.0F);
+            if(MapHelper.MAP_ATLASES){
+                MapAtlasCompat.scaleDecoration(matrixStack);
+            }
             matrixStack.translate(-0.125D, 0.125D, 0.0D);
 
             Matrix4f matrix4f1 = matrixStack.last().pose();
