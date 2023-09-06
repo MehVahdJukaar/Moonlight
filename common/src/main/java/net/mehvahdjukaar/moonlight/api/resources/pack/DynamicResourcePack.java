@@ -179,7 +179,8 @@ public abstract class DynamicResourcePack implements PackResources {
     @Override
     public IoSupplier<InputStream> getRootResource(String... strings) {
         String fileName = String.join("/", strings);
-        return () -> new ByteArrayInputStream(this.rootResources.get(fileName));
+        byte[] resource = this.rootResources.get(fileName);
+        return resource == null ? null : () -> new ByteArrayInputStream(resource);
     }
 
 
