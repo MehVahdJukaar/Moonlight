@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.mojang.serialization.Lifecycle;
+import net.mehvahdjukaar.moonlight.api.client.ICustomItemRendererProvider;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -86,6 +88,10 @@ public class RegistryQueue<T> {
             this.entry = this.holder.value();
             regSupplier = null;
             registryKey = null;
+
+            if(PlatHelper.getPhysicalSide().isClient() && entry instanceof ICustomItemRendererProvider pr){
+                pr.registerFabricRenderer();
+            }
         }
 
     }

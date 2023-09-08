@@ -27,7 +27,7 @@ public abstract class MapItemMixin {
         MapItemSavedData mapData = level == null ? null : MapItem.getSavedData(integer, level);
         if (mapData instanceof ExpandedMapData data) {
             data.getCustomData().forEach((s, o) -> {
-                Component c = o.getTooltip(mapData, stack);
+                Component c = o.onItemTooltip(mapData, stack);
                 if (c != null) tooltips.add(c);
             });
         }
@@ -37,7 +37,7 @@ public abstract class MapItemMixin {
     private void update(Level level, Entity entity, MapItemSavedData data, CallbackInfo ci) {
         AtomicBoolean b = new AtomicBoolean(false);
         if (data instanceof ExpandedMapData d) {
-            d.getCustomData().forEach((s, o) -> b.set(o.onUpdate(data, entity)));
+            d.getCustomData().forEach((s, o) -> b.set(o.onItemUpdate(data, entity)));
         }
         if (b.get()) ci.cancel();
     }

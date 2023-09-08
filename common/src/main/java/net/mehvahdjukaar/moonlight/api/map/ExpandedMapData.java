@@ -12,7 +12,7 @@ import java.util.Map;
 public interface ExpandedMapData {
     Map<String, CustomMapDecoration> getCustomDecorations();
     Map<String, MapBlockMarker<?>> getCustomMarkers();
-    Map<ResourceLocation, CustomDataHolder.Instance<?>> getCustomData();
+    Map<ResourceLocation, CustomMapData> getCustomData();
 
     boolean toggleCustomDecoration(LevelAccessor world, BlockPos pos);
 

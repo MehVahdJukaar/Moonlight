@@ -1,2 +1,1 @@
-actualy fixed baked models
-improved map atlas integration
+fixed an issue with dynamic pack root resources

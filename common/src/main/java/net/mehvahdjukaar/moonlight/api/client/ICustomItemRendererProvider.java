@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.client;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Supplier;
 
@@ -13,8 +14,9 @@ public interface ICustomItemRendererProvider extends ItemLike {
     Supplier<ItemStackRenderer> getRendererFactory();
 
     /**
-     * Register this for fabric. does nothing for forge
+     * Register this for fabric. Does nothing for forge
      */
+    @ApiStatus.Internal
     default void registerFabricRenderer() {
 
     }

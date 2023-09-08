@@ -24,6 +24,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -31,6 +32,7 @@ import java.util.function.Function;
 public class MapDecorationRegistry {
 
     //pain
+    @ApiStatus.Internal
     public static final Codec<MapDecorationType<?, ?>> CODEC =
             Codec.either(CustomDecorationType.CODEC, JsonDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
@@ -43,7 +45,7 @@ public class MapDecorationRegistry {
                         }
                         return Either.right((JsonDecorationType) type);
                     });
-
+    @ApiStatus.Internal
     public static final Codec<MapDecorationType<?, ?>> NETWORK_CODEC =
             Codec.either(CustomDecorationType.CODEC, JsonDecorationType.NETWORK_CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
@@ -58,21 +60,13 @@ public class MapDecorationRegistry {
                     });
 
     //data holder
-
-    public static final Map<ResourceLocation, CustomDataHolder<?>> CUSTOM_MAP_DATA_TYPES = new HashMap<>();
-
+    @ApiStatus.Internal
+    public static final Map<ResourceLocation, CustomMapData.Type<?>> CUSTOM_MAP_DATA_TYPES = new LinkedHashMap<>();
 
     /**
      * Registers a custom data type to be stored in map data
-     *
-     * @param name          id
-     * @param type          data type class
-     * @param load          load function
-     * @param save          save function
-     * @param onItemUpdate  callback for when a map item is updated
-     * @param onItemTooltip callback on map item tooltip
-     * @param <T>           data type
      */
+    @Deprecated(forRemoval = true)
     public static <T> void registerCustomMapSavedData(ResourceLocation name, Class<T> type,
                                                       Function<CompoundTag, T> load,
                                                       BiConsumer<CompoundTag, T> save,
@@ -81,8 +75,48 @@ public class MapDecorationRegistry {
         if (CUSTOM_MAP_DATA_TYPES.containsKey(name)) {
             throw new IllegalArgumentException("Duplicate custom map data registration " + name);
         } else {
-            CUSTOM_MAP_DATA_TYPES.put(name, new CustomDataHolder<>(name, load, save, onItemUpdate, onItemTooltip));
+            AtomicReference<CustomMapData.Type<?>> hack = new AtomicReference<>();
+            CustomMapData.Type<?> tp = new CustomMapData.Type<>(name, (c) ->   new CustomMapData() {
+                    final T obj = load.apply(c);
+
+                    @Override
+                    public Type<?> getType() {
+                        return hack.get();
+                    }
+
+                    @Override
+                    public @Nullable Component onItemTooltip(MapItemSavedData data, ItemStack stack) {
+                        return onItemTooltip.apply(data, stack, obj);
+                    }
+
+                    @Override
+                    public boolean onItemUpdate(MapItemSavedData data, Entity entity) {
+                        return onItemUpdate.apply(data, entity, obj);
+                    }
+
+                    @Override
+                    public void save(CompoundTag tag) {
+                        save.accept(tag, obj);
+                    }
+                });
+            hack.set(tp);
+            CUSTOM_MAP_DATA_TYPES.put(name, tp);
         }
+    }
+
+    /**
+     * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
+     **/
+    public static <T extends CustomMapData> CustomMapData.Type<T> registerCustomMapSavedData(CustomMapData.Type<T> type) {
+        if (CUSTOM_MAP_DATA_TYPES.containsKey(type.id())) {
+            throw new IllegalArgumentException("Duplicate custom map data registration " + type.id());
+        } else {
+            CUSTOM_MAP_DATA_TYPES.put(type.id(), type);
+        }
+        return type;
+    }
+    public static <T extends CustomMapData> CustomMapData.Type<T> registerCustomMapSavedData(ResourceLocation id, Function<CompoundTag, T> factory) {
+        return registerCustomMapSavedData(new CustomMapData.Type<>(id, factory));
     }
 
 
@@ -117,6 +151,7 @@ public class MapDecorationRegistry {
         return getGenericStructure();
     }
 
+    @ApiStatus.Internal
     @ExpectPlatform
     public static void init() {
         throw new AssertionError();

@@ -12,6 +12,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.SeparateTransformsModel;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +36,7 @@ public interface SelfCustomBakedModel extends IDynamicBakedModel, CustomBakedMod
 
     @Override
     default TextureAtlasSprite getParticleIcon(@NotNull ModelData data) {
+        SeparateTransformsModel
         return getBlockParticle(new ExtraModelDataImpl(data));
     }
 

@@ -2,10 +2,7 @@ package net.mehvahdjukaar.moonlight.core.network;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.mehvahdjukaar.moonlight.api.map.CustomDataHolder;
-import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
-import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
+import net.mehvahdjukaar.moonlight.api.map.*;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
@@ -26,10 +23,10 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
     private final int mapId;
 
     private final CustomMapDecoration[] customDecorations;
-    private final CustomDataHolder.Instance<?>[] customData;
+    private final CustomMapData[] customData;
 
     public ClientBoundSyncCustomMapDecorationMessage(int mapId,
-            CustomMapDecoration[] customDecorations, CustomDataHolder.Instance<?>[] customData) {
+            CustomMapDecoration[] customDecorations, CustomMapData[] customData) {
         this.mapId = mapId;
 
         this.customData = customData;
@@ -48,7 +45,7 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
 
         buffer.writeVarInt(this.customData.length);
 
-        for (CustomDataHolder.Instance<?> data : this.customData) {
+        for (CustomMapData data : this.customData) {
             buffer.writeResourceLocation(data.getType().id());
             data.saveToBuffer(buffer);
         }
@@ -67,9 +64,9 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
             }
         }
         //TODO: I really could have merged the 2 systems
-        this.customData = new CustomDataHolder.Instance[pBuffer.readVarInt()];
+        this.customData = new CustomMapData[pBuffer.readVarInt()];
         for (int m = 0; m < this.customData.length; ++m) {
-            CustomDataHolder<?> type = MapDecorationRegistry.CUSTOM_MAP_DATA_TYPES.getOrDefault(pBuffer.readResourceLocation(), null);
+            CustomMapData.Type<?> type = MapDecorationRegistry.CUSTOM_MAP_DATA_TYPES.getOrDefault(pBuffer.readResourceLocation(), null);
             if (type != null) {
                 this.customData[m] = type.createFromBuffer(pBuffer);
             }
@@ -112,9 +109,9 @@ public class ClientBoundSyncCustomMapDecorationMessage implements Message {
                     Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");
                 }
             }
-            Map<ResourceLocation, CustomDataHolder.Instance<?>> customData = mapData.getCustomData();
+            Map<ResourceLocation,CustomMapData> customData = mapData.getCustomData();
             customData.clear();
-            for (CustomDataHolder.Instance<?> instance : this.customData) {
+            for (CustomMapData instance : this.customData) {
                 if (instance != null) customData.put(instance.getType().id(), instance);
                 else {
                     Moonlight.LOGGER.warn("Failed to load custom map data, skipping");
