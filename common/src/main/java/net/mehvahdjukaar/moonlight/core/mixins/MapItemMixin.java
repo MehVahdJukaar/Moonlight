@@ -37,7 +37,9 @@ public abstract class MapItemMixin {
     private void update(Level level, Entity entity, MapItemSavedData data, CallbackInfo ci) {
         AtomicBoolean b = new AtomicBoolean(false);
         if (data instanceof ExpandedMapData d) {
-            d.getCustomData().forEach((s, o) -> b.set(o.onItemUpdate(data, entity)));
+            d.getCustomData().forEach((s, o) -> {
+                if (o.onItemUpdate(data, entity)) b.set(true);
+            });
         }
         if (b.get()) ci.cancel();
     }

@@ -36,7 +36,6 @@ public interface SelfCustomBakedModel extends IDynamicBakedModel, CustomBakedMod
 
     @Override
     default TextureAtlasSprite getParticleIcon(@NotNull ModelData data) {
-        SeparateTransformsModel
         return getBlockParticle(new ExtraModelDataImpl(data));
     }
 

@@ -31,7 +31,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     private final Matrix4f globalTransform;
     private final Matrix3f normalTransf;
     private Consumer<BakedQuad> quadConsumer;
-    private int vertexIndex = 1;
+    private int vertexIndex = 0;
     private boolean autoDirection = false;
 
     private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transform) {

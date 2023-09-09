@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 public interface CustomMapData {
@@ -23,9 +24,13 @@ public interface CustomMapData {
         }
 
         @SuppressWarnings("unchecked")
-        @NotNull
+        @Nullable
         public T get(MapItemSavedData mapData) {
             return (T) ((ExpandedMapData) mapData).getCustomData().get(this.id);
+        }
+
+        public T getOrCreate(MapItemSavedData mapData, Supplier<T> constructor) {
+            return (T) ((ExpandedMapData) mapData).getCustomData().computeIfAbsent(this.id, r -> constructor.get());
         }
     }
 

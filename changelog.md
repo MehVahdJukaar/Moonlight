@@ -1,1 +1,2 @@
-fixed an issue with dynamic pack root resources
+fixed quad builder not workig correctly on fabric
+improved extra map data API
