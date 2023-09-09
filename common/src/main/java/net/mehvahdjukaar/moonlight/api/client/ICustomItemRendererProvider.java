@@ -17,6 +17,7 @@ public interface ICustomItemRendererProvider extends ItemLike {
      * Register this for fabric. Does nothing for forge
      */
     @ApiStatus.Internal
+    @Deprecated(forRemoval = true)
     default void registerFabricRenderer() {
 
     }

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.mojang.serialization.Lifecycle;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.mehvahdjukaar.moonlight.api.client.ICustomItemRendererProvider;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
@@ -12,6 +13,7 @@ import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ItemLike;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,8 +91,14 @@ public class RegistryQueue<T> {
             regSupplier = null;
             registryKey = null;
 
-            if(PlatHelper.getPhysicalSide().isClient() && entry instanceof ICustomItemRendererProvider pr){
-                pr.registerFabricRenderer();
+            if (PlatHelper.getPhysicalSide().isClient() && entry instanceof ICustomItemRendererProvider pr) {
+                ItemLike il = (ItemLike) entry;
+                if (BuiltinItemRendererRegistry.INSTANCE.get(il) == null) {
+                    BuiltinItemRendererRegistry.INSTANCE.register(il,
+                            (BuiltinItemRendererRegistry.DynamicItemRenderer) pr.getRendererFactory().get());
+                } else {
+                    if (PlatHelper.isDev()) throw new AssertionError();
+                }
             }
         }
 
