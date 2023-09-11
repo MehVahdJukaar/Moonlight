@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 import org.jetbrains.annotations.Nullable;
+
 import java.util.Objects;
 
 /**
@@ -20,7 +21,7 @@ import java.util.Objects;
 public abstract class MapBlockMarker<D extends CustomMapDecoration> {
     private final MapDecorationType<D, ?> type;
     private BlockPos pos;
-    private int rot =0;
+    private int rot = 0;
 
     protected MapBlockMarker(MapDecorationType<D, ?> type) {
         this.type = type;
@@ -108,8 +109,12 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
         this.pos = pos;
     }
 
+    public void setRotation(int rot) {
+        this.rot = rot;
+    }
+
     public float getRotation() {
-        return 0;
+        return rot;
     }
 
     /**

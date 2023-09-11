@@ -212,8 +212,8 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
                 //adds dynamic decoration and sends them to a client
                 for (var t : MapDecorationRegistry.getValues()) {
-                    CustomMapDecoration c = t.getDynamicDecoration(player, (MapItemSavedData) (Object)this);
-                    if (c != null) decorations.add(c);
+                    var l = t.getDynamicDecorations(player, (MapItemSavedData) (Object) this);
+                    if (!l.isEmpty()) decorations.addAll(l);
                 }
                 ModMessages.CHANNEL.sendToClientPlayer(serverPlayer,
                         new ClientBoundSyncCustomMapDecorationMessage(mapId,

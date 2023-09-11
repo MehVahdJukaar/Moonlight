@@ -18,6 +18,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -39,7 +41,7 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
     //creates marker from world
     private final BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory;
     //for non-permanent decoration like player icon, only visible to player holding the map
-    private final TriFunction<MapDecorationType<?, ?>, Player, MapItemSavedData, D> volatileFactory;
+    private final TriFunction<MapDecorationType<?, ?>, Player, MapItemSavedData, Set<D>> volatileFactory;
 
     /**
      * Normal constructor for decoration type that has a world marker associated. i.e: banners
@@ -53,7 +55,7 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
                                 BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory,
                                 @Nullable Supplier<M> markerFactory,
                                 @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory,
-                                @Nullable TriFunction<MapDecorationType<?, ?>, Player, MapItemSavedData, D> volatileFactory) {
+                                @Nullable TriFunction<MapDecorationType<?, ?>, Player, MapItemSavedData, Set<D>> volatileFactory) {
         this.id = typeId;
         this.markerFactory = markerFactory;
         this.markerFromWorldFactory = markerFromWorldFactory;
@@ -84,7 +86,7 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
     public static <D extends CustomMapDecoration, M extends MapBlockMarker<D>> CustomDecorationType<D, M> dynamic(
             ResourceLocation typeId,
             BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory,
-            TriFunction<MapDecorationType<?, ?>, Player, MapItemSavedData, D> volatileFactory
+            TriFunction<MapDecorationType<?, ?>, Player, MapItemSavedData, Set<D>> volatileFactory
     ) {
         return new CustomDecorationType<>(typeId, decorationFactory, null, null, volatileFactory);
     }
@@ -126,12 +128,11 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
     }
 
     @Override
-    @Nullable
-    public D getDynamicDecoration(Player player, MapItemSavedData data){
+    public Set<D> getDynamicDecorations(Player player, MapItemSavedData data){
         if(volatileFactory != null){
             return volatileFactory.apply(this, player, data);
         }
-        return null;
+        return Set.of();
     }
 
 

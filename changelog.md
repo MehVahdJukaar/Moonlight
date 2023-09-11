@@ -1,1 +1,1 @@
-fixed an issue with shapeless recipe generation
+even more improvements to map markers. Can now display dynamic ones

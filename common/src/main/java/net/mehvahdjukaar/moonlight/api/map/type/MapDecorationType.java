@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.Set;
 
 //type itself can have 2 types: json defined or custom code defined
 public abstract class MapDecorationType<D extends CustomMapDecoration, M extends MapBlockMarker<D>> {
@@ -29,8 +30,8 @@ public abstract class MapDecorationType<D extends CustomMapDecoration, M extends
     @Nullable
     public abstract D loadDecorationFromBuffer(FriendlyByteBuf buffer);
 
-    public D getDynamicDecoration(Player player, MapItemSavedData data){
-        return null;
+    public Set<D> getDynamicDecorations(Player player, MapItemSavedData data){
+        return Set.of();
     }
 
     @Nullable
