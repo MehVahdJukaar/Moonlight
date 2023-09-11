@@ -133,8 +133,8 @@ public class MapDecorationRegistry {
     /**
      * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
      */
-    public static <T extends CustomDecorationType<?, ?>> void registerCustomType(T markerType) {
-        CODE_TYPES_FACTORIES.put(markerType.getCustomFactoryID(), markerType);
+    public static <T extends CustomDecorationType<?, ?>> void registerCustomType(T decorationType) {
+        CODE_TYPES_FACTORIES.put(decorationType.getCustomFactoryID(), decorationType);
     }
 
     public static CustomDecorationType<?, ?> getCustomType(ResourceLocation resourceLocation) {

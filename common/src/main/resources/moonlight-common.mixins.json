@@ -6,7 +6,7 @@
   "client": [
     "ClientLanguagesMixin",
     "FirstPersonRendererMixin",
-    "MapItemRendererMixin",
+    "MapRendererMixin",
     "PlayerItemInHandLayerMixin",
     "ThirdPersonRendererMixin"
   ],

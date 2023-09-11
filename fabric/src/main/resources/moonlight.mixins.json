@@ -13,7 +13,6 @@
     "MenuScreensAccessor",
     "ModelManagerAccessor",
     "SelfCustomBakedModel",
-    "SelfCustomItemRendererProvider",
     "SelfIExtraModelDataProvider",
     "SelfItemStackRenderer",
     "SelfModFlowingFluidMixin",

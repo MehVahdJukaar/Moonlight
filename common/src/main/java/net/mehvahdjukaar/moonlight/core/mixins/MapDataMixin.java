@@ -208,10 +208,16 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             //sends update packet
             Integer mapId = MapHelper.getMapId(stack, player, this);
             if (player instanceof ServerPlayer serverPlayer && mapId != null) {
+                List<CustomMapDecoration> decorations = new ArrayList<>(this.moonlight$customDecorations.values());
 
+                //adds dynamic decoration and sends them to a client
+                for (var t : MapDecorationRegistry.getValues()) {
+                    CustomMapDecoration c = t.getDynamicDecoration(player, (MapItemSavedData) (Object)this);
+                    if (c != null) decorations.add(c);
+                }
                 ModMessages.CHANNEL.sendToClientPlayer(serverPlayer,
                         new ClientBoundSyncCustomMapDecorationMessage(mapId,
-                                this.moonlight$customDecorations.values().toArray(new CustomMapDecoration[0]),
+                                decorations.toArray(new CustomMapDecoration[0]),
                                 this.moonlight$customData.values().toArray(new CustomMapData[0])));
             }
         }

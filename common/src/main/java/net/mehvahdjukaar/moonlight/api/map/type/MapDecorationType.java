@@ -7,8 +7,11 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,11 +29,16 @@ public abstract class MapDecorationType<D extends CustomMapDecoration, M extends
     @Nullable
     public abstract D loadDecorationFromBuffer(FriendlyByteBuf buffer);
 
+    public D getDynamicDecoration(Player player, MapItemSavedData data){
+        return null;
+    }
+
     @Nullable
     public abstract M loadMarkerFromNBT(CompoundTag compound);
 
     @Nullable
     public abstract M getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos);
+
 
     //used for commands. gives either marker default instance or dummy marker
     @NotNull

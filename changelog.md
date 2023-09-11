@@ -1,2 +1,1 @@
-fixed quad builder not workig correctly on fabric
-improved extra map data API
+fixed an issue with shapeless recipe generation

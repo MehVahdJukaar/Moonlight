@@ -73,12 +73,13 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
                 newRes, this.count);
 
         boolean atLeastOneChanged = false;
-        for (var ing : this.ingredients) {
-            var newIng = IRecipeTemplate.convertIngredients(originalMat, destinationMat, ing);
+        for (var originalIng : this.ingredients) {
+            var newIng = IRecipeTemplate.convertIngredients(originalMat, destinationMat, originalIng);
             if (newIng != null) {
                 atLeastOneChanged = true;
             }
-            newIng = ing;
+            //if fail keep the old one
+            else newIng = originalIng;
             builder.requires(newIng);
         }
         //if recipe fails

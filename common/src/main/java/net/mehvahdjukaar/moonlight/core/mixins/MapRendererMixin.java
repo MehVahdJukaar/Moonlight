@@ -4,17 +4,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientManager;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
+
 @Mixin(MapRenderer.class)
-public abstract class MapItemRendererMixin {
+public abstract class MapRendererMixin {
 
 
     @Inject(method = "render", at = @At("RETURN"))
@@ -22,7 +26,8 @@ public abstract class MapItemRendererMixin {
         if (mapData instanceof ExpandedMapData data) {
             int index = data.getVanillaDecorationSize();
             for (CustomMapDecoration decoration : data.getCustomDecorations().values()) {
-                //this shouldnt texture swap if we didnt draw complex shit in their renderes. still need to create a new one because we might have
+                //this shouldn't texture swap if we didn't draw complex shit in their renderers.
+                //still need to create a new one because we might have
                 VertexConsumer vertexBuilder = buffer.getBuffer(MapDecorationClientManager.MAP_MARKERS_RENDER_TYPE);
                 if (MapDecorationClientManager.render(decoration, poseStack, vertexBuilder, buffer, mapData, isOnFrame, light, index))
                     index++;
