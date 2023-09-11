@@ -19,4 +19,4 @@ These include some highly specialized features such as dynamic asset generation,
 All the classes in the api package have some javadocs explaining their use
 
 Additionally the repo includes many example classes that explain in detaul all the most important features of the mod
-[Examples Here](https://github.com/MehVahdJukaar/Moonlight/tree/1.20/common/src/example/java)https://github.com/MehVahdJukaar/Moonlight/tree/1.20/common/src/example/java
+[Examples Here](https://github.com/MehVahdJukaar/Moonlight/tree/1.20/common/src/example/java)
