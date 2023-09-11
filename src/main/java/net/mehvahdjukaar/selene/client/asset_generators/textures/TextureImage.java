@@ -145,13 +145,12 @@ public class TextureImage implements AutoCloseable {
             NativeImage i = SpriteUtils.readImage(manager, textureLoc);
             //try getting metadata for animated textures
             ResourceLocation metadataLoc = ResType.MCMETA.getPath(relativePath);
-            AnimationMetadataSection metadata;
+            AnimationMetadataSection metadata=null;
 
             try (InputStream metadataStream = manager.getResource(metadataLoc).getInputStream()) {
                 metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
 
             } catch (Exception ignored) {
-                throw new IOException("Failed to read mcmeta file for texture "+ relativePath);
             }
             return new TextureImage(i, metadata);
         }catch (Exception e){
