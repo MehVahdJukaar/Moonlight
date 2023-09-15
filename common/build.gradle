@@ -26,7 +26,8 @@ dependencies {
     modImplementation("curse.maven:map-atlases-436298:4592038")
     //modImplementation("curse.maven:map-atlases-forge-519759:4728634")
 
-
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
+    implementation("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
 }
 
 publishing {

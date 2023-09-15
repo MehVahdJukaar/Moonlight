@@ -11,9 +11,16 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.minecraftforge.common.extensions.IForgeBlock;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
@@ -45,14 +52,12 @@ public class MoonlightForge {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init();
             MoonlightClient.initClient();
-
             ClientHelper.addModelLoaderRegistration(modelLoaderEvent -> {
                 modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
             });
         }
 
     }
-
 
     //hacky but eh
     @SubscribeEvent

@@ -5,14 +5,12 @@ import net.mehvahdjukaar.moonlight.api.map.*;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncCustomMapDecorationMessage;
-import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -62,6 +60,8 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Shadow
     @Final
     public int centerZ;
+
+    @Shadow @Final private List<MapItemSavedData.HoldingPlayer> carriedBy;
     //new decorations (stuff that gets rendered)
     @Unique
     public Map<String, CustomMapDecoration> moonlight$customDecorations = Maps.newLinkedHashMap();
@@ -73,6 +73,19 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     //custom data that can be stored in maps
     @Unique
     public final Map<ResourceLocation, CustomMapData> moonlight$customData = new LinkedHashMap<>();
+
+    @Override
+    public void setCustomDecorationsDirty() {
+        this.setDirty();
+        carriedBy.forEach(h->((IHoldingPlayerExtension)h).moonlight$setCustomMarkersDirty());
+    }
+
+    @Override
+    public void setCustomDataDirty() {
+        this.setDirty();
+        carriedBy.forEach(h->((IHoldingPlayerExtension)h).moonlight$setCustomDataDirty());
+    }
+
 
     @Override
     public Map<ResourceLocation, CustomMapData> getCustomData() {
@@ -99,6 +112,8 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         D decoration = marker.createDecorationFromMarker(scale, this.centerX, this.centerZ, dimension, locked);
         if (decoration != null) {
             this.moonlight$customDecorations.put(marker.getMarkerId(), decoration);
+            //so packet is sent
+            setCustomDecorationsDirty();
         }
     }
 
@@ -111,7 +126,9 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Override
     public void resetCustomDecoration() {
-
+        if(!bannerMarkers.isEmpty() || !moonlight$customMapMarkers.isEmpty()){
+            setCustomDecorationsDirty();
+        }
         for (String key : this.moonlight$customMapMarkers.keySet()) {
             this.moonlight$customDecorations.remove(key);
             this.moonlight$customMapMarkers.remove(key);
@@ -150,6 +167,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     if (this.moonlight$customMapMarkers.containsKey(id) && this.moonlight$customMapMarkers.get(id).equals(marker)) {
                         this.moonlight$customMapMarkers.remove(id);
                         this.moonlight$customDecorations.remove(id);
+                        setCustomDecorationsDirty();
                     } else {
                         this.moonlight$customMapMarkers.put(id, marker);
                         this.addCustomDecoration(marker);
@@ -204,21 +222,6 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                         }
                     }
                 }
-            }
-            //sends update packet
-            Integer mapId = MapHelper.getMapId(stack, player, this);
-            if (player instanceof ServerPlayer serverPlayer && mapId != null) {
-                List<CustomMapDecoration> decorations = new ArrayList<>(this.moonlight$customDecorations.values());
-
-                //adds dynamic decoration and sends them to a client
-                for (var t : MapDecorationRegistry.getValues()) {
-                    var l = t.getDynamicDecorations(player, (MapItemSavedData) (Object) this);
-                    if (!l.isEmpty()) decorations.addAll(l);
-                }
-                ModMessages.CHANNEL.sendToClientPlayer(serverPlayer,
-                        new ClientBoundSyncCustomMapDecorationMessage(mapId,
-                                decorations.toArray(new CustomMapDecoration[0]),
-                                this.moonlight$customData.values().toArray(new CustomMapData[0])));
             }
         }
     }
@@ -276,11 +279,14 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                 if (newMarker == null) {
                     iterator.remove();
                     this.moonlight$customDecorations.remove(id);
+                    setCustomDecorationsDirty();
                 } else if (Objects.equals(id, newMarker.getMarkerId()) && marker.shouldUpdate(newMarker)) {
                     newMarker.updateDecoration(this.moonlight$customDecorations.get(id));
                 }
             }
         }
     }
+
+
 
 }

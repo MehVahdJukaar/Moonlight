@@ -98,4 +98,7 @@ public class Moonlight {
         }
     }
 
+    public static void test() {
+        int aa = 1;
+    }
 }

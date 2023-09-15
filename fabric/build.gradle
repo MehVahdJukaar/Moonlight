@@ -40,6 +40,7 @@ dependencies {
 
     modCompileOnly("curse.maven:yacl-667299:4523734")
 
+    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixin_extras_version}")))
 
 }
 

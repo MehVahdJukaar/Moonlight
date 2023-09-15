@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -13,16 +15,16 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class MapExtendingRecipeMixin {
 
 
-    @Redirect(method = "matches*",
+    @ModifyExpressionValue(method = "matches*",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
                     ordinal = 0))
-    private boolean preventsExpandingCustomExplorationMaps(ItemStack original, CraftingContainer inventory, Level world) {
-        CompoundTag tag = original.getTag();
+    private boolean preventsExpandingCustomExplorationMaps(boolean original, @Local ItemStack stack) {
+        CompoundTag tag = stack.getTag();
         if (tag != null && tag.contains("CustomDecorations", 9)) {
             return true;
         }
-        return original.isEmpty();
+        return original;
     }
 
 }

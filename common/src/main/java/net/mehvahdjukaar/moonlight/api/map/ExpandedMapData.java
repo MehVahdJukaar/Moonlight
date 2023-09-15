@@ -25,5 +25,6 @@ public interface ExpandedMapData {
 
     MapItemSavedData copy();
 
-
+    void setCustomDecorationsDirty();
+    void setCustomDataDirty();
 }
