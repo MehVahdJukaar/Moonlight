@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 public class DecorationRenderer<T extends CustomMapDecoration> {
@@ -41,7 +42,9 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
     }
 
     public boolean render(T decoration, PoseStack matrixStack, VertexConsumer vertexBuilder,
-                          MultiBufferSource buffer, MapItemSavedData mapData, boolean isOnFrame, int light, int index) {
+                          MultiBufferSource buffer,
+                          @Nullable MapItemSavedData mapData,
+                          boolean isOnFrame, int light, int index) {
         if (!isOnFrame || renderOnFrame) {
 
             matrixStack.pushPose();
@@ -51,7 +54,7 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             if(MapHelper.MAP_ATLASES){
                 MapAtlasCompat.scaleDecoration(matrixStack);
             }
-            matrixStack.translate(-0.125D, 0.125D, 0.0D);
+            //matrixStack.translate(-0.125D, 0.125D, 0.0D);
 
             Matrix4f matrix4f1 = matrixStack.last().pose();
 

@@ -1,1 +1,1 @@
-even more improvements to map markers. Can now display dynamic ones
+fixed a possible issue with map decoration renderers

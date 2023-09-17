@@ -31,6 +31,7 @@ public class MapHelper {
         return data;
     }
 
+    @Deprecated(forRemoval = true)
     public static Integer getMapId(ItemStack stack, Player player, Object data) {
         Integer i = MapItem.getMapId(stack);
         if (i == null && MAP_ATLASES) i = MapAtlasCompat.getMapIdFromAtlas(stack, player.level(), data);

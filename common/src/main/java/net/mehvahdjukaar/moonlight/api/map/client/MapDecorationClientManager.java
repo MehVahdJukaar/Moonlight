@@ -15,6 +15,7 @@ import net.minecraft.client.resources.TextureAtlasHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -49,13 +50,15 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
         return new DecorationRenderer<>(texture);
     }
 
-    @ApiStatus.Internal
     public static <E extends CustomMapDecoration> DecorationRenderer<E> getRenderer(E decoration) {
         return (DecorationRenderer<E>) RENDERERS.computeIfAbsent(decoration.getType(), t -> simpleRenderer(decoration.getType()));
     }
 
-    @ApiStatus.Internal
-    public static <T extends CustomMapDecoration> boolean render(T decoration, PoseStack matrixStack, VertexConsumer vertexBuilder, MultiBufferSource buffer, MapItemSavedData mapData, boolean isOnFrame, int light, int index) {
+    public static <T extends CustomMapDecoration> boolean render(T decoration, PoseStack matrixStack,
+                                                                 VertexConsumer vertexBuilder,
+                                                                 MultiBufferSource buffer,
+                                                                 @Nullable MapItemSavedData mapData,
+                                                                 boolean isOnFrame, int light, int index) {
         DecorationRenderer<T> renderer = getRenderer(decoration);
         if (renderer != null) {
             return renderer.render(decoration, matrixStack, vertexBuilder, buffer, mapData, isOnFrame, light, index);
