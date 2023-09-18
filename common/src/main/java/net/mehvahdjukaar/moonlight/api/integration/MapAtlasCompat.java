@@ -11,6 +11,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class MapAtlasCompat {
 
+    //gets active data at pos
     @ExpectPlatform
     public static MapItemSavedData getSavedDataFromAtlas(ItemStack stack, Level level, Player player) {
         throw new AssertionError();

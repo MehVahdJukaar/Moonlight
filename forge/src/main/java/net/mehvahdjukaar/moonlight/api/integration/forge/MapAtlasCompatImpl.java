@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.integration.forge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +26,10 @@ public class MapAtlasCompatImpl {
         if (maps != null) {
             var slice = MapAtlasItem.getSelectedSlice(atlas, level.dimension());
             var key = MapKey.at(maps.getScale(), player, slice);
-            return maps.select(key).getSecond();
+            Pair<String, MapItemSavedData> select = maps.select(key);
+            if (select != null) {
+                return select.getSecond();
+            }
         }
         return null;
     }
