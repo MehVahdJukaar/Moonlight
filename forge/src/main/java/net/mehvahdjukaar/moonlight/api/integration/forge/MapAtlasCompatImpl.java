@@ -1,44 +1,53 @@
 package net.mehvahdjukaar.moonlight.api.integration.forge;
 
-
-import lilypuree.mapatlases.item.MapAtlasItem;
-import lilypuree.mapatlases.util.MapAtlasesAccessUtils;
-import net.minecraft.server.level.ServerPlayer;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
+import pepjebs.mapatlases.capabilities.MapKey;
+import pepjebs.mapatlases.client.MapAtlasesClient;
+import pepjebs.mapatlases.item.MapAtlasItem;
+import pepjebs.mapatlases.utils.MapAtlasesAccessUtils;
 
 public class MapAtlasCompatImpl {
-
     public static boolean isAtlas(Item item) {
         return item instanceof MapAtlasItem;
     }
 
     @Nullable
-    public static MapItemSavedData getSavedDataFromAtlas(ItemStack item, Level level, Player player) {
-        if (player instanceof ServerPlayer serverPlayer) {
-            var data = MapAtlasesAccessUtils.getActiveAtlasMapStateServer(level, item, serverPlayer);
-            if (data == null) return null;
-            return data.getValue();
+    public static MapItemSavedData getSavedDataFromAtlas(ItemStack atlas, Level level, Player player) {
+        var maps = MapAtlasItem.getMaps(atlas, level);
+        if (maps != null) {
+            var slice = MapAtlasItem.getSelectedSlice(atlas, level.dimension());
+            var key = MapKey.at(maps.getScale(), player, slice);
+            return maps.select(key).getSecond();
         }
         return null;
     }
 
     @Nullable
-    public static Integer getMapIdFromAtlas(ItemStack item, Level level, Object data) {
-
-        Map<String, MapItemSavedData> mapInfo = MapAtlasesAccessUtils.getAllMapInfoFromAtlas(level, item);
-        for (var e : mapInfo.entrySet()) {
-            if (e.getValue() == data) {
-                return MapAtlasesAccessUtils.getMapIntFromString(e.getKey());
+    public static Integer getMapIdFromAtlas(ItemStack atlas, Level level, Object data) {
+        try {
+            var maps = MapAtlasItem.getMaps(atlas, level);
+            if (maps != null) {
+                for (var e : maps.getAll()) {
+                    if (e.getSecond() == data) {
+                        return MapAtlasesAccessUtils.getMapIntFromString(e.getFirst());
+                    }
+                }
             }
+        } catch (Exception ignored) {
         }
         return null;
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public static void scaleDecoration(PoseStack poseStack) {
+        MapAtlasesClient.modifyDecorationTransform(poseStack);
+    }
 }
