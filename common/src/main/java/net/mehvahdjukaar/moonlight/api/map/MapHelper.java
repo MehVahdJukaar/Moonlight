@@ -81,7 +81,6 @@ public class MapHelper {
             CompoundTag com = stack.getOrCreateTagElement("display");
             com.putInt("MapColor", mapColor);
         }
-
     }
 
     /**

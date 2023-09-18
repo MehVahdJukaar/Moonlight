@@ -1,1 +1,1 @@
-fixed a possible issue with map decoration renderers
+mapatlas integration bug fix
