@@ -64,47 +64,6 @@ public class MapDecorationRegistry {
     public static final Map<ResourceLocation, CustomMapData.Type<?>> CUSTOM_MAP_DATA_TYPES = new LinkedHashMap<>();
 
     /**
-     * Registers a custom data type to be stored in map data
-     */
-    @Deprecated(forRemoval = true)
-    public static <T> void registerCustomMapSavedData(ResourceLocation name, Class<T> type,
-                                                      Function<CompoundTag, T> load,
-                                                      BiConsumer<CompoundTag, T> save,
-                                                      PropertyDispatch.TriFunction<MapItemSavedData, Entity, T, Boolean> onItemUpdate,
-                                                      PropertyDispatch.TriFunction<MapItemSavedData, ItemStack, T, Component> onItemTooltip) {
-        if (CUSTOM_MAP_DATA_TYPES.containsKey(name)) {
-            throw new IllegalArgumentException("Duplicate custom map data registration " + name);
-        } else {
-            AtomicReference<CustomMapData.Type<?>> hack = new AtomicReference<>();
-            CustomMapData.Type<?> tp = new CustomMapData.Type<>(name, (c) ->   new CustomMapData() {
-                    final T obj = load.apply(c);
-
-                    @Override
-                    public Type<?> getType() {
-                        return hack.get();
-                    }
-
-                    @Override
-                    public @Nullable Component onItemTooltip(MapItemSavedData data, ItemStack stack) {
-                        return onItemTooltip.apply(data, stack, obj);
-                    }
-
-                    @Override
-                    public boolean onItemUpdate(MapItemSavedData data, Entity entity) {
-                        return onItemUpdate.apply(data, entity, obj);
-                    }
-
-                    @Override
-                    public void save(CompoundTag tag) {
-                        save.accept(tag, obj);
-                    }
-                });
-            hack.set(tp);
-            CUSTOM_MAP_DATA_TYPES.put(name, tp);
-        }
-    }
-
-    /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
      **/
     public static <T extends CustomMapData> CustomMapData.Type<T> registerCustomMapSavedData(CustomMapData.Type<T> type) {

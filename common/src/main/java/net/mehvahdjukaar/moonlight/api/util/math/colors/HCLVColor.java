@@ -72,12 +72,17 @@ public class HCLVColor extends BaseColor<HCLVColor> {
     }
 
     @Override
-    public HCLVColor multiply(HCLVColor color, float hue, float chroma, float luminance, float alpha) {
+    public HCLVColor multiply(float hue, float chroma, float luminance, float alpha) {
         return new HCLVColor(Mth.clamp(hue*this.hue(), 0,1),
                 Mth.clamp(chroma*this.chroma(), 0,1),
                 Mth.clamp(luminance*this.luminance(), 0,1),
                 Mth.clamp(alpha*this.alpha(), 0,1));
     }
+    @Deprecated(forRemoval = true)
+    public HCLVColor multiply(HCLVColor color, float hue, float chroma, float luminance, float alpha) {
+        return multiply(hue, chroma, luminance, alpha);
+    }
+
 
     @Override
     public HCLVColor mixWith(HCLVColor color, float bias) {

@@ -73,11 +73,16 @@ public class HSVColor extends BaseColor<HSVColor> {
     }
 
     @Override
-    public HSVColor multiply(HSVColor color, float hue, float saturation, float value, float alpha) {
+    public HSVColor multiply(float hue, float saturation, float value, float alpha) {
         return new HSVColor(Mth.clamp(hue * this.hue(), 0, 1),
                 Mth.clamp(saturation * this.saturation(), 0, 1),
                 Mth.clamp(value * this.value(), 0, 1),
                 Mth.clamp(alpha * this.alpha(), 0, 1));
+    }
+
+    @Deprecated(forRemoval = true)
+    public HSVColor multiply(HSVColor color, float hue, float chroma, float luminance, float alpha) {
+        return multiply(hue, chroma, luminance, alpha);
     }
 
     @Override

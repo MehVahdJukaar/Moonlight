@@ -70,11 +70,15 @@ public class LABColor extends BaseColor<LABColor> {
     }
 
     @Override
-    public LABColor multiply(LABColor color, float luminance, float a, float b, float alpha) {
+    public LABColor multiply( float luminance, float a, float b, float alpha) {
         return new LABColor(Mth.clamp(luminance * this.luminance(), 0, 1),
                 Mth.clamp(a * this.a(), 0, 1),
                 Mth.clamp(b * this.b(), 0, 1),
                 Mth.clamp(alpha * this.alpha(), 0, 1));
+    }
+    @Deprecated(forRemoval = true)
+    public LABColor multiply(LABColor color, float hue, float chroma, float luminance, float alpha) {
+        return multiply(hue, chroma, luminance, alpha);
     }
 
     @Override

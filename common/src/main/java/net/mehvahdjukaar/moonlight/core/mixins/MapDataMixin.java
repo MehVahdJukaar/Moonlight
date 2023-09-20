@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.google.common.collect.Maps;
-import net.mehvahdjukaar.moonlight.api.map.*;
+import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
+import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -55,13 +58,13 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     private Map<String, MapBanner> bannerMarkers;
 
     @Shadow
-    @Final
     public int centerX;
     @Shadow
-    @Final
     public int centerZ;
 
-    @Shadow @Final private List<MapItemSavedData.HoldingPlayer> carriedBy;
+    @Shadow
+    @Final
+    private List<MapItemSavedData.HoldingPlayer> carriedBy;
     //new decorations (stuff that gets rendered)
     @Unique
     public Map<String, CustomMapDecoration> moonlight$customDecorations = Maps.newLinkedHashMap();
@@ -77,13 +80,13 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Override
     public void setCustomDecorationsDirty() {
         this.setDirty();
-        carriedBy.forEach(h->((IHoldingPlayerExtension)h).moonlight$setCustomMarkersDirty());
+        carriedBy.forEach(h -> ((IHoldingPlayerExtension) h).moonlight$setCustomMarkersDirty());
     }
 
     @Override
     public void setCustomDataDirty() {
         this.setDirty();
-        carriedBy.forEach(h->((IHoldingPlayerExtension)h).moonlight$setCustomDataDirty());
+        carriedBy.forEach(h -> ((IHoldingPlayerExtension) h).moonlight$setCustomDataDirty());
     }
 
 
@@ -126,7 +129,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Override
     public void resetCustomDecoration() {
-        if(!bannerMarkers.isEmpty() || !moonlight$customMapMarkers.isEmpty()){
+        if (!bannerMarkers.isEmpty() || !moonlight$customMapMarkers.isEmpty()) {
             setCustomDecorationsDirty();
         }
         for (String key : this.moonlight$customMapMarkers.keySet()) {
@@ -247,7 +250,6 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                 if (i != null) customData.put(s, i);
             });
         }
-
     }
 
     @Inject(method = "save", at = @At("RETURN"))
@@ -286,7 +288,6 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             }
         }
     }
-
 
 
 }

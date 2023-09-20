@@ -91,11 +91,16 @@ public class RGBColor extends BaseColor<RGBColor> {
     }
 
     @Override
-    public RGBColor multiply(RGBColor color, float red, float green, float blue, float alpha) {
+    public RGBColor multiply( float red, float green, float blue, float alpha) {
         return new RGBColor(Mth.clamp(red * this.red(), 0, 1),
                 Mth.clamp(green * this.green(), 0, 1),
                 Mth.clamp(blue * this.blue(), 0, 1),
                 Mth.clamp(alpha * this.alpha(), 0, 1));
+    }
+
+    @Deprecated(forRemoval = true)
+    public RGBColor multiply(RGBColor color, float hue, float chroma, float luminance, float alpha) {
+        return multiply(hue, chroma, luminance, alpha);
     }
 
     @Override

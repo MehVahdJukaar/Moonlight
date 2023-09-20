@@ -70,11 +70,15 @@ public class LUVColor extends BaseColor<LUVColor> {
     }
 
     @Override
-    public LUVColor multiply(LUVColor color, float luminance, float u, float v, float alpha) {
+    public LUVColor multiply( float luminance, float u, float v, float alpha) {
         return new LUVColor(Mth.clamp(luminance * this.luminance(), 0, 1),
                 Mth.clamp(u * this.u(), 0, 1),
                 Mth.clamp(v * this.v(), 0, 1),
                 Mth.clamp(alpha * this.alpha(), 0, 1));
+    }
+    @Deprecated(forRemoval = true)
+    public LUVColor multiply(LUVColor color, float hue, float chroma, float luminance, float alpha) {
+        return multiply(hue, chroma, luminance, alpha);
     }
 
     @Override

@@ -1,11 +1,13 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
+import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
@@ -15,18 +17,29 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Moonlight {
 
@@ -98,7 +111,4 @@ public class Moonlight {
         }
     }
 
-    public static void test() {
-        int aa = 1;
-    }
 }

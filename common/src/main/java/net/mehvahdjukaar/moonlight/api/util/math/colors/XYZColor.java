@@ -46,11 +46,16 @@ public class XYZColor extends BaseColor<XYZColor> {
     }
 
     @Override
-    public XYZColor multiply(XYZColor color, float x, float y, float z, float alpha) {
+    public XYZColor multiply( float x, float y, float z, float alpha) {
         return new XYZColor(Mth.clamp(x * this.x(), 0, 1),
                 Mth.clamp(y * this.y(), 0, 1),
                 Mth.clamp(z * this.z(), 0, 1),
                 Mth.clamp(alpha * this.alpha(), 0, 1));
+    }
+
+    @Deprecated(forRemoval = true)
+    public XYZColor multiply(XYZColor color, float hue, float chroma, float luminance, float alpha) {
+        return multiply(hue, chroma, luminance, alpha);
     }
 
     @Override
