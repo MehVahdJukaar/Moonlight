@@ -1,1 +1,1 @@
-mapatlas integration bug fix
+fixed custom map data not being sent to client correctly

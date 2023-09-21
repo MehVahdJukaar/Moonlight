@@ -1,12 +1,15 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
+import io.netty.buffer.Unpooled;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.client.MapStuffClient;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
@@ -102,11 +105,31 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
     @Override
     public void moonlight$sendCustomDecorations(Collection<CustomMapDecoration> decorations) {
+
+        //packet will be passed to client no decoding. if we are on an integrated server we need to create new objects
+        if (PlatHelper.getPhysicalSide().isClient()) {
+            var buffer = new FriendlyByteBuf(Unpooled.buffer());
+            decorations = decorations.stream().map(e -> {
+                e.saveToBuffer(buffer);
+                CustomMapDecoration d = e.getType().loadDecorationFromBuffer(buffer);
+                return d;
+            }).toList();
+        }
         moonlight$customDecorations = decorations.toArray(CustomMapDecoration[]::new);
     }
 
     @Override
     public void moonlight$sendCustomMapData(Collection<CustomMapData> data) {
+
+        //clone objects
+        if (PlatHelper.getPhysicalSide().isClient()) {
+            data = data.stream().map(e -> {
+                CompoundTag tag = new CompoundTag();
+                e.save(tag);
+                CustomMapData n = e.getType().factory().apply(tag);
+                return n;
+            }).toList();
+        }
         moonlight$customData = data.toArray(CustomMapData[]::new);
     }
 

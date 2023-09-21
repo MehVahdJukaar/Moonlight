@@ -31,7 +31,6 @@ public interface CustomMapData {
 
         public T getOrCreate(MapItemSavedData mapData, Supplier<T> constructor) {
             return (T) ((ExpandedMapData) mapData).getCustomData().computeIfAbsent(this.id, r -> {
-                ((ExpandedMapData) mapData).setCustomDataDirty();
                 return constructor.get();
             });
         }
@@ -57,6 +56,10 @@ public interface CustomMapData {
         buffer.writeNbt(tag);
     }
 
+
+    default void setDirty(MapItemSavedData data){
+        ((ExpandedMapData) data).setCustomDataDirty();
+    }
 
 }
 
