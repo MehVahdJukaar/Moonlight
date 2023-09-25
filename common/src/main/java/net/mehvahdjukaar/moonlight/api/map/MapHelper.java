@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
+import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -14,6 +14,7 @@ import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -27,7 +28,8 @@ public class MapHelper {
     public static MapItemSavedData getMapData(ItemStack stack, Level level, @Nullable Player player) {
         MapItemSavedData data;
         data = MapItem.getSavedData(stack, level);
-        if (data == null && MAP_ATLASES && player != null) data = MapAtlasCompat.getSavedDataFromAtlas(stack, level, player);
+        if (data == null && MAP_ATLASES && player != null)
+            data = MapAtlasCompat.getSavedDataFromAtlas(stack, level, player);
         return data;
     }
 
@@ -53,6 +55,8 @@ public class MapHelper {
             com.putInt("MapColor", mapColor);
         }
     }
+
+    //TODO: rename
 
     /**
      * Adds a static decoration tp a map itemstack NBT.<br>
@@ -91,9 +95,9 @@ public class MapHelper {
      */
     public static void addDecorationToMap(ItemStack stack, BlockPos pos, ResourceLocation id, int mapColor) {
         if (id.getNamespace().equals("minecraft")) {
-            Optional<MapDecoration.Type> opt = Arrays.stream(MapDecoration.Type.values()).filter(t -> t.toString().toLowerCase().equals(id.getPath())).findFirst();
-            if (opt.isPresent()) {
-                addVanillaDecorations(stack, pos, opt.get(), mapColor);
+            MapDecoration.Type type = getVanillaType(id);
+            if (type != null) {
+                addVanillaDecorations(stack, pos, type, mapColor);
                 return;
             }
         }
@@ -103,6 +107,12 @@ public class MapHelper {
         } else {
             addVanillaDecorations(stack, pos, MapDecoration.Type.TARGET_X, mapColor);
         }
+    }
+
+    @Nullable
+    private static MapDecoration.Type getVanillaType(ResourceLocation id) {
+        return Arrays.stream(MapDecoration.Type.values()).filter(t -> t.toString().toLowerCase().equals(id.getPath())).findFirst()
+                .orElse(null);
     }
 
     /**
@@ -121,6 +131,32 @@ public class MapHelper {
         if (data instanceof ExpandedMapData expandedMapData) {
             if (!level.isClientSide) {
                 expandedMapData.resetCustomDecoration();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Adds map decoration directly to map data
+     */
+    public static boolean addDecorationToMap(MapItemSavedData data, Level level, BlockPos pos, ResourceLocation id) {
+        if (id.getNamespace().equals("minecraft")) {
+            MapDecoration.Type type = getVanillaType(id);
+            if(type != null) {
+                double d0 = pos.getX() + 0.5D;
+                double d1 = pos.getZ() + 0.5D;
+                data.addDecoration(
+                        type
+                        , level,
+                        "pin_" + pos,
+                        d0, d1, 180.0D, null);
+                return true;
+            }
+        } else {
+            var type = MapDecorationRegistry.get(id);
+            if (type != null) {
+                ((ExpandedMapData) data).addCustomDecoration(type, pos);
                 return true;
             }
         }

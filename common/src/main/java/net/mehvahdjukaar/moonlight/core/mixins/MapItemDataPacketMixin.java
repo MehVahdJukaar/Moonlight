@@ -7,12 +7,17 @@ import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.client.MapStuffClient;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2i;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,13 +34,8 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
     @Shadow
     @Final
-    private int mapId;
-    @Shadow
-    @Final
-    private byte scale;
-    @Shadow
-    @Final
-    private boolean locked;
+    @Nullable
+    private MapItemSavedData.MapPatch colorPatch;
     @Unique
     private CustomMapDecoration[] moonlight$customDecorations = null;
     @Unique
@@ -44,10 +44,14 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     private int moonlight$mapCenterX = 0;
     @Unique
     private int moonlight$mapCenterZ = 0;
+    @Unique
+    private ResourceLocation moonlight$dimension = Level.OVERWORLD.location();
 
     @Inject(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V",
             at = @At("RETURN"))
     private void readExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
+        //we always need to send enough data to create the correct map type because we dont know if client has it
+        moonlight$dimension = buf.readResourceLocation();
         moonlight$mapCenterX = buf.readVarInt();
         moonlight$mapCenterZ = buf.readVarInt();
         if (buf.readBoolean()) {
@@ -72,6 +76,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
     @Inject(method = "write", at = @At("RETURN"))
     private void writeExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
+        buf.writeResourceLocation(moonlight$dimension);
         buf.writeVarInt(moonlight$mapCenterX);
         buf.writeVarInt(moonlight$mapCenterZ);
         buf.writeBoolean(moonlight$customDecorations != null);
@@ -92,15 +97,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                 data.saveToBuffer(buf);
             }
         }
-    }
-
-    @Inject(method = "handle(Lnet/minecraft/network/protocol/game/ClientGamePacketListener;)V",
-            at = @At("TAIL"))
-    private void handleExtraData(ClientGamePacketListener handler, CallbackInfo ci) {
-        MapStuffClient.handlePacketExtension(this.mapId, this.scale, this.locked,
-                this.moonlight$mapCenterX, this.moonlight$mapCenterZ,
-                this.moonlight$customDecorations,
-                this.moonlight$customData);
     }
 
     @Override
@@ -134,8 +130,34 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     }
 
     @Override
-    public void moonlight$sendMapCenter(int centerX, int centerZ) {
+    public void moonlight$sendCenterAndDimension(int centerX, int centerZ, ResourceLocation dimension) {
         moonlight$mapCenterX = centerX;
         moonlight$mapCenterZ = centerZ;
+        moonlight$dimension = dimension;
+    }
+
+    @Override
+    public CustomMapData[] moonlight$getCustomMapData() {
+        return moonlight$customData;
+    }
+
+    @Override
+    public CustomMapDecoration[] moonlight$getCustomDecorations() {
+        return new CustomMapDecoration[0];
+    }
+
+    @Override
+    public Vector2i moonlight$getMapCenter() {
+        return new Vector2i(moonlight$mapCenterX, moonlight$mapCenterZ);
+    }
+
+    @Override
+    public MapItemSavedData.MapPatch moonlight$getColorPatch() {
+        return colorPatch;
+    }
+
+    @Override
+    public ResourceKey<Level> moonlight$getDimension() {
+        return ResourceKey.create(Registries.DIMENSION, moonlight$dimension);
     }
 }

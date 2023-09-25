@@ -19,11 +19,15 @@ import java.util.function.Supplier;
 public class MoonlightClient {
 
     public static final Supplier<Boolean> MERGE_PACKS;
+    public static final Supplier<Boolean> LAZY_MAP_DATA;
 
     static {
         ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.CLIENT);
         MERGE_PACKS = builder.comment("Merge all dynamic resource packs from all mods that use this library into a single pack")
                 .define("merge_dynamic_packs", true);
+        LAZY_MAP_DATA = builder.comment("Prevents map texture from being upladed to GPU when only map markers have changed." +
+                "Could increase performance")
+                .define("lazy_map_upload", true);
         builder.buildAndRegister().loadFromFile();
     }
 

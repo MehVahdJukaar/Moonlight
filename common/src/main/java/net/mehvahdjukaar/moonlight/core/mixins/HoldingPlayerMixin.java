@@ -80,7 +80,7 @@ public class HoldingPlayerMixin implements IHoldingPlayerExtension {
             }
         }
         if (packet != null) {
-            ((IMapDataPacketExtension) packet).moonlight$sendMapCenter(data.centerX, data.centerZ);
+            ((IMapDataPacketExtension) packet).moonlight$sendCenterAndDimension(data.centerX, data.centerZ, data.dimension);
             // also sends here just incase
             ((IMapDataPacketExtension) packet).moonlight$sendCustomMapData(ed.getCustomData().values());
 

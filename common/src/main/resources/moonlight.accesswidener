@@ -8,6 +8,7 @@ transitive-accessible method net/minecraft/client/gui/screens/MenuScreens regist
 
 transitive-accessible field net/minecraft/world/entity/LivingEntity dead Z
 
+accessible method net/minecraft/world/level/saveddata/maps/MapItemSavedData addDecoration (Lnet/minecraft/world/level/saveddata/maps/MapDecoration$Type;Lnet/minecraft/world/level/LevelAccessor;Ljava/lang/String;DDDLnet/minecraft/network/chat/Component;)V
 #shader stuff
 accessible field com/mojang/blaze3d/systems/RenderSystem shaderLightDirections [Lorg/joml/Vector3f;
 
@@ -30,6 +31,7 @@ accessible field net/minecraft/client/gui/components/AbstractWidget height I
 
 mutable field net/minecraft/world/level/saveddata/maps/MapItemSavedData centerX I
 mutable field net/minecraft/world/level/saveddata/maps/MapItemSavedData centerZ I
+mutable field net/minecraft/world/level/saveddata/maps/MapItemSavedData dimension Lnet/minecraft/resources/ResourceKey;
 
 accessible method net/minecraft/client/gui/GuiGraphics <init> (Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V
 
