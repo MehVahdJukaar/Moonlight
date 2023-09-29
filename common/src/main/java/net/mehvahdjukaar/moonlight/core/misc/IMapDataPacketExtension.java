@@ -20,8 +20,6 @@ public interface IMapDataPacketExtension {
 
     CustomMapData[] moonlight$getCustomMapData();
 
-    void moonlight$sendCenterAndDimension(int centerX, int centerZ, ResourceLocation dimension);
-
     Vector2i moonlight$getMapCenter();
 
     MapItemSavedData.MapPatch moonlight$getColorPatch();

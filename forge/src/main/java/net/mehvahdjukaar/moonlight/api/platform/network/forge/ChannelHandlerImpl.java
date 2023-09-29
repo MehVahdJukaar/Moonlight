@@ -28,16 +28,16 @@ import java.util.function.Supplier;
 public class ChannelHandlerImpl extends ChannelHandler {
 
 
-    public static ChannelHandler createChannel(ResourceLocation channelMame) {
-        return new ChannelHandlerImpl(channelMame);
+    public static ChannelHandler createChannel(ResourceLocation channelMame, int version) {
+        return new ChannelHandlerImpl(channelMame, version);
     }
 
     public final SimpleChannel channel;
     protected int id = 0;
 
-    public ChannelHandlerImpl(ResourceLocation channelName) {
+    public ChannelHandlerImpl(ResourceLocation channelName, int v) {
         super(channelName);
-        String version = "1";
+        String version = String.valueOf(v);
         this.channel = NetworkRegistry.newSimpleChannel(channelName, () -> version,
                 version::equals, version::equals);
     }

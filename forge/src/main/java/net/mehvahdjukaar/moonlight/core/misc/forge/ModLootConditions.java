@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.misc.forge;
 
 import com.google.gson.*;
+import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.KeyMapping;
@@ -15,6 +16,8 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import org.jetbrains.annotations.NotNull;
+import pepjebs.mapatlases.client.screen.PinButton;
+import pepjebs.mapatlases.integration.MoonlightCompat;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;

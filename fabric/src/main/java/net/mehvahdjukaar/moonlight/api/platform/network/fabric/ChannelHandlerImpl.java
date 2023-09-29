@@ -27,7 +27,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
     private static final Map<Class<?>, ResourceLocation> ID_MAP = new HashMap<>();
 
-    public static ChannelHandler createChannel(ResourceLocation channelMame) {
+    public static ChannelHandler createChannel(ResourceLocation channelMame, int version) {
         return new ChannelHandlerImpl(channelMame);
     }
 
@@ -48,7 +48,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             direction = NetworkDir.PLAY_TO_SERVER;
         }
 
-        ResourceLocation res = new ResourceLocation(this.channelName.getNamespace(), "" + id++);
+        ResourceLocation res = new ResourceLocation(this.channelName.getNamespace(), String.valueOf(id++));
         ID_MAP.put(messageClass, res);
 
         if (direction == NetworkDir.PLAY_TO_SERVER) {

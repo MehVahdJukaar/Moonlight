@@ -1,9 +1,11 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import net.mehvahdjukaar.moonlight.api.client.ModFluidRenderProperties;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.network.protocol.Packet;
@@ -16,6 +18,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +27,17 @@ import java.util.List;
 @Mixin(MapItemSavedData.HoldingPlayer.class)
 public class HoldingPlayerMixin implements IHoldingPlayerExtension {
 
+    @Inject(method = "<init>", at = @At("TAIL"))
+    public void initializeDirty(MapItemSavedData mapItemSavedData, Player player, CallbackInfo ci){
+        //just to be sure. we HAVE to send this on the very first update packet
+        moonlight$customMarkersDirty = true;
+        moonlight$customDataDirty  = true;
+    }
+
     @Unique
-    private boolean moonlight$customDataDirty = false;
+    private boolean moonlight$customDataDirty = true;
     @Unique
-    private boolean moonlight$customMarkersDirty = false;
+    private boolean moonlight$customMarkersDirty = true;
 
     @Unique
     private int moonlight$dirtyDecorationTicks = 0;
@@ -78,12 +89,6 @@ public class HoldingPlayerMixin implements IHoldingPlayerExtension {
                 }
                 ep.moonlight$sendCustomDecorations(decorations);
             }
-        }
-        if (packet != null) {
-            ((IMapDataPacketExtension) packet).moonlight$sendCenterAndDimension(data.centerX, data.centerZ, data.dimension);
-            // also sends here just incase
-            ((IMapDataPacketExtension) packet).moonlight$sendCustomMapData(ed.getCustomData().values());
-
         }
         return packet;
     }

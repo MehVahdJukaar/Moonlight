@@ -18,8 +18,12 @@ import java.util.function.Function;
 public abstract class ChannelHandler {
 
     @ExpectPlatform
-    public static ChannelHandler createChannel(ResourceLocation channelMame) {
+    public static ChannelHandler createChannel(ResourceLocation channelMame, int version) {
         throw new AssertionError();
+    }
+
+    public static ChannelHandler createChannel(ResourceLocation channelMame) {
+        return createChannel(channelMame, 1);
     }
 
     protected final ResourceLocation channelName;
@@ -33,6 +37,7 @@ public abstract class ChannelHandler {
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder);
 
+    public void setVersion(int version){}
 
 
     public interface Context {

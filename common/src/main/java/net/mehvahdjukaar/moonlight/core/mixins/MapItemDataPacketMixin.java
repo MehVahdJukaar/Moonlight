@@ -3,10 +3,12 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import io.netty.buffer.Unpooled;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +16,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
@@ -51,10 +54,13 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
             at = @At("RETURN"))
     private void readExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
         //we always need to send enough data to create the correct map type because we dont know if client has it
-        moonlight$dimension = buf.readResourceLocation();
-        moonlight$mapCenterX = buf.readVarInt();
-        moonlight$mapCenterZ = buf.readVarInt();
+        if(buf.readBoolean()) {
+            moonlight$dimension = buf.readResourceLocation();
+            moonlight$mapCenterX = buf.readVarInt();
+            moonlight$mapCenterZ = buf.readVarInt();
+        }
         if (buf.readBoolean()) {
+            this.moonlight$customDecorations = new CustomMapDecoration[buf.readVarInt()];
             for (int m = 0; m < moonlight$customDecorations.length; ++m) {
                 MapDecorationType<?, ?> type = MapDecorationRegistry.get(buf.readResourceLocation());
                 if (type != null) {
@@ -74,14 +80,35 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         }
     }
 
+    //new constructor expansion
+    @Inject(method = "<init>(IBZLjava/util/Collection;Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData$MapPatch;)V",
+            at = @At("RETURN"))
+    private void addExtraCenterAndDimension(int mapId, byte b, boolean bl, Collection collection, MapItemSavedData.MapPatch mapPatch, CallbackInfo ci) {
+        var level = PlatHelper.getCurrentServer().getLevel(Level.OVERWORLD);
+        moonlight$dimension = null;
+        if (level != null) {
+            MapItemSavedData data = level.getMapData(MapItem.makeKey(mapId));
+            if(data != null) {
+                this.moonlight$mapCenterX = data.centerX;
+                this.moonlight$mapCenterZ = data.centerZ;
+                this.moonlight$dimension = data.dimension.location();
+            }
+        }
+    }
+
     @Inject(method = "write", at = @At("RETURN"))
     private void writeExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
-        buf.writeResourceLocation(moonlight$dimension);
-        buf.writeVarInt(moonlight$mapCenterX);
-        buf.writeVarInt(moonlight$mapCenterZ);
+        buf.writeBoolean(moonlight$dimension != null);
+        if(moonlight$dimension != null) {
+            buf.writeResourceLocation(moonlight$dimension);
+            buf.writeVarInt(moonlight$mapCenterX);
+            buf.writeVarInt(moonlight$mapCenterZ);
+        }
+
         buf.writeBoolean(moonlight$customDecorations != null);
         if (moonlight$customDecorations != null) {
             buf.writeVarInt(moonlight$customDecorations.length);
+
             for (CustomMapDecoration decoration : moonlight$customDecorations) {
                 buf.writeResourceLocation(Utils.getID(decoration.getType()));
                 decoration.saveToBuffer(buf);
@@ -130,20 +157,13 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     }
 
     @Override
-    public void moonlight$sendCenterAndDimension(int centerX, int centerZ, ResourceLocation dimension) {
-        moonlight$mapCenterX = centerX;
-        moonlight$mapCenterZ = centerZ;
-        moonlight$dimension = dimension;
-    }
-
-    @Override
     public CustomMapData[] moonlight$getCustomMapData() {
         return moonlight$customData;
     }
 
     @Override
     public CustomMapDecoration[] moonlight$getCustomDecorations() {
-        return new CustomMapDecoration[0];
+        return moonlight$customDecorations;
     }
 
     @Override

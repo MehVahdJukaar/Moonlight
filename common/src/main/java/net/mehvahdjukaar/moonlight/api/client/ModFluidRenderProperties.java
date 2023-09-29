@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 /**
- * Register with ClientPlatformHelper.registerFluidRenderProperties
  * Extend to implement more properties
  * <p>
  * Again this just wraps forge stuff. Some of its basic properties are picked up and registered with fabric api

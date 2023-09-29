@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidType;
 
