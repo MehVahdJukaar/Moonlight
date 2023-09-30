@@ -1,1 +1,2 @@
-map packet fixes
+All game maps will now render with mipmap. This follows its own config instead of the game one for more control.
+This changes greatly improves the quality of maps on item frmes when viewed at distance of for exmple when rendered small on mods like map atlases

@@ -18,18 +18,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends AgeableListModel<T> {
 
     @Unique
-    private boolean isTwoHanded = false;
+    private boolean moonlight$isTwoHanded = false;
 
     @Inject(method = "poseRightArm", at = @At(value = "HEAD"), cancellable = true, require = 0)
     public void poseRightArm(T entity, CallbackInfo ci) {
         //cancel offhand animation if two-handed so two-handed animation always happens last
-        if (this.isTwoHanded) ci.cancel();
+        if (this.moonlight$isTwoHanded) ci.cancel();
         HumanoidArm handSide = entity.getMainArm();
         ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
         Item item = stack.getItem();
         if (item instanceof IThirdPersonAnimationProvider thirdPersonAnimationProvider) {
             if (thirdPersonAnimationProvider.poseRightArm(stack, (HumanoidModel<T>) (Object) this, entity, handSide)) {
-                if (thirdPersonAnimationProvider.isTwoHanded()) isTwoHanded = true;
+                if (thirdPersonAnimationProvider.isTwoHanded()) moonlight$isTwoHanded = true;
                 ci.cancel();
             }
         }
@@ -38,13 +38,13 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
     @Inject(method = "poseLeftArm", at = @At(value = "HEAD"), cancellable = true, require = 0)
     public void poseLeftArm(T entity, CallbackInfo ci) {
         //cancel offhand animation if two-handed so two-handed animation always happens last
-        if (this.isTwoHanded) ci.cancel();
+        if (this.moonlight$isTwoHanded) ci.cancel();
         HumanoidArm handSide = entity.getMainArm();
         ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         Item item = stack.getItem();
         if (item instanceof IThirdPersonAnimationProvider thirdPersonAnimationProvider) {
             if (thirdPersonAnimationProvider.poseLeftArm(stack, (HumanoidModel<T>) (Object) this, entity, handSide)) {
-                if (thirdPersonAnimationProvider.isTwoHanded()) isTwoHanded = true;
+                if (thirdPersonAnimationProvider.isTwoHanded()) moonlight$isTwoHanded = true;
                 ci.cancel();
             }
         }
@@ -52,6 +52,6 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
 
     @Inject(method = "setupAnim*", at = @At(value = "RETURN"), require = 0)
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci) {
-        this.isTwoHanded = false;
+        this.moonlight$isTwoHanded = false;
     }
 }

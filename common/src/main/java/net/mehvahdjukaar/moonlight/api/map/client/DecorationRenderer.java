@@ -6,6 +6,7 @@ import com.mojang.math.Axis;
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.MapHelper;
+import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -51,7 +52,7 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             matrixStack.translate(0.0F + (float) decoration.getX() / 2.0F + 64.0F, 0.0F + (float) decoration.getY() / 2.0F + 64.0F, -0.02F);
             matrixStack.mulPose(Axis.ZP.rotationDegrees((float) (decoration.getRot() * 360) / 16.0F));
             matrixStack.scale(4.0F, 4.0F, 3.0F);
-            if(MapHelper.MAP_ATLASES){
+            if(CompatHandler.MAP_ATLASES){
                 MapAtlasCompat.scaleDecoration(matrixStack);
             }
             //matrixStack.translate(-0.125D, 0.125D, 0.0D);

@@ -3,15 +3,15 @@ package net.mehvahdjukaar.moonlight.api.client.util;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -29,6 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 
 public class RenderUtil {
@@ -171,6 +172,35 @@ public class RenderUtil {
         int width = (int) (c.width() / (sprite.getU1() - sprite.getU0()));
         int height = (int) (c.height() / (sprite.getV1() - sprite.getV0()));
         graphics.blit(sprite.atlasLocation(), x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
+    }
+
+
+
+
+    public static RenderType getTextMipmapRenderType(ResourceLocation texture){
+        return Internal.TEXT.apply(texture);
+    }
+
+    private static class Internal extends RenderType {
+
+
+        private static final Function<ResourceLocation, RenderType> TEXT = Util.memoize((p) ->
+        {
+            CompositeState compositeState = CompositeState.builder()
+                    .setShaderState(RENDERTYPE_TEXT_SHADER)
+                    .setTextureState(new TextureStateShard(p, false, true))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setLightmapState(LIGHTMAP)
+                    .createCompositeState(false);
+            return create("map_atlases_text",
+                    DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+                    VertexFormat.Mode.QUADS, 256, false, true,
+                    compositeState);
+        });
+
+        public Internal(String pName, VertexFormat pFormat, VertexFormat.Mode pMode, int pBufferSize, boolean pAffectsCrumbling, boolean pSortOnUpload, Runnable pSetupState, Runnable pClearState) {
+            super(pName, pFormat, pMode, pBufferSize, pAffectsCrumbling, pSortOnUpload, pSetupState, pClearState);
+        }
     }
 }
 

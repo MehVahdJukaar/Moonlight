@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
+import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
+import net.mehvahdjukaar.moonlight.api.integration.TwilightForestCompat;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
@@ -16,7 +18,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +31,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Collection;
+import java.util.Map;
+
+import static net.mehvahdjukaar.moonlight.core.CompatHandler.TWILIGHTFOREST;
 
 //I hope this won't break with mods. We need this as all data needs to be received at the same time
 @Mixin(ClientboundMapItemDataPacket.class)
@@ -39,6 +43,9 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Final
     @Nullable
     private MapItemSavedData.MapPatch colorPatch;
+    @Shadow
+    @Final
+    private int mapId;
     @Unique
     private CustomMapDecoration[] moonlight$customDecorations = null;
     @Unique
@@ -50,11 +57,15 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Unique
     private ResourceLocation moonlight$dimension = Level.OVERWORLD.location();
 
+    @Unique
+    @Nullable
+    private Pair<Boolean, Integer> moonlight$tfData = null;
+
     @Inject(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V",
             at = @At("RETURN"))
     private void readExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
         //we always need to send enough data to create the correct map type because we dont know if client has it
-        if(buf.readBoolean()) {
+        if (buf.readBoolean()) {
             moonlight$dimension = buf.readResourceLocation();
             moonlight$mapCenterX = buf.readVarInt();
             moonlight$mapCenterZ = buf.readVarInt();
@@ -77,6 +88,9 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                     moonlight$customData[m] = type.createFromBuffer(buf);
                 }
             }
+            if (buf.readBoolean()) {
+                moonlight$tfData = Pair.of(buf.readBoolean(), buf.readVarInt());
+            }
         }
     }
 
@@ -87,11 +101,17 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         var level = PlatHelper.getCurrentServer().getLevel(Level.OVERWORLD);
         moonlight$dimension = null;
         if (level != null) {
-            MapItemSavedData data = level.getMapData(MapItem.makeKey(mapId));
-            if(data != null) {
+            MapItemSavedData data = Moonlight.getMapDataFromKnownKeys(level, mapId);
+            if (data != null) {
                 this.moonlight$mapCenterX = data.centerX;
                 this.moonlight$mapCenterZ = data.centerZ;
                 this.moonlight$dimension = data.dimension.location();
+
+                if (TWILIGHTFOREST) {
+                    // We need this for map atlases.
+                    // I didn't want to add this messy mixin over there aswell or mixin into TF classes
+                    this.moonlight$tfData = TwilightForestCompat.getMapData(data);
+                }
             }
         }
     }
@@ -99,7 +119,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Inject(method = "write", at = @At("RETURN"))
     private void writeExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
         buf.writeBoolean(moonlight$dimension != null);
-        if(moonlight$dimension != null) {
+        if (moonlight$dimension != null) {
             buf.writeResourceLocation(moonlight$dimension);
             buf.writeVarInt(moonlight$mapCenterX);
             buf.writeVarInt(moonlight$mapCenterZ);
@@ -123,6 +143,12 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                 buf.writeResourceLocation(data.getType().id());
                 data.saveToBuffer(buf);
             }
+        }
+
+        buf.writeBoolean(moonlight$tfData != null);
+        if (moonlight$tfData != null) {
+            buf.writeBoolean(moonlight$tfData.getFirst());
+            buf.writeVarInt(moonlight$tfData.getSecond());
         }
     }
 
@@ -179,5 +205,50 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Override
     public ResourceKey<Level> moonlight$getDimension() {
         return ResourceKey.create(Registries.DIMENSION, moonlight$dimension);
+    }
+
+
+    @Inject(method = "applyToMap", at = @At("HEAD"))
+    private void handleExtraData(MapItemSavedData mapData, CallbackInfo ci) {
+        var serverDeco = this.moonlight$getCustomDecorations();
+        var serverData = this.moonlight$getCustomMapData();
+
+        var center = this.moonlight$getMapCenter();
+        mapData.centerX = center.x;
+        mapData.centerZ = center.y;
+        mapData.dimension = this.moonlight$getDimension();
+
+        if (serverDeco != null || serverData != null) {
+
+            if (mapData instanceof ExpandedMapData ed) {
+                //mapData = MapItemSavedData.createForClient(message.scale, message.locked, Minecraft.getInstance().level.dimension());
+                //Minecraft.getInstance().level.setMapData(string, mapData);
+
+                if (serverDeco != null) {
+                    Map<String, CustomMapDecoration> decorations = ed.getCustomDecorations();
+                    decorations.clear();
+                    for (int i = 0; i < serverDeco.length; ++i) {
+                        CustomMapDecoration customDecoration = serverDeco[i];
+                        if (customDecoration != null) decorations.put("icon-" + i, customDecoration);
+                        else {
+                            Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");
+                        }
+                    }
+                }
+                if (serverData != null) {
+                    Map<ResourceLocation, CustomMapData> customData = ed.getCustomData();
+                    customData.clear();
+                    for (CustomMapData d : serverData) {
+                        if (d != null) customData.put(d.getType().id(), d);
+                        else {
+                            Moonlight.LOGGER.warn("Failed to load custom map mapData, skipping");
+                        }
+                    }
+                }
+            }
+            if (TWILIGHTFOREST) {
+                TwilightForestCompat.syncTfYLevel(mapData, this.moonlight$tfData);
+            }
+        }
     }
 }

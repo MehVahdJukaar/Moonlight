@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -272,7 +273,7 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
-    private static final boolean MODERN_FIX = PlatHelper.isModLoaded("modernfix") && ModernFixCompat.areLazyResourcesOn();
+    private static final boolean MODERN_FIX = CompatHandler.MODERNFIX && ModernFixCompat.areLazyResourcesOn();
 
     private boolean modernFixHack(ResourceLocation r) {
         String s = r.getPath();

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(MapItemSavedData.HoldingPlayer.class)
-public class HoldingPlayerMixin implements IHoldingPlayerExtension {
+public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void initializeDirty(MapItemSavedData mapItemSavedData, Player player, CallbackInfo ci){

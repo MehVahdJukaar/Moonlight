@@ -27,6 +27,9 @@ import org.jetbrains.annotations.ApiStatus;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+import static net.mehvahdjukaar.moonlight.core.CompatHandler.CLOTH_CONFIG;
+import static net.mehvahdjukaar.moonlight.core.CompatHandler.YACL;
+
 public final class FabricConfigSpec extends ConfigSpec {
 
     @ApiStatus.Internal
@@ -119,8 +122,6 @@ public final class FabricConfigSpec extends ConfigSpec {
         return Component.literal(LangBuilder.getReadableName(this.res.getPath() + "_configs"));
     }
 
-    private static final boolean YACL = PlatHelper.isModLoaded("yet-another-config-lib");
-    private static final boolean CLOTH_CONFIG = PlatHelper.isModLoaded("cloth-config");
 
     @Override
     @Environment(EnvType.CLIENT)

@@ -1,9 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.events;
 
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
-import net.minecraft.client.resources.language.LanguageInfo;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +22,7 @@ public class AfterLanguageLoadEvent implements SimpleEvent {
     }
 
     public void addEntry(String key, String translation) {
-        if (!languageLines.containsKey(key)) languageLines.put(key, translation);
+        languageLines.computeIfAbsent(key, k -> translation);
     }
 
     public void addEntries(LangBuilder builder) {

@@ -20,9 +20,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class MapHelper {
+import static net.mehvahdjukaar.moonlight.core.CompatHandler.MAP_ATLASES;
 
-    public static final boolean MAP_ATLASES = PlatHelper.isModLoaded("map_atlases");
+public class MapHelper {
 
     @Nullable
     public static MapItemSavedData getMapData(ItemStack stack, Level level, @Nullable Player player) {

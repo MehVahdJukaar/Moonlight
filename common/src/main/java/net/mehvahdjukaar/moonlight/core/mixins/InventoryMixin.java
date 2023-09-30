@@ -18,12 +18,12 @@ import java.util.Iterator;
 import java.util.List;
 
 @Mixin(Inventory.class)
-public class InventoryMixin {
+public abstract class InventoryMixin {
 
     @Shadow @Final public Player player;
 
     @Unique
-    private ItemStack toRestore = null;
+    private ItemStack moonlight$toRestore = null;
 
 
     @Inject(method = "dropAll", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;",
@@ -35,7 +35,7 @@ public class InventoryMixin {
             MoonlightEventsHelper.postEvent( event, IDropItemOnDeathEvent.class);
             if(event.isCanceled()){
                 list.set(i, ItemStack.EMPTY);
-                toRestore = event.getReturnItemStack();
+                moonlight$toRestore = event.getReturnItemStack();
             }
         }
     }
@@ -43,9 +43,9 @@ public class InventoryMixin {
     @Inject(method = "dropAll", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;",
             shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
     public void restoreNotDropped(CallbackInfo ci, Iterator var1, List<ItemStack> list, int i) {
-        if(toRestore != null){
-            list.set(i, toRestore);
-            toRestore = null;
+        if(moonlight$toRestore != null){
+            list.set(i, moonlight$toRestore);
+            moonlight$toRestore = null;
         }
     }
 }
