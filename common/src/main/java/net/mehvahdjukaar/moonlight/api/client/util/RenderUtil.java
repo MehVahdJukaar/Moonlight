@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -21,7 +22,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -175,10 +175,18 @@ public class RenderUtil {
     }
 
 
-
-
+    /**
+     * Text render type that can use mipmap.
+     */
     public static RenderType getTextMipmapRenderType(ResourceLocation texture){
         return Internal.TEXT.apply(texture);
+    }
+
+    /**
+     * Call at appropriate times to turn your dynamic textures into mipmapped ones. Remember to turn off
+     */
+    public static void setDynamicTextureToUseMipmap(boolean mipMap){
+        MoonlightClient.setMipMap(mipMap);
     }
 
     private static class Internal extends RenderType {

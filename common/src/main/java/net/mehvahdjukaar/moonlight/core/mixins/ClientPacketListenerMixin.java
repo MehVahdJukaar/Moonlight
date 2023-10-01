@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.client.gui.MapRenderer;
@@ -25,7 +26,7 @@ public abstract class ClientPacketListenerMixin {
         if (serverData != null) {
             updateTexture = true;
         }
-        updateTexture = updateTexture || MoonlightClient.LAZY_MAP_DATA.get();
+        updateTexture = updateTexture || ClientConfigs.LAZY_MAP_DATA.get();
         //suppress un needed map rendered texture uploads
         if (updateTexture) {
             operation.call(instance, mapId, mapData);

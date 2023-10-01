@@ -11,6 +11,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
+import pepjebs.mapatlases.MapAtlasesMod;
 import pepjebs.mapatlases.capabilities.MapKey;
 import pepjebs.mapatlases.client.MapAtlasesClient;
 import pepjebs.mapatlases.item.MapAtlasItem;
@@ -23,13 +24,15 @@ public class MapAtlasCompatImpl {
 
     @Nullable
     public static MapItemSavedData getSavedDataFromAtlas(ItemStack atlas, Level level, Player player) {
-        var maps = MapAtlasItem.getMaps(atlas, level);
-        if (maps != null) {
-            var slice = MapAtlasItem.getSelectedSlice(atlas, level.dimension());
-            var key = MapKey.at(maps.getScale(), player, slice);
-            Pair<String, MapItemSavedData> select = maps.select(key);
-            if (select != null) {
-                return select.getSecond();
+        if(atlas.is(MapAtlasesMod.MAP_ATLAS.get())) {
+            var maps = MapAtlasItem.getMaps(atlas, level);
+            if (maps != null) {
+                var slice = MapAtlasItem.getSelectedSlice(atlas, level.dimension());
+                var key = MapKey.at(maps.getScale(), player, slice);
+                Pair<String, MapItemSavedData> select = maps.select(key);
+                if (select != null) {
+                    return select.getSecond();
+                }
             }
         }
         return null;

@@ -6,6 +6,7 @@
   "client": [
     "ClientLanguagesMixin",
     "ClientPacketListenerMixin",
+    "DynamicTextureMixin",
     "FirstPersonRendererMixin",
     "MapInstanceMixin",
     "MapRendererMixin",

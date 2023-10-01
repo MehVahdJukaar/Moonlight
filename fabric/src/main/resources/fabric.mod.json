@@ -23,6 +23,9 @@
     ],
     "server": [
       "net.mehvahdjukaar.moonlight.fabric.MoonlightFabric"
+    ],
+    "modmenu": [
+      "net.mehvahdjukaar.moonlight.api.integration.mod_menu.ModMenuCompat"
     ]
   },
   "mixins": [

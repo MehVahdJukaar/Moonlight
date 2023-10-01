@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.Dumpable;
@@ -37,20 +38,20 @@ public abstract class DynamicTextureMixin extends AbstractTexture implements Dum
     public void forceMipMap(int a, int b, int c, Operation<Void> op) {
         if (MoonlightClient.isMapMipMap()) {
             this.mipmap = true;
-            TextureUtil.prepareImage(a, MoonlightClient.MAPS_MIPMAP.get(), b, c);
+            TextureUtil.prepareImage(a, ClientConfigs.MAPS_MIPMAP.get(), b, c);
         } else op.call(a, b, c);
 
     }
 
     /**
-     * @author
+     * @author MehVahdJukaar
      * @reason proper mipmap
      */
     @Overwrite
-    public void dumpContents(ResourceLocation pResourceLocation, Path pPath) throws IOException {
+    public void dumpContents(ResourceLocation pResourceLocation, Path pPath) {
         if (this.pixels != null) {
             String s = pResourceLocation.toDebugFileName();
-            TextureUtil.writeAsPNG(pPath, s, this.getId(), MoonlightClient.MAPS_MIPMAP.get(), this.pixels.getWidth(), this.pixels.getHeight());
+            TextureUtil.writeAsPNG(pPath, s, this.getId(), this.mipmap ? ClientConfigs.MAPS_MIPMAP.get() : 0, this.pixels.getWidth(), this.pixels.getHeight());
         }
     }
 }

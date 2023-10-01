@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.renderer.RenderType;
@@ -40,7 +41,7 @@ public abstract class MapInstanceMixin {
 
     @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;text(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"))
     private RenderType getTextMipMap(ResourceLocation pLocation, Operation<RenderType> op) {
-        if (MoonlightClient.MAPS_MIPMAP.get() != 0) {
+        if (ClientConfigs.MAPS_MIPMAP.get() != 0) {
             return RenderUtil.getTextMipmapRenderType(pLocation);
         } else return op.call(pLocation);
     }
