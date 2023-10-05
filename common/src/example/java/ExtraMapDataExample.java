@@ -1,5 +1,5 @@
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
-import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
+import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -13,7 +13,7 @@ public class ExtraMapDataExample {
     public static void init(){}
 
     // Register your custom data type
-    private static final CustomMapData.Type<MyCustomData> DEPTH_DATA_KEY = MapDecorationRegistry.registerCustomMapSavedData(
+    private static final CustomMapData.Type<MyCustomData> DEPTH_DATA_KEY = MapDataRegistry.registerCustomMapSavedData(
             Moonlight.res("my_data"), MyCustomData::new
     );
 

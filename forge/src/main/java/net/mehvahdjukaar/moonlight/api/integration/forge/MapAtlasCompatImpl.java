@@ -45,7 +45,7 @@ public class MapAtlasCompatImpl {
             if (maps != null) {
                 for (var e : maps.getAll()) {
                     if (e.getSecond() == data) {
-                        return MapAtlasesAccessUtils.getMapIntFromString(e.getFirst());
+                        return MapAtlasesAccessUtils.findMapIntFromString(e.getFirst());
                     }
                 }
             }
@@ -57,5 +57,9 @@ public class MapAtlasCompatImpl {
     @OnlyIn(Dist.CLIENT)
     public static void scaleDecoration(PoseStack poseStack) {
         MapAtlasesClient.modifyDecorationTransform(poseStack);
+    }
+
+    public static void scaleDecorationText(PoseStack poseStack, float textWidth, float textScale) {
+        MapAtlasesClient.modifyTextDecorationTransform(poseStack, textWidth, textScale);
     }
 }

@@ -2,11 +2,11 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -14,11 +14,9 @@ import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.MAP_ATLASES;
 
@@ -101,7 +99,7 @@ public class MapHelper {
                 return;
             }
         }
-        MapDecorationType<?, ?> type = MapDecorationRegistry.get(id.toString());
+        MapDecorationType<?, ?> type = MapDataRegistry.get(id);
         if (type != null) {
             addDecorationToMap(stack, pos, type, mapColor);
         } else {
@@ -138,27 +136,18 @@ public class MapHelper {
     }
 
     /**
-     * Adds map decoration directly to map data
+     * Helper that map decoration directly to map data using a persistent map marker. Only supports moonlight markers
      */
-    public static boolean addDecorationToMap(MapItemSavedData data, Level level, BlockPos pos, ResourceLocation id) {
-        if (id.getNamespace().equals("minecraft")) {
-            MapDecoration.Type type = getVanillaType(id);
-            if(type != null) {
-                double d0 = pos.getX() + 0.5D;
-                double d1 = pos.getZ() + 0.5D;
-                data.addDecoration(
-                        type
-                        , level,
-                        "pin_" + pos,
-                        d0, d1, 180.0D, null);
-                return true;
-            }
-        } else {
-            var type = MapDecorationRegistry.get(id);
-            if (type != null) {
-                ((ExpandedMapData) data).addCustomDecoration(type, pos);
-                return true;
-            }
+    public static boolean addSimpleDecorationToMap(MapItemSavedData data, Level level, ResourceLocation id,
+                                                   BlockPos pos, @Nullable Component name) {
+        MapDecorationType<?, ?> type = MapDataRegistry.get(id);
+        if (type != null) {
+            var marker = type.createEmptyMarker();
+            marker.setPersistent(true);
+            marker.setPos(pos);
+            marker.setName(name);
+            ((ExpandedMapData) data).addCustomMarker(marker);
+            return true;
         }
         return false;
     }

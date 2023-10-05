@@ -39,4 +39,11 @@ public class MapAtlasCompat {
     public static void scaleDecoration(PoseStack poseStack) {
         throw new AssertionError();
     }
+
+
+    @ExpectPlatform
+    @Environment(EnvType.CLIENT)
+    public static void scaleDecorationText(PoseStack poseStack, float textWidth, float textScale) {
+        throw new AssertionError();
+    }
 }

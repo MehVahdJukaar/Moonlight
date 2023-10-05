@@ -1,22 +1,22 @@
-package net.mehvahdjukaar.moonlight.api.map;
+package net.mehvahdjukaar.moonlight.core.map;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
+import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.JsonDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.*;
-import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -24,15 +24,12 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
-//TODO: split into api and core
-public class MapDecorationRegistry {
+@ApiStatus.Internal
+public class MapDataInternal {
 
     //pain
-    @ApiStatus.Internal
     public static final Codec<MapDecorationType<?, ?>> CODEC =
             Codec.either(CustomDecorationType.CODEC, JsonDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
@@ -45,7 +42,7 @@ public class MapDecorationRegistry {
                         }
                         return Either.right((JsonDecorationType) type);
                     });
-    @ApiStatus.Internal
+
     public static final Codec<MapDecorationType<?, ?>> NETWORK_CODEC =
             Codec.either(CustomDecorationType.CODEC, JsonDecorationType.NETWORK_CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
@@ -74,10 +71,6 @@ public class MapDecorationRegistry {
         }
         return type;
     }
-    public static <T extends CustomMapData> CustomMapData.Type<T> registerCustomMapSavedData(ResourceLocation id, Function<CompoundTag, T> factory) {
-        return registerCustomMapSavedData(new CustomMapData.Type<>(id, factory));
-    }
-
 
     //map markers
 
@@ -92,8 +85,9 @@ public class MapDecorationRegistry {
     /**
      * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
      */
-    public static <T extends CustomDecorationType<?, ?>> void registerCustomType(T decorationType) {
+    public static <T extends CustomDecorationType<?, ?>> T registerCustomType(T decorationType) {
         CODE_TYPES_FACTORIES.put(decorationType.getCustomFactoryID(), decorationType);
+        return decorationType;
     }
 
     public static CustomDecorationType<?, ?> getCustomType(ResourceLocation resourceLocation) {
@@ -148,9 +142,24 @@ public class MapDecorationRegistry {
         return hackyGetRegistry().getOptional(id);
     }
 
+    public static Set<MapBlockMarker<?>> getDynamicServer(Player player, int mapId, MapItemSavedData data) {
+        Set<MapBlockMarker<?>> dynamic = new HashSet<>();
+        for (var v : DYNAMIC_SERVER) {
+            dynamic.addAll(v.apply(player, mapId, data));
+        }
+        return dynamic;
+    }
+
+    public static Set<MapBlockMarker<?>> getDynamicClient(int mapId, MapItemSavedData data) {
+        Set<MapBlockMarker<?>> dynamic = new HashSet<>();
+        for (var v : DYNAMIC_CLIENT) {
+            dynamic.addAll(v.apply(mapId, data));
+        }
+        return dynamic;
+    }
+
 
     @Nullable
-    @ApiStatus.Internal
     public static MapBlockMarker<?> readWorldMarker(CompoundTag compound) {
         for (var e : getEntries()) {
             String id = e.getKey().location().toString();
@@ -166,9 +175,8 @@ public class MapDecorationRegistry {
      *
      * @param reader world
      * @param pos    world position
-     * @return markers found, null if none found
+     * @return markers found, empty list if none found
      */
-    @ApiStatus.Internal
     public static List<MapBlockMarker<?>> getMarkersFromWorld(BlockGetter reader, BlockPos pos) {
         List<MapBlockMarker<?>> list = new ArrayList<>();
         for (MapDecorationType<?, ?> type : getValues()) {
@@ -178,5 +186,18 @@ public class MapDecorationRegistry {
         return list;
     }
 
+    //dynamic markers
+
+    private static final List<TriFunction<Player, Integer, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_SERVER = new ArrayList<>();
+    private static final List<BiFunction<Integer, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_CLIENT = new ArrayList<>();
+
+
+    public static void addDynamicClientMarkersEvent(BiFunction<Integer, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+        DYNAMIC_CLIENT.add(event);
+    }
+
+    public static void addDynamicServerMarkersEvent(TriFunction<Player, Integer, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+        DYNAMIC_SERVER.add(event);
+    }
 
 }

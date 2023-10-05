@@ -1,11 +1,10 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import net.mehvahdjukaar.moonlight.api.client.ModFluidRenderProperties;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
-import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.network.protocol.Packet;
@@ -28,10 +27,10 @@ import java.util.List;
 public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void initializeDirty(MapItemSavedData mapItemSavedData, Player player, CallbackInfo ci){
+    public void initializeDirty(MapItemSavedData mapItemSavedData, Player player, CallbackInfo ci) {
         //just to be sure. we HAVE to send this on the very first update packet
         moonlight$customMarkersDirty = true;
-        moonlight$customDataDirty  = true;
+        moonlight$customDataDirty = true;
     }
 
     @Unique
@@ -41,6 +40,8 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
 
     @Unique
     private int moonlight$dirtyDecorationTicks = 0;
+    @Unique
+    private int moonlight$volatileDecorationRefreshTicks = 0;
 
     @Final
     @Shadow
@@ -67,6 +68,16 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             this.moonlight$customMarkersDirty = false;
             updateDeco = true;
         }
+        //update every 5 sec
+        List<CustomMapDecoration> extra = new ArrayList<>();
+        if (updateDeco || (moonlight$volatileDecorationRefreshTicks++ % (20 * 5)) == 0) {
+            //adds dynamic decoration and sends them to a client
+            for (MapBlockMarker<?> m : MapDataInternal.getDynamicServer(player, mapId, data)) {
+                var d = m.createDecorationFromMarker(data);
+                if (d != null) extra.add(d);
+            }
+            updateDeco = true;
+        }
 
         if (updateData || updateDeco) {
             // creates a new packet or modify existing one
@@ -81,12 +92,8 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             }
             if (updateDeco) {
                 List<CustomMapDecoration> decorations = new ArrayList<>(ed.getCustomDecorations().values());
+                decorations.addAll(extra);
 
-                //adds dynamic decoration and sends them to a client
-                for (var t : MapDecorationRegistry.getValues()) {
-                    var l = t.getDynamicDecorations(player, data);
-                    if (!l.isEmpty()) decorations.addAll(l);
-                }
                 ep.moonlight$sendCustomDecorations(decorations);
             }
         }

@@ -6,11 +6,12 @@ import net.mehvahdjukaar.moonlight.api.integration.TwilightForestCompat;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
-import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
+import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -61,38 +62,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Nullable
     private Pair<Boolean, Integer> moonlight$tfData = null;
 
-    @Inject(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V",
-            at = @At("RETURN"))
-    private void readExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
-        //we always need to send enough data to create the correct map type because we dont know if client has it
-        if (buf.readBoolean()) {
-            moonlight$dimension = buf.readResourceLocation();
-            moonlight$mapCenterX = buf.readVarInt();
-            moonlight$mapCenterZ = buf.readVarInt();
-        }
-        if (buf.readBoolean()) {
-            this.moonlight$customDecorations = new CustomMapDecoration[buf.readVarInt()];
-            for (int m = 0; m < moonlight$customDecorations.length; ++m) {
-                MapDecorationType<?, ?> type = MapDecorationRegistry.get(buf.readResourceLocation());
-                if (type != null) {
-                    moonlight$customDecorations[m] = type.loadDecorationFromBuffer(buf);
-                }
-            }
-        }
-        if (buf.readBoolean()) {
-            //TODO: I really could have merged the 2 systems
-            this.moonlight$customData = new CustomMapData[buf.readVarInt()];
-            for (int m = 0; m < moonlight$customData.length; ++m) {
-                CustomMapData.Type<?> type = MapDecorationRegistry.CUSTOM_MAP_DATA_TYPES.getOrDefault(buf.readResourceLocation(), null);
-                if (type != null) {
-                    moonlight$customData[m] = type.createFromBuffer(buf);
-                }
-            }
-            if (buf.readBoolean()) {
-                moonlight$tfData = Pair.of(buf.readBoolean(), buf.readVarInt());
-            }
-        }
-    }
 
     //new constructor expansion
     @Inject(method = "<init>(IBZLjava/util/Collection;Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData$MapPatch;)V",
@@ -113,6 +82,43 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                     this.moonlight$tfData = TwilightForestCompat.getMapData(data);
                 }
             }
+        }
+    }
+
+
+    @Inject(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V",
+            at = @At("RETURN"))
+    private void readExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
+        //we always need to send enough data to create the correct map type because we dont know if client has it
+        if (buf.readBoolean()) {
+            moonlight$dimension = buf.readResourceLocation();
+            moonlight$mapCenterX = buf.readVarInt();
+            moonlight$mapCenterZ = buf.readVarInt();
+        }
+        if (buf.readBoolean()) {
+            this.moonlight$customDecorations = new CustomMapDecoration[buf.readVarInt()];
+            for (int m = 0; m < moonlight$customDecorations.length; ++m) {
+                MapDecorationType<?, ?> type = MapDataInternal.get(buf.readResourceLocation());
+                if (type != null) {
+                    moonlight$customDecorations[m] = type.loadDecorationFromBuffer(buf);
+                }
+            }
+        }
+        if (buf.readBoolean()) {
+            //TODO: I really could have merged the 2 systems
+            this.moonlight$customData = new CustomMapData[buf.readVarInt()];
+            for (int m = 0; m < moonlight$customData.length; ++m) {
+                CustomMapData.Type<?> type = MapDataInternal.CUSTOM_MAP_DATA_TYPES.getOrDefault(
+                        buf.readResourceLocation(), null);
+                if (type != null) {
+                    moonlight$customData[m] = type.createFromBuffer(buf);
+                }
+            }
+        }
+        if (buf.readBoolean()) {
+            boolean first = buf.readBoolean();
+            int second = buf.readVarInt();
+            moonlight$tfData = Pair.of(first, second);
         }
     }
 
@@ -227,11 +233,19 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                 if (serverDeco != null) {
                     Map<String, CustomMapDecoration> decorations = ed.getCustomDecorations();
                     decorations.clear();
-                    for (int i = 0; i < serverDeco.length; ++i) {
+                    int i;
+                    for (i = 0; i < serverDeco.length; ++i) {
                         CustomMapDecoration customDecoration = serverDeco[i];
                         if (customDecoration != null) decorations.put("icon-" + i, customDecoration);
                         else {
                             Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");
+                        }
+                    }
+                    //adds dynamic
+                    for (MapBlockMarker<?> m : MapDataInternal.getDynamicClient(mapId, mapData)) {
+                        var d = m.createDecorationFromMarker(mapData);
+                        if (d != null) {
+                            decorations.put("icon-" + i++, d);
                         }
                     }
                 }

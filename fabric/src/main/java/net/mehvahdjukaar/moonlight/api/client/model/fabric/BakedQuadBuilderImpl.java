@@ -5,9 +5,7 @@ import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
-import net.fabricmc.fabric.impl.client.indigo.renderer.IndigoRenderer;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
-import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -114,9 +112,11 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     }
 
     @Override
-    public BakedQuadBuilderImpl color(int red, int green, int blue, int alpha) {
-        inner.color(red, green, blue, alpha);
-        return this;
+    public BakedQuadBuilderImpl color(int r, int g, int b, int a) {
+        return color(((a & 0xFF) << 24) |
+                ((b & 0xFF) << 16) |
+                ((g & 0xFF) << 8) |
+                (r & 0xFF));
     }
 
     @Override
@@ -132,6 +132,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     @Override
     public BakedQuadBuilderImpl uv2(int u, int v) {
+        inner.lightmap(vertexIndex, (u & 0xFFFF) | ((v & 0xFFFF) << 16));
         return this;
     }
 

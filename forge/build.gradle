@@ -52,7 +52,7 @@ dependencies {
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixin_extras_version}"))
     implementation(include("io.github.llamalad7:mixinextras-forge:${mixin_extras_version}"))
 
-    modImplementation("curse.maven:map-atlases-forge-519759:4770693")
+    modImplementation("curse.maven:map-atlases-forge-519759:4780262")
 
 }
 

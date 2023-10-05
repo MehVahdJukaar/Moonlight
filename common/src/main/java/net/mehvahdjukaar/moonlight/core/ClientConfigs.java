@@ -22,7 +22,7 @@ public class ClientConfigs {
                         "Could increase performance")
                 .define("lazy_map_upload", true);
         MAPS_MIPMAP = builder.comment("Renders map textures using mipmap. Vastly improves look from afar as well when inside a Map Atlas from Map Atlases or similar. Set to 0 to have no mipmap like vanilla")
-                .define("maps_mipmap", 4, 0, 4);
+                .define("maps_mipmap", 3, 0, 4);
         CONFIG = builder.buildAndRegister();
         CONFIG.loadFromFile();
     }

@@ -1,1 +1,1 @@
-workround for oculus compatibility
+another serverside hotfix

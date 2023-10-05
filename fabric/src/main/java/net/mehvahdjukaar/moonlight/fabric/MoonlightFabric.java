@@ -8,10 +8,6 @@ import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.fluids.fabric.SoftFluidRegistryImpl;
-import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacement;
-import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
-import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
@@ -19,6 +15,7 @@ import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.api.platform.setup.fabric.SetupHelperImpl;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
@@ -36,7 +33,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     public void onInitialize() {
 
         DynamicRegistries.registerSynced(SoftFluidRegistry.KEY, SoftFluid.CODEC,SoftFluid.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
-        DynamicRegistries.registerSynced(MapDecorationRegistry.KEY, MapDecorationRegistry.CODEC, MapDecorationRegistry.NETWORK_CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
+        DynamicRegistries.registerSynced(MapDataInternal.KEY, MapDataInternal.CODEC, MapDataInternal.NETWORK_CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
 
         Moonlight.commonInit();
         //client init

@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.MapHelper;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -24,18 +23,20 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
     protected final int mapColor;
     protected final boolean renderOnFrame;
 
-    public DecorationRenderer(ResourceLocation texture,  int mapColor, boolean renderOnFrame){
+    public boolean rendersText = true;
+
+    public DecorationRenderer(ResourceLocation texture, int mapColor, boolean renderOnFrame) {
         this.renderOnFrame = renderOnFrame;
         this.mapColor = mapColor;
         this.textureId = texture;
-        }
-
-    public DecorationRenderer(ResourceLocation texture, int mapColor){
-        this(texture,mapColor,true);
     }
 
-    public DecorationRenderer(ResourceLocation texture){
-        this(texture,-1,true);
+    public DecorationRenderer(ResourceLocation texture, int mapColor) {
+        this(texture, mapColor, true);
+    }
+
+    public DecorationRenderer(ResourceLocation texture) {
+        this(texture, -1, true);
     }
 
     public int getColor(T decoration) {
@@ -52,7 +53,7 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             matrixStack.translate(0.0F + (float) decoration.getX() / 2.0F + 64.0F, 0.0F + (float) decoration.getY() / 2.0F + 64.0F, -0.02F);
             matrixStack.mulPose(Axis.ZP.rotationDegrees((float) (decoration.getRot() * 360) / 16.0F));
             matrixStack.scale(4.0F, 4.0F, 3.0F);
-            if(CompatHandler.MAP_ATLASES){
+            if (CompatHandler.MAP_ATLASES) {
                 MapAtlasCompat.scaleDecoration(matrixStack);
             }
             //matrixStack.translate(-0.125D, 0.125D, 0.0D);
@@ -80,15 +81,18 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u0, v0).uv2(light).endVertex();
 
             matrixStack.popPose();
-            if (decoration.getDisplayName() != null) {
+            if (decoration.getDisplayName() != null && rendersText) {
                 Font font = Minecraft.getInstance().font;
                 Component displayName = decoration.getDisplayName();
-                float width =  font.width(displayName);
-                float clamped = Mth.clamp(25.0F / width, 0.0F, 6.0F / 9.0F);
+                float width = font.width(displayName);
+                float scale = Mth.clamp(25.0F / width, 0.0F, 6.0F / 9.0F);
                 matrixStack.pushPose();
-                matrixStack.translate( (0.0F + (float) decoration.getX() / 2.0F + 64.0F - width * clamped / 2.0F),  (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
-                matrixStack.scale(clamped, clamped, 1.0F);
-                matrixStack.translate(0.0D, 0.0D,  -0.1F);
+                matrixStack.translate((0.0F + (float) decoration.getX() / 2.0F + 64.0F - width * scale / 2.0F), (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
+                if (CompatHandler.MAP_ATLASES) {
+                    MapAtlasCompat.scaleDecorationText(matrixStack, width, scale);
+                }
+                matrixStack.scale(scale, scale, 1.0F);
+                matrixStack.translate(0.0D, 0.0D, -0.1F);
                 font.drawInBatch(displayName, 0.0F, 0.0F, -1, false, matrixStack.last().pose(), buffer, Font.DisplayMode.NORMAL, Integer.MIN_VALUE, light);
                 matrixStack.popPose();
             }

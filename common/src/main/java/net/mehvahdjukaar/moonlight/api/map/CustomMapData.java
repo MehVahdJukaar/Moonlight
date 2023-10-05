@@ -30,9 +30,7 @@ public interface CustomMapData {
         }
 
         public T getOrCreate(MapItemSavedData mapData, Supplier<T> constructor) {
-            return (T) ((ExpandedMapData) mapData).getCustomData().computeIfAbsent(this.id, r -> {
-                return constructor.get();
-            });
+            return (T) ((ExpandedMapData) mapData).getCustomData().computeIfAbsent(this.id, r -> constructor.get());
         }
     }
 

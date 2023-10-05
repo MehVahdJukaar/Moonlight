@@ -50,6 +50,11 @@ public class SimpleTagBuilder extends TagBuilder {
         return this;
     }
 
+    public TagBuilder addOptional(ResourceLocation elementLocation) {
+        super.addOptionalElement(elementLocation);
+        return this;
+    }
+
     //assure entry is unique
     private boolean validateEntry(TagEntry entry){
         if(uniqueKeys.contains(entry.toString()))return false;

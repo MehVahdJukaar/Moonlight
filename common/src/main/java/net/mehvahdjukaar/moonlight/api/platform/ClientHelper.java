@@ -8,7 +8,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
-import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.KeyMapping;
@@ -25,10 +24,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -51,6 +47,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -182,8 +179,12 @@ public class ClientHelper {
     public interface ModelLoaderEvent {
         void register(ResourceLocation id, CustomModelLoader loader);
 
-        default void register(ResourceLocation id, Supplier<CustomBakedModel> bakedModelFactory){
-            register(id,(json, context) -> (modelBaker, spriteGetter, transform, location) -> bakedModelFactory.get());
+        default void register(ResourceLocation id, Supplier<CustomBakedModel> bakedModelFactory) {
+            register(id, (CustomModelLoader) (json, context) -> (modelBaker, spriteGetter, transform, location) -> bakedModelFactory.get());
+        }
+
+        default void register(ResourceLocation id, BiFunction<ModelState, Function<Material, TextureAtlasSprite>, CustomBakedModel> bakedModelFactory) {
+            register(id, (CustomModelLoader) (json, context) -> (modelBaker, spriteGetter, transform, location) -> bakedModelFactory.apply(transform, spriteGetter));
         }
     }
 

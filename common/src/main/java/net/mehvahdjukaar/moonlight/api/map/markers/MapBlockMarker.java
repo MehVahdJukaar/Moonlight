@@ -6,9 +6,8 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -19,17 +18,14 @@ import java.util.Objects;
  * @param <D> decoration
  */
 public abstract class MapBlockMarker<D extends CustomMapDecoration> {
-    private final MapDecorationType<D, ?> type;
+    protected final MapDecorationType<D, ?> type;
     private BlockPos pos;
     private int rot = 0;
+    private Component name;
+    private boolean persistent;
 
     protected MapBlockMarker(MapDecorationType<D, ?> type) {
         this.type = type;
-    }
-
-    protected MapBlockMarker(MapDecorationType<D, ?> type, BlockPos pos) {
-        this(type);
-        this.pos = pos;
     }
 
     /**
@@ -38,6 +34,8 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      */
     public void loadFromNBT(CompoundTag compound) {
         this.pos = NbtUtils.readBlockPos(compound.getCompound("Pos"));
+        this.name = compound.contains("Name") ? Component.Serializer.fromJson(compound.getString("Name")) : null;
+        this.persistent = compound.getBoolean("Persistent");
     }
 
     /**
@@ -48,26 +46,43 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      */
     public CompoundTag saveToNBT(CompoundTag compound) {
         compound.put("Pos", NbtUtils.writeBlockPos(this.getPos()));
+        if (this.name != null) {
+            compound.putString("Name", Component.Serializer.toJson(this.name));
+        }
+        if (this.persistent) compound.putBoolean("Persistent", true);
         return compound;
+    }
+
+
+    public boolean shouldRefresh() {
+        if (persistent) return false;
+        return type.isFromWorld();
+    }
+
+    public boolean shouldSave() {
+        return persistent || type.isFromWorld();
+    }
+
+    /**
+     * Forces this to be always saved, disregarding the one from the world
+     */
+    public void setPersistent(boolean persistent) {
+        this.persistent = persistent;
     }
 
     /**
      * implement if you are adding extra data
      * see default example for an implementation
      *
-     * @param other other marker object
+     * @param o another marker object
      * @return true if they are equal
      */
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        } else if (other != null && this.getClass() == other.getClass()) {
-            MapBlockMarker<?> marker = (MapBlockMarker<?>) other;
-            return Objects.equals(this.getPos(), marker.getPos());
-        } else {
-            return false;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MapBlockMarker<?> that = (MapBlockMarker<?>) o;
+        return Objects.equals(type, that.type) && Objects.equals(pos, that.pos) && Objects.equals(name, that.name);
     }
 
     /**
@@ -77,7 +92,7 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(this.getPos());
+        return Objects.hash(type, pos, name);
     }
 
     /**
@@ -117,6 +132,14 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
         return rot;
     }
 
+    public Component getName() {
+        return name;
+    }
+
+    public void setName(Component name) {
+        this.name = name;
+    }
+
     /**
      * creates a decoration given its map position and rotation
      *
@@ -129,26 +152,21 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
     protected abstract D doCreateDecoration(byte mapX, byte mapY, byte rot);
 
     /**
-     * creates a decoration from this marker. This its default vanilla implementation.<br>
-     * You can do here extra checks for dimension type and so on.<br>
-     * For everything else just implement doCreateDecoration
+     * Creates a decoration from this marker.
+     * This its default vanilla implementation.<br>
+     * You can do here extra check for a dimension type and so on.<br>
+     * For everything else, just implement doCreateDecoration
      *
-     * @param scale     current map scale
-     * @param x         current map origin x
-     * @param z         current map origin z
-     * @param dimension dimension this map is in
-     * @param locked    is this map locked
      * @return new decoration instance
      */
-    @Nullable
-    public D createDecorationFromMarker(byte scale, int x, int z, ResourceKey<Level> dimension, boolean locked) {
+    public D createDecorationFromMarker(MapItemSavedData data) {
         double worldX = this.getPos().getX();
         double worldZ = this.getPos().getZ();
         double rotation = this.getRotation();
 
-        int i = 1 << scale;
-        float f = (float) (worldX - x) / i;
-        float f1 = (float) (worldZ - z) / i;
+        int i = 1 << data.scale;
+        float f = (float) (worldX - data.centerX) / i;
+        float f1 = (float) (worldZ - data.centerZ) / i;
         byte mapX = (byte) ((int) ((f * 2.0F) + 0.5D));
         byte mapY = (byte) ((int) ((f1 * 2.0F) + 0.5D));
         byte rot;
@@ -160,22 +178,5 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
         return null;
     }
 
-
-    /**
-     * used to check if a world marker has changed and needs to update its decoration
-     * as an example it can be used when a tile entity changes its name and its decoration needs to reflect that
-     *
-     * @param other marker that needs to be compared wit this
-     * @return true if corresponding decoration has to be updated
-     */
-    public boolean shouldUpdate(MapBlockMarker<?> other) {
-        return false;
-    }
-
-    /**
-     * updates my map decoration after should update returns true
-     */
-    public void updateDecoration(CustomMapDecoration old) {
-    }
 
 }

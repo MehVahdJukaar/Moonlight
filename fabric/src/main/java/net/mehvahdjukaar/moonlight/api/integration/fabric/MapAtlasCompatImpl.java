@@ -54,4 +54,8 @@ public class MapAtlasCompatImpl {
         float multiplier = MapAtlasesClient.getWorldMapZoomLevel();
         poseStack.scale(multiplier, multiplier, 1);
     }
+
+    @net.fabricmc.api.Environment(EnvType.CLIENT)
+    public static void scaleDecorationText(PoseStack poseStack, float textWidth, float textScale) {
+    }
 }

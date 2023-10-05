@@ -182,15 +182,22 @@ public class RenderUtil {
         return Internal.TEXT.apply(texture);
     }
 
+    public static RenderType getEntityCutoutMipmapRenderType(ResourceLocation texture){
+        return Internal.ENTITY_CUTOUT.apply(texture);
+    }
+
+    public static RenderType getEntitySolidMipmapRenderType(ResourceLocation texture){
+        return Internal.ENTITY_SOLID.apply(texture);
+    }
+
     /**
      * Call at appropriate times to turn your dynamic textures into mipmapped ones. Remember to turn off
      */
-    public static void setDynamicTextureToUseMipmap(boolean mipMap){
+    public static void setDynamicTexturesToUseMipmap(boolean mipMap){
         MoonlightClient.setMipMap(mipMap);
     }
 
     private static class Internal extends RenderType {
-
 
         private static final Function<ResourceLocation, RenderType> TEXT = Util.memoize((p) ->
         {
@@ -200,9 +207,38 @@ public class RenderUtil {
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .setLightmapState(LIGHTMAP)
                     .createCompositeState(false);
-            return create("map_atlases_text",
+            return create("moonlight_text_mipped",
                     DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
                     VertexFormat.Mode.QUADS, 256, false, true,
+                    compositeState);
+        });
+
+
+        private static final Function<ResourceLocation, RenderType> ENTITY_SOLID = Util.memoize((resourceLocation) -> {
+            CompositeState compositeState = RenderType.CompositeState.builder()
+                    .setShaderState(RENDERTYPE_ENTITY_SOLID_SHADER)
+                    .setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, true))
+                    .setTransparencyState(NO_TRANSPARENCY)
+                    .setLightmapState(LIGHTMAP)
+                    .setOverlayState(OVERLAY)
+                    .createCompositeState(true);
+            return create("moonlight_entity_solid_mipped", DefaultVertexFormat.NEW_ENTITY,
+                    VertexFormat.Mode.QUADS,
+                    256, true, false,
+                    compositeState);
+        });
+
+        private static final Function<ResourceLocation, RenderType> ENTITY_CUTOUT = Util.memoize(resourceLocation -> {
+            CompositeState compositeState = CompositeState.builder()
+                    .setShaderState(RENDERTYPE_ENTITY_CUTOUT_SHADER)
+                    .setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, true))
+                    .setTransparencyState(NO_TRANSPARENCY)
+                    .setLightmapState(LIGHTMAP)
+                    .setOverlayState(OVERLAY)
+                    .createCompositeState(true);
+            return RenderType.create("moonlight_entity_cutout_mipped",
+                    DefaultVertexFormat.NEW_ENTITY,
+                    VertexFormat.Mode.QUADS, 256, true, false,
                     compositeState);
         });
 

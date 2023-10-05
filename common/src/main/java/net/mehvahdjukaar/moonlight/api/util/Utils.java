@@ -2,10 +2,10 @@ package net.mehvahdjukaar.moonlight.api.util;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderGetter;
@@ -145,7 +145,7 @@ public class Utils {
     }
 
     public static ResourceLocation getID(MapDecorationType<?, ?> object) {
-        return MapDecorationRegistry.hackyGetRegistry().getKey(object);
+        return MapDataInternal.hackyGetRegistry().getKey(object);
     }
 
     public static ResourceLocation getID(Potion object) {

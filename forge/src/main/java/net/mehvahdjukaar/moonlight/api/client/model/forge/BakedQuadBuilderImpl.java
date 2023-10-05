@@ -60,11 +60,6 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         return this;
     }
 
-    @Override
-    public BakedQuadBuilderImpl vertex(Matrix4f matrix, float x, float y, float z) {
-        BakedQuadBuilder.super.vertex(matrix, x, y, z);
-        return this;
-    }
 
     @Override
     public BakedQuadBuilderImpl vertex(double x, double y, double z) {
