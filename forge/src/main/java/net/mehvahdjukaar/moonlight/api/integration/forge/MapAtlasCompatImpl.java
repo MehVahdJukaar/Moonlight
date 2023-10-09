@@ -16,6 +16,7 @@ import pepjebs.mapatlases.capabilities.MapKey;
 import pepjebs.mapatlases.client.MapAtlasesClient;
 import pepjebs.mapatlases.item.MapAtlasItem;
 import pepjebs.mapatlases.utils.MapAtlasesAccessUtils;
+import pepjebs.mapatlases.utils.MapDataHolder;
 
 public class MapAtlasCompatImpl {
     public static boolean isAtlas(Item item) {
@@ -29,9 +30,9 @@ public class MapAtlasCompatImpl {
             if (maps != null) {
                 var slice = MapAtlasItem.getSelectedSlice(atlas, level.dimension());
                 var key = MapKey.at(maps.getScale(), player, slice);
-                Pair<String, MapItemSavedData> select = maps.select(key);
+                var select = maps.select(key);
                 if (select != null) {
-                    return select.getSecond();
+                    return select.data;
                 }
             }
         }
@@ -44,8 +45,8 @@ public class MapAtlasCompatImpl {
             var maps = MapAtlasItem.getMaps(atlas, level);
             if (maps != null) {
                 for (var e : maps.getAll()) {
-                    if (e.getSecond() == data) {
-                        return MapAtlasesAccessUtils.findMapIntFromString(e.getFirst());
+                    if (e.data == data) {
+                        return e.id;
                     }
                 }
             }
