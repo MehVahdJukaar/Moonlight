@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
@@ -18,18 +19,23 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Matrix4f;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import static org.lwjgl.opengl.GL11.*;
 
 
 public class RenderUtil {
@@ -59,7 +65,7 @@ public class RenderUtil {
     //should be a weaker version of what's above as it doesnt take in level so stuff like offset isnt there
     //from resource location
     public static void renderModel(ResourceLocation modelLocation, PoseStack matrixStack, MultiBufferSource buffer,
-                                        BlockRenderDispatcher blockRenderer, int light, int overlay, boolean cutout) {
+                                   BlockRenderDispatcher blockRenderer, int light, int overlay, boolean cutout) {
 
         blockRenderer.getModelRenderer().renderModel(matrixStack.last(),
                 buffer.getBuffer(cutout ? Sheets.cutoutBlockSheet() : Sheets.solidBlockSheet()),
@@ -150,7 +156,7 @@ public class RenderUtil {
 
     public static GuiGraphics getGuiDummy(PoseStack poseStack) {
         var mc = Minecraft.getInstance();
-        return new GuiGraphics(mc,poseStack, mc.renderBuffers().bufferSource());
+        return new GuiGraphics(mc, poseStack, mc.renderBuffers().bufferSource());
     }
 
     /**
@@ -167,33 +173,54 @@ public class RenderUtil {
      * @param sprite can be grabbed from a material
      */
     public static void blitSpriteSection(GuiGraphics graphics, int x, int y, int w, int h,
-                                  float u, float v, int uW, int vH, TextureAtlasSprite sprite) {
-        var c= sprite.contents();
+                                         float u, float v, int uW, int vH, TextureAtlasSprite sprite) {
+        var c = sprite.contents();
         int width = (int) (c.width() / (sprite.getU1() - sprite.getU0()));
         int height = (int) (c.height() / (sprite.getV1() - sprite.getV0()));
         graphics.blit(sprite.atlasLocation(), x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
+    }
+
+    public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light, int index,
+                                    int b, int g, int r, TextureAtlasSprite sprite) {
+        Matrix4f matrix4f1 = stack.last().pose();
+        float u0 = sprite.getU(0);
+        float u1 = sprite.getU(16);
+        float h = (u0 + u1) / 2.0f;
+        float v0 = sprite.getV(0);
+        float v1 = sprite.getV(16);
+        float k = (v0 + v1) / 2.0f;
+        float shrink = sprite.uvShrinkRatio();
+        float u0s = Mth.lerp(shrink, u0, h);
+        float u1s = Mth.lerp(shrink, u1, h);
+        float v0s = Mth.lerp(shrink, v0, k);
+        float v1s = Mth.lerp(shrink, v1, k);
+
+        vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u0s, v1s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u1s, v1s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u1s, v0s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u0s, v0s).uv2(light).endVertex();
     }
 
 
     /**
      * Text render type that can use mipmap.
      */
-    public static RenderType getTextMipmapRenderType(ResourceLocation texture){
+    public static RenderType getTextMipmapRenderType(ResourceLocation texture) {
         return Internal.TEXT.apply(texture);
     }
 
-    public static RenderType getEntityCutoutMipmapRenderType(ResourceLocation texture){
+    public static RenderType getEntityCutoutMipmapRenderType(ResourceLocation texture) {
         return Internal.ENTITY_CUTOUT.apply(texture);
     }
 
-    public static RenderType getEntitySolidMipmapRenderType(ResourceLocation texture){
+    public static RenderType getEntitySolidMipmapRenderType(ResourceLocation texture) {
         return Internal.ENTITY_SOLID.apply(texture);
     }
 
     /**
      * Call at appropriate times to turn your dynamic textures into mipmapped ones. Remember to turn off
      */
-    public static void setDynamicTexturesToUseMipmap(boolean mipMap){
+    public static void setDynamicTexturesToUseMipmap(boolean mipMap) {
         MoonlightClient.setMipMap(mipMap);
     }
 
@@ -212,6 +239,19 @@ public class RenderUtil {
                     VertexFormat.Mode.QUADS, 256, false, true,
                     compositeState);
         });
+
+        private static class TestStateShard extends TextureStateShard {
+            private TestStateShard(ResourceLocation resLoc) {
+                super(resLoc, false, true);
+                this.setupState = () -> {
+                    TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
+                    var t = texturemanager.getTexture(resLoc);
+                   t.setFilter(false, true);
+                    GlStateManager._texParameter(3553, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    RenderSystem.setShaderTexture(0, resLoc);
+                };
+            }
+        }
 
 
         private static final Function<ResourceLocation, RenderType> ENTITY_SOLID = Util.memoize((resourceLocation) -> {

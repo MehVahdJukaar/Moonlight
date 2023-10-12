@@ -7,6 +7,8 @@ transitive-accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenC
 transitive-accessible method net/minecraft/client/gui/screens/MenuScreens register (Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V
 
 transitive-accessible field net/minecraft/world/entity/LivingEntity dead Z
+accessible field net/minecraft/client/renderer/RenderStateShard setupState Ljava/lang/Runnable;
+mutable field net/minecraft/client/renderer/RenderStateShard setupState Ljava/lang/Runnable;
 
 accessible method net/minecraft/world/level/saveddata/maps/MapItemSavedData addDecoration (Lnet/minecraft/world/level/saveddata/maps/MapDecoration$Type;Lnet/minecraft/world/level/LevelAccessor;Ljava/lang/String;DDDLnet/minecraft/network/chat/Component;)V
 #shader stuff

@@ -1,12 +1,14 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.world.entity.player.Player;
@@ -21,7 +23,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 @Mixin(MapItemSavedData.HoldingPlayer.class)
 public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
@@ -30,11 +35,13 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     public void initializeDirty(MapItemSavedData mapItemSavedData, Player player, CallbackInfo ci) {
         //just to be sure. we HAVE to send this on the very first update packet
         moonlight$customMarkersDirty = true;
-        moonlight$customDataDirty = true;
+        for (var v : ((ExpandedMapData) mapItemSavedData).getCustomData().values()) {
+            moonlight$customDataDirty.put(v.getType(), v.createDirtyCounter());
+        }
     }
 
     @Unique
-    private boolean moonlight$customDataDirty = true;
+    private final Map<CustomMapData.Type<?>, CustomMapData.DirtyCounter> moonlight$customDataDirty = new IdentityHashMap<>();
     @Unique
     private boolean moonlight$customMarkersDirty = true;
 
@@ -60,9 +67,13 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
         boolean updateDeco = false;
 
         // same logic as vanilla just for custom stuff
-        if (this.moonlight$customDataDirty) {
-            this.moonlight$customDataDirty = false;
-            updateData = true;
+        List<Map.Entry<CustomMapData.Type<?>, CustomMapData.DirtyCounter>> dirtyData = new ArrayList<>();
+        for (var e : moonlight$customDataDirty.entrySet()) {
+            CustomMapData.DirtyCounter value = e.getValue();
+            if (value.isDirty()) {
+                dirtyData.add(e);
+                updateData = true;
+            }
         }
         if (this.moonlight$customMarkersDirty && this.moonlight$dirtyDecorationTicks++ % 5 == 0) {
             this.moonlight$customMarkersDirty = false;
@@ -88,7 +99,12 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             IMapDataPacketExtension ep = ((IMapDataPacketExtension) packet);
 
             if (updateData) {
-                ep.moonlight$sendCustomMapData(ed.getCustomData().values());
+                CompoundTag customDataTag = new CompoundTag();
+                for (var e : dirtyData) {
+                    saveDataToUpdateTag(ed, customDataTag, e);
+                    e.getValue().clearDirty();
+                }
+                ep.moonlight$sendCustomMapDataTag(customDataTag);
             }
             if (updateDeco) {
                 List<CustomMapDecoration> decorations = new ArrayList<>(ed.getCustomDecorations().values());
@@ -100,9 +116,21 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
         return packet;
     }
 
+    @Unique
+    private static <C extends CustomMapData.DirtyCounter, D extends CustomMapData<C>> void saveDataToUpdateTag(
+            ExpandedMapData ed, CompoundTag customDataTag,
+            Map.Entry<CustomMapData.Type<?>, CustomMapData.DirtyCounter> e) {
+        D d = (D) ed.getCustomData().get(e.getKey().id());
+        //TODO: put this in a separate compound. cant cause of backwards compat
+        C value = (C) e.getValue();
+        d.saveToUpdateTag(customDataTag, value);
+    }
+
     @Override
-    public void moonlight$setCustomDataDirty() {
-        this.moonlight$customDataDirty = true;
+    public <H extends CustomMapData.DirtyCounter> void moonlight$setCustomDataDirty(
+            CustomMapData.Type<?> type, Consumer<H> dirtySetter) {
+        var t = this.moonlight$customDataDirty.get(type);
+        dirtySetter.accept((H) t);
     }
 
     @Override

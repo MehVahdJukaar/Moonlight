@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 
 @Mixin(MapItemSavedData.class)
@@ -65,7 +67,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     //custom data that can be stored in maps
     @Unique
-    public final Map<ResourceLocation, CustomMapData> moonlight$customData = new LinkedHashMap<>();
+    public final Map<ResourceLocation, CustomMapData<?>> moonlight$customData = new LinkedHashMap<>();
 
     @Override
     public void setCustomDecorationsDirty() {
@@ -74,14 +76,16 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Override
-    public void setCustomDataDirty() {
+    public <H extends CustomMapData.DirtyCounter> void setCustomDataDirty(
+            CustomMapData.Type<?> type, Consumer<H> dirtySetter) {
         this.setDirty();
-        carriedBy.forEach(h -> ((IHoldingPlayerExtension) h).moonlight$setCustomDataDirty());
+        carriedBy.forEach(h -> ((IHoldingPlayerExtension) h)
+                .moonlight$setCustomDataDirty(type, dirtySetter));
+
     }
 
-
     @Override
-    public Map<ResourceLocation, CustomMapData> getCustomData() {
+    public Map<ResourceLocation, CustomMapData<?>> getCustomData() {
         return moonlight$customData;
     }
 
@@ -192,15 +196,29 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             expandedMapData.getCustomMarkers().putAll(this.getCustomMarkers());
             expandedMapData.getCustomDecorations().putAll(this.getCustomDecorations());
         }
+        moonlight$copyCustomData(data);
     }
 
     @Inject(method = "scaled", at = @At("RETURN"))
     public void scaled(CallbackInfoReturnable<MapItemSavedData> cir) {
         MapItemSavedData data = cir.getReturnValue();
-        if (data instanceof ExpandedMapData expandedMapData) {
-            expandedMapData.getCustomData().putAll(this.moonlight$customData);
+        moonlight$copyCustomData(data);
+    }
+
+    @Unique
+    private void moonlight$copyCustomData(MapItemSavedData data) {
+        if (data instanceof ExpandedMapData ed) {
+            for(var d : this.moonlight$customData.entrySet()) {
+                var v = d.getValue();
+                if(v.persistOnCopyOrLock()) {
+                    CompoundTag t = new CompoundTag();
+                    v.save(t);
+                    ed.getCustomData().get(d.getKey()).load(t);
+                }
+            }
         }
     }
+
 
     @Inject(method = "tickCarriedBy", at = @At("TAIL"))
     public void tickCarriedBy(Player player, ItemStack stack, CallbackInfo ci) {
@@ -242,13 +260,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     mapData.addCustomMarker(marker);
                 }
             }
-
-            var customData = mapData.getCustomData();
-            customData.clear();
-            MapDataInternal.CUSTOM_MAP_DATA_TYPES.forEach((s, type) -> {
-                CustomMapData i = type.factory().apply(compound);
-                if (i != null) customData.put(s, i);
-            });
+            mapData.getCustomData().values().forEach( customMapData -> customMapData.load(compound));
         }
     }
 
@@ -293,4 +305,10 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         }
     }
 
+    @Inject(method = "<init>", at = @At("TAIL"))
+    public void initCustomData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3, ResourceKey resourceKey, CallbackInfo ci) {
+        for(var d : MapDataInternal.CUSTOM_MAP_DATA_TYPES.values()){
+            moonlight$customData.put(d.id(), d.factory().get());
+        }
+    }
 }

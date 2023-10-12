@@ -1,9 +1,11 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.mojang.datafixers.util.Pair;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.EncoderException;
 import net.mehvahdjukaar.moonlight.api.integration.TwilightForestCompat;
-import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
@@ -15,14 +17,15 @@ import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2i;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,7 +34,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.TWILIGHTFOREST;
@@ -47,10 +52,13 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Shadow
     @Final
     private int mapId;
+    @Shadow
+    @Final
+    private @Nullable List<MapDecoration> decorations;
     @Unique
     private CustomMapDecoration[] moonlight$customDecorations = null;
     @Unique
-    private CustomMapData[] moonlight$customData = null;
+    private CompoundTag moonlight$customData = null;
     @Unique
     private int moonlight$mapCenterX = 0;
     @Unique
@@ -106,14 +114,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         }
         if (buf.readBoolean()) {
             //TODO: I really could have merged the 2 systems
-            this.moonlight$customData = new CustomMapData[buf.readVarInt()];
-            for (int m = 0; m < moonlight$customData.length; ++m) {
-                CustomMapData.Type<?> type = MapDataInternal.CUSTOM_MAP_DATA_TYPES.getOrDefault(
-                        buf.readResourceLocation(), null);
-                if (type != null) {
-                    moonlight$customData[m] = type.createFromBuffer(buf);
-                }
-            }
+            this.moonlight$customData = readCompressedNbt(buf);
         }
         if (buf.readBoolean()) {
             boolean first = buf.readBoolean();
@@ -143,12 +144,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
         buf.writeBoolean(moonlight$customData != null);
         if (moonlight$customData != null) {
-            buf.writeVarInt(this.moonlight$customData.length);
-
-            for (CustomMapData data : moonlight$customData) {
-                buf.writeResourceLocation(data.getType().id());
-                data.saveToBuffer(buf);
-            }
+            writeCompressedNbt(buf, moonlight$customData);
         }
 
         buf.writeBoolean(moonlight$tfData != null);
@@ -174,33 +170,13 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     }
 
     @Override
-    public void moonlight$sendCustomMapData(Collection<CustomMapData> data) {
-
-        //clone objects
-        if (PlatHelper.getPhysicalSide().isClient()) {
-            data = data.stream().map(e -> {
-                CompoundTag tag = new CompoundTag();
-                e.save(tag);
-                CustomMapData n = e.getType().factory().apply(tag);
-                return n;
-            }).toList();
-        }
-        moonlight$customData = data.toArray(CustomMapData[]::new);
+    public void moonlight$sendCustomMapDataTag(CompoundTag dataTag) {
+        moonlight$customData = dataTag;
     }
 
     @Override
-    public CustomMapData[] moonlight$getCustomMapData() {
+    public CompoundTag moonlight$getCustomMapDataTag() {
         return moonlight$customData;
-    }
-
-    @Override
-    public CustomMapDecoration[] moonlight$getCustomDecorations() {
-        return moonlight$customDecorations;
-    }
-
-    @Override
-    public Vector2i moonlight$getMapCenter() {
-        return new Vector2i(moonlight$mapCenterX, moonlight$mapCenterZ);
     }
 
     @Override
@@ -216,12 +192,11 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
     @Inject(method = "applyToMap", at = @At("HEAD"))
     private void handleExtraData(MapItemSavedData mapData, CallbackInfo ci) {
-        var serverDeco = this.moonlight$getCustomDecorations();
-        var serverData = this.moonlight$getCustomMapData();
+        var serverDeco = this.moonlight$customDecorations;
+        var serverData = this.moonlight$customData;
 
-        var center = this.moonlight$getMapCenter();
-        mapData.centerX = center.x;
-        mapData.centerZ = center.y;
+        mapData.centerX = this.moonlight$mapCenterX;
+        mapData.centerZ = this.moonlight$mapCenterZ;
         mapData.dimension = this.moonlight$getDimension();
 
         if (serverDeco != null || serverData != null) {
@@ -241,27 +216,51 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                             Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");
                         }
                     }
-                    //adds dynamic
+                    //adds dynamic todo use deco instead
                     for (MapBlockMarker<?> m : MapDataInternal.getDynamicClient(mapId, mapData)) {
                         var d = m.createDecorationFromMarker(mapData);
                         if (d != null) {
-                            decorations.put("icon-" + i++, d);
+                            decorations.put(m.getMarkerId(), d);
                         }
                     }
                 }
                 if (serverData != null) {
-                    Map<ResourceLocation, CustomMapData> customData = ed.getCustomData();
-                    customData.clear();
-                    for (CustomMapData d : serverData) {
-                        if (d != null) customData.put(d.getType().id(), d);
-                        else {
-                            Moonlight.LOGGER.warn("Failed to load custom map mapData, skipping");
-                        }
+                    var customData = ed.getCustomData();
+                    for (var v : customData.values()) {
+                        v.loadUpdateTag(this.moonlight$customData);
                     }
                 }
             }
             if (TWILIGHTFOREST) {
                 TwilightForestCompat.syncTfYLevel(mapData, this.moonlight$tfData);
+            }
+        }
+    }
+
+
+    private static CompoundTag readCompressedNbt(FriendlyByteBuf buf) {
+        int i = buf.readerIndex();
+        byte b = buf.readByte();
+        if (b == 0) {
+            throw new EncoderException();
+        } else {
+            buf.readerIndex(i);
+            try {
+                return NbtIo.readCompressed(new ByteBufInputStream(buf));
+            } catch (IOException var5) {
+                throw new EncoderException(var5);
+            }
+        }
+    }
+
+    private static void writeCompressedNbt(FriendlyByteBuf buf, CompoundTag nbt) {
+        if (nbt == null) {
+            buf.writeByte(0);
+        } else {
+            try {
+                NbtIo.writeCompressed(nbt, (new ByteBufOutputStream(buf)));
+            } catch (IOException var3) {
+                throw new EncoderException(var3);
             }
         }
     }

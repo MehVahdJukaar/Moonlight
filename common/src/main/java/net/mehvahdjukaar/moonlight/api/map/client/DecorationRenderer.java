@@ -3,6 +3,8 @@ package net.mehvahdjukaar.moonlight.api.map.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
+import net.mehvahdjukaar.moonlight.api.client.util.VertexUtil;
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
@@ -58,7 +60,6 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             }
             //matrixStack.translate(-0.125D, 0.125D, 0.0D);
 
-            Matrix4f matrix4f1 = matrixStack.last().pose();
 
 
             int color = this.getColor(decoration);
@@ -71,14 +72,8 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             //so we can use local coordinates
             //idk wy wrap doesnt work, it does the same as here
             //vertexBuilder = sprite.wrap(vertexBuilder);
-            float u0 = sprite.getU(0);
-            float u1 = sprite.getU(16);
-            float v0 = sprite.getV(0);
-            float v1 = sprite.getV(16);
-            vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u0, v1).uv2(light).endVertex();
-            vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u1, v1).uv2(light).endVertex();
-            vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u1, v0).uv2(light).endVertex();
-            vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u0, v0).uv2(light).endVertex();
+
+           RenderUtil. renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, sprite);
 
             matrixStack.popPose();
             if (decoration.getDisplayName() != null && rendersText) {
@@ -100,4 +95,6 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
         }
         return false;
     }
+
+
 }

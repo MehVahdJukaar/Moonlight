@@ -1,1 +1,2 @@
-big map API refactors and improvements to allow for further functionality like client only markers
+improved decoration renderers
+added some more compat for wood types

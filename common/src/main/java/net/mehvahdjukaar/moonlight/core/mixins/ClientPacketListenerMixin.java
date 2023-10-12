@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
-import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -21,7 +20,7 @@ public abstract class ClientPacketListenerMixin {
     private void handleExtraData(MapRenderer instance, int mapId, MapItemSavedData mapData, Operation<Void> operation,
                                  @Local ClientboundMapItemDataPacket packet) {
         IMapDataPacketExtension ext = (IMapDataPacketExtension) packet;
-        var serverData = ext.moonlight$getCustomMapData();
+        var serverData = ext.moonlight$getCustomMapDataTag();
         boolean updateTexture = ext.moonlight$getColorPatch() != null;
         if (serverData != null) {
             updateTexture = true;

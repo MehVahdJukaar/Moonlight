@@ -63,7 +63,7 @@ public class MapDataInternal {
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
      **/
-    public static <T extends CustomMapData> CustomMapData.Type<T> registerCustomMapSavedData(CustomMapData.Type<T> type) {
+    public static <T extends CustomMapData<?>> CustomMapData.Type<T> registerCustomMapSavedData(CustomMapData.Type<T> type) {
         if (CUSTOM_MAP_DATA_TYPES.containsKey(type.id())) {
             throw new IllegalArgumentException("Duplicate custom map data registration " + type.id());
         } else {
@@ -161,11 +161,8 @@ public class MapDataInternal {
 
     @Nullable
     public static MapBlockMarker<?> readWorldMarker(CompoundTag compound) {
-        for (var e : getEntries()) {
-            String id = e.getKey().location().toString();
-            if (compound.contains(id)) {
-                return e.getValue().loadMarkerFromNBT(compound.getCompound(id));
-            }
+        for (var id : compound.getAllKeys()) {
+            return get(new ResourceLocation(id)).loadMarkerFromNBT(compound.getCompound(id));
         }
         return null;
     }

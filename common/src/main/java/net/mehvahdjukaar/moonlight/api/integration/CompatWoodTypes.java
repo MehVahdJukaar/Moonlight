@@ -31,6 +31,9 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "terraqueous", "dense_cloud", "dense_cloud", "dense_cloud_column"));
 
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "rats", "pirat", "pirat_planks", "pirat_log"));
+
         var embur = WoodType.Finder.simple(
                 "byg", "embur", "embur_planks", "embur_pedu");
         embur.addChild("stripped_log", "stripped_embur_pedu");

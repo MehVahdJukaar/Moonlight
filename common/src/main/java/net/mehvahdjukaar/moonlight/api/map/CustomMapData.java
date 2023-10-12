@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -10,32 +9,28 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
-public interface CustomMapData {
+public interface CustomMapData<H extends CustomMapData.DirtyCounter> {
 
-    record Type<T extends CustomMapData>(ResourceLocation id, Function<CompoundTag, T> factory) {
 
-        @NotNull
-        public CustomMapData createFromBuffer(FriendlyByteBuf buffer) {
-            return factory.apply(buffer.readNbt());
-        }
+    record Type<T extends CustomMapData<?>>(ResourceLocation id, Supplier<T> factory) {
 
         @SuppressWarnings("unchecked")
-        @Nullable
+        @NotNull
         public T get(MapItemSavedData mapData) {
             return (T) ((ExpandedMapData) mapData).getCustomData().get(this.id);
         }
 
-        public T getOrCreate(MapItemSavedData mapData, Supplier<T> constructor) {
-            return (T) ((ExpandedMapData) mapData).getCustomData().computeIfAbsent(this.id, r -> constructor.get());
-        }
     }
 
     Type<?> getType();
 
+    default boolean persistOnCopyOrLock(){
+        return true;
+    }
 
     default boolean onItemUpdate(MapItemSavedData data, Entity entity) {
         return false;
@@ -46,18 +41,43 @@ public interface CustomMapData {
         return null;
     }
 
+    H createDirtyCounter();
+
+    void load(CompoundTag tag);
+
+    void loadUpdateTag(CompoundTag tag);
+
     void save(CompoundTag tag);
 
-    default void saveToBuffer(FriendlyByteBuf buffer) {
-        CompoundTag tag = new CompoundTag();
-        this.save(tag);
-        buffer.writeNbt(tag);
+    void saveToUpdateTag(CompoundTag tag, H dirtyCounter);
+
+    default void setDirty(MapItemSavedData data, Consumer<H> dirtySetter) {
+        Type<?> type = this.getType();
+        ((ExpandedMapData) data).setCustomDataDirty(type, dirtySetter);
     }
 
+    class SimpleDirtyCounter implements DirtyCounter {
+        private boolean dirty = true;
 
-    default void setDirty(MapItemSavedData data){
-        ((ExpandedMapData) data).setCustomDataDirty();
+        public void markDirty() {
+            this.dirty = true;
+        }
+
+        public boolean isDirty() {
+            return dirty;
+        }
+
+        @Override
+        public void clearDirty() {
+            dirty = false;
+        }
     }
 
+    interface DirtyCounter {
+
+        boolean isDirty();
+
+        void clearDirty();
+    }
 }
 
