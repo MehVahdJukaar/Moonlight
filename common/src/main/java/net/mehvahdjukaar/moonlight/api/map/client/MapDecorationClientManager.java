@@ -51,7 +51,11 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
     }
 
     public static <E extends CustomMapDecoration> DecorationRenderer<E> getRenderer(E decoration) {
-        return (DecorationRenderer<E>) RENDERERS.computeIfAbsent(decoration.getType(), t -> simpleRenderer(decoration.getType()));
+        return (DecorationRenderer<E>) getRenderer(decoration.getType());
+    }
+
+    public static <E extends CustomMapDecoration, T extends MapDecorationType<E,?>> DecorationRenderer<E> getRenderer(T type) {
+        return (DecorationRenderer<E>) RENDERERS.computeIfAbsent(type, t -> simpleRenderer(type));
     }
 
     public static <T extends CustomMapDecoration> boolean render(T decoration, PoseStack matrixStack,

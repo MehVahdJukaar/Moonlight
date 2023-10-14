@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.set.wood;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -106,19 +108,17 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     @Nullable
     private static Block findLog(ResourceLocation id) {
-        ResourceLocation[] test = {
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_log"),
-                new ResourceLocation(id.getNamespace(), "log_" + id.getPath()),
-                new ResourceLocation(id.getPath() + "_log"),
-                new ResourceLocation("log_" + id.getPath()),
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_stem"),
-                new ResourceLocation(id.getNamespace(), "stem_" + id.getPath()),
-                new ResourceLocation(id.getPath() + "_stem"),
-                new ResourceLocation("stem_" + id.getPath()),
-                new ResourceLocation(id.getNamespace(), "stalk_" + id.getPath()),
-                new ResourceLocation(id.getPath() + "_stalk"),
-                new ResourceLocation("stalk_" + id.getPath())
-        };
+        List<String> keywords = List.of("log", "stem", "stalk", "hyphae");
+        List<ResourceLocation> resources = new ArrayList<>();
+        for (String keyword : keywords) {
+            resources.add(new ResourceLocation(id.getNamespace(), id.getPath() + "_" + keyword));
+            resources.add(new ResourceLocation(id.getNamespace(), keyword + "_" + id.getPath()));
+            resources.add(new ResourceLocation(id.getPath() + "_" + keyword));
+            resources.add(new ResourceLocation(keyword + "_" + id.getPath()));
+        }
+        ModelBlockRenderer
+
+        ResourceLocation[] test = resources.toArray(new ResourceLocation[0]);
         Block temp = null;
         for (var r : test) {
             if (BuiltInRegistries.BLOCK.containsKey(r)) {

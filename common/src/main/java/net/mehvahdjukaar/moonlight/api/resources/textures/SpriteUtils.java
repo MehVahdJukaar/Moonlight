@@ -219,7 +219,7 @@ public final class SpriteUtils {
     @NotNull
     public static final Predicate<String> LOOKS_LIKE_LEAF_TEXTURE = s -> {
         s = new ResourceLocation(s).getPath();
-        return !s.contains("_bushy") && !s.contains("_snow");
+        return !s.contains("_bushy") && !s.contains("_snow") && !s.contains("_overlay");
     };
 
     /**

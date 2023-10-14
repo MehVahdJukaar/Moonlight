@@ -284,25 +284,26 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Inject(method = "checkBanners", at = @At("TAIL"))
-    public void checkBanners(BlockGetter world, int x, int z, CallbackInfo ci) {
-        Iterator<MapBlockMarker<?>> iterator = this.moonlight$customMapMarkers.values().iterator();
-
-        while (iterator.hasNext()) {
-            MapBlockMarker<?> marker = iterator.next();
+    public void checkCustomDeco(BlockGetter world, int x, int z, CallbackInfo ci) {
+        List<String> toRemove = new ArrayList<>();
+        List<MapBlockMarker<?>> toAdd = new ArrayList<>();
+        for (var e : this.moonlight$customMapMarkers.entrySet()) {
+            var marker = e.getValue();
             if (marker.getPos().getX() == x && marker.getPos().getZ() == z) {
                 if(marker.shouldRefresh()) {
                     MapBlockMarker<?> newMarker = marker.getType().getWorldMarkerFromWorld(world, marker.getPos());
-                    String id = marker.getMarkerId();
+                    String id = e.getKey();
                     if (newMarker == null) {
-                        iterator.remove();
-                        this.removeCustomMarker(id);
-                    } else if (Objects.equals(marker, newMarker)) {
-                        this.removeCustomMarker(id);
-                        this.addCustomMarker(newMarker);
+                        toRemove.add(id);
+                    } else if (!Objects.equals(marker, newMarker)) {
+                        toRemove.add(id);
+                        toAdd.add(newMarker);
                     }
                 }
             }
         }
+        toRemove.forEach(this::removeCustomMarker);
+        toAdd.forEach(this::addCustomMarker);
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
