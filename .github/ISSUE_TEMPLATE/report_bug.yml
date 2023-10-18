@@ -11,7 +11,7 @@ body:
   - type: checkboxes
     id: pre-checklist
     attributes:
-      label: ""\**Before continuing** Always check you are using the latest version of this mods and it's dependencies"
+      label: "**Before continuing** Always check you are using the latest version of this mods and it's dependencies"
 
   - type: dropdown
     id: version
@@ -26,15 +26,6 @@ body:
         - 1.19.2-fabric
         - 1.18.2-fabric
       default: 0
-    validations:
-      required: true
-
-  - type: input
-    id: moonlight
-    attributes:
-      label: Supplementaries Version
-      description: The current version of Moonlight Lib
-      placeholder: ex. supplementaries-1.16.5-0.18.7
     validations:
       required: true
 
