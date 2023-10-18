@@ -1,0 +1,81 @@
+name: Got a bug? Report
+description: Found a bug? Report it.
+title: "[🐞]: "
+labels: "bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        BUG
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version-Loader
+      description: Which loader is Minecraft running on?
+      options:
+        - 1.20.1-forge
+        - 1.19.2-forge
+        - 1.18.2-forge
+        - 1.20.1-fabric
+        - 1.19.2-fabric
+        - 1.18.2-fabric
+      default: 0
+    validations:
+      required: true
+
+  - type: input
+    id: moonlight
+    attributes:
+      label: Supplementaries Version
+      description: The current version of Moonlight Lib
+      placeholder: ex. supplementaries-1.16.5-0.18.7
+    validations:
+      required: true
+
+  - type: input
+    id: moonlight
+    attributes:
+      label: Moonlight Lib Version
+      description: The current version of Moonlight Lib
+      placeholder: ex. moonlight-1.20-2.8.48
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue-details
+    attributes:
+      label: "Issue Detail"
+      description: "A clear and concise description of what the bug is"
+      placeholder: The more details, the better. (REQUIRED)
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Log Attachment
+      description: |
+        If your Minecraft crashes, it creates a crash-report file which is located in ~/.minecraft/crash-report/
+        Tip: You can attach images, too
+      placeholder: Attach log files (latest.log or crash-report) by clicking this area to highlight it and then dragging files in. (REQUIRED)
+    validations:
+      required: true
+
+  - type: textarea
+    id: to-reproduce
+    attributes:
+      label: "OPTIONAL: To Produce"
+      description: "Steps to reproduce the behaviour"
+      placeholder: "1) First Step\n2)Second Step\n3)There's the bug"
+    validations:
+      required: false
+
+  - type: textarea
+    id: issue-with-mods
+    attributes:
+      label: "OPTIONAL: Which mods are affected?"
+      description: "Which mods does Moonlight Lib affect"
+      placeholder: "ex. - Supplementaries"
+    validations:
+      required: false
+
