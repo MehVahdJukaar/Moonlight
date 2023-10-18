@@ -11,8 +11,9 @@ body:
   - type: checkboxes
     id: pre-checklist
     attributes:
-      - label: "**Before continuing** Always check you are using the latest version of this mods and it's dependencies"
-        required: true
+      options:
+        - label: "**Before continuing** Always check you are using the latest version of this mods and it's dependencies"
+          required: true
       
 
   - type: dropdown
