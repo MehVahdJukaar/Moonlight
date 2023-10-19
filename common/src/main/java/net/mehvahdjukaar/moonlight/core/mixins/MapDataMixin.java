@@ -119,12 +119,12 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Override
     public boolean removeCustomMarker(String key){
+        moonlight$customDecorations.remove(key);
         if(moonlight$customMapMarkers.containsKey(key)){
             moonlight$customMapMarkers.remove(key);
             setCustomDecorationsDirty();
             return true;
         }
-        moonlight$customDecorations.remove(key);
         return false;
     }
 

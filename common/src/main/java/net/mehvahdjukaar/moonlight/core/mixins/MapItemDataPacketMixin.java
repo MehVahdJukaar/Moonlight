@@ -5,7 +5,6 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.EncoderException;
-import net.mehvahdjukaar.moonlight.api.integration.TwilightForestCompat;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
@@ -36,10 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-
-import static net.mehvahdjukaar.moonlight.core.CompatHandler.TWILIGHTFOREST;
 
 //I hope this won't break with mods. We need this as all data needs to be received at the same time
 @Mixin(ClientboundMapItemDataPacket.class)
@@ -52,9 +48,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Shadow
     @Final
     private int mapId;
-    @Shadow
-    @Final
-    private @Nullable List<MapDecoration> decorations;
     @Unique
     private CustomMapDecoration[] moonlight$customDecorations = null;
     @Unique
@@ -83,12 +76,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                 this.moonlight$mapCenterX = data.centerX;
                 this.moonlight$mapCenterZ = data.centerZ;
                 this.moonlight$dimension = data.dimension.location();
-
-                if (TWILIGHTFOREST) {
-                    // We need this for map atlases.
-                    // I didn't want to add this messy mixin over there aswell or mixin into TF classes
-                    this.moonlight$tfData = TwilightForestCompat.getMapData(data);
-                }
             }
         }
     }
@@ -114,7 +101,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         }
         if (buf.readBoolean()) {
             //TODO: I really could have merged the 2 systems
-            this.moonlight$customData = readCompressedNbt(buf);
+            this.moonlight$customData = buf.readNbt(); //readCompressedNbt(buf);
         }
         if (buf.readBoolean()) {
             boolean first = buf.readBoolean();
@@ -144,7 +131,8 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
         buf.writeBoolean(moonlight$customData != null);
         if (moonlight$customData != null) {
-            writeCompressedNbt(buf, moonlight$customData);
+            buf.writeNbt(moonlight$customData);
+           // writeCompressedNbt(buf, moonlight$customData);
         }
 
         buf.writeBoolean(moonlight$tfData != null);
@@ -230,9 +218,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                         v.loadUpdateTag(this.moonlight$customData);
                     }
                 }
-            }
-            if (TWILIGHTFOREST) {
-                TwilightForestCompat.syncTfYLevel(mapData, this.moonlight$tfData);
             }
         }
     }

@@ -1,30 +1,24 @@
 package net.mehvahdjukaar.moonlight.api.fluids.fabric;
 
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.MappedRegistryAccessor;
-import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.worldgen.BootstapContext;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
-import java.util.IdentityHashMap;
 import java.util.Map;
-
-import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry.KEY;
 
 public class SoftFluidRegistryImpl {
 
     public static void init() {
+        DynamicRegistries.registerSynced(SoftFluidRegistry.KEY, SoftFluid.CODEC, SoftFluid.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
     }
 
     public static void registerExistingVanillaFluids(Map<Fluid, SoftFluid> fluidMap, Map<Item, SoftFluid> itemMap) {

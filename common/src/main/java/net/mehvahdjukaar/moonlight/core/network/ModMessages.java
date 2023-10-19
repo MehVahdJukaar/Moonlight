@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 public class ModMessages {
 
     public static final ResourceLocation SPAWN_PACKET_ID = Moonlight.res("0");
-    public static final ChannelHandler CHANNEL = ChannelHandler.createChannel(Moonlight.res("channel"), 2);
+    public static final ChannelHandler CHANNEL = ChannelHandler.createChannel(Moonlight.res("channel"), 3);
 
     public static void registerMessages() {
 

@@ -32,9 +32,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     @Override
     public void onInitialize() {
 
-        DynamicRegistries.registerSynced(SoftFluidRegistry.KEY, SoftFluid.CODEC,SoftFluid.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
-        DynamicRegistries.registerSynced(MapDataInternal.KEY, MapDataInternal.CODEC, MapDataInternal.NETWORK_CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
-
         Moonlight.commonInit();
         //client init
         if (PlatHelper.getPhysicalSide().isClient()) {

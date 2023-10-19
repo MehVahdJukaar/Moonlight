@@ -2,8 +2,6 @@ package net.mehvahdjukaar.moonlight.api.set.wood;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -116,8 +114,6 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             resources.add(new ResourceLocation(id.getPath() + "_" + keyword));
             resources.add(new ResourceLocation(keyword + "_" + id.getPath()));
         }
-        ModelBlockRenderer
-
         ResourceLocation[] test = resources.toArray(new ResourceLocation[0]);
         Block temp = null;
         for (var r : test) {
