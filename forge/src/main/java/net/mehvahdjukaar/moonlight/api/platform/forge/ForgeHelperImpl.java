@@ -1,12 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
+import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -21,17 +21,15 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MobBucketItem;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
-import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.ForgeHooks;
@@ -42,7 +40,6 @@ import net.minecraftforge.common.crafting.ConditionalRecipe;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
-import net.minecraftforge.event.level.NoteBlockEvent;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.GameData;
 import org.jetbrains.annotations.Nullable;
@@ -71,10 +68,41 @@ public class ForgeHelperImpl {
         if (success) {
             AtomicReference<FinishedRecipe> newRecipe = new AtomicReference<>();
             builder.addRecipe(originalRecipe);
-            builder.build(newRecipe::set, originalRecipe.getId());
+            builder.build(r->new Wrapper(r, originalRecipe), originalRecipe.getId());
             return newRecipe.get();
         }
         return originalRecipe;
+    }
+
+
+    private record Wrapper(FinishedRecipe cond, FinishedRecipe original)implements FinishedRecipe{
+
+        @Override
+        public void serializeRecipeData(JsonObject json) {
+            cond.serializeRecipeData(json);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return cond.getId();
+        }
+
+        @Override
+        public RecipeSerializer<?> getType() {
+            return cond.getType();
+        }
+
+        @Nullable
+        @Override
+        public JsonObject serializeAdvancement() {
+            return original.serializeAdvancement();
+        }
+
+        @Nullable
+        @Override
+        public ResourceLocation getAdvancementId() {
+            return original.getAdvancementId();
+        }
     }
 
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {

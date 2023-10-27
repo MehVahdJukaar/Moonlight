@@ -26,6 +26,8 @@ dependencies {
 
     annotationProcessor("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
     implementation("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
+    annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
+
 }
 
 publishing {

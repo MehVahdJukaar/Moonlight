@@ -52,7 +52,7 @@ public class Moonlight {
         CompatWoodTypes.init();
         MoonlightRegistry.init();
 
-        ModMessages.registerMessages();
+        ModMessages.init();
 
         VillagerAIInternal.init();
         MapDataInternal.init();

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadsTransformer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -90,7 +91,7 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
         BakedQuad newQuad = new BakedQuad(v, tint, directionRemap.apply(quad.getDirection()), sprite, shade);
         inner.accept(newQuad);
         if (emissivity != null) {
-            BakedQuadBuilderImpl builder = (BakedQuadBuilderImpl) BakedQuadBuilderImpl.create(sprite, null);
+            BakedQuadBuilder builder = BakedQuadBuilderImpl.create(sprite, null);
             builder.fromVanilla(newQuad);
             builder.lightEmission(emissivity);
             newQuad = builder.build();

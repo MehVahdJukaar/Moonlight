@@ -96,7 +96,7 @@ public final class FabricConfigSpec extends ConfigSpec {
             //don't call a load directly, so we skip the main category name
             mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
         }
-        if(!initialized){
+        if (!initialized) {
             this.initialized = true;
             this.saveConfig();
             Moonlight.LOGGER.info("Loaded config {}", this.getFileName());
@@ -108,7 +108,7 @@ public final class FabricConfigSpec extends ConfigSpec {
              Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
 
             JsonObject jo = new JsonObject();
-            jo.addProperty("#README","This config file does not support comments. To see them configure it in-game using YACL or Cloth Config");
+            jo.addProperty("#README", "This config file does not support comments. To see them configure it in-game using YACL or Cloth Config");
             mainEntry.getEntries().forEach(e -> e.saveToJson(jo));
 
             GSON.toJson(jo, writer);
@@ -126,10 +126,10 @@ public final class FabricConfigSpec extends ConfigSpec {
     @Override
     @Environment(EnvType.CLIENT)
     public Screen makeScreen(Screen parent, ResourceLocation background) {
-        if (CLOTH_CONFIG) {
-            return ClothConfigCompat.makeScreen(parent, this, background);
-        } else if (YACL) {
+        if (YACL) {
             return YACLCompat.makeScreen(parent, this, background);
+        } else if (CLOTH_CONFIG) {
+            return ClothConfigCompat.makeScreen(parent, this, background);
         }
         return null;
     }

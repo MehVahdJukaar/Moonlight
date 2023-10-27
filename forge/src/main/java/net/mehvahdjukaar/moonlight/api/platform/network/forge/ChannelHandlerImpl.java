@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,28 +19,26 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class ChannelHandlerImpl extends ChannelHandler {
 
 
-    public static ChannelHandler createChannel(ResourceLocation channelMame, int version) {
+    public static ChannelHandler createChannel(String channelMame, IntSupplier version) {
         return new ChannelHandlerImpl(channelMame, version);
     }
 
     public final SimpleChannel channel;
     protected int id = 0;
 
-    public ChannelHandlerImpl(ResourceLocation channelName, int v) {
-        super(channelName);
-        String version = String.valueOf(v);
-        this.channel = NetworkRegistry.newSimpleChannel(channelName, () -> version,
-                version::equals, version::equals);
+    public ChannelHandlerImpl(String modId, IntSupplier v) {
+        super(modId);
+        Supplier<String> ver = () -> String.valueOf(v.getAsInt());
+        this.channel = NetworkRegistry.newSimpleChannel(new ResourceLocation(modId, "channel"), ver,
+                ver.get()::equals, ver.get()::equals);
     }
 
     @Override
@@ -47,7 +46,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             NetworkDir dir,
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder) {
-        Optional<NetworkDirection> d = switch (dir){
+        Optional<NetworkDirection> d = switch (dir) {
             case BOTH -> Optional.empty();
             case PLAY_TO_CLIENT -> Optional.of(NetworkDirection.PLAY_TO_CLIENT);
             case PLAY_TO_SERVER -> Optional.of(NetworkDirection.PLAY_TO_SERVER);
@@ -81,6 +80,11 @@ public class ChannelHandlerImpl extends ChannelHandler {
         @Override
         public Player getSender() {
             return context.getSender();
+        }
+
+        @Override
+        public void disconnect(Component message){
+            context.getNetworkManager().disconnect(message);
         }
     }
 
@@ -118,6 +122,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
     public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         channel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target), message);
     }
+
 
 }
 

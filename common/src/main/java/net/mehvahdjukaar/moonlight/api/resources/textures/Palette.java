@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 public class Palette implements Set<PaletteColor> {
 
     public static final float BASE_TOLERANCE = 1 / 180f;
-    private static final Palette EMPTY = new Palette(List.of());
-
     private float tolerance = 0;
     //ordered from darkest to lightest (luminance)
     private final ArrayList<PaletteColor> internal = new ArrayList<>();
@@ -35,7 +33,7 @@ public class Palette implements Set<PaletteColor> {
 
     @Override
     public boolean isEmpty() {
-        return this == EMPTY || internal.isEmpty();
+        return internal.isEmpty();
     }
 
     /**
@@ -43,6 +41,10 @@ public class Palette implements Set<PaletteColor> {
      */
     public Palette copy() {
         return new Palette(new ArrayList<>(this.internal), tolerance);
+    }
+
+    public static Palette empty(){
+        return new Palette(new ArrayList<>());
     }
 
     /**
@@ -425,6 +427,26 @@ public class Palette implements Set<PaletteColor> {
     }
 
     /**
+     * Removes lightest color
+     * @return removed
+     */
+    public PaletteColor reduceUp(){
+        var c = this.getLightest();
+        this.remove(c);
+        return c;
+    }
+
+    /**
+     * Removes darkest color
+     * @return removed
+     */
+    public PaletteColor reduceDown(){
+        var c = this.getDarkest();
+        this.remove(c);
+        return c;
+    }
+
+    /**
      * Adds a color to the palette by interpolating existing colors
      * Only works if it has at least 2 colors
      */
@@ -513,7 +535,7 @@ public class Palette implements Set<PaletteColor> {
                 } else map.put(color, c);
             }
         }
-        if (map.values().size() == 0) return EMPTY;
+        if (map.values().size() == 0) return new Palette(new ArrayList<>());
         return new Palette(map.values());
     }
 
@@ -625,7 +647,7 @@ public class Palette implements Set<PaletteColor> {
         for (var p : paletteBuilders) {
             Palette pal;
             if (p.size() == 0) {
-                pal = EMPTY;
+                pal = new Palette(new ArrayList<>());
             } else {
                 pal = new Palette(p.values(), tolerance);
             }

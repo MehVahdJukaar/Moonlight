@@ -9,11 +9,14 @@ import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -22,19 +25,21 @@ import net.minecraft.world.level.Level;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 public class ChannelHandlerImpl extends ChannelHandler {
 
     private static final Map<Class<?>, ResourceLocation> ID_MAP = new HashMap<>();
 
-    public static ChannelHandler createChannel(ResourceLocation channelMame, int version) {
-        return new ChannelHandlerImpl(channelMame);
+    public static ChannelHandler createChannel(String modID, IntSupplier version) {
+        return new ChannelHandlerImpl(modID);
     }
 
     private int id = 0;
 
-    public ChannelHandlerImpl(ResourceLocation channelName) {
-        super(channelName);
+    public ChannelHandlerImpl(String modId) {
+        super(modId);
     }
 
     @Override
@@ -48,7 +53,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             direction = NetworkDir.PLAY_TO_SERVER;
         }
 
-        ResourceLocation res = new ResourceLocation(this.channelName.getNamespace(), String.valueOf(id++));
+        ResourceLocation res = new ResourceLocation(name, String.valueOf(id++));
         ID_MAP.put(messageClass, res);
 
         if (direction == NetworkDir.PLAY_TO_SERVER) {
@@ -56,7 +61,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             ServerPlayNetworking.registerGlobalReceiver(
                     res, (server, player, h, buf, r) -> {
                         M message = decoder.apply(buf);
-                        server.execute(() -> message.handle(new Wrapper(player, finalDirection)));
+                        server.execute(() -> message.handle(new Wrapper(player, finalDirection, h)));
                     });
         } else {
             if (PlatHelper.getPhysicalSide().isClient()) FabricClientNetwork.register(res, decoder);
@@ -68,10 +73,12 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
         private final Player player;
         private final NetworkDir dir;
+        private final ServerGamePacketListenerImpl packetListener;
 
-        public Wrapper(Player player, NetworkDir dir) {
+        public Wrapper(Player player, NetworkDir dir, ServerGamePacketListenerImpl packetListener) {
             this.player = player;
             this.dir = dir;
+            this.packetListener = packetListener;
         }
 
         @Override
@@ -82,6 +89,11 @@ public class ChannelHandlerImpl extends ChannelHandler {
         @Override
         public Player getSender() {
             return player;
+        }
+
+        @Override
+        public void disconnect(Component reason) {
+            packetListener.disconnect(reason);
         }
     }
 
@@ -144,4 +156,5 @@ public class ChannelHandlerImpl extends ChannelHandler {
         message.writeToBuffer(buf);
         return ServerPlayNetworking.createS2CPacket(ID_MAP.get(message.getClass()), buf);
     }
+
 }

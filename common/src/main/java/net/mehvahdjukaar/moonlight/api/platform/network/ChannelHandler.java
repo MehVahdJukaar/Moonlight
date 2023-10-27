@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.network;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -10,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 
 /**
  * Your main network channel instance.
@@ -17,33 +19,74 @@ import java.util.function.Function;
 //TODO: rename
 public abstract class ChannelHandler {
 
-    @ExpectPlatform
-    public static ChannelHandler createChannel(ResourceLocation channelMame, int version) {
-        throw new AssertionError();
+    public static Builder builder(String modId) {
+        return new Builder(modId);
     }
 
+    public static class Builder {
+        private final ChannelHandler instance;
+        private int version = 0;
+
+        protected Builder(String modId) {
+            instance = createChannel(modId, () -> version);
+        }
+
+        public <M extends Message> Builder register(
+                NetworkDir direction,
+                Class<M> messageClass,
+                Function<FriendlyByteBuf, M> decoder) {
+            instance.register(direction, messageClass, decoder);
+            return this;
+        }
+
+        public Builder version(int version) {
+            this.version = version;
+            return this;
+        }
+
+        public ChannelHandler build() {
+            return instance;
+        }
+    }
+
+    @Deprecated(forRemoval = true)
+    public static ChannelHandler createChannel(ResourceLocation channelMame, int version) {
+        return createChannel(channelMame.getNamespace(), () -> version);
+    }
+
+    @Deprecated(forRemoval = true)
     public static ChannelHandler createChannel(ResourceLocation channelMame) {
         return createChannel(channelMame, 1);
     }
 
-    protected final ResourceLocation channelName;
-
-    protected ChannelHandler(ResourceLocation channelName) {
-        this.channelName = channelName;
+    public static ChannelHandler createChannel(String modId) {
+        return createChannel(modId, () -> 0);
     }
 
+    @ExpectPlatform
+    public static ChannelHandler createChannel(String modId, IntSupplier version) {
+        throw new AssertionError();
+    }
+
+    protected final String name;
+
+    protected ChannelHandler(String modId) {
+        this.name = modId;
+    }
+
+    @Deprecated
     public abstract <M extends Message> void register(
             NetworkDir direction,
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder);
-
-    public void setVersion(int version){}
 
 
     public interface Context {
         NetworkDir getDirection();
 
         Player getSender();
+
+        void disconnect(Component reason);
     }
 
 

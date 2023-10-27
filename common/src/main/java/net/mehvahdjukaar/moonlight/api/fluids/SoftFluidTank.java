@@ -41,7 +41,7 @@ public abstract class SoftFluidTank {
     @Nullable
     protected CompoundTag nbt = null;
     @NotNull
-    protected SoftFluid fluid = Preconditions.checkNotNull(BuiltInSoftFluids.EMPTY.get(), "Builtin empty fluid was null.How?"); //not null
+    protected SoftFluid fluid = BuiltInSoftFluids.EMPTY.get(); //not null
     //Special tint color. Used for dynamic tint fluids like water and potions
     protected int specialColor = 0;
     protected boolean needsColorRefresh = true;
