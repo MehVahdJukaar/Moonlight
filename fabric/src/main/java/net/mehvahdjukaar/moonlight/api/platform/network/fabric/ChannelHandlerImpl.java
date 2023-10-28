@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -21,12 +20,12 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 public class ChannelHandlerImpl extends ChannelHandler {
 
@@ -48,7 +47,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder) {
 
-        if(direction == NetworkDir.BOTH){
+        if (direction == NetworkDir.BOTH) {
             register(NetworkDir.PLAY_TO_CLIENT, messageClass, decoder);
             direction = NetworkDir.PLAY_TO_SERVER;
         }
@@ -73,6 +72,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
         private final Player player;
         private final NetworkDir dir;
+        @Nullable
         private final ServerGamePacketListenerImpl packetListener;
 
         public Wrapper(Player player, NetworkDir dir, ServerGamePacketListenerImpl packetListener) {
@@ -93,7 +93,8 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
         @Override
         public void disconnect(Component reason) {
-            packetListener.disconnect(reason);
+            if (packetListener != null) packetListener.disconnect(reason);
+            else if (PlatHelper.isDev()) throw new AssertionError("Cant disconnect on client");
         }
     }
 

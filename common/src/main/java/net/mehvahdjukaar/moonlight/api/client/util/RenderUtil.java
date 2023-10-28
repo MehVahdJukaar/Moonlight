@@ -3,14 +3,12 @@ package net.mehvahdjukaar.moonlight.api.client.util;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
-import net.minecraft.Util;
+import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.*;
@@ -19,7 +17,6 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
@@ -33,9 +30,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
 
 import java.util.function.BiConsumer;
-import java.util.function.Function;
-
-import static org.lwjgl.opengl.GL11.*;
 
 
 public class RenderUtil {
@@ -206,15 +200,15 @@ public class RenderUtil {
      * Text render type that can use mipmap.
      */
     public static RenderType getTextMipmapRenderType(ResourceLocation texture) {
-        return Internal.TEXT.apply(texture);
+        return MLRenderTypes.TEXT_MIP.apply(texture);
     }
 
     public static RenderType getEntityCutoutMipmapRenderType(ResourceLocation texture) {
-        return Internal.ENTITY_CUTOUT.apply(texture);
+        return MLRenderTypes.ENTITY_CUTOUT_MIP.apply(texture);
     }
 
     public static RenderType getEntitySolidMipmapRenderType(ResourceLocation texture) {
-        return Internal.ENTITY_SOLID.apply(texture);
+        return MLRenderTypes.ENTITY_SOLID_MIP.apply(texture);
     }
 
     /**
@@ -224,67 +218,6 @@ public class RenderUtil {
         MoonlightClient.setMipMap(mipMap);
     }
 
-    private static class Internal extends RenderType {
 
-        private static final Function<ResourceLocation, RenderType> TEXT = Util.memoize((p) ->
-        {
-            CompositeState compositeState = CompositeState.builder()
-                    .setShaderState(RENDERTYPE_TEXT_SHADER)
-                    .setTextureState(new TextureStateShard(p, false, true))
-                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                    .setLightmapState(LIGHTMAP)
-                    .createCompositeState(false);
-            return create("moonlight_text_mipped",
-                    DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
-                    VertexFormat.Mode.QUADS, 256, false, true,
-                    compositeState);
-        });
-
-        private static class TestStateShard extends TextureStateShard {
-            private TestStateShard(ResourceLocation resLoc) {
-                super(resLoc, false, true);
-                this.setupState = () -> {
-                    TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
-                    var t = texturemanager.getTexture(resLoc);
-                   t.setFilter(false, true);
-                    GlStateManager._texParameter(3553, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                    RenderSystem.setShaderTexture(0, resLoc);
-                };
-            }
-        }
-
-
-        private static final Function<ResourceLocation, RenderType> ENTITY_SOLID = Util.memoize((resourceLocation) -> {
-            CompositeState compositeState = RenderType.CompositeState.builder()
-                    .setShaderState(RENDERTYPE_ENTITY_SOLID_SHADER)
-                    .setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, true))
-                    .setTransparencyState(NO_TRANSPARENCY)
-                    .setLightmapState(LIGHTMAP)
-                    .setOverlayState(OVERLAY)
-                    .createCompositeState(true);
-            return create("moonlight_entity_solid_mipped", DefaultVertexFormat.NEW_ENTITY,
-                    VertexFormat.Mode.QUADS,
-                    256, true, false,
-                    compositeState);
-        });
-
-        private static final Function<ResourceLocation, RenderType> ENTITY_CUTOUT = Util.memoize(resourceLocation -> {
-            CompositeState compositeState = CompositeState.builder()
-                    .setShaderState(RENDERTYPE_ENTITY_CUTOUT_SHADER)
-                    .setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, true))
-                    .setTransparencyState(NO_TRANSPARENCY)
-                    .setLightmapState(LIGHTMAP)
-                    .setOverlayState(OVERLAY)
-                    .createCompositeState(true);
-            return RenderType.create("moonlight_entity_cutout_mipped",
-                    DefaultVertexFormat.NEW_ENTITY,
-                    VertexFormat.Mode.QUADS, 256, true, false,
-                    compositeState);
-        });
-
-        public Internal(String pName, VertexFormat pFormat, VertexFormat.Mode pMode, int pBufferSize, boolean pAffectsCrumbling, boolean pSortOnUpload, Runnable pSetupState, Runnable pClearState) {
-            super(pName, pFormat, pMode, pBufferSize, pAffectsCrumbling, pSortOnUpload, pSetupState, pClearState);
-        }
-    }
 }
 
