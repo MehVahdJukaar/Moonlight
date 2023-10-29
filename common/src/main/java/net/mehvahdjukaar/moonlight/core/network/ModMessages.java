@@ -10,7 +10,7 @@ public class ModMessages {
 
     public static final ResourceLocation SPAWN_PACKET_ID = Moonlight.res("0");
     public static final ChannelHandler CHANNEL = ChannelHandler.builder(Moonlight.MOD_ID)
-            .version(4)
+            .version(5)
             .register(NetworkDir.PLAY_TO_CLIENT, //id = "moonlight:0"
                     ClientBoundSpawnCustomEntityMessage.class, ClientBoundSpawnCustomEntityMessage::new)
 
