@@ -28,6 +28,8 @@ import java.util.function.BiFunction;
 
 @ApiStatus.Internal
 public class MapDataInternal {
+    public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
+    private static final Map<ResourceLocation, CustomDecorationType<?, ?>> CODE_TYPES_FACTORIES = new HashMap<>();
 
     //pain
     public static final Codec<MapDecorationType<?, ?>> CODEC =
@@ -74,15 +76,12 @@ public class MapDataInternal {
 
     //map markers
 
-    public static final ResourceKey<Registry<MapDecorationType<?, ?>>> KEY = MapDataInternal.getRegistryKey();
 
     @ExpectPlatform
-    private static ResourceKey<Registry<MapDecorationType<?,?>>> getRegistryKey() {
+    public static ResourceKey<Registry<MapDecorationType<?,?>>> getRegistryKey() {
         throw new AssertionError();
     }
 
-    public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
-    private static final Map<ResourceLocation, CustomDecorationType<?, ?>> CODE_TYPES_FACTORIES = new HashMap<>();
 
     public static MapDecorationType<?, ?> getGenericStructure() {
         return get(GENERIC_STRUCTURE_ID);
@@ -117,11 +116,11 @@ public class MapDataInternal {
     }
 
     public static Registry<MapDecorationType<?, ?>> hackyGetRegistry() {
-        return Utils.hackyGetRegistryAccess().registryOrThrow(KEY);
+        return Utils.hackyGetRegistryAccess().registryOrThrow(getRegistryKey());
     }
 
     public static Registry<MapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
-        return registryAccess.registryOrThrow(KEY);
+        return registryAccess.registryOrThrow(getRegistryKey());
     }
 
     public static Collection<MapDecorationType<?, ?>> getValues() {

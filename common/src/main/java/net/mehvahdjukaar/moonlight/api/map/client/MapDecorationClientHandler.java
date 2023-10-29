@@ -30,7 +30,7 @@ public class MapDecorationClientHandler {
 
     private static <T extends CustomMapDecoration> DecorationRenderer<T> simpleRenderer(MapDecorationType<T, ?> type) {
         var id = Utils.getID(type);
-        ResourceLocation texture = new ResourceLocation(id.getNamespace(), "map_markers/" + id.getPath());
+        ResourceLocation texture = new ResourceLocation(id.getNamespace(), "textures/map_markers/" + id.getPath()+".png");
         return new DecorationRenderer<>(texture);
     }
 

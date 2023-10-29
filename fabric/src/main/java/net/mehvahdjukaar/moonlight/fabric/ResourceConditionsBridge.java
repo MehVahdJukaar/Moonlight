@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.mixins.fabric.ConditionsHackMixin;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -89,8 +88,9 @@ public class ResourceConditionsBridge {
 
     public static boolean matchesForgeCondition(JsonObject obj) {
         try {
+            if (obj.has("fabric:load_conditions")) return true;
             JsonArray conditions = GsonHelper.getAsJsonArray(obj, NON_RECIPE_CONDITIONS_KEY, null);
-            if(conditions == null){
+            if (conditions == null) {
                 conditions = GsonHelper.getAsJsonArray(obj, CONDITIONS_KEY, null);
             }
             if (conditions != null) {
@@ -109,7 +109,7 @@ public class ResourceConditionsBridge {
      * @throws RuntimeException If some condition failed to parse.
      */
     public static boolean conditionMatches(JsonObject condition) throws RuntimeException {
-        if(condition.has(CONDITION_ID)){
+        if (condition.has(CONDITION_ID)) {
             ResourceLocation conditionId = new ResourceLocation(GsonHelper.getAsString(condition, CONDITION_ID));
             Predicate<JsonObject> jrc = ResourceConditions.get(conditionId);
 
@@ -118,7 +118,7 @@ public class ResourceConditionsBridge {
             } else {
                 return jrc.test(condition);
             }
-        }else return ResourceConditions.conditionMatches(condition);
+        } else return ResourceConditions.conditionMatches(condition);
     }
 
     public static boolean conditionsMatch(JsonArray conditions, boolean and) throws RuntimeException {

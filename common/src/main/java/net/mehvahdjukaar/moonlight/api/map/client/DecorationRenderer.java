@@ -25,7 +25,7 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
     private final RenderType RENDER_TYPE;
     private final int mapColor;
     private final boolean renderOnFrame;
-    private  boolean rendersText = true;
+    public   boolean rendersText = true;
     private final ResourceLocation textureId;
 
     public DecorationRenderer(ResourceLocation texture,  int mapColor, boolean renderOnFrame){
@@ -33,6 +33,10 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
         this.renderOnFrame = renderOnFrame;
         this.mapColor = mapColor;
         this.textureId = texture;
+    }
+
+    public ResourceLocation getTextureId() {
+        return textureId;
     }
 
     public DecorationRenderer(ResourceLocation texture, int mapColor) {
@@ -52,6 +56,12 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
     }
 
     public boolean render(T decoration, PoseStack matrixStack, MultiBufferSource buffer, MapItemSavedData mapData, boolean isOnFrame, int light, int index) {
+        VertexConsumer vertexBuilder = buffer.getBuffer(this.getRenderType(decoration));
+        return render(decoration, matrixStack, buffer, vertexBuilder, mapData, isOnFrame, light, index);
+    }
+
+
+    public boolean render(T decoration, PoseStack matrixStack, MultiBufferSource buffer, VertexConsumer vertexBuilder, MapItemSavedData mapData, boolean isOnFrame, int light, int index) {
         if (!isOnFrame || renderOnFrame) {
 
             matrixStack.pushPose();
@@ -65,7 +75,6 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
 
             Matrix4f matrix4f1 = matrixStack.last().pose();
 
-            VertexConsumer vertexBuilder = buffer.getBuffer(this.getRenderType(decoration));
 
             int color = this.getColor(decoration);
 

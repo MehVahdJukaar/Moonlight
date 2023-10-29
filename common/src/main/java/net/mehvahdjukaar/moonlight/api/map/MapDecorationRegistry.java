@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 
 public class MapDecorationRegistry {
 
-    public static final ResourceKey<Registry<MapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.KEY;
+    public static final ResourceKey<Registry<MapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.getRegistryKey();
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
