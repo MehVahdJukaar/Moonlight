@@ -2,15 +2,16 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 /**
  * Represents the actual map marker displayed on a map
- * default base simple decoration. this will be instanced in a map. equivalent of a tile entity or decorations for maps themselves
+ * default base simple decoration. This will be instanced in a map. Equivalent of a tile entity or decorations for maps themselves
  */
 public class CustomMapDecoration {
     private final MapDecorationType<?,?> type;
@@ -18,6 +19,8 @@ public class CustomMapDecoration {
     private byte x;
     private byte y;
     private byte rot;
+
+    boolean isClientOnly; //if client wont be able to remove this.
 
     public CustomMapDecoration(MapDecorationType<?,?> type, byte x, byte y, byte rot, @Nullable Component displayName) {
         this.type = type;
@@ -112,7 +115,7 @@ public class CustomMapDecoration {
     }
 
     /**
-     * used to load decoration data on client. must match saveToBuffer
+     * used to load decoration data on a client. must match saveToBuffer
      * implement this if you are adding new data to this base decoration class
      * @param buffer packed buffer
      */

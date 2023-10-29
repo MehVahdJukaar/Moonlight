@@ -13,6 +13,10 @@ transitive-accessible method net/minecraft/client/renderer/texture/TextureAtlasS
 
 transitive-accessible field net/minecraft/world/entity/LivingEntity dead Z
 
+mutable field net/minecraft/world/level/saveddata/maps/MapItemSavedData z I
+mutable field net/minecraft/world/level/saveddata/maps/MapItemSavedData x I
+mutable field net/minecraft/world/level/saveddata/maps/MapItemSavedData dimension Lnet/minecraft/resources/ResourceKey;
+
 #criteria trigger
 transitive-accessible method net/minecraft/advancements/CriteriaTriggers register (Lnet/minecraft/advancements/CriterionTrigger;)Lnet/minecraft/advancements/CriterionTrigger;
 #falling block

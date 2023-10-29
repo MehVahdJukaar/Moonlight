@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.util;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
@@ -118,6 +119,75 @@ public class VertexUtil {
             float originalZ = Float.intBitsToFloat(v[i * formatLength + 2]);
             v[i * formatLength + 2] = Float.floatToIntBits(originalZ * scale);
         }
+    }
+
+    //fast 2d quad. Use matrix to put where you want
+    public static void addQuad(VertexConsumer builder, PoseStack poseStack,
+                               float x0, float y0,
+                               float x1, float y1,
+                               float u0, float v0,
+                               float u1, float v1,
+                               int r, int g, int b, int a,
+                               int lu, int lv) {
+        PoseStack.Pose last = poseStack.last();
+        Vector3f vector3f = new Vector3f(0, 0, -1);
+        vector3f.transform(last.normal());
+
+        float nx = vector3f.x();
+        float ny = vector3f.y();
+        float nz = vector3f.z();
+        //avoids having to multiply 3 times
+        vertF(builder, poseStack, x0, y1, 0, u0, v0, r, g, b, a, lu, lv, nx, ny, nz);
+        vertF(builder, poseStack, x1, y1, 0, u1, v0, r, g, b, a, lu, lv, nx, ny, nz);
+        vertF(builder, poseStack, x1, y0, 0, u1, v1, r, g, b, a, lu, lv, nx, ny, nz);
+        vertF(builder, poseStack, x0, y0, 0, u0, v1, r, g, b, a, lu, lv, nx, ny, nz);
+    }
+
+    public static void vert(VertexConsumer builder, PoseStack poseStack, float x, float y, float z,
+                            float u, float v,
+                            float r, float g, float b, float a,
+                            int lu, int lv,
+                            float nx, float ny, float nz) {
+        //not chained because of MC263524
+        builder.vertex(poseStack.last().pose(), x, y, z);
+        builder.color(r, g, b, a);
+        builder.uv(u, v);
+        builder.overlayCoords(0, 10);
+        builder.uv2(lu, lv);
+        builder.normal(poseStack.last().normal(), nx, ny, nz);
+        builder.endVertex();
+    }
+
+    private static void vertF(VertexConsumer builder, PoseStack poseStack, float x, float y, float z,
+                              float u, float v,
+                              int r, int g, int b, int a,
+                              int lu, int lv, float nx, float ny, float nz) {
+        //not chained because of MC263524
+        builder.vertex(poseStack.last().pose(), x, y, z);
+        builder.color(r, g, b, a);
+        builder.uv(u, v);
+        builder.overlayCoords(0, 10);
+        builder.uv2(lu, lv);
+        builder.normal(nx, ny, nz);
+        builder.endVertex();
+    }
+
+
+    //no normal rotation
+    private static void vertF(VertexConsumer builder, PoseStack poseStack,
+                              float x, float y, float z,
+                              float u, float v,
+                              int color,
+                              int lu, int lv,
+                              float nx, float ny, float nz) {
+        //not chained because of MC263524
+        builder.vertex(poseStack.last().pose(), x, y, z);
+        builder.color(color);
+        builder.uv(u, v);
+        builder.overlayCoords(0, 10);
+        builder.uv2(lu, lv);
+        builder.normal(nx, ny, nz);
+        builder.endVertex();
     }
 
 }

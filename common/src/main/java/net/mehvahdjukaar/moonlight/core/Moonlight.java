@@ -11,6 +11,7 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.fake_player.FakeServerPlayer;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.ModCriteriaTriggers;
 import net.mehvahdjukaar.moonlight.core.loot_pool_entries.ModLootPoolEntries;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
@@ -18,13 +19,17 @@ import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.CompatTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.framework.qual.MonotonicQualifier;
 
 public class Moonlight {
 
@@ -51,7 +56,7 @@ public class Moonlight {
 
         VillagerAIInternal.init();
         SoftFluidRegistry.init();
-        MapDecorationRegistry.init();
+        MapDataInternal.init();
 
         //client init
         if (PlatformHelper.getEnv().isClient()) {
@@ -85,6 +90,17 @@ public class Moonlight {
                 i++;
             }
         }
+    }
+
+    public static MapItemSavedData getMapDataFromKnownKeys(ServerLevel level, int mapId) {
+        var d = level.getMapData(MapItem.makeKey(mapId));
+        if (d == null) {
+            d = level.getMapData("magicmap_" + mapId);
+            if (d == null) {
+                d = level.getMapData("mazemap_" + mapId);
+            }
+        }
+        return d;
     }
 
 }

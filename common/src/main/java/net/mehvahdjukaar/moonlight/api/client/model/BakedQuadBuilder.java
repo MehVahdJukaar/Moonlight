@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.model;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
@@ -9,21 +11,37 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
+
 /**
  * Cross loader utility to create baked quad
+ * On forge just wraps its own baked quad builder. Can also be fed to render calls as it implements vertex consumer
  */
-public interface BakedQuadBuilder {
+public interface BakedQuadBuilder extends VertexConsumer {
 
-    static BakedQuadBuilder create() {
-        return create(null);
+    static BakedQuadBuilder create(TextureAtlasSprite sprite) {
+        return create(sprite, (Matrix4f) null);
     }
 
+    static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Transformation transformation) {
+        Matrix4f m = null;
+        if (transformation != null) {
+            m = new Matrix4f();
+            m.translate(new Vector3f(0.5f, 0.5f, 0.5f));
+            m.multiply(transformation.getMatrix());
+            m.translate(new Vector3f(-0.5f, -0.5f, -0.5f));
+        }
+        return create(sprite, transformation == null ? null : m);
+    }
+
+    //
     @ExpectPlatform
-    static BakedQuadBuilder create(@Nullable Transformation transformation) {
+    static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
         throw new AssertionError();
     }
 
-    BakedQuadBuilder setSprite(TextureAtlasSprite sprite);
+
+    BakedQuadBuilder setAutoDirection();
 
     BakedQuadBuilder setDirection(Direction direction);
 
@@ -31,43 +49,27 @@ public interface BakedQuadBuilder {
 
     BakedQuadBuilder setShade(boolean shade);
 
-    BakedQuadBuilder pos(float x, float y, float z);
-
-    default BakedQuadBuilder pos(Vector3f vec3) {
-        return pos(vec3.x(), vec3.y(), vec3.z());
-    }
-
-    BakedQuadBuilder normal(float x, float y, float z);
-
-    default BakedQuadBuilder normal(Vector3f vector3f) {
-        return normal(vector3f.x(), vector3f.y(), vector3f.z());
-    }
-
-    BakedQuadBuilder color(int rgba);
-
-
-    BakedQuadBuilder uv(float u, float v);
-
-    default BakedQuadBuilder spriteUV(TextureAtlasSprite sprite, float u, float v) {
-        return uv(sprite.getU(u), sprite.getV(v)).setSprite(sprite);
-    }
-
-    /**
-     * Applies a transformation to the output quads. Must be called before building any vertex data
-     * Successful calls will simply replace the applied transform and won't combine them
-     */
-    @Deprecated(forRemoval = true) //use constructor instead
-    BakedQuadBuilder useTransform(Matrix4f matrix4f);
-    @Deprecated(forRemoval = true) //use constructor instead
-    default BakedQuadBuilder useTransform(Transformation transformation) {
-        if (transformation == Transformation.identity()) return this;
-        return useTransform(transformation.getMatrix());
-    }
-
     BakedQuadBuilder lightEmission(int light);
 
-    BakedQuadBuilder endVertex();
+    @Deprecated(forRemoval = true)
+    BakedQuadBuilder fromVanilla(BakedQuad quad);
+
+    BakedQuadBuilder setTint(int tintIndex);
 
     BakedQuad build();
 
+    BakedQuadBuilder setAutoBuild(Consumer<BakedQuad> quadConsumer);
+
+
+    @Override
+    default BakedQuadBuilder vertex(Matrix4f matrix, float x, float y, float z) {
+        VertexConsumer.super.vertex(matrix, x, y, z);
+        return this;
+    }
+
+    @Override
+    default BakedQuadBuilder normal(Matrix3f matrix, float x, float y, float z) {
+        VertexConsumer.super.normal(matrix, x, y, z);
+        return this;
+    }
 }

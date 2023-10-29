@@ -18,9 +18,6 @@ public class ModMessages {
                 ClientBoundSpawnCustomEntityMessage.class, ClientBoundSpawnCustomEntityMessage::new);
 
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
-                ClientBoundSyncCustomMapDecorationMessage.class, ClientBoundSyncCustomMapDecorationMessage::new);
-
-        CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundFinalizeFluidsMessage.class, ClientBoundFinalizeFluidsMessage::new);
 
         CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,

@@ -1,1 +1,1 @@
-updated map atlas integration
+backported new map API

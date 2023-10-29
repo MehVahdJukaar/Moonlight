@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientHandler;
@@ -21,9 +22,11 @@ public abstract class MapItemRendererMixin {
         if (mapData instanceof ExpandedMapData data) {
             int index = data.getVanillaDecorationSize();
             for (CustomMapDecoration decoration : data.getCustomDecorations().values()) {
-
-                if (MapDecorationClientHandler.render(decoration, poseStack, buffer, mapData, isOnFrame, light, index))
+                //this shouldn't texture swap if we didn't draw complex shit in their renderers.
+                //still need to create a new one because we might have
+                if (MapDecorationClientHandler.render(decoration, poseStack,    buffer, mapData, isOnFrame, light, index))
                     index++;
+
             }
         }
     }

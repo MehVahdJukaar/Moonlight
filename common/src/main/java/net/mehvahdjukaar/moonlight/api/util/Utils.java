@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -141,7 +142,7 @@ public class Utils {
     }
 
     public static ResourceLocation getID(MapDecorationType<?, ?> object) {
-        return MapDecorationRegistry.getID(object);
+        return MapDataInternal.hackyGetRegistry().getKey(object);
     }
 
     @UnstableApi

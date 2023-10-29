@@ -39,7 +39,7 @@ dependencies {
 
     modCompileOnly ("curse.maven:configured-457570:4462837")
 
-    modCompileOnly ("curse.maven:map-atlases-forge-519759:4756611")
+    modCompileOnly ("curse.maven:map-atlases-forge-519759:4796342")
    // modRuntimeOnly("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
    //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
 

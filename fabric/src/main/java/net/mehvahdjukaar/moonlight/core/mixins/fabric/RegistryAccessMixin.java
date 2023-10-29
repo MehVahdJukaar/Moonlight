@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.fabric.SoftFluidRegistryImpl;
-import net.mehvahdjukaar.moonlight.api.map.MapDecorationRegistry;
-import net.mehvahdjukaar.moonlight.api.map.fabric.MapDecorationRegistryImpl;
+import net.mehvahdjukaar.moonlight.core.map.fabric.MapDataInternalImpl;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -23,8 +23,8 @@ public interface RegistryAccessMixin {
                                 ResourceKey<? extends Registry<E>> registryKey, Codec<E> elementCodec, CallbackInfo ci) {
         //who needs an event, nobody will use this but me anyway
         if (registryKey.location() == Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY.location()) {
-            builder.put(MapDecorationRegistryImpl.KEY, new RegistryAccess.RegistryData<>(
-                    MapDecorationRegistryImpl.KEY, MapDecorationRegistry.TYPE_CODEC, MapDecorationRegistry.TYPE_CODEC));
+            builder.put(MapDataInternalImpl.KEY, new RegistryAccess.RegistryData<>(
+                    MapDataInternalImpl.KEY, MapDataInternal.CODEC, MapDataInternal.NETWORK_CODEC));
 
             builder.put(SoftFluidRegistryImpl.KEY, new RegistryAccess.RegistryData<>(
                     SoftFluidRegistryImpl.KEY, SoftFluid.CODEC, SoftFluid.CODEC));

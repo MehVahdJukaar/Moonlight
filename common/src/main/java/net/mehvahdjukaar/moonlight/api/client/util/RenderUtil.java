@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
 import net.minecraft.client.Minecraft;
@@ -22,6 +24,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -153,5 +156,47 @@ public class RenderUtil {
     }
 
 
+    /**
+     * Renders the given sprite or sprite section. Meant for GUI
+     *
+     * @param x      x position
+     * @param y      y position
+     * @param w      width
+     * @param h      height
+     * @param u      sprite local u
+     * @param v      sprite local v
+     * @param uW     sprite section width
+     * @param vH     sprite section height
+     * @param sprite can be grabbed from a material
+     */
+    public static void blitSpriteSection(PoseStack poseStack, int x, int y, int w, int h,
+                                         float u, float v, int uW, int vH, TextureAtlasSprite sprite) {
+        var c = sprite;
+        int width = (int) (c.getWidth() / (sprite.getU1() - sprite.getU0()));
+        int height = (int) (c.getHeight() / (sprite.getV1() - sprite.getV0()));
+        RenderSystem.setShaderTexture(0,sprite.atlas().location());
+        GuiComponent.blit(poseStack, x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
+    }
+
+    public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light, int index,
+                                    int b, int g, int r, TextureAtlasSprite sprite) {
+        Matrix4f matrix4f1 = stack.last().pose();
+        float u0 = sprite.getU(0);
+        float u1 = sprite.getU(16);
+        float h = (u0 + u1) / 2.0f;
+        float v0 = sprite.getV(0);
+        float v1 = sprite.getV(16);
+        float k = (v0 + v1) / 2.0f;
+        float shrink = sprite.uvShrinkRatio();
+        float u0s = Mth.lerp(shrink, u0, h);
+        float u1s = Mth.lerp(shrink, u1, h);
+        float v0s = Mth.lerp(shrink, v0, k);
+        float v1s = Mth.lerp(shrink, v1, k);
+
+        vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u0s, v1s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u1s, v1s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u1s, v0s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u0s, v0s).uv2(light).endVertex();
+    }
 }
 

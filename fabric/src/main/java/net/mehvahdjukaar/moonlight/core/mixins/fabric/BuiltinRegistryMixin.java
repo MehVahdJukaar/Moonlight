@@ -1,12 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
-import net.fabricmc.fabric.impl.registry.sync.RegistryMapSerializer;
-import net.fabricmc.fabric.impl.registry.sync.RegistrySyncManager;
-import net.fabricmc.loader.impl.gui.FabricGuiEntry;
 import net.mehvahdjukaar.moonlight.api.fluids.fabric.SoftFluidRegistryImpl;
-import net.mehvahdjukaar.moonlight.api.map.fabric.MapDecorationRegistryImpl;
-import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
-import net.minecraft.core.RegistryAccess;
+import net.mehvahdjukaar.moonlight.core.map.fabric.MapDataInternalImpl;
 import net.minecraft.data.BuiltinRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,7 +17,7 @@ public abstract class BuiltinRegistryMixin {
         SoftFluidRegistryImpl.REG = BuiltinRegistries
                 .registerSimple(SoftFluidRegistryImpl.KEY,SoftFluidRegistryImpl::getDefaultValue);
 
-        MapDecorationRegistryImpl.REG = BuiltinRegistries
-                .registerSimple(MapDecorationRegistryImpl.KEY,MapDecorationRegistryImpl::getDefaultValue);
+        MapDataInternalImpl.REG = BuiltinRegistries
+                .registerSimple(MapDataInternalImpl.KEY, MapDataInternalImpl::getDefaultValue);
     }
 }
