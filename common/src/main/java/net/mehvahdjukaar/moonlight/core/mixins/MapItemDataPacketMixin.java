@@ -59,11 +59,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Unique
     private ResourceLocation moonlight$dimension = Level.OVERWORLD.location();
 
-    @Unique
-    @Nullable
-    private Pair<Boolean, Integer> moonlight$tfData = null;
-
-
     //new constructor expansion
     @Inject(method = "<init>(IBZLjava/util/Collection;Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData$MapPatch;)V",
             at = @At("RETURN"))
@@ -103,11 +98,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
             //TODO: I really could have merged the 2 systems
             this.moonlight$customData = buf.readNbt(); //readCompressedNbt(buf);
         }
-        if (buf.readBoolean()) {
-            boolean first = buf.readBoolean();
-            int second = buf.readVarInt();
-            moonlight$tfData = Pair.of(first, second);
-        }
     }
 
     @Inject(method = "write", at = @At("RETURN"))
@@ -133,12 +123,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         if (moonlight$customData != null) {
             buf.writeNbt(moonlight$customData);
            // writeCompressedNbt(buf, moonlight$customData);
-        }
-
-        buf.writeBoolean(moonlight$tfData != null);
-        if (moonlight$tfData != null) {
-            buf.writeBoolean(moonlight$tfData.getFirst());
-            buf.writeVarInt(moonlight$tfData.getSecond());
         }
     }
 
