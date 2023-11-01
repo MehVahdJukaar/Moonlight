@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.map;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
@@ -25,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class MapDataInternal {
@@ -76,7 +79,7 @@ public class MapDataInternal {
 
     public static final ResourceKey<Registry<MapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(Moonlight.res("map_markers"));
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
-    private static final Map<ResourceLocation, CustomDecorationType<?, ?>> CODE_TYPES_FACTORIES = new HashMap<>();
+    private static final BiMap<ResourceLocation, Supplier<CustomDecorationType<?, ?>>> CODE_TYPES_FACTORIES = HashBiMap.create();
 
     public static MapDecorationType<?, ?> getGenericStructure() {
         return get(GENERIC_STRUCTURE_ID);
@@ -85,13 +88,17 @@ public class MapDataInternal {
     /**
      * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
      */
-    public static <T extends CustomDecorationType<?, ?>> T registerCustomType(T decorationType) {
-        CODE_TYPES_FACTORIES.put(decorationType.getCustomFactoryID(), decorationType);
-        return decorationType;
+    public static void registerCustomType(ResourceLocation id, Supplier<CustomDecorationType<?, ?>> decorationType) {
+        CODE_TYPES_FACTORIES.put(id, decorationType);
     }
 
     public static CustomDecorationType<?, ?> getCustomType(ResourceLocation resourceLocation) {
-        return Objects.requireNonNull(CODE_TYPES_FACTORIES.get(resourceLocation), "No map decoration type with id: " + resourceLocation);
+        var o = Objects.requireNonNull(CODE_TYPES_FACTORIES.get(resourceLocation),
+                "No map decoration type with id: " + resourceLocation);
+        var t = o.get();
+        //TODO: improve
+        t.factoryId = resourceLocation;
+        return t;
     }
 
     public static MapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {

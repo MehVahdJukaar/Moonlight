@@ -68,12 +68,11 @@ public class ForgeHelperImpl {
         if (success) {
             AtomicReference<FinishedRecipe> newRecipe = new AtomicReference<>();
             builder.addRecipe(originalRecipe);
-            builder.build(r->new Wrapper(r, originalRecipe), originalRecipe.getId());
+            builder.build(r->newRecipe.set(new Wrapper(r, originalRecipe)), originalRecipe.getId());
             return newRecipe.get();
         }
         return originalRecipe;
     }
-
 
     private record Wrapper(FinishedRecipe cond, FinishedRecipe original)implements FinishedRecipe{
 

@@ -1,1 +1,1 @@
-imprved fabric conditions
+map api improvements

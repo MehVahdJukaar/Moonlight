@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -148,7 +149,7 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      * @param rot  decoration rotation
      * @return decoration instance
      */
-    @Nullable
+    @NotNull
     protected abstract D doCreateDecoration(byte mapX, byte mapY, byte rot);
 
     /**

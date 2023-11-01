@@ -2,6 +2,7 @@ import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,6 +24,8 @@ public class BlockSetRegistryExample {
         BlockSetAPI.registerBlockSetDefinition(new FlowerTypeRegistry());
         // Using a block set to register dynamic blocks
         BlockSetAPI.addDynamicBlockRegistration(BlockSetRegistryExample::registerFlowerTypeBlocks, FlowerType.class);
+
+        init2();
     }
 
 
@@ -106,5 +109,18 @@ public class BlockSetRegistryExample {
         }
     }
 
+
+    // example to register wood finders
+
+    public static void init2(){
+        // generic one
+        BlockSetAPI.addBlockTypeFinder(FlowerType.class, ()->{
+            return Optional.of(new FlowerType((FlowerBlock) Blocks.PEONY));
+        });
+
+        // simple one for wood type
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("my_mod_Id",
+                "my_wood_type", "my_wood_type_planks", "my_wood_type_log"));
+    }
 
 }

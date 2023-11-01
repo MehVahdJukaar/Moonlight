@@ -1,44 +1,44 @@
 package net.mehvahdjukaar.moonlight.api.map.type;
 
+import com.mojang.datafixers.types.Func;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
-import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-//Equivalent of TileEntityType.
+// Equivalent of TileEntityType.
 // Singleton, which will be in charge of creating CustomDecoration and MapBlockMarker instances
 // Used for custom implementations
 public final class CustomDecorationType<D extends CustomMapDecoration, M extends MapBlockMarker<D>> implements MapDecorationType<D, M> {
 
     public static final Codec<CustomDecorationType<?, ?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("custom_type").forGetter(MapDecorationType::getCustomFactoryID)
+            ResourceLocation.CODEC.fieldOf("custom_type").forGetter(CustomDecorationType::getCustomFactoryID)
     ).apply(instance, MapDataRegistry::getCustomType));
 
-    private final ResourceLocation id; //just stored here instead than in a registry
+    //This is not the decoration id. Single instance will be registered with multiple ids based off json
+    @ApiStatus.Internal
+    public ResourceLocation factoryId;
 
     //used to restore decorations from nbt
     private final BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory;
 
     //creates empty marker
     @NotNull
-    private final Supplier<M> markerFactory;
+    private final Function<CustomDecorationType<D, M>, M> markerFactory;
     //creates marker from world
     @Nullable
     private final BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory;
@@ -51,10 +51,10 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
      * @param decorationFactory      read decoration data from buffer
      */
     private CustomDecorationType(ResourceLocation typeId,
-                                BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory,
-                                Supplier<M> markerFactory,
-                                @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory) {
-        this.id = typeId;
+                                 BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory,
+                                 Function<CustomDecorationType<D, M>,M> markerFactory,
+                                 @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory) {
+        this.factoryId = typeId;
         this.markerFactory = markerFactory;
         this.markerFromWorldFactory = markerFromWorldFactory;
         this.decorationFactory = decorationFactory;
@@ -64,24 +64,39 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
      * Use for decoration that is tied to an in world block (represented by their marker)
      */
     public static <D extends CustomMapDecoration, M extends MapBlockMarker<D>> CustomDecorationType<D, M> withWorldMarker(
+            Function<CustomDecorationType<D, M>, M> markerFactory,
+            @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory,
+            BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory) {
+        return new CustomDecorationType<>(null, decorationFactory, markerFactory, markerFromWorldFactory);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static <D extends CustomMapDecoration, M extends MapBlockMarker<D>> CustomDecorationType<D, M> withWorldMarker(
             ResourceLocation typeId, Supplier<M> markerFactory,
             @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory,
             BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory) {
-        return new CustomDecorationType<>(typeId, decorationFactory, markerFactory, markerFromWorldFactory);
+        return new CustomDecorationType<>(typeId, decorationFactory, t -> markerFactory.get(), markerFromWorldFactory);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static <D extends CustomMapDecoration, M extends MapBlockMarker<D>> CustomDecorationType<D, M> simple(
+            ResourceLocation typeId, Supplier<M> markerFactory,
+            BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory) {
+        return new CustomDecorationType<>(typeId, decorationFactory, t -> markerFactory.get(), null);
     }
 
     /**
      * For persistent decoration that is not associated to a world block. Still have a marker as they need to be saved
      */
     public static <D extends CustomMapDecoration, M extends MapBlockMarker<D>> CustomDecorationType<D, M> simple(
-            ResourceLocation typeId, Supplier<M> markerFactory,
+            Function<CustomDecorationType<D, M>, M> markerFactory,
             BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory) {
-        return new CustomDecorationType<>(typeId, decorationFactory, markerFactory, null);
+        return new CustomDecorationType<>(null, decorationFactory, markerFactory, null);
     }
 
     @Override
     public ResourceLocation getCustomFactoryID() {
-        return id;
+        return factoryId;
     }
 
     @Override
@@ -103,7 +118,7 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
     @Override
     @Nullable
     public M loadMarkerFromNBT(CompoundTag compound) {
-        M marker = markerFactory.get();
+        M marker = markerFactory.apply(this);
         try {
             marker.loadFromNBT(compound);
             return marker;
@@ -121,6 +136,6 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
 
     @Override
     public M createEmptyMarker() {
-        return markerFactory.get();
+        return markerFactory.apply(this);
     }
 }

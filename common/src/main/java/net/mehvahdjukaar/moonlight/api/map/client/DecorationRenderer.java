@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
-import net.mehvahdjukaar.moonlight.api.client.util.VertexUtil;
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
@@ -18,13 +17,13 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 public class DecorationRenderer<T extends CustomMapDecoration> {
     protected final ResourceLocation textureId;
     protected final int mapColor;
     protected final boolean renderOnFrame;
 
+    @Deprecated(forRemoval = true)
     public boolean rendersText = true;
 
     public DecorationRenderer(ResourceLocation texture, int mapColor, boolean renderOnFrame) {
@@ -45,10 +44,21 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
         return mapColor;
     }
 
+    public ResourceLocation getTextureId() {
+        return textureId;
+    }
+
     public boolean render(T decoration, PoseStack matrixStack, VertexConsumer vertexBuilder,
                           MultiBufferSource buffer,
                           @Nullable MapItemSavedData mapData,
                           boolean isOnFrame, int light, int index) {
+        return render(decoration, matrixStack, vertexBuilder, buffer, mapData, isOnFrame, light, index, true);
+    }
+
+    public boolean render(T decoration, PoseStack matrixStack, VertexConsumer vertexBuilder,
+                          MultiBufferSource buffer,
+                          @Nullable MapItemSavedData mapData,
+                          boolean isOnFrame, int light, int index, boolean rendersText) {
         if (!isOnFrame || renderOnFrame) {
 
             matrixStack.pushPose();
@@ -60,40 +70,48 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             }
             //matrixStack.translate(-0.125D, 0.125D, 0.0D);
 
-
-
-            int color = this.getColor(decoration);
-
-            int b = FastColor.ARGB32.blue(color);
-            int g = FastColor.ARGB32.green(color);
-            int r = FastColor.ARGB32.red(color);
-
-            TextureAtlasSprite sprite = MapDecorationClientManager.getAtlasSprite(this.textureId);
-            //so we can use local coordinates
-            //idk wy wrap doesnt work, it does the same as here
-            //vertexBuilder = sprite.wrap(vertexBuilder);
-
-           RenderUtil. renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, sprite);
+            renderSprite(decoration, matrixStack, vertexBuilder, light, index);
 
             matrixStack.popPose();
+
             if (decoration.getDisplayName() != null && rendersText) {
-                Font font = Minecraft.getInstance().font;
-                Component displayName = decoration.getDisplayName();
-                float width = font.width(displayName);
-                float scale = Mth.clamp(25.0F / width, 0.0F, 6.0F / 9.0F);
-                matrixStack.pushPose();
-                matrixStack.translate((0.0F + (float) decoration.getX() / 2.0F + 64.0F - width * scale / 2.0F), (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
-                if (CompatHandler.MAP_ATLASES) {
-                    MapAtlasCompat.scaleDecorationText(matrixStack, width, scale);
-                }
-                matrixStack.scale(scale, scale, 1.0F);
-                matrixStack.translate(0.0D, 0.0D, -0.1F);
-                font.drawInBatch(displayName, 0.0F, 0.0F, -1, false, matrixStack.last().pose(), buffer, Font.DisplayMode.NORMAL, Integer.MIN_VALUE, light);
-                matrixStack.popPose();
+                renderName(decoration, matrixStack, buffer, light);
             }
             return true;
         }
         return false;
+    }
+
+    // renders centered sprite
+    public void renderSprite(T decoration, PoseStack matrixStack, VertexConsumer vertexBuilder, int light, int index) {
+        int color = this.getColor(decoration);
+
+        int b = FastColor.ARGB32.blue(color);
+        int g = FastColor.ARGB32.green(color);
+        int r = FastColor.ARGB32.red(color);
+
+        TextureAtlasSprite sprite = MapDecorationClientManager.getAtlasSprite(this.getTextureId());
+        //so we can use local coordinates
+        //idk wy wrap doesnt work, it does the same as here
+        //vertexBuilder = sprite.wrap(vertexBuilder);
+
+        RenderUtil.renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, sprite);
+    }
+
+    protected void renderName(T decoration, PoseStack matrixStack, MultiBufferSource buffer, int light) {
+        Font font = Minecraft.getInstance().font;
+        Component displayName = decoration.getDisplayName();
+        float width = font.width(displayName);
+        float scale = Mth.clamp(25.0F / width, 0.0F, 6.0F / 9.0F);
+        matrixStack.pushPose();
+        matrixStack.translate((0.0F + (float) decoration.getX() / 2.0F + 64.0F - width * scale / 2.0F), (0.0F + (float) decoration.getY() / 2.0F + 64.0F + 4.0F), (double) -0.025F);
+        if (CompatHandler.MAP_ATLASES) {
+            MapAtlasCompat.scaleDecorationText(matrixStack, width, scale);
+        }
+        matrixStack.scale(scale, scale, 1.0F);
+        matrixStack.translate(0.0D, 0.0D, -0.1F);
+        font.drawInBatch(displayName, 0.0F, 0.0F, -1, false, matrixStack.last().pose(), buffer, Font.DisplayMode.NORMAL, Integer.MIN_VALUE, light);
+        matrixStack.popPose();
     }
 
 

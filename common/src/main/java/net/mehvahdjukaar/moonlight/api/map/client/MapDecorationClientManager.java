@@ -14,10 +14,10 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.TextureAtlasHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public class MapDecorationClientManager extends TextureAtlasHolder {
 
@@ -34,28 +34,38 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
         return instance.getSprite(location);
     }
 
+
+    @Deprecated(forRemoval = true)
+    public static <T extends CustomMapDecoration> void registerCustomRenderer(MapDecorationType<T, ?> type, DecorationRenderer<T> renderer) {
+        registerCustomRenderer(type.getCustomFactoryID(), r -> renderer);
+    }
+
     /**
      * Registers a renderer for this decoration. Use it to add fancy ones
      */
-    public static <T extends CustomMapDecoration> void registerCustomRenderer(MapDecorationType<T, ?> type, DecorationRenderer<T> renderer) {
-        RENDERERS.put(type, renderer);
+    public static <T extends CustomMapDecoration> void registerCustomRenderer(ResourceLocation typeFactoryId, Function<ResourceLocation, DecorationRenderer<T>> renderer) {
+        CUSTOM_RENDERERS_FACTORIES.put(typeFactoryId, (Function<ResourceLocation, DecorationRenderer<?>>) (Object) renderer);
     }
+
+    private static final Map<ResourceLocation, Function<ResourceLocation, DecorationRenderer<?>>> CUSTOM_RENDERERS_FACTORIES = Maps.newHashMap();
 
     private static final Map<MapDecorationType<?, ?>, DecorationRenderer<?>> RENDERERS = Maps.newHashMap();
 
 
-    private static <T extends CustomMapDecoration> DecorationRenderer<T> simpleRenderer(MapDecorationType<T, ?> type) {
+    private static <T extends CustomMapDecoration> DecorationRenderer<T> createRenderer(MapDecorationType<T, ?> type) {
         var id = Utils.getID(type);
         ResourceLocation texture = new ResourceLocation(id.getNamespace(), "map_marker/" + id.getPath());
-        return new DecorationRenderer<>(texture);
+        var custom = CUSTOM_RENDERERS_FACTORIES.get(type.getCustomFactoryID());
+        if (custom != null) return (DecorationRenderer<T>) custom.apply(texture);
+        else return new DecorationRenderer<>(texture);
     }
 
     public static <E extends CustomMapDecoration> DecorationRenderer<E> getRenderer(E decoration) {
         return (DecorationRenderer<E>) getRenderer(decoration.getType());
     }
 
-    public static <E extends CustomMapDecoration, T extends MapDecorationType<E,?>> DecorationRenderer<E> getRenderer(T type) {
-        return (DecorationRenderer<E>) RENDERERS.computeIfAbsent(type, t -> simpleRenderer(type));
+    public static <E extends CustomMapDecoration, T extends MapDecorationType<E, ?>> DecorationRenderer<E> getRenderer(T type) {
+        return (DecorationRenderer<E>) RENDERERS.computeIfAbsent(type, t -> createRenderer(type));
     }
 
     public static <T extends CustomMapDecoration> boolean render(T decoration, PoseStack matrixStack,

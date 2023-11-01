@@ -44,8 +44,14 @@ public class MapDataRegistry {
     /**
      * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
      */
+    @Deprecated(forRemoval = true)
     public static <T extends CustomDecorationType<?, ?>> T registerCustomType(T decorationType) {
-        return MapDataInternal.registerCustomType(decorationType);
+         MapDataInternal.registerCustomType(decorationType.getCustomFactoryID(), ()->decorationType);
+         return decorationType;
+    }
+
+    public static void registerCustomType(ResourceLocation factoryId, Supplier<CustomDecorationType<?,?>> decorationTypeFactory) {
+         MapDataInternal.registerCustomType(factoryId, decorationTypeFactory);
     }
 
     /**
