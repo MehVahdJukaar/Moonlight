@@ -13,9 +13,10 @@ body:
     attributes:
       label: "BEFORE CONTINUING:"
       options:
-        - label: "Always check you are using the latest version of this mods and it's dependencies"
+        - label: "Always check you are using the latest version of these mods and its dependencies"
           required: true
-      
+        - label: "Remove known problematic rendering mods such as Optifine, Sodium and others"
+          required: true
 
   - type: dropdown
     id: version
