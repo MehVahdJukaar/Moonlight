@@ -10,8 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ClientForgeMod;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -19,22 +19,26 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod.EventBusSubscriber(modid = MoonlightForge.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class MoonlightForgeClient {
 
-    public static void init(){
+    public static void init() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(MoonlightForgeClient::registerShader);
         modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
     }
 
     private static ShaderInstance translucentParticle;
+    public static ShaderInstance textAlphaShader;
 
     public static ShaderInstance getTranslucentParticle() {
         return translucentParticle;
+    }
+
+    public static ShaderInstance getTextAlphaShader() {
+        return textAlphaShader;
     }
 
     public static void registerShader(RegisterShadersEvent event) {
@@ -48,6 +52,19 @@ public class MoonlightForgeClient {
         } catch (Exception e) {
             Moonlight.LOGGER.error("Failed to parse shader: " + e);
         }
+        try {
+            ShaderInstance shader = new ShaderInstance(event.getResourceProvider(),
+                    Moonlight.res("text_alpha_color"), DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+            event.registerShader(shader, s -> textAlphaShader = s);
+        } catch (Exception e) {
+            Moonlight.LOGGER.error("Failed to parse shader: " + e);
+        }
+    }
+
+
+    @SubscribeEvent
+    public static void registerShaders(RegisterShadersEvent event) {
+
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
