@@ -40,7 +40,7 @@ public class WoodType extends BlockType {
         return o.orElse(null);
     });
 
-    protected WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
+    public WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
         super(id);
         this.planks = baseBlock;
         this.log = logBlock;
