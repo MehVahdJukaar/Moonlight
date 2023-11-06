@@ -114,7 +114,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     @Override
     public BakedQuadBuilderImpl color(int rgba) {
-        inner.spriteColor(vertexIndex, rgba);
+        inner.spriteColor(vertexIndex,0, rgba);
         return this;
     }
 
