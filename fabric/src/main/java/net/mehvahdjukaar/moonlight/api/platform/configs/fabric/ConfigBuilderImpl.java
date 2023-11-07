@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.fabric;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;
@@ -12,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -72,6 +72,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         }
 
         this.categoryStack.peek().addEntry(config);
+        if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();
     }
 
     @Override

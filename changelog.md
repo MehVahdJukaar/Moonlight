@@ -1,1 +1,1 @@
-more map api improvements
+added some platform utilities

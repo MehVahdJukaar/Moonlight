@@ -254,5 +254,9 @@ public class PlatHelperImpl {
         bus.addListener(consumer);
     }
 
+    public static String getModVersion(String modId) {
+        return ModList.get().getModContainerById(modId).map(v->v.getModInfo().getVersion().toString()).orElse(null);
+    }
+
 
 }

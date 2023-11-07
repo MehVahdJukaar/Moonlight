@@ -268,5 +268,10 @@ public class PlatHelperImpl {
         return MoonlightFabric.isInitializing();
     }
 
+    public static String getModVersion(String modId) {
+        return FabricLoader.getInstance().getModContainer(modId).map(v->v.getMetadata().getVersion().getFriendlyString())
+                .orElse(null);
+    }
+
 
 }

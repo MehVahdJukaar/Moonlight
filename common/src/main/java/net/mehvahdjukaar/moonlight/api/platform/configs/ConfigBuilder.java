@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -185,6 +186,7 @@ public abstract class ConfigBuilder {
             this.currentComment = null;
             this.currentKey = null;
         }
+        if (this.currentCategory() == null && PlatHelper.isDev()) throw new AssertionError();
     }
 
     public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;

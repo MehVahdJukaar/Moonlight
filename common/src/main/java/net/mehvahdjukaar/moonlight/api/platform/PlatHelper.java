@@ -61,6 +61,7 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    @Contract
     @ExpectPlatform
     public static boolean isDev() {
         throw new AssertionError();
@@ -195,7 +196,13 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
-    public static boolean isModLoaded(String name) {
+    public static boolean isModLoaded(String modId) {
+        throw new AssertionError();
+    }
+
+    @Nullable
+    @ExpectPlatform
+    public static String getModVersion(String modId) {
         throw new AssertionError();
     }
 

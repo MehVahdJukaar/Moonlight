@@ -16,6 +16,7 @@ public class ClientConfigs {
 
     static {
         ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.CLIENT);
+        builder.push("general");
         MERGE_PACKS = builder.comment("Merge all dynamic resource packs from all mods that use this library into a single pack")
                 .define("merge_dynamic_packs", true);
         LAZY_MAP_DATA = builder.comment("Prevents map texture from being upladed to GPU when only map markers have changed." +
@@ -23,6 +24,7 @@ public class ClientConfigs {
                 .define("lazy_map_upload", true);
         MAPS_MIPMAP = builder.comment("Renders map textures using mipmap. Vastly improves look from afar as well when inside a Map Atlas from Map Atlases or similar. Set to 0 to have no mipmap like vanilla")
                 .define("maps_mipmap", 3, 0, 4);
+        builder.pop();
         CONFIG = builder.buildAndRegister();
         CONFIG.loadFromFile();
     }

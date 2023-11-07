@@ -6,7 +6,6 @@ import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
@@ -53,6 +52,11 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         this.velY = (int) (d2 * 8000.0);
         this.velZ = (int) (d3 * 8000.0);
         this.buf = null;
+
+        //idk why this is needed but synced data fails to load correctly sometimes
+        //TODO: remove and figure out why its needed
+
+        //TODO: sent entity data drity here
     }
 
     public ClientBoundSpawnCustomEntityMessage(FriendlyByteBuf buf) {
@@ -91,6 +95,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         if (this.entity instanceof IExtraClientSpawnData spawnData) {
             spawnData.writeSpawnData(buf);
         }
+
     }
 
     @Override
@@ -121,6 +126,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
     @Environment(EnvType.CLIENT)
     private void clientSideStuff(Level world, Entity e) {
         ((ClientLevel) world).putNonPlayerEntity(this.entityId, e);
+
     }
 
 }
