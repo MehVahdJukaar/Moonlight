@@ -64,7 +64,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      */
     public boolean tryAddingFluid(FluidStack fluidStack) {
         int count = fluidStack.getAmount();
-        SoftFluid s = SoftFluidRegistry.fromForgeFluid(fluid.getForgeFluid());
+        SoftFluid s = SoftFluidRegistry.fromVanillaFluid(fluid.getForgeFluid());
         return tryAddingFluid(s, count, fluidStack.getTag());
     }
 
@@ -103,7 +103,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
             boolean transfer = false;
             CompoundTag fsTag = drainable.getTag();
             if (this.fluid.isEmpty()) {
-                this.setFluid(SoftFluidRegistry.fromForgeFluid(drainable.getFluid()), fsTag);
+                this.setFluid(SoftFluidRegistry.fromVanillaFluid(drainable.getFluid()), fsTag);
                 transfer = true;
             } else if (this.isSameFluidAs(drainable, fsTag)) {
                 transfer = true;
@@ -159,7 +159,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
     public void copy(IFluidHandler other) {
         FluidStack drainable = other.getFluidInTank(0).copy();// 250, IFluidHandler.FluidAction.SIMULATE);
         CompoundTag nbt = drainable.isEmpty() ? null : drainable.getTag();
-        this.setFluid(SoftFluidRegistry.fromForgeFluid(drainable.getFluid()), nbt);
+        this.setFluid(SoftFluidRegistry.fromVanillaFluid(drainable.getFluid()), nbt);
         this.setCount((int) Math.min(this.capacity, other.getTankCapacity(0)));
     }
 
@@ -179,7 +179,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      * @param fluidStack forge fluid
      */
     public void setFluid(FluidStack fluidStack) {
-        SoftFluid s = SoftFluidRegistry.fromForgeFluid(fluidStack.getFluid());
+        SoftFluid s = SoftFluidRegistry.fromVanillaFluid(fluidStack.getFluid());
         this.setFluid(s, fluidStack.getTag());
     }
 

@@ -108,8 +108,13 @@ public class SoftFluidRegistry {
      * @param fluid equivalent forge fluid
      * @return soft fluid. empty fluid if not found
      */
-    public static SoftFluid fromForgeFluid(Fluid fluid) {
+    public static SoftFluid fromVanillaFluid(Fluid fluid) {
         return getFluidsMap().getOrDefault(fluid, getEmpty());
+    }
+
+    @Deprecated(forRemoval = true)
+    public static SoftFluid fromForgeFluid(Fluid fluid) {
+        return fromVanillaFluid(fluid);
     }
 
     /**
