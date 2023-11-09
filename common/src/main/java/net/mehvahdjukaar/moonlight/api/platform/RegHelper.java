@@ -522,6 +522,12 @@ public class RegHelper {
         Arrays.stream(food).forEach(f -> Parrot.TAME_FOOD.add(f.asItem()));
     }
 
+    // Only relevant on forge
+    @ExpectPlatform
+    public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient){
+        throw new AssertionError();
+    }
+
 }
 
 

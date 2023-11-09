@@ -83,6 +83,13 @@ accessible field net/minecraft/client/resources/metadata/animation/AnimationMeta
 accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameHeight I
 accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frames Ljava/util/List;
 
+#firework stuff
+transitive-mutable field net/minecraft/world/item/crafting/FireworkStarRecipe SHAPE_BY_ITEM Ljava/util/Map;
+transitive-accessible field net/minecraft/world/item/crafting/FireworkStarRecipe SHAPE_BY_ITEM Ljava/util/Map;
+
+transitive-accessible field net/minecraft/world/item/crafting/FireworkStarRecipe SHAPE_INGREDIENT Lnet/minecraft/world/item/crafting/Ingredient;
+transitive-mutable field net/minecraft/world/item/crafting/FireworkStarRecipe SHAPE_INGREDIENT Lnet/minecraft/world/item/crafting/Ingredient;
+
 #fabric texture stuff
 accessible field net/minecraft/client/renderer/texture/SpriteContents animatedTexture Lnet/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture;
 accessible method net/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture getFrameX (I)I

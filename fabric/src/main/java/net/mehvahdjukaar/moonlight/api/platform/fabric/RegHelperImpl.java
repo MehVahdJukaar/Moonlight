@@ -31,6 +31,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -256,6 +257,9 @@ public class RegHelperImpl {
                         tableBuilder.pool(pool);
                     }
                 }));
+    }
+
+    public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient) {
     }
 
 
