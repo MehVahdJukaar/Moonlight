@@ -5,6 +5,7 @@ import com.google.common.collect.HashBiMap;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.Map;
 import java.util.Optional;
@@ -150,6 +152,7 @@ public abstract class BlockType {
     public void addChild(String genericName, @Nullable Object itemLike) {
         if (itemLike != null) {
             try {
+
                 this.children.put(genericName, itemLike);
                 var v = BlockSetInternal.getRegistry(this.getClass());
                 if (v != null) {

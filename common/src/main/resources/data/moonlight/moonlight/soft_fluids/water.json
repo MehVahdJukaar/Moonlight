@@ -35,6 +35,9 @@
   "equivalent_fluids": [
     "minecraft:water"
   ],
+  "preserved_tags_from_item": [
+    "Purity"
+  ],
   "flowing_texture": "minecraft:block/water_flow",
   "still_texture": "minecraft:block/water_still",
   "translation_key": "block.minecraft.water"

@@ -1,1 +1,1 @@
-mipmap shenanigans 
+somesafety checks
