@@ -273,7 +273,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         for (MapBlockMarker<?> marker : this.moonlight$customMapMarkers.values()) {
             if(marker.shouldSave()) {
                 CompoundTag com2 = new CompoundTag();
-                com2.put(marker.getTypeId(), marker.saveToNBT(new CompoundTag()));
+                com2.put(marker.getTypeId(), marker.saveToNBT());
                 listNBT.add(com2);
             }
         }

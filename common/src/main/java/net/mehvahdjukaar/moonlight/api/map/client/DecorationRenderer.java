@@ -44,6 +44,10 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
         return mapColor;
     }
 
+    public int getAlpha(T de) {
+        return 255;
+    }
+
     public ResourceLocation getTextureId() {
         return textureId;
     }
@@ -95,8 +99,10 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
         //idk wy wrap doesnt work, it does the same as here
         //vertexBuilder = sprite.wrap(vertexBuilder);
 
-        RenderUtil.renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, sprite);
+        int alpha = this.getAlpha(decoration);
+        if (alpha != 0) RenderUtil.renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, alpha, sprite);
     }
+
 
     protected void renderName(T decoration, PoseStack matrixStack, MultiBufferSource buffer, int light) {
         Font font = Minecraft.getInstance().font;

@@ -23,7 +23,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 
 /**
@@ -113,11 +112,16 @@ public class SoftFluid {
      *
      * @return forge fluid
      */
-    public Fluid getForgeFluid() {
+    public Fluid getVanillaFluid() {
         for (Fluid fluid : this.getEquivalentFluids()) {
             return fluid;
         }
         return Fluids.EMPTY;
+    }
+
+    @Deprecated(forRemoval = true)
+    public Fluid getForgeFluid() {
+        return getVanillaFluid();
     }
 
     /**

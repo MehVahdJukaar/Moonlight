@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
@@ -10,6 +11,8 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import java.io.IOException;
 import java.nio.file.Path;
+
+import static org.lwjgl.opengl.GL14.GL_GENERATE_MIPMAP;
 
 @Mixin(DynamicTexture.class)
 public abstract class DynamicTextureMixin extends AbstractTexture implements Dumpable {
@@ -30,6 +35,8 @@ public abstract class DynamicTextureMixin extends AbstractTexture implements Dum
             this.mipmap = true;
             instance.upload(a, b, c, 0, 0, instance.getWidth(), instance.getHeight(),
                     false, true, true, autoClose);
+            //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL11.GL_TRUE);
+            if(!autoClose) GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
         } else op.call(instance, a, b, c, autoClose);
     }
 

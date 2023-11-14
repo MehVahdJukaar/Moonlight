@@ -149,10 +149,14 @@ public abstract class BlockType {
      */
     public void addChild(String genericName, @Nullable Object itemLike) {
         if (itemLike != null) {
-            this.children.put(genericName, itemLike);
-            var v = BlockSetInternal.getRegistry(this.getClass());
-            if (v != null) {
-                v.mapBlockToType(itemLike, this);
+            try {
+                this.children.put(genericName, itemLike);
+                var v = BlockSetInternal.getRegistry(this.getClass());
+                if (v != null) {
+                    v.mapBlockToType(itemLike, this);
+                }
+            }catch (Exception e){
+                Moonlight.LOGGER.error("Failed to add block type child: value already present. Key {}, Object {}, BlockType {}", genericName,itemLike, this);
             }
         }
     }

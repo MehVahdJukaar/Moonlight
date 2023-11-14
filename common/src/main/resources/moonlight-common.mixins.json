@@ -37,6 +37,7 @@
     "accessor.DispenserBlockEntityAccessor"
   ],
   "injectors": {
-    "defaultRequire": 1
+    "defaultRequire": 1,
+    "injectionPoints": ["net.mehvahdjukaar.moonlight.api.misc.InvokeUnrestricted"]
   }
 }

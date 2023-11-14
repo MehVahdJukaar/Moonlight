@@ -15,8 +15,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -33,7 +32,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     private final ForgeConfigSpec.Builder builder;
 
-    private String cat = null;
+    private Deque<String> cat = new ArrayDeque<>();
 
     public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);
@@ -42,7 +41,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public String currentCategory() {
-        return cat;
+        return cat.peekFirst();
     }
 
 
@@ -54,17 +53,15 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigBuilderImpl push(String category) {
-        assert cat == null;
         builder.push(category);
-        cat = category;
+        cat.push(category);
         return this;
     }
 
     @Override
     public ConfigBuilderImpl pop() {
-        assert cat != null;
         builder.pop();
-        cat = null;
+        cat.pop();
         return this;
     }
 

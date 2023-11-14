@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
@@ -72,7 +71,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         if (fluid == BuiltInSoftFluids.POTION.get()) {
             this.specialColor = PotionNBTHelper.getColorFromNBT(this.nbt);
         } else {
-            Fluid f = this.fluid.getForgeFluid();
+            Fluid f = this.fluid.getVanillaFluid();
             if (f != Fluids.EMPTY) {
             }
         }

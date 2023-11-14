@@ -45,6 +45,12 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      *
      * @return nbt
      */
+    public CompoundTag saveToNBT() {
+        var compound = new CompoundTag();
+        return saveToNBT(compound);
+    }
+
+    @Deprecated(forRemoval = true)
     public CompoundTag saveToNBT(CompoundTag compound) {
         compound.put("Pos", NbtUtils.writeBlockPos(this.getPos()));
         if (this.name != null) {
@@ -53,7 +59,6 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
         if (this.persistent) compound.putBoolean("Persistent", true);
         return compound;
     }
-
 
     public boolean shouldRefresh() {
         if (persistent) return false;
@@ -160,6 +165,7 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      *
      * @return new decoration instance
      */
+    @Nullable
     public D createDecorationFromMarker(MapItemSavedData data) {
         double worldX = this.getPos().getX();
         double worldZ = this.getPos().getZ();

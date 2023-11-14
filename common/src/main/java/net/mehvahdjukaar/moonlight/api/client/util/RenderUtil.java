@@ -176,6 +176,11 @@ public class RenderUtil {
 
     public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light, int index,
                                     int b, int g, int r, TextureAtlasSprite sprite) {
+        renderSprite(stack, vertexBuilder, light, index, b, g, r, 255, sprite);
+    }
+
+    public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light, int index,
+                                    int b, int g, int r, int a, TextureAtlasSprite sprite) {
         Matrix4f matrix4f1 = stack.last().pose();
         float u0 = sprite.getU(0);
         float u1 = sprite.getU(16);
@@ -189,10 +194,10 @@ public class RenderUtil {
         float v0s = Mth.lerp(shrink, v0, k);
         float v1s = Mth.lerp(shrink, v1, k);
 
-        vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u0s, v1s).uv2(light).endVertex();
-        vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).color(r, g, b, 255).uv(u1s, v1s).uv2(light).endVertex();
-        vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u1s, v0s).uv2(light).endVertex();
-        vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b, 255).uv(u0s, v0s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).color(r, g, b, a).uv(u0s, v1s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).color(r, g, b, a).uv(u1s, v1s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).color(r, g, b, a).uv(u1s, v0s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b,a).uv(u0s, v0s).uv2(light).endVertex();
     }
 
 

@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -65,7 +64,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      */
     public boolean tryAddingFluid(FluidStack fluidStack) {
         int count = fluidStack.getAmount();
-        SoftFluid s = SoftFluidRegistry.fromVanillaFluid(fluid.getForgeFluid());
+        SoftFluid s = SoftFluidRegistry.fromVanillaFluid(fluid.getVanillaFluid());
         return tryAddingFluid(s, count, fluidStack.getTag());
     }
 
@@ -79,7 +78,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
     public boolean tryTransferToFluidTank(IFluidHandler fluidDestination, int bottles) {
         if (!this.canRemove(bottles)) return false;
         int milliBuckets = bottles * 250;
-        FluidStack stack = this.toEquivalentForgeFluid(milliBuckets);
+        FluidStack stack = this.toEquivalentVanillaFluid(milliBuckets);
         if (!stack.isEmpty()) {
             int fillableAmount = fluidDestination.fill(stack, IFluidHandler.FluidAction.SIMULATE);
             if (fillableAmount == milliBuckets) {
@@ -128,10 +127,15 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      * @param mb forge minecraft buckets
      * @return forge fluid stacks
      */
-    public FluidStack toEquivalentForgeFluid(int mb) {
-        FluidStack stack = new FluidStack(this.fluid.getForgeFluid(), mb);
+    public FluidStack toEquivalentVanillaFluid(int mb) {
+        FluidStack stack = new FluidStack(this.fluid.getVanillaFluid(), mb);
         this.applyNBTtoFluidStack(stack);
         return stack;
+    }
+
+    @Deprecated(forRemoval = true)
+    public FluidStack toEquivalentForgeFluid(int mb) {
+        return toEquivalentVanillaFluid(mb);
     }
 
     private void applyNBTtoFluidStack(FluidStack fluidStack) {
@@ -229,14 +233,14 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         if (fluid == BuiltInSoftFluids.POTION.get()) {
             this.specialColor = PotionNBTHelper.getColorFromNBT(this.nbt);
         } else {
-            Fluid f = this.fluid.getForgeFluid();
+            Fluid f = this.fluid.getVanillaFluid();
             if (f != Fluids.EMPTY) {
                 var prop = IClientFluidTypeExtensions.of(f);
                 if (prop != IClientFluidTypeExtensions.DEFAULT) {
                     //world accessor
                     int w;
                     //stack accessor
-                    w = prop.getTintColor(this.toEquivalentForgeFluid(1));
+                    w = prop.getTintColor(this.toEquivalentVanillaFluid(1));
                     if (w != -1) this.specialColor = w;
                     else {
                         w = prop.getTintColor(f.defaultFluidState(),world, pos);
