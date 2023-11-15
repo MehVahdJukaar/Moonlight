@@ -61,8 +61,9 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     public Optional<WoodType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseRes) {
         String name = null;
         String path = baseRes.getPath();
-        //stuff for tfc
-        if (baseRes.getNamespace().equals("tfc")) {
+        // Support TerraFirmaCraft (TFC) & ArborFirmaCraft (AFC)
+        if (baseRes.getNamespace().equals("tfc") || baseRes.getNamespace().equals("afc")) {
+            // Needs to contain palnks in its path
             if (path.contains("wood/planks/")) {
                 var log = BuiltInRegistries.BLOCK.getOptional(
                         new ResourceLocation(baseRes.getNamespace(), path.replace("planks", "log")));
@@ -73,8 +74,8 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             }
             return Optional.empty();
         }
-        //needs to contain planks in its name
-        if (path.endsWith("_planks")) {
+        // DEFAULT
+        if (path.endsWith("_planks")) { //needs to contain planks in its name
             name = path.substring(0, path.length() - "_planks".length());
         } else if (path.startsWith("planks_")) {
             name = path.substring("planks_".length());

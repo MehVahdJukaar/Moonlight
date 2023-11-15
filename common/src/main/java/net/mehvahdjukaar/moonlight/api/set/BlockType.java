@@ -96,15 +96,12 @@ public abstract class BlockType {
 
     @Nullable
     protected <V> V findRelatedEntry(String append, String postPend, Registry<V> reg) {
-        if (this.id.getNamespace().equals("tfc")) {
-            var o = reg.getOptional(
-                    new ResourceLocation(id.getNamespace(), "wood/" + postPend + "/" + id.getPath()));
-            if (o.isPresent()) return o.get();
-        }
-
-
         String post = postPend.isEmpty() ? "" : "_" + postPend;
         ResourceLocation[] targets = {
+                // TFC & AFC: Include children of wood_type: stairs, slab...
+                new ResourceLocation(id.getNamespace(), "wood/planks/" + id.getPath() + "_" + append),
+                // TFC & AFC: Include twig (sticks), leaves, planks
+                new ResourceLocation(id.getNamespace(), "wood/" + append + post + "/" + id.getPath()),
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post),
                 new ResourceLocation(id.getNamespace(), id.getPath() + "_planks_" + append + post),
