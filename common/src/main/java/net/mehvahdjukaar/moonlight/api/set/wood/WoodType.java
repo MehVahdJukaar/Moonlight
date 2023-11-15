@@ -48,7 +48,8 @@ public class WoodType extends BlockType {
 
     @Nullable
     protected Block findLogRelatedBlock(String append, String postpend) {
-        if (this.id.getNamespace().equals("tfc")) {
+        // SUPPORT: TFC & AFC
+        if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
             var o = BuiltInRegistries.BLOCK.getOptional(
                     new ResourceLocation(id.getNamespace(),
                             "wood/" + append + "_" + postpend + "/" + id.getPath()));
@@ -133,6 +134,8 @@ public class WoodType extends BlockType {
         this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", BuiltInRegistries.BLOCK));
         this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign", BuiltInRegistries.BLOCK));
         this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.BLOCK));
+
+        this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK)); // TFC & AFC only
 
         WoodTypeRegistry.INSTANCE.mapVanillaWood(this);
     }
