@@ -56,7 +56,7 @@ public class WoodType extends BlockType {
         if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
             var o = BuiltInRegistries.BLOCK.getOptional(
                     new ResourceLocation(id.getNamespace(),
-                            "wood/" + append + postpend + "/" + id.getPath()));
+                            "wood/" + append + post + "/" + id.getPath()));
             if (o.isPresent()) return o.get();
         }
 
