@@ -48,16 +48,18 @@ public class WoodType extends BlockType {
 
     @Nullable
     protected Block findLogRelatedBlock(String append, String postpend) {
-        if (this.id.getNamespace().equals("tfc")) {
-            var o = BuiltInRegistries.BLOCK.getOptional(
-                    new ResourceLocation(id.getNamespace(),
-                            "wood/" + append + "_" + postpend + "/" + id.getPath()));
-            if (o.isPresent()) return o.get();
-        }
-
         String post = postpend.isEmpty() ? "" : "_" + postpend;
         var id = this.getId();
         String logN = Utils.getID(this.log).getPath();
+
+        // SUPPORT: TFC & AFC
+        if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
+            var o = BuiltInRegistries.BLOCK.getOptional(
+                    new ResourceLocation(id.getNamespace(),
+                            "wood/" + append + post + "/" + id.getPath()));
+            if (o.isPresent()) return o.get();
+        }
+
         ResourceLocation[] targets = {
                 new ResourceLocation(id.getNamespace(), logN + "_" + append + post),
                 new ResourceLocation(id.getNamespace(), append + "_" + logN + post),
@@ -133,6 +135,8 @@ public class WoodType extends BlockType {
         this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", BuiltInRegistries.BLOCK));
         this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign", BuiltInRegistries.BLOCK));
         this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.BLOCK));
+
+        this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK)); // TFC & AFC only
 
         WoodTypeRegistry.INSTANCE.mapVanillaWood(this);
     }
