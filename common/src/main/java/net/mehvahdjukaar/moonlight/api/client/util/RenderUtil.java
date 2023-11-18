@@ -216,6 +216,10 @@ public class RenderUtil {
         return MLRenderTypes.ENTITY_SOLID_MIP.apply(texture);
     }
 
+    public static RenderType getTextColorRenderType(ResourceLocation texture) {
+        return MLRenderTypes.COLOR_TEXT.apply(texture);
+    }
+
     /**
      * Call at appropriate times to turn your dynamic textures into mipmapped ones. Remember to turn off
      */

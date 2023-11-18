@@ -1,1 +1,1 @@
-somesafety checks
+added compat with Purity mod

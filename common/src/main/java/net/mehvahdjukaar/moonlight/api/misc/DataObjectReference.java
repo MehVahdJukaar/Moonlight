@@ -5,6 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,38 +16,50 @@ import org.jetbrains.annotations.Nullable;
  */
 public class DataObjectReference<T> {
 
-    private final ResourceLocation location;
+    private static final WeakHashSet<DataObjectReference<?>> REFERENCES = new WeakHashSet<>();
+
     private final ResourceKey<Registry<T>> registryKey;
+    private final ResourceKey<T> key;
+
+    @Nullable
+    private Holder<T> cache;
 
     public DataObjectReference(ResourceLocation location, ResourceKey<Registry<T>> registry) {
-        this.location = location;
         this.registryKey = registry;
+        this.key = ResourceKey.create(registryKey, location);
+        REFERENCES.add(this);
     }
 
     public Holder<T> getHolder() {
-        var r = Utils.hackyGetRegistryAccess();
-        return r.registryOrThrow(registryKey).getHolderOrThrow(ResourceKey.create(registryKey, location));
+        if(cache == null) {
+            var r = Utils.hackyGetRegistryAccess();
+            Registry<T> reg = r.registryOrThrow(registryKey);
+            cache = reg.getHolderOrThrow(key);
+        }
+        return cache;
     }
 
     @NotNull
     public T get() {
-        var r = Utils.hackyGetRegistryAccess();
-        var reg = r.registryOrThrow(registryKey);
-        var v = reg.get(this.location);
-        if (v == null) {
-            throw new RuntimeException("Data object at location " + location + " could not be found. How? " +
-                    "Registry content:" + reg.keySet());
-        }
-        return v;
+        return getHolder().value();
     }
 
+    @Deprecated(forRemoval = true)
     @Nullable
     public T getUnchecked() {
-        var r = Utils.hackyGetRegistryAccess();
-        return r.registryOrThrow(registryKey).get(location);
+        return get();
+    }
+
+    public void clearCache() {
+        cache = null;
     }
 
     public ResourceLocation getID() {
-        return location;
+        return key.location();
+    }
+
+    @ApiStatus.Internal
+    public static void onDataReload() {
+        REFERENCES.forEach(DataObjectReference::clearCache);
     }
 }

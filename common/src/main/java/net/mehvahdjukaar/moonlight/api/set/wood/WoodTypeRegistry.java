@@ -87,7 +87,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         if (name != null && !IGNORED_MODS.contains(namespace)) {
 
             BlockState state = baseBlock.defaultBlockState();
-            //can't check if the block is a full one, so I do this. Adding some checks here
+            //Can't check if the block is a full one, so I do this. Adding some checks here
             if (state.getProperties().size() <= 2 && !(baseBlock instanceof SlabBlock)) {
                 //needs to use wood sound type
                 if (state.instrument() == NoteBlockInstrument.BASS) {

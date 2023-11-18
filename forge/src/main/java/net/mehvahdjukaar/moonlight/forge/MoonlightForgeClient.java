@@ -6,11 +6,11 @@ import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
+import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
@@ -31,14 +31,14 @@ public class MoonlightForgeClient {
     }
 
     private static ShaderInstance translucentParticle;
-    public static ShaderInstance textAlphaShader;
+    public static ShaderInstance textColorShader;
 
     public static ShaderInstance getTranslucentParticle() {
         return translucentParticle;
     }
 
-    public static ShaderInstance getTextAlphaShader() {
-        return textAlphaShader;
+    public static ShaderInstance getTextColorShader() {
+        return textColorShader;
     }
 
     public static void registerShader(RegisterShadersEvent event) {
@@ -55,7 +55,9 @@ public class MoonlightForgeClient {
         try {
             ShaderInstance shader = new ShaderInstance(event.getResourceProvider(),
                     Moonlight.res("text_alpha_color"), DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
-            event.registerShader(shader, s -> textAlphaShader = s);
+            event.registerShader(shader, s -> textColorShader = s);
+
+            MLRenderTypes.textColorShader = MoonlightForgeClient::getTextColorShader;
         } catch (Exception e) {
             Moonlight.LOGGER.error("Failed to parse shader: " + e);
         }

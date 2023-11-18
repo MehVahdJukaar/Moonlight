@@ -125,20 +125,20 @@ public class ChannelHandlerImpl extends ChannelHandler {
     public void sendToAllClientPlayersInRange(Level level, BlockPos pos, double radius, Message message) {
 
         MinecraftServer currentServer = PlatHelper.getCurrentServer();
-        if (currentServer != null) {
+        if (!level.isClientSide && currentServer != null) {
             PlayerList players = currentServer.getPlayerList();
             var dimension = level.dimension();
 
             players.broadcast(null, pos.getX(), pos.getY(), pos.getZ(),
                     radius, dimension, toVanillaPacket(message));
-        }
+        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
     }
 
     @Override
     public void sentToAllClientPlayersTrackingEntity(Entity target, Message message) {
         if (target.level() instanceof ServerLevel serverLevel) {
             serverLevel.getChunkSource().broadcast(target, toVanillaPacket(message));
-        }
+        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
     }
 
     @Override
@@ -149,7 +149,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             if (target instanceof ServerPlayer player) {
                 sendToClientPlayer(player, message);
             }
-        }
+        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
     }
 
     private Packet<?> toVanillaPacket(Message message) {

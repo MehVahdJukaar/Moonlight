@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.map.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -9,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
@@ -20,36 +22,30 @@ import org.jetbrains.annotations.Nullable;
 
 public class DecorationRenderer<T extends CustomMapDecoration> {
     protected final ResourceLocation textureId;
-    protected final int mapColor;
-    protected final boolean renderOnFrame;
 
     @Deprecated(forRemoval = true)
-    public boolean rendersText = true;
-
     public DecorationRenderer(ResourceLocation texture, int mapColor, boolean renderOnFrame) {
-        this.renderOnFrame = renderOnFrame;
-        this.mapColor = mapColor;
-        this.textureId = texture;
-    }
-
-    public DecorationRenderer(ResourceLocation texture, int mapColor) {
-        this(texture, mapColor, true);
+        this(texture);
     }
 
     public DecorationRenderer(ResourceLocation texture) {
-        this(texture, -1, true);
+        this.textureId = texture;
     }
 
-    public int getColor(T decoration) {
-        return mapColor;
+    protected int getColor(T decoration) {
+        return -1;
     }
 
-    public int getAlpha(T de) {
+    protected int getAlpha(T decoration) {
         return 255;
     }
 
-    public ResourceLocation getTextureId() {
-        return textureId;
+    protected boolean hasOutline(T decoration) {
+        return false;
+    }
+
+    protected boolean rendersOnFrame(T decoration) {
+        return true;
     }
 
     public boolean render(T decoration, PoseStack matrixStack, VertexConsumer vertexBuilder,
@@ -63,7 +59,7 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
                           MultiBufferSource buffer,
                           @Nullable MapItemSavedData mapData,
                           boolean isOnFrame, int light, int index, boolean rendersText) {
-        if (!isOnFrame || renderOnFrame) {
+        if (!isOnFrame || rendersOnFrame(decoration)) {
 
             matrixStack.pushPose();
             matrixStack.translate(0.0F + (float) decoration.getX() / 2.0F + 64.0F, 0.0F + (float) decoration.getY() / 2.0F + 64.0F, -0.02F);
@@ -74,7 +70,8 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
             }
             //matrixStack.translate(-0.125D, 0.125D, 0.0D);
 
-            renderSprite(decoration, matrixStack, vertexBuilder, light, index);
+            renderDecorationSprite(matrixStack, buffer, vertexBuilder, light, index,
+                    this.getColor(decoration), this.getAlpha(decoration), this.hasOutline(decoration));
 
             matrixStack.popPose();
 
@@ -86,21 +83,39 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
         return false;
     }
 
+
     // renders centered sprite
-    public void renderSprite(T decoration, PoseStack matrixStack, VertexConsumer vertexBuilder, int light, int index) {
-        int color = this.getColor(decoration);
+    public void renderDecorationSprite(PoseStack matrixStack, MultiBufferSource buffer, VertexConsumer vertexBuilder, int light, int index,
+                                       int color, int alpha, boolean outline) {
 
         int b = FastColor.ARGB32.blue(color);
         int g = FastColor.ARGB32.green(color);
         int r = FastColor.ARGB32.red(color);
 
-        TextureAtlasSprite sprite = MapDecorationClientManager.getAtlasSprite(this.getTextureId());
+        RenderSystem.enableDepthTest();
+        TextureAtlasSprite sprite = MapDecorationClientManager.getAtlasSprite(textureId);
         //so we can use local coordinates
         //idk wy wrap doesnt work, it does the same as here
         //vertexBuilder = sprite.wrap(vertexBuilder);
 
-        int alpha = this.getAlpha(decoration);
-        if (alpha != 0) RenderUtil.renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, alpha, sprite);
+        if (alpha != 0) {
+            RenderUtil.renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, alpha, sprite);
+
+            if (outline) {
+                RenderSystem.setShaderColor(1, 1, 1, 1);
+                VertexConsumer vb2 = buffer.getBuffer(RenderUtil.getTextColorRenderType(MapDecorationClientManager.LOCATION_MAP_MARKERS));
+                for (int j = -1; j <= 1; ++j) {
+                    for (int k = -1; k <= 1; ++k) {
+                        if (j != 0 || k != 0) {
+                            matrixStack.pushPose();
+                            matrixStack.translate(j * 0.125, k * 0.125, 0.001);
+                            RenderUtil.renderSprite(matrixStack, vb2, LightTexture.FULL_BRIGHT, index, 255, 255, 255, alpha, sprite);
+                            matrixStack.popPose();
+                        }
+                    }
+                }
+            }
+        }
     }
 
 

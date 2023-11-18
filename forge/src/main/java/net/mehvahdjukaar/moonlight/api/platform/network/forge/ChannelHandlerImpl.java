@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.network.forge;
 
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
@@ -77,6 +78,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             };
         }
 
+
         @Override
         public Player getSender() {
             return context.getSender();
@@ -106,21 +108,25 @@ public class ChannelHandlerImpl extends ChannelHandler {
     @Override
     public void sendToAllClientPlayersInRange(Level level, BlockPos pos, double radius, Message message) {
         MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
-        if (currentServer != null) {
+        if (currentServer != null && !level.isClientSide) {
             var distributor = PacketDistributor.NEAR.with(() ->
                     new PacketDistributor.TargetPoint(pos.getX(), pos.getY(), pos.getZ(), radius, level.dimension()));
             channel.send(distributor, message);
-        }
+        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
     }
 
     @Override
     public void sentToAllClientPlayersTrackingEntity(Entity target, Message message) {
-        channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> target), message);
+        if(!target.level().isClientSide) {
+            channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> target), message);
+        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
     }
 
     @Override
     public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
-        channel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target), message);
+        if(!target.level().isClientSide) {
+            channel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target), message);
+        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
     }
 
 

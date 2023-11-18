@@ -1,22 +1,37 @@
 package net.mehvahdjukaar.moonlight.core.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Function;
-
-import static org.lwjgl.opengl.GL11.GL_LINEAR;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
+import java.util.function.Supplier;
 
 public class MLRenderTypes extends RenderType {
+
+    @ApiStatus.Internal
+    public static Supplier<ShaderInstance> textColorShader = GameRenderer::getRendertypeTextShader;
+
+    public static final Function<ResourceLocation, RenderType> COLOR_TEXT = Util.memoize((p) ->
+    {
+        CompositeState compositeState = CompositeState.builder()
+                .setShaderState(new ShaderStateShard(textColorShader))
+                .setTextureState(new TextureStateShard(p,
+                        false, true))
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setLightmapState(LIGHTMAP)
+                .createCompositeState(false);
+        return create("moonlight_text_color_mipped",
+                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+                VertexFormat.Mode.QUADS, 256, false, true,
+                compositeState);
+    });
 
     public static final Function<ResourceLocation, RenderType> TEXT_MIP = Util.memoize((p) ->
     {
@@ -31,20 +46,6 @@ public class MLRenderTypes extends RenderType {
                 VertexFormat.Mode.QUADS, 256, false, true,
                 compositeState);
     });
-
-    private static class TestStateShard extends TextureStateShard {
-        private TestStateShard(ResourceLocation resLoc) {
-            super(resLoc, false, true);
-            this.setupState = () -> {
-                TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
-                var t = texturemanager.getTexture(resLoc);
-                t.setFilter(false, true);
-                GlStateManager._texParameter(3553, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                RenderSystem.setShaderTexture(0, resLoc);
-            };
-        }
-    }
-
 
     public static final Function<ResourceLocation, RenderType> ENTITY_SOLID_MIP = Util.memoize((resourceLocation) -> {
         CompositeState compositeState = RenderType.CompositeState.builder()

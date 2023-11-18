@@ -81,7 +81,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
         }
         //update every 5 sec
         List<CustomMapDecoration> extra = new ArrayList<>();
-        if (updateDeco || (moonlight$volatileDecorationRefreshTicks++ % (20 * 5)) == 0) {
+        if ( (moonlight$volatileDecorationRefreshTicks++ % (20 * 5)) == 0 || updateDeco) {
             //adds dynamic decoration and sends them to a client
             for (MapBlockMarker<?> m : MapDataInternal.getDynamicServer(player, mapId, data)) {
                 var d = m.createDecorationFromMarker(data);

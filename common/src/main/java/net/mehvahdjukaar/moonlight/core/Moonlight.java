@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
+import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
@@ -92,6 +93,7 @@ public class Moonlight {
     public static void afterDataReload(RegistryAccess registryAccess) {
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
         DynamicResourcePack.clearAfterReload(false);
+        DataObjectReference.onDataReload();
     }
 
     public static void assertInitPhase() {

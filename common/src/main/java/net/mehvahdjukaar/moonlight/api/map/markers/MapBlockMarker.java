@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.map.markers;
 
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -19,9 +22,12 @@ import java.util.Objects;
  * @param <D> decoration
  */
 public abstract class MapBlockMarker<D extends CustomMapDecoration> {
+    //Static ref is fine as data registry cant change with reload command. Just don't hold ref outside of a world
     protected final MapDecorationType<D, ?> type;
+    @Nullable
     private BlockPos pos;
     private int rot = 0;
+    @Nullable
     private Component name;
     private boolean persistent;
 
@@ -52,7 +58,9 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
 
     @Deprecated(forRemoval = true)
     public CompoundTag saveToNBT(CompoundTag compound) {
-        compound.put("Pos", NbtUtils.writeBlockPos(this.getPos()));
+        if (this.pos != null) {
+            compound.put("Pos", NbtUtils.writeBlockPos(this.pos));
+        }
         if (this.name != null) {
             compound.putString("Name", Component.Serializer.toJson(this.name));
         }
@@ -107,7 +115,7 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      * @return suffix
      */
     private String getPosSuffix() {
-        return pos.getX() + "," + pos.getY() + "," + pos.getZ();
+        return pos == null ? "" : pos.getX() + "," + pos.getY() + "," + pos.getZ();
     }
 
     public MapDecorationType<D, ?> getType() {
@@ -167,8 +175,10 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      */
     @Nullable
     public D createDecorationFromMarker(MapItemSavedData data) {
-        double worldX = this.getPos().getX();
-        double worldZ = this.getPos().getZ();
+        BlockPos pos = this.getPos();
+        if (pos == null) return null;
+        double worldX = pos.getX();
+        double worldZ = pos.getZ();
         double rotation = this.getRotation();
 
         int i = 1 << data.scale;
