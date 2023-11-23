@@ -21,11 +21,13 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 @Mixin(MapItemSavedData.HoldingPlayer.class)
@@ -39,6 +41,9 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             moonlight$customDataDirty.put(v.getType(), v.createDirtyCounter());
         }
     }
+
+    @Unique
+    private final ReentrantLock concurrentLock = new ReentrantLock();
 
     @Unique
     private final Map<CustomMapData.Type<?>, CustomMapData.DirtyCounter> moonlight$customDataDirty = new IdentityHashMap<>();
@@ -57,6 +62,12 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     @Shadow
     @Final
     public Player player;
+
+    @Inject(method = "nextUpdatePacket", at = @At("HEAD"), cancellable = true)
+    public void checkLocked(int mapId, CallbackInfoReturnable<@Nullable Packet<?>> cir) {
+        //we won't wait here. if its locked too bad we cant block the main thread
+        if (concurrentLock.isLocked()) cir.setReturnValue(null);
+    }
 
     @ModifyReturnValue(method = "nextUpdatePacket", at = @At("TAIL"))
     public Packet<?> addExtraPacketData(@Nullable Packet<?> packet, int mapId) {
@@ -81,7 +92,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
         }
         //update every 5 sec
         List<CustomMapDecoration> extra = new ArrayList<>();
-        if ( (moonlight$volatileDecorationRefreshTicks++ % (20 * 5)) == 0 || updateDeco) {
+        if ((moonlight$volatileDecorationRefreshTicks++ % (20 * 5)) == 0 || updateDeco) {
             //adds dynamic decoration and sends them to a client
             for (MapBlockMarker<?> m : MapDataInternal.getDynamicServer(player, mapId, data)) {
                 var d = m.createDecorationFromMarker(data);
@@ -129,12 +140,28 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     @Override
     public <H extends CustomMapData.DirtyCounter> void moonlight$setCustomDataDirty(
             CustomMapData.Type<?> type, Consumer<H> dirtySetter) {
-        var t = this.moonlight$customDataDirty.get(type);
-        dirtySetter.accept((H) t);
+        try {
+            concurrentLock.lock();
+            var t = this.moonlight$customDataDirty.get(type);
+            dirtySetter.accept((H) t);
+        }finally {
+            concurrentLock.unlock();
+        }
     }
 
     @Override
     public void moonlight$setCustomMarkersDirty() {
         this.moonlight$customMarkersDirty = true;
+    }
+
+
+    @Inject(method = "markColorsDirty", at = @At("HEAD"))
+    public void lockData(int x, int z, CallbackInfo ci) {
+        concurrentLock.lock();
+    }
+
+    @Inject(method = "markColorsDirty", at = @At("RETURN"))
+    public void sanityCheck(int x, int z, CallbackInfo ci) {
+        concurrentLock.unlock();
     }
 }

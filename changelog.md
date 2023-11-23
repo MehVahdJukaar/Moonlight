@@ -1,1 +1,1 @@
-added compat with Purity mod
+solved some concurrency issues with map data

@@ -30,6 +30,12 @@ public class DataObjectReference<T> {
         REFERENCES.add(this);
     }
 
+    public DataObjectReference(ResourceKey<T> key){
+        this.key = key;
+        this.registryKey =  ResourceKey.createRegistryKey(key.registry());
+        REFERENCES.add(this);
+    }
+
     public Holder<T> getHolder() {
         if(cache == null) {
             var r = Utils.hackyGetRegistryAccess();
