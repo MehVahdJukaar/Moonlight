@@ -1,1 +1,1 @@
-solved some concurrency issues with map data
+fixed network issue

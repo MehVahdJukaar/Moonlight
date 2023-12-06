@@ -47,22 +47,18 @@ public class ChannelHandlerImpl extends ChannelHandler {
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder) {
 
-        if (direction == NetworkDir.BOTH) {
-            register(NetworkDir.PLAY_TO_CLIENT, messageClass, decoder);
-            direction = NetworkDir.PLAY_TO_SERVER;
-        }
-
         ResourceLocation res = new ResourceLocation(name, String.valueOf(id++));
         ID_MAP.put(messageClass, res);
 
-        if (direction == NetworkDir.PLAY_TO_SERVER) {
-            NetworkDir finalDirection = direction;
+        if (direction != NetworkDir.PLAY_TO_CLIENT) {
             ServerPlayNetworking.registerGlobalReceiver(
                     res, (server, player, h, buf, r) -> {
                         M message = decoder.apply(buf);
-                        server.execute(() -> message.handle(new Wrapper(player, finalDirection, h)));
+                        server.execute(() -> message.handle(new Wrapper(player, NetworkDir.PLAY_TO_SERVER, h)));
                     });
-        } else {
+        }
+
+        if (direction != NetworkDir.PLAY_TO_SERVER) {
             if (PlatHelper.getPhysicalSide().isClient()) FabricClientNetwork.register(res, decoder);
         }
     }
@@ -131,14 +127,14 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
             players.broadcast(null, pos.getX(), pos.getY(), pos.getZ(),
                     radius, dimension, toVanillaPacket(message));
-        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
+        } else if (PlatHelper.isDev()) throw new AssertionError("Cant send message to clients from client side");
     }
 
     @Override
     public void sentToAllClientPlayersTrackingEntity(Entity target, Message message) {
         if (target.level() instanceof ServerLevel serverLevel) {
             serverLevel.getChunkSource().broadcast(target, toVanillaPacket(message));
-        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
+        } else if (PlatHelper.isDev()) throw new AssertionError("Cant send message to clients from client side");
     }
 
     @Override
@@ -149,7 +145,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             if (target instanceof ServerPlayer player) {
                 sendToClientPlayer(player, message);
             }
-        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
+        } else if (PlatHelper.isDev()) throw new AssertionError("Cant send message to clients from client side");
     }
 
     private Packet<?> toVanillaPacket(Message message) {

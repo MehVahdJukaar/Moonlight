@@ -56,8 +56,8 @@ public class BlocksColorInternal {
         Collections.reverse(colorPriority);
         //group by color
         loop1:
-        for (var b : registry) {
-            ResourceLocation id = Utils.getID(b);
+        for (var e : registry.entrySet()) {
+            ResourceLocation id = e.getKey().location();
             String name = id.getPath();
             if (!name.contains("_")) continue;
 
@@ -71,7 +71,7 @@ public class BlocksColorInternal {
                 }
                 if (newId != null) {
                     DyeColor dyeColor = colors.get(c);
-                    groupedByType.computeIfAbsent(newId, a -> new EnumMap<>(DyeColor.class)).put(dyeColor, b);
+                    groupedByType.computeIfAbsent(newId, a -> new EnumMap<>(DyeColor.class)).put(dyeColor, e.getValue());
                     continue loop1;
                 }
             }
@@ -81,7 +81,8 @@ public class BlocksColorInternal {
         for (var j : groupedByType.entrySet()) {
             var map = j.getValue();
             ResourceLocation id = j.getKey();
-            if (id.getNamespace().equals("energeticsheep")) continue;
+            String modId = id.getNamespace();
+            if (modId.equals("energeticsheep") || modId.equals("xycraft_world") || modId.equals("botania")) continue;
             if (map.keySet().containsAll(VANILLA_COLORS)) {
                 var set = new ColoredSet<>(id, map, registry);
                 colorSetMap.put(id.toString(), set);

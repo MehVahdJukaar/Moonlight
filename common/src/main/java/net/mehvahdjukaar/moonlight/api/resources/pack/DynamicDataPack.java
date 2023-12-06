@@ -33,7 +33,7 @@ public class DynamicDataPack extends DynamicResourcePack {
 
         ResourceLocation tagId = builder.getId();
         String tagPath = type.location().getPath();
-        if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item")) tagPath = tagPath + "s";
+        if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item") || tagPath.equals("fluid")) tagPath = tagPath + "s";
         ResourceLocation loc = ResType.TAGS.getPath(new ResourceLocation(tagId.getNamespace(),
                 tagPath + "/" + tagId.getPath()));
         //merge tags

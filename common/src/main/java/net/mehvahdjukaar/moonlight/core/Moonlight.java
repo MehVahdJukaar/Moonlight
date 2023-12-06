@@ -33,6 +33,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
+import javax.swing.*;
+
 @ApiStatus.Internal
 public class Moonlight {
 
@@ -64,6 +66,7 @@ public class Moonlight {
         //hack
         BlockSetAPI.addDynamicRegistration((reg, wood) -> AdditionalItemPlacementsAPI.afterItemReg(),
                 WoodType.class, BuiltInRegistries.BLOCK_ENTITY_TYPE);
+
     }
     //TODO: refactor respriter and palette to better acocunt for animated stuff
 
