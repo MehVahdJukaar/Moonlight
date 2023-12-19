@@ -195,7 +195,7 @@ public class TextUtil {
             this(color.getTextColor(),
                     getDarkenedColor(color.getTextColor(), outline),
                     outline && (isVeryNear.getAsBoolean() || color == DyeColor.BLACK),
-                    outline ? combinedLight : LightTexture.FULL_BRIGHT, style);
+                    outline ? LightTexture.FULL_BRIGHT : combinedLight, style);
         }
     }
 
@@ -217,7 +217,7 @@ public class TextUtil {
         } else {
             dark = color;
         }
-        return new RenderProperties(color, dark, outline, glowing ? combinedLight : LightTexture.FULL_BRIGHT, style);
+        return new RenderProperties(color, dark, outline, glowing ? LightTexture.FULL_BRIGHT : combinedLight, style);
     }
 
 

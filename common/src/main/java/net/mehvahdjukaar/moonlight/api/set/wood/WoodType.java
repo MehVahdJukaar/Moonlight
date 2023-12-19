@@ -10,7 +10,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.ApiStatus;
@@ -34,11 +34,23 @@ public class WoodType extends BlockType {
     public final Block planks;
     public final Block log;
 
-    private final Supplier<net.minecraft.world.level.block.state.properties.WoodType> vanillaType = Suppliers.memoize(() -> {
+    private final Supplier<net.minecraft.world.level.block.state.properties.WoodType> vanillaType = Suppliers.memoize(this::detectVanillaWood);
+
+    @Nullable
+    private net.minecraft.world.level.block.state.properties.WoodType detectVanillaWood() {
         String i = id.getNamespace().equals("minecraft") ? id.getPath() : id.toString();
-        var o = net.minecraft.world.level.block.state.properties.WoodType.values().filter(v -> v.name().equals(i)).findAny();
+        var values = net.minecraft.world.level.block.state.properties.WoodType.values();
+        var o = values.filter(v -> v.name().equals(i)).findAny();
+        if (o.isEmpty()) {
+            if(getChild("hanging_sign") instanceof CeilingHangingSignBlock c){
+                return c.type();
+            }
+            if(getChild("sign") instanceof SignBlock f){
+                return f.type();
+            }
+        }
         return o.orElse(null);
-    });
+    }
 
     public WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
         super(id);
@@ -134,8 +146,8 @@ public class WoodType extends BlockType {
         this.addChild("button", this.findRelatedEntry("button", BuiltInRegistries.BLOCK));
         this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", BuiltInRegistries.BLOCK));
         this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign", BuiltInRegistries.BLOCK));
+        this.addChild("wall_hanging_sign", this.findRelatedEntry("wall_hanging_sign", BuiltInRegistries.BLOCK));
         this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.BLOCK));
-
         this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK)); // TFC & AFC only
 
         WoodTypeRegistry.INSTANCE.mapVanillaWood(this);

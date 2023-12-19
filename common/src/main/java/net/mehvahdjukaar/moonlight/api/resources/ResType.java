@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources;
 
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 
 public enum ResType {
     GENERIC("%s"),
@@ -35,7 +36,7 @@ public enum ResType {
 
     private final String loc;
 
-    ResType(String loc){
+    ResType(String loc) {
         this.loc = loc;
     }
 
@@ -46,6 +47,10 @@ public enum ResType {
 
     public ResourceLocation getPath(String relativeLocation) {
         return this.getPath(new ResourceLocation(relativeLocation));
+    }
+
+    public static ResourceLocation getTagPath(TagKey<?> tag) {
+     return    TAGS.getPath(tag.location().withPrefix(tag.registry().location().getPath() + "s/"));
     }
 
 }

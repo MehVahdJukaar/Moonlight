@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.mehvahdjukaar.moonlight.api.client.ModFluidRenderProperties;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
