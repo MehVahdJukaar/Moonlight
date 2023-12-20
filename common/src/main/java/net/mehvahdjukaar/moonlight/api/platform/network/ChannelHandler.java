@@ -10,13 +10,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
 
 /**
  * Your main network channel instance.
  */
-//TODO: rename
 public abstract class ChannelHandler {
 
     public static Builder builder(String modId) {
@@ -36,6 +36,11 @@ public abstract class ChannelHandler {
                 Class<M> messageClass,
                 Function<FriendlyByteBuf, M> decoder) {
             instance.register(direction, messageClass, decoder);
+            return this;
+        }
+
+        public Builder and(Consumer<Builder> consumer){
+            consumer.accept(this);
             return this;
         }
 
@@ -74,8 +79,7 @@ public abstract class ChannelHandler {
         this.name = modId;
     }
 
-    @Deprecated
-    public abstract <M extends Message> void register(
+    protected abstract <M extends Message> void register(
             NetworkDir direction,
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder);

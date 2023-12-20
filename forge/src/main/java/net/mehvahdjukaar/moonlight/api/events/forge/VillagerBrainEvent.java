@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;
@@ -24,81 +24,39 @@ public class VillagerBrainEvent extends Event implements IVillagerBrainEvent {
     //hack so we can extend Event class
     private final VillagerBrainEventInternal internal;
 
-    /**
-     * used to add activities, memories, sensor types and modify schedules in a compatible way
-     * Main feature is easily adding scheduled activities without overriding the whole schedule and adding sensor types
-     */
     public VillagerBrainEvent(Brain<Villager> brain, Villager villager) {
         this.internal = new VillagerBrainEventInternal(brain, villager);
     }
 
-    /**
-     * If possible do not access the villager brain directly. The whole porpouse of this is to makde adding activities work better
-     * between mods without modifying the brain directly. Use the methods below
-     *
-     * @return villager entity
-     */
+    @Override
     public Villager getVillager() {
         return internal.getVillager();
     }
 
-    /**
-     * access the brain memories to add new ones or remove existing ones
-     * Important: to register a new memory types use the static method in VillagerAIManager otherwise they will not be able to be saved if you add them here manually
-     *
-     * @return brain memories
-     */
+    @Override
     public Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> getMemories() {
         return internal.getMemories();
     }
 
-    /**
-     * add an activity to the brain.
-     * However this isn't recommended since it doesn't completely clear its previous requirements from the requirements map. This might not be an issue tho
-     * Try to use addTaskToActivity instead if you just want to add a task to an existing activity without completely overriding it
-     *
-     * @param activity        the identifier of the activity
-     * @param activityPackage the play package itself that will be executed
-     */
+    @Override
     public void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> activityPackage) {
         this.internal.addOrReplaceActivity(activity, activityPackage);
     }
 
-    /**
-     * Adds an activity to the schedule. will override any activity that is in that specified time window
-     * Note that subsequent call to this from other mods in later event execution might override your activity if the time window is the same
-     * If it's not it might be shortened or cut in two
-     *
-     * @param activity  activity to register
-     * @param startTime day time at which activity will start
-     * @param endTime   day time at which activity will end. can also be less than start time
-     */
+    @Override
     public void scheduleActivity(Activity activity, int startTime, int endTime) {
         this.internal.scheduleActivity(activity, startTime, endTime);
     }
 
     //this might be bad
-
-    /**
-     * Adds a sensor to the villager
-     *
-     * @param newSensor sensor to be added
-     */
+    @Override
     public void addSensor(SensorType<? extends Sensor<Villager>> newSensor) {
         this.internal.addSensor(newSensor);
     }
 
-
-    /**
-     * Used to add a single task to an existing activity. Useful so you can add to existing activities without overriding or having to override the entire activity.
-     * Alternatively you can define your own activity and add it to the villager schedule using scheduleActivity
-     *
-     * @param activity activity you want to add a task to
-     * @param task     task to add with its priority
-     * @return if successfull
-     */
+    @Override
     public <P extends Pair<Integer, ? extends Behavior<Villager>>> boolean addTaskToActivity(Activity activity, P task) {
-        return this.internal.addTaskToActivity(activity,task);
+        return this.internal.addTaskToActivity(activity, task);
     }
 
     @ApiStatus.Internal

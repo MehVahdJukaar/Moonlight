@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
 public class LightningStruckBlockEvent extends BlockEvent implements ILightningStruckBlockEvent {
 
@@ -16,6 +16,7 @@ public class LightningStruckBlockEvent extends BlockEvent implements ILightningS
         this.entity = entity;
     }
 
+    @Override
     public LightningBolt getEntity() {
         return entity;
     }

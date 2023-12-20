@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
@@ -64,7 +65,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         var level = PlatHelper.getCurrentServer().getLevel(Level.OVERWORLD);
         moonlight$dimension = null;
         if (level != null) {
-            MapItemSavedData data = Moonlight.getMapDataFromKnownKeys(level, mapId);
+            MapItemSavedData data = CompatHandler.getMapDataFromKnownKeys(level, mapId);
             if (data != null) {
                 this.moonlight$mapCenterX = data.centerX;
                 this.moonlight$mapCenterZ = data.centerZ;
@@ -204,34 +205,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                 if (d != null) {
                     decorations.put(m.getMarkerId(), d);
                 }
-            }
-        }
-    }
-
-
-    private static CompoundTag readCompressedNbt(FriendlyByteBuf buf) {
-        int i = buf.readerIndex();
-        byte b = buf.readByte();
-        if (b == 0) {
-            throw new EncoderException();
-        } else {
-            buf.readerIndex(i);
-            try {
-                return NbtIo.readCompressed(new ByteBufInputStream(buf));
-            } catch (IOException var5) {
-                throw new EncoderException(var5);
-            }
-        }
-    }
-
-    private static void writeCompressedNbt(FriendlyByteBuf buf, CompoundTag nbt) {
-        if (nbt == null) {
-            buf.writeByte(0);
-        } else {
-            try {
-                NbtIo.writeCompressed(nbt, (new ByteBufOutputStream(buf)));
-            } catch (IOException var3) {
-                throw new EncoderException(var3);
             }
         }
     }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.BrainAccessor;
 import net.minecraft.world.entity.ai.Brain;
@@ -192,7 +193,7 @@ public class VillagerBrainEventInternal {
     }
 
     Schedule buildFinalizedSchedule() {
-        ScheduleBuilder builder = new ScheduleBuilder(VillagerAIInternal.CUSTOM_VILLAGER_SCHEDULE.get());
+        ScheduleBuilder builder = new ScheduleBuilder(MoonlightRegistry.CUSTOM_VILLAGER_SCHEDULE.get());
         for (var e : this.scheduleBuilder.entrySet()) {
             builder.changeActivityAt(e.getKey(), e.getValue());
         }

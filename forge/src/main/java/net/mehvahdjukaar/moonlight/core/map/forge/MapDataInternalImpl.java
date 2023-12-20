@@ -2,9 +2,9 @@ package net.mehvahdjukaar.moonlight.core.map.forge;
 
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DataPackRegistryEvent;
+import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 
 
 public class MapDataInternalImpl {
@@ -15,7 +15,7 @@ public class MapDataInternalImpl {
     }
 
     public static void init() {
-        var bus = FMLJavaModLoadingContext.get().getModEventBus();
+        var bus = MoonlightForge.getCurrentModBus();
         bus.register(MapDataInternalImpl.class);
     }
 }

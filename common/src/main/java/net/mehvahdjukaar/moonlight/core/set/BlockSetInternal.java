@@ -96,16 +96,6 @@ public class BlockSetInternal {
         throw new AssertionError();
     }
 
-    public static <T extends BlockType> void addDynamicBlockRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.BLOCK);
-    }
-
-    public static <T extends BlockType> void addDynamicItemRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.ITEM);
-    }
-
 
     public static Collection<BlockTypeRegistry<?>> getRegistries() {
         return BLOCK_SET_CONTAINERS.values();

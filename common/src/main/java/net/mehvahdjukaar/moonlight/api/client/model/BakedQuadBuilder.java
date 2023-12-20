@@ -45,9 +45,6 @@ public interface BakedQuadBuilder extends VertexConsumer {
 
     BakedQuadBuilder lightEmission(int light);
 
-    @Deprecated(forRemoval = true)
-    BakedQuadBuilder fromVanilla(BakedQuad quad);
-
     BakedQuadBuilder setTint(int tintIndex);
 
     BakedQuad build();

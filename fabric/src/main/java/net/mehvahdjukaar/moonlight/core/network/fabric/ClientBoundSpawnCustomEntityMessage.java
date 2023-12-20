@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.network;
+package net.mehvahdjukaar.moonlight.core.network.fabric;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
@@ -125,8 +126,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
 
     @Environment(EnvType.CLIENT)
     private void clientSideStuff(Level world, Entity e) {
-        ((ClientLevel) world).putNonPlayerEntity(this.entityId, e);
-
+        ((ClientLevel) world).addEntity(e);
     }
 
 }

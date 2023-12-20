@@ -1,14 +1,18 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
+import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootDataType;
@@ -35,7 +39,8 @@ public class DynamicDataPack extends DynamicResourcePack {
 
         ResourceLocation tagId = builder.getId();
         String tagPath = type.location().getPath();
-        if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item") || tagPath.equals("fluid")) tagPath = tagPath + "s";
+        if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item") || tagPath.equals("fluid"))
+            tagPath = tagPath + "s";
         ResourceLocation loc = ResType.TAGS.getPath(new ResourceLocation(tagId.getNamespace(),
                 tagPath + "/" + tagId.getPath()));
         //merge tags
@@ -58,15 +63,15 @@ public class DynamicDataPack extends DynamicResourcePack {
      */
     public void addSimpleBlockLootTable(Block block) {
         this.addLootTable(block, createSingleItemTable(block)
-                        .setParamSet(LootContextParamSets.BLOCK));
+                .setParamSet(LootContextParamSets.BLOCK));
     }
 
-    public void addLootTable(Block block, LootTable.Builder table){
+    public void addLootTable(Block block, LootTable.Builder table) {
         this.addLootTable(block.getLootTable(), table.build());
     }
 
-    public void addLootTable(ResourceLocation id, LootTable table){
-        this.addJson(id, LootDataType.TABLE.parser().toJsonTree(table), ResType.LOOT_TABLES);
+    public void addLootTable(ResourceLocation id, LootTable table) {
+        this.addJson(id, Util.getOrThrow(LootDataType.TABLE.codec.encodeStart(JsonOps.INSTANCE, table), RuntimeException::new), ResType.LOOT_TABLES);
     }
 
     protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {
@@ -77,16 +82,25 @@ public class DynamicDataPack extends DynamicResourcePack {
                                 .add(LootItem.lootTableItem(itemLike)).unwrap());
     }
 
-    public void addRecipe(FinishedRecipe recipe) {
-        this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
-        ResourceLocation advancementId = recipe.getAdvancementId();
-        if (advancementId != null) {
-            this.addJson(recipe.getAdvancementId(), recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
-        }
+    public void addRecipe(RecipeHolder<?> holder){
+        addRecipe(holder.value(), holder.id());
     }
 
-    public void addRecipeNoAdvancement(FinishedRecipe recipe) {
-        this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
+    @UnstableApi
+    public void addRecipe(Recipe<?> recipe, ResourceLocation id) {
+        this.addRecipeNoAdvancement(recipe, id);
+
+        //Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+        // ResourceLocation advancementId = recipe.getAdvancementId();
+        //if (advancementId != null) {
+        //  this.addJson(recipe.getAdvancementId(), recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
+        //}
     }
+
+    @UnstableApi
+    public void addRecipeNoAdvancement(Recipe<?> recipe, ResourceLocation id) {
+        this.addJson(id, RPUtils.writeRecipe(recipe), ResType.RECIPES);
+    }
+
 
 }

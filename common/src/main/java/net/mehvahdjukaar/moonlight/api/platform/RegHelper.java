@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -54,8 +55,13 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -106,6 +112,23 @@ public class RegHelper {
         });
         return block;
     }
+
+    public static <T extends SimpleCriterionTrigger<?>> RegSupplier<T> registerTriggerType(ResourceLocation name, Supplier<T> instance) {
+        return register(name, instance, Registries.TRIGGER_TYPE);
+    }
+
+    public static <T extends PlacementModifierType<?>> RegSupplier<T> registerPlacementModifier(ResourceLocation name, Supplier<T> instance) {
+        return register(name, instance, Registries.PLACEMENT_MODIFIER_TYPE);
+    }
+
+    public static <T extends LootPoolEntryContainer> RegSupplier<LootPoolEntryType> registerLootPoolEntry(ResourceLocation name, Supplier<Codec<T>> instance) {
+        return register(name, () -> new LootPoolEntryType(instance.get()), Registries.LOOT_POOL_ENTRY_TYPE);
+    }
+
+    public static <T extends LootItemCondition> RegSupplier<LootItemConditionType> registerLootCondition(ResourceLocation name, Supplier<Codec<T>> instance) {
+        return register(name, () -> new LootItemConditionType(instance.get()), Registries.LOOT_CONDITION_TYPE);
+    }
+
 
     public static RegSupplier<PoiType> registerPOI(ResourceLocation name, Supplier<PoiType> poi) {
         return register(name, poi, Registries.POINT_OF_INTEREST_TYPE);
@@ -434,7 +457,7 @@ public class RegHelper {
     }
 
     public static EnumMap<VariantType, Supplier<Block>> registerBaseBlockSet(ResourceLocation baseName, Block parentBlock) {
-        return registerBaseBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock));
+        return registerBaseBlockSet(baseName, BlockBehaviour.Properties.ofFullCopy(parentBlock));
     }
 
     /**
@@ -446,7 +469,7 @@ public class RegHelper {
     }
 
     public static EnumMap<VariantType, Supplier<Block>> registerReducedBlockSet(ResourceLocation baseName, Block parentBlock) {
-        return registerReducedBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock));
+        return registerReducedBlockSet(baseName, BlockBehaviour.Properties.ofFullCopy(parentBlock));
     }
 
     /**
@@ -459,7 +482,7 @@ public class RegHelper {
 
     public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
                                                                              Block parentBlock) {
-        return registerFullBlockSet(baseName, BlockBehaviour.Properties.copy(parentBlock));
+        return registerFullBlockSet(baseName, BlockBehaviour.Properties.ofFullCopy(parentBlock));
     }
 
     /**
@@ -497,7 +520,7 @@ public class RegHelper {
             name += "_" + type.name().toLowerCase(Locale.ROOT);
             ResourceLocation blockId = new ResourceLocation(modId, name);
             var block = registerBlock(blockId, () ->
-                    type.create(BlockBehaviour.Properties.copy(baseBlock.get()), baseBlock::get));
+                    type.create(BlockBehaviour.Properties.ofFullCopy(baseBlock.get()), baseBlock::get));
             registerItem(blockId, () -> new BlockItem(block.get(), new Item.Properties()));
             map.put(type, block);
         }

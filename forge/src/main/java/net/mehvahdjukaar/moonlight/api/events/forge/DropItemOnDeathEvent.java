@@ -3,12 +3,10 @@ package net.mehvahdjukaar.moonlight.api.events.forge;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
 
-@Cancelable
-public class DropItemOnDeathEvent extends Event implements IDropItemOnDeathEvent {
+public class DropItemOnDeathEvent extends Event implements IDropItemOnDeathEvent, ICancellableEvent {
     private final ItemStack itemStack;
     private final Player player;
     private final boolean beforeDrop;
@@ -21,6 +19,7 @@ public class DropItemOnDeathEvent extends Event implements IDropItemOnDeathEvent
         this.beforeDrop = beforeDrop;
     }
 
+    @Override
     public boolean isBeforeDrop() {
         return beforeDrop;
     }
@@ -37,6 +36,16 @@ public class DropItemOnDeathEvent extends Event implements IDropItemOnDeathEvent
     @Override
     public ItemStack getItemStack() {
         return this.itemStack;
+    }
+
+    @Override
+    public void setCanceled(boolean cancelled) {
+        ICancellableEvent.super.setCanceled(cancelled);
+    }
+
+    @Override
+    public boolean isCanceled() {
+        return ICancellableEvent.super.isCanceled();
     }
 
     @Override

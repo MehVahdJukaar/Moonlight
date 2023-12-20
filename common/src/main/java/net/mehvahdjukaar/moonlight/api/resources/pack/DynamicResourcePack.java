@@ -16,8 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSectionSerializer;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
@@ -100,7 +100,7 @@ public abstract class DynamicResourcePack implements PackResources {
         this.fixed = fixed;
         this.hidden = hidden; //UNUSED. TODO: re add (forge)
         this.metadata = Suppliers.memoize(() -> new PackMetadataSection(this.makeDescription(),
-                SharedConstants.getCurrentVersion().getPackVersion(type)));
+                SharedConstants.getCurrentVersion().getPackVersion(type), Optional.empty()));
         this.generateDebugResources = PlatHelper.isDev();
     }
 
@@ -162,15 +162,24 @@ public abstract class DynamicResourcePack implements PackResources {
 
         if (!INSTANCES.contains(this)) {
             PlatHelper.registerResourcePack(this.packType, () ->
-                    Pack.create(
+                    Pack.readMetaAndCreate(
                             this.packId(),    // id
                             this.getTitle(), // title
                             true,    // required -- this MAY need to be true for the pack to be enabled by default
-                            (s) -> this, // pack supplier
-                            new Pack.Info(metadata.get().getDescription(), metadata.get().getPackFormat(), FeatureFlagSet.of()), // description
+                            new Pack.ResourcesSupplier() {
+                                @Override
+                                public PackResources openPrimary(String id) {
+                                    return DynamicResourcePack.this;
+                                }
+
+                                @Override
+                                public PackResources openFull(String id, Pack.Info info) {
+                                    return DynamicResourcePack.this;
+                                }
+                            },// pack supplier
                             this.packType,
                             Pack.Position.TOP,
-                            this.fixed, // fixed position? no
+                            //this.fixed, // fixed position? no
                             PackSource.BUILT_IN));
             INSTANCES.add(this);
         }
@@ -190,7 +199,11 @@ public abstract class DynamicResourcePack implements PackResources {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
-        return serializer instanceof PackMetadataSectionSerializer ? (T) this.metadata : null;
+        try {
+            return serializer instanceof MetadataSectionType ? (T) this.metadata : null;
+        } catch (Exception exception){
+            return null;
+        }
     }
 
     public void addRootResource(String name, byte[] resource) {

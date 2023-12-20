@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins.forge;
 import net.mehvahdjukaar.moonlight.api.client.forge.ModFluidType;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;

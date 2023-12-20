@@ -5,18 +5,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
-import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
-import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.Util;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
@@ -222,35 +224,18 @@ public class RPUtils {
         var resource = manager.getResource(location);
         try (var stream = resource.orElseThrow().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
-            return RecipeManager.fromJson(location, element);
+            return Util.getOrThrow(Recipe.CODEC.parse(JsonOps.INSTANCE, element), JsonParseException::new);
         } catch (Exception e) {
             throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));
         }
     }
 
-    public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, String location) {
-        return readRecipeAsTemplate(manager, ResType.RECIPES.getPath(location));
+    public static <T extends Recipe<?>> JsonElement writeRecipe(T recipe) {
+        Codec<T> codec = (Codec<T>) recipe.getSerializer().codec();
+        return codec.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow(false, s -> Moonlight.LOGGER.error("Failed to serialize recipe: {}", s));
     }
 
-
-    public static IRecipeTemplate<?> readRecipeAsTemplate(ResourceManager manager, ResourceLocation location) {
-        var resource = manager.getResource(location);
-        try (var stream = resource.orElseThrow().open()) {
-            JsonObject element = RPUtils.deserializeJson(stream);
-            try {
-                return TemplateRecipeManager.read(element);
-            } catch (Exception e) {
-                Moonlight.LOGGER.error(element);
-                Moonlight.LOGGER.error(location);
-                throw e;
-            }
-
-        } catch (Exception e) {
-            throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));
-        }
-    }
-
-    public static <T extends BlockType> Recipe<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, String baseID) {
+    public static <T extends BlockType> RecipeHolder<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, String baseID) {
         if (original instanceof ShapedRecipe or) {
             List<Ingredient> newList = new ArrayList<>();
             for (var ingredient : or.getIngredients()) {
@@ -265,7 +250,8 @@ public class RPUtils {
             ItemStack result = newRes.asItem().getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
             NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
-            return new ShapedRecipe(newId, or.getGroup(), or.category(), or.getWidth(), or.getHeight(), ingredients, result);
+            ShapedRecipePattern pattern = new ShapedRecipePattern(or.getWidth(), or.getHeight(), ingredients, Optional.empty());
+            return new RecipeHolder<>(newId, new ShapedRecipe(or.getGroup(), or.category(),   pattern, result));
         } else if (original instanceof ShapelessRecipe or) {
             List<Ingredient> newList = new ArrayList<>();
             for (var ingredient : or.getIngredients()) {
@@ -280,7 +266,7 @@ public class RPUtils {
             ItemStack result = newRes.asItem().getDefaultInstance();
             ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
             NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
-            return new ShapelessRecipe(newId, or.getGroup(), or.category(), result, ingredients);
+            return new RecipeHolder<>(newId, new ShapelessRecipe(or.getGroup(), or.category(), result, ingredients));
         } else {
             throw new UnsupportedOperationException(String.format("Original recipe %s must be Shaped or Shapeless", original));
         }
@@ -326,6 +312,7 @@ public class RPUtils {
         json.add("predicate", predicates);
         return json;
     }
+
 
 
 }

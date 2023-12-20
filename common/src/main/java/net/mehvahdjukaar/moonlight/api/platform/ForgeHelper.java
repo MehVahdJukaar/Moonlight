@@ -4,7 +4,8 @@ import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -47,7 +48,7 @@ public class ForgeHelper {
 
     @Deprecated(forRemoval = true)
     @ExpectPlatform
-    public static FinishedRecipe addRecipeConditions(FinishedRecipe originalRecipe, List<Object> conditions) {
+    public static RecipeOutput addRecipeConditions(RecipeOutput originalRecipe, List<Object> conditions) {
         throw new AssertionError();
     }
 

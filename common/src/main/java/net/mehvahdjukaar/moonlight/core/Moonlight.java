@@ -17,6 +17,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingRegistry;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
@@ -116,10 +117,7 @@ public class Moonlight {
 
     public static void assertInitPhase() {
         if (!PlatHelper.isInitializing()) {
-            //TODO: re add once all mods are updated. we have to let fabric use its own initializer. this is too strict so we ignore
-            if (PlatHelper.isDev() && PlatHelper.getPlatform().isForge()) {
-                throw new AssertionError("Method has to be called during main mod initialization phase. Client and Server initializer are not valid, you must call in the main one");
-            }
+            throw new AssertionError("Method has to be called during main mod initialization phase. Client and Server initializer are not valid, you must call in the main one");
         }
     }
 

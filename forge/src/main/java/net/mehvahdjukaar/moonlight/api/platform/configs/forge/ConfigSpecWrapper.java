@@ -14,22 +14,22 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ConfigFileTypeHandler;
-import net.minecraftforge.fml.config.IConfigEvent;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ConfigFileTypeHandler;
+import net.neoforged.fml.config.ConfigTracker;
+import net.neoforged.fml.config.IConfigEvent;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.client.ConfigScreenHandler;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
@@ -45,16 +45,16 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     private static final Method SETUP_CONFIG_FILE = ObfuscationReflectionHelper.findMethod(ConfigFileTypeHandler.class,
             "setupConfigFile", ModConfig.class, Path.class, ConfigFormat.class);
 
-    private final ForgeConfigSpec spec;
+    private final ModConfigSpec spec;
 
     private final ModConfig modConfig;
     private final ModContainer modContainer;
 
-    private final Map<ForgeConfigSpec.ConfigValue<?>, Object> requireRestartValues;
+    private final Map<ModConfigSpec.ConfigValue<?>, Object> requireRestartValues;
     private final List<ConfigBuilderImpl.SpecialValue<?,?>> specialValues;
 
-    public ConfigSpecWrapper(ResourceLocation name, ForgeConfigSpec spec, ConfigType type, boolean synced,
-                             @Nullable Runnable onChange, List<ForgeConfigSpec.ConfigValue<?>> requireRestart,
+    public ConfigSpecWrapper(ResourceLocation name, ModConfigSpec spec, ConfigType type, boolean synced,
+                             @Nullable Runnable onChange, List<ModConfigSpec.ConfigValue<?>> requireRestart,
                              List<ConfigBuilderImpl.SpecialValue<?,?>> specialValues) {
         super(name.getNamespace(), name.getNamespace() + "-" + name.getPath() + ".toml",
                 FMLPaths.CONFIGDIR.get(), type, synced, onChange);
@@ -66,12 +66,12 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         this.modContainer = ModLoadingContext.get().getActiveContainer();
         this.modConfig = new ModConfig(t, spec, modContainer, this.getFileName());
 
-        var bus = FMLJavaModLoadingContext.get().getModEventBus();
+        var bus = modContainer.getEventBus();
         if (onChange != null || this.isSynced() || !specialValues.isEmpty()) bus.addListener(this::onConfigChange);
         if (this.isSynced()) {
 
-            MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
-            MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
+            NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
+            NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         }
         //for event
         ConfigSpec.addTrackedSpec(this);
@@ -79,7 +79,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         if (!requireRestart.isEmpty()) {
             loadFromFile(); //Early load if this has world reload ones as we need to get their current values. Isn't there a better way?
         }
-        this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ForgeConfigSpec.ConfigValue::get));
+        this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ModConfigSpec.ConfigValue::get));
 
     }
 
@@ -114,7 +114,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         }
     }
 
-    //we need this so we don't add a second file watcher. Same as handler::reader
+    //We need this, so we don't add a second file watcher. Same as handler::reader
     private CommentedFileConfig readConfig(ConfigFileTypeHandler handler, Path configBasePath, ModConfig c) {
         Path configPath = configBasePath.resolve(c.getFileName());
         CommentedFileConfig configData = CommentedFileConfig.builder(configPath).sync().
@@ -139,7 +139,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         }
     }
 
-    public ForgeConfigSpec getSpec() {
+    public ModConfigSpec getSpec() {
         return spec;
     }
 
@@ -216,7 +216,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     }
 
 
-    public boolean requiresGameRestart(ForgeConfigSpec.ConfigValue<?> value) {
+    public boolean requiresGameRestart(ModConfigSpec.ConfigValue<?> value) {
         var v = requireRestartValues.get(value);
         if (v == null) return false;
         else return v != value.get();

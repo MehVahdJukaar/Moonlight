@@ -19,11 +19,6 @@ public class VillagerAIInternal {
     public static void init() {
     }
 
-    //schedule to which all the tasks are registered to
-    public static final Supplier<Schedule> CUSTOM_VILLAGER_SCHEDULE =
-            RegHelper.register(Moonlight.res("custom_villager_schedule"), Schedule::new, Registries.SCHEDULE);
-
-
     //called by mixin. Do not call
     public static void onRegisterBrainGoals(Brain<Villager> brain, AbstractVillager villager) {
         if (villager instanceof Villager v) {

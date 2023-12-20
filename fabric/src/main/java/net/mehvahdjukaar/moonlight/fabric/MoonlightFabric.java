@@ -6,6 +6,8 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
@@ -29,9 +31,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     public void onInitialize() {
 
         Moonlight.commonInit();
-
-        ModMessages.CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
-                ClientBoundOpenScreenMessage.class, ClientBoundOpenScreenMessage::new);
 
         ServerPlayConnectionEvents.JOIN.register((l, s, m) -> ModMessages.CHANNEL.sendToClientPlayer(l.player,
                 new ClientBoundSendLoginPacket()));
@@ -59,8 +58,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
         RegHelperImpl.lateRegisterEntries();
         FabricConfigSpec.loadAllConfigs();
-        MLFabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
-        MLFabricSetupCallbacks.COMMON_SETUP.clear();
 
         isInit = false;
 

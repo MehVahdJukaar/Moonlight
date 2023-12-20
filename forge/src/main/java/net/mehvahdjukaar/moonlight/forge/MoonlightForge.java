@@ -29,6 +29,19 @@ import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.IModBusEvent;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -42,9 +55,9 @@ public class MoonlightForge {
     public static final ForgeConfigSpec SPEC = ((ConfigSpecWrapper) ConfigBuilder.create(MOD_ID, ConfigType.COMMON)
             .buildAndRegister()).getSpec();
 
-    public MoonlightForge() {
+    public MoonlightForge(IModBusEvent bus) {
         Moonlight.commonInit();
-        MinecraftForge.EVENT_BUS.register(MoonlightForge.class);
+        NeoForge.EVENT_BUS.register(MoonlightForge.class);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(MoonlightForge::configsLoaded);
         ModLootModifiers.register();
         ModLootConditions.register();
@@ -132,6 +145,12 @@ public class MoonlightForge {
     @SubscribeEvent
     public static void onLevelLoaded(LevelEvent.Load event) {
         if (!event.getLevel().isClientSide()) Moonlight.checkDatapackRegistry();
+    }
+
+
+    @Deprecated
+    public static IEventBus getCurrentModBus() {
+        return FMLJavaModLoadingContext.get().getModEventBus();
     }
 
 }

@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -63,6 +64,7 @@ public class DummyWorld extends Level {
     private final RecipeManager recipeManager = new RecipeManager();
     private final ChunkSource chunkManager = new DummyChunkManager();
     private final DummyLevelEntityGetter<Entity> entityGetter = new DummyLevelEntityGetter<>();
+    private final TickRateManager tickRateManager = new TickRateManager();
 
     protected DummyWorld() {
         this(true, false);
@@ -135,6 +137,11 @@ public class DummyWorld extends Level {
     @Override
     public Entity getEntity(int id) {
         return null;
+    }
+
+    @Override
+    public TickRateManager tickRateManager() {
+        return tickRateManager;
     }
 
     @Override

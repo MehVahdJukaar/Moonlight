@@ -216,7 +216,7 @@ public class Utils {
      * Copies block properties without keeping stupid lambdas that could include references to the wrong blockstate properties
      */
     public static BlockBehaviour.Properties copyPropertySafe(Block blockBehaviour) {
-        var p = BlockBehaviour.Properties.copy(blockBehaviour);
+        var p = BlockBehaviour.Properties.ofFullCopy(blockBehaviour);
         BlockState state = blockBehaviour.defaultBlockState();
         p.lightLevel(s -> state.getLightEmission());
         p.offsetType(BlockBehaviour.OffsetType.NONE);

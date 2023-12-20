@@ -1,6 +1,9 @@
 package net.mehvahdjukaar.moonlight.core;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -34,5 +37,15 @@ public class CompatHandler {
             }
         }
         return 0;
+    }
+    public static MapItemSavedData getMapDataFromKnownKeys(ServerLevel level, int mapId) {
+        var d = level.getMapData(MapItem.makeKey(mapId));
+        if (d == null) {
+            d = level.getMapData("magicmap_" + mapId);
+            if (d == null) {
+                d = level.getMapData("mazemap_" + mapId);
+            }
+        }
+        return d;
     }
 }

@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,16 +32,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.crafting.ConditionalRecipe;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.registries.GameData;
+import net.neoforged.neoforge.common.*;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.registries.GameData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -53,10 +49,10 @@ import java.util.function.Consumer;
 public class ForgeHelperImpl {
 
     public static boolean onProjectileImpact(Projectile projectile, HitResult blockHitResult) {
-        return ForgeEventFactory.onProjectileImpact(projectile, blockHitResult);
+        return EventHooks.onProjectileImpact(projectile, blockHitResult);
     }
 
-    public static FinishedRecipe addRecipeConditions(FinishedRecipe originalRecipe, List<Object> conditions) {
+    public static RecipeOutput addRecipeConditions(RecipeOutput originalRecipe, List<Object> conditions) {
         boolean success = false;
         var builder = ConditionalRecipe.builder();
         for (var c : conditions) {
@@ -123,27 +119,27 @@ public class ForgeHelperImpl {
     }
 
     public static boolean canEntityDestroy(Level level, BlockPos blockPos, Animal animal) {
-        return ForgeHooks.canEntityDestroy(level, blockPos, animal);
+        return CommonHooks.canEntityDestroy(level, blockPos, animal);
     }
 
     public static boolean onExplosionStart(Level level, Explosion explosion) {
-        return ForgeEventFactory.onExplosionStart(level, explosion);
+        return EventHooks.onExplosionStart(level, explosion);
     }
 
     public static void onExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
-        ForgeEventFactory.onExplosionDetonate(level, explosion, entities, diameter);
+        EventHooks.onExplosionDetonate(level, explosion, entities, diameter);
     }
 
     public static void onLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {
-        ForgeEventFactory.onLivingConvert(newHorse, newHorse);
+        EventHooks.onLivingConvert(newHorse, newHorse);
     }
 
     public static boolean canLivingConvert(LivingEntity entity, EntityType<? extends LivingEntity> outcome, Consumer<Integer> timer) {
-        return ForgeEventFactory.canLivingConvert(entity, outcome, timer);
+        return EventHooks.canLivingConvert(entity, outcome, timer);
     }
 
     public static double getReachDistance(LivingEntity entity) {
-        return entity.getAttribute(ForgeMod.BLOCK_REACH.get()).getValue();
+        return entity.getAttribute(NeoForgeMod.BLOCK_REACH.value()).getValue();
     }
 
     public static float getExplosionResistance(BlockState state, Level level, BlockPos pos, Explosion explosion) {
@@ -196,20 +192,20 @@ public class ForgeHelperImpl {
 
 
     public static boolean onCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
-        return ForgeHooks.onCropsGrowPre(level, pos, state, b);
+        return CommonHooks.onCropsGrowPre(level, pos, state, b);
     }
 
     public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
-        ForgeHooks.onCropsGrowPost(level, pos, state);
+        CommonHooks.onCropsGrowPost(level, pos, state);
     }
 
     public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
-        MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(entity, slot, from, to));
+        NeoForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(entity, slot, from, to));
     }
 
     @Nullable
     public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
-        var ev = ForgeHooks.onRightClickBlock(player, hand, below, rayTraceResult);
+        var ev = CommonHooks.onRightClickBlock(player, hand, below, rayTraceResult);
         if (ev.isCanceled()) return ev.getCancellationResult();
         return null;
     }
