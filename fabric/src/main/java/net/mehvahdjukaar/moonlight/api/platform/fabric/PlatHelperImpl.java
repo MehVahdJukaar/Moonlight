@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.DynamicOps;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
@@ -252,7 +253,7 @@ public class PlatHelperImpl {
         addCommonSetup(setup);
     }
 
-    public static boolean evaluateRecipeCondition(JsonElement jo) {
+    public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
         if (jo instanceof JsonObject j) ResourceConditions.objectMatchesConditions(j);
         return true;
     }

@@ -1,60 +1,35 @@
 package net.mehvahdjukaar.moonlight.api.resources.recipe.forge;
 
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
-import net.minecraft.resources.ResourceLocation;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 /**
  * Simple recipe condition implementation for conditional recipes
  */
-public class OptionalRecipeCondition implements iIConditionSerializer<OptionalRecipeCondition.Instance> {
+public record OptionalRecipeCondition(AtomicReference<Codec<OptionalRecipeCondition>> codecRef, String name, Predicate<String> predicate,
+                                      String conditionValue) implements ICondition {
 
-    private final ResourceLocation id;
-    private final Predicate<String> predicate;
-
-    public OptionalRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
-        this.id = id;
-        this.predicate = predicate;
-    }
-
-    public static Codec<ICondition> codec(Predicate<String> predicate) {
-    }
-
-    @Override
-    public void write(JsonObject json, Instance value) {
-        json.addProperty(id.getPath(), value.condition);
+    public static Codec<OptionalRecipeCondition> createCodec(String name, Predicate<String> predicate) {
+        AtomicReference<Codec<OptionalRecipeCondition>> ref= new AtomicReference<>();
+        Codec<OptionalRecipeCondition> codec = RecordCodecBuilder.create(builder -> builder.group(
+                Codec.STRING.fieldOf(name).forGetter(OptionalRecipeCondition::name)
+        ).apply(builder, s -> new OptionalRecipeCondition(ref, name, predicate, s)));
+        ref.set(codec);
+        return codec;
     }
 
     @Override
-    public Instance read(JsonObject json) {
-        return new Instance(json.getAsJsonPrimitive(id.getPath()).getAsString());
+    public boolean test(IContext context) {
+        return OptionalRecipeCondition.this.predicate.test(conditionValue);
     }
 
     @Override
-    public ResourceLocation getID() {
-        return id;
+    public Codec<? extends ICondition> codec() {
+        return codecRef.get();
     }
 
-
-    protected final class Instance implements ICondition {
-
-        private final String condition;
-
-        private Instance(String condition) {
-            this.condition = condition;
-        }
-
-        @Override
-        public ResourceLocation getID() {
-            return OptionalRecipeCondition.this.getID();
-        }
-
-        @Override
-        public boolean test(IContext context) {
-            return OptionalRecipeCondition.this.predicate.test(condition);
-        }
-    }
 }

@@ -3,10 +3,10 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -27,6 +27,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -119,11 +120,6 @@ public class ForgeHelper {
     }
 
     @ExpectPlatform
-    public static boolean areStacksEqual(ItemStack stack, ItemStack other, boolean sameNbt) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
         throw new AssertionError();
     }
@@ -209,5 +205,11 @@ public class ForgeHelper {
     @ExpectPlatform
     public static Map<Block, Item> getBlockItemMap() {
         throw new AssertionError();
+    }
+
+
+    @ExpectPlatform
+    public static void registerDefaultContainerCap(BlockEntityType<? extends Container> container) {
+
     }
 }

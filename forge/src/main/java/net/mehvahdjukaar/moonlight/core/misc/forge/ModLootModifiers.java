@@ -29,13 +29,13 @@ public class ModLootModifiers {
     public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIERS = DeferredRegister.create(
             NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, Moonlight.MOD_ID);
 
-    public static final DeferredHolder<Codec<? extends IGlobalLootModifier>> ADD_ITEM_GLM =
+    public static final DeferredHolder<?,?> ADD_ITEM_GLM =
             LOOT_MODIFIERS.register("add_item", AddItemModifier.CODEC);
 
-    public static final DeferredHolder<Codec<? extends IGlobalLootModifier>> REPLACE_ITEM_GLM =
+    public static final DeferredHolder<?,?> REPLACE_ITEM_GLM =
             LOOT_MODIFIERS.register("replace_item", ReplaceItemModifier.CODEC);
 
-    public static final DeferredHolder<Codec<? extends IGlobalLootModifier>> ADD_TABLE =
+    public static final DeferredHolder<?,?> ADD_TABLE =
             LOOT_MODIFIERS.register("add_loot_table", AddTableModifier.CODEC);
 
     public static class AddItemModifier extends LootModifier {

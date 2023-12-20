@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -91,10 +93,6 @@ public class ForgeHelperImpl {
     public static void onBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         level.setBlock(blockpos, Blocks.AIR.defaultBlockState(), 3);
         blockstate.getBlock().wasExploded(level, blockpos, explosion);
-    }
-
-    public static boolean areStacksEqual(ItemStack stack, ItemStack other, boolean sameNbt) {
-        return stack.equals(other);
     }
 
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
@@ -167,5 +165,8 @@ public class ForgeHelperImpl {
 
     public static Map<Block, Item> getBlockItemMap() {
         return Item.BY_BLOCK;
+    }
+
+    public static void registerDefaultContainerCap(BlockEntityType<? extends Container> container) {
     }
 }

@@ -30,12 +30,12 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
     modCompileOnly ("curse.maven:configured-457570:4462894")
-    modRuntimeOnly("curse.maven:yacl-667299:4523736")
+    modCompileOnly("curse.maven:yacl-667299:4523736")
 
     modCompileOnly("curse.maven:autoreglib-250363:3857246")
     modCompileOnly("curse.maven:quark-oddities-301051:3575623")
     modCompileOnly("curse.maven:quark-243121:4463411")
-    modImplementation("curse.maven:the-twilight-forest-227639:4755494")
+    modCompileOnly("curse.maven:the-twilight-forest-227639:4755494")
    // modRuntimeOnly("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
    //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
 

@@ -43,7 +43,8 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
-
+//TODO: add back
+/*
 //credits to MrCrayfish's Configured Mod
 //this is just a more customized version of Configured default config screen with some extra icons and such
 public abstract class CustomConfigScreen extends ConfigScreen {
@@ -476,6 +477,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         }
     }
 }
+*/
 
 
     /*

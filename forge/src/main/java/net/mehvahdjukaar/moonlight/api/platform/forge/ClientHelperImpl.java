@@ -21,6 +21,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
@@ -182,7 +183,7 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<ModelEvent.RegisterGeometryLoaders> eventConsumer = event -> {
-            eventListener.accept((i, l) -> event.register(i.getPath(), (IGeometryLoader<?>) l));
+            eventListener.accept((i, l) -> event.register(i, (IGeometryLoader<?>) l));
         };
         getCurrentModBus().addListener(eventConsumer);
     }
@@ -267,17 +268,25 @@ public class ClientHelperImpl {
                     IModFile file = ModList.get().getModFileById(folderName.getNamespace()).getFile();
                     try (PathPackResources pack = new PathPackResources(
                             folderName.toString(),
-                            true,
-                            file.findResource("resourcepacks/" + folderName.getPath()))) {
-                        PackMetadataSection metadata = Objects.requireNonNull(pack.getMetadataSection(PackMetadataSection.TYPE));
+                            file.findResource("resourcepacks/" + folderName.getPath()),
+                            true)) {
                         return Pack.readMetaAndCreate(
                                 folderName.toString(),
                                 displayName,
                                 defaultEnabled,
-                                (s) -> pack,
+                                new Pack.ResourcesSupplier() {
+                                    @Override
+                                    public PackResources openPrimary(String id) {
+                                        return pack;
+                                    }
+
+                                    @Override
+                                    public PackResources openFull(String id, Pack.Info info) {
+                                        return pack;
+                                    }
+                                },
                                 PackType.CLIENT_RESOURCES,
                                 Pack.Position.TOP,
-                                false,
                                 PackSource.BUILT_IN);
                     } catch (Exception ee) {
                         if (!DatagenModLoader.isRunningDataGen()) ee.printStackTrace();

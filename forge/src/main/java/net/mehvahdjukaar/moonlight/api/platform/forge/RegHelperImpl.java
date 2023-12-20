@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
+import net.mehvahdjukaar.moonlight.core.mixins.MapItemMixin;
 import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -260,7 +261,7 @@ public class RegHelperImpl {
     }
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
-        register(id, () -> OptionalRecipeCondition.codec(predicate), NeoForgeRegistries.Keys.CONDITION_CODECS);
+        register(id, () -> OptionalRecipeCondition.createCodec(id.getPath(), predicate), NeoForgeRegistries.Keys.CONDITION_CODECS);
     }
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {

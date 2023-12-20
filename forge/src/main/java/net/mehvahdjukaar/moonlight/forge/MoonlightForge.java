@@ -3,8 +3,8 @@ package net.mehvahdjukaar.moonlight.forge;
 import net.mehvahdjukaar.moonlight.api.client.model.RetexturedModelLoader;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
@@ -12,15 +12,11 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -40,19 +36,18 @@ import java.lang.ref.WeakReference;
 public class MoonlightForge {
     public static final String MOD_ID = Moonlight.MOD_ID;
 
-    public MoonlightForge(IModBusEvent bus) {
+    public MoonlightForge(IEventBus bus) {
         Moonlight.commonInit();
         NeoForge.EVENT_BUS.register(MoonlightForge.class);
         ModLootModifiers.register();
         ModLootConditions.register();
         if (PlatHelper.getPhysicalSide().isClient()) {
-            MoonlightForgeClient.init();
+            MoonlightForgeClient.init(bus);
             MoonlightClient.initClient();
             ClientHelper.addModelLoaderRegistration(modelLoaderEvent -> {
                 modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
             });
         }
-
     }
 
     //hacky but eh
@@ -115,7 +110,6 @@ public class MoonlightForge {
     public static void onPlayerClone(PlayerEvent.Clone event) {
         Moonlight.onPlayerCloned(event.getOriginal(), event.getEntity(), event.isWasDeath());
     }
-
 
     @Deprecated
     public static IEventBus getCurrentModBus() {

@@ -2,19 +2,20 @@ package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 
 import java.util.Map;
@@ -36,7 +37,7 @@ public class SoftFluidRegistryImpl {
             try {
                 if (f == null) continue;
                 if (f instanceof FlowingFluid flowingFluid && flowingFluid.getSource() != f) continue;
-                if (f instanceof ForgeFlowingFluid.Flowing || f == Fluids.EMPTY) continue;
+                if (f instanceof BaseFlowingFluid.Flowing || f == Fluids.EMPTY) continue;
                 //if fluid map contains fluid it means that another equivalent fluid has already been registered
                 if (fluidMap.containsKey(f)) continue;
                 //is not equivalent: create new SoftFluid from forge fluid

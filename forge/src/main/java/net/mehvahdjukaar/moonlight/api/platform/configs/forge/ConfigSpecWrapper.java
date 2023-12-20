@@ -104,10 +104,10 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     public void loadFromFile() {
         //same stuff that forge config tracker does
         try {
-            CommentedFileConfig configData = readConfig(modConfig.getHandler(), FMLPaths.CONFIGDIR.get(), modConfig);
+            CommentedFileConfig configData = readConfig(ConfigFileTypeHandler.TOML, FMLPaths.CONFIGDIR.get(), modConfig);
             SET_CONFIG_DATA.setAccessible(true);
             SET_CONFIG_DATA.invoke(modConfig, configData);
-            modContainer.dispatchConfigEvent(IConfigEvent.loading(modConfig));
+            IConfigEvent.loading(modConfig).post();
             modConfig.save();
         } catch (Exception e) {
             throw new ConfigLoadingException(modConfig, e);

@@ -30,10 +30,10 @@ public class BlockSetInternalImpl {
 
     private static boolean hasFilledBlockSets = false;
 
-    static{
+    static {
         //if loaded registers post item init
-        Consumer<RegisterEvent> eventConsumer = e->{
-            if(e.getRegistryKey().equals(BuiltInRegistries.ENCHANTMENT.key())){
+        Consumer<RegisterEvent> eventConsumer = e -> {
+            if (e.getRegistryKey().equals(BuiltInRegistries.ENCHANTMENT.key())) {
                 BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
             }
         };
@@ -41,17 +41,17 @@ public class BlockSetInternalImpl {
     }
 
     //aaaa
-    public static  <T extends BlockType, E> void addDynamicRegistration(
+    public static <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
-        if(registry == BuiltInRegistries.BLOCK) {
+        if (registry == BuiltInRegistries.BLOCK) {
             addDynamicBlockRegistration((BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
-        }else if(registry == BuiltInRegistries.FLUID || registry == BuiltInRegistries.SOUND_EVENT){
+        } else if (registry == BuiltInRegistries.FLUID || registry == BuiltInRegistries.SOUND_EVENT) {
             throw new IllegalArgumentException("Fluid and Sound Events registry not supported here");
-        } else{
+        } else {
             //ensure has filled block set
             getOrAddQueue();
             //other entries
-            RegHelper.registerInBatch(registry, e-> registrationFunction.accept(e, BlockSetAPI.getBlockSet(blockType).getValues()));
+            RegHelper.registerInBatch(registry, e -> registrationFunction.accept(e, BlockSetAPI.getBlockSet(blockType).getValues()));
         }
     }
 
@@ -68,14 +68,7 @@ public class BlockSetInternalImpl {
             if (e.getRegistryKey().equals(BuiltInRegistries.BLOCK.key())) {
                 //actual runnable which will registers the blocks
                 Runnable lateRegistration = () -> {
-
-                    var registry = e.getRegistry();
-                    if (registry instanceof ForgeRegistry<?> fr) {
-                        boolean frozen = fr.isLocked();
-                        fr.unfreeze();
-                        registrationFunction.accept(registry::register, BlockSetAPI.getBlockSet(blockType).getValues());
-                        if (frozen) fr.freeze();
-                    }
+                    registrationFunction.accept((r, o) -> Registry.register(BuiltInRegistries.BLOCK, r, o), BlockSetAPI.getBlockSet(blockType).getValues());
                 };
                 //when this reg block event fires we only add a runnable to the queue
                 registrationQueues.add(lateRegistration);
@@ -103,7 +96,7 @@ public class BlockSetInternalImpl {
     //shittiest code ever lol
     protected static void registerLateBlockAndItems(RegisterEvent event) {
         //fires right after blocks
-        if (!event.getRegistryKey().equals(ForgeRegistries.ATTRIBUTES.getRegistryKey())) return;
+        if (!event.getRegistryKey().equals(BuiltInRegistries.ATTRIBUTE.key())) return;
         //when the first registration function is called we find all block types
         if (!hasFilledBlockSets) {
             BlockSetInternal.initializeBlockSets();
@@ -124,7 +117,6 @@ public class BlockSetInternalImpl {
     public static boolean hasFilledBlockSets() {
         return hasFilledBlockSets;
     }
-
 
 
 }

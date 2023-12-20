@@ -14,8 +14,7 @@
     "ConditionHackMixin",
     "FireBlockMixin",
     "SelfModFlowingFluidMixin",
-    "SelfEntitySpawnDataMixin",
-    "SelfItemDisplayTileMixin"
+    "SelfEntitySpawnDataMixin"
   ],
   "injectors": {
     "defaultRequire": 1
