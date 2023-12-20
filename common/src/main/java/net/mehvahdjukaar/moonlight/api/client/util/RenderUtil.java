@@ -50,12 +50,6 @@ public class RenderUtil {
         renderBlock(model, seed, poseStack, buffer, state, level, pos, dispatcher);
     }
 
-    @Deprecated(forRemoval = true)
-    public static void renderBlockModel(ResourceLocation modelLocation, PoseStack matrixStack, MultiBufferSource buffer,
-                                        BlockRenderDispatcher blockRenderer, int light, int overlay, boolean cutout) {
-        renderModel(modelLocation, matrixStack, buffer, blockRenderer, light, overlay, cutout);
-    }
-
     //should be a weaker version of what's above as it doesnt take in level so stuff like offset isnt there
     //from resource location
     public static void renderModel(ResourceLocation modelLocation, PoseStack matrixStack, MultiBufferSource buffer,

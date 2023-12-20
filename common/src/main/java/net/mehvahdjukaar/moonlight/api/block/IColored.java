@@ -6,6 +6,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
+//TODO: add color change api
 public interface IColored {
 
     /**
@@ -13,15 +16,6 @@ public interface IColored {
      */
     @Nullable
     DyeColor getColor();
-
-    /**
-     * @return the associated item to this block or item with the given color. Null if it fails
-     */
-    @Nullable
-    @Deprecated(forRemoval = true)
-    default Item changeItemColor(@Nullable DyeColor color){
-        return BlocksColorAPI.changeColor(((ItemLike)this).asItem(), color);
-    };
 
     /**
      * If this kind of block can have a null color, similar to shulker boxes
