@@ -1,7 +1,5 @@
 accessWidener   v2  named
 
-transitive-accessible class net/minecraft/data/recipes/ShapedRecipeBuilder$Result
-
 transitive-accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
 
 transitive-accessible method net/minecraft/client/gui/screens/MenuScreens register (Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V
@@ -39,15 +37,10 @@ accessible method net/minecraft/client/gui/GuiGraphics <init> (Lnet/minecraft/cl
 
 transitive-accessible method net/minecraft/client/renderer/item/ItemProperties register (Lnet/minecraft/world/item/Item;Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/client/renderer/item/ClampedItemPropertyFunction;)V
 
-#criteria trigger
-transitive-accessible method net/minecraft/advancements/CriteriaTriggers register (Lnet/minecraft/advancements/CriterionTrigger;)Lnet/minecraft/advancements/CriterionTrigger;
 #falling block
 transitive-accessible field net/minecraft/world/entity/item/FallingBlockEntity cancelDrop Z
 #arrow
 transitive-accessible field net/minecraft/world/entity/projectile/Projectile hasBeenShot Z
-
-#recipe book
-transitive-accessible method net/minecraft/data/recipes/CraftingRecipeBuilder determineBookCategory (Lnet/minecraft/data/recipes/RecipeCategory;)Lnet/minecraft/world/item/crafting/CraftingBookCategory;
 
 #registry stuff
 accessible class net/minecraft/core/RegistrySynchronization$NetworkedRegistryData
@@ -97,11 +90,6 @@ accessible method net/minecraft/client/renderer/texture/SpriteContents$AnimatedT
 accessible field net/minecraft/client/renderer/texture/SpriteContents originalImage Lcom/mojang/blaze3d/platform/NativeImage;
 
 #doors &co
-transitive-accessible method net/minecraft/world/level/block/DoorBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/world/level/block/state/properties/BlockSetType;)V
-#transitive-accessible method net/minecraft/world/level/block/DoorBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/world/level/block/state/properties/BlockSetType;)V
-transitive-accessible method net/minecraft/world/level/block/TrapDoorBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/world/level/block/state/properties/BlockSetType;)V
-transitive-accessible method net/minecraft/world/level/block/TorchBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/core/particles/ParticleOptions;)V
-transitive-accessible method net/minecraft/world/level/block/WallTorchBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/core/particles/ParticleOptions;)V
 transitive-accessible method net/minecraft/world/level/block/IronBarsBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
 
 #explosion stuff
@@ -114,7 +102,9 @@ transitive-accessible field net/minecraft/world/level/Explosion z D
 transitive-accessible field net/minecraft/world/level/Explosion damageSource Lnet/minecraft/world/damagesource/DamageSource;
 transitive-mutable field net/minecraft/world/level/Explosion damageSource Lnet/minecraft/world/damagesource/DamageSource;
 transitive-accessible field net/minecraft/world/level/Explosion blockInteraction Lnet/minecraft/world/level/Explosion$BlockInteraction;
-transitive-extendable method net/minecraft/world/level/Explosion addBlockDrops (Lit/unimi/dsi/fastutil/objects/ObjectArrayList;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/BlockPos;)V
+
+#loot
+transitive-accessible field net/minecraft/world/level/storage/loot/LootDataType codec Lcom/mojang/serialization/Codec;
 
 #flute renderer fabric
 transitive-accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V

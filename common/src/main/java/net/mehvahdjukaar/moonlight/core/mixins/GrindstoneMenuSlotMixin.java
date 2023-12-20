@@ -16,7 +16,7 @@ public abstract class GrindstoneMenuSlotMixin {
     @Inject(method = {"onTake"}, at = @At("RETURN"))
     private void onTake(Player player, ItemStack stack, CallbackInfo ci) {
         if(player instanceof ServerPlayer serverPlayer)
-            MoonlightRegistry.GRIND_TRIGGER.trigger(serverPlayer, stack.copy());
+            MoonlightRegistry.GRIND_TRIGGER.get().trigger(serverPlayer, stack.copy());
     }
 
 }

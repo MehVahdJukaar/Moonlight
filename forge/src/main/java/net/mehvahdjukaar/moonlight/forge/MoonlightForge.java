@@ -16,24 +16,19 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.extensions.IForgeBlock;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.IModBusEvent;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -45,9 +40,9 @@ import java.lang.ref.WeakReference;
 public class MoonlightForge {
     public static final String MOD_ID = Moonlight.MOD_ID;
 
-    public MoonlightForge() {
+    public MoonlightForge(IModBusEvent bus) {
         Moonlight.commonInit();
-        MinecraftForge.EVENT_BUS.register(MoonlightForge.class);
+        NeoForge.EVENT_BUS.register(MoonlightForge.class);
         ModLootModifiers.register();
         ModLootConditions.register();
         if (PlatHelper.getPhysicalSide().isClient()) {
@@ -119,6 +114,12 @@ public class MoonlightForge {
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
         Moonlight.onPlayerCloned(event.getOriginal(), event.getEntity(), event.isWasDeath());
+    }
+
+
+    @Deprecated
+    public static IEventBus getCurrentModBus() {
+        return FMLJavaModLoadingContext.get().getModEventBus();
     }
 
 }

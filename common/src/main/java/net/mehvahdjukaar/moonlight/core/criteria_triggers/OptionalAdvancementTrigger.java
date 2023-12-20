@@ -1,15 +1,20 @@
 package net.mehvahdjukaar.moonlight.core.criteria_triggers;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
+//TODO: register and finish
 public class OptionalAdvancementTrigger extends SimpleCriterionTrigger<OptionalAdvancementTrigger.Instance> {
 
     private final ResourceLocation id;
@@ -20,34 +25,21 @@ public class OptionalAdvancementTrigger extends SimpleCriterionTrigger<OptionalA
         this.predicate = predicate;
     }
 
-    @Override
-    public @NotNull ResourceLocation getId() {
-        return id;
-    }
-
-    @Override
-    public Instance createInstance(JsonObject json, ContextAwarePredicate predicate, DeserializationContext deserializationContext) {
-        String condition = json.get("flag").getAsString();
-        return new Instance(predicate, condition);
-    }
-
     public void trigger(ServerPlayer playerEntity, ItemStack stack) {
         this.trigger(playerEntity, (instance) -> predicate.test(instance.condition));
     }
 
-    protected class Instance extends AbstractCriterionTriggerInstance {
-        private final String condition;
+    @Override
+    public Codec<Instance> codec() {
+        return Instance.CODEC;
+    }
 
-        public Instance(ContextAwarePredicate composite, String condition) {
-            super(OptionalAdvancementTrigger.this.id, composite);
-            this.condition = condition;
-        }
+    protected record Instance(Optional<ContextAwarePredicate> player,String condition)  implements SimpleCriterionTrigger.SimpleInstance {
 
-        @Override
-        public JsonObject serializeToJson(SerializationContext serializer) {
-            JsonObject jsonobject = super.serializeToJson(serializer);
-            jsonobject.addProperty("flag", this.condition);
-            return jsonobject;
-        }
+        public static final Codec<Instance> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+                ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(Instance::player),
+                Codec.STRING.fieldOf("flag").forGetter(Instance::condition)
+        ).apply(instance, Instance::new));
+
     }
 }

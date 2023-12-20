@@ -3,6 +3,11 @@ loaderVersion = "[40,)"
 license = "gplv3"
 issueTrackerURL = "https://github.com/MehVahdJukaar/Moonlight/issues" #optional
 
+[[mixins]]
+    config = "moonlight.mixins.json"
+[[mixins]]
+    config = "moonlight.mixins-common.json"
+
 [[mods]]
     modId = "moonlight"
     version = "${version}"

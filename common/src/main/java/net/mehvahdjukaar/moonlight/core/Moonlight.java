@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
-import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -16,6 +15,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
@@ -32,8 +32,6 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
-
-import javax.swing.*;
 
 @ApiStatus.Internal
 public class Moonlight {
@@ -101,23 +99,8 @@ public class Moonlight {
 
     public static void assertInitPhase() {
         if (!PlatHelper.isInitializing()) {
-            //TODO: re add once all mods are updated
-            if (PlatHelper.isDev()) {
-                throw new AssertionError("Method has to be called during mod initialization phase");
-            }
+            throw new AssertionError("Method has to be called during mod initialization phase");
         }
     }
-
-    public static MapItemSavedData getMapDataFromKnownKeys(ServerLevel level, int mapId) {
-        var d = level.getMapData(MapItem.makeKey(mapId));
-        if (d == null) {
-            d = level.getMapData("magicmap_" + mapId);
-            if (d == null) {
-                d = level.getMapData("mazemap_" + mapId);
-            }
-        }
-        return d;
-    }
-
 
 }

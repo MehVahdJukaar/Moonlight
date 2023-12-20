@@ -29,10 +29,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DataResult.PartialResult;
 import com.mojang.serialization.DynamicOps;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,7 +68,7 @@ public class ConfigHelper {
      */
     public static <T> T register(
             final ModConfig.Type configType,
-            final Function<ForgeConfigSpec.Builder, T> configFactory) {
+            final Function<ModConfigSpec.Builder, T> configFactory) {
         return register(configType, configFactory, null);
     }
 
@@ -89,13 +88,13 @@ public class ConfigHelper {
      */
     public static <T> T register(
             final ModConfig.Type configType,
-            final Function<ForgeConfigSpec.Builder, T> configFactory,
+            final Function<ModConfigSpec.Builder, T> configFactory,
             final @Nullable String configName) {
         final ModLoadingContext modContext = ModLoadingContext.get();
-        final org.apache.commons.lang3.tuple.Pair<T, ForgeConfigSpec> entry = new ForgeConfigSpec.Builder()
+        final org.apache.commons.lang3.tuple.Pair<T, ModConfigSpec> entry = new ModConfigSpec.Builder()
                 .configure(configFactory);
         final T config = entry.getLeft();
-        final ForgeConfigSpec spec = entry.getRight();
+        final ModConfigSpec spec = entry.getRight();
         if (configName == null) {
             modContext.registerConfig(configType, spec);
         } else {
@@ -117,14 +116,14 @@ public class ConfigHelper {
      *                        If the codec fails to deserialize the config field at a later time, an error message will be logged and this default instance will be used instead.
      * @return A reload-sensitive wrapper around your config object value. Use ConfigObject#get to get the most up-to-date object.
      */
-    public static <T> ConfigObject<T> defineObject(ForgeConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
+    public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
         com.google.common.base.Supplier<Object> lazyDefaultValue = Suppliers.memoize(() -> {
             T defaultValue = defaultSupplier.get();
             var encodeResult = codec.encodeStart(TomlConfigOps.INSTANCE, defaultValue);
             return encodeResult.getOrThrow(false, s -> LOGGER.error("Unable to encode default value: {}", s));
         });
 
-        ConfigValue<Object> value = builder.define(name, lazyDefaultValue, o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass()));
+        ModConfigSpec.ConfigValue<Object> value = builder.define(name, lazyDefaultValue, o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass()));
         return new ConfigObject<>(value, codec, defaultSupplier);
     }
 
@@ -133,14 +132,14 @@ public class ConfigHelper {
      **/
     public static class ConfigObject<T> implements Supplier<T> {
         private @NotNull
-        final ConfigValue<Object> value;
+        final ModConfigSpec.ConfigValue<Object> value;
         private @NotNull
         final Codec<T> codec;
         private @Nullable Object cachedObject;
         private @NotNull T parsedObject;
         private final @NotNull Supplier<T> defaultObject;
 
-        private ConfigObject(ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
+        private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
             this.value = value;
             this.codec = codec;
             this.defaultObject = Suppliers.memoize(defaultSupplier);

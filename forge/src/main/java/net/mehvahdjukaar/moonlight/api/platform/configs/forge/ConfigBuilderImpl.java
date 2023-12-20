@@ -11,8 +11,8 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -21,22 +21,22 @@ import java.util.function.Supplier;
 
 public class ConfigBuilderImpl extends ConfigBuilder {
 
-    private final List<ForgeConfigSpec.ConfigValue<?>> requireGameRestart = new ArrayList<>();
+    private final List<ModConfigSpec.ConfigValue<?>> requireGameRestart = new ArrayList<>();
     private boolean currentGameRestart;
-    private ForgeConfigSpec.ConfigValue<?> currentValue;
+    private ModConfigSpec.ConfigValue<?> currentValue;
     private final List<SpecialValue<?, ?>> specialValues = new ArrayList<>();
 
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         return new ConfigBuilderImpl(name, type);
     }
 
-    private final ForgeConfigSpec.Builder builder;
+    private final ModConfigSpec.Builder builder;
 
     private Deque<String> cat = new ArrayDeque<>();
 
     public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);
-        this.builder = new ForgeConfigSpec.Builder();
+        this.builder = new ModConfigSpec.Builder();
     }
 
     @Override
@@ -207,13 +207,13 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     private static class StringJsonConfigValue implements Supplier<JsonElement> {
 
-        private static final Field cachedValue = ObfuscationReflectionHelper.findField(ForgeConfigSpec.ConfigValue.class, "cachedValue");
+        private static final Field cachedValue = ObfuscationReflectionHelper.findField(ModConfigSpec.ConfigValue.class, "cachedValue");
 
         static {
             cachedValue.setAccessible(true);
         }
 
-        private final ForgeConfigSpec.ConfigValue<String> inner;
+        private final ModConfigSpec.ConfigValue<String> inner;
         private JsonElement cache = null;
 
         public static StringJsonConfigValue define(ConfigBuilderImpl cfg, String path, Supplier<JsonElement> defaultValueSupplier) {
@@ -228,7 +228,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         }
 
         StringJsonConfigValue(Supplier<String> innerConfig) {
-            this.inner = (ForgeConfigSpec.ConfigValue<String>) innerConfig;
+            this.inner = (ModConfigSpec.ConfigValue<String>) innerConfig;
         }
 
         @Override
@@ -294,10 +294,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     // wrapper class for special configs. ugly and hacky just to allow cachind as defualt config entries arent extendable
     abstract class SpecialValue<T, C> implements Supplier<T> {
-        private final ForgeConfigSpec.ConfigValue<C> original;
+        private final ModConfigSpec.ConfigValue<C> original;
         private T cachedValue = null;
 
-        SpecialValue(ForgeConfigSpec.ConfigValue<C> original) {
+        SpecialValue(ModConfigSpec.ConfigValue<C> original) {
             this.original = original;
         }
 

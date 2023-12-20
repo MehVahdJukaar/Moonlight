@@ -7,9 +7,8 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -17,8 +16,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-
+import net.minecraft.world.level.block.SuspiciousEffectHolder;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -122,20 +124,15 @@ public class FoodProvider {
             if (nbtApplier != null) nbtApplier.accept(stack);
             FoodProperties foodProperties = this.food.getFoodProperties();
             if (foodProperties != null && player.canEat(false)) {
-
-                CompoundTag tag = stack.getTag();
-                if (tag != null && tag.contains("Effects", 9)) {
-                    ListTag effects = tag.getList("Effects", 10);
-                    for (int i = 0; i < effects.size(); ++i) {
-                        int j = 160;
-                        CompoundTag effectsCompound = effects.getCompound(i);
-                        if (effectsCompound.contains("EffectDuration", 3))
-                            j = effectsCompound.getInt("EffectDuration") / this.divider;
-                        MobEffect effect = MobEffect.byId(effectsCompound.getByte("EffectId"));
-                        if (effect != null) {
-                            player.addEffect(new MobEffectInstance(effect, j));
-                        }
-                    }
+                List<SuspiciousEffectHolder.EffectEntry> list = new ArrayList<>();
+                CompoundTag compoundTag = stack.getTag();
+                if (compoundTag != null && compoundTag.contains("effects", 9)) {
+                    SuspiciousEffectHolder.EffectEntry.LIST_CODEC.parse(NbtOps.INSTANCE, compoundTag.getList("effects", 10)).result()
+                            .ifPresent(list::addAll);
+                }
+                for (var effect : list) {
+                    int j = effect.duration() / this.divider;
+                    player.addEffect(new MobEffectInstance(effect.effect(), j));
                 }
                 player.getFoodData().eat(foodProperties.getNutrition() / this.divider, foodProperties.getSaturationModifier() / (float) this.divider);
                 player.playSound(this.food.getDrinkingSound(), 1, 1);

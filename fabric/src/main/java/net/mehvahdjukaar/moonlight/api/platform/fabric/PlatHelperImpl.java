@@ -19,7 +19,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
+import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
@@ -132,7 +132,8 @@ public class PlatHelperImpl {
         var packet = new ClientBoundSpawnCustomEntityMessage(entity);
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeToBuffer(buf);
-        return ServerPlayNetworking.createS2CPacket(ModMessages.SPAWN_PACKET_ID, buf);
+        var p =(Packet) ServerPlayNetworking.createS2CPacket(ModMessages.SPAWN_PACKET_ID, buf);
+        return (Packet<ClientGamePacketListener>) p;
     }
 
     public static Path getGamePath() {

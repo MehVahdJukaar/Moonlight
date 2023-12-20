@@ -50,7 +50,7 @@ public class FabricConfigListScreen extends Screen {
 
     @Override
     protected void init() {
-        this.list = new ConfigList(this.minecraft, this.width, this.height, 32, this.height - 32, 40,
+        this.list = new ConfigList(this.minecraft, this.width, this.height, 32, 40,
                 this.configs);
         this.addRenderableWidget(this.list);
 
@@ -101,10 +101,9 @@ public class FabricConfigListScreen extends Screen {
 
     protected class ConfigList extends ContainerObjectSelectionList<ConfigButton> {
 
-        public ConfigList(Minecraft minecraft, int width, int height, int y0, int y1, int itemHeight, ConfigSpec... specs) {
-            super(minecraft, width, height, y0, y1, itemHeight);
+        public ConfigList(Minecraft minecraft, int width, int height, int y0, int itemHeight, ConfigSpec... specs) {
+            super(minecraft, width, height, y0,  itemHeight);
             this.centerListVertically = true;
-            this.setRenderSelection(false);
             for (var s : specs) {
                 this.addEntry(new ConfigButton(s, this.width, this.getRowWidth()));
             }
@@ -128,6 +127,8 @@ public class FabricConfigListScreen extends Screen {
                     this.y0 + 4 - (int) this.getScrollAmount() + index * this.itemHeight + this.headerHeight;
         }*/
 
+        //TODO: readd
+        /*
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             this.renderBackground(graphics);
@@ -177,7 +178,7 @@ public class FabricConfigListScreen extends Screen {
 
             this.renderDecorations(graphics, mouseX, mouseY);
             RenderSystem.disableBlend();
-        }
+        }*/
     }
 
     protected class ConfigButton extends ContainerObjectSelectionList.Entry<ConfigButton> {

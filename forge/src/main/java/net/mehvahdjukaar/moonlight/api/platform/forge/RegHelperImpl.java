@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
+import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -24,33 +25,34 @@ import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootTableReference;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.crafting.CompoundIngredient;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.LootTableLoadEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
-import net.minecraftforge.event.village.VillagerTradesEvent;
-import net.minecraftforge.event.village.WandererTradesEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.javafmlmod.FMLModContainer;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.javafmlmod.FMLModContainer;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.crafting.CompoundIngredient;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.LootTableLoadEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent;
+import net.neoforged.neoforge.event.village.VillagerTradesEvent;
+import net.neoforged.neoforge.event.village.WandererTradesEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,7 +66,7 @@ import java.util.function.Supplier;
 
 public class RegHelperImpl {
 
-    public record EntryWrapper<T>(RegistryObject<T> registryObject) implements RegSupplier<T> {
+    public record EntryWrapper<T>(DeferredHolder<T, ? extends T> registryObject) implements RegSupplier<T> {
         @Override
         public T get() {
             return registryObject.get();
@@ -82,7 +84,7 @@ public class RegHelperImpl {
 
         @Override
         public Holder<T> getHolder() {
-            return registryObject.getHolder().get();
+            return registryObject;
         }
     }
 
@@ -114,7 +116,8 @@ public class RegHelperImpl {
             return r;
         });
         //forge we don't care about mod id since it's always the active container one
-        return new EntryWrapper<>(registry.register(name.getPath(), supplier));
+        DeferredHolder<T, E> register = registry.register(name.getPath(), supplier);
+        return (RegSupplier<E>) new EntryWrapper<>(register);
     }
 
     private static IEventBus getModEventBus(String modId) {
@@ -122,7 +125,7 @@ public class RegHelperImpl {
         IEventBus bus;
         if (!(cont instanceof FMLModContainer container)) {
             Moonlight.LOGGER.warn("Failed to get mod container for mod {}", modId);
-            bus = FMLJavaModLoadingContext.get().getModEventBus();
+            bus = MoonlightForge.getCurrentModBus();
         } else bus = container.getEventBus();
         return bus;
     }
@@ -133,17 +136,17 @@ public class RegHelperImpl {
 
     public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {
         Consumer<RegisterEvent> eventConsumer = event -> {
-            if (event.getVanillaRegistry() == reg) {
-                eventListener.accept(event.getForgeRegistry()::register);
+            if (event.getRegistry() == reg) {
+                eventListener.accept((r, o) -> Registry.register(reg, r, o));
             }
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
     }
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
-        return register(name, () -> IForgeMenuType.create(containerFactory::apply), Registries.MENU);
+        return register(name, () -> IMenuTypeExtension.create(containerFactory::apply), Registries.MENU);
     }
 
     public static <T extends
@@ -156,7 +159,7 @@ public class RegHelperImpl {
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
         var f = register(name, fluid, Registries.FLUID);
         //register fluid type
-        register(name, () -> f.get().getFluidType(), ForgeRegistries.Keys.FLUID_TYPES);
+        register(name, () -> f.get().getFluidType(), NeoForgeRegistries.FLUID_TYPES);
         return f;
     }
 
@@ -179,7 +182,7 @@ public class RegHelperImpl {
             if (!afterEntries.isEmpty()) {
                 b.withTabsBefore(afterEntries.toArray(ResourceLocation[]::new));
             }
-            if(hasSearchBar)b.withSearchBar();
+            if (hasSearchBar) b.withSearchBar();
             return b.build();
         }, Registries.CREATIVE_MODE_TAB);
     }
@@ -202,7 +205,7 @@ public class RegHelperImpl {
                 factories.accept(list);
             }
         };
-        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+        NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>>
@@ -217,7 +220,7 @@ public class RegHelperImpl {
                 factories.accept(event.getRareTrades());
             }
         };
-        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+        NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
@@ -226,7 +229,7 @@ public class RegHelperImpl {
         Consumer<EntityAttributeCreationEvent> eventConsumer = event -> {
             eventListener.accept((e, b) -> event.put(e, b.build()));
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addCommandRegistration(RegHelper.CommandRegistration eventListener) {
@@ -235,7 +238,7 @@ public class RegHelperImpl {
         Consumer<RegisterCommandsEvent> eventConsumer = event -> {
             eventListener.accept(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
         };
-        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+        NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
     record PlacementEventImpl(SpawnPlacementRegisterEvent event) implements RegHelper.SpawnPlacementEvent {
@@ -253,13 +256,11 @@ public class RegHelperImpl {
             RegHelper.SpawnPlacementEvent spawnPlacementEvent = new PlacementEventImpl(event);
             eventListener.accept(spawnPlacementEvent);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
-        Moonlight.assertInitPhase();
-
-        CraftingHelper.register(new OptionalRecipeCondition(id, predicate));
+        register(id, () -> OptionalRecipeCondition.codec(predicate), NeoForgeRegistries.Keys.CONDITION_CODECS);
     }
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
@@ -308,7 +309,7 @@ public class RegHelperImpl {
             });
             eventListener.accept(itemToTabEvent);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.LOW, eventConsumer);
+        MoonlightForge.getCurrentModBus().addListener(EventPriority.LOW, eventConsumer);
     }
 
 
@@ -328,11 +329,11 @@ public class RegHelperImpl {
                         event.getTable().addPool(pool);
                     }
                 });
-        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+        NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
     public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient) {
-        FireworkStarRecipe.SHAPE_BY_ITEM = new HashMap<>(FireworkStarRecipe.SHAPE_BY_ITEM );
+        FireworkStarRecipe.SHAPE_BY_ITEM = new HashMap<>(FireworkStarRecipe.SHAPE_BY_ITEM);
         FireworkStarRecipe.SHAPE_BY_ITEM.put(ingredient, shape);
         FireworkStarRecipe.SHAPE_INGREDIENT = CompoundIngredient.of(
                 FireworkStarRecipe.SHAPE_INGREDIENT,

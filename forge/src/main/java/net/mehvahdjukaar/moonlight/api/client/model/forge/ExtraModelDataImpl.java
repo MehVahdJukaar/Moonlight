@@ -3,8 +3,8 @@ package net.mehvahdjukaar.moonlight.api.client.model.forge;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.data.ModelProperty;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;

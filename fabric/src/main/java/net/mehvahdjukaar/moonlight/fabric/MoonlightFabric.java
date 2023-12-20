@@ -4,10 +4,7 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.mixin.recipe.ingredient.PacketEncoderMixin;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
@@ -16,10 +13,8 @@ import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.Queue;
@@ -39,9 +34,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
              MoonlightClient.initClient();
         }
 
-        ModMessages.CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
-                ClientBoundOpenScreenMessage.class, ClientBoundOpenScreenMessage::new);
-
         ServerPlayConnectionEvents.JOIN.register((l, s, m) -> ModMessages.CHANNEL.sendToClientPlayer(l.player,
                 new ClientBoundSendLoginPacket()));
         ServerLifecycleEvents.SERVER_STARTING.register(s -> currentServer = s);
@@ -60,8 +52,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
         RegHelperImpl.lateRegisterEntries();
         FabricConfigSpec.loadAllConfigs();
-        MLFabricSetupCallbacks.COMMON_SETUP.forEach(Runnable::run);
-        MLFabricSetupCallbacks.COMMON_SETUP.clear();
 
         isInit = false;
 

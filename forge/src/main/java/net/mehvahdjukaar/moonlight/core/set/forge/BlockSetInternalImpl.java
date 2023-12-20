@@ -5,17 +5,14 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
+import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -36,11 +33,11 @@ public class BlockSetInternalImpl {
     static{
         //if loaded registers post item init
         Consumer<RegisterEvent> eventConsumer = e->{
-            if(e.getRegistryKey().equals(ForgeRegistries.ENCHANTMENTS.getRegistryKey())){
+            if(e.getRegistryKey().equals(BuiltInRegistries.ENCHANTMENT.key())){
                 BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
             }
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
     }
 
     //aaaa
@@ -68,11 +65,11 @@ public class BlockSetInternalImpl {
 
         //if block makes a function that just adds the bus and runnable to the queue whenever reg block is fired
         eventConsumer = e -> {
-            if (e.getRegistryKey().equals(ForgeRegistries.BLOCKS.getRegistryKey())) {
+            if (e.getRegistryKey().equals(BuiltInRegistries.BLOCK.key())) {
                 //actual runnable which will registers the blocks
                 Runnable lateRegistration = () -> {
 
-                    IForgeRegistry<Block> registry = e.getForgeRegistry();
+                    var registry = e.getRegistry();
                     if (registry instanceof ForgeRegistry<?> fr) {
                         boolean frozen = fr.isLocked();
                         fr.unfreeze();
@@ -85,14 +82,14 @@ public class BlockSetInternalImpl {
             }
         };
         //registering block event to the bus
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus bus = MoonlightForge.getCurrentModBus();
         bus.addListener(EventPriority.HIGHEST, eventConsumer);
     }
 
     @NotNull
     private static List<Runnable> getOrAddQueue() {
         //this is horrible. worst shit ever
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus bus = MoonlightForge.getCurrentModBus();
         //get the queue corresponding to this certain mod
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         return LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {

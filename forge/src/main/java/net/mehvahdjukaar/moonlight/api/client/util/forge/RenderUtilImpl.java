@@ -16,9 +16,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.ClientHooks;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
 public class RenderUtilImpl {
 
@@ -69,7 +69,7 @@ public class RenderUtilImpl {
     }
 
     public static BakedModel handleCameraTransforms(BakedModel model, PoseStack poseStack, ItemDisplayContext transform) {
-        return ForgeHooksClient.handleCameraTransforms(poseStack, model, transform, false);
+        return ClientHooks.handleCameraTransforms(poseStack, model, transform, false);
     }
 
 

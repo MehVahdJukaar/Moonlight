@@ -11,8 +11,6 @@ public class MoonlightFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         //dont remove
         MoonlightFabric.commonSetup();
-        MLFabricSetupCallbacks.CLIENT_SETUP.forEach(Runnable::run);
-        MLFabricSetupCallbacks.CLIENT_SETUP.clear();
 
         PRE_CLIENT_SETUP_WORK.forEach(Runnable::run);
         CLIENT_SETUP_WORK.forEach(Runnable::run);

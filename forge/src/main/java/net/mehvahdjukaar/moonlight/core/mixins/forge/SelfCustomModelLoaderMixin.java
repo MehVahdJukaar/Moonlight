@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.api.client.model.forge.GeometryWrapper;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(CustomModelLoader.class)

@@ -13,12 +13,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.network.*;
+import net.neoforged.neoforge.network.simple.SimpleChannel;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -47,19 +44,18 @@ public class ChannelHandlerImpl extends ChannelHandler {
             NetworkDir dir,
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder) {
-        Optional<NetworkDirection> d = switch (dir) {
+        Optional<INetworkDirection<?>> d = switch (dir) {
             case BOTH -> Optional.empty();
-            case PLAY_TO_CLIENT -> Optional.of(NetworkDirection.PLAY_TO_CLIENT);
-            case PLAY_TO_SERVER -> Optional.of(NetworkDirection.PLAY_TO_SERVER);
+            case PLAY_TO_CLIENT -> Optional.of(PlayNetworkDirection.PLAY_TO_CLIENT);
+            case PLAY_TO_SERVER -> Optional.of(PlayNetworkDirection.PLAY_TO_SERVER);
         };
 
-        channel.registerMessage(id++, messageClass, Message::writeToBuffer, decoder, this::consumer, d);
+        channel.registerMessage(id++, messageClass, Message::writeToBuffer, decoder::apply, this::consumer, d);
     }
 
-    private <M extends Message> void consumer(M message, Supplier<NetworkEvent.Context> context) {
-        var c = context.get();
-        c.enqueueWork(() -> message.handle(new Wrapper(c)));
-        c.setPacketHandled(true);
+    private <M extends Message> void consumer(M message, NetworkEvent.Context context) {
+        context.enqueueWork(() -> message.handle(new Wrapper(context)));
+        context.setPacketHandled(true);
     }
 
     static class Wrapper implements Context {
@@ -72,8 +68,8 @@ public class ChannelHandlerImpl extends ChannelHandler {
 
         @Override
         public NetworkDir getDirection() {
-            return switch (context.getDirection()) {
-                case PLAY_TO_CLIENT -> NetworkDir.PLAY_TO_CLIENT;
+            return switch (context.getDirection().getOriginationSide()) {
+                case CLIENT -> NetworkDir.PLAY_TO_CLIENT;
                 default -> NetworkDir.PLAY_TO_SERVER;
             };
         }

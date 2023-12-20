@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -16,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -41,10 +41,9 @@ public class ForgeHelperImpl {
         return false;
     }
 
-    public static FinishedRecipe addRecipeConditions(FinishedRecipe originalRecipe, List<Object> conditions) {
+    public static Recipe addRecipeConditions(Recipe originalRecipe, List<Object> conditions) {
         return originalRecipe;
     }
-
 
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
         return stack.getItem() == Items.MILK_BUCKET || stack.getItem() == Items.HONEY_BOTTLE;

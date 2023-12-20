@@ -5,37 +5,37 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.common.loot.LootModifier;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 public class ModLootModifiers {
 
     public static void register() {
-        LOOT_MODIFIERS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        LOOT_MODIFIERS.register(MoonlightForge.getCurrentModBus());
     }
 
     public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIERS = DeferredRegister.create(
-            ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, Moonlight.MOD_ID);
+            NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, Moonlight.MOD_ID);
 
-    public static final RegistryObject<Codec<? extends IGlobalLootModifier>> ADD_ITEM_GLM =
+    public static final DeferredHolder<Codec<? extends IGlobalLootModifier>> ADD_ITEM_GLM =
             LOOT_MODIFIERS.register("add_item", AddItemModifier.CODEC);
 
-    public static final RegistryObject<Codec<? extends IGlobalLootModifier>> REPLACE_ITEM_GLM =
+    public static final DeferredHolder<Codec<? extends IGlobalLootModifier>> REPLACE_ITEM_GLM =
             LOOT_MODIFIERS.register("replace_item", ReplaceItemModifier.CODEC);
 
-    public static final RegistryObject<Codec<? extends IGlobalLootModifier>> ADD_TABLE =
+    public static final DeferredHolder<Codec<? extends IGlobalLootModifier>> ADD_TABLE =
             LOOT_MODIFIERS.register("add_loot_table", AddTableModifier.CODEC);
 
     public static class AddItemModifier extends LootModifier {

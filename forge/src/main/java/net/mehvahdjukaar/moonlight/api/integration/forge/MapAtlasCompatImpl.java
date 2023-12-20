@@ -8,15 +8,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import pepjebs.mapatlases.MapAtlasesMod;
 import pepjebs.mapatlases.capabilities.MapKey;
 import pepjebs.mapatlases.client.MapAtlasesClient;
 import pepjebs.mapatlases.item.MapAtlasItem;
-import pepjebs.mapatlases.utils.MapAtlasesAccessUtils;
-import pepjebs.mapatlases.utils.MapDataHolder;
 
 public class MapAtlasCompatImpl {
     public static boolean isAtlas(Item item) {

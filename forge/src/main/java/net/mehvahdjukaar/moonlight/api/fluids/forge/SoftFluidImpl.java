@@ -3,13 +3,14 @@ package net.mehvahdjukaar.moonlight.api.fluids.forge;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
 
 public class SoftFluidImpl {
 
@@ -21,7 +22,7 @@ public class SoftFluidImpl {
     }
 
     public static Triplet<ResourceLocation, ResourceLocation, Integer> getRenderingData(ResourceLocation useTexturesFrom) {
-        Fluid f = ForgeRegistries.FLUIDS.getValue(useTexturesFrom);
+        Fluid f = BuiltInRegistries.FLUID.getOptional(useTexturesFrom).orElse(null);
         if (f != null && f != Fluids.EMPTY) {
 
             IClientFluidTypeExtensions prop = IClientFluidTypeExtensions.of(f);

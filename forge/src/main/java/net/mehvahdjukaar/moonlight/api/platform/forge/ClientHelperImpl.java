@@ -22,6 +22,7 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
@@ -31,19 +32,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.client.IItemDecorator;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.client.model.ExtendedBlockModelDeserializer;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
-import net.minecraftforge.data.loading.DatagenModLoader;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.forgespi.locating.IModFile;
-import net.minecraftforge.resource.PathPackResources;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.IItemDecorator;
+import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer;
+import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
+import net.neoforged.neoforge.data.loading.DatagenModLoader;
+import net.neoforged.neoforgespi.language.IModInfo;
+import net.neoforged.neoforgespi.locating.IModFile;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -52,6 +52,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static net.mehvahdjukaar.moonlight.forge.MoonlightForge.getCurrentModBus;
 
 public class ClientHelperImpl {
 
@@ -75,7 +77,7 @@ public class ClientHelperImpl {
         Consumer<RegisterParticleProvidersEvent> eventConsumer = event -> {
             eventListener.accept(new ParticleEventImpl(event));
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     private record ParticleEventImpl(RegisterParticleProvidersEvent event) implements ClientHelper.ParticleEvent {
@@ -92,7 +94,7 @@ public class ClientHelperImpl {
 
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerEntityRenderer);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {
@@ -100,7 +102,7 @@ public class ClientHelperImpl {
 
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerBlockEntityRenderer);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addBlockColorsRegistration(Consumer<ClientHelper.BlockColorEvent> eventListener) {
@@ -119,7 +121,7 @@ public class ClientHelperImpl {
                 }
             });
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addItemColorsRegistration(Consumer<ClientHelper.ItemColorEvent> eventListener) {
@@ -138,7 +140,7 @@ public class ClientHelperImpl {
                 }
             });
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -146,7 +148,7 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<RegisterClientReloadListenersEvent> eventConsumer = event -> event.registerReloadListener(listener.get());
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addModelLayerRegistration(Consumer<ClientHelper.ModelLayerEvent> eventListener) {
@@ -155,7 +157,7 @@ public class ClientHelperImpl {
         Consumer<EntityRenderersEvent.RegisterLayerDefinitions> eventConsumer = event -> {
             eventListener.accept(event::registerLayerDefinition);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
@@ -164,7 +166,7 @@ public class ClientHelperImpl {
         Consumer<ModelEvent.RegisterAdditional> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
@@ -173,7 +175,7 @@ public class ClientHelperImpl {
         Consumer<RegisterClientTooltipComponentFactoriesEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addModelLoaderRegistration(Consumer<ClientHelper.ModelLoaderEvent> eventListener) {
@@ -182,7 +184,7 @@ public class ClientHelperImpl {
         Consumer<ModelEvent.RegisterGeometryLoaders> eventConsumer = event -> {
             eventListener.accept((i, l) -> event.register(i.getPath(), (IGeometryLoader<?>) l));
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addItemDecoratorsRegistration(Consumer<ClientHelper.ItemDecoratorEvent> eventListener) {
@@ -199,7 +201,7 @@ public class ClientHelperImpl {
                 event.register(i, deco);
             });
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addKeyBindRegistration(Consumer<ClientHelper.KeyBindEvent> eventListener) {
@@ -208,7 +210,7 @@ public class ClientHelperImpl {
         Consumer<RegisterKeyMappingsEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
 
@@ -246,14 +248,14 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLClientSetupEvent> eventConsumer = event -> event.enqueueWork(clientSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
     public static void addClientSetupAsync(Runnable clientSetup) {
         Moonlight.assertInitPhase();
 
         Consumer<FMLClientSetupEvent> eventConsumer = event -> clientSetup.run();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentModBus().addListener(eventConsumer);
     }
 
 
@@ -267,13 +269,12 @@ public class ClientHelperImpl {
                             folderName.toString(),
                             true,
                             file.findResource("resourcepacks/" + folderName.getPath()))) {
-                        var metadata = Objects.requireNonNull(pack.getMetadataSection(PackMetadataSection.TYPE));
-                        return Pack.create(
+                        PackMetadataSection metadata = Objects.requireNonNull(pack.getMetadataSection(PackMetadataSection.TYPE));
+                        return Pack.readMetaAndCreate(
                                 folderName.toString(),
                                 displayName,
                                 defaultEnabled,
                                 (s) -> pack,
-                                new Pack.Info(metadata.getDescription(), metadata.getPackFormat(), FeatureFlagSet.of()),
                                 PackType.CLIENT_RESOURCES,
                                 Pack.Position.TOP,
                                 false,

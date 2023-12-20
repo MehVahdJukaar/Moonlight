@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.events.forge;
 
 import net.mehvahdjukaar.moonlight.api.events.*;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,16 +18,16 @@ public class MoonlightEventsHelperImpl {
         //hacky
         if (eventClass == IVillagerBrainEvent.class) {
             Consumer<VillagerBrainEvent> eventConsumer = e -> listener.accept((T) e);
-            MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+            NeoForge.EVENT_BUS.addListener(eventConsumer);
         } else if (eventClass == IFireConsumeBlockEvent.class) {
             Consumer<FireConsumeBlockEvent> eventConsumer = e -> listener.accept((T) e);
-            MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+            NeoForge.EVENT_BUS.addListener(eventConsumer);
         } else if (eventClass == ILightningStruckBlockEvent.class) {
             Consumer<LightningStruckBlockEvent> eventConsumer = e -> listener.accept((T) e);
-            MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+            NeoForge.EVENT_BUS.addListener(eventConsumer);
         } else if (eventClass == IDropItemOnDeathEvent.class) {
             Consumer<DropItemOnDeathEvent> eventConsumer = e -> listener.accept((T) e);
-            MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+            NeoForge.EVENT_BUS.addListener(eventConsumer);
         } else {
             //other 2 events dont work on forge bus for some reason... Randomly too
             LISTENERS.computeIfAbsent(eventClass, ev -> new ConcurrentLinkedDeque<>()).add(listener);
@@ -36,7 +36,7 @@ public class MoonlightEventsHelperImpl {
 
     public static <T extends SimpleEvent> void postEvent(T event, Class<T> eventClass) {
         if (event instanceof Event e) {
-            MinecraftForge.EVENT_BUS.post(e);
+            NeoForge.EVENT_BUS.post(e);
         } else {
             var consumers = LISTENERS.get(eventClass);
             if (consumers != null) {

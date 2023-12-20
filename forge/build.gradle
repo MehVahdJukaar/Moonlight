@@ -4,20 +4,14 @@ plugins {
 
 architectury {
     platformSetupLoomIde()
-    forge()
+    neoForge {
+        platformPackage = "forge"
+    }
 }
 
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
-
-    forge {
-        convertAccessWideners = true
-        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-
-        mixinConfig  "moonlight-common.mixins.json"
-        mixinConfig  "moonlight.mixins.json"
-    }
 }
 
 configurations {
@@ -25,17 +19,15 @@ configurations {
     shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
+    developmentNeoForge.extendsFrom common
 }
 
 dependencies {
-    forge "net.minecraftforge:forge:${rootProject.forge_version}"
-    // Remove the next line if you don't want to depend on the API
-    // modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
+    neoForge "net.neoforged:neoforge:${forge_version}"
 
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
     modCompileOnly ("curse.maven:configured-457570:4462894")
     modRuntimeOnly("curse.maven:yacl-667299:4523736")
@@ -49,12 +41,6 @@ dependencies {
 
    // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
     modCompileOnly("curse.maven:map-atlases-forge-519759:4784907")
-
-    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixin_extras_version}"))
-    implementation(include("io.github.llamalad7:mixinextras-forge:${mixin_extras_version}"))
-    annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
-
-
 }
 
 processResources {
@@ -72,13 +58,13 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    archiveClassifier = "dev-shadow"
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier "forge"
+    archiveClassifier = "forge"
 
     exclude('net/mehvahdjukaar/moonlight/example/**')
 }
@@ -93,7 +79,7 @@ task updateJson {
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier = "dev"
 }
 
 sourcesJar {

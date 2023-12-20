@@ -1,5 +1,7 @@
 architectury {
-    common(rootProject.enabled_platforms.split(","))
+    common(rootProject.enabled_platforms.split(",")){
+        it.platformPackage("neoforge", "forge")
+    }
 }
 
 loom {
@@ -24,8 +26,8 @@ dependencies {
     modCompileOnly("curse.maven:yacl-667299:4523734")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
 
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
-    implementation("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
+    //annotationProcessor("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
+   /// implementation("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
     annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
 
 }

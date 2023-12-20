@@ -6,8 +6,8 @@ import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraftforge.client.model.QuadTransformers;
-import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
+import net.neoforged.neoforge.client.model.QuadTransformers;
+import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -155,13 +155,6 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuadBuilder lightEmission(int light) {
         this.emissivity = light;
-        return this;
-    }
-
-    @Override
-    public BakedQuadBuilder fromVanilla(BakedQuad q) {
-        int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
-        output = new BakedQuad(v, q.getTintIndex(), q.getDirection(), q.getSprite(), q.isShade(), q.hasAmbientOcclusion());
         return this;
     }
 

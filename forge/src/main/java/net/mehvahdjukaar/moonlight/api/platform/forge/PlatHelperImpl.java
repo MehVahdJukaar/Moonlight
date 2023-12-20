@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -38,28 +39,26 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.AddPackFindersEvent;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoader;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.network.NetworkHooks;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -111,7 +110,7 @@ public class PlatHelperImpl {
     }
 
     public static boolean isMobGriefingOn(Level level, Entity entity) {
-        return ForgeEventFactory.getMobGriefingEvent(level, entity);
+        return EventHooks.getMobGriefingEvent(level, entity);
     }
 
     public static boolean isAreaLoaded(LevelReader level, BlockPos pos, int maxRange) {
@@ -131,7 +130,7 @@ public class PlatHelperImpl {
 
 
     public static int getBurnTime(ItemStack stack) {
-        return ForgeHooks.getBurnTime(stack, null);
+        return CommonHooks.getBurnTime(stack, null);
     }
 
     @Nullable
@@ -156,7 +155,7 @@ public class PlatHelperImpl {
     }
 
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
-        return new ForgeSpawnEggItem(entityType, color, outerColor, properties);
+        return new DeferredSpawnEggItem(entityType, color, outerColor, properties);
     }
 
     public static Path getModFilePath(String modId) {
@@ -198,7 +197,7 @@ public class PlatHelperImpl {
     }
 
     public static boolean evaluateRecipeCondition(JsonElement jo) {
-        return CraftingHelper.getCondition(jo.getAsJsonObject()).test(ICondition.IContext.EMPTY);
+        return ICondition.conditionsMatched( jo.getAsJsonObject()).test(ICondition.IContext.EMPTY);
     }
 
     public static List<String> getInstalledMods() {
@@ -217,7 +216,7 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLCommonSetupEvent> eventConsumer = event -> event.enqueueWork(commonSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
     }
 
 
@@ -225,7 +224,7 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLCommonSetupEvent> eventConsumer = event -> commonSetup.run();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
     }
 
 
@@ -235,14 +234,14 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<AddReloadListenerEvent> eventConsumer = event -> event.addListener(listener);
-        MinecraftForge.EVENT_BUS.addListener(eventConsumer);
+        NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
     public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
         Moonlight.assertInitPhase();
 
         if (packSupplier == null) return;
-        var bus = FMLJavaModLoadingContext.get().getModEventBus();
+        var bus = MoonlightForge.getCurrentModBus();
         Consumer<AddPackFindersEvent> consumer = event -> {
             if (event.getPackType() == packType) {
                 var p = packSupplier.get();

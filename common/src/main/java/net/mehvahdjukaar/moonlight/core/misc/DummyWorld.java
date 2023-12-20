@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -48,6 +49,7 @@ public class DummyWorld extends Level {
 
     private final Scoreboard scoreboard = new Scoreboard();
     private final ChunkSource chunkManager = new DummyChunkManager(this);
+    private final TickRateManager tickRateManager = new TickRateManager();
 
     private DummyWorld() {
         super(new ClientLevel.ClientLevelData(Difficulty.NORMAL, false, false),
@@ -113,6 +115,11 @@ public class DummyWorld extends Level {
     @Override
     public Entity getEntity(int id) {
         throw new IllegalStateException("not implemented");
+    }
+
+    @Override
+    public TickRateManager tickRateManager() {
+        return tickRateManager;
     }
 
     @Override

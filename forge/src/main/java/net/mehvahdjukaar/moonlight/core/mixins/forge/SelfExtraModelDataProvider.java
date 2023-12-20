@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.mixins.forge;
 
-import dev.architectury.patchedmixin.staticmixin.spongepowered.asm.mixin.Overwrite;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
 import net.mehvahdjukaar.moonlight.api.client.model.forge.ExtraModelDataImpl;
 import net.minecraft.nbt.CompoundTag;
@@ -8,14 +7,13 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.common.extensions.IForgeBlockEntity;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension;
 import org.spongepowered.asm.mixin.Mixin;
-
-import java.util.Objects;
+import org.spongepowered.asm.mixin.Overwrite;
 
 @Mixin(IExtraModelDataProvider.class)
-public interface SelfExtraModelDataProvider extends IForgeBlockEntity, IExtraModelDataProvider {
+public interface SelfExtraModelDataProvider extends IBlockEntityExtension, IExtraModelDataProvider {
 
     //overwrite since it already has a default
     @Overwrite

@@ -87,7 +87,7 @@ public abstract class MimicBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
         if (level.getBlockEntity(pos) instanceof IBlockHolder tile) {
             BlockState mimic = tile.getHeldBlock();
             return mimic.getBlock().getCloneItemStack(level, pos, state);
