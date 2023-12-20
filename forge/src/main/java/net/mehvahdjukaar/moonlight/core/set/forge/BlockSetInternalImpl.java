@@ -31,10 +31,10 @@ public class BlockSetInternalImpl {
 
     private static boolean hasFilledBlockSets = false;
 
-    static{
+    static {
         //if loaded registers post item init
-        Consumer<RegisterEvent> eventConsumer = e->{
-            if(e.getRegistryKey().equals(BuiltInRegistries.ENCHANTMENT.key())){
+        Consumer<RegisterEvent> eventConsumer = e -> {
+            if (e.getRegistryKey().equals(BuiltInRegistries.ENCHANTMENT.key())) {
                 BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
             }
         };
@@ -72,14 +72,7 @@ public class BlockSetInternalImpl {
             if (e.getRegistryKey().equals(BuiltInRegistries.BLOCK.key())) {
                 //actual runnable which will registers the blocks
                 Runnable lateRegistration = () -> {
-
-                    var registry = e.getRegistry();
-                    if (registry instanceof ForgeRegistry<?> fr) {
-                        boolean frozen = fr.isLocked();
-                        fr.unfreeze();
-                        registrationFunction.accept(registry::register, BlockSetAPI.getBlockSet(blockType).getValues());
-                        if (frozen) fr.freeze();
-                    }
+                    registrationFunction.accept((r, o) -> Registry.register(BuiltInRegistries.BLOCK, r, o), BlockSetAPI.getBlockSet(blockType).getValues());
                 };
                 //when this reg block event fires we only add a runnable to the queue
                 registrationQueues.add(lateRegistration);
@@ -107,7 +100,7 @@ public class BlockSetInternalImpl {
     //shittiest code ever lol
     protected static void registerLateBlockAndItems(RegisterEvent event) {
         //fires right after blocks
-        if (event.getRegistryKey().equals(ForgeRegistries.ATTRIBUTES.getRegistryKey())) {
+        if (event.getRegistryKey().equals(BuiltInRegistries.ATTRIBUTE.key())) {
             if (!hasFilledBlockSets) {
                 BlockSetInternal.initializeBlockSets();
                 hasFilledBlockSets = true;

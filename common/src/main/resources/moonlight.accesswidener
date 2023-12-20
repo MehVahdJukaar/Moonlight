@@ -61,6 +61,9 @@ accessible method net/minecraft/client/gui/GuiGraphics <init> (Lnet/minecraft/cl
 
 transitive-accessible method net/minecraft/client/renderer/item/ItemProperties register (Lnet/minecraft/world/item/Item;Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/client/renderer/item/ClampedItemPropertyFunction;)V
 
+#config list
+accessible method net/minecraft/client/gui/components/AbstractSelectionList replaceEntries (Ljava/util/Collection;)V
+
 #falling block
 transitive-accessible field net/minecraft/world/entity/item/FallingBlockEntity cancelDrop Z
 #arrow

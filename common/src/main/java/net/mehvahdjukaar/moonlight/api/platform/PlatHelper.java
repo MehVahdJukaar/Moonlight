@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -89,7 +90,7 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
-    public static boolean evaluateRecipeCondition(JsonElement jo) {
+    public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
         throw new AssertionError();
     }
 

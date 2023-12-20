@@ -1,12 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
-import com.google.gson.JsonObject;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -18,32 +19,31 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.*;
-import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import net.neoforged.neoforge.registries.GameData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class ForgeHelperImpl {
@@ -54,6 +54,7 @@ public class ForgeHelperImpl {
 
     public static RecipeOutput addRecipeConditions(RecipeOutput originalRecipe, List<Object> conditions) {
         boolean success = false;
+        /*
         var builder = ConditionalRecipe.builder();
         for (var c : conditions) {
             if (c instanceof ICondition condition) {
@@ -66,7 +67,8 @@ public class ForgeHelperImpl {
             builder.addRecipe(originalRecipe);
             builder.build(r -> newRecipe.set(new Wrapper(r, originalRecipe)), originalRecipe.getId());
             return newRecipe.get();
-        }
+        }*/
+        //TODO: re add
         return originalRecipe;
     }
 
@@ -101,7 +103,12 @@ public class ForgeHelperImpl {
     }
 
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
-        return effect.isCurativeItem(stack);
+        EffectCure cure = null;
+        // somehow worse api...
+        if (stack.getItem() instanceof MilkBucketItem) cure = EffectCures.MILK;
+        if (stack.getItem() instanceof HoneyBottleItem) cure = EffectCures.HONEY;
+        if (cure != null) return effect.getCures().contains(cure);
+        return false;
     }
 
 
@@ -148,10 +155,6 @@ public class ForgeHelperImpl {
 
     public static void onBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         blockstate.onBlockExploded(level, blockpos, explosion);
-    }
-
-    public static boolean areStacksEqual(ItemStack stack, ItemStack other, boolean sameNbt) {
-        return stack.equals(other, sameNbt);
     }
 
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
@@ -220,6 +223,16 @@ public class ForgeHelperImpl {
 
     public static Map<Block, Item> getBlockItemMap() {
         return GameData.getBlockItemMap();
+    }
+
+    public static void registerDefaultContainerCap(BlockEntityType<? extends Container> type) {
+        Moonlight.assertInitPhase();
+
+        Consumer<RegisterCapabilitiesEvent> eventConsumer = event -> {
+            event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, type, (container, side) -> new InvWrapper(container));
+
+        };
+        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
     }
 
     public static boolean isInFluidThatCanExtinguish(Entity entity) {

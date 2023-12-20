@@ -8,7 +8,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 @Mixin(ItemDisplayTile.class)
 public abstract class SelfItemDisplayTileMixin extends RandomizableContainerBlockEntity {
 
-    @Unique
     private final LazyOptional<? extends IItemHandler>[] handlers = SidedInvWrapper.create((WorldlyContainer) this, Direction.values());
 
     protected SelfItemDisplayTileMixin(BlockEntityType<?> entityType, BlockPos pos, BlockState state) {

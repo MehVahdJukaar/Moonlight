@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+/*
 public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
 
     public static final ResourceLocation MISC_ICONS = Moonlight.res("textures/gui/misc_icons.png");
@@ -79,9 +80,6 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         return modId;
     }
 
-    /**
-     * Registers this custom config screen
-     */
     public static void registerConfigScreen(String modId, Function<Screen, CustomConfigSelectScreen> screenSelectFactory) {
         ModContainer container = ModList.get().getModContainerById(modId).get();
         container.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () ->
@@ -157,3 +155,4 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     }
 
 }
+*/

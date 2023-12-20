@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
@@ -59,6 +61,7 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.network.NetworkHooks;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -196,8 +199,8 @@ public class PlatHelperImpl {
         NetworkHooks.openScreen(player, menuProvider, extraDataProvider);
     }
 
-    public static boolean evaluateRecipeCondition(JsonElement jo) {
-        return ICondition.conditionsMatched( jo.getAsJsonObject()).test(ICondition.IContext.EMPTY);
+    public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
+        return ICondition.conditionsMatched(ops, jo);
     }
 
     public static List<String> getInstalledMods() {

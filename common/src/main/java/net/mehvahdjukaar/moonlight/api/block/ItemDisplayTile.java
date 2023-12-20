@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;

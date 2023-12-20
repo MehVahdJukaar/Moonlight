@@ -1,9 +1,13 @@
 package net.mehvahdjukaar.moonlight.forge;
 
+import net.mehvahdjukaar.moonlight.api.client.model.RetexturedModelLoader;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
@@ -13,28 +17,10 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.IModBusEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -55,7 +41,7 @@ public class MoonlightForge {
     public static final ForgeConfigSpec SPEC = ((ConfigSpecWrapper) ConfigBuilder.create(MOD_ID, ConfigType.COMMON)
             .buildAndRegister()).getSpec();
 
-    public MoonlightForge(IModBusEvent bus) {
+    public MoonlightForge(IEventBus bus) {
         Moonlight.commonInit();
         NeoForge.EVENT_BUS.register(MoonlightForge.class);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(MoonlightForge::configsLoaded);
@@ -63,7 +49,7 @@ public class MoonlightForge {
         ModLootConditions.register();
 
         if (PlatHelper.getPhysicalSide().isClient()) {
-            MoonlightForgeClient.init();
+            MoonlightForgeClient.init(bus);
         }
     }
 
