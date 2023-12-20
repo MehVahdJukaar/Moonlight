@@ -1,10 +1,7 @@
 package net.mehvahdjukaar.moonlight.forge;
 
-import net.mehvahdjukaar.moonlight.api.client.model.RetexturedModelLoader;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
@@ -44,9 +41,6 @@ public class MoonlightForge {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init(bus);
             MoonlightClient.initClient();
-            ClientHelper.addModelLoaderRegistration(modelLoaderEvent -> {
-                modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
-            });
         }
     }
 

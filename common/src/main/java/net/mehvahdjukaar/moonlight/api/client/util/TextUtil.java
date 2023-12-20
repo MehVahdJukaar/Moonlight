@@ -189,14 +189,6 @@ public class TextUtil {
      * bundles all data needed to render a generic text line. Useful for signs like blocks
      */
     public record RenderProperties(int textColor, int darkenedColor, boolean outline, int light, Style style) {
-
-        @Deprecated(forRemoval = true)
-        public RenderProperties(DyeColor color, boolean outline, int combinedLight, Style style, BooleanSupplier isVeryNear) {
-            this(color.getTextColor(),
-                    getDarkenedColor(color.getTextColor(), outline),
-                    outline && (isVeryNear.getAsBoolean() || color == DyeColor.BLACK),
-                    outline ? LightTexture.FULL_BRIGHT : combinedLight, style);
-        }
     }
 
     public static RenderProperties renderProperties(DyeColor dyeColor, boolean glowing,

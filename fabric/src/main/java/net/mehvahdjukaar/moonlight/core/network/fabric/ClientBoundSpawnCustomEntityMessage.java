@@ -55,9 +55,6 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         this.buf = null;
 
         //idk why this is needed but synced data fails to load correctly sometimes
-        //TODO: remove and figure out why its needed
-
-        //TODO: sent entity data drity here
     }
 
     public ClientBoundSpawnCustomEntityMessage(FriendlyByteBuf buf) {

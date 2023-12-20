@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RotHlpr {
-    //TODO: merge with math helper
     //dont modify these pls. these are mutable unforunately posestack doesnt accept Quaternionfc
     public static final Quaternionf Y180 = Axis.YP.rotationDegrees(180);
     public static final Quaternionf Y90 = Axis.YP.rotationDegrees(90);
@@ -21,7 +20,7 @@ public class RotHlpr {
     public static final Quaternionf YN90 = Axis.YP.rotationDegrees(-90);
     public static final Quaternionf YN180 = Axis.YP.rotationDegrees(-180);
 
-    public static final Quaternionf X180 = Axis.XP.rotationDegrees(180);
+    public static final Quaternionf X180 =  Axis.XP.rotationDegrees(180);
     public static final Quaternionf X90 = Axis.XP.rotationDegrees(90);
     public static final Quaternionf X22 = Axis.XP.rotationDegrees(22.5f);
     public static final Quaternionf XN22 = Axis.XP.rotationDegrees(-22.5f);
@@ -52,26 +51,5 @@ public class RotHlpr {
         return YAW2ROT.getOrDefault(rot, def);
     }
 
-    @Deprecated(forRemoval = true)
-    public static Vector3f rotateVertexOnCenterBy(float x, float y, float z, Matrix4f pTransform) {
-        Vector3f v = new Vector3f(x, y, z);
-        rotateVertexBy(v, new Vector3f(0.5F, 0.5F, 0.5F), pTransform);
-        return v;
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void rotateVertexBy(Vector3f pPos, Vector3f pOrigin, Matrix4f pTransform) {
-        Vector4f vector4f = new Vector4f(pPos.x() - pOrigin.x(), pPos.y() - pOrigin.y(), pPos.z() - pOrigin.z(), 1.0F);
-        vector4f.mul(pTransform);
-        pPos.set(vector4f.x() + pOrigin.x(), vector4f.y() + pOrigin.y(), vector4f.z() + pOrigin.z());
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Direction rotateDirection(Direction direction, Matrix4f transform) {
-        var d = direction.getNormal();
-        var normal = new Vector3f(d.getX(), d.getY(), d.getZ());
-        RotHlpr.rotateVertexBy(normal, new Vector3f(), transform);
-        return Direction.getNearest(normal.x(), normal.y(), normal.z());
-    }
 
 }
