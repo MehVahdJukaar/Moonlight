@@ -35,6 +35,9 @@ public interface BakedQuadBuilder extends VertexConsumer {
     }
 
 
+    @Deprecated
+    BakedQuadBuilder fromVanilla(BakedQuad quad);
+
     BakedQuadBuilder setAutoDirection();
 
     BakedQuadBuilder setDirection(Direction direction);

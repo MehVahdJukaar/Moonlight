@@ -54,22 +54,12 @@ public abstract class ChannelHandler {
         }
     }
 
-    @Deprecated(forRemoval = true)
-    public static ChannelHandler createChannel(ResourceLocation channelMame, int version) {
-        return createChannel(channelMame.getNamespace(), () -> version);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static ChannelHandler createChannel(ResourceLocation channelMame) {
-        return createChannel(channelMame, 1);
-    }
-
-    public static ChannelHandler createChannel(String modId) {
+    private static ChannelHandler createChannel(String modId) {
         return createChannel(modId, () -> 0);
     }
 
     @ExpectPlatform
-    public static ChannelHandler createChannel(String modId, IntSupplier version) {
+    protected static ChannelHandler createChannel(String modId, IntSupplier version) {
         throw new AssertionError();
     }
 

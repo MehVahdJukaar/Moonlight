@@ -23,11 +23,6 @@ import org.jetbrains.annotations.Nullable;
 public class DecorationRenderer<T extends CustomMapDecoration> {
     protected final ResourceLocation textureId;
 
-    @Deprecated(forRemoval = true)
-    public DecorationRenderer(ResourceLocation texture, int mapColor, boolean renderOnFrame) {
-        this(texture);
-    }
-
     public DecorationRenderer(ResourceLocation texture) {
         this.textureId = texture;
     }

@@ -53,11 +53,6 @@ public class XYZColor extends BaseColor<XYZColor> {
                 Mth.clamp(alpha * this.alpha(), 0, 1));
     }
 
-    @Deprecated(forRemoval = true)
-    public XYZColor multiply(XYZColor color, float hue, float chroma, float luminance, float alpha) {
-        return multiply(hue, chroma, luminance, alpha);
-    }
-
     @Override
     public RGBColor asRGB() {
         return ColorSpaces.XYZtoRGB(this);

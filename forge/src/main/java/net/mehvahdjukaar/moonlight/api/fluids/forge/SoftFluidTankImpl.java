@@ -133,11 +133,6 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         return stack;
     }
 
-    @Deprecated(forRemoval = true)
-    public FluidStack toEquivalentForgeFluid(int mb) {
-        return toEquivalentVanillaFluid(mb);
-    }
-
     private void applyNBTtoFluidStack(FluidStack fluidStack) {
         List<String> nbtKey = this.fluid.getNbtKeyFromItem();
         if (this.nbt != null && !this.nbt.isEmpty() && !fluidStack.isEmpty() && nbtKey != null) {

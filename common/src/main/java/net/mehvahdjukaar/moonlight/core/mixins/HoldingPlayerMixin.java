@@ -43,7 +43,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     }
 
     @Unique
-    private final ReentrantLock concurrentLock = new ReentrantLock();
+    private final ReentrantLock moonlight$concurrentLock = new ReentrantLock();
 
     @Unique
     private final Map<CustomMapData.Type<?>, CustomMapData.DirtyCounter> moonlight$customDataDirty = new IdentityHashMap<>();
@@ -66,7 +66,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     @Inject(method = "nextUpdatePacket", at = @At("HEAD"), cancellable = true)
     public void checkLocked(int mapId, CallbackInfoReturnable<@Nullable Packet<?>> cir) {
         //we won't wait here. if its locked too bad we cant block the main thread
-        if (concurrentLock.isLocked()) cir.setReturnValue(null);
+        if (moonlight$concurrentLock.isLocked()) cir.setReturnValue(null);
     }
 
     @ModifyReturnValue(method = "nextUpdatePacket", at = @At("TAIL"))
@@ -141,11 +141,11 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     public <H extends CustomMapData.DirtyCounter> void moonlight$setCustomDataDirty(
             CustomMapData.Type<?> type, Consumer<H> dirtySetter) {
         try {
-            concurrentLock.lock();
+            moonlight$concurrentLock.lock();
             var t = this.moonlight$customDataDirty.get(type);
             dirtySetter.accept((H) t);
         }finally {
-            concurrentLock.unlock();
+            moonlight$concurrentLock.unlock();
         }
     }
 
@@ -157,11 +157,11 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
 
     @Inject(method = "markColorsDirty", at = @At("HEAD"))
     public void lockData(int x, int z, CallbackInfo ci) {
-        concurrentLock.lock();
+        moonlight$concurrentLock.lock();
     }
 
     @Inject(method = "markColorsDirty", at = @At("RETURN"))
     public void sanityCheck(int x, int z, CallbackInfo ci) {
-        concurrentLock.unlock();
+        moonlight$concurrentLock.unlock();
     }
 }

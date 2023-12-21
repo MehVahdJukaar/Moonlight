@@ -23,7 +23,7 @@ configurations {
 }
 
 dependencies {
-    neoForge "net.neoforged:neoforge:${forge_version}"
+        neoForge "net.neoforged:neoforge:${forge_version}"
 
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }

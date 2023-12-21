@@ -98,11 +98,6 @@ public class RGBColor extends BaseColor<RGBColor> {
                 Mth.clamp(alpha * this.alpha(), 0, 1));
     }
 
-    @Deprecated(forRemoval = true)
-    public RGBColor multiply(RGBColor color, float hue, float chroma, float luminance, float alpha) {
-        return multiply(hue, chroma, luminance, alpha);
-    }
-
     @Override
     public RGBColor mixWith(RGBColor color, float bias) {
         float i = 1 - bias;

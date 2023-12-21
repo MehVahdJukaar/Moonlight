@@ -133,10 +133,6 @@ public final class SpriteUtils {
         return (0.299f * r + 0.587f * g + 0.114f * b);
     }
 
-    @Deprecated(forRemoval = true)
-    public static void reduceColors(NativeImage image, UnaryOperator<Integer> sizeFn) {
-        reduceColors(image, (IntUnaryOperator) sizeFn::apply);
-    }
 
     /**
      * Given an image, reduce its color palette using k-means algorithm

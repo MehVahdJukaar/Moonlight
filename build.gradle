@@ -12,7 +12,6 @@ architectury {
 
 subprojects {
     apply plugin: "dev.architectury.loom"
-//    apply plugin: "io.github.juuxel.loom-quiltflower"
     apply plugin: "com.matthewprenger.cursegradle"
     apply plugin: "com.modrinth.minotaur"
 
@@ -45,7 +44,7 @@ subprojects {
             gameVersions = [minecraft_version]
             loaders = [modLoader]
             changelog = changelogText
-            versionNumber = modLoader +"_"+ mod_version
+            versionNumber = modLoader + "_" + mod_version
             versionType = "release"
 
             if (modLoader == "fabric") {
@@ -66,6 +65,7 @@ subprojects {
                 changelogType = 'markdown'
                 releaseType = 'release'
                 addGameVersion rootProject.minecraft_version
+                if (modLoader == "forge") modLoader = "neoforge"
                 addGameVersion modLoader.capitalize()
 
                 mainArtifact(tasks.remapJar)

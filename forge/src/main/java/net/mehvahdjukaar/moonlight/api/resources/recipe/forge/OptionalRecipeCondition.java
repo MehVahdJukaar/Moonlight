@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe.forge;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.concurrent.atomic.AtomicReference;

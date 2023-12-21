@@ -70,21 +70,6 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
         return new CustomDecorationType<>(null, decorationFactory, markerFactory, markerFromWorldFactory);
     }
 
-    @Deprecated(forRemoval = true)
-    public static <D extends CustomMapDecoration, M extends MapBlockMarker<D>> CustomDecorationType<D, M> withWorldMarker(
-            ResourceLocation typeId, Supplier<M> markerFactory,
-            @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory,
-            BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory) {
-        return new CustomDecorationType<>(typeId, decorationFactory, t -> markerFactory.get(), markerFromWorldFactory);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <D extends CustomMapDecoration, M extends MapBlockMarker<D>> CustomDecorationType<D, M> simple(
-            ResourceLocation typeId, Supplier<M> markerFactory,
-            BiFunction<MapDecorationType<?, ?>, FriendlyByteBuf, D> decorationFactory) {
-        return new CustomDecorationType<>(typeId, decorationFactory, t -> markerFactory.get(), null);
-    }
-
     /**
      * For persistent decoration that is not associated to a world block. Still have a marker as they need to be saved
      */

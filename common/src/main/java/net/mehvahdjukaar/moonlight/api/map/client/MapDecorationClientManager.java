@@ -35,11 +35,6 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
     }
 
 
-    @Deprecated(forRemoval = true)
-    public static <T extends CustomMapDecoration> void registerCustomRenderer(MapDecorationType<T, ?> type, DecorationRenderer<T> renderer) {
-        registerCustomRenderer(type.getCustomFactoryID(), r -> renderer);
-    }
-
     /**
      * Registers a renderer for this decoration. Use it to add fancy ones
      */

@@ -81,10 +81,6 @@ public class HSLColor extends BaseColor<HSLColor> {
                 Mth.clamp(alpha*this.alpha(), 0,1));
     }
 
-    @Deprecated(forRemoval = true)
-    public HSLColor multiply(HSLColor color, float hue, float chroma, float luminance, float alpha) {
-        return multiply(hue, chroma, luminance, alpha);
-    }
     @Override
     public HSLColor mixWith(HSLColor color, float bias) {
         float i = 1 - bias;

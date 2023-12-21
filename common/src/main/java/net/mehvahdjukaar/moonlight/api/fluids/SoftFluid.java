@@ -119,11 +119,6 @@ public class SoftFluid {
         return Fluids.EMPTY;
     }
 
-    @Deprecated(forRemoval = true)
-    public Fluid getForgeFluid() {
-        return getVanillaFluid();
-    }
-
     /**
      * @return name of nbt tag that will be transferred from container item to fluid
      */

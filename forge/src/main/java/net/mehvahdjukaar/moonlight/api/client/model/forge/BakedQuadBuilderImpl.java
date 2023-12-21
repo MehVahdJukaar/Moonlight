@@ -163,4 +163,11 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         this.autoDirection = true;
         return this;
     }
+
+    @Override
+    public BakedQuadBuilder fromVanilla(BakedQuad q) {
+        int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
+        output = new BakedQuad(v, q.getTintIndex(), q.getDirection(), q.getSprite(), q.isShade(), q.hasAmbientOcclusion());
+        return this;
+    }
 }

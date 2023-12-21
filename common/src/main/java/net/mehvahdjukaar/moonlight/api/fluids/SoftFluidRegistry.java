@@ -98,11 +98,6 @@ public class SoftFluidRegistry {
         return FLUID_MAP.getOrDefault(fluid, getEmpty());
     }
 
-    @Deprecated(forRemoval = true)
-    public static SoftFluid fromForgeFluid(Fluid fluid) {
-        return fromVanillaFluid(fluid);
-    }
-
     /**
      * gets a soft fluid provided a bottle like item
      *
