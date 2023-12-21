@@ -75,10 +75,6 @@ public class LABColor extends BaseColor<LABColor> {
                 b * this.b(),
                 alpha * this.alpha());
     }
-    @Deprecated(forRemoval = true)
-    public LABColor multiply(LABColor color, float hue, float chroma, float luminance, float alpha) {
-        return multiply(hue, chroma, luminance, alpha);
-    }
 
     @Override
     public LABColor mixWith(LABColor color, float bias) {

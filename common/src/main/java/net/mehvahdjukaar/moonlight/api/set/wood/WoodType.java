@@ -156,6 +156,7 @@ public class WoodType extends BlockType {
 
     @Override
     public void initializeChildrenBlocks() {
+        //TODO: enforce more requirements
         this.addChild("planks", this.planks);
         this.addChild("log", this.log);
         this.addChild("leaves", this.findRelatedEntry("leaves", BuiltInRegistries.BLOCK));

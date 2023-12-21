@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api;
 
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.BlockPlacerItem;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.resources.RecipeConverter;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.GrindItemTrigger;
 import net.mehvahdjukaar.moonlight.core.loot.OptionalItemPool;

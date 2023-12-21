@@ -50,11 +50,6 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      */
     public CompoundTag saveToNBT() {
         var compound = new CompoundTag();
-        return saveToNBT(compound);
-    }
-
-    @Deprecated(forRemoval = true)
-    public CompoundTag saveToNBT(CompoundTag compound) {
         if (this.pos != null) {
             compound.put("Pos", NbtUtils.writeBlockPos(this.pos));
         }

@@ -64,12 +64,6 @@ public class DataObjectReference<T> implements Supplier<T> {
         return getHolder().value();
     }
 
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public T getUnchecked() {
-        return get();
-    }
-
     public void clearCache() {
         cache = null;
     }

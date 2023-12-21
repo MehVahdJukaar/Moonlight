@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.LenientUnboundedMapCodec;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.concurrent.atomic.AtomicReference;

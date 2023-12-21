@@ -91,11 +91,6 @@ public class HCLColor extends BaseColor<HCLColor> {
                 Mth.clamp(luminance * this.luminance(), 0, 1),
                 Mth.clamp(alpha * this.alpha(), 0, 1));
     }
-    @Deprecated(forRemoval = true)
-    public HCLColor multiply(HCLColor color, float hue, float chroma, float luminance, float alpha) {
-        return multiply(hue, chroma, luminance, alpha);
-    }
-
 
     @Override
     public HCLColor fromRGB(RGBColor rgb) {

@@ -108,7 +108,4 @@ public abstract class BaseColor<T extends BaseColor<T>> {
 
     public abstract T fromRGB(RGBColor rgb);
 
-    //utility codec that serializes either a string or an integer
-    @Deprecated(forRemoval = true)
-    public static final Codec<Integer> CODEC = ColorUtils.CODEC;
 }
