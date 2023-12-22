@@ -103,7 +103,7 @@ public class Moonlight {
         if (!PlatHelper.isInitializing()) {
             //TODO: re add once all mods are updated
             if (PlatHelper.isDev()) {
-                throw new AssertionError("Method has to be called during mod initialization phase");
+                throw new AssertionError("Method has to be called during main mod initialization phase. Client and Server initializer are not valid, you must call in the main one");
             }
         }
     }

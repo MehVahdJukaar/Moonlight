@@ -10,9 +10,10 @@ public class PlatHelperExample {
     public static void init() {
         // Adding a Common Setup step, called after registration. Equivalent of Forge one
         PlatHelper.addCommonSetup(PlatHelperExample::setup);
-
+        PlatHelper.addCommonSetupAsync(()->{/* Some expensive task which can be run off thread*/});
         if (PlatHelper.getPhysicalSide().isClient()) {
             // From here we also initialize client stuff. No need for two separate initializers with this
+            // Infact, on Fabric, you should not use Client and Server initiailizers and just use this architecture instead
             ClientHelperExample.init();
         }
         // The above code will be the basics for any mod that uses this lib
