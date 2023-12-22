@@ -6,7 +6,7 @@ import net.minecraft.world.item.Items;
 // different implementation for both platforms. More forge specific calls that dont have a fabric equivalent are in ForgeHelper
 public class PlatHelperExample {
 
-    // Call on mod init
+    // Call on mod init (Forge: mod constructor, Fabric: Main entry point)
     public static void init() {
         // Adding a Common Setup step, called after registration. Equivalent of Forge one
         PlatHelper.addCommonSetup(PlatHelperExample::setup);

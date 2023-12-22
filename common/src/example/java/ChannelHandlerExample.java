@@ -23,13 +23,10 @@ public class ChannelHandlerExample {
         CHANNEL.sendToAllClientPlayersInRange(level, pos, range, new S2CTestMessage(data));
     }
 
-    private static final ChannelHandler CHANNEL;
-
-    static {
-        CHANNEL = ChannelHandler.createChannel(Moonlight.res("main_channel"));
-
-        CHANNEL.register(NetworkDir.PLAY_TO_CLIENT, S2CTestMessage.class, S2CTestMessage::new);
-    }
+    // Create your channel and register its messages
+    private static final ChannelHandler CHANNEL = ChannelHandler.builder(Moonlight.MOD_ID)
+            .register(NetworkDir.PLAY_TO_CLIENT, S2CTestMessage.class, S2CTestMessage::new)
+            .build();
 
     public record S2CTestMessage(int data) implements Message{
 
