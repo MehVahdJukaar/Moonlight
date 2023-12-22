@@ -43,6 +43,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
@@ -137,6 +138,7 @@ public class ClientHelper {
         void register(BlockColor color, Block... block);
 
         int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint);
+
     }
 
     @ExpectPlatform
@@ -148,6 +150,7 @@ public class ClientHelper {
         void register(ItemColor color, ItemLike... items);
 
         int getColor(ItemStack stack, int tint);
+
     }
 
     @ExpectPlatform

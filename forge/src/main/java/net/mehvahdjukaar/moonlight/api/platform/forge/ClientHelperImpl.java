@@ -120,6 +120,7 @@ public class ClientHelperImpl {
                 public int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint) {
                     return event.getBlockColors().getColor(block, level, pos, tint);
                 }
+
             });
         };
         getCurrentModBus().addListener(eventConsumer);
