@@ -229,8 +229,7 @@ public class RPUtils {
     }
 
     public static <T extends Recipe<?>> JsonElement writeRecipe(T recipe) {
-        Codec<T> codec = (Codec<T>) recipe.getSerializer().codec();
-        return codec.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow(false, s -> Moonlight.LOGGER.error("Failed to serialize recipe: {}", s));
+        return Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow(false, s -> Moonlight.LOGGER.error("Failed to serialize recipe: {}", s));
     }
 
     public static <T extends BlockType> RecipeHolder<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, String baseID) {

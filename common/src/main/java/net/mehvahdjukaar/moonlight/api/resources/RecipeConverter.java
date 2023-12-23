@@ -7,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,7 +56,9 @@ public class RecipeConverter {
     @Nullable
     private <V, T extends BlockType> V tryConverting(T originalMat, T destinationMat, V value) {
         if (value instanceof ItemStack stack) {
-            return (V) BlockType.changeItemType(stack.getItem(), originalMat, destinationMat).getDefaultInstance();
+            Item item = BlockType.changeItemType(stack.getItem(), originalMat, destinationMat);
+            if (item == null) return null;
+            return (V) item.getDefaultInstance();
         } else if (value instanceof Item il) {
             return (V) BlockType.changeItemType(il, originalMat, destinationMat);
         } else if (value instanceof Ingredient ing) {
@@ -96,7 +99,7 @@ public class RecipeConverter {
         try {
             return conv.convert(recipe, originalMat, destinationMat, unlockItem, id);
         } catch (Exception e) {
-            Moonlight.LOGGER.error("Recipe conversion error: "+e.getMessage());
+            Moonlight.LOGGER.error("Recipe conversion error: " + e.getMessage());
         }
         return null;
     }
@@ -120,6 +123,9 @@ public class RecipeConverter {
                         foundFields.add(field);
                         break;
                     }
+                }else if(ShapedRecipePattern.class.isAssignableFrom(fieldType)){
+                    foundFields.addAll(findFieldsByType(clazz, targetTypes));
+                    break;
                 }
             }
         }

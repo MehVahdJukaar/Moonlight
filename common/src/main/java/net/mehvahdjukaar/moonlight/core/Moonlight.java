@@ -98,7 +98,7 @@ public class Moonlight {
     }
 
     public static void assertInitPhase() {
-        if (!PlatHelper.isInitializing()) {
+        if (!PlatHelper.isInitializing() && PlatHelper.getPlatform().isForge()) {
             throw new AssertionError("Method has to be called during mod initialization phase");
         }
     }
