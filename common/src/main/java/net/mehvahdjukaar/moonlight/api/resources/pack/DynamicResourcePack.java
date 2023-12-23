@@ -200,7 +200,7 @@ public abstract class DynamicResourcePack implements PackResources {
     @Override
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
         try {
-            return serializer instanceof MetadataSectionType ? (T) this.metadata : null;
+            return serializer == PackMetadataSection.TYPE ? (T) this.metadata.get() : null;
         } catch (Exception exception){
             return null;
         }

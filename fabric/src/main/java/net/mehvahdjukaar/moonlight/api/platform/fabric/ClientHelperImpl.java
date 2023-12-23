@@ -104,7 +104,7 @@ public class ClientHelperImpl {
 
                 @Override
                 public int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint) {
-                    var c = getBlockColor(block.getBlock());
+                    var c = ColorProviderRegistry.BLOCK.get(block.getBlock());
                     return c == null ? -1 : c.getColor(block, level, pos, tint);
                 }
             });
