@@ -7,7 +7,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,9 +25,9 @@ public class RecipeConverter {
     }
 
     @Nullable
-    private <R extends Recipe<?>, T extends BlockType> R convert(R recipe, T originalMat, T destinationMat, Item unlockedBy, String id) throws IllegalAccessException {
+    private <R, T extends BlockType> R convert(R recipe, T originalMat, T destinationMat, Item unlockedBy, String id) throws IllegalAccessException {
         for (var f : fieldToConvert) {
-            var value = f.get(recipe);
+            Object value = f.get(recipe);
             if (value instanceof List<?> list) {
                 boolean oneChanged = false;
                 ListIterator<Object> iterator = ((List<Object>) list).listIterator();
@@ -42,6 +41,44 @@ public class RecipeConverter {
                 }
                 if (!oneChanged) {
                     throw new RuntimeException(String.format("Failed to convert some fields for recipe %s from type %s to type %s", recipe, originalMat, destinationMat));
+                }
+            } else if (value instanceof Map<?, ?> map) {
+                Map<Object, Object> omap = (Map<Object, Object>) map;
+                boolean oneChanged = false;
+                for (Map.Entry<Object, Object> entry : new HashSet<>(omap.entrySet())) {
+                    Object currentKey = entry.getKey();
+                    Object currentValue = entry.getValue();
+
+                    Object newKey = tryConverting(originalMat, destinationMat, currentKey);
+                    Object newValue = tryConverting(originalMat, destinationMat, currentValue);
+
+                    if (newKey != null || newValue != null) {
+                        omap.remove(currentKey);
+                        oneChanged = true;
+                    }
+
+                    if (newKey != null) {
+                        omap.put(newKey, newValue != null ? newValue : currentValue);
+                    } else if (newValue != null) {
+                        entry.setValue(newValue);
+                    }
+                }
+                if (!oneChanged) {
+                    throw new RuntimeException(String.format("Failed to convert some fields for recipe %s from type %s to type %s", recipe, originalMat, destinationMat));
+                }
+            } else if (value instanceof Record) {
+                var innerConv = getOrCreateConverter(value.getClass());
+                if (innerConv != null) {
+                    innerConv.convert(value, originalMat, destinationMat, unlockedBy, id);
+                }
+            } else if (value instanceof Optional<?> opt) {
+                if (opt.isPresent()) {
+                    value = opt.get();
+                    var innerConv = getOrCreateConverter(value.getClass());
+                    if (innerConv != null) {
+                        f.setAccessible(true);
+                        f.set(recipe, Optional.of(innerConv.convert(value, originalMat, destinationMat, unlockedBy, id)));
+                    }
                 }
             } else {
                 Object newValue = tryConverting(originalMat, destinationMat, value);
@@ -84,16 +121,9 @@ public class RecipeConverter {
 
     @Nullable
     public static <T extends BlockType, R extends Recipe<?>> R createSimilar(R recipe, T originalMat, T destinationMat, Item unlockItem, @Nullable String id) {
+        recipe = (R) RPUtils.readRecipe(RPUtils.writeRecipe(recipe));
         Class<?> clazz = recipe.getClass();
-        var conv = CONVERTERS.computeIfAbsent(clazz, c -> {
-            try {
-                var fields = findFieldsByType(clazz, ItemStack.class, Item.class, Ingredient.class);
-                return new RecipeConverter(fields);
-            } catch (Exception ignored) {
-
-            }
-            return null;
-        });
+        RecipeConverter conv = getOrCreateConverter(clazz);
         if (conv == null) throw new RuntimeException("Failed to convert recipe of class " + clazz);
 
         try {
@@ -102,6 +132,19 @@ public class RecipeConverter {
             Moonlight.LOGGER.error("Recipe conversion error: " + e.getMessage());
         }
         return null;
+    }
+
+    @Nullable
+    private static RecipeConverter getOrCreateConverter(Class<?> clazz) {
+        return CONVERTERS.computeIfAbsent(clazz, c -> {
+            try {
+                var fields = findFieldsByType(clazz, ItemStack.class, Item.class, Ingredient.class, Record.class);
+                fields.forEach(f -> f.setAccessible(true));
+                return new RecipeConverter(fields);
+            } catch (Exception ignored) {
+            }
+            return null;
+        });
     }
 
     private static List<Field> findFieldsByType(Class<?> clazz, Class<?>... targetTypes) {
@@ -123,9 +166,14 @@ public class RecipeConverter {
                         foundFields.add(field);
                         break;
                     }
-                }else if(ShapedRecipePattern.class.isAssignableFrom(fieldType)){
-                    foundFields.addAll(findFieldsByType(clazz, targetTypes));
-                    break;
+                } else if (Map.class.isAssignableFrom(fieldType)) {
+                    ParameterizedType mapType = (ParameterizedType) field.getGenericType();
+                    Class<?> mapKeyType = (Class<?>) mapType.getActualTypeArguments()[0];
+                    Class<?> mapValueType = (Class<?>) mapType.getActualTypeArguments()[1];
+                    if (targetType.isAssignableFrom(mapKeyType) || targetType.isAssignableFrom(mapValueType)) {
+                        foundFields.add(field);
+                        break;
+                    }
                 }
             }
         }

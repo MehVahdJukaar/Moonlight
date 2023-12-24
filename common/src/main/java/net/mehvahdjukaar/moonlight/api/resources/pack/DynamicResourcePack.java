@@ -117,8 +117,13 @@ public abstract class DynamicResourcePack implements PackResources {
         this.clearOnReload = canBeCleared;
     }
 
-    public void markNotClearable(ResourceLocation staticResources) {
-        this.staticResources.add(staticResources);
+    /**
+     * Marks this texture as non-clearable.
+     * By default, all textures will be cleared after texture atlases have been created
+     * Call this for textures that are not on an atlas.
+     */
+    public void markNotClearable(ResourceLocation texturePath) {
+        this.staticResources.add(texturePath);
     }
 
     public void unMarkNotClearable(ResourceLocation staticResources) {
