@@ -1,14 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
-import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.misc.VanillaResourceManager;
+import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -52,7 +51,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     }
 
     /**
-     * @return if this pack assets can depend on other loaded resource packs, aka we need to access some textures that arent strictly the vanilla ones
+     * @return if this pack assets can depend on other loaded resource packs, aka we need to access some textures that aren't strictly the vanilla ones
      */
     public abstract boolean dependsOnLoadedPacks();
 
@@ -98,9 +97,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             this.dynamicPack.addToStatic = true;
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
             if (!resourcePackSupport) {
-                var pack = this.getRepository();
-                if (pack != null) {
-                    VanillaResourceManager vanillaManager = new VanillaResourceManager(pack);
+                var repository = this.getRepository();
+                if (repository != null) {
+                    FilteredResManager vanillaManager = FilteredResManager.including(repository,this.dynamicPack.packType,
+                            "vanilla","mod_resources");
                     this.regenerateDynamicAssets(vanillaManager);
                     vanillaManager.close();
                 } else {
@@ -112,6 +112,14 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
         //generate textures
         if (resourcePackSupport) {
+            var repository = this.getRepository();
+            //only needed on second reload
+            if(repository != null && hasBeenInitialized) {
+                FilteredResManager nonSelfManager = FilteredResManager.excluding(repository, this.dynamicPack.packType,
+                        dynamicPack.packId());
+                this.regenerateDynamicAssets(nonSelfManager);
+                nonSelfManager.close();
+            }
             this.regenerateDynamicAssets(manager);
         }
         getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms" +

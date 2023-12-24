@@ -109,6 +109,10 @@ public abstract class DynamicResourcePack implements PackResources {
         this.staticResources.add(texturePath);
     }
 
+    public void unMarkNotClearable(ResourceLocation staticResources) {
+        this.staticResources.remove(staticResources);
+    }
+
     public void setGenerateDebugResources(boolean generateDebugResources) {
         this.generateDebugResources = generateDebugResources;
     }
@@ -254,6 +258,11 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
+    public void removeResource(ResourceLocation res){
+        this.resources.remove(res);
+        this.staticResources.remove(res);
+    }
+
     public void addResource(StaticResource resource) {
         this.addBytes(resource.location, resource.data);
     }
@@ -279,6 +288,7 @@ public abstract class DynamicResourcePack implements PackResources {
         return packType;
     }
 
+    @ApiStatus.Internal
     public void clearContent() {
         if (this.canBeCleared) {
             boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
