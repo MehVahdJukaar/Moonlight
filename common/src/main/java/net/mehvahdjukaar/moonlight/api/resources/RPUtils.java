@@ -8,6 +8,7 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import net.fabricmc.loader.impl.lib.gson.MalformedJsonException;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
@@ -222,14 +223,18 @@ public class RPUtils {
         var resource = manager.getResource(location);
         try (var stream = resource.orElseThrow().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
-            return Util.getOrThrow(Recipe.CODEC.parse(JsonOps.INSTANCE, element), JsonParseException::new);
+            return readRecipe(element);
         } catch (Exception e) {
             throw new InvalidOpenTypeException(String.format("Failed to get recipe at %s: %s", location, e));
         }
     }
 
+    public static Recipe<?> readRecipe(JsonElement element) {
+        return Util.getOrThrow(Recipe.CODEC.parse(JsonOps.INSTANCE, element), JsonParseException::new);
+    }
+
     public static <T extends Recipe<?>> JsonElement writeRecipe(T recipe) {
-        return Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow(false, s -> Moonlight.LOGGER.error("Failed to serialize recipe: {}", s));
+        return Util.getOrThrow(Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe), RuntimeException::new);
     }
 
     public static <T extends BlockType> RecipeHolder<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, String baseID) {

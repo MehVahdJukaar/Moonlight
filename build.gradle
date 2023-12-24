@@ -9,7 +9,6 @@ architectury {
     minecraft = rootProject.minecraft_version
 }
 
-
 subprojects {
     apply plugin: "dev.architectury.loom"
     apply plugin: "com.matthewprenger.cursegradle"
@@ -57,6 +56,7 @@ subprojects {
     }
 
     if (env.CURSEFORGE_TOKEN) {
+
         curseforge {
             apiKey = env.CURSEFORGE_TOKEN
             project {
@@ -64,11 +64,13 @@ subprojects {
                 changelog = changelogText
                 changelogType = 'markdown'
                 releaseType = 'release'
+
+                mainArtifact(tasks.remapJar)
+                addArtifact(tasks.remapSourcesJar)
+
                 addGameVersion rootProject.minecraft_version
                 if(modLoader == "forge") modLoader = "NeoForge"
                 addGameVersion modLoader.capitalize()
-
-                mainArtifact(tasks.remapJar)
 
                 if (modLoader == "fabric") {
                     relations {

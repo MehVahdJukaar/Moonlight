@@ -40,7 +40,8 @@ public class DynamicTexturePack extends DynamicResourcePack {
 
     /**
      * Adds a new textures and closes the passed native image
-     * last boolean is for textures that arent stitched so wont be cleared
+     * Last boolean is for textures that aren't stitched on an atlas so won't be cleared after texture stitching.
+     * Set to true for textures like GUIs, entity textures and such
      */
     public void addAndCloseTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
         try (image) {

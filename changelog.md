@@ -1,1 +1,1 @@
-fixed some issues with recipe conversions and dynamic packs
+added sources jars
