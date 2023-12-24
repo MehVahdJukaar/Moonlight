@@ -43,6 +43,7 @@ subprojects {
         modrinth {
             projectId = mod_id
             uploadFile = tasks.remapJar
+            additionalFiles.add(tasks.remapSourcesJar)
             gameVersions = [minecraft_version]
             loaders = [modLoader]
             changelog = changelogText
@@ -70,6 +71,7 @@ subprojects {
                 addGameVersion modLoader.capitalize()
 
                 mainArtifact(tasks.remapJar)
+                addArtifact(tasks.remapSourcesJar)
 
                 if (modLoader == "fabric") {
                     relations {

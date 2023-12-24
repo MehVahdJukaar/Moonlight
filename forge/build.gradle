@@ -100,6 +100,12 @@ sourcesJar {
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
+
+    classifier "forge-sources"
+}
+
+remapSourcesJar{
+    classifier "forge-sources"
 }
 
 components.java {
