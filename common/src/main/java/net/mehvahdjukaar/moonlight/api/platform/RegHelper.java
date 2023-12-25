@@ -110,18 +110,7 @@ public class RegHelper {
     }
 
     public static RegSupplier<PoiType> registerPOI(ResourceLocation name, Supplier<PoiType> poi) {
-        return register(name, () -> {
-            var p = poi.get();
-            if (PlatHelper.getPlatform().isFabric()) {
-                //forge does it automatically. Vanilla is stupid...
-                PlatHelper.addCommonSetup(() -> {
-                    var holder = BuiltInRegistries.POINT_OF_INTEREST_TYPE
-                            .getHolderOrThrow(ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, name));
-                    PoiTypes.registerBlockStates(holder, p.matchingStates());
-                });
-            }
-            return p;
-        }, Registries.POINT_OF_INTEREST_TYPE);
+        return register(name, poi, Registries.POINT_OF_INTEREST_TYPE);
     }
 
     public static RegSupplier<PoiType> registerPOI(ResourceLocation name, int searchDistance, int maxTickets, Block... blocks) {
