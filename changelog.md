@@ -1,1 +1,1 @@
-api improvements
+fixed an issue with fabric POI registration

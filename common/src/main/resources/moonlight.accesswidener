@@ -10,6 +10,8 @@ transitive-accessible field net/minecraft/world/entity/LivingEntity dead Z
 accessible field net/minecraft/client/renderer/RenderStateShard setupState Ljava/lang/Runnable;
 mutable field net/minecraft/client/renderer/RenderStateShard setupState Ljava/lang/Runnable;
 
+accessible method net/minecraft/world/entity/ai/village/poi/PoiTypes registerBlockStates (Lnet/minecraft/core/Holder;Ljava/util/Set;)V
+
 accessible method net/minecraft/world/level/saveddata/maps/MapItemSavedData addDecoration (Lnet/minecraft/world/level/saveddata/maps/MapDecoration$Type;Lnet/minecraft/world/level/LevelAccessor;Ljava/lang/String;DDDLnet/minecraft/network/chat/Component;)V
 #shader stuff
 accessible field com/mojang/blaze3d/systems/RenderSystem shaderLightDirections [Lorg/joml/Vector3f;

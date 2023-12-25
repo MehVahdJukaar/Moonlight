@@ -16,6 +16,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -107,8 +109,19 @@ public class RegHelper {
         return block;
     }
 
-    public static RegSupplier<PoiType> registerPOI(ResourceLocation name, Supplier<PoiType> block) {
-        return register(name, block, Registries.POINT_OF_INTEREST_TYPE);
+    public static RegSupplier<PoiType> registerPOI(ResourceLocation name, Supplier<PoiType> poi) {
+        return register(name, () -> {
+            var p = poi.get();
+            if (PlatHelper.getPlatform().isFabric()) {
+                //forge does it automatically. Vanilla is stupid...
+                PlatHelper.addCommonSetup(() -> {
+                    var holder = BuiltInRegistries.POINT_OF_INTEREST_TYPE
+                            .getHolderOrThrow(ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, name));
+                    PoiTypes.registerBlockStates(holder, p.matchingStates());
+                });
+            }
+            return p;
+        }, Registries.POINT_OF_INTEREST_TYPE);
     }
 
     public static RegSupplier<PoiType> registerPOI(ResourceLocation name, int searchDistance, int maxTickets, Block... blocks) {
@@ -120,7 +133,6 @@ public class RegHelper {
             return new PoiType(builder.build(), searchDistance, maxTickets);
         });
     }
-
 
     @ExpectPlatform
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
@@ -524,7 +536,7 @@ public class RegHelper {
 
     // Only relevant on forge
     @ExpectPlatform
-    public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient){
+    public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient) {
         throw new AssertionError();
     }
 
