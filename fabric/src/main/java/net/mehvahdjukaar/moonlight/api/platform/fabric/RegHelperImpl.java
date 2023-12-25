@@ -20,11 +20,13 @@ import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
@@ -130,6 +132,13 @@ public class RegHelperImpl {
 
                     return new RegistryQueue<>(reg);
                 });
+        if (reg.equals(Registries.POINT_OF_INTEREST_TYPE)) {
+            PlatHelper.addCommonSetup(() -> {
+                var holder = BuiltInRegistries.POINT_OF_INTEREST_TYPE
+                        .getHolderOrThrow(ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, name));
+                PoiTypes.registerBlockStates(holder, holder.value().matchingStates());
+            });
+        }
         return registry.add(supplier, name);
     }
 
