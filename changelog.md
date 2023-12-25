@@ -1,1 +1,1 @@
-fixed an issue with fabric POI registration
+hotfix
