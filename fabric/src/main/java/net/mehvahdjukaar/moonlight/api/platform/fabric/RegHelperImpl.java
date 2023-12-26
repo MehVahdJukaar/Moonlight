@@ -21,8 +21,10 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
@@ -124,6 +126,13 @@ public class RegHelperImpl {
 
                     return new RegistryQueue<>(reg);
                 });
+        if (reg.equals(Registry.POINT_OF_INTEREST_TYPE)) {
+            PlatformHelper.addCommonSetup(() -> {
+                var holder = Registry.POINT_OF_INTEREST_TYPE
+                        .getHolderOrThrow(ResourceKey.create(Registry.POINT_OF_INTEREST_TYPE_REGISTRY, name));
+                PoiTypes.registerBlockStates(holder);
+            });
+        }
         return registry.add(supplier, name);
     }
 
