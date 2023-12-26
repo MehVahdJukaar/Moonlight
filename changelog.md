@@ -1,1 +1,1 @@
-fixed map stuff and vertex builder
+Fix Beehives from Friends&Foes Module (EveryCompat) not acting as home/nest for bees
