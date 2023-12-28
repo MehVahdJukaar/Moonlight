@@ -99,8 +99,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             if (!resourcePackSupport) {
                 var repository = this.getRepository();
                 if (repository != null) {
+                    Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
                     FilteredResManager vanillaManager = FilteredResManager.including(repository,this.dynamicPack.packType,
                             "vanilla","mod_resources");
+                    Moonlight.CAN_EARLY_RELOAD_HACK.set(true);
                     this.regenerateDynamicAssets(vanillaManager);
                     vanillaManager.close();
                 } else {
@@ -115,8 +117,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             var repository = this.getRepository();
             //only needed on second reload
             if(repository != null && hasBeenInitialized) {
+                Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
                 FilteredResManager nonSelfManager = FilteredResManager.excluding(repository, this.dynamicPack.packType,
                         dynamicPack.packId());
+                Moonlight.CAN_EARLY_RELOAD_HACK.set(true);
                 this.regenerateDynamicAssets(nonSelfManager);
                 nonSelfManager.close();
             }

@@ -30,7 +30,9 @@ public abstract class MultiPackResourceManagerMixin implements CloseableResource
     private void dynamicPackEarlyReload(PackType type, List<PackResources> packs, CallbackInfo cir) {
         //fires on world load or on /reload
         //token to assure that modded resources are included
-        if (!((Object)(this) instanceof FilteredResManager) && this.getResource(new ResourceLocation("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
+        if (!((Object)(this) instanceof FilteredResManager) &&
+                Moonlight.CAN_EARLY_RELOAD_HACK.get() &&
+                this.getResource(new ResourceLocation("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
             //reload dynamic packs before reloading data packs
             MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(packs, this, type), EarlyPackReloadEvent.class);
         }
