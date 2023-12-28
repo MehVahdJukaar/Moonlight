@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class StringConfigValue extends ConfigValue<String> {
@@ -12,6 +14,7 @@ public class StringConfigValue extends ConfigValue<String> {
     public StringConfigValue(String name, String defaultValue, Predicate<Object> validator) {
         super(name, defaultValue);
         this.validator = validator;
+        Preconditions.checkState(isValid(defaultValue), "Config defaults are invalid");
     }
 
     @Override

@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+
+import java.util.Objects;
 
 public class IntConfigValue extends ConfigValue<Integer> {
 
@@ -10,8 +13,9 @@ public class IntConfigValue extends ConfigValue<Integer> {
 
     public IntConfigValue(String name, Integer defaultValue, Integer min, Integer max) {
         super(name, defaultValue);
-        this.min = min;
-        this.max = max;
+        this.min = Objects.requireNonNull(min);
+        this.max = Objects.requireNonNull(max);
+        Preconditions.checkState(isValid(defaultValue), "Config defaults are invalid");
     }
 
     @Override

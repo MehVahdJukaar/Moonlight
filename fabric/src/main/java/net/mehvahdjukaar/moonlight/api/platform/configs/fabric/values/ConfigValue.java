@@ -19,7 +19,6 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
         this.defaultValue = defaultValue;
         if (!(this instanceof ObjectConfigValue<T>) && !(this instanceof JsonConfigValue)) {
             Objects.requireNonNull(defaultValue, "default value cant be null");
-            assert this.isValid(defaultValue) : "default value is invalid";
         }
     }
 

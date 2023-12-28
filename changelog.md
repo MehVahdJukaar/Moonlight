@@ -1,1 +1,1 @@
-hotfix
+some fix related to configs defaults on fabric
