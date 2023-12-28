@@ -2,48 +2,64 @@ package net.mehvahdjukaar.moonlight.api.integration;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
+import pepjebs.mapatlases.MapAtlasesMod;
+import pepjebs.mapatlases.client.MapAtlasesClient;
+import pepjebs.mapatlases.item.MapAtlasItem;
+import pepjebs.mapatlases.map_collection.MapKey;
 
 public class MapAtlasCompat {
 
-    @ExpectPlatform
     public static boolean isAtlas(Item item) {
-        throw new AssertionError();
+        return item == MapAtlasesMod.MAP_ATLAS.get();
     }
 
-    @ExpectPlatform
     @Nullable
-    public static MapItemSavedData getSavedDataFromAtlas(ItemStack item, Level level, Player player) {
-     throw new AssertionError();
+    public static MapItemSavedData getSavedDataFromAtlas(ItemStack atlas, Level level, Player player) {
+        if(isAtlas(atlas.getItem())) {
+            var maps = MapAtlasItem.getMaps(atlas, level);
+            if (maps != null) {
+                var slice = MapAtlasItem.getSelectedSlice(atlas, level.dimension());
+                var key = MapKey.at(maps.getScale(), player, slice);
+                var select = maps.select(key);
+                if (select != null) {
+                    return select.data;
+                }
+            }
+        }
+        return null;
     }
 
-    @ExpectPlatform
     @Nullable
-    public static Integer getMapIdFromAtlas(ItemStack item, Level level, Object data) {
-        throw new AssertionError();
+    public static Integer getMapIdFromAtlas(ItemStack atlas, Level level, Object data) {
+        try {
+            var maps = MapAtlasItem.getMaps(atlas, level);
+            if (maps != null) {
+                for (var e : maps.getAll()) {
+                    if (e.data == data) {
+                        return e.id;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
-    @ExpectPlatform
     @Environment(EnvType.CLIENT)
     public static void scaleDecoration(PoseStack poseStack) {
-        throw new AssertionError();
+        MapAtlasesClient.modifyDecorationTransform(poseStack);
     }
 
-
-    @ExpectPlatform
     @Environment(EnvType.CLIENT)
     public static void scaleDecorationText(PoseStack poseStack, float textWidth, float textScale) {
-        throw new AssertionError();
+        MapAtlasesClient.modifyTextDecorationTransform(poseStack, textWidth, textScale);
     }
 }

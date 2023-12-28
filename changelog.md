@@ -1,1 +1,1 @@
-fixed something with quilt
+updated map atlas compat to work with new version

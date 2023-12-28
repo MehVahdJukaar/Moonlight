@@ -46,7 +46,7 @@ public abstract class DynamicResourcePack implements PackResources {
     public static void clearAfterReload(boolean clientSide) {
         for (var p : DynamicResourcePack.INSTANCES) {
             if (p.packType == PackType.CLIENT_RESOURCES == clientSide) {
-                p.clearContent();
+                p.clearNonStatic();
             }
         }
     }
@@ -66,10 +66,12 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final String mainNamespace;
 
+
+    protected boolean clearOnReload = true;
+    protected Set<ResourceLocation> staticResources = new HashSet<>();
+
     //for debug or to generate assets
     protected boolean generateDebugResources;
-    protected boolean canBeCleared = true;
-    protected Set<ResourceLocation> staticResources = new HashSet<>();
 
     boolean addToStatic = false;
 
@@ -96,8 +98,13 @@ public abstract class DynamicResourcePack implements PackResources {
         return Component.translatable(LangBuilder.getReadableName(mainNamespace + "_dynamic_resources"));
     }
 
+    public void setClearOnReload(boolean canBeCleared) {
+        this.clearOnReload = canBeCleared;
+    }
+
+    @Deprecated(forRemoval = true)
     public void clearOnReload(boolean canBeCleared) {
-        this.canBeCleared = canBeCleared;
+        this.clearOnReload = canBeCleared;
     }
 
     public void markNotClearable(ResourceLocation staticResources) {
@@ -270,15 +277,24 @@ public abstract class DynamicResourcePack implements PackResources {
         return packType;
     }
 
+    // Called after texture have been stitched. Only keeps needed stuff
     @ApiStatus.Internal
-    public void clearContent() {
-        if (this.canBeCleared) {
-            boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
+    public void clearNonStatic() {
+        boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
+        for (var r : this.resources.keySet()) {
+            if (mf && modernFixHack(r)) continue;
+            if (!this.staticResources.contains(r)) {
+                this.resources.remove(r);
+            }
+        }
+    }
+
+    // Called after each reload
+    @ApiStatus.Internal
+    public void clearAllContent(){
+        if (this.clearOnReload) {
             for (var r : this.resources.keySet()) {
-                if (mf && modernFixHack(r)) continue;
-                if (!this.staticResources.contains(r)) {
-                    this.resources.remove(r);
-                }
+                this.resources.remove(r);
             }
         }
     }

@@ -23,6 +23,7 @@ dependencies {
 
     modCompileOnly("curse.maven:yacl-667299:4523734")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
+    modCompileOnly ("curse.maven:map-atlases-forge-519759:4990003")
 
     annotationProcessor("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
     implementation("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
