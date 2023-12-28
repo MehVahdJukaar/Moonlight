@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core;
 
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
+import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
@@ -42,6 +43,7 @@ public class Moonlight {
 
     public static final Logger LOGGER = LogManager.getLogger("Moonlight");
     public static final boolean HAS_BEEN_INIT = true;
+    public static final ThreadLocal<Boolean> CAN_EARLY_RELOAD_HACK = ThreadLocal.withInitial(()->true) ;
 
     public static ResourceLocation res(String name) {
         return new ResourceLocation(MOD_ID, name);
