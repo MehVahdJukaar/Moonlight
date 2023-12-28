@@ -9,7 +9,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 public class ColorConfigValue extends IntConfigValue {
 
     public ColorConfigValue(String name, int defaultValue) {
-        super(name, defaultValue, 0, 0xffffff);
+        super(name, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
     @Override

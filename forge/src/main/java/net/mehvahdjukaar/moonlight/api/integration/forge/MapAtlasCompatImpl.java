@@ -8,11 +8,15 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import pepjebs.mapatlases.MapAtlasesMod;
 import pepjebs.mapatlases.capabilities.MapKey;
 import pepjebs.mapatlases.client.MapAtlasesClient;
 import pepjebs.mapatlases.item.MapAtlasItem;
+import pepjebs.mapatlases.utils.MapAtlasesAccessUtils;
+import pepjebs.mapatlases.utils.MapDataHolder;
 
 public class MapAtlasCompatImpl {
     public static boolean isAtlas(Item item) {
@@ -21,8 +25,6 @@ public class MapAtlasCompatImpl {
 
     @Nullable
     public static MapItemSavedData getSavedDataFromAtlas(ItemStack atlas, Level level, Player player) {
-        //TODO: re add
-        /*
         if(atlas.is(MapAtlasesMod.MAP_ATLAS.get())) {
             var maps = MapAtlasItem.getMaps(atlas, level);
             if (maps != null) {
@@ -33,13 +35,12 @@ public class MapAtlasCompatImpl {
                     return select.data;
                 }
             }
-        }*/
+        }
         return null;
     }
 
     @Nullable
     public static Integer getMapIdFromAtlas(ItemStack atlas, Level level, Object data) {
-        /* //TODO
         try {
             var maps = MapAtlasItem.getMaps(atlas, level);
             if (maps != null) {
@@ -50,10 +51,11 @@ public class MapAtlasCompatImpl {
                 }
             }
         } catch (Exception ignored) {
-        }*/
+        }
         return null;
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void scaleDecoration(PoseStack poseStack) {
         MapAtlasesClient.modifyDecorationTransform(poseStack);
     }

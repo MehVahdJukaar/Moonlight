@@ -91,15 +91,17 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         Stopwatch watch = Stopwatch.createStarted();
 
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
+        //first clear all pack content if it should be cleared
+        this.dynamicPack.clearAllContent();
 
         if (!this.hasBeenInitialized) {
             this.hasBeenInitialized = true;
-            this.dynamicPack.addToStatic = true;
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
             if (!resourcePackSupport) {
                 var repository = this.getRepository();
                 if (repository != null) {
                     Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
+                    //no resource pack support, just include these
                     FilteredResManager vanillaManager = FilteredResManager.including(repository,this.dynamicPack.packType,
                             "vanilla","mod_resources");
                     Moonlight.CAN_EARLY_RELOAD_HACK.set(true);
@@ -109,14 +111,14 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                     this.regenerateDynamicAssets(manager);
                 }
             }
-            this.dynamicPack.addToStatic = false;
         }
 
         //generate textures
         if (resourcePackSupport) {
             var repository = this.getRepository();
-            //only needed on second reload
-            if(repository != null && hasBeenInitialized) {
+            // only needed on second reload since there will be no pack on first
+            // and only if the pack itself doesn't get cleared
+            if(repository != null && hasBeenInitialized && !dynamicPack.clearOnReload) {
                 Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
                 FilteredResManager nonSelfManager = FilteredResManager.excluding(repository, this.dynamicPack.packType,
                         dynamicPack.packId());
