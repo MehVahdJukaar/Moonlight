@@ -1,1 +1,1 @@
-updated map atlas compat to work with new version
+fixed another issue with packs

@@ -92,10 +92,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
         //first clear all pack content if it should be cleared
-        this.dynamicPack.clearAllContent();
 
         if (!this.hasBeenInitialized) {
             this.hasBeenInitialized = true;
+            //TODO: figure out why this is need. I got no clue but we get missing models if not.
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
             if (!resourcePackSupport) {
                 var repository = this.getRepository();

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.minecraft.resources.ResourceLocation;
@@ -34,6 +35,8 @@ public abstract class MultiPackResourceManagerMixin implements CloseableResource
                 Moonlight.CAN_EARLY_RELOAD_HACK.get() &&
                 this.getResource(new ResourceLocation("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
             //reload dynamic packs before reloading data packs
+            //first clear all packs. ugly I know
+            DynamicResourcePack.clearBeforeReload(type);
             MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(packs, this, type), EarlyPackReloadEvent.class);
         }
     }
