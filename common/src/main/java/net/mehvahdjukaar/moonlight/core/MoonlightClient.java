@@ -8,6 +8,8 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingRegistry;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackType;
+import org.apache.commons.compress.archivers.sevenz.CLI;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Set;
@@ -51,7 +53,7 @@ public class MoonlightClient {
 
     @EventCalled
     public static void afterTextureReload() {
-        DynamicResourcePack.clearAfterReload(true);
+        DynamicResourcePack.clearAfterReload(PackType.CLIENT_RESOURCES);
     }
 
     public static void setMipMap(boolean b) {

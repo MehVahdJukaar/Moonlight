@@ -43,10 +43,20 @@ public abstract class DynamicResourcePack implements PackResources {
     private static final List<DynamicResourcePack> INSTANCES = new ArrayList<>();
 
     @ApiStatus.Internal
-    public static void clearAfterReload(boolean clientSide) {
+    public static void clearAfterReload(PackType targetType) {
+        //this will be called multiple times. shunt be an issue I hope
         for (var p : DynamicResourcePack.INSTANCES) {
-            if (p.packType == PackType.CLIENT_RESOURCES == clientSide) {
+            if (p.packType == targetType) {
                 p.clearNonStatic();
+            }
+        }
+    }
+
+    @ApiStatus.Internal
+    public static void clearBeforeReload(PackType targetType) {
+        for (var p : DynamicResourcePack.INSTANCES) {
+            if (p.packType == targetType) {
+                p.clearAllContent();
             }
         }
     }
@@ -265,7 +275,7 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
-    public void removeResource(ResourceLocation res){
+    public void removeResource(ResourceLocation res) {
         this.resources.remove(res);
         this.staticResources.remove(res);
     }
@@ -297,7 +307,7 @@ public abstract class DynamicResourcePack implements PackResources {
 
     // Called after texture have been stitched. Only keeps needed stuff
     @ApiStatus.Internal
-    public void clearNonStatic() {
+    protected void clearNonStatic() {
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
         for (var r : this.resources.keySet()) {
             if (mf && modernFixHack(r)) continue;
@@ -309,7 +319,7 @@ public abstract class DynamicResourcePack implements PackResources {
 
     // Called after each reload
     @ApiStatus.Internal
-    public void clearAllContent(){
+    protected void clearAllContent() {
         if (this.clearOnReload) {
             for (var r : this.resources.keySet()) {
                 this.resources.remove(r);

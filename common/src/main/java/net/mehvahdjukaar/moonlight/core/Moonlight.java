@@ -26,6 +26,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
@@ -98,7 +99,7 @@ public class Moonlight {
     @EventCalled
     public static void afterDataReload(RegistryAccess registryAccess) {
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
-        DynamicResourcePack.clearAfterReload(false);
+        DynamicResourcePack.clearAfterReload(PackType.SERVER_DATA);
         DataObjectReference.onDataReload();
     }
 
