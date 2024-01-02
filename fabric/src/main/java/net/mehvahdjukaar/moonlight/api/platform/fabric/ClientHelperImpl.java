@@ -17,6 +17,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.MLFabricModelLoaderRegistry;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
@@ -240,11 +241,12 @@ public class ClientHelperImpl {
 
     public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
         Moonlight.assertInitPhase();
-
-        FabricLoader.getInstance().getModContainer(folderName.getNamespace()).ifPresent(c -> {
-            ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, displayName,
-                    defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL);
-        });
+        if(!PlatHelper.isDev()) {
+            FabricLoader.getInstance().getModContainer(folderName.getNamespace()).ifPresent(c -> {
+                ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, displayName,
+                        defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL);
+            });
+        }
     }
 
     public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
