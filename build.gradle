@@ -107,6 +107,10 @@ allprojects {
             url = "https://www.cursemaven.com"
             allowInsecureProtocol = true
         }
+        maven {
+            name = 'Ladysnake Mods'
+            url = 'https://maven.ladysnake.org/releases'
+        }
 
         maven { url 'https://jitpack.io' }
 

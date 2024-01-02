@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,12 +21,12 @@ public abstract class ClientPacketListenerMixin {
     private void handleExtraData(MapRenderer instance, int mapId, MapItemSavedData mapData, Operation<Void> operation,
                                  @Local ClientboundMapItemDataPacket packet) {
         IMapDataPacketExtension ext = (IMapDataPacketExtension) packet;
-        var serverData = ext.moonlight$getCustomMapDataTag();
+        CompoundTag customServerData = ext.moonlight$getCustomMapDataTag();
         boolean updateTexture = ext.moonlight$getColorPatch() != null;
-        if (serverData != null) {
+        if (customServerData != null) {
             updateTexture = true;
         }
-        updateTexture = updateTexture || ClientConfigs.LAZY_MAP_DATA.get();
+        updateTexture = updateTexture || !ClientConfigs.LAZY_MAP_DATA.get();
         //suppress un needed map rendered texture uploads
         if (updateTexture) {
             operation.call(instance, mapId, mapData);

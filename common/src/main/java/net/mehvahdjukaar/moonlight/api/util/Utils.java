@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderGetter;
@@ -17,6 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
@@ -223,6 +225,20 @@ public class Utils {
         Vec3 endPos = startPos.add(ray);
         ClipContext context = new ClipContext(startPos, endPos, blockMode, fluidMode, entity);
         return world.clip(context);
+    }
+
+    public static void awardAdvancement(ServerPlayer sp, ResourceLocation name) {
+        awardAdvancement(sp, name, "unlock");
+    }
+
+    public static void awardAdvancement( ServerPlayer sp, ResourceLocation name, String unlockProp) {
+        Advancement advancement = sp.getServer().getAdvancements().getAdvancement(name);
+        if (advancement != null) {
+            PlayerAdvancements advancements = sp.getAdvancements();
+            if (!advancements.getOrStartProgress(advancement).isDone()) {
+                advancements.award(advancement, unlockProp);
+            }
+        }
     }
 
     @Nullable

@@ -49,6 +49,7 @@ dependencies {
 
    // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
     modImplementation ("curse.maven:map-atlases-forge-519759:4990003")
+    //modImplementation ("curse.maven:supplementaries-412082:4995508")
 
 
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixin_extras_version}"))
