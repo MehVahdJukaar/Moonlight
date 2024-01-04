@@ -29,6 +29,7 @@ public class FabricConfigListScreen extends Screen {
 
     protected final Screen parent;
     protected final ConfigSpec[] configs;
+    @Nullable
     protected final ResourceLocation background;
     private final ItemStack mainIcon;
     private final String modId;
@@ -134,6 +135,7 @@ public class FabricConfigListScreen extends Screen {
             this.renderBackground(graphics);
 
             var background = FabricConfigListScreen.this.background;
+            if (background == null) background = Screen.BACKGROUND_LOCATION;
 
             int i = this.getScrollbarPosition();
             int j = i + 6;

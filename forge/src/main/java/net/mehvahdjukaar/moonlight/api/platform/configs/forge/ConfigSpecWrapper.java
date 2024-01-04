@@ -177,7 +177,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     }
 
     @EventCalled
-    protected void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+    private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             //send this configuration to connected clients
             syncConfigsToPlayer(serverPlayer);
