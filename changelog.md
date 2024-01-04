@@ -1,1 +1,1 @@
-fixed an importnt issue which invalidated the lazy map update config making it so maps would update at vanilla rate instead of the optimized one
+fixed fabric config menu

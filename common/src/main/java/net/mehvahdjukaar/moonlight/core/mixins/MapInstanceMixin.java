@@ -15,11 +15,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+// All require 0 because of Optishit. I should have not given in...
 @Mixin(targets = "net/minecraft/client/gui/MapRenderer$MapInstance", priority = 900)
 public abstract class MapInstanceMixin {
 
 
-    @WrapOperation(method = "updateTexture", at = @At(value = "INVOKE",
+    @WrapOperation(method = "updateTexture",
+            require = 0,
+            at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/renderer/texture/DynamicTexture;upload()V"))
     public void forceMipMap(DynamicTexture instance, Operation<Void> op) {
         MoonlightClient.setMipMap(true);
@@ -29,6 +32,7 @@ public abstract class MapInstanceMixin {
 
     @Inject(
             method = {"<init>"},
+            require = 0,
             at = {@At(
                     value = "moonlight:INVOKE_UNRESTRICTED",
                     target = "Ljava/lang/Object;<init>()V",
@@ -39,12 +43,16 @@ public abstract class MapInstanceMixin {
         MoonlightClient.setMipMap(true);
     }
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>",
+            require = 0,
+            at = @At("RETURN"))
     public void forceMipMapOff(MapRenderer r, int pId, MapItemSavedData pData, CallbackInfo ci) {
         MoonlightClient.setMipMap(false);
     }
 
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;text(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"))
+    @WrapOperation(method = "<init>",
+            require = 0,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;text(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"))
     private RenderType getTextMipMap(ResourceLocation pLocation, Operation<RenderType> op) {
         if (ClientConfigs.MAPS_MIPMAP.get() != 0) {
             return RenderUtil.getTextMipmapRenderType(pLocation);
