@@ -14,4 +14,10 @@ public interface IExtendedItem {
     AdditionalItemPlacement moonlight$getAdditionalBehavior();
 
     void moonlight$addAdditionalBehavior(AdditionalItemPlacement b);
+
+    @Nullable
+    Object moonlight$getClientAnimationExtension();
+
+    void moonlight$setClientAnimationExtension(Object b);
+
 }

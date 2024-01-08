@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 
 // Implement one of these interfaces into your item to control its animation
+// Alternatively you can use the attach methods on ONE of the interface to register ONE provider object per item
 public class ItemAnimationExample extends Item implements IFirstPersonAnimationProvider, IThirdPersonAnimationProvider, IThirdPersonSpecialItemRenderer {
 
     @Override

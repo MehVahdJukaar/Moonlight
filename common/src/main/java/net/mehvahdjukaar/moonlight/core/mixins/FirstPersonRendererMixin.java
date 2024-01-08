@@ -21,8 +21,8 @@ public abstract class FirstPersonRendererMixin {
             target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"),
             require = 0)
     public void renderItem(AbstractClientPlayer entity, float partialTicks, float pitch, InteractionHand hand, float attackAnim, ItemStack stack, float handHeight, PoseStack matrixStack, MultiBufferSource buffer, int light, CallbackInfo ci) {
-        Item item = stack.getItem();
-        if (item instanceof IFirstPersonAnimationProvider provider) {
+        IFirstPersonAnimationProvider provider  = IFirstPersonAnimationProvider.get(stack.getItem());
+        if (provider != null) {
             provider.animateItemFirstPerson(entity, stack, hand, matrixStack, partialTicks, pitch, attackAnim, handHeight);
         }
     }
