@@ -6,6 +6,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
+import net.mehvahdjukaar.moonlight.core.StrOpt;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -19,8 +20,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.ApiStatus;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 import java.util.function.Function;
 
@@ -531,17 +532,17 @@ public class SoftFluid {
     public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
             ResourceLocation.CODEC.fieldOf("flowing_texture").forGetter(SoftFluid::getFlowingTexture),
-            Codec.STRING.optionalFieldOf("from_mod").forGetter(getHackyOptional(SoftFluid::getFromMod)),
-            Codec.STRING.optionalFieldOf("translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
-            Codec.intRange(0, 15).optionalFieldOf("luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
-            ColorUtils.CODEC.optionalFieldOf("color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
-            TintMethod.CODEC.optionalFieldOf("tint_method").forGetter(getHackyOptional(SoftFluid::getTintMethod)),
+            StrOpt.of(Codec.STRING, "from_mod").forGetter(getHackyOptional(SoftFluid::getFromMod)),
+            StrOpt.of(Codec.STRING, "translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
+            StrOpt.of(Codec.intRange(0, 15), "luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
+            StrOpt.of(ColorUtils.CODEC, "color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
+            StrOpt.of(TintMethod.CODEC, "tint_method").forGetter(getHackyOptional(SoftFluid::getTintMethod)),
             FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
-            Codec.STRING.listOf().optionalFieldOf("preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
-            FluidContainerList.Category.CODEC.listOf().optionalFieldOf("containers").forGetter(f -> f.getContainerList().encodeList()),
+            StrOpt.of(Codec.STRING.listOf(), "preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
+            StrOpt.of(FluidContainerList.Category.CODEC.listOf(), "containers").forGetter(f -> f.getContainerList().encodeList()),
             BuiltInRegistries.FLUID.byNameCodec().listOf().optionalFieldOf("equivalent_fluids")
                     .forGetter(getHackyOptional(s -> s.getEquivalentFluids().stream().toList())),
-            ResourceLocation.CODEC.optionalFieldOf("use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
+            StrOpt.of(ResourceLocation.CODEC, "use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
     ).apply(instance, SoftFluid::create));
 
 

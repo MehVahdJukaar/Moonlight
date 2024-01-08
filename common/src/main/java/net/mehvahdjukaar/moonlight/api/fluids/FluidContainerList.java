@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.StrOpt;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -113,8 +114,8 @@ public class FluidContainerList {
                 ResourceLocation.CODEC.fieldOf("empty").forGetter(c -> Utils.getID(c.emptyContainer)),
                 Codec.INT.fieldOf("capacity").forGetter(Category::getCapacity),
                 ResourceLocation.CODEC.listOf().fieldOf("filled").forGetter(c -> c.filled.stream().map(Utils::getID).toList()),
-                BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
-                BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
+                StrOpt.of(BuiltInRegistries.SOUND_EVENT.byNameCodec(), "fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
+                StrOpt.of(BuiltInRegistries.SOUND_EVENT.byNameCodec(), "empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
         ).apply(instance, Category::decode));
 
         private final Item emptyContainer;

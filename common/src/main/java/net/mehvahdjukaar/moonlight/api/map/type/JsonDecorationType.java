@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.markers.SimpleMapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.StrOpt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
@@ -27,20 +28,20 @@ public final class JsonDecorationType implements MapDecorationType<CustomMapDeco
 
 
     public static final Codec<JsonDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(JsonDecorationType::getTarget),
-            Codec.STRING.optionalFieldOf("name").forGetter(JsonDecorationType::getName),
-            Codec.INT.optionalFieldOf("rotation", 0).forGetter(JsonDecorationType::getRotation),
-            Codec.INT.optionalFieldOf("map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
-            RegistryCodecs.homogeneousList(Registries.STRUCTURE).optionalFieldOf("target_structures")
+            StrOpt.of(RuleTest.CODEC,"target_block").forGetter(JsonDecorationType::getTarget),
+            StrOpt.of(Codec.STRING, "name").forGetter(JsonDecorationType::getName),
+            StrOpt.of(Codec.INT,"rotation", 0).forGetter(JsonDecorationType::getRotation),
+            StrOpt.of(Codec.INT, "map_color" ,0).forGetter(JsonDecorationType::getDefaultMapColor),
+            StrOpt.of(RegistryCodecs.homogeneousList(Registries.STRUCTURE), "target_structures")
                     .forGetter(JsonDecorationType::getAssociatedStructure)
     ).apply(instance, JsonDecorationType::new));
 
     //we cant reference other datapack registries in network codec...
     public static final Codec<JsonDecorationType> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(JsonDecorationType::getTarget),
-            Codec.STRING.optionalFieldOf("name").forGetter(JsonDecorationType::getName),
-            Codec.INT.optionalFieldOf("rotation", 0).forGetter(JsonDecorationType::getRotation),
-            Codec.INT.optionalFieldOf("map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor)
+            StrOpt.of(RuleTest.CODEC, "target_block").forGetter(JsonDecorationType::getTarget),
+            StrOpt.of(Codec.STRING, "name").forGetter(JsonDecorationType::getName),
+            StrOpt.of(Codec.INT,"rotation" ,0).forGetter(JsonDecorationType::getRotation),
+            StrOpt.of(Codec.INT, "map_color",0).forGetter(JsonDecorationType::getDefaultMapColor)
     ).apply(instance, JsonDecorationType::new));
 
     //using this and not block predicate since it requires a worldLevelGen...
