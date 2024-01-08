@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacement;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
 import net.minecraft.network.chat.Component;
@@ -29,6 +31,10 @@ public abstract class ItemMixin implements IExtendedItem {
     @Unique
     @Nullable
     private AdditionalItemPlacement moonlight$additionalBehavior;
+
+    @Environment(EnvType.CLIENT)
+    @Nullable
+    @Unique Object moonlight$clientAnimationProvider;
 
     @Shadow
     @Final
@@ -62,5 +68,14 @@ public abstract class ItemMixin implements IExtendedItem {
     @Override
     public void moonlight$addAdditionalBehavior(AdditionalItemPlacement placementOverride) {
         this.moonlight$additionalBehavior = placementOverride;
+    }
+
+    @Override
+    public @Nullable Object moonlight$getClientAnimationExtension() {
+        return moonlight$clientAnimationProvider;
+    }
+
+    public void moonlight$setClientAnimationExtension(Object obj) {
+        this.moonlight$clientAnimationProvider = obj;
     }
 }

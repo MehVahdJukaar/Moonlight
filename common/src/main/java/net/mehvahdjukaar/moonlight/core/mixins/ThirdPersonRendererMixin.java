@@ -6,7 +6,6 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -26,10 +25,10 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
         if (this.moonlight$isTwoHanded) ci.cancel();
         HumanoidArm handSide = entity.getMainArm();
         ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
-        Item item = stack.getItem();
-        if (item instanceof IThirdPersonAnimationProvider thirdPersonAnimationProvider) {
-            if (thirdPersonAnimationProvider.poseRightArm(stack, (HumanoidModel<T>) (Object) this, entity, handSide)) {
-                if (thirdPersonAnimationProvider.isTwoHanded()) moonlight$isTwoHanded = true;
+        IThirdPersonAnimationProvider provider = IThirdPersonAnimationProvider.get(stack.getItem());
+        if (provider != null) {
+            if (provider.poseRightArm(stack, (HumanoidModel<T>) (Object) this, entity, handSide)) {
+                if (provider.isTwoHanded()) moonlight$isTwoHanded = true;
                 ci.cancel();
             }
         }
@@ -41,10 +40,10 @@ public abstract class ThirdPersonRendererMixin<T extends LivingEntity> extends A
         if (this.moonlight$isTwoHanded) ci.cancel();
         HumanoidArm handSide = entity.getMainArm();
         ItemStack stack = entity.getItemInHand(handSide == HumanoidArm.RIGHT ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
-        Item item = stack.getItem();
-        if (item instanceof IThirdPersonAnimationProvider thirdPersonAnimationProvider) {
-            if (thirdPersonAnimationProvider.poseLeftArm(stack, (HumanoidModel<T>) (Object) this, entity, handSide)) {
-                if (thirdPersonAnimationProvider.isTwoHanded()) moonlight$isTwoHanded = true;
+        IThirdPersonAnimationProvider provider = IThirdPersonAnimationProvider.get(stack.getItem());
+        if (provider != null) {
+            if (provider.poseLeftArm(stack, (HumanoidModel<T>) (Object) this, entity, handSide)) {
+                if (provider.isTwoHanded()) moonlight$isTwoHanded = true;
                 ci.cancel();
             }
         }

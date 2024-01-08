@@ -87,7 +87,6 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-
     @FunctionalInterface
     @Environment(EnvType.CLIENT)
     public interface ParticleFactory<T extends ParticleOptions> {
