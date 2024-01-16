@@ -18,6 +18,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.StatType;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -160,6 +161,10 @@ public class Utils {
         return BuiltInRegistries.CREATIVE_MODE_TAB.getKey(object);
     }
 
+    public static ResourceLocation getID(StatType<?> object) {
+        return BuiltInRegistries.STAT_TYPE.getKey(object);
+    }
+
     public static ResourceLocation getID(Object object) {
         if (object instanceof Block b) return getID(b);
         if (object instanceof Item b) return getID(b);
@@ -176,6 +181,7 @@ public class Utils {
         if (object instanceof MapDecorationType<?, ?> s) return getID(s);
         if (object instanceof CreativeModeTab t) return getID(t);
         if (object instanceof DamageType t) return getID(t);
+        if (object instanceof StatType t) return getID(t);
         throw new UnsupportedOperationException("Unknown class type " + object.getClass());
     }
 
