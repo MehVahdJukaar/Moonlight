@@ -1,1 +1,1 @@
-fixed fabric config menu
+updated some dependencies

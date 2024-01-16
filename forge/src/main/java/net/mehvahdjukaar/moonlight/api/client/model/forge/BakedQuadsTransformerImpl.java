@@ -16,7 +16,7 @@ import java.util.function.UnaryOperator;
 
 public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
 
-    private final IQuadTransformer inner = QuadTransformers.empty();
+    private IQuadTransformer inner = QuadTransformers.empty();
 
     private Boolean ambientOcclusion = null;
     private Boolean shade = null;
@@ -30,13 +30,13 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
 
     @Override
     public BakedQuadsTransformer applyingColor(IntUnaryOperator indexToABGR) {
-        inner.andThen(applyingColorInplace(indexToABGR));
+        inner = inner.andThen(applyingColorInplace(indexToABGR));
         return this;
     }
 
     @Override
     public BakedQuadsTransformer applyingLightMap(int packedLight) {
-        inner.andThen(QuadTransformers.applyingLightmap(packedLight));
+        inner = inner.andThen(QuadTransformers.applyingLightmap(packedLight));
         return this;
     }
 
@@ -47,7 +47,7 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
         m.translate(-0.5f, -0.5f, -0.5f);
         m.mul(transform);
         m.translate(0.5f, 0.5f, 0.5f);
-        inner.andThen(QuadTransformers.applying(new Transformation(m)));
+        inner = inner.andThen(QuadTransformers.applying(new Transformation(m)));
         directionRemap = d -> Direction.rotate(new Matrix4f(new Matrix3f(transform)), d);
         return this;
     }
@@ -72,16 +72,17 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
 
     @Override
     public BakedQuadsTransformer applyingEmissivity(int emissivity) {
-        this.inner.andThen(QuadTransformers.settingEmissivity(emissivity));
+        inner = inner.andThen(QuadTransformers.settingEmissivity(emissivity));
         return this;
     }
 
     @Override
     public BakedQuadsTransformer applyingSprite(TextureAtlasSprite sprite) {
-        this.inner.andThen(applyingSpriteInplace(sprite));
+        inner = inner.andThen(applyingSpriteInplace(sprite));
         this.sprite = sprite;
         return this;
     }
+    private TextureAtlasSprite lastSpriteHack = null;
 
     @Override
     public BakedQuad transform(BakedQuad quad) {
@@ -90,16 +91,18 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
         int tint = this.tintIndex == null ? quad.getTintIndex() : this.tintIndex;
         boolean shade = this.shade == null ? quad.isShade() : this.shade;
         boolean ambientOcclusion = this.ambientOcclusion == null ? quad.isShade() : this.shade;
+        lastSpriteHack = quad.getSprite();
         TextureAtlasSprite sprite = this.sprite == null ? quad.getSprite() : this.sprite;
         BakedQuad newQuad = new BakedQuad(v, tint, directionRemap.apply(quad.getDirection()), sprite, shade, ambientOcclusion);
+        lastSpriteHack = null;
         inner.processInPlace(newQuad);
         return newQuad;
     }
 
 
-    private static IQuadTransformer applyingSpriteInplace(TextureAtlasSprite sprite) {
+    private IQuadTransformer applyingSpriteInplace(TextureAtlasSprite sprite) {
         return q -> {
-            TextureAtlasSprite oldSprite = q.getSprite();
+            TextureAtlasSprite oldSprite = lastSpriteHack;
             int stride = IQuadTransformer.STRIDE;
             int[] v = q.getVertices();
             float segmentWScale = sprite.contents().width() / (float) oldSprite.contents().width();
