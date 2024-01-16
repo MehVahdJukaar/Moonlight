@@ -34,19 +34,19 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
 
     @Override
     public BakedQuadsTransformer applyingColor(IntUnaryOperator indexToABGR) {
-        this.inner = inner.andThen(applyingColorInplace(indexToABGR));
+        inner = inner.andThen(applyingColorInplace(indexToABGR));
         return this;
     }
 
     @Override
     public BakedQuadsTransformer applyingLightMap(int packedLight) {
-        inner.andThen(applyingLightmapInplace(packedLight));
+        inner = inner.andThen(applyingLightmapInplace(packedLight));
         return this;
     }
 
     @Override
     public BakedQuadsTransformer applyingTransform(Matrix4f transform) {
-        inner.andThen(applyingTransformInplace(transform));
+        inner = inner.andThen(applyingTransformInplace(transform));
         directionRemap = d -> Direction.rotate(new Matrix4f(new Matrix3f(transform)), d);
         return this;
     }
@@ -76,10 +76,12 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
 
     @Override
     public BakedQuadsTransformer applyingSprite(TextureAtlasSprite sprite) {
-        this.inner.andThen(applyingSpriteInplace(sprite));
+        inner = inner.andThen(applyingSpriteInplace(sprite));
         this.sprite = sprite;
         return this;
     }
+
+    private TextureAtlasSprite lastSpriteHack = null;
 
     @Override
     public BakedQuad transform(BakedQuad quad) {
@@ -88,8 +90,10 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
         int tint = this.tintIndex == null ? quad.getTintIndex() : this.tintIndex;
         boolean shade = this.shade == null ? quad.isShade() : this.shade;
         TextureAtlasSprite sprite = this.sprite == null ? quad.getSprite() : this.sprite;
+        lastSpriteHack = quad.getSprite();
         BakedQuad newQuad = new BakedQuad(v, tint, directionRemap.apply(quad.getDirection()), sprite, shade);
         inner.accept(newQuad);
+        lastSpriteHack = null;
         if (emissivity != null) {
             BakedQuadBuilder builder = BakedQuadBuilderImpl.create(sprite, null);
             builder.fromVanilla(newQuad);
@@ -100,9 +104,9 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
     }
 
 
-    private static Consumer<BakedQuad> applyingSpriteInplace(TextureAtlasSprite sprite) {
+    private Consumer<BakedQuad> applyingSpriteInplace(TextureAtlasSprite sprite) {
         return q -> {
-            TextureAtlasSprite oldSprite = q.getSprite();
+            TextureAtlasSprite oldSprite = lastSpriteHack;
             int stride = getStride();
             int[] v = q.getVertices();
             float segmentWScale = sprite.contents().width() / (float) oldSprite.contents().width();

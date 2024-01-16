@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.markers.SimpleMapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.StrOpt;
 import net.minecraft.core.BlockPos;
@@ -31,7 +32,7 @@ public final class JsonDecorationType implements MapDecorationType<CustomMapDeco
             StrOpt.of(RuleTest.CODEC,"target_block").forGetter(JsonDecorationType::getTarget),
             StrOpt.of(Codec.STRING, "name").forGetter(JsonDecorationType::getName),
             StrOpt.of(Codec.INT,"rotation", 0).forGetter(JsonDecorationType::getRotation),
-            StrOpt.of(Codec.INT, "map_color" ,0).forGetter(JsonDecorationType::getDefaultMapColor),
+            StrOpt.of(ColorUtils.CODEC, "map_color" ,0).forGetter(JsonDecorationType::getDefaultMapColor),
             StrOpt.of(RegistryCodecs.homogeneousList(Registries.STRUCTURE), "target_structures")
                     .forGetter(JsonDecorationType::getAssociatedStructure)
     ).apply(instance, JsonDecorationType::new));
@@ -41,7 +42,7 @@ public final class JsonDecorationType implements MapDecorationType<CustomMapDeco
             StrOpt.of(RuleTest.CODEC, "target_block").forGetter(JsonDecorationType::getTarget),
             StrOpt.of(Codec.STRING, "name").forGetter(JsonDecorationType::getName),
             StrOpt.of(Codec.INT,"rotation" ,0).forGetter(JsonDecorationType::getRotation),
-            StrOpt.of(Codec.INT, "map_color",0).forGetter(JsonDecorationType::getDefaultMapColor)
+            StrOpt.of(ColorUtils.CODEC, "map_color",0).forGetter(JsonDecorationType::getDefaultMapColor)
     ).apply(instance, JsonDecorationType::new));
 
     //using this and not block predicate since it requires a worldLevelGen...
