@@ -10,7 +10,9 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CeilingHangingSignBlock;
+import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.ApiStatus;
@@ -42,10 +44,10 @@ public class WoodType extends BlockType {
         var values = net.minecraft.world.level.block.state.properties.WoodType.values();
         var o = values.filter(v -> v.name().equals(i)).findAny();
         if (o.isEmpty()) {
-            if(getChild("hanging_sign") instanceof CeilingHangingSignBlock c){
+            if (getChild("hanging_sign") instanceof CeilingHangingSignBlock c) {
                 return c.type();
             }
-            if(getChild("sign") instanceof SignBlock f){
+            if (getChild("sign") instanceof SignBlock f) {
                 return f.type();
             }
         }
@@ -59,8 +61,18 @@ public class WoodType extends BlockType {
     }
 
     @Nullable
-    protected Block findLogRelatedBlock(String append, String postpend) {
-        String post = postpend.isEmpty() ? "" : "_" + postpend;
+    protected Block findLogRelatedBlock(String prefix, String... possibleNames) {
+        for (var n : possibleNames) {
+            var b = findWithPrefix(prefix, n);
+            if (b != null) return b;
+        }
+        return null;
+    }
+
+    @Nullable
+    protected Block findWithPrefix(String prefix, String postfix) {
+        postfix = "_" + postfix;
+        prefix = prefix.isEmpty() ? "" : prefix + "_";
         var id = this.getId();
         String logN = Utils.getID(this.log).getPath();
 
@@ -68,15 +80,15 @@ public class WoodType extends BlockType {
         if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
             var o = BuiltInRegistries.BLOCK.getOptional(
                     new ResourceLocation(id.getNamespace(),
-                            "wood/" + append + post + "/" + id.getPath()));
+                            "wood/" + prefix + postfix.replace("_", "") + "/" + id.getPath()));
             if (o.isPresent()) return o.get();
         }
 
         ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), logN + "_" + append + post),
-                new ResourceLocation(id.getNamespace(), append + "_" + logN + post),
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
-                new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post)
+                new ResourceLocation(id.getNamespace(), logN + "_" + prefix + postfix),
+                new ResourceLocation(id.getNamespace(), prefix + logN + postfix),
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + prefix + postfix),
+                new ResourceLocation(id.getNamespace(), prefix + id.getPath() + postfix)
         };
         Block found = null;
         for (var r : targets) {
@@ -134,9 +146,9 @@ public class WoodType extends BlockType {
         this.addChild("planks", this.planks);
         this.addChild("log", this.log);
         this.addChild("leaves", this.findRelatedEntry("leaves", BuiltInRegistries.BLOCK));
-        this.addChild("stripped_log", this.findLogRelatedBlock("stripped", "log"));
-        this.addChild("stripped_wood", this.findLogRelatedBlock("stripped", "wood"));
-        this.addChild("wood", this.findRelatedEntry("wood", BuiltInRegistries.BLOCK));
+        this.addChild("stripped_log", this.findLogRelatedBlock("stripped", "log", "stem", "stalk"));
+        this.addChild("stripped_wood", this.findLogRelatedBlock("stripped", "wood", "hyphae"));
+        this.addChild("wood", this.findLogRelatedBlock("", "wood", "hyphae"));
         this.addChild("slab", this.findRelatedEntry("slab", BuiltInRegistries.BLOCK));
         this.addChild("stairs", this.findRelatedEntry("stairs", BuiltInRegistries.BLOCK));
         this.addChild("fence", this.findRelatedEntry("fence", BuiltInRegistries.BLOCK));
