@@ -1,1 +1,1 @@
-updated some dependencies
+improved wood detection system
