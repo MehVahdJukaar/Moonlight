@@ -60,15 +60,19 @@ public class LOD {
     public static final int MEDIUM_DIST = 64 * 64;
     public static final int FAR_DIST = 96 * 96;
 
+    //TODO: refactor and make member methods
+    @Deprecated(forRemoval = true)
     public static boolean isOutOfFocus(Vec3 cameraPos, BlockPos pos, float blockYaw) {
         return isOutOfFocus(cameraPos, pos, blockYaw, 0, Direction.UP, 0);
     }
 
+    @Deprecated(forRemoval = true)
     public static boolean isOutOfFocus(Vec3 cameraPos, BlockPos pos, float blockYaw, float degMargin, Direction dir, float offset) {
         float relAngle = getRelativeAngle(cameraPos, pos, dir, offset);
         return isOutOfFocus(relAngle, blockYaw, degMargin);
     }
 
+    @Deprecated(forRemoval = true)
     public static boolean isOutOfFocus(float relativeAngle, float blockYaw, float degMargin) {
         return (Mth.degreesDifference(relativeAngle, blockYaw - 90) > -degMargin);
     }
