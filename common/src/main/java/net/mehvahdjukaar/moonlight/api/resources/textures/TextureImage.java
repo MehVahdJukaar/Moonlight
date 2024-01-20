@@ -168,7 +168,7 @@ public class TextureImage implements AutoCloseable {
                 } catch (Exception ignored) {
                     throw new IOException("Failed to open mcmeta file at location " + metadataLoc);
                 }
-            }
+            }}
 
             return new TextureImage(i, metadata);
         } catch (Exception e) {
@@ -303,18 +303,22 @@ public class TextureImage implements AutoCloseable {
      * Closes all given overlays images
      */
     public void applyOverlay(TextureImage... overlays) throws IllegalStateException {
-        int width = imageWidth();
-        int height = imageHeight();
-        if (Arrays.stream(overlays).anyMatch(n -> n.imageHeight() < height || n.imageWidth() < width)) {
-            throw new IllegalStateException("Could not merge images because they had different dimensions");
-        }
-
         for (var o : overlays) {
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    image.blendPixel(x, y, o.image.getPixelRGBA(x, y));
-                }
+            if (o.frameW < frameW) {
+                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay W: " + o.frameW + ", image W: " + frameW);
             }
+            if (o.frameH < frameH) {
+                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay H: " + o.frameH + ", image H: " + frameH);
+            }
+        }
+        for (var o : overlays) {
+            this.forEachFrame((frameIndex, globalX, globalY) -> {
+                int frameX = globalX - this.getFrameX(frameIndex);
+                int frameY = globalY - this.getFrameX(frameIndex);
+                int targetOverlayFrame = Math.max(frameIndex, o.maxFrames-1);
+                int overlayPixel = o.getFramePixel(targetOverlayFrame, frameX, frameY);
+                image.blendPixel(globalX, globalY, overlayPixel);
+            });
             o.close();
         }
     }
