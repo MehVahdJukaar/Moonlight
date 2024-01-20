@@ -278,7 +278,7 @@ public class TextureImage implements AutoCloseable {
         for (var o : overlays) {
             this.forEachFrame((frameIndex, globalX, globalY) -> {
                 int frameX = globalX - this.getFrameX(frameIndex);
-                int frameY = globalY - this.getFrameX(frameIndex);
+                int frameY = globalY - this.getFrameY(frameIndex);
                 int targetOverlayFrame = Math.max(frameIndex, o.maxFrames-1);
                 int overlayPixel = o.getFramePixel(targetOverlayFrame, frameX, frameY);
                 image.blendPixel(globalX, globalY, overlayPixel);
@@ -288,7 +288,7 @@ public class TextureImage implements AutoCloseable {
     }
 
     /**
-     * Same as before but only applies them on non transparent pixels
+     * Same as before but only applies them on non-transparent pixels
      * Overlays are applied first in first out
      * Closes all given overlays images
      */

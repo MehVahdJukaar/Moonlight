@@ -9,6 +9,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import org.jetbrains.annotations.ApiStatus;
@@ -39,22 +40,34 @@ public class WoodType extends BlockType {
     }
 
     @Nullable
-    protected Block findLogRelatedBlock(String append, String postpend) {
-        if (this.id.getNamespace().equals("tfc")) {
+    protected Block findLogRelatedBlock(String prefix, String... possibleNames) {
+        for (var n : possibleNames) {
+            var b = findWithPrefix(prefix, n);
+            if (b != null) return b;
+        }
+        return null;
+    }
+
+    @Nullable
+    protected Block findWithPrefix(String prefix, String postfix) {
+        postfix = "_" + postfix;
+        prefix = prefix.isEmpty() ? "" : prefix + "_";
+        var id = this.getId();
+        String logN = Utils.getID(this.log).getPath();
+
+        // SUPPORT: TFC & AFC
+        if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
             var o = Registry.BLOCK.getOptional(
                     new ResourceLocation(id.getNamespace(),
-                            "wood/" + append + "_" + postpend + "/" + id.getPath()));
+                            "wood/" + prefix + postfix.replace("_", "") + "/" + id.getPath()));
             if (o.isPresent()) return o.get();
         }
 
-        String post = postpend.isEmpty() ? "" : "_" + postpend;
-        var id = this.getId();
-        String logN = Utils.getID(this.log).getPath();
         ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), logN + "_" + append + post),
-                new ResourceLocation(id.getNamespace(), append + "_" + logN + post),
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
-                new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post)
+                new ResourceLocation(id.getNamespace(), logN + "_" + prefix + postfix),
+                new ResourceLocation(id.getNamespace(), prefix + logN + postfix),
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + prefix + postfix),
+                new ResourceLocation(id.getNamespace(), prefix + id.getPath() + postfix)
         };
         Block found = null;
         for (var r : targets) {
@@ -106,20 +119,24 @@ public class WoodType extends BlockType {
 
     @Override
     public void initializeChildrenBlocks() {
-        this.addChild("planks", (Object) this.planks);
-        this.addChild("log", (Object) this.log);
-        this.addChild("leaves", (Object) this.findRelatedEntry("leaves", Registry.BLOCK));
-        this.addChild("stripped_log", (Object) this.findLogRelatedBlock("stripped", "log"));
-        this.addChild("stripped_wood", (Object) this.findLogRelatedBlock("stripped", "wood"));
-        this.addChild("wood", (Object) this.findRelatedEntry("wood", Registry.BLOCK));
-        this.addChild("slab", (Object) this.findRelatedEntry("slab", Registry.BLOCK));
-        this.addChild("stairs", (Object) this.findRelatedEntry("stairs", Registry.BLOCK));
-        this.addChild("fence", (Object) this.findRelatedEntry("fence", Registry.BLOCK));
-        this.addChild("fence_gate", (Object) this.findRelatedEntry("fence_gate", Registry.BLOCK));
-        this.addChild("door", (Object) this.findRelatedEntry("door", Registry.BLOCK));
-        this.addChild("trapdoor", (Object) this.findRelatedEntry("trapdoor", Registry.BLOCK));
-        this.addChild("button", (Object) this.findRelatedEntry("button", Registry.BLOCK));
-        this.addChild("pressure_plate", (Object) this.findRelatedEntry("pressure_plate", Registry.BLOCK));
+        this.addChild("planks", this.planks);
+        this.addChild("log", this.log);
+        this.addChild("leaves", this.findRelatedEntry("leaves", Registry.BLOCK));
+        this.addChild("stripped_log", this.findLogRelatedBlock("stripped", "log", "stem", "stalk"));
+        this.addChild("stripped_wood", this.findLogRelatedBlock("stripped", "wood", "hyphae"));
+        this.addChild("wood", this.findLogRelatedBlock("", "wood", "hyphae"));
+        this.addChild("slab", this.findRelatedEntry("slab", Registry.BLOCK));
+        this.addChild("stairs", this.findRelatedEntry("stairs", Registry.BLOCK));
+        this.addChild("fence", this.findRelatedEntry("fence", Registry.BLOCK));
+        this.addChild("fence_gate", this.findRelatedEntry("fence_gate", Registry.BLOCK));
+        this.addChild("door", this.findRelatedEntry("door", Registry.BLOCK));
+        this.addChild("trapdoor", this.findRelatedEntry("trapdoor", Registry.BLOCK));
+        this.addChild("button", this.findRelatedEntry("button", Registry.BLOCK));
+        this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", Registry.BLOCK));
+        this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign", Registry.BLOCK));
+        this.addChild("wall_hanging_sign", this.findRelatedEntry("wall_hanging_sign", Registry.BLOCK));
+        this.addChild("sign", this.findRelatedEntry("sign", Registry.BLOCK));
+        this.addChild("stick", this.findRelatedEntry("twig", Registry.BLOCK)); // TFC & AFC only
     }
 
     @Override

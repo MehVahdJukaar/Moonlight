@@ -1,1 +1,2 @@
-Fix Beehives from Friends&Foes Module (EveryCompat) not acting as home/nest for bees
+improved overlay application stuff
+improved wood system
