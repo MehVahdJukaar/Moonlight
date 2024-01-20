@@ -15,6 +15,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -129,12 +130,13 @@ public abstract class BlockType {
     @Nullable
     public Item getItemOfThis(String key) {
         var v = this.getChild(key);
-        return v instanceof Item i ? i : null;
+        return v instanceof ItemLike i ? i.asItem() : null;
     }
 
     @Nullable
     public Block getBlockOfThis(String key) {
         var v = this.getChild(key);
+        if (v instanceof BlockItem bi) return bi.getBlock();
         return v instanceof Block b ? b : null;
     }
 
@@ -149,14 +151,22 @@ public abstract class BlockType {
     }
 
     /**
-     * Should be called after you register a block that is made out of this wood type
+     * Should be called after you register a block made out of this wood type
      */
-    public void addChild(String genericName, @Nullable Object itemLike) {
-        if (itemLike != null) {
-            this.children.put(genericName, itemLike);
-            var v = BlockSetInternal.getRegistry(this.getClass());
-            if (v != null) {
-                v.mapBlockToType(itemLike, this);
+    public void addChild(String genericName, @Nullable Object object) {
+        if (object != null) {
+            this.children.put(genericName, object);
+            var registry = BlockSetInternal.getRegistry(this.getClass());
+            if (registry != null) {
+                Set<Object> toAdd = new HashSet<>();
+                toAdd.add(object);
+                if (object instanceof ItemLike il) {
+                    toAdd.add(il.asItem());
+                }
+                if (object instanceof BlockItem bi) {
+                    toAdd.add(bi.getBlock());
+                }
+                toAdd.forEach(o -> registry.mapObjectToType(o, this));
             }
         }
     }
@@ -248,7 +258,6 @@ public abstract class BlockType {
         if (v instanceof ItemLike il) return il;
         return null;
     }
-
 
 
 }

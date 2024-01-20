@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
@@ -157,7 +155,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         return childrenToType.getOrDefault(itemLike, null);
     }
 
-    protected void mapBlockToType(Object itemLike, BlockType type) {
+    protected void mapObjectToType(Object itemLike, BlockType type) {
         this.childrenToType.put(itemLike, (T) type);
     }
 }
