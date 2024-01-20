@@ -168,7 +168,7 @@ public class TextureImage implements AutoCloseable {
                 } catch (Exception ignored) {
                     throw new IOException("Failed to open mcmeta file at location " + metadataLoc);
                 }
-            }}
+            }
 
             return new TextureImage(i, metadata);
         } catch (Exception e) {
@@ -304,18 +304,18 @@ public class TextureImage implements AutoCloseable {
      */
     public void applyOverlay(TextureImage... overlays) throws IllegalStateException {
         for (var o : overlays) {
-            if (o.frameW < frameW) {
-                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay W: " + o.frameW + ", image W: " + frameW);
+            if (o.frameWidth() < frameWidth()) {
+                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay W: " + o.frameWidth() + ", image W: " + frameWidth());
             }
-            if (o.frameH < frameH) {
-                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay H: " + o.frameH + ", image H: " + frameH);
+            if (o.frameHeight() < frameHeight()) {
+                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay H: " + o.frameHeight() + ", image H: " + frameHeight());
             }
         }
         for (var o : overlays) {
             this.forEachFrame((frameIndex, globalX, globalY) -> {
-                int frameX = globalX - this.getFrameX(frameIndex);
-                int frameY = globalY - this.getFrameX(frameIndex);
-                int targetOverlayFrame = Math.max(frameIndex, o.maxFrames-1);
+                int frameX = globalX - this.getFrameStartX(frameIndex);
+                int frameY = globalY - this.getFrameStartY(frameIndex);
+                int targetOverlayFrame = Math.max(frameIndex, o.frameCount - 1);
                 int overlayPixel = o.getFramePixel(targetOverlayFrame, frameX, frameY);
                 image.blendPixel(globalX, globalY, overlayPixel);
             });
