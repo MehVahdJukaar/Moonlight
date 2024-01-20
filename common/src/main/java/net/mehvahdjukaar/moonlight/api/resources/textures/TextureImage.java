@@ -65,11 +65,11 @@ public class TextureImage implements AutoCloseable {
         }
     }
 
-    public void toGrayscale(){
+    public void toGrayscale() {
         SpriteUtils.grayscaleImage(this.image);
     }
 
-    public RGBColor getAverageColor(){
+    public RGBColor getAverageColor() {
         return SpriteUtils.averageColor(this.image);
     }
 
@@ -152,11 +152,12 @@ public class TextureImage implements AutoCloseable {
         AnimationMetadataSection metadata = null;
 
         var res = manager.getResource(metadataLoc);
-        if(res.isPresent()){
+        if (res.isPresent()) {
             try (InputStream metadataStream = res.get().open()) {
                 metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, metadataStream);
 
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         return new TextureImage(i, metadata);
@@ -266,18 +267,22 @@ public class TextureImage implements AutoCloseable {
      * Closes all given overlays images
      */
     public void applyOverlay(TextureImage... overlays) throws IllegalStateException {
-        int width = imageWidth();
-        int height = imageHeight();
-        if (Arrays.stream(overlays).anyMatch(n -> n.imageHeight() < height || n.imageWidth() < width)) {
-            throw new IllegalStateException("Could not merge images because they had different dimensions");
-        }
-
         for (var o : overlays) {
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    image.blendPixel(x, y, o.image.getPixelRGBA(x, y));
-                }
+            if (o.frameW < frameW) {
+                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay W: " + o.frameW + ", image W: " + frameW);
             }
+            if (o.frameH < frameH) {
+                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay H: " + o.frameH + ", image H: " + frameH);
+            }
+        }
+        for (var o : overlays) {
+            this.forEachFrame((frameIndex, globalX, globalY) -> {
+                int frameX = globalX - this.getFrameX(frameIndex);
+                int frameY = globalY - this.getFrameX(frameIndex);
+                int targetOverlayFrame = Math.max(frameIndex, o.maxFrames-1);
+                int overlayPixel = o.getFramePixel(targetOverlayFrame, frameX, frameY);
+                image.blendPixel(globalX, globalY, overlayPixel);
+            });
             o.close();
         }
     }
@@ -297,7 +302,7 @@ public class TextureImage implements AutoCloseable {
         for (var o : overlays) {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    if(NativeImage.getA(image.getPixelRGBA(x,y))!=0) {
+                    if (NativeImage.getA(image.getPixelRGBA(x, y)) != 0) {
                         image.blendPixel(x, y, o.image.getPixelRGBA(x, y));
                     }
                 }
@@ -326,17 +331,18 @@ public class TextureImage implements AutoCloseable {
         }
     }
 
-    public void crop(TextureImage mask){
+    public void crop(TextureImage mask) {
         crop(mask, true);
     }
 
     /**
      * Crop the given image with the provided mask. All that isnt transparent will be erased
      * Closes the given mask
-     * @param mask mask
+     *
+     * @param mask  mask
      * @param inner if the operation should be reversed by keeping what is not transparent
      */
-    public void crop(TextureImage mask, boolean inner){
+    public void crop(TextureImage mask, boolean inner) {
         int width = imageWidth();
         int height = imageHeight();
         if (mask.imageHeight() < height || mask.imageWidth() < width) {
@@ -344,8 +350,8 @@ public class TextureImage implements AutoCloseable {
         }
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if(NativeImage.getA(mask.image.getPixelRGBA(x,y))!=0 == inner) {
-                    image.setPixelRGBA(x,y,0);
+                if (NativeImage.getA(mask.image.getPixelRGBA(x, y)) != 0 == inner) {
+                    image.setPixelRGBA(x, y, 0);
                 }
             }
         }
