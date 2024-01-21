@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.entity;
 
 import com.google.common.collect.ImmutableList;
+import net.mehvahdjukaar.moonlight.api.misc.ModItemListing;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.npc.Villager;
 
 import java.util.function.Consumer;
 
+//TODO: rename
 public class VillagerAIHooks {
 
     /**
