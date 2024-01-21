@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core;
+package net.mehvahdjukaar.moonlight.api.misc;
 
 import com.mojang.serialization.*;
 

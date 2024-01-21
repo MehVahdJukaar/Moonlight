@@ -1,1 +1,2 @@
-improved wood detection system
+added villager trades codec
+further improved wood type detection

@@ -5,7 +5,6 @@ import com.google.common.collect.HashBiMap;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -16,7 +15,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -156,17 +154,17 @@ public abstract class BlockType {
                 var registry = BlockSetInternal.getRegistry(this.getClass());
                 if (registry != null) {
                     Set<Object> toAdd = new HashSet<>();
-                toAdd.add(object);
-                if (object instanceof ItemLike il) {
-                    toAdd.add(il.asItem());
+                    toAdd.add(object);
+                    if (object instanceof ItemLike il) {
+                        toAdd.add(il.asItem());
+                    }
+                    if (object instanceof BlockItem bi) {
+                        toAdd.add(bi.getBlock());
+                    }
+                    toAdd.forEach(o -> registry.mapObjectToType(o, this));
                 }
-                if (object instanceof BlockItem bi) {
-                    toAdd.add(bi.getBlock());
-                }
-                toAdd.forEach(o -> registry.mapObjectToType(o, this));
-                }
-            }catch (Exception e){
-                Moonlight.LOGGER.error("Failed to add block type child: value already present. Key {}, Object {}, BlockType {}", genericName,itemLike, this);
+            } catch (Exception e) {
+                Moonlight.LOGGER.error("Failed to add block type child: value already present. Key {}, Object {}, BlockType {}", genericName, object, this);
             }
         }
     }

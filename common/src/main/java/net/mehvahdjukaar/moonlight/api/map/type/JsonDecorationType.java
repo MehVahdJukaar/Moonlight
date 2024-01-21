@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.map.markers.SimpleMapBlockMarker;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.StrOpt;
+import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
