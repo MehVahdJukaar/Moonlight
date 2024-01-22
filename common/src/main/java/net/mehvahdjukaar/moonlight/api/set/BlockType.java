@@ -146,25 +146,19 @@ public abstract class BlockType {
     /**
      * Should be called after you register a block made out of this wood type
      */
-    public void addChild(String genericName, @Nullable Object object) {
-        if (object != null) {
+    public void addChild(String genericName, @Nullable Object obj) {
+        if (obj != null) {
             try {
 
-                this.children.put(genericName, object);
+                this.children.put(genericName, obj);
                 var registry = BlockSetInternal.getRegistry(this.getClass());
                 if (registry != null) {
-                    Set<Object> toAdd = new HashSet<>();
-                    toAdd.add(object);
-                    if (object instanceof ItemLike il) {
-                        toAdd.add(il.asItem());
-                    }
-                    if (object instanceof BlockItem bi) {
-                        toAdd.add(bi.getBlock());
-                    }
-                    toAdd.forEach(o -> registry.mapObjectToType(o, this));
+                    // Don't you dare to access block item map now.
+                    // Will cause all sorts of issues. We'll worry about items later
+                    registry.mapObjectToType(obj, this);
                 }
-            } catch (Exception e) {
-                Moonlight.LOGGER.error("Failed to add block type child: value already present. Key {}, Object {}, BlockType {}", genericName, object, this);
+            }catch (Exception e){
+                Moonlight.LOGGER.error("Failed to add block type child: value already present. Key {}, Object {}, BlockType {}", genericName,obj, this);
             }
         }
     }

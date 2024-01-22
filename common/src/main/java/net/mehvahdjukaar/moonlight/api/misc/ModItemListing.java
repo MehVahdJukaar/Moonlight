@@ -22,7 +22,8 @@ import java.util.Optional;
  * Simple item listing implementation
  */
 public record ModItemListing(ItemStack price, ItemStack price2, ItemStack offer,
-                             int maxTrades, int xp, float priceMult) implements VillagerTrades.ItemListing {
+                             int maxTrades, int xp, float priceMult,
+                             int level) implements VillagerTrades.ItemListing {
 
     public static final BiMap<ResourceLocation, VillagerTrades.ItemListing> SPECIAL_TRADES = HashBiMap.create();
 
@@ -40,7 +41,8 @@ public record ModItemListing(ItemStack price, ItemStack price2, ItemStack offer,
             ItemStack.CODEC.fieldOf("offer").forGetter(ModItemListing::offer),
             StrOpt.of(ExtraCodecs.POSITIVE_INT, "max_trades", 16).forGetter(ModItemListing::maxTrades),
             StrOpt.of(ExtraCodecs.POSITIVE_INT, "xp", 2).forGetter(ModItemListing::xp),
-            StrOpt.of(ExtraCodecs.POSITIVE_FLOAT, "price_multiplier", 0.05f).forGetter(ModItemListing::priceMult)
+            StrOpt.of(ExtraCodecs.POSITIVE_FLOAT, "price_multiplier", 0.05f).forGetter(ModItemListing::priceMult),
+            StrOpt.of(Codec.intRange(1, 5), "level", 1).forGetter(ModItemListing::level)
     ).apply(instance, ModItemListing::new));
 
     public static final Codec<VillagerTrades.ItemListing> CODEC =
@@ -58,7 +60,7 @@ public record ModItemListing(ItemStack price, ItemStack price2, ItemStack offer,
     }
 
     public ModItemListing(ItemStack price, ItemStack forSale, int maxTrades, int xp, float priceMult) {
-        this(price, ItemStack.EMPTY, forSale, maxTrades, xp, priceMult);
+        this(price, ItemStack.EMPTY, forSale, maxTrades, xp, priceMult, 1);
     }
 
     public ModItemListing(int emeralds, ItemStack forSale, int maxTrades, int xp, float mult) {
