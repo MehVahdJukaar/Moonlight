@@ -153,20 +153,12 @@ public abstract class BlockType {
     /**
      * Should be called after you register a block made out of this wood type
      */
-    public void addChild(String genericName, @Nullable Object object) {
-        if (object != null) {
-            this.children.put(genericName, object);
-            var registry = BlockSetInternal.getRegistry(this.getClass());
-            if (registry != null) {
-                Set<Object> toAdd = new HashSet<>();
-                toAdd.add(object);
-                if (object instanceof ItemLike il) {
-                    toAdd.add(il.asItem());
-                }
-                if (object instanceof BlockItem bi) {
-                    toAdd.add(bi.getBlock());
-                }
-                toAdd.forEach(o -> registry.mapObjectToType(o, this));
+    public void addChild(String genericName, @Nullable Object itemLike) {
+        if (itemLike != null) {
+            this.children.put(genericName, itemLike);
+            var v = BlockSetInternal.getRegistry(this.getClass());
+            if (v != null) {
+                v.mapObjectToType(itemLike, this);
             }
         }
     }
