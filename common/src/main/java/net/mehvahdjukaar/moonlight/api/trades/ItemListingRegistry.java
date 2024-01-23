@@ -52,6 +52,7 @@ public class ItemListingRegistry extends SimpleJsonResourceReloadListener {
             var j = e.getValue();
             var id = e.getKey();
             try {
+                if (!id.getPath().contains("/")) continue;
                 var targetId = id.withPath(p -> p.substring(0, p.lastIndexOf('/')));
                 var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(targetId);
                 if (profession.isPresent()) {
@@ -87,7 +88,8 @@ public class ItemListingRegistry extends SimpleJsonResourceReloadListener {
         for (var e : newValues.int2ObjectEntrySet()) {
             int level = e.getIntKey();
 
-            var original = new ArrayList<>(List.of(originalValues.get(level)));
+            VillagerTrades.ItemListing[] elements = originalValues.get(level);
+            var original = new ArrayList<>(elements == null ? List.of() : List.of(elements));
             List<ModItemListing> value = e.getValue();
             if (add) {
                 original.addAll(value);
@@ -100,7 +102,7 @@ public class ItemListingRegistry extends SimpleJsonResourceReloadListener {
     private void mergeProfessionAndSpecial(boolean add) {
         for (var p : customTrades.entrySet()) {
             VillagerProfession profession = p.getKey();
-            Int2ObjectMap<VillagerTrades.ItemListing[]> map = VillagerTrades.TRADES.computeIfAbsent(profession,k->
+            Int2ObjectMap<VillagerTrades.ItemListing[]> map = VillagerTrades.TRADES.computeIfAbsent(profession, k ->
                     new Int2ObjectArrayMap<>());
             Int2ObjectArrayMap<List<ModItemListing>> value = p.getValue();
             mergeAll(map, value, add);

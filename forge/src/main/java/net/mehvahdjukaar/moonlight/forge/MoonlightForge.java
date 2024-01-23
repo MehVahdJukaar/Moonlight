@@ -2,6 +2,9 @@ package net.mehvahdjukaar.moonlight.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
@@ -33,15 +36,27 @@ import java.lang.ref.WeakReference;
 @Mod(Moonlight.MOD_ID)
 public class MoonlightForge {
     public static final String MOD_ID = Moonlight.MOD_ID;
+    private static final ForgeConfigSpec SPEC = ((ConfigSpecWrapper) ConfigBuilder.create(MOD_ID, ConfigType.COMMON)
+            .buildAndRegister()).getSpec();
 
     public MoonlightForge(IEventBus bus) {
         Moonlight.commonInit();
         NeoForge.EVENT_BUS.register(MoonlightForge.class);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(MoonlightForge::configsLoaded);
         ModLootModifiers.register();
         ModLootConditions.register();
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init(bus);
             MoonlightClient.initClient();
+        }
+    }
+
+
+    public static void configsLoaded(ModConfigEvent.Loading event) {
+        if (event.getConfig().getSpec() == SPEC) {
+            if (!ModLoader.get().hasCompletedState("LOAD_REGISTRIES")) {
+                throw new IllegalStateException("Some OTHER mod has forcefully loaded ALL other mods configs before the registry phase. This should not be done. Dont report this to Moonlight. Refusing to proceed further");
+            }
         }
     }
 
