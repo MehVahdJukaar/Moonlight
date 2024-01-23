@@ -32,7 +32,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     private final ForgeConfigSpec.Builder builder;
 
-    private Deque<String> cat = new ArrayDeque<>();
+    private final Deque<String> cat = new ArrayDeque<>();
 
     public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);

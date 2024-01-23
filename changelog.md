@@ -1,1 +1,1 @@
-Fixed very critical issue added with todays build. apologies for that
+hotfix for non vanilla villageer professions

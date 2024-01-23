@@ -169,6 +169,7 @@ public class WoodType extends BlockType {
     public void initializeChildrenItems() {
         this.addChild("boat", this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
         this.addChild("chest_boat", this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
+        this.addChild("sapling", this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
     }
 
     public static class Finder implements SetFinder<WoodType> {
