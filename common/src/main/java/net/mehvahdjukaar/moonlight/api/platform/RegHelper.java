@@ -146,6 +146,16 @@ public class RegHelper {
         });
     }
 
+    public static RegSupplier<PoiType> registerPOI(ResourceLocation name, int searchDistance, int maxTickets, Supplier<Block>... blocks) {
+        return registerPOI(name, () -> {
+            ImmutableSet.Builder<BlockState> builder = ImmutableSet.builder();
+            for (var block : blocks) {
+                builder.addAll(block.get().getStateDefinition().getPossibleStates());
+            }
+            return new PoiType(builder.build(), searchDistance, maxTickets);
+        });
+    }
+
     @ExpectPlatform
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
         throw new AssertionError();

@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
+import net.mehvahdjukaar.moonlight.api.trades.ItemListingRegistry;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
@@ -25,10 +26,9 @@ public class MoonlightClient {
 
 
     public static DynamicTexturePack maybeMergePack(DynamicTexturePack pack) {
+        if (!ClientConfigs.MERGE_PACKS.get()) return pack;
         if (mergedDynamicPack == null) {
-            mergedDynamicPack = new MergedDynamicTexturePack() {
-
-            };
+            mergedDynamicPack = new MergedDynamicTexturePack() {};
         }
         Set<String> nameSpaces = pack.getNamespaces(pack.getPackType());
         for (var n : nameSpaces) mergedDynamicPack.addNamespaces(n);
