@@ -27,7 +27,7 @@ public interface ModItemListing extends VillagerTrades.ItemListing {
     Codec<? extends ModItemListing> getCodec();
 
     static int defaultXp(boolean buying, int villagerLevel) {
-        return Math.min(1, 5 * villagerLevel - 1) * (buying ? 2 : 1);
+        return Math.max(1, 5 * villagerLevel - 1) * (buying ? 2 : 1);
     }
 
     //return false if this trade should be ignored

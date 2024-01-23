@@ -3,8 +3,10 @@ package net.mehvahdjukaar.moonlight.forge;
 import net.mehvahdjukaar.moonlight.api.client.model.RetexturedModelLoader;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
@@ -12,28 +14,20 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.ai.village.poi.PoiTypes;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.extensions.IForgeBlock;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,10 +39,13 @@ import java.lang.ref.WeakReference;
 @Mod(Moonlight.MOD_ID)
 public class MoonlightForge {
     public static final String MOD_ID = Moonlight.MOD_ID;
+    private static final ForgeConfigSpec SPEC = ((ConfigSpecWrapper) ConfigBuilder.create(MOD_ID, ConfigType.COMMON)
+            .buildAndRegister()).getSpec();
 
     public MoonlightForge() {
         Moonlight.commonInit();
         MinecraftForge.EVENT_BUS.register(MoonlightForge.class);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(MoonlightForge::configsLoaded);
         ModLootModifiers.register();
         ModLootConditions.register();
         if (PlatHelper.getPhysicalSide().isClient()) {
@@ -58,7 +55,15 @@ public class MoonlightForge {
                 modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
             });
         }
+    }
 
+
+    public static void configsLoaded(ModConfigEvent.Loading event) {
+        if (event.getConfig().getSpec() == SPEC) {
+            if (!ModLoader.get().hasCompletedState("LOAD_REGISTRIES")) {
+                throw new IllegalStateException("Some OTHER mod has forcefully loaded ALL other mods configs before the registry phase. This should not be done. Dont report this to Moonlight. Refusing to proceed further");
+            }
+        }
     }
 
     //hacky but eh
