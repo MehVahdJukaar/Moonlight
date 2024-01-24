@@ -33,6 +33,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
@@ -195,6 +197,7 @@ public class RegHelperImpl {
     }
 
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
+        ((FireBlock) Blocks.FIRE).setFlammable(item, fireSpread, flammability);
     }
 
     //TODO change these 2
