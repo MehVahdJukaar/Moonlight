@@ -3,15 +3,18 @@ package net.mehvahdjukaar.moonlight.api.set.wood;
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CeilingHangingSignBlock;
+import net.minecraft.world.level.block.FurnaceBlock;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -58,6 +61,20 @@ public class WoodType extends BlockType {
         super(id);
         this.planks = baseBlock;
         this.log = logBlock;
+    }
+
+    @Nullable
+    protected Block findStrippedLog(String... possibleNames) {
+        for (var v : possibleNames) {
+            var b = this.getBlockOfThis(v);
+            if (v != null) {
+                Block stripped = AxeItem.STRIPPABLE.get(b);
+                if (stripped != null && stripped != b) {
+                    return stripped;
+                }
+            }
+        }
+        return findLogRelatedBlock("stripped", possibleNames);
     }
 
     @Nullable
@@ -146,9 +163,9 @@ public class WoodType extends BlockType {
         this.addChild("planks", this.planks);
         this.addChild("log", this.log);
         this.addChild("leaves", this.findRelatedEntry("leaves", BuiltInRegistries.BLOCK));
-        this.addChild("stripped_log", this.findLogRelatedBlock("stripped", "log", "stem", "stalk"));
-        this.addChild("stripped_wood", this.findLogRelatedBlock("stripped", "wood", "hyphae"));
         this.addChild("wood", this.findLogRelatedBlock("", "wood", "hyphae"));
+        this.addChild("stripped_log", this.findStrippedLog("log", "stem", "stalk"));
+        this.addChild("stripped_wood", this.findStrippedLog("wood", "hyphae"));
         this.addChild("slab", this.findRelatedEntry("slab", BuiltInRegistries.BLOCK));
         this.addChild("stairs", this.findRelatedEntry("stairs", BuiltInRegistries.BLOCK));
         this.addChild("fence", this.findRelatedEntry("fence", BuiltInRegistries.BLOCK));

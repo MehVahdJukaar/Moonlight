@@ -282,16 +282,18 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform //fabric
+    @ExpectPlatform //Works on both. On forge, however, consider using block method overrides
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
         throw new AssertionError();
     }
 
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         throw new AssertionError();
     }
 
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         throw new AssertionError();

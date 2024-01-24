@@ -118,6 +118,9 @@ transitive-mutable field net/minecraft/world/level/Explosion damageSource Lnet/m
 transitive-accessible field net/minecraft/world/level/Explosion blockInteraction Lnet/minecraft/world/level/Explosion$BlockInteraction;
 transitive-extendable method net/minecraft/world/level/Explosion addBlockDrops (Lit/unimi/dsi/fastutil/objects/ObjectArrayList;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/BlockPos;)V
 
+accessible field net/minecraft/world/item/AxeItem STRIPPABLES Ljava/util/Map;
+accessible method net/minecraft/world/level/block/FireBlock setFlammable (Lnet/minecraft/world/level/block/Block;II)V
+
 #flute renderer fabric
 transitive-accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V
 
