@@ -32,11 +32,17 @@ public class ItemListingRegistry extends SimpleJsonResourceReloadListener {
     private final Map<EntityType<?>, Int2ObjectArrayMap<List<ModItemListing>>> specialCustomTrades = new HashMap<>();
     private final Map<VillagerProfession, Int2ObjectArrayMap<List<ModItemListing>>> customTrades = new HashMap<>();
 
+
+    private final Map<EntityType<?>, Int2ObjectArrayMap<ModItemListing[]>> oldSpecialTrades = new HashMap<>();
+    private final Map<VillagerProfession, Int2ObjectArrayMap<ModItemListing[]>> oldTrades = new HashMap<>();
+
+
     private int count = 0;
 
     public ItemListingRegistry() {
         super(new Gson(), "villager_trades");
         serializers.put(new ResourceLocation("simple"), (Codec<ModItemListing>) (Object) SimpleItemListing.CODEC);
+        serializers.put(new ResourceLocation("remove_all_non_data"), (Codec<ModItemListing>) (Object) RemoveNonDataListingListing.CODEC);
     }
 
     @Override
