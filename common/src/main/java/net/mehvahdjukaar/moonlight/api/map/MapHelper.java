@@ -31,13 +31,6 @@ public class MapHelper {
         return data;
     }
 
-    @Deprecated(forRemoval = true)
-    public static Integer getMapId(ItemStack stack, Player player, Object data) {
-        Integer i = MapItem.getMapId(stack);
-        if (i == null && MAP_ATLASES) i = MapAtlasCompat.getMapIdFromAtlas(stack, player.level(), data);
-        return i;
-    }
-
     /**
      * adds a vanilla decoration
      *
@@ -54,8 +47,6 @@ public class MapHelper {
         }
     }
 
-    //TODO: rename
-
     /**
      * Adds a static decoration tp a map itemstack NBT.<br>
      * Such decoration will not have any world marker associated and wont be toggleable
@@ -65,7 +56,7 @@ public class MapHelper {
      * @param type     custom decorationType
      * @param mapColor map item tint color
      */
-    public static void addDecorationToMap(ItemStack stack, BlockPos pos, MapDecorationType<?, ?> type, int mapColor) {
+    public static void addDecorationToStack(ItemStack stack, BlockPos pos, MapDecorationType<?, ?> type, int mapColor) {
 
         ListTag tags;
         if (stack.hasTag() && stack.getTag().contains("CustomDecorations", 9)) {
@@ -91,7 +82,7 @@ public class MapHelper {
      *
      * @param id decoration type id. if invalid will default to generic structure decoration
      */
-    public static void addDecorationToMap(ItemStack stack, BlockPos pos, ResourceLocation id, int mapColor) {
+    public static void addDecorationToStack(ItemStack stack, BlockPos pos, ResourceLocation id, int mapColor) {
         if (id.getNamespace().equals("minecraft")) {
             MapDecoration.Type type = getVanillaType(id);
             if (type != null) {
@@ -101,7 +92,7 @@ public class MapHelper {
         }
         MapDecorationType<?, ?> type = MapDataRegistry.get(id);
         if (type != null) {
-            addDecorationToMap(stack, pos, type, mapColor);
+            addDecorationToStack(stack, pos, type, mapColor);
         } else {
             addVanillaDecorations(stack, pos, MapDecoration.Type.TARGET_X, mapColor);
         }
@@ -138,8 +129,8 @@ public class MapHelper {
     /**
      * Helper that map decoration directly to map data using a persistent map marker. Only supports moonlight markers
      */
-    public static boolean addSimpleDecorationToMap(MapItemSavedData data, Level level, ResourceLocation id,
-                                                   BlockPos pos, @Nullable Component name) {
+    public static boolean addPersistentDecoration(MapItemSavedData data, Level level, ResourceLocation id,
+                                                  BlockPos pos, @Nullable Component name) {
         MapDecorationType<?, ?> type = MapDataRegistry.get(id);
         if (type != null) {
             var marker = type.createEmptyMarker();

@@ -96,7 +96,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
             }
         }
         if (buf.readBoolean()) {
-            //TODO: I really could have merged the 2 systems
             this.moonlight$customData = buf.readNbt(); //readCompressedNbt(buf);
         }
     }

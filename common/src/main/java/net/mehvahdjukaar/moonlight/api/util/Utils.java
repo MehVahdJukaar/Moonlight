@@ -238,7 +238,7 @@ public class Utils {
     }
 
     public static void awardAdvancement( ServerPlayer sp, ResourceLocation name, String unlockProp) {
-        Advancement advancement = sp.getServer().getAdvancements().getAdvancement(name);
+        var advancement = sp.getServer().getAdvancements().get(name);
         if (advancement != null) {
             PlayerAdvancements advancements = sp.getAdvancements();
             if (!advancements.getOrStartProgress(advancement).isDone()) {

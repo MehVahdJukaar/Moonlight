@@ -200,35 +200,6 @@ public class RegHelperImpl {
         ((FireBlock) Blocks.FIRE).setFlammable(item, fireSpread, flammability);
     }
 
-    //TODO change these 2
-    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<
-            List<VillagerTrades.ItemListing>> factories) {
-        Moonlight.assertInitPhase();
-
-        Consumer<VillagerTradesEvent> eventConsumer = event -> {
-            if (event.getType() == profession) {
-                var list = event.getTrades().get(level);
-                factories.accept(list);
-            }
-        };
-        NeoForge.EVENT_BUS.addListener(eventConsumer);
-    }
-
-    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>>
-            factories) {
-        Moonlight.assertInitPhase();
-
-        //0 = common, 1 = rare
-        Consumer<WandererTradesEvent> eventConsumer = event -> {
-            if (level == 0) {
-                factories.accept(event.getGenericTrades());
-            } else {
-                factories.accept(event.getRareTrades());
-            }
-        };
-        NeoForge.EVENT_BUS.addListener(eventConsumer);
-    }
-
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
         Moonlight.assertInitPhase();
 

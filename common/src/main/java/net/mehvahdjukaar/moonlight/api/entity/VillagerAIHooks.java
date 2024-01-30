@@ -9,7 +9,6 @@ import net.minecraft.world.entity.npc.Villager;
 
 import java.util.function.Consumer;
 
-//TODO: rename
 public class VillagerAIHooks {
 
     /**

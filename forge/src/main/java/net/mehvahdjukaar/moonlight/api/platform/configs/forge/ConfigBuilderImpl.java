@@ -153,7 +153,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return super.defineObjectList(name, defaultSupplier, codec);
     }
 
-    @Deprecated(forRemoval = true)
     private static class StringCodecConfigValue<T> implements Supplier<T> {
 
         private final StringJsonConfigValue inner;

@@ -231,7 +231,7 @@ public class WoodType extends BlockType {
                     var d = BuiltInRegistries.BLOCK.get(BuiltInRegistries.BLOCK.getDefaultKey());
                     if (plank != d && log != d && plank != null && log != null) {
                         var w = new WoodType(id, plank, log);
-                        childNames.forEach((key, value) -> w.addChild(key, (Object) BuiltInRegistries.BLOCK.get(value)));
+                        childNames.forEach((key, value) -> w.addChild(key, BuiltInRegistries.BLOCK.get(value)));
                         return Optional.of(w);
                     }
                 } catch (Exception ignored) {

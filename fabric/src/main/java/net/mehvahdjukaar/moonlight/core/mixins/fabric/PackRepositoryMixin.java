@@ -19,7 +19,6 @@ public abstract class PackRepositoryMixin {
     @Inject(method = "<init>",
             at = @At("TAIL"))
     private void init(RepositorySource[] repositorySources, CallbackInfo ci) {
-        //TODO: check this
         var list = PlatHelperImpl.getAdditionalPacks(null);
         var newSources = new HashSet<>(((PackRepositoryAccessor) this).getSources());
         list.forEach(l -> {

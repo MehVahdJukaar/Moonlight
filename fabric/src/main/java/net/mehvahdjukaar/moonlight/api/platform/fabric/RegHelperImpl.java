@@ -182,17 +182,6 @@ public class RegHelperImpl {
         FlammableBlockRegistry.getDefaultInstance().add(item, fireSpread, flammability);
     }
 
-    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        Moonlight.assertInitPhase();
-
-        MoonlightFabric.PRE_SETUP_WORK.add(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
-    }
-
-    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        //this just runs immediately... needs to run on mod setup instead
-        MoonlightFabric.PRE_SETUP_WORK.add(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
-    }
-
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
         Moonlight.assertInitPhase();
 

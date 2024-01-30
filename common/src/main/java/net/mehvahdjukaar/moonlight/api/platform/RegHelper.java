@@ -170,8 +170,7 @@ public class RegHelper {
     }
 
     public static <T extends StructureType<?>> RegSupplier<T> registerStructure(ResourceLocation name, Supplier<T> feature) {
-        //TODO: this causes issues on fabric and its very random as might be on only with some random unrelated mods. best to lave it like this
-        // return register(name, feature, Registry.STRUCTURE_TYPES);
+        //this causes issues on fabric and its very random as might be on only with some random unrelated mods. best to lave it like this
         return registerAsync(name, feature, Registries.STRUCTURE_TYPE);
     }
 
@@ -307,18 +306,6 @@ public class RegHelper {
 
     @ExpectPlatform //Works on both. On forge, however, consider using block method overrides
     public static void registerBlockFlammability(Block item, int fireSpread, int flammability) {
-        throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    @ExpectPlatform
-    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    @ExpectPlatform
-    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
         throw new AssertionError();
     }
 

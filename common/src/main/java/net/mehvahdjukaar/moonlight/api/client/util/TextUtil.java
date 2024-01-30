@@ -183,8 +183,6 @@ public class TextUtil {
         return getDarkenedColor(color, glowing, 1);
     }
 
-    //TODO: account for light. text doesnt account for light direction
-
     /**
      * bundles all data needed to render a generic text line. Useful for signs like blocks
      */

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.set.wood;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -91,14 +92,17 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             //Can't check if the block is a full one, so I do this. Adding some checks here
             if (state.getProperties().size() <= 2 && !(baseBlock instanceof SlabBlock)) {
                 //needs to use wood sound type
-                if (state.instrument() == NoteBlockInstrument.BASS) {
-                    //we do not allow "/" in the wood name
-                    name = name.replace("/", "_");
-                    ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
-                    Block logBlock = findLog(id);
-                    if (logBlock != null) {
-                        return Optional.of(new WoodType(id, baseBlock, logBlock));
+                //we do not allow "/" in the wood name
+                name = name.replace("/", "_");
+                ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
+                Block logBlock = findLog(id);
+                if (logBlock != null) {
+                    if (state.instrument() != NoteBlockInstrument.BASS) {
+                        Moonlight.LOGGER.error("Found wood type candidate with plank {} having incorrect noteblock sound type!" +
+                                " This is likely due to some mod not having updated correctly (.material(WOOD) to .noteBlockSound(BASS) )." +
+                                " This should be corrected! Proceeding anyways", baseRes);
                     }
+                    return Optional.of(new WoodType(id, baseBlock, logBlock));
                 }
             }
         }

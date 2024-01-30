@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(LevelChunk.class)
 public abstract class LevelChunkMixin {
 
-    //TODO: remove from IW
     //fixing a vanilla bug that causes log spam when a block that can provide a tile doesn't actually provide it (they can do this now)
     @Redirect(method = "promotePendingBlockEntity",
             require = 0,

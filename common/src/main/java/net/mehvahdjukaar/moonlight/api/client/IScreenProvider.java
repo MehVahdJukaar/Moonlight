@@ -16,19 +16,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public interface IScreenProvider {
 
-    @Deprecated(forRemoval = true)
     @Environment(EnvType.CLIENT)
-    void openScreen(Level level, BlockPos pos, Player player);
-
-    @Environment(EnvType.CLIENT)
-    default void openScreen(Level level, BlockPos pos, Player player, Direction direction){
-        openScreen(level, pos, player);
-    }
-
-    @Deprecated(forRemoval = true)
-    default void sendOpenGuiPacket(Level level, BlockPos pos, Player player) {
-        sendOpenGuiPacket(level, pos, player, Direction.NORTH);
-    }
+     void openScreen(Level level, BlockPos pos, Player player, Direction direction)
 
     default void sendOpenGuiPacket(Level level, BlockPos pos, Player player, Direction hitFace) {
         ModMessages.CHANNEL.sendToClientPlayer((ServerPlayer) player,
