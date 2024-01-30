@@ -67,7 +67,7 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    archiveClassifier = "dev-shadow"
 }
 
 remapJar {
@@ -82,7 +82,7 @@ remapJar {
 
 jar {
 
-    classifier "dev"
+    archiveClassifier = "dev"
 }
 
 sourcesJar {
@@ -90,11 +90,11 @@ sourcesJar {
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 
-    classifier "fabric-sources"
+    archiveClassifier = "fabric-sources"
 }
 
 remapSourcesJar{
-    classifier "fabric-sources"
+    archiveClassifier = "fabric-sources"
 }
 
 components.java {

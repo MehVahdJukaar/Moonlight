@@ -1,1 +1,1 @@
-more villager tarde stuff fixes
+actually moved villager trades to moonlight/villager_trades (sad but im tired of getting reports of another mod issue)

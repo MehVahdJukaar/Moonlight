@@ -68,7 +68,7 @@ public class WoodType extends BlockType {
         for (var v : possibleNames) {
             var b = this.getBlockOfThis(v);
             if (v != null) {
-                Block stripped = AxeItem.STRIPPABLE.get(b);
+                Block stripped = AxeItem.STRIPPABLES.get(b);
                 if (stripped != null && stripped != b) {
                     return stripped;
                 }
