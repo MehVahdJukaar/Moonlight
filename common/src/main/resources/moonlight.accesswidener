@@ -114,6 +114,8 @@ transitive-accessible field net/minecraft/world/level/Explosion damageSource Lne
 transitive-mutable field net/minecraft/world/level/Explosion damageSource Lnet/minecraft/world/damagesource/DamageSource;
 transitive-accessible field net/minecraft/world/level/Explosion blockInteraction Lnet/minecraft/world/level/Explosion$BlockInteraction;
 
+accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
+
 #loot
 transitive-accessible field net/minecraft/world/level/storage/loot/LootDataType codec Lcom/mojang/serialization/Codec;
 
