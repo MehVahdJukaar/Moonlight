@@ -69,20 +69,6 @@ public class MoonlightForge {
         Moonlight.afterDataReload(event.getRegistryAccess());
     }
 
-    @Nullable
-    private static WeakReference<ICondition.IContext> context = null;
-
-    @Nullable
-    public static ICondition.IContext getConditionContext() {
-        if (context == null) return null;
-        return context.get();
-    }
-
-    @SubscribeEvent
-    public static void onResourceReload(AddReloadListenerEvent event) {
-        context = new WeakReference<>(event.getConditionContext());
-    }
-
     @SubscribeEvent
     public static void onDataSync(OnDatapackSyncEvent event) {
         SoftFluidRegistry.onDataLoad();

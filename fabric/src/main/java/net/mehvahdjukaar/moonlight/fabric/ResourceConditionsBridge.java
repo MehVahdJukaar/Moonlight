@@ -27,22 +27,22 @@ public class ResourceConditionsBridge {
 
     public static void init() {
         try {
-            ResourceConditions.register(new ResourceLocation("forge:not"), ResourceConditionsBridge::forgeNot);
+            ResourceConditions.register(new ResourceLocation("neoforge:not"), ResourceConditionsBridge::forgeNot);
         } catch (Exception ignored) {
 
         }
         try {
-            ResourceConditions.register(new ResourceLocation("forge:and"), ResourceConditionsBridge::forgeAnd);
+            ResourceConditions.register(new ResourceLocation("neoforge:and"), ResourceConditionsBridge::forgeAnd);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(new ResourceLocation("forge:mod_loaded"), ResourceConditionsBridge::forgeModLoaded);
+            ResourceConditions.register(new ResourceLocation("neoforge:mod_loaded"), ResourceConditionsBridge::forgeModLoaded);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(new ResourceLocation("forge:tag_empty"), ResourceConditionsBridge::forgeTagEmpty);
+            ResourceConditions.register(new ResourceLocation("neoforge:tag_empty"), ResourceConditionsBridge::forgeTagEmpty);
         } catch (Exception ignored) {
         }
     }

@@ -61,8 +61,8 @@ transitive-accessible method net/minecraft/world/entity/animal/Fox setSleeping (
 transitive-accessible method net/minecraft/world/entity/animal/Fox trusts (Ljava/util/UUID;)Z
 
 #villager ai
-mutable field net/minecraft/world/entity/npc/Villager MEMORY_TYPES Lcom/google/common/collect/ImmutableList;
-accessible field net/minecraft/world/entity/npc/Villager MEMORY_TYPES Lcom/google/common/collect/ImmutableList;
+transitive-accessible field net/minecraft/world/entity/npc/Villager MEMORY_TYPES Lcom/google/common/collect/ImmutableList;
+transitive-mutable field net/minecraft/world/entity/npc/Villager MEMORY_TYPES Lcom/google/common/collect/ImmutableList;
 transitive-accessible field net/minecraft/world/entity/Mob goalSelector Lnet/minecraft/world/entity/ai/goal/GoalSelector;
 
 #bee growable
