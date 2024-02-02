@@ -1,37 +1,36 @@
+
 modLoader = "javafml"
-loaderVersion = "[40,)"
-license = "gplv3"
-issueTrackerURL = "https://github.com/MehVahdJukaar/Moonlight/issues" #optional
+loaderVersion = "*"
+
+license = "${mod_license}"
+issueTrackerURL = "${mod_github}/issues"
 
 [[mixins]]
-    config = "moonlight.mixins.json"
+config = "${mod_id}.mixins.json"
 [[mixins]]
-    config = "moonlight.mixins-common.json"
+config = "${mod_id}-common.mixins.json"
 
 [[mods]]
-    modId = "moonlight"
-    version = "${version}"
-    displayName = "Moonlight Library"
-    authors = "MehVahdJukaar"
-    modUrl = "https://www.curseforge.com/minecraft/mc-mods/selene" #optional
-    updateJSONURL = "https://raw.githubusercontent.com/MehVahdJukaar/Moonlight/multi-loader/forge/update.json"
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+logoFile = "icon.png"
+authors = "${mod_authors}"
+credits = "${mod_credits}"
+description = '''${mod_description}'''
+modUrl = "${mod_homepage}"
+itemIcon="minecraft:endstone" #catalogue icon
 
-    logoFile="icon.png" #optional
-    description = '''
-    A small library with many cool unique features, from dynamic asset generation to dynamic villager schedules and simple multi loader utilities
-    '''
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "REQUIRED"
+versionRange = "${forge_version_range}"
+ordering = "NONE"
+side = "BOTH"
 
-[[dependencies.moonlight]]
-    modId = "forge"
-    type = "REQUIRED"
-    versionRange = "[47.0.0,)"
-    ordering = "NONE"
-    side = "BOTH"
-
-[[dependencies.moonlight]]
-    modId = "minecraft"
-    type = "REQUIRED"
-    versionRange = "[1.20,1.20.2)"
-    ordering = "NONE"
-    side = "BOTH"
-
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "REQUIRED"
+versionRange = "[${minecraft_min_version},${minecraft_max_version})"
+ordering = "NONE"
+side = "BOTH"

@@ -25,7 +25,7 @@ public abstract class FireBlockMixin extends BaseFireBlock {
         super(settings, damage);
     }
 
-    @Inject(method = "tryCatchFire",
+    @Inject(method = "checkBurnOut",
             at = @At(value = "INVOKE",
                     target = "net/minecraft/world/level/Level.removeBlock (Lnet/minecraft/core/BlockPos;Z)Z",
                     shift = At.Shift.AFTER))

@@ -62,9 +62,8 @@ public class MoonlightForgeClient {
     }
 
 
-    @SubscribeEvent
-    public static void registerShaders(RegisterShadersEvent event) {
-
+    public static void onTextureStitch(TextureAtlasStitchedEvent event) {
+        MoonlightClient.afterTextureReload();
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -81,9 +80,5 @@ public class MoonlightForgeClient {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onTextureStitch(TextureAtlasStitchedEvent event) {
-        MoonlightClient.afterTextureReload();
-    }
 
 }

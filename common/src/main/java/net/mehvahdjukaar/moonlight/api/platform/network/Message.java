@@ -4,7 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 
 public interface Message {
 
-    void writeToBuffer(FriendlyByteBuf buf);
+    void write(FriendlyByteBuf buf);
 
-    void handle(ChannelHandler.Context context);
+    void handle(NetworkHelper.Context context);
 }

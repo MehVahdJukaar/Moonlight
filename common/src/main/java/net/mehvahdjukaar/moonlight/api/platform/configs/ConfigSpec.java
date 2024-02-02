@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
@@ -114,7 +115,7 @@ public abstract class ConfigSpec {
         if (this.getConfigType() == ConfigType.COMMON && this.isSynced()) {
             try {
                 final byte[] configData = Files.readAllBytes(this.getFullPath());
-                ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundSyncConfigsMessage(configData, this.getFileName(), this.getModId()));
+                NetworkHelper.sendToClientPlayer(player, new ClientBoundSyncConfigsMessage(configData, this.getFileName(), this.getModId()));
             } catch (IOException e) {
                 Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
             }

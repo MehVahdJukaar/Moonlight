@@ -13,7 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import pepjebs.mapatlases.MapAtlasesMod;
 import pepjebs.mapatlases.client.MapAtlasesClient;
 import pepjebs.mapatlases.item.MapAtlasItem;
+import pepjebs.mapatlases.map_collection.IMapCollection;
 import pepjebs.mapatlases.map_collection.MapKey;
+
 
 public class MapAtlasCompat {
 
@@ -23,8 +25,8 @@ public class MapAtlasCompat {
 
     @Nullable
     public static MapItemSavedData getSavedDataFromAtlas(ItemStack atlas, Level level, Player player) {
-        if(isAtlas(atlas.getItem())) {
-            var maps = MapAtlasItem.getMaps(atlas, level);
+        if (isAtlas(atlas.getItem())) {
+            IMapCollection maps = MapAtlasItem.getMaps(atlas, level);
             if (maps != null) {
                 var slice = MapAtlasItem.getSelectedSlice(atlas, level.dimension());
                 var key = MapKey.at(maps.getScale(), player, slice);
@@ -40,7 +42,8 @@ public class MapAtlasCompat {
     @Nullable
     public static Integer getMapIdFromAtlas(ItemStack atlas, Level level, Object data) {
         try {
-            var maps = MapAtlasItem.getMaps(atlas, level);
+            IMapCollection c = null;
+            IMapCollection maps = MapAtlasItem.getMaps(atlas, level);
             if (maps != null) {
                 for (var e : maps.getAll()) {
                     if (e.data == data) {

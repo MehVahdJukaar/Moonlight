@@ -3,10 +3,9 @@ package net.mehvahdjukaar.moonlight.core.network.fabric;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
@@ -76,7 +75,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeVarInt(this.typeId);
         buf.writeInt(this.entityId);
         buf.writeLong(this.uuid.getMostSignificantBits());
@@ -97,7 +96,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
+    public void handle(NetworkHelper.Context context) {
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.byId(this.typeId);
 
         Level world = context.getSender().level();

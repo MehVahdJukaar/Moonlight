@@ -1,6 +1,7 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "1.4-SNAPSHOT" apply false
+    id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
     id "com.matthewprenger.cursegradle" version "1.4.0"
     id "com.modrinth.minotaur" version "2.8.4"
 }
@@ -11,9 +12,9 @@ architectury {
 
 subprojects {
     apply plugin: "dev.architectury.loom"
+    apply plugin: "io.github.juuxel.loom-quiltflower"
     apply plugin: "com.matthewprenger.cursegradle"
     apply plugin: "com.modrinth.minotaur"
-
 
     loom {
         silentMojangMappingsLicense()
@@ -22,7 +23,6 @@ subprojects {
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
         mappings loom.layered() {
-
             it.parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}")
             it.officialMojangMappings {
                 setNameSyntheticMembers(false)
@@ -40,8 +40,11 @@ subprojects {
         modrinth {
             projectId = mod_id
             uploadFile = tasks.remapJar
-            gameVersions = [minecraft_version]
-            loaders = [modLoader]
+            gameVersions = [rootProject.minecraft_version]
+            if (modLoader == "forge") {
+                loaders = ["neoforge"]
+            } else loaders = [modLoader]
+
             changelog = changelogText
             versionNumber = modLoader + "_" + mod_version
             versionType = "release"
@@ -56,7 +59,6 @@ subprojects {
     }
 
     if (env.CURSEFORGE_TOKEN) {
-
         curseforge {
             apiKey = env.CURSEFORGE_TOKEN
             project {
@@ -64,13 +66,12 @@ subprojects {
                 changelog = changelogText
                 changelogType = 'markdown'
                 releaseType = 'release'
+                addGameVersion rootProject.minecraft_version
+                if (modLoader == "forge") {
+                    addGameVersion("NeoForge")
+                } else addGameVersion modLoader.capitalize()
 
                 mainArtifact(tasks.remapJar)
-                addArtifact(tasks.remapSourcesJar)
-
-                addGameVersion rootProject.minecraft_version
-                if(modLoader == "forge") modLoader = "NeoForge"
-                addGameVersion modLoader.capitalize()
 
                 if (modLoader == "fabric") {
                     relations {
@@ -88,9 +89,10 @@ allprojects {
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    archivesBaseName = rootProject.mod_id
-    version = rootProject.mod_version
-    group = rootProject.maven_group
+    archivesBaseName = mod_id
+    version = mod_version
+    group = mod_group_id
+
 
     repositories {
 
@@ -106,15 +108,27 @@ allprojects {
             url = "https://www.cursemaven.com"
             allowInsecureProtocol = true
         }
+
+        maven {
+            url "https://maven.firstdarkdev.xyz/snapshots"
+        }
+
         maven {
             name = 'Ladysnake Mods'
             url = 'https://maven.ladysnake.org/releases'
         }
 
         maven { url 'https://jitpack.io' }
+
         maven {
             url = 'https://maven.neoforged.net'
         }
+
+        maven {
+            url = "https://api.modrinth.com/maven"
+        }
+
+
     }
 
     tasks.withType(JavaCompile) {
@@ -124,6 +138,5 @@ allprojects {
 
     java {
         withSourcesJar()
-
     }
 }

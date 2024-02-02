@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
@@ -12,7 +11,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -54,12 +55,10 @@ import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.EventHooks;
-import net.neoforged.neoforge.network.NetworkHooks;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.Nullable;
@@ -129,9 +128,6 @@ public class PlatHelperImpl {
         return food.getFoodProperties(stack, player);
     }
 
-
-
-
     public static int getBurnTime(ItemStack stack) {
         return CommonHooks.getBurnTime(stack, null);
     }
@@ -141,8 +137,9 @@ public class PlatHelperImpl {
         return ServerLifecycleHooks.getCurrentServer();
     }
 
+    //Forge now handles this internally. We don't need to override anymore
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
-        return NetworkHooks.getEntitySpawningPacket(entity);
+        return new ClientboundAddEntityPacket(entity);
     }
 
     public static Path getGamePath() {
@@ -190,13 +187,12 @@ public class PlatHelperImpl {
     }
 
 
-
     public static boolean isModLoadingValid() {
         return ModLoader.isLoadingStateValid();
     }
 
     public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataProvider) {
-        NetworkHooks.openScreen(player, menuProvider, extraDataProvider);
+        player.openMenu(menuProvider, extraDataProvider);
     }
 
     public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
@@ -257,7 +253,7 @@ public class PlatHelperImpl {
     }
 
     public static String getModVersion(String modId) {
-        return ModList.get().getModContainerById(modId).map(v->v.getModInfo().getVersion().toString()).orElse(null);
+        return ModList.get().getModContainerById(modId).map(v -> v.getModInfo().getVersion().toString()).orElse(null);
     }
 
 

@@ -1,11 +1,10 @@
 architectury {
-    common(rootProject.enabled_platforms.split(",")){
+    common(enabled_platforms.split(",")){
         it.platformPackage("neoforge", "forge")
     }
 }
-
 loom {
-    accessWidenerPath = file("src/main/resources/moonlight.accesswidener")
+    accessWidenerPath = file("src/main/resources/${mod_id}.accesswidener")
 }
 
 sourceSets.create("example"){
@@ -18,18 +17,13 @@ sourceSets.create("example"){
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    // Remove the next line if you don't want to depend on the API
-    //modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
 
     modCompileOnly("curse.maven:yacl-667299:4523734")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly ("curse.maven:map-atlases-forge-519759:5018175")
 
-    //annotationProcessor("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
-   /// implementation("com.github.LlamaLad7:MixinExtras:${mixin_extras_version}")
     annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
-
 }
 
 publishing {
@@ -40,9 +34,7 @@ publishing {
         }
     }
 
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
         // Add repositories to publish to here.
     }
 }
-

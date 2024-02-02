@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.api.events.IFireConsumeBlockEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.core.BlockPos;
@@ -19,9 +20,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FireBlock.class)
 public abstract class FireBlockMixin extends BaseFireBlock {
 
-    @Unique
-    private BlockState bs;
-
     protected FireBlockMixin(Properties settings, float damage) {
         super(settings, damage);
     }
@@ -31,18 +29,12 @@ public abstract class FireBlockMixin extends BaseFireBlock {
             at = @At(value = "INVOKE",
                     target = "net/minecraft/world/level/Level.removeBlock (Lnet/minecraft/core/BlockPos;Z)Z",
                     shift = At.Shift.AFTER))
-    private void afterRemoveBlock(Level level, BlockPos pos, int chance, RandomSource randomSource, int age, CallbackInfo ci) {
+    private void afterRemoveBlock(Level level, BlockPos pos, int chance, RandomSource randomSource, int age, CallbackInfo ci,
+                                  @Local BlockState bs) {
         var event = IFireConsumeBlockEvent.create(pos, level, bs, chance, age, Direction.DOWN);
         MoonlightEventsHelper.postEvent(event, IFireConsumeBlockEvent.class);
         BlockState newState = event.getFinalState();
         if (newState != null) level.setBlockAndUpdate(pos, newState);
-    }
-
-    @Inject(method = "checkBurnOut",
-            at = @At(value = "INVOKE",
-                    target = "net/minecraft/world/level/Level.removeBlock (Lnet/minecraft/core/BlockPos;Z)Z"))
-    private void beforeRemoveBlock(Level level, BlockPos blockPos, int i, RandomSource random, int j, CallbackInfo ci) {
-        bs = level.getBlockState(blockPos);
     }
 
 

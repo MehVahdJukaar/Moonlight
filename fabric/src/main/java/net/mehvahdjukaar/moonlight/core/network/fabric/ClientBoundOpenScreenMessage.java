@@ -3,9 +3,8 @@ package net.mehvahdjukaar.moonlight.core.network.fabric;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.MenuScreensAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.MenuTypeAccessor;
@@ -16,12 +15,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -52,7 +48,7 @@ public class ClientBoundOpenScreenMessage implements Message {
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeVarInt(this.containerId);
         buf.writeId(BuiltInRegistries.MENU, this.type);
         buf.writeComponent(this.title);
@@ -60,7 +56,7 @@ public class ClientBoundOpenScreenMessage implements Message {
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
+    public void handle(NetworkHelper.Context context) {
         clientHandle();
     }
 
@@ -111,7 +107,7 @@ public class ClientBoundOpenScreenMessage implements Message {
             FriendlyByteBuf output = new FriendlyByteBuf(Unpooled.buffer());
             output.writeVarInt(extraData.readableBytes());
             output.writeBytes(extraData);
-            ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundOpenScreenMessage(containerMenu.containerId,
+            NetworkHelper.sendToClientPlayer(player, new ClientBoundOpenScreenMessage(containerMenu.containerId,
                     containerMenu.getType(), menuProvider.getDisplayName(), output));
             p.invokeInitMenu(containerMenu);
             player.containerMenu = containerMenu;

@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.network;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -16,12 +16,12 @@ public class ClientBoundFinalizeFluidsMessage implements Message {
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buffer) {
+    public void write(FriendlyByteBuf buffer) {
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
-        if (context.getDirection() == NetworkDir.PLAY_TO_CLIENT) {
+    public void handle(NetworkHelper.Context context) {
+        if (context.getDirection() == NetworkDir.CLIENTBOUND) {
             SoftFluidRegistry.postInitClient();
         }
     }

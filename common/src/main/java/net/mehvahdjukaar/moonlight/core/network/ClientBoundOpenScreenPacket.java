@@ -3,39 +3,28 @@ package net.mehvahdjukaar.moonlight.core.network;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.IScreenProvider;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.Level;
-
-import java.util.function.Consumer;
 
 
-public class ClientBoundOpenScreenPacket implements Message {
-    public final BlockPos pos;
-    private final Direction dir;
+public record ClientBoundOpenScreenPacket(BlockPos pos, Direction dir) implements Message {
 
     public ClientBoundOpenScreenPacket(FriendlyByteBuf buffer) {
-        this.pos = buffer.readBlockPos();
-        this.dir = Direction.from3DDataValue(buffer.readVarInt());
-    }
-
-    public ClientBoundOpenScreenPacket(BlockPos pos, Direction hitFace) {
-        this.pos = pos;
-        this.dir = hitFace;
+        this(buffer.readBlockPos(), Direction.from3DDataValue(buffer.readVarInt()));
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buffer) {
+    public void write(FriendlyByteBuf buffer) {
         buffer.writeBlockPos(this.pos);
         buffer.writeVarInt(this.dir.get3DDataValue());
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
+    public void handle(NetworkHelper.Context context) {
         handleOpenScreenPacket(this);
     }
 

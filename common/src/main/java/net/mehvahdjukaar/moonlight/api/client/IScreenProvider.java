@@ -2,14 +2,13 @@ package net.mehvahdjukaar.moonlight.api.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundOpenScreenPacket;
-import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * Implement in your blocks or tiles. Just for utility method
@@ -17,10 +16,10 @@ import net.minecraft.world.phys.Vec3;
 public interface IScreenProvider {
 
     @Environment(EnvType.CLIENT)
-     void openScreen(Level level, BlockPos pos, Player player, Direction direction);
+    void openScreen(Level level, BlockPos pos, Player player, Direction direction);
 
     default void sendOpenGuiPacket(Level level, BlockPos pos, Player player, Direction hitFace) {
-        ModMessages.CHANNEL.sendToClientPlayer((ServerPlayer) player,
+        NetworkHelper.sendToClientPlayer((ServerPlayer) player,
                 new ClientBoundOpenScreenPacket(pos, hitFace));
     }
 }

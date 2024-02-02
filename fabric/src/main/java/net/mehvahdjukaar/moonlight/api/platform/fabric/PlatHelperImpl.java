@@ -132,7 +132,7 @@ public class PlatHelperImpl {
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
         var packet = new ClientBoundSpawnCustomEntityMessage(entity);
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        packet.writeToBuffer(buf);
+        packet.write(buf);
         var p =(Packet) ServerPlayNetworking.createS2CPacket(ModMessages.SPAWN_PACKET_ID, buf);
         return (Packet<ClientGamePacketListener>) p;
     }

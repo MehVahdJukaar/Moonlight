@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
@@ -139,7 +140,7 @@ public class SoftFluidRegistry {
 
     @ApiStatus.Internal
     public static void onDataSyncToPlayer(ServerPlayer player, boolean o) {
-        ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundFinalizeFluidsMessage());
+        NetworkHelper.sendToClientPlayer(player, new ClientBoundFinalizeFluidsMessage());
     }
 
     //on data load

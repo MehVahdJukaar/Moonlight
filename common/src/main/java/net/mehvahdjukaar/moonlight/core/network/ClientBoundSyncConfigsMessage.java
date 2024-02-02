@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.network;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.FriendlyByteBuf;
@@ -28,14 +28,14 @@ public class ClientBoundSyncConfigsMessage implements Message {
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeUtf(this.modId);
         buf.writeUtf(this.fineName);
         buf.writeByteArray(this.configData);
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
+    public void handle(NetworkHelper.Context context) {
         var config = ConfigSpec.getSpec(this.modId, ConfigType.COMMON);
         if (config != null) {
             try(var stream =  new ByteArrayInputStream(this.configData)) {

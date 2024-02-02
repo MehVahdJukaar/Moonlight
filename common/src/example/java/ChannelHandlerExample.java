@@ -1,4 +1,4 @@
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -17,8 +17,8 @@ public class ChannelHandlerExample {
         CHANNEL.sendToAllClientPlayersInRange(level, pos, range, new S2CTestMessage(data));
     }
 
-    private static final ChannelHandler CHANNEL = ChannelHandler.builder(Moonlight.MOD_ID)
-            .register(NetworkDir.PLAY_TO_CLIENT, S2CTestMessage.class, S2CTestMessage::new)
+    private static final NetworkHelper CHANNEL = NetworkHelper.builder(Moonlight.MOD_ID)
+            .register(NetworkDir.CLIENTBOUND, S2CTestMessage.class, S2CTestMessage::new)
             .build();
 
     public record S2CTestMessage(int data) implements Message {
@@ -33,7 +33,7 @@ public class ChannelHandlerExample {
         }
 
         @Override
-        public void handle(ChannelHandler.Context context) {
+        public void handle(NetworkHelper.Context context) {
             // Handle your packet on the client here. Be mindful of classloading tho
         }
     }
