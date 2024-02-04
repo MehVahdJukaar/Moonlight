@@ -1,1 +1,1 @@
-fixed neoforge not loading the mod
+fixed forge packets not being executed on main thread

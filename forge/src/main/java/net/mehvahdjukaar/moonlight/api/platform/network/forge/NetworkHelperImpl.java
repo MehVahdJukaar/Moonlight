@@ -51,7 +51,9 @@ public class NetworkHelperImpl {
                     ResourceLocation id = new ResourceLocation(modId, String.valueOf(idCounter++));
                     registerId(id, messageClass);
                     registrar.common(id, buf -> wrap(decoder.apply(buf)), (payload, playPayloadContext) -> {
-                        payload.message.handle(new ContextWrapper(playPayloadContext));
+                        playPayloadContext.workHandler().execute(() ->
+                                //execute on the main thread
+                                payload.message.handle(new ContextWrapper(playPayloadContext)));
                     });
                     return this;
                 }
