@@ -18,7 +18,7 @@ import java.util.Map;
 //hacky registered item that handles placing placeable stuff
 public final class BlockPlacerItem extends BlockItem {
 
-    public static BlockPlacerItem get(){
+    public static BlockPlacerItem get() {
         return MoonlightRegistry.BLOCK_PLACER.get();
     }
 
@@ -32,9 +32,8 @@ public final class BlockPlacerItem extends BlockItem {
 
     @Override
     public void registerBlocks(Map<Block, Item> pBlockToItemMap, Item pItem) {
-      AdditionalItemPlacementsAPI.  onRegistryCallback(pBlockToItemMap);
+        AdditionalItemPlacementsAPI.onRegistryCallback(pBlockToItemMap);
     }
-
 
 
     @Nullable
