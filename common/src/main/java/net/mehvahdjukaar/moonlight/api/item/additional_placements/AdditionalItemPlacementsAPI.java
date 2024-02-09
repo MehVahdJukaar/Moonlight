@@ -15,6 +15,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -23,12 +24,16 @@ public class AdditionalItemPlacementsAPI {
 
     private static boolean isAfterRegistration = false;
     private static WeakReference<Map<Block, Item>> blockToItemsMap = new WeakReference<>(null);
+
+    private static final List<Consumer<Event>> registrationListeners =
+
     private static final List<Pair<Supplier<? extends AdditionalItemPlacement>, Supplier<? extends Item>>> PLACEMENTS = new ArrayList<>();
     private static final List<Pair<Function<Item, ? extends AdditionalItemPlacement>, Predicate<Item>>> PLACEMENTS_GENERIC = new ArrayList<>();
 
     /**
      * Adds a behavior to an existing block. can be called at any time but ideally before registration. Less ideally during mod setup
      */
+    @Deprecated(forRemoval = true)
     public static void register(Supplier<? extends AdditionalItemPlacement> placement, Supplier<? extends Item> itemSupplier) {
         if (PlatHelper.isDev() && isAfterRegistration) {
             throw new IllegalStateException("Attempted to add placeable behavior after registration");
@@ -36,6 +41,7 @@ public class AdditionalItemPlacementsAPI {
         PLACEMENTS.add(Pair.of(placement, itemSupplier));
     }
 
+    @Deprecated(forRemoval = true)
     public static void register(Function<Item, ? extends AdditionalItemPlacement> placement, Predicate<Item> itemPredicate) {
         if (PlatHelper.isDev() && isAfterRegistration) {
             throw new IllegalStateException("Attempted to add placeable behavior after registration");
@@ -110,6 +116,13 @@ public class AdditionalItemPlacementsAPI {
             blockToItemsMap.clear();
         }
         isAfterRegistration = true;
+    }
+
+    public interface Event{
+
+        Item getTarget();
+
+        void register(AdditionalItemPlacement instance);
     }
 
 }
