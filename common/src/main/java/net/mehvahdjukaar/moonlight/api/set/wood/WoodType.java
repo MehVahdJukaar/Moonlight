@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.set.wood;
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -14,7 +13,6 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CeilingHangingSignBlock;
-import net.minecraft.world.level.block.FurnaceBlock;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -88,8 +86,7 @@ public class WoodType extends BlockType {
 
     @Nullable
     protected Block findWithPrefix(String prefix, String postfix) {
-        postfix = "_" + postfix;
-        prefix = prefix.isEmpty() ? "" : prefix + "_";
+        String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
         var id = this.getId();
         String logN = Utils.getID(this.log).getPath();
 
@@ -97,15 +94,15 @@ public class WoodType extends BlockType {
         if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
             var o = BuiltInRegistries.BLOCK.getOptional(
                     new ResourceLocation(id.getNamespace(),
-                            "wood/" + prefix + postfix.replace("_", "") + "/" + id.getPath()));
+                            "wood/" + prefix_ + postfix + "/" + id.getPath()));
             if (o.isPresent()) return o.get();
         }
 
         ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), logN + "_" + prefix + postfix),
-                new ResourceLocation(id.getNamespace(), prefix + logN + postfix),
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + prefix + postfix),
-                new ResourceLocation(id.getNamespace(), prefix + id.getPath() + postfix)
+                new ResourceLocation(id.getNamespace(), logN + "_" + prefix_ + postfix),
+                new ResourceLocation(id.getNamespace(), prefix_ + logN + "_" + postfix),
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + prefix_ + postfix),
+                new ResourceLocation(id.getNamespace(), prefix_ + id.getPath() + "_" + postfix)
         };
         Block found = null;
         for (var r : targets) {

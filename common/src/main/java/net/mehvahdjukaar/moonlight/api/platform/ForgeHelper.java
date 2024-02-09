@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
+import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,11 +18,9 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -46,9 +45,14 @@ import java.util.function.Consumer;
  */
 public class ForgeHelper {
 
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static FinishedRecipe addRecipeConditions(FinishedRecipe originalRecipe, List<Object> conditions) {
         throw new AssertionError();
+    }
+
+    public static <T> DynamicOps<T> addConditionOps(DynamicOps<T> ops) {
+        return ops; //TODO: 1.20.4
     }
 
     @ExpectPlatform
@@ -188,7 +192,7 @@ public class ForgeHelper {
     }
 
     @ExpectPlatform
-    public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to){
+    public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
     }
 
     @ExpectPlatform
@@ -198,7 +202,7 @@ public class ForgeHelper {
     }
 
     @ExpectPlatform
-    public static boolean canItemStack(ItemStack i, ItemStack i1){
+    public static boolean canItemStack(ItemStack i, ItemStack i1) {
         throw new AssertionError();
     }
 
