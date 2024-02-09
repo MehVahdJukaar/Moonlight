@@ -25,7 +25,7 @@ public class AdditionalItemPlacementsAPI {
     private static boolean isAfterRegistration = false;
     private static WeakReference<Map<Block, Item>> blockToItemsMap = new WeakReference<>(null);
 
-    private static final List<Consumer<Event>> registrationListeners =
+    private static final List<Consumer<Event>> registrationListeners = new ArrayList<>();
 
     private static final List<Pair<Supplier<? extends AdditionalItemPlacement>, Supplier<? extends Item>>> PLACEMENTS = new ArrayList<>();
     private static final List<Pair<Function<Item, ? extends AdditionalItemPlacement>, Predicate<Item>>> PLACEMENTS_GENERIC = new ArrayList<>();
@@ -49,6 +49,7 @@ public class AdditionalItemPlacementsAPI {
         PLACEMENTS_GENERIC.add(Pair.of(placement, itemPredicate));
     }
 
+    @Deprecated(forRemoval = true)
     public static void registerSimple(Supplier<? extends Block> block, Supplier<? extends Item> itemSupplier) {
         register(() -> new AdditionalItemPlacement(block.get()), itemSupplier);
     }
@@ -57,7 +58,6 @@ public class AdditionalItemPlacementsAPI {
     public static AdditionalItemPlacement getBehavior(Item item) {
         return ((IExtendedItem) item).moonlight$getAdditionalBehavior();
     }
-
 
     public static boolean hasBehavior(Item item) {
         return getBehavior(item) != null;
@@ -87,6 +87,20 @@ public class AdditionalItemPlacementsAPI {
                     if (predicate.test(item)) {
                         PLACEMENTS.add(Pair.of(() -> v.getFirst().apply(item), () -> item));
                     }
+                }
+                Event ev = new Event() {
+                    @Override
+                    public Item getTarget() {
+                        return item;
+                    }
+
+                    @Override
+                    public void register(AdditionalItemPlacement instance) {
+                        PLACEMENTS.add(Pair.of(() -> instance, () -> item));
+                    }
+                };
+                for (var l : registrationListeners) {
+                    l.accept(ev);
                 }
             }
             PLACEMENTS_GENERIC.clear();
@@ -118,11 +132,16 @@ public class AdditionalItemPlacementsAPI {
         isAfterRegistration = true;
     }
 
-    public interface Event{
+    public interface Event {
 
         Item getTarget();
 
         void register(AdditionalItemPlacement instance);
+
+        // Registers default instance to make simple block placement behavior
+        default void registerSimple(Block toPlace) {
+            register(new AdditionalItemPlacement(toPlace));
+        }
     }
 
 }
