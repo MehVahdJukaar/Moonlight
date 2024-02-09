@@ -1,1 +1,2 @@
-actually moved villager trades to moonlight/villager_trades (sad but im tired of getting reports of another mod issue)
+minor improvements to wood detection system
+added no_op villager trade type, useful to replace existing data ones to disale them
