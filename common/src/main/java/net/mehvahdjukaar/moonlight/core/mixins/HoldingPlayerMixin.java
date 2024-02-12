@@ -92,14 +92,18 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
         }
         //update every 5 sec
         List<CustomMapDecoration> extra = new ArrayList<>();
-        if ((moonlight$volatileDecorationRefreshTicks++ % (20 * 5)) == 0 || updateDeco) {
-            //adds dynamic decoration and sends them to a client
-            for (MapBlockMarker<?> m : MapDataInternal.getDynamicServer(player, mapId, data)) {
-                var d = m.createDecorationFromMarker(data);
-                if (d != null) extra.add(d);
-            }
-            updateDeco = true;
+        //we got to update every darn time if we want other heartstone players to be updated properly. Cant use client info because client doesnt have them
+        //re any time check optimization will be done by those getDynamic functions
+        //if ((moonlight$volatileDecorationRefreshTicks++ % (20 * 4)) == 0 || updateDeco) {
+        //adds dynamic decoration and sends them to a client
+        for (MapBlockMarker<?> m : MapDataInternal.getDynamicServer(player, mapId, data)) {
+            var d = m.createDecorationFromMarker(data);
+            if (d != null) extra.add(d);
         }
+        // only send if we have stuff to update or every 4 sec
+        // this ensures removal happens (even if late), while keeping additions / modifications instant
+        if(!extra.isEmpty() || (moonlight$volatileDecorationRefreshTicks++ % (20 * 4)) == 0) updateDeco = true;
+        //}
 
         if (updateData || updateDeco) {
             // creates a new packet or modify existing one

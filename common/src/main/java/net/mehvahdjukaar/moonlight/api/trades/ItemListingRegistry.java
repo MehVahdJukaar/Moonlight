@@ -61,7 +61,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
         for (var e : jsons.entrySet()) {
             var json = e.getValue();
             var id = e.getKey();
-            if (!id.getPath().contains("/")) {
+            if (id.getPath().contains("/")) {
                 parseAndAddTrade(json, id, ops);
             }
         }
@@ -77,7 +77,11 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
         var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(targetId);
         if (profession.isPresent()) {
             ModItemListing trade = parseOrThrow(json, id, ops);
-            if (!(trade instanceof NoOpListing)) {
+            if ((trade instanceof NoOpListing)) {
+                // no op
+            } else if (trade instanceof RemoveNonDataListingListing) {
+                //TODO: add remove trades
+            } else {
                 customTrades.computeIfAbsent(profession.get(), t ->
                                 new Int2ObjectArrayMap<>()).computeIfAbsent(trade.getLevel(), a -> new ArrayList<>())
                         .add(trade);

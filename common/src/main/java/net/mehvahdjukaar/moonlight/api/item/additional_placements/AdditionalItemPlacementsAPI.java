@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.item.additional_placements;
 
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
@@ -54,6 +55,11 @@ public class AdditionalItemPlacementsAPI {
         register(() -> new AdditionalItemPlacement(block.get()), itemSupplier);
     }
 
+    public static void addRegistration(Consumer<Event> eventConsumer){
+        Moonlight.assertInitPhase();
+        registrationListeners.add(eventConsumer);
+    }
+
     @Nullable
     public static AdditionalItemPlacement getBehavior(Item item) {
         return ((IExtendedItem) item).moonlight$getAdditionalBehavior();
@@ -88,20 +94,10 @@ public class AdditionalItemPlacementsAPI {
                         PLACEMENTS.add(Pair.of(() -> v.getFirst().apply(item), () -> item));
                     }
                 }
-                Event ev = new Event() {
-                    @Override
-                    public Item getTarget() {
-                        return item;
-                    }
-
-                    @Override
-                    public void register(AdditionalItemPlacement instance) {
-                        PLACEMENTS.add(Pair.of(() -> instance, () -> item));
-                    }
-                };
-                for (var l : registrationListeners) {
-                    l.accept(ev);
-                }
+            }
+            Event ev = (target, instance) -> PLACEMENTS.add(Pair.of(() -> instance, () -> target));
+            for (var l : registrationListeners) {
+                l.accept(ev);
             }
             PLACEMENTS_GENERIC.clear();
             for (var p : PLACEMENTS) {
@@ -134,13 +130,11 @@ public class AdditionalItemPlacementsAPI {
 
     public interface Event {
 
-        Item getTarget();
-
-        void register(AdditionalItemPlacement instance);
+        void register(Item target, AdditionalItemPlacement instance);
 
         // Registers default instance to make simple block placement behavior
-        default void registerSimple(Block toPlace) {
-            register(new AdditionalItemPlacement(toPlace));
+        default void registerSimple(Item target, Block toPlace) {
+            register(target, new AdditionalItemPlacement(toPlace));
         }
     }
 
