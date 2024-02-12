@@ -34,6 +34,11 @@ public class AdditionalItemPlacementsAPI {
         registrationListeners.add(eventConsumer);
     }
 
+    public static void addRegistration(Consumer<Event> eventConsumer){
+        Moonlight.assertInitPhase();
+        registrationListeners.add(eventConsumer);
+    }
+
     @Nullable
     public static AdditionalItemPlacement getBehavior(Item item) {
         return ((IExtendedItem) item).moonlight$getAdditionalBehavior();
@@ -108,13 +113,11 @@ public class AdditionalItemPlacementsAPI {
 
     public interface Event {
 
-        Item getTarget();
-
-        void register(AdditionalItemPlacement instance);
+        void register(Item target, AdditionalItemPlacement instance);
 
         // Registers default instance to make simple block placement behavior
-        default void registerSimple(Block toPlace) {
-            register(new AdditionalItemPlacement(toPlace));
+        default void registerSimple(Item target, Block toPlace) {
+            register(target, new AdditionalItemPlacement(toPlace));
         }
     }
 

@@ -20,9 +20,10 @@ public interface CustomBakedModel extends BakedModel {
 
     /**
      * Main implementation
+     * render type is null when we do block breaking animation
      */
     List<BakedQuad> getBlockQuads(BlockState state, Direction direction, RandomSource randomSource,
-                                  RenderType renderType, ExtraModelData extraModelData);
+                                  @Nullable RenderType renderType, ExtraModelData extraModelData);
 
     TextureAtlasSprite getBlockParticle(ExtraModelData extraModelData);
 

@@ -190,5 +190,15 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
         return null;
     }
 
+    // override to give special behaviors
+    public int getFlags(){
+        return 0;
+    }
+
+    public boolean hasFlag(int flag){
+        return (getFlags() & flag) != 0;
+    }
+
+    public static final int HAS_SMALL_TEXTURE_FLAG = 1;
 
 }

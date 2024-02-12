@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
@@ -23,7 +22,6 @@ import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -122,7 +120,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         buf.writeBoolean(moonlight$customData != null);
         if (moonlight$customData != null) {
             buf.writeNbt(moonlight$customData);
-           // writeCompressedNbt(buf, moonlight$customData);
+            // writeCompressedNbt(buf, moonlight$customData);
         }
     }
 
@@ -171,36 +169,40 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         mapData.centerZ = this.moonlight$mapCenterZ;
         mapData.dimension = this.moonlight$getDimension();
 
-        if (serverDeco != null || serverData != null) {
 
-            if (mapData instanceof ExpandedMapData ed) {
-                //mapData = MapItemSavedData.createForClient(message.scale, message.locked, Minecraft.getInstance().level.dimension());
-                //Minecraft.getInstance().level.setMapData(string, mapData);
+        if (mapData instanceof ExpandedMapData ed) {
+            Map<String, CustomMapDecoration> decorations = ed.getCustomDecorations();
 
-                if (serverDeco != null) {
-                    Map<String, CustomMapDecoration> decorations = ed.getCustomDecorations();
-                    decorations.clear();
-                    int i;
-                    for (i = 0; i < serverDeco.length; ++i) {
-                        CustomMapDecoration customDecoration = serverDeco[i];
-                        if (customDecoration != null) decorations.put("icon-" + i, customDecoration);
-                        else {
-                            Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");
-                        }
-                    }
-                    //adds dynamic todo use deco instead
-                    for (MapBlockMarker<?> m : MapDataInternal.getDynamicClient(mapId, mapData)) {
-                        var d = m.createDecorationFromMarker(mapData);
-                        if (d != null) {
-                            decorations.put(m.getMarkerId(), d);
-                        }
+
+            //mapData = MapItemSavedData.createForClient(message.scale, message.locked, Minecraft.getInstance().level.dimension());
+            //Minecraft.getInstance().level.setMapData(string, mapData);
+
+            if (serverDeco != null) {
+                decorations.clear();
+                int i;
+                for (i = 0; i < serverDeco.length; ++i) {
+                    CustomMapDecoration customDecoration = serverDeco[i];
+                    if (customDecoration != null) decorations.put("icon-" + i, customDecoration);
+                    else {
+                        Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");
                     }
                 }
-                if (serverData != null) {
-                    var customData = ed.getCustomData();
-                    for (var v : customData.values()) {
-                        v.loadUpdateTag(this.moonlight$customData);
-                    }
+
+            }
+            if (serverData != null) {
+                var customData = ed.getCustomData();
+                for (var v : customData.values()) {
+                    v.loadUpdateTag(this.moonlight$customData);
+                }
+            }
+
+            //adds dynamic todo use deco instead
+            // aaa not optimal but needed for player like behavior
+            // update immediately all the times
+            for (MapBlockMarker<?> m : MapDataInternal.getDynamicClient(mapId, mapData)) {
+                var d = m.createDecorationFromMarker(mapData);
+                if (d != null) {
+                    decorations.put(m.getMarkerId(), d);
                 }
             }
         }

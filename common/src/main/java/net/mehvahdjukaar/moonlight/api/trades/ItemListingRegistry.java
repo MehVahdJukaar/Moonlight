@@ -5,16 +5,18 @@ import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
+import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -24,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class ItemListingRegistry extends SimpleJsonResourceReloadListener {
+public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
     public static final ItemListingRegistry INSTANCE = new ItemListingRegistry();
 
@@ -43,10 +45,11 @@ public class ItemListingRegistry extends SimpleJsonResourceReloadListener {
         super(new Gson(), "moonlight/villager_trades");
         serializers.put(new ResourceLocation("simple"), (Codec<ModItemListing>) (Object) SimpleItemListing.CODEC);
         serializers.put(new ResourceLocation("remove_all_non_data"), (Codec<ModItemListing>) (Object) RemoveNonDataListingListing.CODEC);
+        serializers.put(new ResourceLocation("no_op"), (Codec<ModItemListing>) (Object) NoOpListing.CODEC);
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> jsons, ResourceManager resourceManager, ProfilerFiller profiler) {
+    public void parse(Map<ResourceLocation, JsonElement> jsons, RegistryAccess registryAccess) {
 
         mergeProfessionAndSpecial(false);
 
@@ -54,38 +57,48 @@ public class ItemListingRegistry extends SimpleJsonResourceReloadListener {
         customTrades.clear();
         specialCustomTrades.clear();
 
+        DynamicOps<JsonElement> ops = ForgeHelper.addConditionOps(RegistryOps.create(JsonOps.INSTANCE, registryAccess));
         for (var e : jsons.entrySet()) {
-            var j = e.getValue();
+            var json = e.getValue();
             var id = e.getKey();
-            try {
-                if (!id.getPath().contains("/")) continue;
-                var targetId = id.withPath(p -> p.substring(0, p.lastIndexOf('/')));
-                var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(targetId);
-                if (profession.isPresent()) {
-                    ModItemListing trade = parseOrThrow(j, id);
-                    customTrades.computeIfAbsent(profession.get(), t ->
-                                    new Int2ObjectArrayMap<>()).computeIfAbsent(trade.getLevel(), a -> new ArrayList<>())
-                            .add(trade);
-                    continue;
-                }
-                var entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(targetId);
-                if (entityType.isPresent()) {
-                    ModItemListing trade = parseOrThrow(j, id);
-                    specialCustomTrades.computeIfAbsent(entityType.get(), t ->
-                                    new Int2ObjectArrayMap<>()).computeIfAbsent(trade.getLevel(), a -> new ArrayList<>())
-                            .add(trade);
-
-                } else {
-                    Moonlight.LOGGER.warn("Unknown villager type: {}", targetId);
-                }
-            } catch (Exception err) {
-                Moonlight.LOGGER.error("Something went wrong while parsing custom villager trades", err);
+            if (id.getPath().contains("/")) {
+                parseAndAddTrade(json, id, ops);
             }
         }
 
         mergeProfessionAndSpecial(true);
         if (count != 0) {
             Moonlight.LOGGER.info("Applied {} data villager trades", count);
+        }
+    }
+
+    private void parseAndAddTrade(JsonElement json, ResourceLocation id, DynamicOps<JsonElement> ops) {
+        var targetId = id.withPath(p -> p.substring(0, p.lastIndexOf('/')));
+        var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(targetId);
+        if (profession.isPresent()) {
+            ModItemListing trade = parseOrThrow(json, id, ops);
+            if ((trade instanceof NoOpListing)) {
+                // no op
+            } else if (trade instanceof RemoveNonDataListingListing) {
+                //TODO: add remove trades
+            } else {
+                customTrades.computeIfAbsent(profession.get(), t ->
+                                new Int2ObjectArrayMap<>()).computeIfAbsent(trade.getLevel(), a -> new ArrayList<>())
+                        .add(trade);
+            }
+            return;
+        }
+        var entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(targetId);
+        if (entityType.isPresent()) {
+            ModItemListing trade = parseOrThrow(json, id, ops);
+            if (!(trade instanceof NoOpListing)) {
+                specialCustomTrades.computeIfAbsent(entityType.get(), t ->
+                                new Int2ObjectArrayMap<>()).computeIfAbsent(trade.getLevel(), a -> new ArrayList<>())
+                        .add(trade);
+            }
+
+        } else {
+            Moonlight.LOGGER.warn("Unknown villager type: {}", targetId);
         }
     }
 
@@ -119,8 +132,8 @@ public class ItemListingRegistry extends SimpleJsonResourceReloadListener {
         }
     }
 
-    private static ModItemListing parseOrThrow(JsonElement j, ResourceLocation id) {
-        return ModItemListing.CODEC.decode(JsonOps.INSTANCE, j)
+    private static ModItemListing parseOrThrow(JsonElement j, ResourceLocation id, DynamicOps<JsonElement> ops) {
+        return ModItemListing.CODEC.decode(ops, j)
                 .getOrThrow(false, errorMsg -> Moonlight.LOGGER.warn("Failed to parse custom trade with id {} - error: {}",
                         id, errorMsg)).getFirst();
     }
