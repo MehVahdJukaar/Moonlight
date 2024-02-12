@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.integration.configured;
 
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mrcrayfish.configured.api.ConfigType;
 import com.mrcrayfish.configured.api.IModConfig;
 import com.mrcrayfish.configured.client.screen.ModConfigSelectionScreen;
@@ -9,7 +9,6 @@ import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.impl.forge.ForgeConfig;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
-import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
@@ -49,19 +48,23 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     ConfigSpec... specs) {
-        this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap( specs));
+        this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap(specs));
     }
 
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     Map<ConfigType, Set<IModConfig>> configMap) {
-         super(parent, Component.literal(displayName), background, configMap);
+        super(parent, Component.literal(displayName), ensureNotNull(background), configMap);
         this.configScreenFactory = configScreenFactory;
         this.mainIcon = mainIcon;
         this.modId = modId;
         ModContainer container = ModList.get().getModContainerById(modId).get();
         this.modURL = container.getModInfo().getModURL().map(URL::getPath).orElse(null);
+    }
+
+    public static ResourceLocation ensureNotNull(ResourceLocation background) {
+        return background == null ? new ResourceLocation("minecraft:textures/gui/options_background.png") : background;
     }
 
     public ItemStack getMainIcon() {
@@ -130,7 +133,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.render(graphics, mouseX, mouseY, partialTicks);
-
+        Lighting.setupFor3DItems();
         int titleWidth = this.font.width(this.title) + 35;
         graphics.renderFakeItem(mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2);
         graphics.renderFakeItem(mainIcon, (this.width / 2) - titleWidth / 2, 2);
