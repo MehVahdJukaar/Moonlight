@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.forge;
 
-import net.mehvahdjukaar.moonlight.api.client.model.RetexturedModelLoader;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -39,7 +38,7 @@ import java.lang.ref.WeakReference;
 @Mod(Moonlight.MOD_ID)
 public class MoonlightForge {
     public static final String MOD_ID = Moonlight.MOD_ID;
-    private static final ForgeConfigSpec SPEC = ((ConfigSpecWrapper) ConfigBuilder.create(MOD_ID, ConfigType.COMMON)
+    public static final ForgeConfigSpec SPEC = ((ConfigSpecWrapper) ConfigBuilder.create(MOD_ID, ConfigType.COMMON)
             .buildAndRegister()).getSpec();
 
     public MoonlightForge() {
@@ -51,9 +50,6 @@ public class MoonlightForge {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init();
             MoonlightClient.initClient();
-            ClientHelper.addModelLoaderRegistration(modelLoaderEvent -> {
-                modelLoaderEvent.register(Moonlight.res("lazy_copy"), new RetexturedModelLoader());
-            });
         }
     }
 

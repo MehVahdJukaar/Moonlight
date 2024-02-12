@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.integration.configured;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -35,6 +36,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -102,7 +104,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     //needed for custom title
     protected CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
                                  Screen parent, IModConfig config) {
-        super(parent, title, config, background);
+        super(parent, title, config, CustomConfigSelectScreen.ensureNotNull(background));
         this.modId = modId;
         this.mainIcon = mainIcon;
     }
@@ -201,7 +203,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.render(graphics, mouseX, mouseY, partialTicks);
-
+        Lighting.setupFor3DItems();
         int titleWidth = this.font.width(this.title) + 35;
         graphics.renderFakeItem(mainIcon, (this.width / 2) + titleWidth / 2 - 17, 2);
         graphics.renderFakeItem(mainIcon, (this.width / 2) - titleWidth / 2, 2);
@@ -326,7 +328,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             RenderUtil.renderGuiItemRelative(graphics.pose(), this.icon, center + 95 - 17, top + 2, renderer,
                     (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
 
-
             RenderUtil.renderGuiItemRelative(graphics.pose(), this.icon, center - 95, top + 2, renderer,
                     (s, m) -> rotateItem(ticks, partialTicks, s, m), light, OverlayTexture.NO_OVERLAY);
 
@@ -398,8 +399,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         @Override
         public void render(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovered, float partialTicks) {
             this.button.setMessage(Component.literal(""));
-            //TODO: 1.20 add back
-            //super.render(graphics, index, top, left, width, height, mouseX, mouseY, hovered, partialTicks);
+            super.render(graphics, index, top, left, width, height, mouseX, mouseY, hovered, partialTicks);
             //hovered concerns the entire entry not just the button
             hovered = this.button.isMouseOver(mouseX, mouseY);
             if (lastTick < CustomConfigScreen.this.ticks) {

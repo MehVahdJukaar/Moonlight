@@ -11,7 +11,10 @@ import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -24,7 +27,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
@@ -81,20 +83,12 @@ public class RenderUtil {
 
         BakedModel model = renderer.getModel(stack, null, null, 0);
         int l = 0;
-        poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, (50 + (model.isGui3d() ? l : 0)));
 
-        Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
-        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         poseStack.pushPose();
-        poseStack.translate(x, y, 100.0F + 50.0F);
-        poseStack.translate(8.0D, 8.0D, 0.0D);
-        poseStack.scale(1.0F, -1.0F, 1.0F);
+
+        poseStack.translate((x + 8), (y + 8), (150 + (model.isGui3d() ? l : 0)));
+        poseStack.mulPoseMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
         poseStack.scale(16.0F, 16.0F, 16.0F);
-
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         boolean flag = !model.usesBlockLight();
@@ -105,24 +99,17 @@ public class RenderUtil {
         }
 
         //-----render---
-
         ItemDisplayContext pTransformType = ItemDisplayContext.GUI;
 
-
-        if (stack.is(Items.TRIDENT)) {
-            model = renderer.getItemModelShaper().getModelManager().getModel(TRIDENT_MODEL);
-        } else if (stack.is(Items.SPYGLASS)) {
-            model = renderer.getItemModelShaper().getModelManager().getModel(SPYGLASS_MODEL);
-        }
-
+        // applies rotation first then custom rot and gives display context of none
         model = handleCameraTransforms(model, poseStack, pTransformType);
 
         //custom rotation
 
         movement.accept(poseStack, model);
 
-        renderGuiItem(model, stack, renderer, combinedLight, pCombinedOverlay, poseStack, bufferSource, flag);
-
+        renderer.render(stack, ItemDisplayContext.NONE, false, poseStack, bufferSource,
+                combinedLight, pCombinedOverlay, model);
 
         //----end-render---
 
@@ -131,9 +118,6 @@ public class RenderUtil {
         if (flag) {
             Lighting.setupFor3DItems();
         }
-
-        poseStack.popPose();
-
         poseStack.popPose();
     }
 
@@ -142,6 +126,7 @@ public class RenderUtil {
         throw new ArrayStoreException();
     }
 
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static void renderGuiItem(BakedModel model, ItemStack stack, ItemRenderer renderer, int combinedLight, int pCombinedOverlay,
                                      PoseStack poseStack, MultiBufferSource.BufferSource buffer, boolean flatItem) {
@@ -197,7 +182,7 @@ public class RenderUtil {
         vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).color(r, g, b, a).uv(u0s, v1s).uv2(light).endVertex();
         vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).color(r, g, b, a).uv(u1s, v1s).uv2(light).endVertex();
         vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).color(r, g, b, a).uv(u1s, v0s).uv2(light).endVertex();
-        vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b,a).uv(u0s, v0s).uv2(light).endVertex();
+        vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b, a).uv(u0s, v0s).uv2(light).endVertex();
     }
 
 
