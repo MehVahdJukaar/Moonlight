@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.item;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
@@ -14,6 +15,15 @@ import net.minecraft.world.item.ItemStack;
  * You probably want to return UseAnim.NONE in item::getUseAnimation to not have two animations at the same time
  */
 public interface IFirstPersonAnimationProvider {
+
+    /**
+     * Implement if you want to also override the item renderer code
+     * @return true to cancel original item renderer
+     */
+    default boolean renderFirstPersonItem(final LivingEntity entity, final ItemStack stack, final InteractionHand hand, final PoseStack poseStack,
+                                          float partialTicks, MultiBufferSource buffer, int light){
+        return false;
+    }
 
     void animateItemFirstPerson(final LivingEntity entity, final ItemStack stack, final InteractionHand hand, final PoseStack matrixStack,
                                 float partialTicks, float pitch, float attackAnim, float handHeight);
