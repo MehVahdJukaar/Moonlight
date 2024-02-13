@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
-import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HSVColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
@@ -250,7 +249,7 @@ public final class SpriteUtils {
 
         try (var image = TextureImage.createNew(16, 16, null)) {
             var it = colors.iterator();
-            image.forEachFrame((x, y, f) -> {
+            image.forEachFramePixel((x, y, f) -> {
                 if (it.hasNext()) {
                     image.getImage().setPixelRGBA(x, y, it.next());
                 }

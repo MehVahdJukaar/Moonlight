@@ -23,7 +23,7 @@ public class ImageTransformer {
         for (Tpos tr : transforms) {
             //TODO: fix scale. use STBImageResize.nstbir_resize_uint8
             Tpos t = tr.scaled(oFrameW, oFrameH, tFrameW, tFrameH, originalW, originalH, targetW, targetH);
-            original.forEachFrame((frameIndex, globalX, globalY) -> {
+            original.forEachFramePixel((frameIndex, globalX, globalY) -> {
                 int frameX = globalX - original.getFrameStartX(frameIndex);
                 int frameY = globalY - original.getFrameStartX(frameIndex);
                 if (frameX >= t.startX() && frameX < t.maxX() && frameY >= t.startY() && frameY < t.maxY()) {
