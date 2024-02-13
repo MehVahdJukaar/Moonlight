@@ -106,7 +106,7 @@ public class Respriter {
 
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
-        texture.forEachFrame((ind, x, y) -> {
+        texture.forEachFramePixel((ind, x, y) -> {
             int finalInd = useMergedPalette ? 0 : ind;
 
             //caches these for each palette
@@ -152,7 +152,7 @@ public class Respriter {
 
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
-        texture.forEachFrame((ind, x, y) -> {
+        texture.forEachFramePixel((ind, x, y) -> {
             //caches these for each palette
 
             int finalInd = useMergedPalette ? 0 : ind;

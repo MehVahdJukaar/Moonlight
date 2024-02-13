@@ -627,7 +627,7 @@ public class Palette implements Set<PaletteColor> {
 
         List<Map<Integer, PaletteColor>> paletteBuilders = new ArrayList<>();
 
-        textureImage.forEachFrame((index, x, y) -> {
+        textureImage.forEachFramePixel((index, x, y) -> {
             //when index changes, we add a completed palette
             if (paletteBuilders.size() <= index) {
                 paletteBuilders.add(new HashMap<>());

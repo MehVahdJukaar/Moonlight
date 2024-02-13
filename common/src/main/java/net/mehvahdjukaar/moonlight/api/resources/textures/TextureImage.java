@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 //like a native image that also has its metadata
@@ -52,7 +51,7 @@ public class TextureImage implements AutoCloseable {
      * Accepts a consumer that iterates over all image pixels, ordered by frame.
      * The given coordinates are global texture coordinates while the index represents the currently viewed frame
      */
-    public void forEachFrame(FramePixelConsumer framePixelConsumer) {
+    public void forEachFramePixel(FramePixelConsumer framePixelConsumer) {
         for (int ind = 0; ind < frameCount; ind++) {
             int xOff = getFrameStartX(ind);
             int yOff = getFrameStartY(ind);
@@ -62,6 +61,11 @@ public class TextureImage implements AutoCloseable {
                 }
             }
         }
+    }
+
+    @Deprecated(forRemoval = true)
+    public void forEachFrame(FramePixelConsumer e) {
+        forEachFramePixel(e);
     }
 
     public void toGrayscale() {
@@ -138,7 +142,7 @@ public class TextureImage implements AutoCloseable {
         NativeImage im = new NativeImage(this.frameWidth(), this.frameHeight() * length, false);
         TextureImage t = new TextureImage(im, new AnimationMetadataSection(frameData, this.frameWidth(), this.frameHeight(), frameTime, interpolate));
 
-        t.forEachFrame((i, x, y) -> {
+        t.forEachFramePixel((i, x, y) -> {
             int xo = x - t.getFrameStartX(i);
             int yo = y - t.getFrameStartY(i);
             t.image.setPixelRGBA(x, y, this.image.getPixelRGBA(xo, yo));
@@ -298,11 +302,8 @@ public class TextureImage implements AutoCloseable {
         return obj;
     }
 
-    /**
-     * Creates an image by combining two others taking alpha into consideration. Overlays are applied first in first out
-     * Closes all given overlays images
-     */
-    public void applyOverlay(TextureImage... overlays) throws IllegalStateException {
+
+    private void applyOverlay(boolean onlyOnExisting, TextureImage... overlays) throws IllegalStateException {
         for (var o : overlays) {
             if (o.frameWidth() < frameWidth()) {
                 throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay W: " + o.frameWidth() + ", image W: " + frameWidth());
@@ -312,11 +313,12 @@ public class TextureImage implements AutoCloseable {
             }
         }
         for (var o : overlays) {
-            this.forEachFrame((frameIndex, globalX, globalY) -> {
+            this.forEachFramePixel((frameIndex, globalX, globalY) -> {
                 int frameX = globalX - this.getFrameStartX(frameIndex);
                 int frameY = globalY - this.getFrameStartY(frameIndex);
                 int targetOverlayFrame = Math.max(frameIndex, o.frameCount - 1);
                 int overlayPixel = o.getFramePixel(targetOverlayFrame, frameX, frameY);
+                if (onlyOnExisting && FastColor.ABGR32.alpha(overlayPixel) == 0) return;
                 image.blendPixel(globalX, globalY, overlayPixel);
             });
             o.close();
@@ -324,27 +326,20 @@ public class TextureImage implements AutoCloseable {
     }
 
     /**
-     * Same as before but only applies them on non transparent pixels
+     * Creates an image by combining two others taking alpha into consideration. Overlays are applied first in first out
+     * Closes all given overlay images
+     */
+    public void applyOverlay(TextureImage... overlays) throws IllegalStateException {
+        applyOverlay(false, overlays);
+    }
+
+    /**
+     * Same as before but only applies them on non-transparent pixels
      * Overlays are applied first in first out
      * Closes all given overlays images
      */
     public void applyOverlayOnExisting(TextureImage... overlays) throws IllegalStateException {
-        int width = imageWidth();
-        int height = imageHeight();
-        if (Arrays.stream(overlays).anyMatch(n -> n.imageHeight() < height || n.imageWidth() < width)) {
-            throw new IllegalStateException("Could not merge images because they had different dimensions");
-        }
-
-        for (var o : overlays) {
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    if (FastColor.ABGR32.alpha(image.getPixelRGBA(x, y)) != 0) {
-                        image.blendPixel(x, y, o.image.getPixelRGBA(x, y));
-                    }
-                }
-            }
-            o.close();
-        }
+        applyOverlay(true, overlays);
     }
 
     /**
@@ -398,7 +393,7 @@ public class TextureImage implements AutoCloseable {
 
         TextureImage flippedImage = TextureImage.createNew(frameHeight(), frameWidth() * frameCount, metadata);
 
-        this.forEachFrame((frameIndex, globalX, globalY) -> {
+        this.forEachFramePixel((frameIndex, globalX, globalY) -> {
 
             int frameX = globalX - this.getFrameStartX(frameIndex);
             int frameY = globalY - this.getFrameStartY(frameIndex);
