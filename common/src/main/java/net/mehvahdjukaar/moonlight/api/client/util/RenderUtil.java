@@ -120,13 +120,6 @@ public class RenderUtil {
         throw new ArrayStoreException();
     }
 
-    @Deprecated(forRemoval = true)
-    @ExpectPlatform
-    public static void renderGuiItem(BakedModel model, ItemStack stack, ItemRenderer renderer, int combinedLight, int pCombinedOverlay,
-                                     PoseStack poseStack, MultiBufferSource.BufferSource buffer, boolean flatItem) {
-        throw new ArrayStoreException();
-    }
-
     public static GuiGraphics getGuiDummy(PoseStack poseStack) {
         var mc = Minecraft.getInstance();
         return new GuiGraphics(mc, poseStack, mc.renderBuffers().bufferSource());
