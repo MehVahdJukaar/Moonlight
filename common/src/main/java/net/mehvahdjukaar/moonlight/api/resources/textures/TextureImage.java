@@ -143,8 +143,8 @@ public class TextureImage implements AutoCloseable {
         TextureImage t = new TextureImage(im, new AnimationMetadataSection(frameData, this.frameWidth(), this.frameHeight(), frameTime, interpolate));
 
         t.forEachFramePixel((i, x, y) -> {
-            int xo = x - t.getFrameStartX(i);
-            int yo = y - t.getFrameStartY(i);
+            int xo = getFrameX(i, x);
+            int yo = getFrameY(i, y);
             t.image.setPixelRGBA(x, y, this.image.getPixelRGBA(xo, yo));
         });
         return t;
@@ -314,15 +314,23 @@ public class TextureImage implements AutoCloseable {
         }
         for (var o : overlays) {
             this.forEachFramePixel((frameIndex, globalX, globalY) -> {
-                int frameX = globalX - this.getFrameStartX(frameIndex);
-                int frameY = globalY - this.getFrameStartY(frameIndex);
-                int targetOverlayFrame = Math.max(frameIndex, o.frameCount - 1);
+                int frameX = getFrameX(frameIndex, globalX);
+                int frameY = getFrameY(frameIndex, globalY);
+                int targetOverlayFrame = Math.min(frameIndex, o.frameCount - 1);
                 int overlayPixel = o.getFramePixel(targetOverlayFrame, frameX, frameY);
                 if (onlyOnExisting && FastColor.ABGR32.alpha(overlayPixel) == 0) return;
                 image.blendPixel(globalX, globalY, overlayPixel);
             });
             o.close();
         }
+    }
+
+    private int getFrameY(Integer frameIndex, Integer globalY) {
+        return globalY - this.getFrameStartY(frameIndex);
+    }
+
+    private int getFrameX(Integer frameIndex, Integer globalX) {
+        return globalX - this.getFrameStartX(frameIndex);
     }
 
     /**
@@ -395,8 +403,8 @@ public class TextureImage implements AutoCloseable {
 
         this.forEachFramePixel((frameIndex, globalX, globalY) -> {
 
-            int frameX = globalX - this.getFrameStartX(frameIndex);
-            int frameY = globalY - this.getFrameStartY(frameIndex);
+            int frameX = getFrameX(frameIndex, globalX);
+            int frameY = getFrameY(frameIndex, globalY);
 
             int newFrameX = frameX;
             int newFrameY = frameY;
