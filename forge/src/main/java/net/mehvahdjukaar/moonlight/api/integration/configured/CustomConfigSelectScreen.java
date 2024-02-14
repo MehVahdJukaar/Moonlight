@@ -93,7 +93,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         for (var ss : specs) {
             ConfigSpecWrapper s = (ConfigSpecWrapper) ss;
             ModConfig modConfig = s.getModConfig();
-            var forgeConfig = new ForgeConfig(modConfig);
+            var forgeConfig = new ForgeConfig(modConfig, ((ConfigSpecWrapper) ss).getSpec());
             var set = modConfigMap.computeIfAbsent(
                     forgeConfig.getType(), a -> new HashSet<>());
             set.add(forgeConfig);

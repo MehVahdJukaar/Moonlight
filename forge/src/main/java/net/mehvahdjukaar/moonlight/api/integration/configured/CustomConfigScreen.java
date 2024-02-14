@@ -97,7 +97,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
     protected CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
                                  Screen parent, ModConfig config) {
-        this(modId, mainIcon, background, title, parent, new ForgeConfig(config));
+        this(modId, mainIcon, background, title, parent, new ForgeConfig(config, (ForgeConfigSpec) config.getSpec()));
 
     }
 

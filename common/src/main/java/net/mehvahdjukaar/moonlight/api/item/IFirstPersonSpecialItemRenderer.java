@@ -7,6 +7,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -21,9 +22,10 @@ public interface IFirstPersonSpecialItemRenderer {
      *
      * @return true to cancel original item renderer
      */
-    boolean renderFirstPersonItem(final AbstractClientPlayer player, final ItemStack stack, final InteractionHand hand, final PoseStack poseStack,
-                                  float partialTicks, float attackAnim, float equipAnim, MultiBufferSource buffer, int light, ItemInHandRenderer renderer);
-
+    boolean renderFirstPersonItem(final AbstractClientPlayer player, final ItemStack stack, final HumanoidArm arm, final PoseStack poseStack,
+                                  float partialTicks, float pitch, float attackAnim, float equipAnim,
+                                  MultiBufferSource buffer, int light, ItemInHandRenderer renderer);
+//TODO: replace all interaction hands with HumanoidHand!!
     /**
      * Alternatively, if you don't own the item and cant implement this interface in it you can use this call to attach your interface to an item
      * Note that when using other any of these 3 extensions only 1 object can be attached to any item, so be sure what you attach implements all of them
