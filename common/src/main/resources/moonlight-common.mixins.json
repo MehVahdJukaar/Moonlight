@@ -7,7 +7,7 @@
     "ClientLanguagesMixin",
     "ClientPacketListenerMixin",
     "DynamicTextureMixin",
-    "FirstPersonRendererMixin",
+    "ItemInHandRendererMixin",
     "MapInstanceMixin",
     "MapRendererMixin",
     "PlayerItemInHandLayerMixin",
