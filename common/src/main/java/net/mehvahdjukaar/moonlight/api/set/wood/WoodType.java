@@ -55,14 +55,6 @@ public class WoodType extends BlockType {
         var id = this.getId();
         String logN = Utils.getID(this.log).getPath();
 
-        // SUPPORT: TFC & AFC
-        if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
-            var o = Registry.BLOCK.getOptional(
-                    new ResourceLocation(id.getNamespace(),
-                            "wood/" + prefix + postfix.replace("_", "") + "/" + id.getPath()));
-            if (o.isPresent()) return o.get();
-        }
-
         ResourceLocation[] targets = {
                 new ResourceLocation(id.getNamespace(), logN + "_" + prefix + postfix),
                 new ResourceLocation(id.getNamespace(), prefix + logN + postfix),
@@ -136,7 +128,6 @@ public class WoodType extends BlockType {
         this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign", Registry.BLOCK));
         this.addChild("wall_hanging_sign", this.findRelatedEntry("wall_hanging_sign", Registry.BLOCK));
         this.addChild("sign", this.findRelatedEntry("sign", Registry.BLOCK));
-        this.addChild("stick", this.findRelatedEntry("twig", Registry.BLOCK)); // TFC & AFC only
     }
 
     @Override
