@@ -51,15 +51,6 @@ public abstract class ItemMixin implements IExtendedItem {
         }
     }
 
-    //delegates stuff to internal blockItem
-    @Inject(method = "appendHoverText", at = @At("HEAD"))
-    private void appendHoverText(ItemStack pStack, Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced, CallbackInfo ci) {
-        AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
-        if (behavior != null) {
-            behavior.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
-        }
-    }
-
     @Nullable
     public AdditionalItemPlacement moonlight$getAdditionalBehavior() {
         return this.moonlight$additionalBehavior;

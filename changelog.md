@@ -1,1 +1,1 @@
-fixed an issue with configured
+fixed messup with serveers on last patch

@@ -49,9 +49,6 @@ public class AdditionalItemPlacement{
         return null;
     }
 
-    public void appendHoverText(ItemStack stack, Level level, List<Component> components, TooltipFlag pIsAdvanced) {
-    }
-
     public Block getPlacedBlock() {
         return placeable;
     }
