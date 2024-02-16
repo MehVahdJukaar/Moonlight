@@ -25,7 +25,7 @@ public class VertexUtil {
     }
 
     /**
-     * Replaces all the texture in te given model with the given sprite
+     * Replaces all the texture in the given model with the given sprite
      * returns a new list
      */
     @Deprecated(forRemoval = true)

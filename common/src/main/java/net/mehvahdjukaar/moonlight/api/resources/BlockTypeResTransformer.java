@@ -107,7 +107,9 @@ public class BlockTypeResTransformer<T extends BlockType> {
     }
 
     public BlockTypeResTransformer<T> replaceOakLeaves() {
-        return this.replaceWithTextureFromChild("minecraft:block/oak_leaves", "leaves", s -> !s.contains("_snow"));
+        return this.replaceWithTextureFromChild("minecraft:block/oak_leaves", "leaves", s -> {
+          return   !s.contains("_snow") && !s.contains("snow_") && !s.contains("snowy_");
+        });
     }
 
     /**
@@ -124,7 +126,6 @@ public class BlockTypeResTransformer<T extends BlockType> {
         return this.replaceWithTextureFromChild("minecraft:block/oak_log", "log", SpriteUtils.LOOKS_LIKE_SIDE_LOG_TEXTURE)
                 .replaceWithTextureFromChild("minecraft:block/oak_log_top", "log", SpriteUtils.LOOKS_LIKE_TOP_LOG_TEXTURE);
     }
-
 
     public BlockTypeResTransformer<T> replaceOakStripped() {
         return this.replaceWithTextureFromChild("minecraft:block/stripped_oak_log", "stripped_log", SpriteUtils.LOOKS_LIKE_SIDE_LOG_TEXTURE)

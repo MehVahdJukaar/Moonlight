@@ -1,8 +1,0 @@
-{
-  "loader": "moonlight:lazy_copy",
-  "parent_block": "minecraft:oak_slab",
-  "parent_model": "minecraft:block/oak_planks",
-  "textures": {
-    "all": "minecraft:block/acacia_planks"
-  }
-}

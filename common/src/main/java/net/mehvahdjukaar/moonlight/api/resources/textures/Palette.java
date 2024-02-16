@@ -43,7 +43,7 @@ public class Palette implements Set<PaletteColor> {
         return new Palette(new ArrayList<>(this.internal), tolerance);
     }
 
-    public static Palette empty(){
+    public static Palette empty() {
         return new Palette(new ArrayList<>());
     }
 
@@ -368,6 +368,88 @@ public class Palette implements Set<PaletteColor> {
         return newColor;
     }
 
+    /**
+     * Change palette size to match the target luminance span
+     * You can think of this as "set contrast"
+     * Works by adding or removing colors.
+     * Does not change all colors as a whole
+     *
+     * @param targetLuminanceSpan target luminance span (max luminance - min luminance)
+     */
+    public void changeSizeMatchingLuminanceSpan(float targetLuminanceSpan) {
+        float currentSpan = this.getLuminanceSpan();
+        while (Mth.abs(currentSpan - targetLuminanceSpan) > 0.5 * this.getAverageLuminanceStep()) {
+            if (currentSpan < targetLuminanceSpan) {
+                if (this.getLightest().luminance() < 1 - this.getDarkest().luminance()) {
+                    this.increaseUp();
+                } else {
+                    this.increaseDown();
+                }
+            } else if (currentSpan > targetLuminanceSpan) {
+                if (this.getLightest().luminance() > 1 - this.getDarkest().luminance()) {
+                    this.reduceUp();
+                } else {
+                    this.reduceDown();
+                }
+            } else {
+                break;
+            }
+            currentSpan = this.getLuminanceSpan();
+        }
+    }
+
+    /**
+     * Changes the size of a palette to match the luminance range of the target
+     * You can think of this as "set contrast" by means of setting the lightest and darkest colors (luminance)
+     * Works by adding or removing colors.
+     * Does not change all colors as a whole
+     *
+     * @param minLuminance target min luminance
+     * @param maxLuminance target max luminance
+     */
+    public void expandMatchingLuminanceRange(float minLuminance, float maxLuminance) {
+        float currentMin = this.getDarkest().luminance();
+        float currentMax = this.getLightest().luminance();
+        while (Mth.abs(currentMin - minLuminance) > 0.5 * this.getAverageLuminanceStep()) {
+            if (currentMin < minLuminance) {
+                this.reduceDown();
+            } else {
+                this.increaseDown();
+            }
+        }
+
+        while (Mth.abs(currentMax - maxLuminance) > 0.5 * this.getAverageLuminanceStep()) {
+            if (currentMax > maxLuminance) {
+                this.reduceUp();
+            } else {
+                this.increaseUp();
+            }
+        }
+    }
+
+    //write a function that altersthis palette by increasing / decreasing its contrast using an input float. COntrast is directly related tothe "luminance" field you can find here. each color has luminance
+    //this is similar to changeSizeMatchingLuminanceSpan, however i do not want to add new colors changing palettesize. I want to instead modify the eixsting one colors
+    // so youcannot clal increase inner or decrease methods. those add new colors
+
+    //TODO:
+    /*
+    public void setLuminanceStep(float newLuminanceStep){
+        float averageLuminance = getCenterLuminance();
+        int size = this.size();
+        var copy = this.copy();
+        for(int i = 0; i < size; i++){
+            PaletteColor color = copy.get(i);
+            float lum = color.luminance();
+            float diff = lum - averageLuminance;
+            float newLum = lum + diff * luminanceIncrease;
+            this.remove(color);
+            this.add()
+        }
+    }*/
+
+    /**
+     * @return true if there is a significant gap between two neighboring colors
+     */
     private boolean hasLuminanceGap() {
         return hasLuminanceGap(1.7f);
     }
@@ -422,15 +504,20 @@ public class Palette implements Set<PaletteColor> {
         return total / list.size();
     }
 
-    public float getLuminanceSpan(){
+    public float getLuminanceSpan() {
         return this.getLightest().luminance() - this.getDarkest().luminance();
+    }
+
+    public float getCenterLuminance() {
+        return (this.getLightest().luminance() + this.getDarkest().luminance()) / 2;
     }
 
     /**
      * Removes lightest color
+     *
      * @return removed
      */
-    public PaletteColor reduceUp(){
+    public PaletteColor reduceUp() {
         var c = this.getLightest();
         this.remove(c);
         return c;
@@ -438,9 +525,10 @@ public class Palette implements Set<PaletteColor> {
 
     /**
      * Removes darkest color
+     *
      * @return removed
      */
-    public PaletteColor reduceDown(){
+    public PaletteColor reduceDown() {
         var c = this.getDarkest();
         this.remove(c);
         return c;

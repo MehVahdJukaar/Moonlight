@@ -41,17 +41,15 @@ public class WoodType extends BlockType {
 
     @Nullable
     private net.minecraft.world.level.block.state.properties.WoodType detectVanillaWood() {
+        if (getChild("hanging_sign") instanceof CeilingHangingSignBlock c) {
+            return c.type();
+        }
+        if (getChild("sign") instanceof SignBlock f) {
+            return f.type();
+        }
         String i = id.getNamespace().equals("minecraft") ? id.getPath() : id.toString();
         var values = net.minecraft.world.level.block.state.properties.WoodType.values();
         var o = values.filter(v -> v.name().equals(i)).findAny();
-        if (o.isEmpty()) {
-            if (getChild("hanging_sign") instanceof CeilingHangingSignBlock c) {
-                return c.type();
-            }
-            if (getChild("sign") instanceof SignBlock f) {
-                return f.type();
-            }
-        }
         return o.orElse(null);
     }
 

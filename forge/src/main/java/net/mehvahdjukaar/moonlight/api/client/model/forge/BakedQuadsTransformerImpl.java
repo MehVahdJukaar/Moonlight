@@ -90,12 +90,12 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
 
         int tint = this.tintIndex == null ? quad.getTintIndex() : this.tintIndex;
         boolean shade = this.shade == null ? quad.isShade() : this.shade;
-        boolean ambientOcclusion = this.ambientOcclusion == null ? quad.isShade() : this.shade;
+        boolean ambientOcclusion = this.ambientOcclusion == null ? quad.hasAmbientOcclusion() : this.ambientOcclusion;
         lastSpriteHack = quad.getSprite();
         TextureAtlasSprite sprite = this.sprite == null ? quad.getSprite() : this.sprite;
         BakedQuad newQuad = new BakedQuad(v, tint, directionRemap.apply(quad.getDirection()), sprite, shade, ambientOcclusion);
-        lastSpriteHack = null;
         inner.processInPlace(newQuad);
+        lastSpriteHack = null;
         return newQuad;
     }
 
