@@ -11,6 +11,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FastColor;
@@ -39,11 +40,11 @@ public class SoftFluidParticleColors extends GenericSimpleResourceReloadListener
         TextureCache.clear();
     }
 
-    public static int getParticleColor(SoftFluid s) {
+    public static int getParticleColor(Holder<SoftFluid> s) {
         if(PARTICLE_COLORS.isEmpty()){
             refreshParticleColors();
         }
-        return PARTICLE_COLORS.getOrDefault(Utils.getID(s), -1);
+        return PARTICLE_COLORS.getOrDefault(s.unwrapKey().get().location(), -1);
     }
 
     //TODO: possibly do it for ALL fluids, not only non grayscale ones

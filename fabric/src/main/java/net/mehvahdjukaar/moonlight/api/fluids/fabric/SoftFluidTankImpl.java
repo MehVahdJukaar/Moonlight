@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -17,6 +18,8 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("unused")
 public class SoftFluidTankImpl extends SoftFluidTank {
+
+    //TODO: fabric fluid api support
 
     public static SoftFluidTank create(int capacity) {
         return new SoftFluidTankImpl(capacity);
@@ -57,7 +60,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         if (this.isEmpty()) return -1;
         int tintColor = this.getTintColor(world, pos);
         //if tint color is white gets averaged color
-        if (tintColor == -1) return SoftFluidParticleColors.getParticleColor(this.fluid);
+        if (tintColor == -1) return SoftFluidParticleColors.getParticleColor(this.fluid.getFluid());
         return tintColor;
     }
 
@@ -65,11 +68,12 @@ public class SoftFluidTankImpl extends SoftFluidTank {
     private void refreshSpecialColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
         //yay hardcoding
         //at least this works for any fluid
-        if(this.nbt != null && this.nbt.contains("color")){
-            this.specialColor = this.nbt.getInt("color");
+        CompoundTag tag = this.fluid.getTag();
+        if(tag != null && tag.contains("color")){
+            this.specialColor = tag.getInt("color");
         }
-        if (fluid == BuiltInSoftFluids.POTION.get()) {
-            this.specialColor = PotionNBTHelper.getColorFromNBT(this.nbt);
+        if (fluid .is(BuiltInSoftFluids.POTION.get())) {
+            this.specialColor = PotionNBTHelper.getColorFromNBT(tag);
         } else {
             Fluid f = this.fluid.getVanillaFluid();
             if (f != Fluids.EMPTY) {

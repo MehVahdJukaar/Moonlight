@@ -223,7 +223,7 @@ public abstract class SoftFluidTank {
     //transfers between two fluid holders
     public boolean transferFluid(SoftFluidTank destination, int amount) {
         if (this.getFluidCount() >= amount) {
-            if(destination.addFluid(this.fluid.copyWithCount(amount))){
+            if (destination.addFluid(this.fluid.copyWithCount(amount))) {
                 this.fluid.shrink(amount);
             }
         }
@@ -290,6 +290,11 @@ public abstract class SoftFluidTank {
     public void copyContent(SoftFluidTank other) {
         SoftFluidStack stack = other.getFluids();
         this.setFluid(stack.copyWithCount(Math.min(this.capacity, stack.getCount())));
+    }
+
+
+    public void capCapacity() {
+        this.fluid.setCount(Mth.clamp(this.fluid.getCount(), 0, capacity));
     }
 
     /**

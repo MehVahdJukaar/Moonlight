@@ -11,9 +11,11 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 // do NOT have these in a static field as they contain registry holders
 public class SoftFluidStack {
@@ -182,7 +184,7 @@ public class SoftFluidStack {
      * Just checks if nbt is the same
      */
     public boolean isFluidStackTagEqual(SoftFluidStack other) {
-        return tag == null ? other.tag == null : other.tag != null && tag.equals(other.tag);
+        return Objects.equals(this.tag, other.tag);
     }
 
     // these do not take count into account for some reason
@@ -336,4 +338,19 @@ public class SoftFluidStack {
     }
 
 
+    public boolean isEquivalent(Fluid fluid) {
+        return this.fluid.value().isEquivalent(fluid);
+    }
+
+    public Fluid getVanillaFluid() {
+        return this.fluid.value().getVanillaFluid();
+    }
+
+    public SoftFluid.TintMethod getTintMethod() {
+        return this.fluid.value().getTintMethod();
+    }
+
+    public int getTintColor() {
+        return this.fluid.value().getTintColor();
+    }
 }
