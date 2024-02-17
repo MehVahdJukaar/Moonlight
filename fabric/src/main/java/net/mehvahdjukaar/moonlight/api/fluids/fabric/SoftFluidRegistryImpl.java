@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.MappedRegistryAccessor;
+import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,7 +22,7 @@ public class SoftFluidRegistryImpl {
         DynamicRegistries.registerSynced(SoftFluidRegistry.KEY, SoftFluid.CODEC, SoftFluid.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
     }
 
-    public static void registerExistingVanillaFluids(Map<Fluid, SoftFluid> fluidMap, Map<Item, SoftFluid> itemMap) {
+    public static void registerExistingVanillaFluids(Map<Fluid, Holder<SoftFluid>> fluidMap, Map<Item, Holder<SoftFluid>> itemMap) {
         //only runs on the first object
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.hackyGetRegistry();
         ((MappedRegistryAccessor) reg).setFrozen(false);
@@ -39,7 +40,7 @@ public class SoftFluidRegistryImpl {
                 //cope
                 //SOFT_FLUIDS.get().register(sf.getRegistryName(),sf);
                 Registry.register(reg, Utils.getID(f), sf);
-                fluidMap.put(f, sf);
+                fluidMap.put(f, reg.getHolder(reg.getId(sf)).orElseThrow());
 
             } catch (Exception ignored) {
             }

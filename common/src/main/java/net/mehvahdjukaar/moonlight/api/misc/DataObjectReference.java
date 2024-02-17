@@ -9,12 +9,14 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 //can be statically stored and persists across world loads
 
 /**
  * A soft reference to an object in a Data pack registry
  */
-public class DataObjectReference<T> {
+public class DataObjectReference<T> implements Supplier<T> {
 
     private static final WeakHashSet<DataObjectReference<?>> REFERENCES = new WeakHashSet<>();
 
@@ -30,14 +32,14 @@ public class DataObjectReference<T> {
         REFERENCES.add(this);
     }
 
-    public DataObjectReference(ResourceKey<T> key){
+    public DataObjectReference(ResourceKey<T> key) {
         this.key = key;
-        this.registryKey =  ResourceKey.createRegistryKey(key.registry());
+        this.registryKey = ResourceKey.createRegistryKey(key.registry());
         REFERENCES.add(this);
     }
 
     public Holder<T> getHolder() {
-        if(cache == null) {
+        if (cache == null) {
             var r = Utils.hackyGetRegistryAccess();
             Registry<T> reg = r.registryOrThrow(registryKey);
             cache = reg.getHolderOrThrow(key);

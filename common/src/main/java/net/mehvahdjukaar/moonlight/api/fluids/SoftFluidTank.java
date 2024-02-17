@@ -1,28 +1,22 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
-import com.google.common.base.Preconditions;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
-
 import org.jetbrains.annotations.Nullable;
-import java.util.List;
 
 /**
  * instance this fluid tank in your tile entity
@@ -30,28 +24,19 @@ import java.util.List;
 @SuppressWarnings("unused")
 public abstract class SoftFluidTank {
 
-    public static final String POTION_TYPE_KEY = "Bottle";
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
     public static final int BUCKET_COUNT = 4;
 
-    //count in bottles
-    protected int count = 0;
     protected final int capacity;
-    @Nullable
-    protected CompoundTag nbt = null;
-    @NotNull
-    protected SoftFluid fluid = BuiltInSoftFluids.EMPTY.get(); //not null
+    protected SoftFluidStack fluid = SoftFluidStack.empty();
+
     //Special tint color. Used for dynamic tint fluids like water and potions
     protected int specialColor = 0;
     protected boolean needsColorRefresh = true;
 
     protected SoftFluidTank(int capacity) {
         this.capacity = capacity;
-        //sanity check cause we keep getting empty shit
-        if(fluid == null){
-            throw new IllegalStateException("Empty fluid returned null. How?");
-        }
     }
 
     @ExpectPlatform
@@ -59,10 +44,8 @@ public abstract class SoftFluidTank {
         throw new AssertionError();
     }
 
-    //TODO: add default methods here
-
     /**
-     * call this method from your block when player interacts. tries to fill or empty current held item in tank
+     * call this method from your block when the player interacts. tries to fill or empty current held item in tank
      *
      * @param player player
      * @param hand   hand
@@ -91,123 +74,59 @@ public abstract class SoftFluidTank {
      * @return resulting ItemStack: empty for empty hand return, null if it failed
      */
     @Nullable
-    public ItemStack interactWithItem(ItemStack stack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
+    public ItemStack interactWithItem(ItemStack stack, Level world, @Nullable BlockPos pos, boolean simulate) {
         ItemStack returnStack;
         //try filling
-        returnStack = this.tryFillingItem(stack.getItem(), world, pos, simulate);
-        if (returnStack != null) return returnStack;
+        var fillResult = this.fillItem(stack, world, pos, simulate);
+        if (fillResult.getResult().consumesAction()) return fillResult.getObject();
         //try emptying
-        returnStack = this.tryDrainItem(stack, world, pos, simulate);
+        var drainResult = this.drainItem(stack, world, pos, simulate);
+        if (drainResult.getResult().consumesAction()) return drainResult.getObject();
 
-        return returnStack;
-    }
-
-    public ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
-        return tryDrainItem(filledContainerStack, world, pos, simulate, true);
-    }
-
-    //TODO: use interaction result holder
-    /**
-     * tries pouring the content of provided item in the tank
-     * also plays sound
-     *
-     * @return empty container item, null if it failed
-     */
-    @Nullable
-    public ItemStack tryDrainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
-
-        //TODO: generalize this adding a function list that converts items in compounds and fluid pair or a compound whitelist
-        //TODO: all of this  is horrible
-
-        Item filledContainer = filledContainerStack.getItem();
-
-        /*
-        if(filledContainer instanceof ISoftFluidContainerItem){
-            ISoftFluidContainerItem p = ((ISoftFluidContainerItem) filledContainer);
-            ResourceLocation r = p.getSoftFluid();
-            SoftFluid s = SoftFluidRegistry.get(r.toString());
-            if(!s.isEmpty()) {
-                CompoundNBT nbt = p.getFluidNBT();
-                int am = p.getAmount();
-                if (this.isEmpty()) {
-                    this.setFluid(s, nbt);
-                }
-                if (this.canAddSoftFluid(s, am, nbt)) {
-                    this.grow(am);
-                    SoundEvent sound = p.getEmptySound();
-                    if (sound != null && world != null && pos != null)
-                        world.playSound(null, pos, sound, SoundCategory.BLOCKS, 1, 1);
-                    return p.getEmptyContainer();
-                }
-            }
-            return null
-        }*/
-
-
-        SoftFluid s = SoftFluidRegistry.fromItem(filledContainer);
-
-        if (s.isEmpty()) return null;
-
-        CompoundTag com = filledContainerStack.getTag();
-        CompoundTag newCom = new CompoundTag();
-
-        //convert potions to water bottles
-        Potion potion = PotionUtils.getPotion(filledContainerStack);
-        boolean hasCustomPot = (com != null && com.contains("CustomPotionEffects"));
-        if (potion == Potions.WATER && !hasCustomPot) {
-            s = BuiltInSoftFluids.WATER.get();
-        }
-        //add tags to splash and lingering potions
-        else if (potion != Potions.EMPTY || hasCustomPot) {
-            addPotionTag(filledContainer, newCom);
-        }
-
-        //copy nbt from item
-        if (com != null) {
-            for (String k : s.getNbtKeyFromItem()) {
-                Tag c = com.get(k);
-                if (c != null) {
-                    newCom.put(k, c);
-                }
-            }
-        }
-
-        //set new fluid if empty
-        if (this.isEmpty()) {
-            this.setFluid(s, newCom.isEmpty() ? null : newCom);
-        }
-
-        var optionalCategory = s.getContainerList().getCategoryFromFilled(filledContainer);
-
-        if (optionalCategory.isPresent()) {
-            var category = optionalCategory.get();
-            int amount = category.getAmount();
-            if (this.canAddSoftFluid(s, amount, newCom)) {
-                if (simulate) return ItemStack.EMPTY;
-                addFluidOntoExisting(s, amount, newCom);
-
-                SoundEvent sound = category.getEmptySound();
-                if (sound != null && world != null && pos != null)
-                    world.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);
-
-                return new ItemStack(category.getEmptyContainer());
-            }
-        }
         return null;
     }
 
+    public InteractionResultHolder<ItemStack> drainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
+        return drainItem(filledContainerStack, world, pos, simulate, true);
+    }
+
     /**
-     * Called when talk is not empty and a new fluid is added. For most uses just increments the existing one but could alter the fluid content
-     * You can assume that canAddSoftFluid has been called before
+     * Tries pouring the content of provided item in the tank
+     * also plays sound.
+     * If simulate is true, it will return the same item as normal but wont alter the container state
+     *
+     * @return empty container item, PASS if it failed
      */
-    protected void addFluidOntoExisting(SoftFluid incoming, int amount, @Nullable CompoundTag tag) {
-        this.grow(amount);
+    public InteractionResultHolder<ItemStack> drainItem(ItemStack filledContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
+
+        var extracted = SoftFluidStack.fromItem(filledContainer);
+
+        if (extracted != null && this.canAddSoftFluid(extracted.getFirst())) {
+            SoftFluidStack fluidStack = extracted.getFirst();
+            FluidContainerList.Category category = extracted.getSecond();
+
+            ItemStack emptyContainer = category.getEmptyContainer().getDefaultInstance();
+            if (!simulate) {
+
+                //set new fluid if empty
+                if (this.isEmpty()) {
+                    this.setFluid(fluidStack);
+                } else addFluidOntoExisting(fluidStack);
+
+                SoundEvent sound = category.getEmptySound();
+                if (sound != null && pos != null) {
+                    level.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);
+                }
+            }
+            return InteractionResultHolder.sidedSuccess(emptyContainer, level.isClientSide);
+        }
+        return InteractionResultHolder.pass(ItemStack.EMPTY);
     }
 
-    public ItemStack tryFillingItem(Item emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
-        return tryFillingItem(emptyContainer, world, pos, simulate, true);
-    }
 
+    public InteractionResultHolder<ItemStack> fillItem(ItemStack emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
+        return fillItem(emptyContainer, world, pos, simulate, true);
+    }
 
     /**
      * tries removing said amount of fluid and returns filled item
@@ -216,38 +135,26 @@ public abstract class SoftFluidTank {
      * @return filled bottle item. null if it failed or if simulated is true and failed
      */
     @Nullable
-    public ItemStack tryFillingItem(Item emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
-        var opt = fluid.getContainerList().getCategoryFromEmpty(emptyContainer);
-        if (opt.isPresent()) {
-            var category = opt.get();
-            int amount = category.getAmount();
-            if (this.canRemove(amount)) {
-                if (simulate) return ItemStack.EMPTY;
-                ItemStack stack = new ItemStack(category.getFirstFilled().get());
-                //case for lingering potions
-                if (this.fluid == BuiltInSoftFluids.POTION.get()) {
-                    if (this.nbt != null && this.nbt.contains(POTION_TYPE_KEY) && !Utils.getID(emptyContainer).getNamespace().equals("inspirations")) {
-                        String bottle = this.nbt.getString(POTION_TYPE_KEY);
-                        if (bottle.equals("SPLASH")) stack = new ItemStack(Items.SPLASH_POTION);
-                        else if (bottle.equals("LINGERING")) stack = new ItemStack(Items.LINGERING_POTION);
-                    }
-                }
+    public InteractionResultHolder<ItemStack> fillItem(ItemStack emptyContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
+        var pair = this.fluid.toItem(emptyContainer, simulate);
 
-                //converts water bottles into potions
-                if (emptyContainer == Items.GLASS_BOTTLE && fluid == BuiltInSoftFluids.WATER.get())
-                    stack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
-
-                this.applyNBTtoItemStack(stack);
-                this.shrink(amount);
-
-                SoundEvent sound = category.getEmptySound();
-                if (sound != null && world != null && pos != null)
-                    world.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);
-
-                return stack;
+        if (pair != null) {
+            var category = pair.getSecond();
+            SoundEvent sound = category.getEmptySound();
+            if (sound != null && pos != null) {
+                level.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);
             }
+            return InteractionResultHolder.sidedSuccess(pair.getFirst(), level.isClientSide);
         }
-        return null;
+        return InteractionResultHolder.pass(ItemStack.EMPTY);
+    }
+
+    /**
+     * Called when talk is not empty and a new fluid is added. For most uses just increments the existing one but could alter the fluid content
+     * You can assume that canAddSoftFluid has been called before
+     */
+    protected void addFluidOntoExisting(SoftFluidStack stack) {
+        this.fluid.grow(stack.getCount());
     }
 
     /**
@@ -256,8 +163,8 @@ public abstract class SoftFluidTank {
      * @return filled bottle item. null if it failed
      */
     @Nullable
-    public ItemStack tryFillingBottle(Level world, BlockPos pos) {
-        return tryFillingItem(Items.GLASS_BOTTLE, world, pos, false);
+    public InteractionResultHolder<ItemStack> fillBottle(Level world, BlockPos pos) {
+        return fillItem(Items.GLASS_BOTTLE.getDefaultInstance(), world, pos, false);
     }
 
     /**
@@ -266,8 +173,8 @@ public abstract class SoftFluidTank {
      * @return filled bucket item. null if it failed
      */
     @Nullable
-    public ItemStack tryFillingBucket(Level world, BlockPos pos) {
-        return tryFillingItem(Items.BUCKET, world, pos, false);
+    public InteractionResultHolder<ItemStack> fillBucket(Level world, BlockPos pos) {
+        return fillItem(Items.BUCKET.getDefaultInstance(), world, pos, false);
     }
 
     /**
@@ -276,195 +183,68 @@ public abstract class SoftFluidTank {
      * @return filled bowl item. null if it failed
      */
     @Nullable
-    public ItemStack tryFillingBowl(Level world, BlockPos pos) {
-        return tryFillingItem(Items.BOWL, world, pos, false);
+    public InteractionResultHolder<ItemStack> fillBowl(Level world, BlockPos pos) {
+        return fillItem(Items.BOWL.getDefaultInstance(), world, pos, false);
     }
 
     /**
-     * checks if current tank holds equivalent fluid as provided soft fluid
-     *
-     * @param other soft fluid
-     * @return is same
+     * Main method called when checking if fluid can be added to this or not
      */
-    public boolean isSameFluidAs(SoftFluid other) {
-        return isSameFluidAs(other, null);
-    }
-
-    /**
-     * checks if current tank holds equivalent fluid as provided soft fluid
-     *
-     * @param other soft fluid
-     * @param com   fluid nbt
-     * @return is same
-     */
-    public boolean isSameFluidAs(SoftFluid other, @Nullable CompoundTag com) {
-        return this.getFluid().equals(other) && areNbtEquals(this.getNbt(), com);
+    public boolean canAddSoftFluid(SoftFluidStack fluidStack) {
+        if (this.isEmpty()) return false;
+        if (!this.fluid.isFluidEqual(fluidStack)) return false;
+        return this.getSpace() >= fluid.getCount();
     }
 
     /**
      * try adding provided soft fluid to the tank
      *
-     * @param s     soft fluid to add
-     * @param count count to add
-     * @param com   fluid nbt
      * @return success
      */
-    public boolean tryAddingFluid(SoftFluid s, int count, @Nullable CompoundTag com) {
-        if (this.canAdd(count)) {
+    public boolean addFluid(SoftFluidStack stack) {
+        if (this.canAddSoftFluid(stack)) {
             if (this.isEmpty()) {
-                this.setFluid(s, com);
-                this.setCount(count);
-                return true;
-            } else if (this.isSameFluidAs(s, com)) {
-                addFluidOntoExisting(s, count, com);
-                return true;
+                this.setFluid(stack);
+            } else {
+                addFluidOntoExisting(stack);
             }
+            return true;
         }
         return false;
-    }
-
-    /**
-     * try adding provided soft fluid to the tank
-     *
-     * @param s     soft fluid to add
-     * @param count count to add
-     * @return success
-     */
-    public boolean tryAddingFluid(SoftFluid s, int count) {
-        return tryAddingFluid(s, count, null);
-    }
-
-    /**
-     * try adding 1 bottle of provided soft fluid to the tank
-     *
-     * @param s soft fluid to add
-     * @return success
-     */
-    public boolean tryAddingFluid(SoftFluid s) {
-        return this.tryAddingFluid(s, 1);
     }
 
     /**
      * Transfers between 2 soft fluid tanks
      */
-    public boolean tryTransferFluid(SoftFluidTank destination) {
-        return this.tryTransferFluid(destination, BOTTLE_COUNT);
+    public boolean transferFluid(SoftFluidTank destination) {
+        return this.transferFluid(destination, BOTTLE_COUNT);
     }
 
     //transfers between two fluid holders
-    public boolean tryTransferFluid(SoftFluidTank destination, int amount) {
-        if (destination.canAdd(amount) && this.canRemove(amount)) {
-            if (destination.isEmpty()) {
-                destination.setFluid(this.getFluid(), this.getNbt());
-                this.shrink(amount);
-                destination.grow(amount);
-                return true;
-            } else if (this.isSameFluidAs(destination.getFluid(), destination.getNbt())) {
-                this.shrink(amount);
-                destination.grow(amount);
-                return true;
+    public boolean transferFluid(SoftFluidTank destination, int amount) {
+        if (this.getFluidCount() >= amount) {
+            if(destination.addFluid(this.fluid.copyWithCount(amount))){
+                this.fluid.shrink(amount);
             }
         }
         return false;
     }
 
-    /**
-     * can I remove n bottles of fluid
-     *
-     * @param n bottles amount
-     * @return can remove
-     */
-    protected boolean canRemove(int n) {
-        return this.count >= n && !this.isEmpty();
+    public int getSpace() {
+        return Math.max(0, capacity - fluid.getCount());
     }
 
-    /**
-     * can I add n bottles of fluid
-     *
-     * @param n bottles amount
-     * @return can add
-     */
-    protected boolean canAdd(int n) {
-        return this.count + n <= this.capacity;
-    }
-
-    /**
-     * can provide soft fluid be added to tank
-     *
-     * @param s     soft fluid to add
-     * @param count bottles amount
-     * @return can add
-     */
-    public boolean canAddSoftFluid(SoftFluid s, int count) {
-        return canAddSoftFluid(s, count, null);
-    }
-
-    /**
-     * can provide soft fluid be added to tank
-     *
-     * @param s     soft fluid to add
-     * @param count bottles amount
-     * @param nbt   soft fluid nbt
-     * @return can add
-     */
-    public boolean canAddSoftFluid(SoftFluid s, int count, @Nullable CompoundTag nbt) {
-        return this.canAdd(count) && this.isSameFluidAs(s, nbt);
+    public int getFluidCount() {
+        return fluid.getCount();
     }
 
     public boolean isFull() {
-        return this.count == this.capacity;
+        return fluid.getCount() == this.capacity;
     }
 
     public boolean isEmpty() {
         //count 0 should always = to fluid.empty
-        return this.fluid.isEmpty() || this.count <= 0;
-    }
-
-
-    /**
-     * grows contained fluid by at most inc bottles. doesn't need checking
-     *
-     * @param inc maximum increment
-     */
-    public void lossyAdd(int inc) {
-        this.count = Math.min(this.capacity, this.count + inc);
-    }
-
-    /**
-     * unchecked sets the tank fluid count
-     *
-     * @param count bottles count
-     */
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    /**
-     * fills out tank to the maximum capacity
-     */
-    public void fillCount() {
-        this.setCount(capacity);
-    }
-
-    /**
-     * unchecked grows the tank by inc bottles. Check with canAdd()
-     *
-     * @param inc bottles increment
-     */
-    public void grow(int inc) {
-        this.setCount((this.count + inc));
-    }
-
-    /**
-     * unchecked shrinks the tank by inc bottles
-     *
-     * @param inc bottles increment
-     */
-    public void shrink(int inc) {
-        this.grow(-inc);
-        if (this.count == 0) {
-            this.clear();
-        }
+        return this.fluid.isEmpty();
     }
 
     /**
@@ -474,43 +254,32 @@ public abstract class SoftFluidTank {
      * @return fluid height
      */
     public float getHeight(float maxHeight) {
-        return maxHeight * this.count / this.capacity;
+        return maxHeight * fluid.getCount() / this.capacity;
     }
 
     /**
      * @return comparator block redstone power
      */
     public int getComparatorOutput() {
-        float f = this.count / (float) this.capacity;
+        float f = fluid.getCount() / (float) this.capacity;
         return Mth.floor(f * 14.0F) + 1;
     }
 
-    public int getCount() {
-        return count;
-    }
-
-    @NotNull
-    public SoftFluid getFluid() {
+    public SoftFluidStack getFluids() {
         return fluid;
     }
 
-    @Nullable
-    public CompoundTag getNbt() {
-        return nbt;
-    }
-
-    public void setNbt(@Nullable CompoundTag nbt) {
-        this.nbt = nbt;
+    public void setFluid(SoftFluidStack fluid) {
+        this.fluid = fluid;
+        this.specialColor = 0;
+        this.needsColorRefresh = true;
     }
 
     /**
      * resets & clears the tank
      */
     public void clear() {
-        this.fluid = BuiltInSoftFluids.EMPTY.get();
-        this.setCount(0);
-        this.nbt = null;
-        this.specialColor = 0;
+        this.setFluid(SoftFluidStack.empty());
     }
 
     /**
@@ -518,55 +287,9 @@ public abstract class SoftFluidTank {
      *
      * @param other other tank
      */
-    public void copy(SoftFluidTank other) {
-        this.setFluid(other.getFluid(), other.getNbt());
-        this.setCount(Math.min(this.capacity, other.getCount()));
-    }
-
-    /**
-     * fills to max capacity with provided soft fluid
-     *
-     * @param fluid forge fluid
-     */
-    public void fill(SoftFluid fluid) {
-        this.fill(fluid, null);
-    }
-
-    /**
-     * fills to max capacity with provided soft fluid
-     *
-     * @param fluid soft fluid
-     * @param nbt   soft fluid nbt
-     */
-    public void fill(SoftFluid fluid, @Nullable CompoundTag nbt) {
-        this.setFluid(fluid, nbt);
-        this.fillCount();
-    }
-
-    /**
-     * sets current fluid to provided soft fluid equivalent
-     *
-     * @param fluid soft fluid
-     */
-    public void setFluid(@NotNull SoftFluid fluid) {
-        this.setFluid(fluid, null);
-    }
-
-    //called when it goes from empty to full
-    public void setFluid(@NotNull SoftFluid fluid, @Nullable CompoundTag nbt) {
-        Preconditions.checkNotNull(fluid,"Tried to add a null fluid. How?");
-        this.fluid = fluid;
-        this.nbt = null;
-        if (nbt != null) {
-            this.nbt = nbt.copy();
-            //even more hardcoded shit
-            if (fluid.equals(BuiltInSoftFluids.POTION.get()) && !this.nbt.contains(POTION_TYPE_KEY)) {
-                this.nbt.putString(POTION_TYPE_KEY, "REGULAR");
-            }
-        }
-        this.specialColor = 0;
-        if (this.fluid.isEmpty()) this.setCount(0);
-        this.needsColorRefresh = true;
+    public void copyContent(SoftFluidTank other) {
+        SoftFluidStack stack = other.getFluids();
+        this.setFluid(stack.copyWithCount(Math.min(this.capacity, stack.getCount())));
     }
 
     /**
@@ -589,7 +312,7 @@ public abstract class SoftFluidTank {
      * @return true if contained fluid has associated food
      */
     public boolean containsFood() {
-        return this.fluid.isFood();
+        return !this.fluid.getFoodProvider().isEmpty();
     }
 
     /**
@@ -600,10 +323,7 @@ public abstract class SoftFluidTank {
     public void load(CompoundTag compound) {
         if (compound.contains("FluidHolder")) {
             CompoundTag cmp = compound.getCompound("FluidHolder");
-            this.setCount(cmp.getInt("Count"));
-            String id = cmp.getString("Fluid");
-            SoftFluid sf = SoftFluidRegistry.get(id);
-            this.setFluid(sf, cmp.getCompound("NBT"));
+            this.fluid = SoftFluidStack.load(cmp);
         }
     }
 
@@ -615,21 +335,10 @@ public abstract class SoftFluidTank {
      */
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
-        cmp.putInt("Count", this.count);
-        if (this.fluid == null){
-            this.fluid = BuiltInSoftFluids.EMPTY.get();
-            Moonlight.LOGGER.error("Null fluid detected in tank. Hod did this happen?"+BuiltInSoftFluids.EMPTY.get());
-        }
-        var id = Utils.getID(fluid);
-        if (id == null) {
-            Moonlight.LOGGER.warn("Failed to save fluid in container: {} is not registered", fluid);
-            cmp.putString("Fluid", SoftFluidRegistry.EMPTY_ID.toString());
-        } else {
-            cmp.putString("Fluid", id.toString());
-        }
+        this.fluid.save(cmp);
         //for item render. needed for potion colors. could be done better taking pos and level into account
         cmp.putInt("CachedColor", this.getTintColor(null, null));
-        if (nbt != null && !nbt.isEmpty()) cmp.put("NBT", nbt);
+
         compound.put("FluidHolder", cmp);
         return compound;
     }
@@ -643,53 +352,12 @@ public abstract class SoftFluidTank {
      */
     public boolean tryDrinkUpFluid(Player player, Level world) {
         if (!this.isEmpty() && this.containsFood()) {
-            if (this.fluid.getFoodProvider().consume(player, world, this::applyNBTtoItemStack)) {
-                this.shrink(1);
+            if (this.fluid.getFoodProvider().consume(player, world, this.fluid::applyNBTtoItemStack)) { //crap code right there
+                fluid.shrink(1);
                 return true;
             }
         }
         return false;
-    }
-
-    protected static boolean areNbtEquals(CompoundTag nbt, CompoundTag nbt1) {
-        if ((nbt == null || nbt.isEmpty()) && (nbt1 == null || nbt1.isEmpty())) return true;
-        if (nbt == null || nbt1 == null) return false;
-        if (nbt1.contains(POTION_TYPE_KEY) && !nbt.contains(POTION_TYPE_KEY)) {
-            var n1 = nbt1.copy();
-            n1.remove(POTION_TYPE_KEY);
-            return n1.equals(nbt);
-        }
-        if (nbt.contains(POTION_TYPE_KEY) && !nbt1.contains(POTION_TYPE_KEY)) {
-            var n = nbt.copy();
-            n.remove(POTION_TYPE_KEY);
-            return n.equals(nbt1);
-        }
-        return nbt1.equals(nbt);
-    }
-
-
-    //handles special nbt items such as potions or soups
-    protected void applyNBTtoItemStack(ItemStack stack) {
-        List<String> nbtKey = this.fluid.getNbtKeyFromItem();
-        if (this.nbt != null && !this.nbt.isEmpty()) {
-            CompoundTag newCom = new CompoundTag();
-            for (String s : nbtKey) {
-                //ignores bottle tag, handled separately since it's a diff item
-                Tag c = this.nbt.get(s);
-                if (c != null && !s.equals(POTION_TYPE_KEY)) {
-                    newCom.put(s, c);
-                }
-            }
-            if (!newCom.isEmpty()) stack.setTag(newCom);
-        }
-    }
-
-    //same syntax as merge
-    protected void addPotionTag(Item i, CompoundTag com) {
-        String type = "REGULAR";
-        if (i instanceof SplashPotionItem) type = "SPLASH";
-        else if (i instanceof LingeringPotionItem) type = "LINGERING";
-        com.putString(POTION_TYPE_KEY, type);
     }
 
 

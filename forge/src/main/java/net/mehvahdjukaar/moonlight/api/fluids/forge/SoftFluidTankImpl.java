@@ -25,7 +25,6 @@ import java.util.List;
  */
 public class SoftFluidTankImpl extends SoftFluidTank {
 
-
     public static SoftFluidTank create(int capacity) {
         return new SoftFluidTankImpl(capacity);
     }
