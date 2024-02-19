@@ -25,7 +25,6 @@ public interface IScreenProvider {
         openScreen(level, pos, player);
     }
 
-    @Deprecated(forRemoval = true)
     default void sendOpenGuiPacket(Level level, BlockPos pos, Player player) {
         sendOpenGuiPacket(level, pos, player, Direction.NORTH);
     }

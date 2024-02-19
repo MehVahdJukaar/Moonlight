@@ -134,7 +134,6 @@ public abstract class SoftFluidTank {
      *
      * @return filled bottle item. null if it failed or if simulated is true and failed
      */
-    @Nullable
     public InteractionResultHolder<ItemStack> fillItem(ItemStack emptyContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
         var pair = this.fluid.toItem(emptyContainer, simulate);
 
@@ -191,9 +190,9 @@ public abstract class SoftFluidTank {
      * Main method called when checking if fluid can be added to this or not
      */
     public boolean canAddSoftFluid(SoftFluidStack fluidStack) {
-        if (this.isEmpty()) return false;
+        if (this.isEmpty()) return true;
         if (!this.fluid.isFluidEqual(fluidStack)) return false;
-        return this.getSpace() >= fluid.getCount();
+        return this.getSpace() >= fluidStack.getCount();
     }
 
     /**
@@ -265,14 +264,26 @@ public abstract class SoftFluidTank {
         return Mth.floor(f * 14.0F) + 1;
     }
 
-    public SoftFluidStack getFluids() {
+    public SoftFluidStack getFluid() {
         return fluid;
+    }
+
+    public SoftFluid getFluidValue() {
+        return fluid.getFluid().value();
     }
 
     public void setFluid(SoftFluidStack fluid) {
         this.fluid = fluid;
-        this.specialColor = 0;
-        this.needsColorRefresh = true;
+        refreshTintCache();
+    }
+
+    public void refreshTintCache(){
+        specialColor = 0;
+        needsColorRefresh = true;
+    }
+
+    private void fillCount() {
+        this.fluid.setCount(this.capacity);
     }
 
     /**
@@ -288,28 +299,32 @@ public abstract class SoftFluidTank {
      * @param other other tank
      */
     public void copyContent(SoftFluidTank other) {
-        SoftFluidStack stack = other.getFluids();
+        SoftFluidStack stack = other.getFluid();
         this.setFluid(stack.copyWithCount(Math.min(this.capacity, stack.getCount())));
     }
 
+    public int getCapacity() {
+        return capacity;
+    }
 
     public void capCapacity() {
         this.fluid.setCount(Mth.clamp(this.fluid.getCount(), 0, capacity));
     }
 
+    //TODO: move color stuff into fluidStack
     /**
-     * @return tint color to be applied on the fluid texture
+     * @return cached tint color to be applied on the fluid texture
      */
     //works on both side
     public abstract int getTintColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos);
 
     /**
-     * @return tint color to be applied on the fluid texture
+     * @return cached tint color to be applied on the fluid texture
      */
     public abstract int getFlowingTint(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos);
 
     /**
-     * @return tint color to be used on particle. Differs from getTintColor since it returns an mixWith color extrapolated from their fluid textures
+     * @return cached tint color to be used on particle. Differs from getTintColor since it returns an mixWith color extrapolated from their fluid textures
      */
     public abstract int getParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos);
 

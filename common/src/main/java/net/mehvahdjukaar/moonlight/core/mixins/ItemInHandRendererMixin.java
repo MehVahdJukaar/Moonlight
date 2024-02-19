@@ -25,10 +25,10 @@ public abstract class ItemInHandRendererMixin {
     public void moonlight$animateItem(AbstractClientPlayer player, float partialTicks, float pitch,
                                       InteractionHand hand, float swingProgress, ItemStack stack,
                                       float handHeight, PoseStack poseStack, MultiBufferSource buffer,
-                                      int combinedLight, CallbackInfo ci) {
+                                      int combinedLight, CallbackInfo ci, @Local HumanoidArm arm) {
         IFirstPersonAnimationProvider provider = IFirstPersonAnimationProvider.get(stack.getItem());
         if (provider != null) {
-            provider.animateItemFirstPerson(player, stack, hand, poseStack, partialTicks, pitch, swingProgress, handHeight);
+            provider.animateItemFirstPerson(player, stack, hand, arm, poseStack, partialTicks, pitch, swingProgress, handHeight);
         }
     }
 
@@ -42,7 +42,7 @@ public abstract class ItemInHandRendererMixin {
                                         @Local HumanoidArm arm) {
         IFirstPersonSpecialItemRenderer provider = IFirstPersonSpecialItemRenderer.get(stack.getItem());
         if (provider != null) {
-            if (provider.renderFirstPersonItem(player, stack, arm, poseStack, partialTicks, pitch, swingProgress, equippedProgress,
+            if (provider.renderFirstPersonItem(player, stack,hand, arm, poseStack, partialTicks, pitch, swingProgress, equippedProgress,
                     buffer, combinedLight, (ItemInHandRenderer) (Object) this)) {
                 poseStack.popPose();
                 ci.cancel();

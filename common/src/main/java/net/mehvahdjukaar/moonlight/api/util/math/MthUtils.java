@@ -134,7 +134,7 @@ public class MthUtils {
     /**
      * @param rand a rng
      * @param max  maximum value. Has to be >0
-     * @param bias positive getValues skew the average towards 0 (has to be from 0 to infinity).
+     * @param bias when a positive number, skew the average towards 0 (has to be from 0 to infinity).
      *             negative toward max (has to be from 0 to negative infinity). Values <= -1 are invalid.
      *             Setting it to 0 is equivalent to rand.nextFloat()*max.
      *             bias = 1 is slightly skewed towards 0 with average 0.38*max

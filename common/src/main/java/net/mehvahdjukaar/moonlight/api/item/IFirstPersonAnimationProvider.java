@@ -22,11 +22,9 @@ public interface IFirstPersonAnimationProvider {
                                         float partialTicks, float pitch, float attackAnim, float handHeight) {
     }
 
-    default void animateItemFirstPerson(final Player entity, final ItemStack stack, final HumanoidArm arm, final PoseStack poseStack,
+    default void animateItemFirstPerson(final Player entity, final ItemStack stack, final InteractionHand hand, final HumanoidArm arm, final PoseStack poseStack,
                                         float partialTicks, float pitch, float attackAnim, float handHeight) {
-        animateItemFirstPerson(entity, stack,
-                arm == HumanoidArm.RIGHT ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND
-                , poseStack, partialTicks, pitch, attackAnim, handHeight);
+        animateItemFirstPerson(entity, stack, hand, poseStack, partialTicks, pitch, attackAnim, handHeight);
     }
 
     /**

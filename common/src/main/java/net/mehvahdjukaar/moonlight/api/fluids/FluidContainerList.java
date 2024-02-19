@@ -27,12 +27,11 @@ public class FluidContainerList {
 
     private final Map<Item, Category> emptyToFilledMap = new IdentityHashMap<>();
 
-    public FluidContainerList() {
-
-    }
-
     public FluidContainerList(List<Category> categoryList) {
         categoryList.forEach(this::addCategory);
+    }
+
+    public FluidContainerList() {
     }
 
     private void addCategory(Category newCategory) {
@@ -70,7 +69,7 @@ public class FluidContainerList {
     }
 
 
-    public Optional<List<Category>> encodeList() {
+    protected Optional<List<Category>> encodeList() {
         return emptyToFilledMap.isEmpty() ? Optional.empty() : Optional.of(new ArrayList<>(emptyToFilledMap.values()));
     }
 
@@ -88,16 +87,16 @@ public class FluidContainerList {
         return this.emptyToFilledMap.values();
     }
 
-    public void merge(FluidContainerList other) {
+    protected void merge(FluidContainerList other) {
         other.emptyToFilledMap.values().forEach(this::addCategory);
     }
 
-    public void add(Item empty, Item filled, int amount) {
+    protected void add(Item empty, Item filled, int amount) {
         var c = this.emptyToFilledMap.computeIfAbsent(empty, i -> new Category(i, amount));
         c.addItem(filled);
     }
 
-    public void add(Item empty, Item filled, int amount, SoundEvent fillSound, SoundEvent emptySound) {
+    protected void add(Item empty, Item filled, int amount, SoundEvent fillSound, SoundEvent emptySound) {
         var c = this.emptyToFilledMap.computeIfAbsent(empty, i -> new Category(i, amount));
         c.addItem(filled);
         c.fillSound = fillSound;

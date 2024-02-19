@@ -2,7 +2,9 @@ package net.mehvahdjukaar.moonlight.api.block;
 
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,8 +15,8 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public interface ISoftFluidProvider {
 
-    Pair<SoftFluid, CompoundTag> getProvidedFluid(Level world, BlockState state, BlockPos pos);
+    SoftFluidStack getProvidedFluid(Level level, BlockState state, BlockPos pos);
 
-    void consumeProvidedFluid(Level world, BlockState state, BlockPos pos, SoftFluid f, CompoundTag nbt, int amount);
+    void consumeProvidedFluid(Level world, BlockState state, BlockPos pos, SoftFluidStack fluid);
 
 }

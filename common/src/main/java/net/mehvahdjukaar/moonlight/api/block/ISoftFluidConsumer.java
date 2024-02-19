@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -14,6 +15,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface ISoftFluidConsumer {
 
-    boolean tryAcceptingFluid(Level world, BlockState state, BlockPos pos, SoftFluid f, @Nullable CompoundTag nbt, int amount);
+    boolean tryAcceptingFluid(Level world, BlockState state, BlockPos pos, SoftFluidStack stack);
 
 }

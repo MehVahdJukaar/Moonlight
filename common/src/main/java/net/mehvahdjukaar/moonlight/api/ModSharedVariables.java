@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,15 +31,21 @@ public class ModSharedVariables {
         }
     }
 
+    @Nullable
     public static Double getDouble(String name) {
-        return DOUBLES.get(name).get();
+        var sup = DOUBLES.get(name);
+        return sup == null ? null : sup.get();
     }
 
+    @Nullable
     public static Boolean getBool(String name) {
-        return BOOL.get(name).get();
+        var sup = BOOL.get(name);
+        return sup == null ? null : sup.get();
     }
 
+    @Nullable
     public static String getString(String name) {
-        return STRINGS.get(name).get();
+        var sup = STRINGS.get(name);
+        return sup == null ? null : sup.get();
     }
 }

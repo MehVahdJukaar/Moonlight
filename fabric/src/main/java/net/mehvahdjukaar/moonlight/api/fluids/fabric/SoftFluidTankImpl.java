@@ -41,7 +41,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
             this.needsColorRefresh = false;
         }
         if (this.specialColor != 0) return this.specialColor;
-        return this.fluid.getTintColor();
+        return this.fluid.getFluid().value().getTintColor();
     }
 
     /**

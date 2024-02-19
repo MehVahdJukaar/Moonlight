@@ -22,7 +22,7 @@ public interface IFirstPersonSpecialItemRenderer {
      *
      * @return true to cancel original item renderer
      */
-    boolean renderFirstPersonItem(final AbstractClientPlayer player, final ItemStack stack, final HumanoidArm arm, final PoseStack poseStack,
+    boolean renderFirstPersonItem(final AbstractClientPlayer player, final ItemStack stack,  final InteractionHand hand, final HumanoidArm arm, final PoseStack poseStack,
                                   float partialTicks, float pitch, float attackAnim, float equipAnim,
                                   MultiBufferSource buffer, int light, ItemInHandRenderer renderer);
 //TODO: replace all interaction hands with HumanoidHand!!

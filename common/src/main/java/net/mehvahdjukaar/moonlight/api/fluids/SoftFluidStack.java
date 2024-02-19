@@ -1,13 +1,16 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
 import com.mojang.datafixers.util.Pair;
+import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
@@ -20,12 +23,11 @@ import java.util.Objects;
 // do NOT have these in a static field as they contain registry holders
 public class SoftFluidStack {
 
-    public static final String POTION_TYPE_KEY = "Bottle";
-
     private final Holder<SoftFluid> fluid;
     private int count;
     private CompoundTag tag;
     private boolean isEmptyCache;
+
 
     public SoftFluidStack(Holder<SoftFluid> fluid, int count, CompoundTag tag) {
         this.fluid = fluid;
@@ -35,8 +37,8 @@ public class SoftFluidStack {
 
         //even more hardcoded shit
         if (fluid.is(BuiltInSoftFluids.POTION.getID())) {
-            if (this.tag == null || !this.tag.contains(POTION_TYPE_KEY)) {
-                this.getOrCreateTag().putString(POTION_TYPE_KEY, "REGULAR");
+            if (this.tag == null || PotionNBTHelper.getPotionType(this.tag) == null) {
+                PotionNBTHelper.Type.REGULAR.applyToTag(this.getOrCreateTag());
             }
         }
     }
@@ -66,20 +68,24 @@ public class SoftFluidStack {
         //backwards compat
         if (tag.contains("Fluid")) {
             tag.putString("id", tag.getString("Fluid"));
+            tag.remove("Fluid");
         }
         if (tag.contains("NBT")) {
-            tag.putString("tag", tag.getString("NBT"));
+            tag.put("tag", tag.get("NBT"));
+            tag.remove("NBT");
         }
         if (tag.contains("Count")) {
-            tag.putString("count", tag.getString("Count"));
+            tag.putByte("count", (byte) tag.getInt("Count"));
+            tag.remove("count");
         }
 
         var fluid = SoftFluidRegistry.getHolder(new ResourceLocation(tag.getString("id")));
         var amount = tag.getByte("count");
+        CompoundTag nbt = null;
         if (tag.contains("tag", 10)) {
-            tag = tag.getCompound("tag");
+            nbt = tag.getCompound("tag");
         }
-        return new SoftFluidStack(fluid, amount, tag);
+        return new SoftFluidStack(fluid, amount, nbt);
     }
 
     public boolean is(TagKey<SoftFluid> tag) {
@@ -210,17 +216,10 @@ public class SoftFluidStack {
         return false;
     }
 
-
-    // fluid delegates
-
-    public FluidContainerList getContainerList() {
-        return getFluid().value().getContainerList();
+    @Override
+    public String toString() {
+        return count + " " + fluid.unwrapKey().get().location() + " [" + tag.toString() + "]";
     }
-
-    public FoodProvider getFoodProvider() {
-        return getFluid().value().getFoodProvider();
-    }
-
 
     // item conversion
 
@@ -249,7 +248,9 @@ public class SoftFluidStack {
                 }
                 //add tags to splash and lingering potions
                 else if (potion != Potions.EMPTY || hasCustomPot) {
-                    applyPotionNBT(filledContainer, fluidTag);
+                    PotionNBTHelper.Type type = PotionNBTHelper.getPotionType(filledContainer);
+                    if (type == null) type = PotionNBTHelper.Type.REGULAR;
+                    type.applyToTag(fluidTag);
                 }
 
                 //copy nbt from item
@@ -274,12 +275,12 @@ public class SoftFluidStack {
     /**
      * Fills the item if possible. Returns empty stack if it fails
      *
-     * @param emptyContainer empty bottle item
-     * @param modifyStack    if the stack count actually is decremented.
+     * @param emptyContainer  empty bottle item
+     * @param dontModifyStack if the stack count actually is decremented.
      * @return null if it fails, filled stack otherwise
      */
     @Nullable
-    public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean modifyStack) {
+    public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
         var opt = fluid.value().getContainerList().getCategoryFromEmpty(emptyContainer.getItem());
         if (opt.isPresent()) {
             var category = opt.get();
@@ -288,11 +289,12 @@ public class SoftFluidStack {
 
                 ItemStack filledStack = new ItemStack(category.getFirstFilled().get());
                 //case for lingering potions
-                if (this.fluid.value() == BuiltInSoftFluids.POTION.get()) {
-                    if (this.tag != null && this.tag.contains(POTION_TYPE_KEY) && !Utils.getID(emptyContainer).getNamespace().equals("inspirations")) {
-                        String bottle = this.tag.getString(POTION_TYPE_KEY);
-                        if (bottle.equals("SPLASH")) filledStack = new ItemStack(Items.SPLASH_POTION);
-                        else if (bottle.equals("LINGERING")) filledStack = new ItemStack(Items.LINGERING_POTION);
+                if (this.fluid.is(BuiltInSoftFluids.POTION.getID()) && this.tag != null) {
+                    var type = PotionNBTHelper.getPotionType(this.tag);
+                    if (type != null && !Utils.getID(emptyContainer.getItem()).getNamespace().equals("inspirations")) {
+                        if(type != PotionNBTHelper.Type.REGULAR){
+                            filledStack = type.getDefaultItem();
+                        }
                     }
                 }
 
@@ -303,7 +305,7 @@ public class SoftFluidStack {
 
                 this.applyNBTtoItemStack(filledStack);
 
-                if(modifyStack) this.shrink(shrinkAmount);
+                if (!dontModifyStack) this.shrink(shrinkAmount);
 
                 return Pair.of(filledStack, category);
             }
@@ -313,14 +315,6 @@ public class SoftFluidStack {
 
     //TODO: clean this nbt hardcoded stuff up
 
-    //same syntax as merge
-    protected static void applyPotionNBT(Item item, CompoundTag com) {
-        String type = "REGULAR";
-        if (item instanceof SplashPotionItem) type = "SPLASH";
-        else if (item instanceof LingeringPotionItem) type = "LINGERING";
-        com.putString(POTION_TYPE_KEY, type);
-    }
-
     //handles special nbt items such as potions or soups
     protected void applyNBTtoItemStack(ItemStack stack) {
         List<String> nbtKey = this.fluid.value().getNbtKeyFromItem();
@@ -329,7 +323,7 @@ public class SoftFluidStack {
             for (String s : nbtKey) {
                 //ignores bottle tag, handled separately since it's a diff item
                 Tag c = this.tag.get(s);
-                if (c != null && !s.equals(POTION_TYPE_KEY)) {
+                if (c != null && !s.equals(PotionNBTHelper.POTION_TYPE_KEY)) {
                     newCom.put(s, c);
                 }
             }
@@ -337,6 +331,16 @@ public class SoftFluidStack {
         }
     }
 
+
+    // fluid delegates
+
+    public FluidContainerList getContainerList() {
+        return getFluid().value().getContainerList();
+    }
+
+    public FoodProvider getFoodProvider() {
+        return getFluid().value().getFoodProvider();
+    }
 
     public boolean isEquivalent(Fluid fluid) {
         return this.fluid.value().isEquivalent(fluid);
@@ -350,7 +354,4 @@ public class SoftFluidStack {
         return this.fluid.value().getTintMethod();
     }
 
-    public int getTintColor() {
-        return this.fluid.value().getTintColor();
-    }
 }

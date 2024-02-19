@@ -19,8 +19,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack.POTION_TYPE_KEY;
-
 /**
  * instance this fluid tank in your tile entity
  */
@@ -149,7 +147,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
             CompoundTag newCom = new CompoundTag();
             for (String k : nbtKey) {
                 //special case to convert to IE pot fluid
-                if (k.equals(POTION_TYPE_KEY) && Utils.getID(fluidStack.getFluid()).getNamespace().equals("immersiveengineering")) {
+                if (k.equals(PotionNBTHelper.POTION_TYPE_KEY) && Utils.getID(fluidStack.getFluid()).getNamespace().equals("immersiveengineering")) {
                     continue;
                 }
                 Tag c = tag.get(k);
@@ -185,7 +183,6 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         }
     }
 
-
     /**
      * @return tint color to be applied on the fluid texture
      */
@@ -197,7 +194,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
             this.needsColorRefresh = false;
         }
         if (this.specialColor != 0) return this.specialColor;
-        return this.fluid.getTintColor();
+        return this.getFluidValue().getTintColor();
     }
 
     /**
