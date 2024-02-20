@@ -18,7 +18,6 @@ import net.mehvahdjukaar.moonlight.api.client.model.fabric.MLFabricModelLoaderRe
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ModelManagerAccessor;
@@ -169,9 +168,9 @@ public class ClientHelperImpl {
 
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
         Moonlight.assertInitPhase();
-        ModelLoadingPlugin.register(pluginContext -> {
-            eventListener.accept(pluginContext::addModels);
-        });
+            ModelLoadingPlugin.register(pluginContext -> {
+                eventListener.accept(pluginContext::addModels);
+            });
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {

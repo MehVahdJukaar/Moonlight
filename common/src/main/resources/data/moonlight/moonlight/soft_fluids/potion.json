@@ -48,6 +48,7 @@
     "CustomPotionEffects",
     "CustomPotionColor"
   ],
+  "luminosity": 5,
   "still_texture": "moonlight:block/soft_fluids/potion_still",
   "translation_key": "item.minecraft.potion",
   "use_texture_from": "create:potion"

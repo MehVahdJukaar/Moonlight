@@ -221,10 +221,9 @@ public abstract class SoftFluidTank {
 
     //transfers between two fluid holders
     public boolean transferFluid(SoftFluidTank destination, int amount) {
-        if (this.getFluidCount() >= amount) {
-            if (destination.addFluid(this.fluid.copyWithCount(amount))) {
-                this.fluid.shrink(amount);
-            }
+        if (this.getFluidCount() >= amount && destination.addFluid(this.fluid.copyWithCount(amount))) {
+            this.fluid.shrink(amount);
+            return true;
         }
         return false;
     }
@@ -277,7 +276,7 @@ public abstract class SoftFluidTank {
         refreshTintCache();
     }
 
-    public void refreshTintCache(){
+    public void refreshTintCache() {
         specialColor = 0;
         needsColorRefresh = true;
     }
@@ -312,6 +311,7 @@ public abstract class SoftFluidTank {
     }
 
     //TODO: move color stuff into fluidStack
+
     /**
      * @return cached tint color to be applied on the fluid texture
      */

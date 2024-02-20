@@ -161,7 +161,7 @@ public class SoftFluidStack {
     }
 
     public SoftFluidStack copy() {
-        return new SoftFluidStack(getFluid(), count, tag.copy());
+        return new SoftFluidStack(getFluid(), count, tag == null ? null : tag.copy());
     }
 
     public SoftFluidStack copyWithCount(int count) {
@@ -292,7 +292,7 @@ public class SoftFluidStack {
                 if (this.fluid.is(BuiltInSoftFluids.POTION.getID()) && this.tag != null) {
                     var type = PotionNBTHelper.getPotionType(this.tag);
                     if (type != null && !Utils.getID(emptyContainer.getItem()).getNamespace().equals("inspirations")) {
-                        if(type != PotionNBTHelper.Type.REGULAR){
+                        if (type != PotionNBTHelper.Type.REGULAR) {
                             filledStack = type.getDefaultItem();
                         }
                     }
