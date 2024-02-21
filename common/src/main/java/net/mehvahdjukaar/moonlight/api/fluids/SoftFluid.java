@@ -39,6 +39,7 @@ public class SoftFluid {
     private final String fromMod;
     private final String translationKey;
     private final int luminosity;
+    private final int emissivity;
     private final int tintColor;
     private final TintMethod tintMethod;
     private final List<Fluid> equivalentFluids;
@@ -56,6 +57,7 @@ public class SoftFluid {
         this.tintMethod = builder.tintMethod;
         this.equivalentFluids = builder.equivalentFluids;
         this.luminosity = builder.luminosity;
+        this.emissivity = builder.emissivity;
         this.containerList = builder.containerList;
         this.food = builder.food;
         this.fromMod = builder.fromMod;
@@ -188,6 +190,10 @@ public class SoftFluid {
         return luminosity;
     }
 
+    public int getEmissivity() {
+        return emissivity;
+    }
+
     /**
      * @return tint color. default is -1 (white) so effectively no tint
      */
@@ -232,6 +238,7 @@ public class SoftFluid {
         private String translationKey = "fluid.moonlight.generic_fluid";
 
         private int luminosity = 0;
+        private int emissivity = 0;
         private int tintColor = -1;
         private TintMethod tintMethod = TintMethod.STILL_AND_FLOWING;
 
@@ -339,6 +346,12 @@ public class SoftFluid {
 
         public final Builder luminosity(int luminosity) {
             this.luminosity = luminosity;
+            this.emissivity = luminosity;
+            return this;
+        }
+
+        public final Builder emissivity(int emissivity) {
+            this.emissivity = emissivity;
             return this;
         }
 
@@ -535,6 +548,7 @@ public class SoftFluid {
             StrOpt.of(Codec.STRING, "from_mod").forGetter(getHackyOptional(SoftFluid::getFromMod)),
             StrOpt.of(Codec.STRING, "translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
             StrOpt.of(Codec.intRange(0, 15), "luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
+            StrOpt.of(Codec.intRange(0, 15), "emissivity").forGetter(getHackyOptional(SoftFluid::getEmissivity)),
             StrOpt.of(ColorUtils.CODEC, "color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
             StrOpt.of(TintMethod.CODEC, "tint_method").forGetter(getHackyOptional(SoftFluid::getTintMethod)),
             FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
@@ -547,8 +561,9 @@ public class SoftFluid {
 
 
     protected static SoftFluid create(ResourceLocation still, ResourceLocation flowing, Optional<String> fromMod,
-                                      Optional<String> translation, Optional<Integer> luminosity, Optional<Integer> color,
-                                      Optional<TintMethod> tint, Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
+                                      Optional<String> translation, Optional<Integer> luminosity,  Optional<Integer> emissivity,
+                                      Optional<Integer> color, Optional<TintMethod> tint,
+                                      Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
                                       Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,
                                       Optional<ResourceLocation> textureFrom) {
 
@@ -556,6 +571,7 @@ public class SoftFluid {
         fromMod.ifPresent(builder::fromMod);
         translation.ifPresent(builder::translationKey);
         luminosity.ifPresent(builder::luminosity);
+        emissivity.ifPresent(builder::emissivity);
         color.ifPresent(builder::color);
         tint.ifPresent(builder::tintMethod);
         food.ifPresent(builder::food);

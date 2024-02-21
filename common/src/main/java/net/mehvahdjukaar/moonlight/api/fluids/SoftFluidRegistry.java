@@ -26,10 +26,8 @@ public class SoftFluidRegistry {
 
     public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(Moonlight.res("soft_fluids"));
 
-    public static final ResourceLocation EMPTY_ID = Moonlight.res("empty");
-
-    private static final Map<Fluid, Holder<SoftFluid>> FLUID_MAP = new IdentityHashMap<>();
-    private static final Map<Item, Holder<SoftFluid>> ITEM_MAP = new IdentityHashMap<>();
+    protected static final Map<Fluid, Holder<SoftFluid>> FLUID_MAP = new IdentityHashMap<>();
+    protected static final Map<Item, Holder<SoftFluid>> ITEM_MAP = new IdentityHashMap<>();
 
 
     public static Holder<SoftFluid> getEmpty() {
@@ -79,27 +77,6 @@ public class SoftFluidRegistry {
         return id;
     }
 
-    /**
-     * gets a soft fluid provided a forge fluid
-     *
-     * @param fluid equivalent forge fluid
-     * @return soft fluid. null if not found
-     */
-    @Nullable
-    public static Holder<SoftFluid> fromVanillaFluid(Fluid fluid) {
-        return FLUID_MAP.get(fluid);
-    }
-
-    /**
-     * gets a soft fluid provided a bottle like item
-     *
-     * @param filledContainerItem item containing provided fluid
-     * @return soft fluid. null if not found
-     */
-    @Nullable
-    public static Holder<SoftFluid> fromItem(Item filledContainerItem) {
-        return ITEM_MAP.get(filledContainerItem);
-    }
 
     //needs to be called on both sides
     private static void populateSlaveMaps() {

@@ -11,7 +11,7 @@ public class BuiltInSoftFluids {
     public static final DataObjectReference<SoftFluid> HONEY = create("honey");
     public static final DataObjectReference<SoftFluid> MILK = create("milk");
     public static final DataObjectReference<SoftFluid> MUSHROOM_STEW = create("mushroom_stew");
-    public static final DataObjectReference<SoftFluid> BEETROOT_SOUP = create("beetroot_stew");
+    public static final DataObjectReference<SoftFluid> BEETROOT_SOUP = create("beetroot_soup");
     public static final DataObjectReference<SoftFluid> RABBIT_STEW = create("rabbit_stew");
     public static final DataObjectReference<SoftFluid> SUS_STEW = create("suspicious_stew");
     public static final DataObjectReference<SoftFluid> POTION = create("potion");

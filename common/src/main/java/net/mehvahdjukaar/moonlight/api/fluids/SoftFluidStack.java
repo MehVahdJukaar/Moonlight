@@ -51,6 +51,7 @@ public class SoftFluidStack {
         this(fluid, 1, null);
     }
 
+
     public static SoftFluidStack empty() {
         return new SoftFluidStack(SoftFluidRegistry.getEmpty(), 0, null);
     }
@@ -221,12 +222,18 @@ public class SoftFluidStack {
         return count + " " + fluid.unwrapKey().get().location() + " [" + tag.toString() + "]";
     }
 
+    public static SoftFluidStack fromFluid(Fluid fluid, int amount, @Nullable CompoundTag tag) {
+        Holder<SoftFluid> f = SoftFluidRegistry.FLUID_MAP.get(fluid);
+        if (f == null) return null;
+        return new SoftFluidStack(f, amount, tag);
+    }
+
     // item conversion
 
     @Nullable
     public static Pair<SoftFluidStack, FluidContainerList.Category> fromItem(ItemStack itemStack) {
         Item filledContainer = itemStack.getItem();
-        Holder<SoftFluid> fluid = SoftFluidRegistry.fromItem(filledContainer);
+        Holder<SoftFluid> fluid = SoftFluidRegistry.ITEM_MAP.get(filledContainer);
 
         if (fluid != null && !fluid.value().isEmpty()) {
             var category = fluid.value().getContainerList()

@@ -6,7 +6,6 @@ import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -61,22 +60,29 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      * @return success
      */
     public boolean addVanillaFluid(FluidStack fluidStack) {
-        Holder<SoftFluid> s = SoftFluidRegistry.fromVanillaFluid(fluidStack.getFluid());
+        var s = convertForgeFluid(fluidStack);
         if (s == null) return false;
-        return addFluid(new SoftFluidStack(s, fluidStack.getAmount(), fluidStack.getTag().copy()));
+        return addFluid(s);
+    }
+
+    @Nullable
+    public static SoftFluidStack convertForgeFluid(FluidStack fluidStack) {
+        int amount = MBtoBottles(fluidStack.getAmount());
+        return SoftFluidStack.fromFluid(fluidStack.getFluid(), amount,
+                fluidStack.hasTag() ? fluidStack.getTag().copy() : null);
     }
 
     //TODO: re check all the ones below here. I blindly ported
 
     /**
-     * empties n bottle of content into said forge fluid tank
+     * pours n bottle of my content into said forge fluid tank
      *
      * @param fluidDestination forge fluid tank handler
      * @param bottles          number of bottles to empty (1blt = 250mb)
      * @return success
      */
-    public boolean tryTransferToFluidTank(IFluidHandler fluidDestination, int bottles) {
-        if (this.getFluidCount() < bottles) return false;
+    public boolean transferToFluidTank(IFluidHandler fluidDestination, int bottles) {
+        if (this.isEmpty() || this.getFluidCount() < bottles) return false;
         int milliBuckets = bottlesToMB(bottles);
         FluidStack stack = this.toEquivalentVanillaFluid(milliBuckets);
         if (!stack.isEmpty()) {
@@ -98,8 +104,8 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         return (int) (milliBuckets / 250f);
     }
 
-    public boolean tryTransferToFluidTank(IFluidHandler fluidDestination) {
-        return this.tryTransferToFluidTank(fluidDestination, BOTTLE_COUNT);
+    public boolean transferToFluidTank(IFluidHandler fluidDestination) {
+        return this.transferToFluidTank(fluidDestination, BOTTLE_COUNT);
     }
 
     //drains said fluid tank of 250mb (1 bottle) of fluid
@@ -176,10 +182,9 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      * @param fluidStack forge fluid
      */
     public void setFluid(FluidStack fluidStack) {
-        var s = SoftFluidRegistry.fromVanillaFluid(fluidStack.getFluid());
+        var s = convertForgeFluid(fluidStack);
         if (s != null) {
-            int amount = MBtoBottles(fluidStack.getAmount());
-            this.setFluid(new SoftFluidStack(s, amount, fluidStack.getTag().copy()));
+            this.setFluid(s);
         }
     }
 

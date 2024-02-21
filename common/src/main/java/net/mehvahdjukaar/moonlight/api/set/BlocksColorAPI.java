@@ -36,11 +36,15 @@ public class BlocksColorAPI {
     }
 
     public static boolean isDefaultColor(Block block) {
-        return getColoredBlock(getKey(block), null) == block;
+        String key = getKey(block);
+        if (key == null) return true;
+        return getColoredBlock(key, null) == block;
     }
 
     public static boolean isDefaultColor(Item item) {
-        return getColoredItem(getKey(item), null) == item;
+        String key = getKey(item);
+        if (key == null) return true;
+        return getColoredItem(key, null) == item;
     }
 
     /**

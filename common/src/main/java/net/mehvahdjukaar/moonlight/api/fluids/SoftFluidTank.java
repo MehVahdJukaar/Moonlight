@@ -221,6 +221,7 @@ public abstract class SoftFluidTank {
 
     //transfers between two fluid holders
     public boolean transferFluid(SoftFluidTank destination, int amount) {
+        if (this.isEmpty()) return false;
         if (this.getFluidCount() >= amount && destination.addFluid(this.fluid.copyWithCount(amount))) {
             this.fluid.shrink(amount);
             return true;
@@ -344,6 +345,7 @@ public abstract class SoftFluidTank {
         if (compound.contains("FluidHolder")) {
             CompoundTag cmp = compound.getCompound("FluidHolder");
             this.fluid = SoftFluidStack.load(cmp);
+            if (this.isEmpty()) this.fluid = SoftFluidStack.empty();
         }
     }
 
@@ -355,6 +357,7 @@ public abstract class SoftFluidTank {
      */
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
+        if (this.isEmpty()) this.fluid = SoftFluidStack.empty();
         this.fluid.save(cmp);
         //for item render. needed for potion colors. could be done better taking pos and level into account
         cmp.putInt("CachedColor", this.getTintColor(null, null));
