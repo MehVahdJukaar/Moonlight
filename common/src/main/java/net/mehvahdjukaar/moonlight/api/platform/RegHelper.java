@@ -238,8 +238,14 @@ public class RegHelper {
     }
 
     public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(
-            ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Block... block) {
-        return (RegSupplier<T>) registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply, block));
+            ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Block... blocks) {
+        return (RegSupplier<T>) registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply, blocks));
+    }
+
+    public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(
+            ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Supplier<Block>... blocks) {
+        return (RegSupplier<T>) registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply,
+                blocks.stream().map(Supplier::get).toArray(Block[]::new)));
     }
 
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {

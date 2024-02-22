@@ -66,7 +66,7 @@ public abstract class ConfigBuilder {
 
     public abstract ConfigBuilder pop();
 
-    public <T extends ConfigBuilder> T setWriteJsons(){
+    public <T extends ConfigBuilder> T setWriteJsons() {
         this.usesDataBuddy = false;
         return (T) this;
     }
@@ -98,8 +98,16 @@ public abstract class ConfigBuilder {
     //be very careful with these as you might use some objects that arent registered yet and things will break
     public abstract <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec);
 
-    public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec){
+    public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec) {
         return defineObject(name, defaultSupplier, codec.listOf());
+    }
+
+    public Supplier<Map<String, String>> defineMap(String name, Map<String, String> def) {
+        return defineObject(name, () -> def, Codec.unboundedMap(Codec.STRING, Codec.STRING));
+    }
+
+    public Supplier<Map<ResourceLocation, ResourceLocation>> defineIDMap(String name, Map<ResourceLocation, ResourceLocation> def) {
+        return defineObject(name, () -> def, Codec.unboundedMap(ResourceLocation.CODEC, ResourceLocation.CODEC));
     }
 
     public abstract Supplier<JsonElement> defineJson(String name, JsonElement defaultValue);

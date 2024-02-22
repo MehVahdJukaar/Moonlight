@@ -1,5 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
@@ -54,6 +57,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Supplier;
 
 
@@ -292,6 +296,12 @@ public class Utils {
             }
         }
         return null;
+    }
+
+
+    @ExpectPlatform
+    public static <K, V> MapCodec<Map<K, V>> optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec){
+        throw new AssertionError();
     }
 
 }
