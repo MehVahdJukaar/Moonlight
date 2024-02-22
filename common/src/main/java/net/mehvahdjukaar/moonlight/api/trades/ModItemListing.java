@@ -1,24 +1,14 @@
 package net.mehvahdjukaar.moonlight.api.trades;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.VillagerTrades;
 
-import java.util.Optional;
+import java.util.function.Function;
 
 
 public interface ModItemListing extends VillagerTrades.ItemListing {
 
-    Codec<ModItemListing> CODEC = ResourceLocation.CODEC
-            .flatXmap((string) -> Optional.ofNullable(ItemListingRegistry.getSerializer(string))
-                            .map(DataResult::success)
-                            .orElseGet(() -> DataResult.error(() -> "Unknown element name:" + string)),
-                    (object) -> Optional.ofNullable(ItemListingRegistry.getSerializerKey(object))
-                            .map(DataResult::success).orElseGet(() ->
-                                    DataResult.error(() -> "Element with unknown name: " + object)))
-            .dispatch("type", o -> (Codec<ModItemListing>) o.getCodec(), o -> o);
-
+    Codec<ModItemListing> CODEC = ItemListingRegistry.INSTANCE.byNameCodec().dispatch(ModItemListing::getCodec);
 
     default int getLevel() {
         return 1;

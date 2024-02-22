@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.trades;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
@@ -9,6 +7,8 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.mehvahdjukaar.moonlight.api.misc.CodecMapRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -30,7 +30,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
     public static final ItemListingRegistry INSTANCE = new ItemListingRegistry();
 
-    private final BiMap<ResourceLocation, Codec<ModItemListing>> serializers = HashBiMap.create();
+    private final CodecMapRegistry<ModItemListing> reg = MapRegistry.ofCodec();
     private final Map<EntityType<?>, Int2ObjectArrayMap<List<ModItemListing>>> specialCustomTrades = new HashMap<>();
     private final Map<VillagerProfession, Int2ObjectArrayMap<List<ModItemListing>>> customTrades = new HashMap<>();
 
@@ -43,9 +43,13 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
     public ItemListingRegistry() {
         super(new Gson(), "moonlight/villager_trades");
-        serializers.put(new ResourceLocation("simple"), (Codec<ModItemListing>) (Object) SimpleItemListing.CODEC);
-        serializers.put(new ResourceLocation("remove_all_non_data"), (Codec<ModItemListing>) (Object) RemoveNonDataListingListing.CODEC);
-        serializers.put(new ResourceLocation("no_op"), (Codec<ModItemListing>) (Object) NoOpListing.CODEC);
+        reg.register(new ResourceLocation("simple"), SimpleItemListing.CODEC);
+        reg.register(new ResourceLocation("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
+        reg.register(new ResourceLocation("no_op"), NoOpListing.CODEC);
+    }
+
+    public CodecMapRegistry<ModItemListing> byNameCodec(){
+        return reg;
     }
 
     @Override
@@ -160,7 +164,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
      * Call on mod setup. Register a new serializer for your trade
      */
     public static void registerSerializer(ResourceLocation id, Codec<? extends ModItemListing> trade) {
-        INSTANCE.serializers.put(id, (Codec<ModItemListing>) trade);
+        INSTANCE.reg.register(id, trade);
     }
 
     /**
@@ -170,15 +174,6 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
         SpecialListing specialListing = new SpecialListing(instance, level);
         registerSerializer(id, specialListing.getCodec());
     }
-
-    public static Codec<ModItemListing> getSerializer(ResourceLocation id) {
-        return INSTANCE.serializers.get(id);
-    }
-
-    public static ResourceLocation getSerializerKey(Codec<ModItemListing> object) {
-        return INSTANCE.serializers.inverse().get(object);
-    }
-
 
     private static class SpecialListing implements ModItemListing {
 
