@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Field;

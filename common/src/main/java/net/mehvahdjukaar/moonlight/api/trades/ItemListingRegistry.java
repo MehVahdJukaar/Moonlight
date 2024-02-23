@@ -26,30 +26,27 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+//TODO: rename to ItemListingManager
 public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
-    public static final ItemListingRegistry INSTANCE = new ItemListingRegistry();
+    protected static final CodecMapRegistry<ModItemListing> REGISTRY = MapRegistry.ofCodec();
+    private static final Map<EntityType<?>, Int2ObjectArrayMap<List<ModItemListing>>> SPECIAL_CUSTOM_TRADES = new HashMap<>();
+    private static final Map<VillagerProfession, Int2ObjectArrayMap<List<ModItemListing>>> CUSTOM_TRADES = new HashMap<>();
 
-    private final CodecMapRegistry<ModItemListing> reg = MapRegistry.ofCodec();
-    private final Map<EntityType<?>, Int2ObjectArrayMap<List<ModItemListing>>> specialCustomTrades = new HashMap<>();
-    private final Map<VillagerProfession, Int2ObjectArrayMap<List<ModItemListing>>> customTrades = new HashMap<>();
+    private static final Map<EntityType<?>, Int2ObjectArrayMap<ModItemListing[]>> oldSpecialTrades = new HashMap<>();
+    private static final Map<VillagerProfession, Int2ObjectArrayMap<ModItemListing[]>> oldTrades = new HashMap<>();
 
+    private static int count = 0;
 
-    private final Map<EntityType<?>, Int2ObjectArrayMap<ModItemListing[]>> oldSpecialTrades = new HashMap<>();
-    private final Map<VillagerProfession, Int2ObjectArrayMap<ModItemListing[]>> oldTrades = new HashMap<>();
+    static{
+        REGISTRY.register(new ResourceLocation("simple"), SimpleItemListing.CODEC);
+        REGISTRY.register(new ResourceLocation("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
+        REGISTRY.register(new ResourceLocation("no_op"), NoOpListing.CODEC);
+    }
 
-
-    private int count = 0;
 
     public ItemListingRegistry() {
         super(new Gson(), "moonlight/villager_trades");
-        reg.register(new ResourceLocation("simple"), SimpleItemListing.CODEC);
-        reg.register(new ResourceLocation("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
-        reg.register(new ResourceLocation("no_op"), NoOpListing.CODEC);
-    }
-
-    public CodecMapRegistry<ModItemListing> byNameCodec(){
-        return reg;
     }
 
     @Override
@@ -58,8 +55,8 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
         mergeProfessionAndSpecial(false);
 
         count = 0;
-        customTrades.clear();
-        specialCustomTrades.clear();
+        CUSTOM_TRADES.clear();
+        SPECIAL_CUSTOM_TRADES.clear();
 
         DynamicOps<JsonElement> ops = ForgeHelper.addConditionOps(RegistryOps.create(JsonOps.INSTANCE, registryAccess));
         for (var e : jsons.entrySet()) {
@@ -86,7 +83,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
             } else if (trade instanceof RemoveNonDataListingListing) {
                 //TODO: add remove trades
             } else {
-                customTrades.computeIfAbsent(profession.get(), t ->
+                CUSTOM_TRADES.computeIfAbsent(profession.get(), t ->
                                 new Int2ObjectArrayMap<>()).computeIfAbsent(trade.getLevel(), a -> new ArrayList<>())
                         .add(trade);
             }
@@ -96,7 +93,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
         if (entityType.isPresent()) {
             ModItemListing trade = parseOrThrow(json, id, ops);
             if (!(trade instanceof NoOpListing)) {
-                specialCustomTrades.computeIfAbsent(entityType.get(), t ->
+                SPECIAL_CUSTOM_TRADES.computeIfAbsent(entityType.get(), t ->
                                 new Int2ObjectArrayMap<>()).computeIfAbsent(trade.getLevel(), a -> new ArrayList<>())
                         .add(trade);
             }
@@ -123,14 +120,14 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
     }
 
     private void mergeProfessionAndSpecial(boolean add) {
-        for (var p : customTrades.entrySet()) {
+        for (var p : CUSTOM_TRADES.entrySet()) {
             VillagerProfession profession = p.getKey();
             Int2ObjectMap<VillagerTrades.ItemListing[]> map = VillagerTrades.TRADES.computeIfAbsent(profession, k ->
                     new Int2ObjectArrayMap<>());
             Int2ObjectArrayMap<List<ModItemListing>> value = p.getValue();
             mergeAll(map, value, add);
         }
-        Int2ObjectArrayMap<List<ModItemListing>> wanderingStuff = specialCustomTrades.get(EntityType.WANDERING_TRADER);
+        Int2ObjectArrayMap<List<ModItemListing>> wanderingStuff = SPECIAL_CUSTOM_TRADES.get(EntityType.WANDERING_TRADER);
         if (wanderingStuff != null) {
             mergeAll(VillagerTrades.WANDERING_TRADER_TRADES, wanderingStuff, add);
         }
@@ -154,7 +151,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
             if (array == null) return List.of();
             return Arrays.stream(array).toList();
         } else {
-            var special = INSTANCE.specialCustomTrades.get(entityType);
+            var special = SPECIAL_CUSTOM_TRADES.get(entityType);
             if (special == null) return List.of();
             return special.getOrDefault(level, List.of());
         }
@@ -164,7 +161,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
      * Call on mod setup. Register a new serializer for your trade
      */
     public static void registerSerializer(ResourceLocation id, Codec<? extends ModItemListing> trade) {
-        INSTANCE.reg.register(id, trade);
+        REGISTRY.register(id, trade);
     }
 
     /**

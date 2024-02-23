@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 
 /**
  * A soft reference to an object in a Data pack registry
+ * Like registry object but can be invalidated and works for data pack registries
  */
 public class DataObjectReference<T> implements Supplier<T> {
 
@@ -25,6 +26,10 @@ public class DataObjectReference<T> implements Supplier<T> {
 
     @Nullable
     private Holder<T> cache;
+
+    public DataObjectReference(String id, ResourceKey<Registry<T>> registry) {
+        this(new ResourceLocation(id), registry);
+    }
 
     public DataObjectReference(ResourceLocation location, ResourceKey<Registry<T>> registry) {
         this.registryKey = registry;

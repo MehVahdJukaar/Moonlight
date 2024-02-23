@@ -2,13 +2,14 @@ package net.mehvahdjukaar.moonlight.api.trades;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.level.Level;
 
 import java.util.function.Function;
 
 
 public interface ModItemListing extends VillagerTrades.ItemListing {
 
-    Codec<ModItemListing> CODEC = ItemListingRegistry.INSTANCE.byNameCodec().dispatch(ModItemListing::getCodec);
+    Codec<ModItemListing> CODEC = ItemListingRegistry.REGISTRY.dispatch(ModItemListing::getCodec);
 
     default int getLevel() {
         return 1;

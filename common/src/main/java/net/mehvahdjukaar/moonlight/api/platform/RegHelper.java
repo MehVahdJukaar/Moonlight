@@ -16,7 +16,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -29,7 +28,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
-import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -233,19 +231,20 @@ public class RegHelper {
         }, Registries.RECIPE_TYPE);
     }
 
-    public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(ResourceLocation name, Supplier<T> blockEntity) {
+    public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(ResourceLocation name,
+                                                                                                               Supplier<T> blockEntity) {
         return register(name, blockEntity, Registries.BLOCK_ENTITY_TYPE);
     }
 
-    public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(
+    public static <E extends BlockEntity> RegSupplier<BlockEntityType<E>> registerBlockEntityType(
             ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Block... blocks) {
-        return (RegSupplier<T>) registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply, blocks));
+        return registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply, blocks));
     }
 
-    public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(
+    public static <E extends BlockEntity> RegSupplier<BlockEntityType<E>> registerBlockEntityType(
             ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Supplier<Block>... blocks) {
-        return (RegSupplier<T>) registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply,
-                blocks.stream().map(Supplier::get).toArray(Block[]::new)));
+        return registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply,
+                Arrays.stream(blocks).map(Supplier::get).toArray(Block[]::new)));
     }
 
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {

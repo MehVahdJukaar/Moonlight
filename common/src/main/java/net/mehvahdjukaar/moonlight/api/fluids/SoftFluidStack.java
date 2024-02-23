@@ -23,6 +23,7 @@ import java.util.Objects;
 // do NOT have these in a static field as they contain registry holders
 public class SoftFluidStack {
 
+    // dont access directly
     private final Holder<SoftFluid> fluid;
     private int count;
     private CompoundTag tag;
@@ -31,9 +32,8 @@ public class SoftFluidStack {
 
     public SoftFluidStack(Holder<SoftFluid> fluid, int count, CompoundTag tag) {
         this.fluid = fluid;
-        this.count = count;
         this.tag = tag;
-        updateEmpty();
+        this.setCount(count);
 
         //even more hardcoded shit
         if (fluid.is(BuiltInSoftFluids.POTION.getID())) {
@@ -57,7 +57,7 @@ public class SoftFluidStack {
     }
 
     public CompoundTag save(CompoundTag compoundTag) {
-        compoundTag.putString("id", fluid.unwrapKey().get().location().toString());
+        compoundTag.putString("id", getFluid().unwrapKey().get().location().toString());
         compoundTag.putByte("count", (byte) this.count);
         if (this.tag != null) {
             compoundTag.put("tag", this.tag.copy());
@@ -90,11 +90,11 @@ public class SoftFluidStack {
     }
 
     public boolean is(TagKey<SoftFluid> tag) {
-        return fluid.is(tag);
+        return getFluid().is(tag);
     }
 
     public boolean is(SoftFluid fluid) {
-        return this.fluid.value() == fluid;
+        return this.getFluid().value() == fluid;
     }
 
     public boolean is(Holder<SoftFluid> fluid) {
@@ -219,7 +219,7 @@ public class SoftFluidStack {
 
     @Override
     public String toString() {
-        return count + " " + fluid.unwrapKey().get().location() + " [" + tag.toString() + "]";
+        return count + " " + getFluid().unwrapKey().get().location() + " [" + tag.toString() + "]";
     }
 
     public static SoftFluidStack fromFluid(Fluid fluid, int amount, @Nullable CompoundTag tag) {
@@ -288,7 +288,7 @@ public class SoftFluidStack {
      */
     @Nullable
     public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
-        var opt = fluid.value().getContainerList().getCategoryFromEmpty(emptyContainer.getItem());
+        var opt = getFluid().value().getContainerList().getCategoryFromEmpty(emptyContainer.getItem());
         if (opt.isPresent()) {
             var category = opt.get();
             int shrinkAmount = category.getAmount();
@@ -296,7 +296,7 @@ public class SoftFluidStack {
 
                 ItemStack filledStack = new ItemStack(category.getFirstFilled().get());
                 //case for lingering potions
-                if (this.fluid.is(BuiltInSoftFluids.POTION.getID()) && this.tag != null) {
+                if (this.getFluid().is(BuiltInSoftFluids.POTION.getID()) && this.tag != null) {
                     var type = PotionNBTHelper.getPotionType(this.tag);
                     if (type != null && !Utils.getID(emptyContainer.getItem()).getNamespace().equals("inspirations")) {
                         if (type != PotionNBTHelper.Type.REGULAR) {
@@ -306,7 +306,7 @@ public class SoftFluidStack {
                 }
 
                 //converts water bottles into potions
-                if (emptyContainer.is(Items.GLASS_BOTTLE) && fluid.value() == BuiltInSoftFluids.WATER.get()) {
+                if (emptyContainer.is(Items.GLASS_BOTTLE) && getFluid().value() == BuiltInSoftFluids.WATER.get()) {
                     filledStack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
                 }
 
@@ -324,7 +324,7 @@ public class SoftFluidStack {
 
     //handles special nbt items such as potions or soups
     protected void applyNBTtoItemStack(ItemStack stack) {
-        List<String> nbtKey = this.fluid.value().getNbtKeyFromItem();
+        List<String> nbtKey = this.getFluid().value().getNbtKeyFromItem();
         if (this.tag != null && !this.tag.isEmpty()) {
             CompoundTag newCom = new CompoundTag();
             for (String s : nbtKey) {
@@ -350,15 +350,15 @@ public class SoftFluidStack {
     }
 
     public boolean isEquivalent(Fluid fluid) {
-        return this.fluid.value().isEquivalent(fluid);
+        return this.getFluid().value().isEquivalent(fluid);
     }
 
     public Fluid getVanillaFluid() {
-        return this.fluid.value().getVanillaFluid();
+        return this.getFluid().value().getVanillaFluid();
     }
 
     public SoftFluid.TintMethod getTintMethod() {
-        return this.fluid.value().getTintMethod();
+        return this.getFluid().value().getTintMethod();
     }
 
 }

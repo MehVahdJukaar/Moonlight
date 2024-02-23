@@ -12,8 +12,8 @@ import java.util.Objects;
 
 public class UtilsImpl {
 
-    public static <K, V> BaseMapCodec<K, V> optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec){
-        return new OptionalMapCodec<>(keyCodec, elementCodec);
+    public static <K, V, C extends BaseMapCodec<K, V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec) {
+        return (C) new OptionalMapCodec<>(keyCodec, elementCodec);
     }
 
     public record OptionalMapCodec<K, V>(Codec<K> keyCodec,

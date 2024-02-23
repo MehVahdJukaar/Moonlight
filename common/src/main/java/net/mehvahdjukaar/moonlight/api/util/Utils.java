@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.BaseMapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
@@ -300,7 +301,7 @@ public class Utils {
 
 
     @ExpectPlatform
-    public static <K, V> MapCodec<Map<K, V>> optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec){
+    public static <K, V, C extends BaseMapCodec<K,V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec){
         throw new AssertionError();
     }
 
