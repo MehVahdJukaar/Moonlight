@@ -1,1 +1,1 @@
-fixed some issues with empty fluid stacks
+fixed an important issue with fluid syncing

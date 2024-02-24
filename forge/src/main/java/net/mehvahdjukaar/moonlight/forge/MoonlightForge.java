@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -22,9 +21,9 @@ import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -84,16 +83,16 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event){
+        SoftFluidRegistry.doPostInitServer();
+    }
+
+    @SubscribeEvent
     public static void onDataSync(OnDatapackSyncEvent event) {
-        SoftFluidRegistry.onDataLoad();
-        //send syncing packets
+        //send syncing packets just on login
         if (event.getPlayer() != null) {
             SoftFluidRegistry.onDataSyncToPlayer(event.getPlayer(), true);
-        } else {
-            for (var p : event.getPlayerList().getPlayers()) {
-                SoftFluidRegistry.onDataSyncToPlayer(p, true);
-            }
-        }
+        }//else joined = false
     }
 
     @SubscribeEvent

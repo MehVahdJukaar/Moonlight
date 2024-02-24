@@ -46,8 +46,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
                 new ClientBoundSendLoginPacket()));
         ServerLifecycleEvents.SERVER_STARTING.register(s -> currentServer = s);
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(SoftFluidRegistry::onDataSyncToPlayer);
-        ServerLifecycleEvents.SERVER_STARTED.register((s) -> SoftFluidRegistry.onDataLoad()); //need this too because fabric is stupid
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((a, b, c) -> SoftFluidRegistry.onDataLoad()); //only fire after reload command
+        ServerLifecycleEvents.SERVER_STARTED.register((s) -> SoftFluidRegistry.doPostInitServer());
         ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
 
         ResourceConditionsBridge.init();

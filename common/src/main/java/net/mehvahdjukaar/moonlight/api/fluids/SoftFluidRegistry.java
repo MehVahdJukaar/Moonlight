@@ -17,7 +17,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -105,19 +104,23 @@ public class SoftFluidRegistry {
     @ApiStatus.Internal
     public static void postInitClient() {
         populateSlaveMaps();
+        //ok so here the extra registered fluids should have already been sent to the client
     }
 
     @ApiStatus.Internal
-    public static void onDataSyncToPlayer(ServerPlayer player, boolean o) {
-        ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundFinalizeFluidsMessage());
+    public static void onDataSyncToPlayer(ServerPlayer player, boolean isJoined) {
+        //just sends on login
+        if(isJoined) {
+            ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundFinalizeFluidsMessage());
+        }
     }
 
     //on data load
     @ApiStatus.Internal
-    public static void onDataLoad() {
+    public static void doPostInitServer() {
         populateSlaveMaps();
         //registers existing fluids. also update the salve maps
-        //TODO: why not needed on the client?
+        //we need to call this on bont server and client as this happens too late and these wont be sent
         registerExistingVanillaFluids(FLUID_MAP, ITEM_MAP);
     }
 
