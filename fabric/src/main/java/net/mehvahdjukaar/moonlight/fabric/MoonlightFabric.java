@@ -44,9 +44,11 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
         ServerPlayConnectionEvents.JOIN.register((l, s, m) -> ModMessages.CHANNEL.sendToClientPlayer(l.player,
                 new ClientBoundSendLoginPacket()));
-        ServerLifecycleEvents.SERVER_STARTING.register(s -> currentServer = s);
+        ServerLifecycleEvents.SERVER_STARTING.register(s -> {
+            currentServer = s;
+            SoftFluidRegistry.doPostInitServer();
+        });
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(SoftFluidRegistry::onDataSyncToPlayer);
-        ServerLifecycleEvents.SERVER_STARTED.register((s) -> SoftFluidRegistry.doPostInitServer());
         ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
 
         ResourceConditionsBridge.init();

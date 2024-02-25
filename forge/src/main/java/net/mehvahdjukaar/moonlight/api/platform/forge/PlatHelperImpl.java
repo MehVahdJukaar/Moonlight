@@ -168,7 +168,7 @@ public class PlatHelperImpl {
     }
 
     public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> soundSupplier, Item.Properties properties, int duration) {
-        return new RecordItem(power, soundSupplier, properties, duration);
+        return new RecordItem(power, soundSupplier, properties, duration*20);
     }
 
     public static SimpleParticleType newParticle() {

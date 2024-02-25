@@ -261,7 +261,7 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
-    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties, int duration) {
+    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties, int secondDuration) {
         throw new AssertionError();
     }
 

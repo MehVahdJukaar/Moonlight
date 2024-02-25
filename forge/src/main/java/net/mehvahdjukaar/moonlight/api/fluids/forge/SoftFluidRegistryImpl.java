@@ -2,13 +2,12 @@ package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -49,7 +48,10 @@ public class SoftFluidRegistryImpl {
                 //SOFT_FLUIDS.get().register(sf.getRegistryName(),sf);
                 Registry.register(reg, Utils.getID(f), sf);
 
-                fluidMap.put(f, reg.getHolder(reg.getId(sf)).orElseThrow());
+                Holder.Reference<SoftFluid> holder = reg.getHolder(reg.getId(sf)).orElseThrow();
+                fluidMap.put(f, holder);
+                Item bucket = f.getBucket();
+                if (bucket != Items.AIR && bucket != null) itemMap.put(bucket, holder);
             } catch (Exception ignored) {
             }
         }
@@ -58,7 +60,7 @@ public class SoftFluidRegistryImpl {
 
     @SubscribeEvent
     public static void registerDataPackRegistry(DataPackRegistryEvent.NewRegistry event) {
-      event.dataPackRegistry(KEY, SoftFluid.CODEC, SoftFluid.CODEC);
+        event.dataPackRegistry(KEY, SoftFluid.CODEC, SoftFluid.CODEC);
     }
 
 

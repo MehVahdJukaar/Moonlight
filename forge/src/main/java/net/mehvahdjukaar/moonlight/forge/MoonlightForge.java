@@ -21,6 +21,7 @@ import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -83,7 +84,7 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
-    public static void onServerStarted(ServerStartedEvent event){
+    public static void beforeServerStart(ServerAboutToStartEvent event){
         SoftFluidRegistry.doPostInitServer();
     }
 
