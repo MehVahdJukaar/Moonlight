@@ -1,12 +1,8 @@
 {
   "fluid.moonlight.generic_fluid": "Безіменна рідина",
-  "item.minecraft.potion_lingering": "Осідаюче зілля",
+  "item.minecraft.potion_lingering": "Осідальне зілля",
   "item.minecraft.potion_splash": "Вибухове зілля",
   "gui.moonlight.open_mod_page": "Відкрити сторінку CurseForge %s"
   "message.moonlight.anti_repost": "Ви, здається, завантажили %1$s зі шкідливого сайту :( Отримайте справжню версію %2$s.",
-  "message.moonlight.anti_repost_link": "тут",
-
-  "wood_type.twilightforest.dark": "Темне дерево",
-  "leaves_type.twilightforest.dark": "Темне дерево",
-  "leaves_type.ulterlands.souldrained": "Скам'янілий"
+  "message.moonlight.anti_repost_link": "тут"
 }
