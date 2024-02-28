@@ -3,22 +3,18 @@ package net.mehvahdjukaar.moonlight.api.resources;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
-import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.TemplateRecipeManager;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.*;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +32,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class RPUtils {
@@ -78,18 +73,15 @@ public class RPUtils {
         if (cached != null) {
             return new ResourceLocation(cached);
         }
-        ResourceLocation res = Utils.getID(block);
-        var blockState = manager.getResource(ResType.BLOCKSTATES.getPath(res));
+        ResourceLocation blockId = Utils.getID(block);
+        var blockState = manager.getResource(ResType.BLOCKSTATES.getPath(blockId));
         try (var bsStream = blockState.orElseThrow().open()) {
 
-
             JsonElement bsElement = RPUtils.deserializeJson(bsStream);
-
             //grabs the first resource location of a model
             Set<String> models = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"));
 
-            for(var modelPath : models) {
-
+            for (var modelPath : models) {
                 List<String> textures = findAllTexturesInModelRecursive(manager, modelPath);
 
                 for (var t : textures) {
@@ -100,32 +92,34 @@ public class RPUtils {
         } catch (Exception ignored) {
         }
         //if texture is not there try to guess location. Hack for better end
-        var hack = guessTextureLocation(res, manager, block);
+        var hack = guessBlockTextureLocation(blockId, block);
         for (var t : hack) {
             TextureCache.add(block, t);
             if (texturePredicate.test(t)) return new ResourceLocation(t);
         }
 
-        throw new FileNotFoundException("Could not find any texture associated to the given block " + res);
+        throw new FileNotFoundException("Could not find any texture associated to the given block " + blockId);
     }
 
-    private static List<String> guessTextureLocation(ResourceLocation id, ResourceManager manager, Block block) {
+    //if texture is not there try to guess location. Hack for better end
+    private static Set<String> guessItemTextureLocation(ResourceLocation id, Item item) {
+        return Set.of(id.getNamespace() + ":item/" + item);
+    }
+
+    private static Set<String> guessBlockTextureLocation(ResourceLocation id, Block block) {
         String name = id.getPath();
-        List<String> textures = new ArrayList<>();
-        for (var w : WoodTypeRegistry.getTypes()) {
-            if (name.contains(w.id.getPath())) {
-                for (var c : w.getChildren()) {
-                    if (c.getValue() == block) {
-                        if (Objects.equals(c.getKey(), "log") || c.getKey().equals("stripped_log")) {
-                            textures.add(id.getNamespace() + ":block/" + name + "_top");
-                            textures.add(id.getNamespace() + ":block/" + name + "_side");
-                        } else textures.add(id.getNamespace() + ":block/" + name);
-                        return textures;
-                    }
-                }
+        Set<String> textures = new HashSet<>();
+        //just works for wood types
+        textures.add(id.getNamespace() + ":block/" + name);
+        WoodType w = WoodTypeRegistry.INSTANCE.getBlockTypeOf(block);
+        if (w != null) {
+            String key = w.getChildKey(block);
+            if (Objects.equals(key, "log") || Objects.equals(key, "stripped_log")) {
+                textures.add(id.getNamespace() + ":block/" + name + "_top");
+                textures.add(id.getNamespace() + ":block/" + name + "_side");
             }
         }
-        return List.of();
+        return textures;
     }
 
     @NotNull
@@ -163,21 +157,24 @@ public class RPUtils {
     public static ResourceLocation findFirstItemTextureLocation(ResourceManager manager, Item item, Predicate<String> texturePredicate) throws FileNotFoundException {
         var cached = TextureCache.getCached(item, texturePredicate);
         if (cached != null) return new ResourceLocation(cached);
-        ResourceLocation res = Utils.getID(item);
-        var itemModel = manager.getResource(ResType.ITEM_MODELS.getPath(res));
-        try (var stream = itemModel.get().open()) {
+        ResourceLocation itemId = Utils.getID(item);
 
+        Set<String> textures;
+        var itemModel = manager.getResource(ResType.ITEM_MODELS.getPath(itemId));
+        try (var stream = itemModel.orElseThrow().open()) {
             JsonElement bsElement = RPUtils.deserializeJson(stream);
 
-            var textures = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject().getAsJsonObject("textures"));
-            for (var t : textures) {
-                TextureCache.add(item, t);
-                if (texturePredicate.test(t)) return new ResourceLocation(t);
-            }
-
+            textures = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject().getAsJsonObject("textures"));
         } catch (Exception ignored) {
+            //if texture is not there try to guess location. Hack for better end
+            textures = guessItemTextureLocation(itemId, item);
         }
-        throw new FileNotFoundException("Could not find any texture associated to the given item " + res);
+        for (var t : textures) {
+            TextureCache.add(item, t);
+            if (texturePredicate.test(t)) return new ResourceLocation(t);
+        }
+
+        throw new FileNotFoundException("Could not find any texture associated to the given item " + itemId);
     }
 
     public static String findFirstResourceInJsonRecursive(JsonElement element) throws NoSuchElementException {
@@ -292,6 +289,7 @@ public class RPUtils {
     @FunctionalInterface
     public interface OverrideAppender {
         void add(ItemOverride override);
+
     }
 
     /**
@@ -304,9 +302,10 @@ public class RPUtils {
             try (var model = o.get().open()) {
                 var json = RPUtils.deserializeJson(model);
                 JsonArray overrides;
-                if(json.has("overrides")){
-                    overrides = json.getAsJsonArray("overrides");;
-                }else overrides = new JsonArray();
+                if (json.has("overrides")) {
+                    overrides = json.getAsJsonArray("overrides");
+                    ;
+                } else overrides = new JsonArray();
 
                 modelConsumer.accept(ov -> overrides.add(serializeOverride(ov)));
 

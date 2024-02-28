@@ -7,7 +7,15 @@ import java.util.Objects;
  */
 public interface IExtraModelDataProvider {
 
-    ExtraModelData getExtraModelData();
+    @Deprecated(forRemoval = true)
+    default ExtraModelData getExtraModelData() {
+        var builder = ExtraModelData.builder();
+        addExtraModelData(builder);
+        return builder.build();
+    }
+
+    default void addExtraModelData(ExtraModelData.Builder builder) {
+    }
 
     default void requestModelReload() {
     }

@@ -15,6 +15,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,6 +23,9 @@ import java.util.Objects;
 
 // do NOT have these in a static field as they contain registry holders
 public class SoftFluidStack {
+
+    // this is not a singleton. Many empty instances might exist. We keep this just as a minor optimization
+    private static SoftFluidStack cachedEmptyInstance = null;
 
     // dont access directly
     private final Holder<SoftFluid> fluid;
@@ -53,7 +57,15 @@ public class SoftFluidStack {
 
 
     public static SoftFluidStack empty() {
-        return new SoftFluidStack(SoftFluidRegistry.getEmpty(), 0, null);
+        if (cachedEmptyInstance == null) {
+            cachedEmptyInstance = new SoftFluidStack(SoftFluidRegistry.getEmpty(), 0, null);
+        }
+        return cachedEmptyInstance;
+    }
+
+    @ApiStatus.Internal
+    public static void invalidateEmptyInstance() {
+        cachedEmptyInstance = null;
     }
 
     public CompoundTag save(CompoundTag compoundTag) {

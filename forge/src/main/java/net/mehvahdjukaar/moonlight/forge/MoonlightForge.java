@@ -85,7 +85,7 @@ public class MoonlightForge {
 
     @SubscribeEvent
     public static void beforeServerStart(ServerAboutToStartEvent event){
-        SoftFluidRegistry.doPostInitServer();
+       Moonlight.beforeServerStart();
     }
 
     @SubscribeEvent

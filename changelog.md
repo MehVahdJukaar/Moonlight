@@ -1,1 +1,2 @@
-fixed another issue with fluids due to sapwn chunk stuff 
+improvements to assets generation system, should improve compat with some mods
+added some more rendering utilities
