@@ -36,9 +36,7 @@ public class FakeLocalPlayer extends AbstractClientPlayer {
     }
 
     static void unloadLevel(LevelAccessor level) {
-        for (var l : FAKE_PLAYERS.keySet()) {
-            if (l == level) FAKE_PLAYERS.remove(l);
-        }
+        FAKE_PLAYERS.entrySet().removeIf(e -> e.getKey() == level);
     }
 
     private final EntityDimensions dimensions = EntityDimensions.fixed(0, 0);

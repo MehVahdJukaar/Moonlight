@@ -17,6 +17,6 @@ public interface ISoftFluidProvider {
 
     SoftFluidStack getProvidedFluid(Level level, BlockState state, BlockPos pos);
 
-    void consumeProvidedFluid(Level world, BlockState state, BlockPos pos, SoftFluidStack fluid);
+    void consumeProvidedFluid(Level world, BlockState state, BlockPos pos);
 
 }

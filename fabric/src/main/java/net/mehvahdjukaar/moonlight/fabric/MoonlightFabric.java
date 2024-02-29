@@ -22,13 +22,14 @@ import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMess
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.MinecraftServer;
 
+import java.lang.ref.WeakReference;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MoonlightFabric implements ModInitializer, DedicatedServerModInitializer {
 
     private static boolean isInit = true;
-    private static MinecraftServer currentServer;
+    private static WeakReference<MinecraftServer> currentServer;
 
     @Override
     public void onInitialize() {
@@ -45,7 +46,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         ServerPlayConnectionEvents.JOIN.register((l, s, m) -> ModMessages.CHANNEL.sendToClientPlayer(l.player,
                 new ClientBoundSendLoginPacket()));
         ServerLifecycleEvents.SERVER_STARTING.register(s -> {
-            currentServer = s;
+            currentServer = new WeakReference<>(s);
             Moonlight.beforeServerStart();
         });
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(SoftFluidRegistry::onDataSyncToPlayer);
@@ -81,7 +82,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
 
     public static MinecraftServer getCurrentServer() {
-        return currentServer;
+        return currentServer.get();
     }
 
     public static boolean isInitializing() {

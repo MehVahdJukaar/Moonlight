@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.resources.recipe.forge;
 
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.forge.PlatHelperImpl;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.LenientUnboundedMapCodec;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;

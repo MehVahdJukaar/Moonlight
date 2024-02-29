@@ -1,6 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
@@ -23,6 +26,12 @@ import java.util.Objects;
 
 // do NOT have these in a static field as they contain registry holders
 public class SoftFluidStack {
+
+    public static final Codec<SoftFluidStack> CODEC = RecordCodecBuilder.create(i -> i.group(
+            SoftFluid.HOLDER_CODEC.fieldOf("id").forGetter(SoftFluidStack::getFluid),
+            Codec.INT.optionalFieldOf("count", 1).forGetter(SoftFluidStack::getCount),
+            CompoundTag.CODEC.optionalFieldOf("tag", null).forGetter(SoftFluidStack::getTag)
+    ).apply(i, SoftFluidStack::new));
 
     // this is not a singleton. Many empty instances might exist. We keep this just as a minor optimization
     private static SoftFluidStack cachedEmptyInstance = null;
@@ -55,6 +64,17 @@ public class SoftFluidStack {
         this(fluid, 1, null);
     }
 
+    public SoftFluidStack bucket(Holder<SoftFluid> fluid){
+        return new SoftFluidStack(fluid, SoftFluid.BUCKET_COUNT);
+    }
+
+    public SoftFluidStack bowl(Holder<SoftFluid> fluid){
+        return new SoftFluidStack(fluid, SoftFluid.BOWL_COUNT);
+    }
+
+    public SoftFluidStack bottle(Holder<SoftFluid> fluid){
+        return new SoftFluidStack(fluid, SoftFluid.BOTTLE_COUNT);
+    }
 
     public static SoftFluidStack empty() {
         if (cachedEmptyInstance == null) {
@@ -130,6 +150,10 @@ public class SoftFluidStack {
     }
 
     public void setCount(int count) {
+        if (this == cachedEmptyInstance) {
+            if (PlatHelper.isDev()) throw new AssertionError();
+            return;
+        }
         this.count = count;
         updateEmpty();
     }
@@ -151,6 +175,10 @@ public class SoftFluidStack {
     }
 
     public void setTag(CompoundTag tag) {
+        if (this == cachedEmptyInstance) {
+            if (PlatHelper.isDev()) throw new AssertionError();
+            return;
+        }
         this.tag = tag;
     }
 
