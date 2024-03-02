@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.model;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.util.Objects;
 
 /**
@@ -8,6 +10,7 @@ import java.util.Objects;
 public interface IExtraModelDataProvider {
 
     @Deprecated(forRemoval = true)
+    @ApiStatus.Internal
     default ExtraModelData getExtraModelData() {
         var builder = ExtraModelData.builder();
         addExtraModelData(builder);

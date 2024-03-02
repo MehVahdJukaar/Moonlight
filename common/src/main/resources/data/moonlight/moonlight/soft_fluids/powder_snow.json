@@ -2,12 +2,14 @@
   "containers": [
     {
       "filled": [
-        "minecraft:powder_snow_bucket"
+        "minecraft:powder_snow_bucket",
+        "caverns_and_chasms:golden_powder_snow_bucket",
+        "windswept:wooden_powder_snow_bucket"
       ],
       "fill_sound": "minecraft:item.bucket.fill_powder_snow",
       "empty_sound": "minecraft:item.bucket.empty_powder_snow",
       "empty": "minecraft:bucket",
-      "capacity": 4
+      "capacity": 3
     }
   ],
   "flowing_texture": "minecraft:block/powder_snow",

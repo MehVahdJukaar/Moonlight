@@ -4,10 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.markers.SimpleMapBlockMarker;
+import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
@@ -29,20 +30,23 @@ public final class JsonDecorationType implements MapDecorationType<CustomMapDeco
 
 
     public static final Codec<JsonDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            StrOpt.of(RuleTest.CODEC,"target_block").forGetter(JsonDecorationType::getTarget),
+            StrOpt.of(RuleTest.CODEC, "target_block").forGetter(JsonDecorationType::getTarget),
             StrOpt.of(Codec.STRING, "name").forGetter(JsonDecorationType::getName),
-            StrOpt.of(Codec.INT,"rotation", 0).forGetter(JsonDecorationType::getRotation),
-            StrOpt.of(ColorUtils.CODEC, "map_color" ,0).forGetter(JsonDecorationType::getDefaultMapColor),
-            StrOpt.of(RegistryCodecs.homogeneousList(Registries.STRUCTURE), "target_structures")
-                    .forGetter(JsonDecorationType::getAssociatedStructure)
+            StrOpt.of(Codec.INT, "rotation", 0).forGetter(JsonDecorationType::getRotation),
+            StrOpt.of(ColorUtils.CODEC, "map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
+            StrOpt.of(RegistryCodecs.homogeneousList(Registries.STRUCTURE), "target_structures").forGetter(
+                    JsonDecorationType::getAssociatedStructure), Codec.STRING.xmap(PlatHelper::isModLoaded, b -> "minecraft")
+                    .optionalFieldOf("from_mod", true)
+                    .forGetter(t -> t.enabled)
     ).apply(instance, JsonDecorationType::new));
 
-    //we cant reference other datapack registries in network codec...
+    //we cant reference other data pack registries in network codec...
     public static final Codec<JsonDecorationType> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             StrOpt.of(RuleTest.CODEC, "target_block").forGetter(JsonDecorationType::getTarget),
             StrOpt.of(Codec.STRING, "name").forGetter(JsonDecorationType::getName),
-            StrOpt.of(Codec.INT,"rotation" ,0).forGetter(JsonDecorationType::getRotation),
-            StrOpt.of(ColorUtils.CODEC, "map_color",0).forGetter(JsonDecorationType::getDefaultMapColor)
+            StrOpt.of(Codec.INT, "rotation", 0).forGetter(JsonDecorationType::getRotation),
+            StrOpt.of(ColorUtils.CODEC, "map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
+            Codec.BOOL.fieldOf("enabled").forGetter(t -> t.enabled)
     ).apply(instance, JsonDecorationType::new));
 
     //using this and not block predicate since it requires a worldLevelGen...
@@ -55,24 +59,27 @@ public final class JsonDecorationType implements MapDecorationType<CustomMapDeco
     private final HolderSet<Structure> structures;
     private final int mapColor;
     private final int rotation;
+    private final boolean enabled;
 
     public JsonDecorationType(Optional<RuleTest> target) {
-        this(target, Optional.empty(), 0, 0);
+        this(target, Optional.empty(), 0, 0, true);
     }
 
     public JsonDecorationType(Optional<RuleTest> target, Optional<String> name, int rotation,
-                              int mapColor) {
-        this(target, name, rotation, mapColor, Optional.empty());
+                              int mapColor, boolean enabled) {
+        this(target, name, rotation, mapColor, Optional.empty(), enabled);
     }
 
     public JsonDecorationType(Optional<RuleTest> target, Optional<String> name, int rotation,
-                              int mapColor, Optional<HolderSet<Structure>> structure) {
+                              int mapColor, Optional<HolderSet<Structure>> structure, Boolean enabled) {
         this.target = target.orElse(null);
         this.name = name.orElse(null);
         this.rotation = rotation;
         this.structures = structure.orElse(null);
         this.mapColor = mapColor;
+        this.enabled = enabled;
     }
+
 
     public Optional<RuleTest> getTarget() {
         return Optional.ofNullable(target);
@@ -130,7 +137,7 @@ public final class JsonDecorationType implements MapDecorationType<CustomMapDeco
     @Nullable
     @Override
     public SimpleMapBlockMarker getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos) {
-        if (this.target != null) {
+        if (this.target != null && enabled) {
             if (target.test(reader.getBlockState(pos), RandomSource.create())) {
                 SimpleMapBlockMarker m = createEmptyMarker();
                 m.setPos(pos);

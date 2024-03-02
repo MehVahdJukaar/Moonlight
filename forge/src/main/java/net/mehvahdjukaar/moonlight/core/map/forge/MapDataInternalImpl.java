@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.map.forge;
 
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DataPackRegistryEvent;

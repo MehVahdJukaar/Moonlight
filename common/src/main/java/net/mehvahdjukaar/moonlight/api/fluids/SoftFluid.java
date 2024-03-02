@@ -520,6 +520,7 @@ public class SoftFluid {
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
     public static final int BUCKET_COUNT = 4;
+    public static final int WATER_BUCKET_COUNT = 3;
 
     /**
      * NO_TINT for both colored textures

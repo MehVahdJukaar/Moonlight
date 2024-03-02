@@ -3,7 +3,9 @@
   "containers": [
     {
       "filled": [
-        "minecraft:water_bucket"
+        "minecraft:water_bucket",
+        "caverns_and_chasms:golden_water_bucket",
+        "windswept:wooden_water_bucket"
       ],
       "fill_sound": "minecraft:item.bucket.fill",
       "empty_sound": "minecraft:item.bucket.empty",

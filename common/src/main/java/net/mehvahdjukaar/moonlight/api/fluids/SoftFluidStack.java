@@ -10,6 +10,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +18,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,15 +67,15 @@ public class SoftFluidStack {
         this(fluid, 1, null);
     }
 
-    public SoftFluidStack bucket(Holder<SoftFluid> fluid){
+    public SoftFluidStack bucket(Holder<SoftFluid> fluid) {
         return new SoftFluidStack(fluid, SoftFluid.BUCKET_COUNT);
     }
 
-    public SoftFluidStack bowl(Holder<SoftFluid> fluid){
+    public SoftFluidStack bowl(Holder<SoftFluid> fluid) {
         return new SoftFluidStack(fluid, SoftFluid.BOWL_COUNT);
     }
 
-    public SoftFluidStack bottle(Holder<SoftFluid> fluid){
+    public SoftFluidStack bottle(Holder<SoftFluid> fluid) {
         return new SoftFluidStack(fluid, SoftFluid.BOTTLE_COUNT);
     }
 
@@ -267,6 +270,14 @@ public class SoftFluidStack {
         if (f == null) return null;
         return new SoftFluidStack(f, amount, tag);
     }
+
+    public static SoftFluidStack fromFluid(FluidState fluid) {
+        if (fluid.getType().is(FluidTags.WATER)) {
+            return fromFluid(fluid.getType(), SoftFluid.WATER_BUCKET_COUNT, null);
+        }
+        return fromFluid(fluid.getType(), SoftFluid.BUCKET_COUNT, null);
+    }
+
 
     // item conversion
 

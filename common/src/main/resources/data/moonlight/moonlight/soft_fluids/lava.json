@@ -2,7 +2,9 @@
   "containers": [
     {
       "filled": [
-        "minecraft:lava_bucket"
+        "minecraft:lava_bucket",
+        "caverns_and_chasms:golden_lava_bucket",
+        "windswept:wooden_lava_bucket"
       ],
       "fill_sound": "minecraft:item.bucket.fill_lava",
       "empty_sound": "minecraft:item.bucket.empty_lava",
