@@ -33,14 +33,28 @@ public interface ILightable {
 
     TagKey<Item> FLINT_AND_STEELS = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "tools/flint_and_steel"));
 
-    boolean isLitUp(BlockState state);
+    default boolean isLitUp(BlockState state, LevelAccessor level, BlockPos pos) {
+        return isLitUp(state);
+    }
 
-    BlockState toggleLitState(BlockState state, boolean lit);
+    default void setLitUp(BlockState state, LevelAccessor world, BlockPos pos, boolean lit) {
+        world.setBlock(pos, toggleLitState(state, lit), 3);
+    }
+
+    @Deprecated(forRemoval = true)
+    default boolean isLitUp(BlockState state) {
+        return false;
+    }
+
+    @Deprecated(forRemoval = true)
+    default BlockState toggleLitState(BlockState state, boolean lit) {
+        return state;
+    }
 
     default boolean lightUp(@Nullable Entity player, BlockState state, BlockPos pos, LevelAccessor world, FireSourceType fireSourceType) {
-        if (!isLitUp(state)) {
+        if (!isLitUp(state, world, pos)) {
             if (!world.isClientSide()) {
-                world.setBlock(pos, toggleLitState(state, true), 3);
+                this.setLitUp(state, world, pos, true);
                 playLightUpSound(world, pos, fireSourceType);
             }
             world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
@@ -50,10 +64,10 @@ public interface ILightable {
     }
 
     default boolean extinguish(@Nullable Entity player, BlockState state, BlockPos pos, LevelAccessor world) {
-        if (this.isLitUp(state)) {
+        if (this.isLitUp(state, world, pos)) {
             if (!world.isClientSide()) {
                 playExtinguishSound(world, pos);
-                world.setBlock(pos, toggleLitState(state, false), 3);
+                this.setLitUp(state, world, pos, false);
             } else {
                 spawnSmokeParticles(state, pos, world);
             }

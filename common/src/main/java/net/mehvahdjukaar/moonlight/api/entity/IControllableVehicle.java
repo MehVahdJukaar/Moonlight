@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.entity;
 
-public interface IControllableVehicle {
+@Deprecated(forRemoval = true)
+public interface IControllableVehicle extends IControllableEntity{
 
-    void onInputUpdate(boolean left, boolean right, boolean up, boolean down, boolean sprint, boolean jumping);
 }

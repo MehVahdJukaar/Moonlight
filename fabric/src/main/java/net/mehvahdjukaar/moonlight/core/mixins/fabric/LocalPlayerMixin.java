@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import com.mojang.authlib.GameProfile;
+import net.mehvahdjukaar.moonlight.api.entity.IControllableEntity;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -33,7 +34,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
             shift = At.Shift.AFTER))
     public void onMovementInputUpdate(CallbackInfo ci) {
         Entity riddenEntity = this.getVehicle();
-        if (riddenEntity instanceof IControllableVehicle listener) {
+        if (riddenEntity instanceof IControllableEntity listener) {
             listener.onInputUpdate(this.input.left, input.right,
                     input.up, input.down,
                     this.minecraft.options.keySprint.isDown(), input.jumping);
