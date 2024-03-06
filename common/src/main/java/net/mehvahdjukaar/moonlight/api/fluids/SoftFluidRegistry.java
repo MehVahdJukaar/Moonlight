@@ -20,21 +20,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-//TODO: maybe split into api/core?
 public class SoftFluidRegistry {
 
     public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(Moonlight.res("soft_fluids"));
-
-    protected static final Map<Fluid, Holder<SoftFluid>> FLUID_MAP = new IdentityHashMap<>();
-    protected static final Map<Item, Holder<SoftFluid>> ITEM_MAP = new IdentityHashMap<>();
-
 
     public static Holder<SoftFluid> getEmpty() {
         return BuiltInSoftFluids.EMPTY.getHolder();
     }
 
-    @ExpectPlatform
-    public static void init() {
+    public static SoftFluid empty() {
+        return BuiltInSoftFluids.EMPTY.get();
     }
 
     public static Registry<SoftFluid> hackyGetRegistry() {
@@ -76,58 +71,6 @@ public class SoftFluidRegistry {
         return id;
     }
 
-
-    //needs to be called on both sides
-    private static void populateSlaveMaps() {
-        var itemMap = ITEM_MAP;
-        itemMap.clear();
-        var fluidsMap = FLUID_MAP;
-        fluidsMap.clear();
-        for (var h : getHolders()) {
-            var s = h.value();
-            if (PlatHelper.isModLoaded(s.getFromMod())) {
-                s.getEquivalentFluids().forEach(f -> fluidsMap.put(f, h));
-                s.getContainerList().getPossibleFilled().forEach(i -> {
-                    //don't associate water to potion bottle
-                    if (i != Items.POTION || s != BuiltInSoftFluids.WATER.get()) {
-                        itemMap.put(i, h);
-                    }
-                });
-            }
-        }
-    }
-
-
-    //wtf is going on here
-
-    //called by data sync to player
-    @ApiStatus.Internal
-    public static void postInitClient() {
-        populateSlaveMaps();
-        //ok so here the extra registered fluids should have already been sent to the client
-    }
-
-    @ApiStatus.Internal
-    public static void onDataSyncToPlayer(ServerPlayer player, boolean isJoined) {
-        //just sends on login
-        if(isJoined) {
-            ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundFinalizeFluidsMessage());
-        }
-    }
-
-    //on data load
-    @ApiStatus.Internal
-    public static void doPostInitServer() {
-        populateSlaveMaps();
-        //registers existing fluids. also update the salve maps
-        //we need to call this on bont server and client as this happens too late and these wont be sent
-        registerExistingVanillaFluids(FLUID_MAP, ITEM_MAP);
-    }
-
-    @ExpectPlatform
-    private static void registerExistingVanillaFluids(Map<Fluid, Holder<SoftFluid>> fluidMap, Map<Item, Holder<SoftFluid>> itemMap) {
-        throw new AssertionError();
-    }
 
 
 }

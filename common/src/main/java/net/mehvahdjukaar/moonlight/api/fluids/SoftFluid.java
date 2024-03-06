@@ -3,10 +3,10 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
-import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -33,25 +33,32 @@ import java.util.function.Function;
 public class SoftFluid {
 
 
-    private final ResourceLocation stillTexture;
-    private final ResourceLocation flowingTexture;
+
 
     private final String fromMod;
     private final String translationKey;
-    private final int luminosity;
-    private final int emissivity;
-    private final int tintColor;
-    private final TintMethod tintMethod;
     private final List<Fluid> equivalentFluids;
     private final FluidContainerList containerList;
     private final FoodProvider food;
     private final List<String> NBTFromItem;
 
-    @Nullable
-    private final ResourceLocation useTexturesFrom;
-
     //used to indicate if it has been directly converted from a forge fluid
     public final boolean isGenerated;
+
+    //client only
+
+    private final ResourceLocation stillTexture;
+    private final ResourceLocation flowingTexture;
+    @Nullable
+    private final ResourceLocation useTexturesFrom;
+    private final int luminosity;
+    private final int emissivity;
+    private final int tintColor;
+    //determines to which textures to apply tintColor
+    private final TintMethod tintMethod;
+
+    //populated with reload listener. Includes tintColor information
+    protected int averageTextureTint = -1;
 
     private SoftFluid(Builder builder) {
         this.tintMethod = builder.tintMethod;
@@ -153,8 +160,15 @@ public class SoftFluid {
         return this.equivalentFluids.contains(fluid);
     }
 
+    @ApiStatus.Internal
+    //todo: rename or remove
+    @Deprecated(forRemoval = true)
     public boolean isEmpty() {
-        return this == SoftFluidRegistry.getEmpty().value();
+        return this == SoftFluidRegistry.empty();
+    }
+
+    public boolean isEmptyFluid() {
+        return this == SoftFluidRegistry.empty();
     }
 
     /**
@@ -199,6 +213,10 @@ public class SoftFluid {
      */
     public int getTintColor() {
         return tintColor;
+    }
+
+    public int getAverageTextureTintColor() {
+        return averageTextureTint;
     }
 
     /**
@@ -529,14 +547,22 @@ public class SoftFluid {
      */
     public enum TintMethod implements StringRepresentable {
         NO_TINT, //allows special color
-        FLOWING, //use particle for flowing
-        STILL_AND_FLOWING; //both gray-scaled
+        FLOWING, //use particle for flowing. Still texture wont have any color
+        STILL_AND_FLOWING; //both texture needs to be gray-scaled and will be colored
 
         public static final Codec<TintMethod> CODEC = StringRepresentable.fromEnum(TintMethod::values);
 
         @Override
         public String getSerializedName() {
             return this.name().toLowerCase(Locale.ROOT);
+        }
+
+        public boolean appliesToFlowing(){
+            return this == FLOWING || this == STILL_AND_FLOWING;
+        }
+
+        public boolean appliesToStill(){
+            return this == STILL_AND_FLOWING;
         }
     }
 
@@ -562,7 +588,7 @@ public class SoftFluid {
 
 
     protected static SoftFluid create(ResourceLocation still, ResourceLocation flowing, Optional<String> fromMod,
-                                      Optional<String> translation, Optional<Integer> luminosity,  Optional<Integer> emissivity,
+                                      Optional<String> translation, Optional<Integer> luminosity, Optional<Integer> emissivity,
                                       Optional<Integer> color, Optional<TintMethod> tint,
                                       Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
                                       Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,

@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+
+@Deprecated(forRemoval = true)
 public abstract class GenericSimpleResourceReloadListener implements PreparableReloadListener {
     private final String pathSuffix;
     private final int suffixLength;

@@ -3,9 +3,12 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -18,10 +21,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -31,23 +35,26 @@ import java.util.Objects;
 public class SoftFluidStack {
 
     public static final Codec<SoftFluidStack> CODEC = RecordCodecBuilder.create(i -> i.group(
-            SoftFluid.HOLDER_CODEC.fieldOf("id").forGetter(SoftFluidStack::getFluid),
+            SoftFluid.HOLDER_CODEC.fieldOf("id").forGetter(SoftFluidStack::getHolder),
             Codec.INT.optionalFieldOf("count", 1).forGetter(SoftFluidStack::getCount),
             CompoundTag.CODEC.optionalFieldOf("tag", null).forGetter(SoftFluidStack::getTag)
-    ).apply(i, SoftFluidStack::new));
+    ).apply(i, SoftFluidStack::of));
 
     // this is not a singleton. Many empty instances might exist. We keep this just as a minor optimization
     private static SoftFluidStack cachedEmptyInstance = null;
 
     // dont access directly
-    private final Holder<SoftFluid> fluid;
+    private final Holder<SoftFluid> fluidHolder;
+    private final SoftFluid fluid; //reference to avoid calling value all the times. these 2 should always match
     private int count;
     private CompoundTag tag;
     private boolean isEmptyCache;
 
-
+    //TODO: make abstract and internal
+    @Deprecated(forRemoval = true)
     public SoftFluidStack(Holder<SoftFluid> fluid, int count, CompoundTag tag) {
-        this.fluid = fluid;
+        this.fluidHolder = fluid;
+        this.fluid = this.fluidHolder.value();
         this.tag = tag;
         this.setCount(count);
 
@@ -59,29 +66,44 @@ public class SoftFluidStack {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public SoftFluidStack(Holder<SoftFluid> fluid, int count) {
         this(fluid, count, null);
     }
 
+    @Deprecated(forRemoval = true)
     public SoftFluidStack(Holder<SoftFluid> fluid) {
         this(fluid, 1, null);
     }
 
-    public SoftFluidStack bucket(Holder<SoftFluid> fluid) {
-        return new SoftFluidStack(fluid, SoftFluid.BUCKET_COUNT);
+    @ExpectPlatform
+    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, @Nullable CompoundTag tag){
+        throw new AssertionError();
     }
 
-    public SoftFluidStack bowl(Holder<SoftFluid> fluid) {
-        return new SoftFluidStack(fluid, SoftFluid.BOWL_COUNT);
+    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count){
+        return of(fluid, count, null);
     }
 
-    public SoftFluidStack bottle(Holder<SoftFluid> fluid) {
-        return new SoftFluidStack(fluid, SoftFluid.BOTTLE_COUNT);
+    public static SoftFluidStack of(Holder<SoftFluid> fluid){
+        return of(fluid, 1, null);
+    }
+
+    public static SoftFluidStack bucket(Holder<SoftFluid> fluid) {
+        return of(fluid, SoftFluid.BUCKET_COUNT);
+    }
+
+    public static SoftFluidStack bowl(Holder<SoftFluid> fluid) {
+        return of(fluid, SoftFluid.BOWL_COUNT);
+    }
+
+    public static SoftFluidStack bottle(Holder<SoftFluid> fluid) {
+        return of(fluid, SoftFluid.BOTTLE_COUNT);
     }
 
     public static SoftFluidStack empty() {
         if (cachedEmptyInstance == null) {
-            cachedEmptyInstance = new SoftFluidStack(SoftFluidRegistry.getEmpty(), 0, null);
+            cachedEmptyInstance = of(SoftFluidRegistry.getEmpty(), 0, null);
         }
         return cachedEmptyInstance;
     }
@@ -92,7 +114,7 @@ public class SoftFluidStack {
     }
 
     public CompoundTag save(CompoundTag compoundTag) {
-        compoundTag.putString("id", getFluid().unwrapKey().get().location().toString());
+        compoundTag.putString("id", getHolder().unwrapKey().get().location().toString());
         compoundTag.putByte("count", (byte) this.count);
         if (this.tag != null) {
             compoundTag.put("tag", this.tag.copy());
@@ -121,23 +143,32 @@ public class SoftFluidStack {
         if (tag.contains("tag", 10)) {
             nbt = tag.getCompound("tag");
         }
-        return new SoftFluidStack(fluid, amount, nbt);
+        return of(fluid, amount, nbt);
     }
 
     public boolean is(TagKey<SoftFluid> tag) {
-        return getFluid().is(tag);
+        return getHolder().is(tag);
     }
 
     public boolean is(SoftFluid fluid) {
-        return this.getFluid().value() == fluid;
+        return this.fluid() == fluid;
     }
 
     public boolean is(Holder<SoftFluid> fluid) {
         return is(fluid.value());
     }
 
+    @Deprecated(forRemoval = true)    //just make private
     public final Holder<SoftFluid> getFluid() {
-        return isEmptyCache ? SoftFluidRegistry.getEmpty() : fluid;
+        return isEmptyCache ? SoftFluidRegistry.getEmpty() : fluidHolder;
+    }
+
+    public final Holder<SoftFluid> getHolder() {
+        return isEmptyCache ? SoftFluidRegistry.getEmpty() : fluidHolder;
+    }
+
+    public final SoftFluid fluid() {
+        return isEmptyCache ? SoftFluidRegistry.empty() : fluid;
     }
 
     public boolean isEmpty() {
@@ -145,7 +176,7 @@ public class SoftFluidStack {
     }
 
     protected void updateEmpty() {
-        isEmptyCache = fluid.value().isEmpty() || count <= 0;
+        isEmptyCache = fluid.isEmptyFluid() || count <= 0;
     }
 
     public int getCount() {
@@ -205,7 +236,7 @@ public class SoftFluidStack {
     }
 
     public SoftFluidStack copy() {
-        return new SoftFluidStack(getFluid(), count, tag == null ? null : tag.copy());
+        return of(getHolder(), count, tag == null ? null : tag.copy());
     }
 
     public SoftFluidStack copyWithCount(int count) {
@@ -227,7 +258,7 @@ public class SoftFluidStack {
      * Checks if the fluids and NBT Tags are equal. This does not check amounts.
      */
     public boolean isFluidEqual(SoftFluidStack other) {
-        return getFluid() == other.getFluid() && isFluidStackTagEqual(other);
+        return fluid() == other.fluid() && isFluidStackTagEqual(other);
     }
 
     /**
@@ -241,7 +272,7 @@ public class SoftFluidStack {
     @Override
     public final int hashCode() {
         int code = 1;
-        code = 31 * code + getFluid().hashCode();
+        code = 31 * code + fluid().hashCode();
         if (tag != null)
             code = 31 * code + tag.hashCode();
         return code;
@@ -262,17 +293,19 @@ public class SoftFluidStack {
 
     @Override
     public String toString() {
-        return count + " " + getFluid().unwrapKey().get().location() + " [" + tag.toString() + "]";
+        return count + " " + getHolder().unwrapKey().get().location() + " [" + tag.toString() + "]";
     }
 
+    @NotNull
     public static SoftFluidStack fromFluid(Fluid fluid, int amount, @Nullable CompoundTag tag) {
-        Holder<SoftFluid> f = SoftFluidRegistry.FLUID_MAP.get(fluid);
-        if (f == null) return null;
-        return new SoftFluidStack(f, amount, tag);
+        Holder<SoftFluid> f = SoftFluidInternal.FLUID_MAP.get(fluid);
+        if (f == null) return empty();
+        return of(f, amount, tag);
     }
 
+    @NotNull
     public static SoftFluidStack fromFluid(FluidState fluid) {
-        if (fluid.getType().is(FluidTags.WATER)) {
+        if (fluid.is(FluidTags.WATER)) {
             return fromFluid(fluid.getType(), SoftFluid.WATER_BUCKET_COUNT, null);
         }
         return fromFluid(fluid.getType(), SoftFluid.BUCKET_COUNT, null);
@@ -284,9 +317,9 @@ public class SoftFluidStack {
     @Nullable
     public static Pair<SoftFluidStack, FluidContainerList.Category> fromItem(ItemStack itemStack) {
         Item filledContainer = itemStack.getItem();
-        Holder<SoftFluid> fluid = SoftFluidRegistry.ITEM_MAP.get(filledContainer);
+        Holder<SoftFluid> fluid = SoftFluidInternal.ITEM_MAP.get(filledContainer);
 
-        if (fluid != null && !fluid.value().isEmpty()) {
+        if (fluid != null && !fluid.value().isEmptyFluid()) {
             var category = fluid.value().getContainerList()
                     .getCategoryFromFilled(filledContainer);
 
@@ -323,7 +356,7 @@ public class SoftFluidStack {
 
                 if (fluidTag.isEmpty()) fluidTag = null;
 
-                return Pair.of(new SoftFluidStack(fluid, count, fluidTag), category.get());
+                return Pair.of(SoftFluidStack.of(fluid, count, fluidTag), category.get());
             }
         }
         return null;
@@ -339,7 +372,7 @@ public class SoftFluidStack {
      */
     @Nullable
     public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
-        var opt = getFluid().value().getContainerList().getCategoryFromEmpty(emptyContainer.getItem());
+        var opt = fluid().getContainerList().getCategoryFromEmpty(emptyContainer.getItem());
         if (opt.isPresent()) {
             var category = opt.get();
             int shrinkAmount = category.getAmount();
@@ -347,7 +380,7 @@ public class SoftFluidStack {
 
                 ItemStack filledStack = new ItemStack(category.getFirstFilled().get());
                 //case for lingering potions
-                if (this.getFluid().is(BuiltInSoftFluids.POTION.getID()) && this.tag != null) {
+                if (this.is(BuiltInSoftFluids.POTION.getHolder()) && this.tag != null) {
                     var type = PotionNBTHelper.getPotionType(this.tag);
                     if (type != null && !Utils.getID(emptyContainer.getItem()).getNamespace().equals("inspirations")) {
                         if (type != PotionNBTHelper.Type.REGULAR) {
@@ -357,7 +390,7 @@ public class SoftFluidStack {
                 }
 
                 //converts water bottles into potions
-                if (emptyContainer.is(Items.GLASS_BOTTLE) && getFluid().value() == BuiltInSoftFluids.WATER.get()) {
+                if (emptyContainer.is(Items.GLASS_BOTTLE) && this.is(BuiltInSoftFluids.WATER.get())) {
                     filledStack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
                 }
 
@@ -375,7 +408,7 @@ public class SoftFluidStack {
 
     //handles special nbt items such as potions or soups
     protected void applyNBTtoItemStack(ItemStack stack) {
-        List<String> nbtKey = this.getFluid().value().getNbtKeyFromItem();
+        List<String> nbtKey = this.fluid().getNbtKeyFromItem();
         if (this.tag != null && !this.tag.isEmpty()) {
             CompoundTag newCom = new CompoundTag();
             for (String s : nbtKey) {
@@ -393,23 +426,57 @@ public class SoftFluidStack {
     // fluid delegates
 
     public FluidContainerList getContainerList() {
-        return getFluid().value().getContainerList();
+        return fluid().getContainerList();
     }
 
     public FoodProvider getFoodProvider() {
-        return getFluid().value().getFoodProvider();
+        return fluid().getFoodProvider();
     }
 
     public boolean isEquivalent(Fluid fluid) {
-        return this.getFluid().value().isEquivalent(fluid);
+        return this.fluid().isEquivalent(fluid);
     }
 
     public Fluid getVanillaFluid() {
-        return this.getFluid().value().getVanillaFluid();
+        return this.fluid().getVanillaFluid();
     }
 
-    public SoftFluid.TintMethod getTintMethod() {
-        return this.getFluid().value().getTintMethod();
+    /**
+     * Client only
+     *
+     * @return tint color to be applied on the fluid texture
+     */
+    public int getStillColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        SoftFluid fluid = this.fluid();
+        SoftFluid.TintMethod method = fluid.getTintMethod();
+        if (method == SoftFluid.TintMethod.NO_TINT) return -1;
+        int specialColor = SoftFluidColors.getSpecialColor(this, world, pos);
+
+        if (specialColor != 0) return specialColor;
+        return fluid.getTintColor();
+    }
+
+    /**
+     * Client only
+     *
+     * @return tint color to be applied on the fluid texture
+     */
+    public int getFlowingColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        SoftFluid.TintMethod method = this.fluid().getTintMethod();
+        if (method == SoftFluid.TintMethod.FLOWING) return this.getParticleColor(world, pos);
+        else return this.getStillColor(world, pos);
+    }
+
+    /**
+     * Client only
+     *
+     * @return tint color to be used on particle. Differs from getTintColor since it returns an mixWith color extrapolated from their fluid textures
+     */
+    public int getParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        int tintColor = getStillColor(world, pos);
+        //if tint color is white gets averaged color
+        if (tintColor == -1) return this.fluid().getAverageTextureTintColor();
+        return tintColor;
     }
 
 }

@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.fluids.fabric;
+package net.mehvahdjukaar.moonlight.core.fluid.fabric;
 
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
@@ -16,7 +16,7 @@ import net.minecraft.world.level.material.Fluids;
 
 import java.util.Map;
 
-public class SoftFluidRegistryImpl {
+public class SoftFluidInternalImpl {
 
     public static void init() {
         DynamicRegistries.registerSynced(SoftFluidRegistry.KEY, SoftFluid.CODEC, SoftFluid.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);

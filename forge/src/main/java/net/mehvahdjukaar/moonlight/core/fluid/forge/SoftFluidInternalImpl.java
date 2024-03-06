@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.fluids.forge;
+package net.mehvahdjukaar.moonlight.core.fluid.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
@@ -22,11 +22,11 @@ import java.util.Map;
 
 import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry.KEY;
 
-public class SoftFluidRegistryImpl {
+public class SoftFluidInternalImpl {
 
     public static void init() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.register(SoftFluidRegistryImpl.class);
+        bus.register(SoftFluidInternalImpl.class);
     }
 
     public static void registerExistingVanillaFluids(Map<Fluid, Holder<SoftFluid>> fluidMap, Map<Item, Holder<SoftFluid>> itemMap) {

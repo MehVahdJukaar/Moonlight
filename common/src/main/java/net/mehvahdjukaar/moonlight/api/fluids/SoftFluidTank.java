@@ -22,17 +22,19 @@ import org.jetbrains.annotations.Nullable;
  * instance this fluid tank in your tile entity
  */
 @SuppressWarnings("unused")
-public abstract class SoftFluidTank {
+public class SoftFluidTank {
 
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
     public static final int BUCKET_COUNT = 4;
 
     protected final int capacity;
-    protected SoftFluidStack fluid = SoftFluidStack.empty();
+    protected SoftFluidStack fluidStack = SoftFluidStack.empty();
 
-    //Special tint color. Used for dynamic tint fluids like water and potions
-    protected int specialColor = 0;
+    //Minor optimization. Caches the tint color for the fluid
+    protected int stillTintCache = 0;
+    protected int flowingTintCache = 0;
+    protected int particleTintCache = 0;
     protected boolean needsColorRefresh = true;
 
     protected SoftFluidTank(int capacity) {
@@ -135,7 +137,7 @@ public abstract class SoftFluidTank {
      * @return filled bottle item. null if it failed or if simulated is true and failed
      */
     public InteractionResultHolder<ItemStack> fillItem(ItemStack emptyContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
-        var pair = this.fluid.toItem(emptyContainer, simulate);
+        var pair = this.fluidStack.toItem(emptyContainer, simulate);
 
         if (pair != null) {
             var category = pair.getSecond();
@@ -153,7 +155,7 @@ public abstract class SoftFluidTank {
      * You can assume that canAddSoftFluid has been called before
      */
     protected void addFluidOntoExisting(SoftFluidStack stack) {
-        this.fluid.grow(stack.getCount());
+        this.fluidStack.grow(stack.getCount());
     }
 
     /**
@@ -191,7 +193,7 @@ public abstract class SoftFluidTank {
      */
     public boolean canAddSoftFluid(SoftFluidStack fluidStack) {
         if (this.isEmpty()) return true;
-        if (!this.fluid.isFluidEqual(fluidStack)) return false;
+        if (!this.fluidStack.isFluidEqual(fluidStack)) return false;
         return this.getSpace() >= fluidStack.getCount();
     }
 
@@ -222,28 +224,28 @@ public abstract class SoftFluidTank {
     //transfers between two fluid holders
     public boolean transferFluid(SoftFluidTank destination, int amount) {
         if (this.isEmpty()) return false;
-        if (this.getFluidCount() >= amount && destination.addFluid(this.fluid.copyWithCount(amount))) {
-            this.fluid.shrink(amount);
+        if (this.getFluidCount() >= amount && destination.addFluid(this.fluidStack.copyWithCount(amount))) {
+            this.fluidStack.shrink(amount);
             return true;
         }
         return false;
     }
 
     public int getSpace() {
-        return Math.max(0, capacity - fluid.getCount());
+        return Math.max(0, capacity - fluidStack.getCount());
     }
 
     public int getFluidCount() {
-        return fluid.getCount();
+        return fluidStack.getCount();
     }
 
     public boolean isFull() {
-        return fluid.getCount() == this.capacity;
+        return fluidStack.getCount() == this.capacity;
     }
 
     public boolean isEmpty() {
         //count 0 should always = to fluid.empty
-        return this.fluid.isEmpty();
+        return this.fluidStack.isEmpty();
     }
 
     /**
@@ -253,37 +255,37 @@ public abstract class SoftFluidTank {
      * @return fluid height
      */
     public float getHeight(float maxHeight) {
-        return maxHeight * fluid.getCount() / this.capacity;
+        return maxHeight * fluidStack.getCount() / this.capacity;
     }
 
     /**
      * @return comparator block redstone power
      */
     public int getComparatorOutput() {
-        float f = fluid.getCount() / (float) this.capacity;
+        float f = fluidStack.getCount() / (float) this.capacity;
         return Mth.floor(f * 14.0F) + 1;
     }
 
     public SoftFluidStack getFluid() {
-        return fluid;
+        return fluidStack;
     }
 
     public SoftFluid getFluidValue() {
-        return fluid.getFluid().value();
+        return fluidStack.getHolder().value();
     }
 
     public void setFluid(SoftFluidStack fluid) {
-        this.fluid = fluid;
+        this.fluidStack = fluid;
         refreshTintCache();
     }
 
     public void refreshTintCache() {
-        specialColor = 0;
+        stillTintCache = 0;
         needsColorRefresh = true;
     }
 
     private void fillCount() {
-        this.fluid.setCount(this.capacity);
+        this.fluidStack.setCount(this.capacity);
     }
 
     /**
@@ -308,32 +310,51 @@ public abstract class SoftFluidTank {
     }
 
     public void capCapacity() {
-        this.fluid.setCount(Mth.clamp(this.fluid.getCount(), 0, capacity));
+        this.fluidStack.setCount(Mth.clamp(this.fluidStack.getCount(), 0, capacity));
     }
 
-    //TODO: move color stuff into fluidStack
+    private void cacheColors(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        stillTintCache = this.fluidStack.getStillColor(world, pos);
+        flowingTintCache = this.fluidStack.getFlowingColor(world, pos);
+        particleTintCache = this.fluidStack.getParticleColor(world, pos);
+        needsColorRefresh = false;
+    }
 
-    /**
-     * @return cached tint color to be applied on the fluid texture
-     */
-    //works on both side
-    public abstract int getTintColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos);
+    @Deprecated(forRemoval = true)
+    public int getTintColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        return getCachedStillColor(world, pos);
+    }
 
-    /**
-     * @return cached tint color to be applied on the fluid texture
-     */
-    public abstract int getFlowingTint(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos);
+    @Deprecated(forRemoval = true)
+    public int getFlowingTint(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        return getCachedFlowingColor(world, pos);
+    }
 
-    /**
-     * @return cached tint color to be used on particle. Differs from getTintColor since it returns an mixWith color extrapolated from their fluid textures
-     */
-    public abstract int getParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos);
+    @Deprecated(forRemoval = true)
+    public int getParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        return getCachedParticleColor(world, pos);
+    }
+
+    public int getCachedStillColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        if (needsColorRefresh) cacheColors(world, pos);
+        return stillTintCache;
+    }
+
+    public int getCachedFlowingColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        if (needsColorRefresh) cacheColors(world, pos);
+        return flowingTintCache;
+    }
+
+    public int getCachedParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+        if (needsColorRefresh) cacheColors(world, pos);
+        return particleTintCache;
+    }
 
     /**
      * @return true if contained fluid has associated food
      */
     public boolean containsFood() {
-        return !this.fluid.getFoodProvider().isEmpty();
+        return !this.fluidStack.getFoodProvider().isEmpty();
     }
 
     /**
@@ -344,8 +365,8 @@ public abstract class SoftFluidTank {
     public void load(CompoundTag compound) {
         if (compound.contains("FluidHolder")) {
             CompoundTag cmp = compound.getCompound("FluidHolder");
-            this.fluid = SoftFluidStack.load(cmp);
-            if (this.isEmpty()) this.fluid = SoftFluidStack.empty();
+            this.fluidStack = SoftFluidStack.load(cmp);
+            if (this.isEmpty()) this.fluidStack = SoftFluidStack.empty();
         }
     }
 
@@ -357,8 +378,8 @@ public abstract class SoftFluidTank {
      */
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
-        if (this.isEmpty()) this.fluid = SoftFluidStack.empty();
-        this.fluid.save(cmp);
+        if (this.isEmpty()) this.fluidStack = SoftFluidStack.empty();
+        this.fluidStack.save(cmp);
         //for item render. needed for potion colors. could be done better taking pos and level into account
         cmp.putInt("CachedColor", this.getTintColor(null, null));
 
@@ -375,8 +396,8 @@ public abstract class SoftFluidTank {
      */
     public boolean tryDrinkUpFluid(Player player, Level world) {
         if (!this.isEmpty() && this.containsFood()) {
-            if (this.fluid.getFoodProvider().consume(player, world, this.fluid::applyNBTtoItemStack)) { //crap code right there
-                fluid.shrink(1);
+            if (this.fluidStack.getFoodProvider().consume(player, world, this.fluidStack::applyNBTtoItemStack)) { //crap code right there
+                fluidStack.shrink(1);
                 return true;
             }
         }

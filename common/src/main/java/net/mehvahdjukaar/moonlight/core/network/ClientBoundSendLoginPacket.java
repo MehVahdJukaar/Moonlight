@@ -26,7 +26,7 @@ public class ClientBoundSendLoginPacket implements Message {
 
         try {
             //check on datapack registries on client
-            SoftFluidRegistry.getEmpty();
+            SoftFluidRegistry.empty();
         } catch (Exception e) {
             throw new RuntimeException("Not all required entries were found in datapack registry. How did this happen?", e);
         }

@@ -5,8 +5,7 @@ import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
-import net.mehvahdjukaar.moonlight.api.trades.ItemListingRegistry;
-import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
 import org.jetbrains.annotations.ApiStatus;
@@ -20,7 +19,7 @@ public class MoonlightClient {
     private static MergedDynamicTexturePack mergedDynamicPack;
 
     public static void initClient() {
-        ClientHelper.addClientReloadListener(SoftFluidParticleColors::new, Moonlight.res("soft_fluids"));
+        ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluids"));
         ClientHelper.addClientReloadListener(MapDecorationClientManager::new, Moonlight.res("map_markers"));
         ClientConfigs.init();
     }

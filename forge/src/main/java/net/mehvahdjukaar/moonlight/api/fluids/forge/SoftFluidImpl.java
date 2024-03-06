@@ -23,7 +23,7 @@ public class SoftFluidImpl {
     public static Triplet<ResourceLocation, ResourceLocation, Integer> getRenderingData(ResourceLocation useTexturesFrom) {
         Fluid f = ForgeRegistries.FLUIDS.getValue(useTexturesFrom);
         if (f != null && f != Fluids.EMPTY) {
-
+            // do we even have access on this on server side?
             IClientFluidTypeExtensions prop = IClientFluidTypeExtensions.of(f);
             if (prop != IClientFluidTypeExtensions.DEFAULT) {
                 var s = new FluidStack(f, 1000);

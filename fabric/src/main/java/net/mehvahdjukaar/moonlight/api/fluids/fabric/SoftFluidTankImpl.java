@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
-import net.mehvahdjukaar.moonlight.core.client.SoftFluidParticleColors;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -17,9 +17,8 @@ import org.jetbrains.annotations.Nullable;
  * instance this fluid tank in your tile entity
  */
 @SuppressWarnings("unused")
+@Deprecated(forRemoval = true)
 public class SoftFluidTankImpl extends SoftFluidTank {
-
-    //TODO: fabric fluid api support
 
     public static SoftFluidTank create(int capacity) {
         return new SoftFluidTankImpl(capacity);
@@ -27,58 +26,6 @@ public class SoftFluidTankImpl extends SoftFluidTank {
 
     protected SoftFluidTankImpl(int capacity) {
         super(capacity);
-    }
-
-    /**
-     * @return tint color to be applied on the fluid texture
-     */
-    //client only
-    public int getTintColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        SoftFluid.TintMethod method = this.fluid.getTintMethod();
-        if (method == SoftFluid.TintMethod.NO_TINT) return -1;
-        if (this.needsColorRefresh) {
-            this.refreshSpecialColor(world, pos);
-            this.needsColorRefresh = false;
-        }
-        if (this.specialColor != 0) return this.specialColor;
-        return this.fluid.getFluid().value().getTintColor();
-    }
-
-    /**
-     * @return tint color to be applied on the fluid texture
-     */
-    public int getFlowingTint(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        SoftFluid.TintMethod method = this.fluid.getTintMethod();
-        if (method == SoftFluid.TintMethod.FLOWING) return this.getParticleColor(world, pos);
-        else return this.getTintColor(world, pos);
-    }
-
-    /**
-     * @return tint color to be used on particle. Differs from getTintColor since it returns an mixWith color extrapolated from their fluid textures
-     */
-    public int getParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        if (this.isEmpty()) return -1;
-        int tintColor = this.getTintColor(world, pos);
-        //if tint color is white gets averaged color
-        if (tintColor == -1) return SoftFluidParticleColors.getParticleColor(this.fluid.getFluid());
-        return tintColor;
-    }
-
-    //grabs world/ fluid stack dependent tint color if fluid has associated forge fluid. overrides normal tint color
-    private void refreshSpecialColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        //yay hardcoding
-        //at least this works for any fluid
-        CompoundTag tag = this.fluid.getTag();
-        if(tag != null && tag.contains("color")){
-            this.specialColor = tag.getInt("color");
-        }
-        if (fluid .is(BuiltInSoftFluids.POTION.get())) {
-            this.specialColor = PotionNBTHelper.getColorFromNBT(tag);
-        } else {
-            Fluid f = this.fluid.getVanillaFluid();
-            if (f != Fluids.EMPTY) {
-            }
-        }
     }
 
 }
