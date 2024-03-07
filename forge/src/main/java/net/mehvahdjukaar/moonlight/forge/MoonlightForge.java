@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
+import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
@@ -92,7 +93,7 @@ public class MoonlightForge {
     public static void onDataSync(OnDatapackSyncEvent event) {
         //send syncing packets just on login
         if (event.getPlayer() != null) {
-            SoftFluidRegistry.onDataSyncToPlayer(event.getPlayer(), true);
+            SoftFluidInternal.onDataSyncToPlayer(event.getPlayer(), true);
         }//else joined = false
     }
 

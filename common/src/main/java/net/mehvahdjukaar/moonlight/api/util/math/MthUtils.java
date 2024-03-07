@@ -210,4 +210,26 @@ public class MthUtils {
         return newShape.get();
     }
 
+
+    // just brute forces it with newton approximation method
+    public static double lambertW(double x) {
+        double maxError = 1e-6;
+        if (x == -1 / Math.E) {
+            return -1;
+        }
+        else if (x < 0 && x > -1 / Math.E) {
+            double nLog = Math.log(-x);
+            double nLog0 = 1;
+            while (Math.abs(nLog0 - nLog) > maxError) {
+                nLog0 = (nLog * nLog + x / Math.exp(nLog)) / (nLog + 1);
+                nLog = (nLog0 * nLog0 + x / Math.exp(nLog0)) / (nLog0 + 1);
+            }
+            // precision of the return value
+            return (Math.round(1000000 * nLog) / 1000000);
+        } else if (x == 0) {
+            return 0;
+        } else {
+            return 0;
+        }
+    }
 }

@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -15,8 +16,9 @@ import org.jetbrains.annotations.Nullable;
 public class SoftFluidColorsImpl {
 
     //grabs world/ fluid stack dependent tint color if fluid has associated forge fluid. overrides normal tint color
-    private static int getSpecialColor(SoftFluidStack stack, @Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
+    public static int getSpecialColor(SoftFluidStack stack, @Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
         int specialColor = 0;
+        Minecraft
         //yay hardcoding
         //at least this works for any fluid
         CompoundTag fluidTag = stack.getTag();

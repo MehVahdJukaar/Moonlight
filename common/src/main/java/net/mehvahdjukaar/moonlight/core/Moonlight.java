@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
@@ -16,6 +17,7 @@ import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingRegistry;
+import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
@@ -60,7 +62,7 @@ public class Moonlight {
 
         VillagerAIInternal.init();
         MapDataInternal.init();
-        SoftFluidRegistry.init();
+        SoftFluidInternal.init();
 
         PlatHelper.addCommonSetup(Moonlight::commonSetup);
 
@@ -104,8 +106,8 @@ public class Moonlight {
 
     @EventCalled
     public static void beforeServerStart() {
-        SoftFluidRegistry.doPostInitServer();
-        net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack.invalidateEmptyInstance();
+        SoftFluidInternal.doPostInitServer();
+        SoftFluidStack.invalidateEmptyInstance();
     }
 
     public static void assertInitPhase() {

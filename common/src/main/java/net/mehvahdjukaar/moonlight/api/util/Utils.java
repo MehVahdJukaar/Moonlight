@@ -226,10 +226,13 @@ public class Utils {
         return p;
     }
 
+    @Deprecated(forRemoval = true)
     public static HitResult rayTrace(LivingEntity entity, Level world, ClipContext.Block blockMode, ClipContext.Fluid fluidMode) {
         return rayTrace(entity, world, blockMode, fluidMode, ForgeHelper.getReachDistance(entity));
     }
 
+    // use entity.clip
+    @Deprecated(forRemoval = true)
     public static HitResult rayTrace(Entity entity, Level world, ClipContext.Block blockMode, ClipContext.Fluid fluidMode, double range) {
         Vec3 startPos = entity.getEyePosition();
         Vec3 ray = entity.getViewVector(1).scale(range);
