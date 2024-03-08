@@ -106,19 +106,19 @@ public class RPUtils {
         return Set.of(id.getNamespace() + ":item/" + item);
     }
 
-    private static Set<String> guessBlockTextureLocation(ResourceLocation id, Block block) {
+    private static List<String> guessBlockTextureLocation(ResourceLocation id, Block block) {
         String name = id.getPath();
-        Set<String> textures = new HashSet<>();
+        List<String> textures = new ArrayList<>();
         //just works for wood types
-        textures.add(id.getNamespace() + ":block/" + name);
         WoodType w = WoodTypeRegistry.INSTANCE.getBlockTypeOf(block);
         if (w != null) {
             String key = w.getChildKey(block);
             if (Objects.equals(key, "log") || Objects.equals(key, "stripped_log")) {
                 textures.add(id.getNamespace() + ":block/" + name + "_top");
                 textures.add(id.getNamespace() + ":block/" + name + "_side");
-            }else textures.add(id.getNamespace() + ":block/" + name);
+            }
         }
+        textures.add(id.getNamespace() + ":block/" + name);
         return textures;
     }
 
