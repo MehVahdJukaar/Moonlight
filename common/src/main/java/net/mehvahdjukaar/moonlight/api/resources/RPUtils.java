@@ -117,7 +117,7 @@ public class RPUtils {
             if (Objects.equals(key, "log") || Objects.equals(key, "stripped_log")) {
                 textures.add(id.getNamespace() + ":block/" + name + "_top");
                 textures.add(id.getNamespace() + ":block/" + name + "_side");
-            }
+            }else textures.add(id.getNamespace() + ":block/" + name);
         }
         return textures;
     }

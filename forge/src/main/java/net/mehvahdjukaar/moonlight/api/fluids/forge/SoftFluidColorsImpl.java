@@ -18,7 +18,7 @@ public class SoftFluidColorsImpl {
     //grabs world/ fluid stack dependent tint color if fluid has associated forge fluid. overrides normal tint color
     public static int getSpecialColor(SoftFluidStack stack, @Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
         int specialColor = 0;
-        Minecraft
+
         //yay hardcoding
         //at least this works for any fluid
         CompoundTag fluidTag = stack.getTag();

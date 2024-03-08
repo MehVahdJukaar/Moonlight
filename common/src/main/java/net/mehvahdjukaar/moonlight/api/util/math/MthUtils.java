@@ -212,6 +212,7 @@ public class MthUtils {
 
 
     // just brute forces it with newton approximation method
+    // this only uses the first branch of the W function
     public static double lambertW(double x) {
         double maxError = 1e-6;
         if (x == -1 / Math.E) {
@@ -229,7 +230,7 @@ public class MthUtils {
         } else if (x == 0) {
             return 0;
         } else {
-            return 0;
+            throw new IllegalArgumentException("Not in valid range for lambertW function. x has to be in [-1/e,0]");
         }
     }
 }
