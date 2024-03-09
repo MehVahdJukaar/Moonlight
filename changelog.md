@@ -1,3 +1,1 @@
-- moved fluid registry clases to core package
-- improved fluid coloring logic
-- added lambertW function to MathUtils
+fixed an issue with fluid colors

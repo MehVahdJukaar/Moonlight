@@ -33,9 +33,11 @@ public class SoftFluidColorsImpl {
                 var prop = IClientFluidTypeExtensions.of(f);
                 if (prop != IClientFluidTypeExtensions.DEFAULT) {
                     //world accessor
-                    int w;
+                    int w = -1;
                     //stack accessor
-                    w = prop.getTintColor(((SoftFluidStackImpl) stack).toForgeFluid());
+                    if(stack instanceof SoftFluidStackImpl ss) {
+                        w = prop.getTintColor(ss.toForgeFluid());
+                    }
                     if (w != -1) specialColor = w;
                     else {
                         w = prop.getTintColor(f.defaultFluidState(), world, pos);

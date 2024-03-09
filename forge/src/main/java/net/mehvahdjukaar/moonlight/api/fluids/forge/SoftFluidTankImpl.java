@@ -119,6 +119,9 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      */
     @Deprecated(forRemoval = true)
     public FluidStack toEquivalentVanillaFluid(int mb) {
+        if (!(fluidStack instanceof SoftFluidStackImpl)) {
+            return FluidStack.EMPTY;
+        }
         var s = ((SoftFluidStackImpl) this.fluidStack).toForgeFluid();
         s.setAmount(mb);
         return s;
