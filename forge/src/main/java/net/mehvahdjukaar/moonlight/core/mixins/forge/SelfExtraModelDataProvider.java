@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.moonlight.core.mixins.forge;
 
 import dev.architectury.patchedmixin.staticmixin.spongepowered.asm.mixin.Overwrite;
+import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadsTransformer;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
 import net.mehvahdjukaar.moonlight.api.client.model.forge.ExtraModelDataImpl;
+import net.mehvahdjukaar.moonlight.api.entity.ImprovedProjectileEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;

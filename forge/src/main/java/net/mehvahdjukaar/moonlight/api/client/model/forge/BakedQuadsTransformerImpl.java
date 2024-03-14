@@ -44,9 +44,9 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
     public BakedQuadsTransformer applyingTransform(Matrix4f transform) {
         //transform to block center
         var m = new Matrix4f();
-        m.translate(-0.5f, -0.5f, -0.5f);
-        m.mul(transform);
         m.translate(0.5f, 0.5f, 0.5f);
+        m.mul(transform);
+        m.translate(-0.5f, -0.5f, -0.5f);
         inner = inner.andThen(QuadTransformers.applying(new Transformation(m)));
         directionRemap = d -> Direction.rotate(new Matrix4f(new Matrix3f(transform)), d);
         return this;

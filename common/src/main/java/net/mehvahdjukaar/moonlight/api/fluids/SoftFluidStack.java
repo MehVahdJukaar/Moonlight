@@ -51,6 +51,7 @@ public class SoftFluidStack {
     private boolean isEmptyCache;
 
     //TODO: make abstract and internal
+    @ApiStatus.Internal
     @Deprecated(forRemoval = true)
     public SoftFluidStack(Holder<SoftFluid> fluid, int count, CompoundTag tag) {
         this.fluidHolder = fluid;

@@ -207,14 +207,20 @@ public final class SpriteUtils {
         });
     }
 
+    @Deprecated(forRemoval = true)
     @NotNull
     public static final Predicate<String> LOOKS_LIKE_TOP_LOG_TEXTURE = s -> {
         s = new ResourceLocation(s).getPath();
+        if(s.contains("_overlay"))return false;
         return s.contains("_top") || s.contains("_end") || s.contains("_up");
     };
-    @NotNull
-    public static final Predicate<String> LOOKS_LIKE_SIDE_LOG_TEXTURE = s -> !LOOKS_LIKE_TOP_LOG_TEXTURE.test(s);
 
+    @Deprecated(forRemoval = true)
+    @NotNull
+    public static final Predicate<String> LOOKS_LIKE_SIDE_LOG_TEXTURE =
+            s -> !LOOKS_LIKE_TOP_LOG_TEXTURE.test(s) && !new ResourceLocation(s).getPath().contains("_overlay");
+
+    @Deprecated(forRemoval = true)
     @NotNull
     public static final Predicate<String> LOOKS_LIKE_LEAF_TEXTURE = s -> {
         s = new ResourceLocation(s).getPath();

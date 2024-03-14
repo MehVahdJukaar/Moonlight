@@ -1,10 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -35,11 +33,11 @@ public class SoftFluidColorsImpl {
                     //world accessor
                     int w = -1;
                     //stack accessor
-                    if(stack instanceof SoftFluidStackImpl ss) {
+                    if (stack instanceof SoftFluidStackImpl ss) {
                         w = prop.getTintColor(ss.toForgeFluid());
                     }
                     if (w != -1) specialColor = w;
-                    else {
+                    else if (world != null && pos != null) {
                         w = prop.getTintColor(f.defaultFluidState(), world, pos);
                         if (w != -1) specialColor = w;
                     }

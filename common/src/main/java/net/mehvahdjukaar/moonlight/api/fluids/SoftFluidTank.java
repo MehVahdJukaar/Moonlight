@@ -380,9 +380,6 @@ public class SoftFluidTank {
         CompoundTag cmp = new CompoundTag();
         if (this.isEmpty()) this.fluidStack = SoftFluidStack.empty();
         this.fluidStack.save(cmp);
-        //for item render. needed for potion colors. could be done better taking pos and level into account
-        cmp.putInt("CachedColor", this.getTintColor(null, null));
-
         compound.put("FluidHolder", cmp);
         return compound;
     }

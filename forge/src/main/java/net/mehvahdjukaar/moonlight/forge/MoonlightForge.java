@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
+import net.mehvahdjukaar.moonlight.core.misc.DummyWorld;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
@@ -24,6 +25,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoader;
@@ -87,6 +89,11 @@ public class MoonlightForge {
     @SubscribeEvent
     public static void beforeServerStart(ServerAboutToStartEvent event){
        Moonlight.beforeServerStart();
+    }
+
+    @SubscribeEvent
+    public static void beforeServerStart(ServerStoppedEvent event){
+        DummyWorld.clearInstance();
     }
 
     @SubscribeEvent

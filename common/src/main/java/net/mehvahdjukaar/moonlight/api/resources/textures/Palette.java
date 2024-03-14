@@ -136,6 +136,10 @@ public class Palette implements Set<PaletteColor> {
         return this.internal.indexOf(color);
     }
 
+    public boolean hasColor(int rgba) {
+        return this.hasColor(new PaletteColor(rgba), 0);
+    }
+
     public boolean hasColor(PaletteColor color) {
         return this.hasColor(color, this.tolerance);
     }

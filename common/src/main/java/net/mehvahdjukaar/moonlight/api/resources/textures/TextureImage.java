@@ -186,6 +186,23 @@ public class TextureImage implements AutoCloseable {
         return v;
     }
 
+    /**
+     * Create a mask texture from the original texture and the given palette where all colors not in the palette will be black. the rest transparent
+     */
+    public static TextureImage createMask(TextureImage original, Palette palette) {
+        TextureImage copy = original.makeCopy();
+        NativeImage nativeImage = copy.getImage();
+        SpriteUtils.forEachPixel(nativeImage, (x, y) -> {
+            int color = nativeImage.getPixelRGBA(x, y);
+            if (palette.hasColor(color)) {
+                nativeImage.setPixelRGBA(x, y, 0);
+            } else {
+                nativeImage.setPixelRGBA(x, y, 0xFF000000);
+            }
+        });
+        return copy;
+    }
+
     public TextureImage createResized(float widthScale, float heightScale) {
         int newW = (int) (this.imageWidth() * widthScale);
         int newH = (int) (this.imageHeight() * heightScale);

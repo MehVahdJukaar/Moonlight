@@ -1,15 +1,18 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
 import net.mehvahdjukaar.moonlight.api.block.IOwnerProtected;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,6 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -108,6 +112,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
             //remove
             if (!this.isEmpty() && handItem.isEmpty()) {
                 ItemStack it = this.removeItemNoUpdate(slot);
+                onItemRemoved(player, it, slot);
                 if (!this.level.isClientSide()) {
                     player.setItemInHand(handIn, it);
                     this.setChanged();
@@ -126,6 +131,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                 if (!player.isCreative()) {
                     handItem.shrink(1);
                 }
+                onItemAdded(player, it, slot);
                 if (!this.level.isClientSide()) {
                     this.level.playSound(null, this.worldPosition, this.getAddItemSound(), SoundSource.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.10F + 0.95F);
                     //this.setChanged();
@@ -137,6 +143,20 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
             }
         }
         return InteractionResult.PASS;
+    }
+
+    public void onItemRemoved(Player player, ItemStack stack, int slot) {
+        level.gameEvent(GameEvent.BLOCK_CHANGE, worldPosition, GameEvent.Context.of(player, getBlockState()));
+    }
+
+    public void onItemAdded(Player player, ItemStack stack, int slot) {
+        level.gameEvent(GameEvent.BLOCK_CHANGE, worldPosition, GameEvent.Context.of(player, getBlockState()));
+
+        //server
+        if (player instanceof ServerPlayer serverPlayer) {
+            CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, worldPosition, stack);
+            player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
+        }
     }
 
     public SoundEvent getAddItemSound() {
