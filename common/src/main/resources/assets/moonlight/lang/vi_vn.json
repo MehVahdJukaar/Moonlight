@@ -1,0 +1,12 @@
+{
+  "fluid.moonlight.generic_fluid": "Dung dịch không tên",
+  "item.minecraft.potion_lingering": "Thuốc kéo dài",
+  "item.minecraft.potion_splash": "Thuốc có thể ném được",
+  "gui.moonlight.open_mod_page": "Mở trang Curseforge của %s",
+  "message.moonlight.anti_repost": "Có vẻ như bạn đã tải xuống %1$s từ một trang web độc hại :( Lấy phiên bản thật tại %2$s.",
+  "message.moonlight.anti_repost_link": "đây",
+
+  "wood_type.twilightforest.dark": "Gỗ sẫm",
+  "leaves_type.twilightforest.dark": "Gỗ sẫm",
+  "leaves_type.ulterlands.souldrained": "Gỗ hóa đá"
+}
