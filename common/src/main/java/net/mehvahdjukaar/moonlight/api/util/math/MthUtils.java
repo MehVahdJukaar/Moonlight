@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
+import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -211,9 +212,27 @@ public class MthUtils {
     }
 
 
+    public static double lambertW0(double x) {
+        double maxError = 1e-6;
+        if (x == -1 / Math.E) {
+            return -1;
+        } else if (x >= -1 / Math.E) {
+            double nLog = Math.log(x);
+            double nLog0 = 1;
+            while (Math.abs(nLog0 - nLog) > maxError) {
+                nLog0 = (x * Math.exp(-nLog)) / (1 + nLog);
+                nLog = (x * Math.exp(-nLog0)) / (1 + nLog0);
+            }
+            // precision of the return value
+            return (Math.round(1000000 * nLog) / 1000000);
+        } else {
+            throw new IllegalArgumentException("Not in valid range for lambertW function. x has to be greater than or equal to -1/e.");
+        }
+    }
+
     // just brute forces it with newton approximation method
-    // this only uses the first branch of the W function
-    public static double lambertW(double x) {
+    // this only uses the secondary branch of the W function
+    public static double lambertW1(double x) {
         double maxError = 1e-6;
         if (x == -1 / Math.E) {
             return -1;

@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.renderer;
+package net.mehvahdjukaar.moonlight.api.block;
 
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
@@ -16,7 +16,6 @@ import net.minecraft.world.phys.Vec3;
  * A tile entity that is able to switch off and on its tile renderer based on distance from the camera
  * Should be used with a dynamic baked model that can react to the change in the extra model data to render with or without TESR
  */
-@Deprecated(forRemoval = true)
 public abstract class DynamicRenderedBlockTile extends BlockEntity implements IExtraModelDataProvider {
 
     public static final ModelDataKey<Boolean> IS_FANCY = new ModelDataKey<>(Boolean.class);

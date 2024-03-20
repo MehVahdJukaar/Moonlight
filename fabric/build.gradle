@@ -38,9 +38,9 @@ dependencies {
     }
 
     modCompileOnly("curse.maven:yacl-667299:4523734")
-    modImplementation("curse.maven:map-atlases-436298:5018173")
+    modCompileOnly("curse.maven:map-atlases-436298:5018173")
     //modImplementation ("curse.maven:supplementaries-412082:4987505")
-    modRuntimeOnly("net.mehvahdjukaar:supplementaries-fabric:1.20-2.7.17")
+   // modRuntimeOnly("net.mehvahdjukaar:supplementaries-fabric:1.20-2.7.17")
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-item:${project.cca_version}"
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"

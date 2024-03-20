@@ -60,7 +60,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     //should only be server side. called when inventory has changed
     @Override
     public void setChanged() {
-        if (this.level == null) return;
+        if (this.level == null || level.isClientSide) return;
         this.updateTileOnInventoryChanged();
         if (this.needsToUpdateClientWhenChanged()) {
             //this saves and sends a packet to update the client tile
@@ -110,17 +110,19 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         } else if (handIn == InteractionHand.MAIN_HAND) {
             ItemStack handItem = player.getItemInHand(handIn);
             //remove
-            if (!this.isEmpty() && handItem.isEmpty()) {
+            if (handItem.isEmpty()) {
                 ItemStack it = this.removeItemNoUpdate(slot);
-                onItemRemoved(player, it, slot);
-                if (!this.level.isClientSide()) {
-                    player.setItemInHand(handIn, it);
-                    this.setChanged();
-                } else {
-                    //also update visuals on client. will get overwritten by packet tho
-                    this.updateClientVisualsOnLoad();
+                if(!it.isEmpty()) {
+                    onItemRemoved(player, it, slot);
+                    if (!this.level.isClientSide()) {
+                        player.setItemInHand(handIn, it);
+                        this.setChanged();
+                    } else {
+                        //also update visuals on client. will get overwritten by packet tho
+                        this.updateClientVisualsOnLoad();
+                    }
+                    return InteractionResult.sidedSuccess(this.level.isClientSide);
                 }
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
             //place
             else if (!handItem.isEmpty() && this.canPlaceItem(slot, handItem)) {

@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.renderer;
+package net.mehvahdjukaar.moonlight.api.block;
 
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
@@ -7,25 +7,28 @@ import net.mehvahdjukaar.moonlight.api.client.util.LOD;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
+ * A mix of ItemDisplayTile and DynamicRenderedBlockTile
  * A tile entity that is able to switch off and on its tile renderer based on distance from the camera
  * Should be used with a dynamic baked model that can react to the change in the extra model data to render with or without TESR
  */
-@Deprecated(forRemoval = true)
-public abstract class DynamicRenderedBlockTile extends BlockEntity implements IExtraModelDataProvider {
+public abstract class DynamicRenderedItemDisplayTile extends ItemDisplayTile implements IExtraModelDataProvider {
 
-    public static final ModelDataKey<Boolean> IS_FANCY = new ModelDataKey<>(Boolean.class);
+    public static final ModelDataKey<Boolean> IS_FANCY = DynamicRenderedBlockTile.IS_FANCY;
 
     // lod stuff (client)
     private boolean isFancy = false; // current
     private int extraFancyTicks = 0;
 
-    protected DynamicRenderedBlockTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+    protected DynamicRenderedItemDisplayTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state, int capacity) {
+        super(tileEntityTypeIn, pos, state, capacity);
+    }
+
+    protected DynamicRenderedItemDisplayTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
         super(tileEntityTypeIn, pos, state);
     }
 
