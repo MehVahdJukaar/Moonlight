@@ -1,1 +1,1 @@
-fixed a server side crash
+added an optional fix that fixes entity renderer shading to be precisely the same that block use. Now BER and baked model renderer stuff will look identical shading wise. Works with any mod as it just changes the include shaders and Lighting parameters

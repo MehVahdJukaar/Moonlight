@@ -13,6 +13,7 @@ public class ClientConfigs {
     public static final Supplier<Boolean> MERGE_PACKS;
     public static final Supplier<Boolean> LAZY_MAP_DATA;
     public static final Supplier<Integer> MAPS_MIPMAP;
+    public static final Supplier<Boolean> FIX_SHADE;
 
     public static final ConfigSpec CONFIG;
 
@@ -26,6 +27,10 @@ public class ClientConfigs {
                 .define("lazy_map_upload", true);
         MAPS_MIPMAP = builder.comment("Renders map textures using mipmap. Vastly improves look from afar as well when inside a Map Atlas from Map Atlases or similar. Set to 0 to have no mipmap like vanilla")
                 .define("maps_mipmap", 3, 0, 4);
+
+        FIX_SHADE = builder.comment("Fix minecraft entity shading to be exactly the same that blocks use. (1 for up,0.8 for north, 0.6 for west and 0.5 for down)." +
+                        "This means that if you have a model and render it with a tile renderer or entity it will appear identical as one rendered via baked models")
+                .define("fix_entity_renderer_shade", true);
         builder.pop();
         CONFIG = builder.buildAndRegister();
         CONFIG.loadFromFile();
