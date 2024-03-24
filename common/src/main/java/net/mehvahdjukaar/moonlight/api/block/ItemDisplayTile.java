@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
-import net.mehvahdjukaar.moonlight.api.block.IOwnerProtected;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

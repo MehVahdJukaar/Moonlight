@@ -32,10 +32,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     public void onInitialize() {
 
         Moonlight.commonInit();
-        //client init
-        if (PlatHelper.getPhysicalSide().isClient()) {
-            MoonlightClient.initClient();
-        }
 
         ModMessages.CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundOpenScreenMessage.class, ClientBoundOpenScreenMessage::new);

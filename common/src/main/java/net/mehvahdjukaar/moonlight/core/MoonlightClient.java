@@ -89,7 +89,7 @@ public class MoonlightClient {
 
         @Override
         public boolean dependsOnLoadedPacks() {
-            return false;
+            return true;
         }
 
         private Vector3f oldL0 = null;

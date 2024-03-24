@@ -51,9 +51,9 @@ public class MoonlightForge {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(MoonlightForge::configsLoaded);
         ModLootModifiers.register();
         ModLootConditions.register();
+
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init();
-            MoonlightClient.initClient();
         }
     }
 

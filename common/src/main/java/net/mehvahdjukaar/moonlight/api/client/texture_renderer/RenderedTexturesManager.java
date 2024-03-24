@@ -129,7 +129,7 @@ public class RenderedTexturesManager {
 
     public static void drawTexture(FrameBufferBackedDynamicTexture tex, ResourceLocation texture) {
         RenderedTexturesManager.drawAsInGUI(tex, s -> {
-            RenderSystem.setShaderTexture(0, MapDecorationClientManager.LOCATION_MAP_MARKERS);
+            RenderSystem.setShaderTexture(0, texture);
             var matrix = s.last().pose();
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);

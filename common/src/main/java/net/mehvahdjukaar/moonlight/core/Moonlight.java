@@ -72,6 +72,11 @@ public class Moonlight {
         BlockSetAPI.addDynamicRegistration((reg, wood) -> AdditionalItemPlacementsAPI.afterItemReg(),
                 WoodType.class, BuiltInRegistries.BLOCK_ENTITY_TYPE);
 
+        //client init
+        if (PlatHelper.getPhysicalSide().isClient()) {
+            MoonlightClient.initClient();
+        }
+
     }
     //TODO: refactor respriter and palette to better acocunt for animated stuff
 
