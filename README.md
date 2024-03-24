@@ -20,3 +20,12 @@ All the classes in the api package have some javadocs explaining their use
 
 Additionally the repo includes many example classes that explain in detaul all the most important features of the mod
 [Examples Here](https://github.com/MehVahdJukaar/Moonlight/tree/1.20/common/src/example/java)
+
+
+The mod also adds 3 datapack registry systems. These by nature are mostly meant to use via datapack so we cant have many javadocs.
+These are
+- Soft fluid
+- Custom Map markers
+- Custom Villager Trades
+
+You can find additional documentation on Supplementaries wiki here https://github.com/MehVahdJukaar/Supplementaries/wiki/Customization#custom-villager-trades
