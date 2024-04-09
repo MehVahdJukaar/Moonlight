@@ -74,6 +74,11 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("gardens_of_the_dead",
                 "whistlecane", "whistlecane_block", "whistlecane"));
 
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("dawnoftimebuilder",
+                "waxed_oak", "waxed_oak_log_stripped", "waxed_oak_planks"));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("dawnoftimebuilder",
+                "charred_spruce", "charred_spruce_log_stripped", "charred_spruce_planks"));
+
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "habitat", "fairy_ring_mushroom", "fairy_ring_mushroom_planks", "enhanced_fairy_ring_mushroom_stem"));
