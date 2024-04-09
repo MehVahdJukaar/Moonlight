@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
@@ -18,10 +17,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
-import java.io.IOException;
 import java.nio.file.Path;
-
-import static org.lwjgl.opengl.GL14.GL_GENERATE_MIPMAP;
 
 @Mixin(DynamicTexture.class)
 public abstract class DynamicTextureMixin extends AbstractTexture implements Dumpable {

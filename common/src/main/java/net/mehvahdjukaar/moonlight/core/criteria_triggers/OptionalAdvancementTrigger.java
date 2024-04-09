@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.criteria_triggers;
 
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;

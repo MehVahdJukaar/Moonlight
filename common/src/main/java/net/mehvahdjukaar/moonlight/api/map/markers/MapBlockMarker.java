@@ -1,10 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map.markers;
 
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
-import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

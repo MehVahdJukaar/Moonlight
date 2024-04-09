@@ -2,11 +2,8 @@ package net.mehvahdjukaar.moonlight.core.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.IRecipeTemplate;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;

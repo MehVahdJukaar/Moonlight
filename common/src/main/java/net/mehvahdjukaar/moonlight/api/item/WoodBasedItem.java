@@ -2,9 +2,6 @@ package net.mehvahdjukaar.moonlight.api.item;
 
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeType;
-import org.jetbrains.annotations.Nullable;
 
 public class WoodBasedItem extends BlockTypeBasedItem<WoodType> {
 

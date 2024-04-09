@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe;
 
 import com.google.gson.JsonObject;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.block.MimicBlockTile;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.recipe.ShapedRecipeTemplate;
 import net.mehvahdjukaar.moonlight.core.recipe.ShapelessRecipeTemplate;

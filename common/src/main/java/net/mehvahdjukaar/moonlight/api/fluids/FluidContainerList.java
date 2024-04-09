@@ -3,15 +3,15 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;

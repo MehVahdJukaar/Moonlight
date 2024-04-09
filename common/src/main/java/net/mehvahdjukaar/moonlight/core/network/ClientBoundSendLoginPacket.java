@@ -4,7 +4,6 @@ package net.mehvahdjukaar.moonlight.core.network;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
-import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.minecraft.network.FriendlyByteBuf;
 

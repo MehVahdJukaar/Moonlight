@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.misc;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;

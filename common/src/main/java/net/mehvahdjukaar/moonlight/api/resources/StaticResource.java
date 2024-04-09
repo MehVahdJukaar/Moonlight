@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -10,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.NoSuchElementException;
 
 /**

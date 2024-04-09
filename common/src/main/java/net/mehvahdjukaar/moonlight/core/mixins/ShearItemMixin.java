@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;

@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
-import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

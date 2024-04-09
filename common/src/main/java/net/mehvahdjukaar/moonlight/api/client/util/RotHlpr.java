@@ -4,8 +4,10 @@ import com.google.common.base.Functions;
 import com.google.common.collect.Maps;
 import com.mojang.math.Axis;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
-import org.joml.*;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.Arrays;
 import java.util.Map;

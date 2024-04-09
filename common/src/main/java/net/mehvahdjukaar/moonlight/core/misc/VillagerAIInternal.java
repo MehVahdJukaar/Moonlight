@@ -5,7 +5,6 @@ import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.npc.AbstractVillager;

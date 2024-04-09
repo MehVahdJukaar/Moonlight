@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
-import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;

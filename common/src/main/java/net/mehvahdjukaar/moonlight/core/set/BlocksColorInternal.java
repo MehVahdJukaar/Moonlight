@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.core.set;
 import com.google.common.base.Stopwatch;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -18,7 +17,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class BlocksColorInternal {
-    public static final List<DyeColor> VANILLA_COLORS = List.of(Arrays.copyOfRange(DyeColor.values(), 0, 16));
+    public static final List<DyeColor> VANILLA_COLORS = List.of(DyeColor.WHITE,
+            DyeColor.ORANGE, DyeColor.MAGENTA, DyeColor.LIGHT_BLUE, DyeColor.YELLOW, DyeColor.LIME, DyeColor.PINK, DyeColor.GRAY,
+            DyeColor.LIGHT_GRAY, DyeColor.CYAN, DyeColor.PURPLE, DyeColor.BLUE, DyeColor.BROWN, DyeColor.GREEN, DyeColor.RED, DyeColor.BLACK);
     public static final List<DyeColor> MODDED_COLORS = List.of(Arrays.stream(DyeColor.values()).filter(v -> !VANILLA_COLORS.contains(v)).toArray(DyeColor[]::new));
 
     private static final Map<String, ColoredSet<Block>> BLOCK_COLOR_SETS = new HashMap<>();
@@ -226,17 +227,19 @@ public class BlocksColorInternal {
             this.id = id;
 
             //fill optional
-            //only supports tinted mod
+            List<String> newColorMods = List.of("tinted", "dye_depot", "dyenamics");
             colors:
             for (var c : MODDED_COLORS) {
                 String namespace = id.getNamespace();
                 String path = id.getPath();
-                String mod = "tinted";
-                for (var s : new String[]{namespace + ":" + path + "_%s", namespace + ":%s_" + path, mod + ":" + path + "_%s", mod + ":%s_" + path}) {
-                    var o = registry.getOptional(new ResourceLocation(String.format(s, c.getName())));
-                    if (o.isPresent()) {
-                        colorsToObj.put(c, o.get());
-                        continue colors;
+
+                for(var mod : newColorMods) {
+                    for (var s : new String[]{namespace + ":" + path + "_%s", namespace + ":%s_" + path, mod + ":" + path + "_%s", mod + ":%s_" + path}) {
+                        var o = registry.getOptional(new ResourceLocation(String.format(s, c.getName())));
+                        if (o.isPresent()) {
+                            colorsToObj.put(c, o.get());
+                            continue colors;
+                        }
                     }
                 }
             }

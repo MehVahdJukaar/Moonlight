@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.item;
 import com.google.common.base.Suppliers;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
-import net.minecraft.world.item.CreativeModeTab;
 
 import java.util.function.Supplier;
 

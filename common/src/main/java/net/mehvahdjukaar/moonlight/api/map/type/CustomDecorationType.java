@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.map.type;
 
-import com.mojang.datafixers.types.Func;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;

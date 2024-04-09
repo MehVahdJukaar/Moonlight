@@ -1,19 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.item.additional_placements;
 
-import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 /**
  * Something called by mixin which should place or alter a block when clicked on

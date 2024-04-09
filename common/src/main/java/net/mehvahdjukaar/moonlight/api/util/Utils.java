@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;

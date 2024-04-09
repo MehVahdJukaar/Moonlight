@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 
 public class BuiltInSoftFluids {
 

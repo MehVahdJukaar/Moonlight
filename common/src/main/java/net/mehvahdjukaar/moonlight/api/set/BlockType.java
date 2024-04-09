@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;

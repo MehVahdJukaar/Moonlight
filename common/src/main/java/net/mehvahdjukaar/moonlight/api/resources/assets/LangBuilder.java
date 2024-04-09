@@ -2,10 +2,9 @@ package net.mehvahdjukaar.moonlight.api.resources.assets;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.api.client.util.TextUtil;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;

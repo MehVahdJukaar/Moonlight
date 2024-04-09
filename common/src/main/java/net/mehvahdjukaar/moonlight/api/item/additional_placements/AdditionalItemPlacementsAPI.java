@@ -110,7 +110,8 @@ public class AdditionalItemPlacementsAPI {
                         ((IExtendedItem) i).moonlight$addAdditionalBehavior(placement);
                         if (!map.containsKey(b)) map.put(b, i);
                     } else {
-                        throw new AssertionError("Attempted to register an Additional behavior to invalid blocks or items: " + b + ", " + i);
+                        throw new AssertionError("Attempted to register an Additional behavior to invalid blocks "+  b + " with item " + i+
+                                "This means that a you eiter attempted to register an additional placement for a block without an item or that the Block returned a null item");
                     }
                 }
             }

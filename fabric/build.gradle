@@ -38,6 +38,7 @@ dependencies {
     }
 
     modCompileOnly("curse.maven:yacl-667299:4523734")
+    modImplementation("curse.maven:super-better-grass-911433:4744836")
     modCompileOnly("curse.maven:map-atlases-436298:5018173")
     //modImplementation ("curse.maven:supplementaries-412082:4987505")
    // modRuntimeOnly("net.mehvahdjukaar:supplementaries-fabric:1.20-2.7.17")

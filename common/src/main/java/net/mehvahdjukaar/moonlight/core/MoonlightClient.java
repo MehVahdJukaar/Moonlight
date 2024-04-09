@@ -114,8 +114,8 @@ public class MoonlightClient {
                 float z = -0.6f;
                 Lighting.DIFFUSE_LIGHT_0 = new Vector3f(x, y, z).normalize();
                 Lighting.DIFFUSE_LIGHT_1 = new Vector3f(-x, y, -z).normalize();
-                Lighting.NETHER_DIFFUSE_LIGHT_0 =Lighting.DIFFUSE_LIGHT_0;
-                Lighting.NETHER_DIFFUSE_LIGHT_1 =Lighting.DIFFUSE_LIGHT_1;
+                Lighting.NETHER_DIFFUSE_LIGHT_0 = Lighting.DIFFUSE_LIGHT_0;
+                Lighting.NETHER_DIFFUSE_LIGHT_1 = Lighting.DIFFUSE_LIGHT_1;
 
                 dynamicPack.addBytes(new ResourceLocation("shaders/include/light.glsl"),
                         ("""

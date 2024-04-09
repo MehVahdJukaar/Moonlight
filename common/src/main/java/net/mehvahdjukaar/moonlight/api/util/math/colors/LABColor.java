@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
-import net.minecraft.util.Mth;
-
 public class LABColor extends BaseColor<LABColor> {
 
     public LABColor(float l, float a, float b, float alpha) {

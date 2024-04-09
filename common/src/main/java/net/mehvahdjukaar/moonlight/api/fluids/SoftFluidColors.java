@@ -49,7 +49,7 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
                 TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
                 TextureAtlasSprite sprite = textureMap.getSprite(location);
                 try {
-                    averageColor = getColorFrom(sprite, tint);
+                    averageColor = getAverageColor(sprite, tint);
                 } catch (Exception e) {
                     Moonlight.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
                 }
@@ -60,7 +60,7 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
 
     //credits to Random832
     @SuppressWarnings("ConstantConditions")
-    private int getColorFrom(TextureAtlasSprite sprite, int tint) {
+    private int getAverageColor(TextureAtlasSprite sprite, int tint) {
         var c = sprite.contents();
         if (sprite == null || c.getFrameCount() == 0) return -1;
 

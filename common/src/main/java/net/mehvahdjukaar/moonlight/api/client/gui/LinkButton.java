@@ -10,7 +10,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import org.w3c.dom.Text;
 
 import java.util.Calendar;
 
