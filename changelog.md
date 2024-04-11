@@ -1,1 +1,2 @@
-added an optional fix that fixes entity renderer shading to be precisely the same that block use. Now BER and baked model renderer stuff will look identical shading wise. Works with any mod as it just changes the include shaders and Lighting parameters
+fixed an issue with fluid tanks allowing more than their capacity
+added some integration with potion fluid from other mods

@@ -192,9 +192,8 @@ public class SoftFluidTank {
      * Main method called when checking if fluid can be added to this or not
      */
     public boolean canAddSoftFluid(SoftFluidStack fluidStack) {
-        if (this.isEmpty()) return true;
-        if (!this.fluidStack.isFluidEqual(fluidStack)) return false;
-        return this.getSpace() >= fluidStack.getCount();
+        if (this.getSpace() < fluidStack.getCount()) return false;
+        return this.fluidStack.isFluidEqual(fluidStack) || this.isEmpty();
     }
 
     /**
