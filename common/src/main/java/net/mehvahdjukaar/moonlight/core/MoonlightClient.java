@@ -92,44 +92,36 @@ public class MoonlightClient {
             return true;
         }
 
-        private Vector3f oldL0 = null;
-        private Vector3f oldL1 = null;
-
-        private Vector3f oldL0n = null;
-        private Vector3f oldL1n = null;
 
 
         @Override
         public void regenerateDynamicAssets(ResourceManager manager) {
-            if (ClientConfigs.FIX_SHADE.get()) {
-                if (oldL0 == null) {
-                    oldL0 = Lighting.DIFFUSE_LIGHT_0;
-                    oldL1 = Lighting.DIFFUSE_LIGHT_1;
-                    oldL0n = Lighting.NETHER_DIFFUSE_LIGHT_0;
-                    oldL1n = Lighting.NETHER_DIFFUSE_LIGHT_1;
-                }
-                // such neat numbers. These give exactly the same shade that block use (1, 0.8, 0.6, 0.5)
-                float x = 0.2f;
-                float y = 7 / 9f;
-                float z = -0.6f;
-                Lighting.DIFFUSE_LIGHT_0 = new Vector3f(x, y, z).normalize();
-                Lighting.DIFFUSE_LIGHT_1 = new Vector3f(-x, y, -z).normalize();
-                Lighting.NETHER_DIFFUSE_LIGHT_0 = Lighting.DIFFUSE_LIGHT_0;
-                Lighting.NETHER_DIFFUSE_LIGHT_1 = Lighting.DIFFUSE_LIGHT_1;
+            fixShade = ClientConfigs.FIX_SHADE.get();
+            revertFixedShade();
+            if (fixShade != ClientConfigs.ShadeFix.FALSE) {
+                applyFixedShade();
 
                 dynamicPack.addBytes(new ResourceLocation("shaders/include/light.glsl"),
                         ("""
                                 #version 150
 
-                                #define MINECRAFT_LIGHT_POWER   (0.5)
-                                #define MINECRAFT_AMBIENT_LIGHT (0.5)
+                                #define MINECRAFT_LIGHT_POWER   (0.6)
+                                #define MINECRAFT_LIGHT_POWER_FIXED   (0.5)
+                                #define MINECRAFT_AMBIENT_LIGHT (0.4)
+                                #define MINECRAFT_AMBIENT_LIGHT_FIXED (0.5)
 
                                 vec4 minecraft_mix_light(vec3 lightDir0, vec3 lightDir1, vec3 normal, vec4 color) {
                                     lightDir0 = normalize(lightDir0);
                                     lightDir1 = normalize(lightDir1);
                                     float light0 = max(0.0, dot(lightDir0, normal));
                                     float light1 = max(0.0, dot(lightDir1, normal));
-                                    float lightAccum = min(1.0, (light0 + light1) * MINECRAFT_LIGHT_POWER + MINECRAFT_AMBIENT_LIGHT);
+                                    
+                                    float dotP = dot(lightDir0, lightDir1);
+                                    bool isFixed = dotP > 0.20 && dotP < 0.205;
+                                    float lightPow = isFixed ? MINECRAFT_LIGHT_POWER_FIXED : MINECRAFT_LIGHT_POWER;
+                                    float ambientLight = isFixed ? MINECRAFT_AMBIENT_LIGHT_FIXED : MINECRAFT_AMBIENT_LIGHT;
+                                    
+                                    float lightAccum = min(1.0, (light0 + light1) * lightPow + ambientLight);
                                     return vec4(color.rgb * lightAccum, color.a);
                                 }
 
@@ -138,17 +130,60 @@ public class MoonlightClient {
                                 }""").getBytes()
 
                         , ResType.GENERIC);
-            } else if (oldL0 != null) {
-                Lighting.DIFFUSE_LIGHT_0 = oldL0;
-                Lighting.DIFFUSE_LIGHT_1 = oldL1;
-                Lighting.NETHER_DIFFUSE_LIGHT_0 = oldL0n;
-                Lighting.NETHER_DIFFUSE_LIGHT_1 = oldL1n;
-                oldL0 = null;
-                oldL1 = null;
-                oldL0n = null;
-                oldL1n = null;
             }
         }
     }
+
+    private static ClientConfigs.ShadeFix fixShade = ClientConfigs.ShadeFix.FALSE;
+
+    public static void beforeRenderGui() {
+        if (fixShade == ClientConfigs.ShadeFix.WORLD_ONLY) {
+            revertFixedShade();
+        }
+    }
+
+    public static void afterRenderGui() {
+        if (fixShade == ClientConfigs.ShadeFix.WORLD_ONLY) {
+            applyFixedShade();
+        }
+    }
+
+    private static void revertFixedShade() {
+        if(oldL0 != null) {
+            Lighting.DIFFUSE_LIGHT_0 = oldL0;
+            Lighting.DIFFUSE_LIGHT_1 = oldL1;
+            Lighting.NETHER_DIFFUSE_LIGHT_0 = oldL0n;
+            Lighting.NETHER_DIFFUSE_LIGHT_1 = oldL1n;
+            oldL0 = null;
+            oldL1 = null;
+            oldL0n = null;
+            oldL1n = null;
+        }
+    }
+
+    private static void applyFixedShade() {
+        if (oldL0 == null) {
+            oldL0 = Lighting.DIFFUSE_LIGHT_0;
+            oldL1 = Lighting.DIFFUSE_LIGHT_1;
+            oldL0n = Lighting.NETHER_DIFFUSE_LIGHT_0;
+            oldL1n = Lighting.NETHER_DIFFUSE_LIGHT_1;
+        }
+        Lighting.DIFFUSE_LIGHT_0 = NEW_L_0;
+        Lighting.DIFFUSE_LIGHT_1 = NEW_L_1;
+        Lighting.NETHER_DIFFUSE_LIGHT_0 = NEW_L_0;
+        Lighting.NETHER_DIFFUSE_LIGHT_1 = NEW_L_1;
+    }
+
+
+    private static Vector3f oldL0 = null;
+    private static Vector3f oldL1 = null;
+
+    private static Vector3f oldL0n = null;
+    private static Vector3f oldL1n = null;
+
+    // such neat numbers. These give exactly the same shade that block use (1, 0.8, 0.6, 0.5)
+    private static final Vector3f NEW_L_0 = new Vector3f(0.2f, 7 / 9f, -0.6f).normalize();
+    private static final Vector3f NEW_L_1 = new Vector3f(-0.2f, 7 / 9f, 0.6f).normalize();
+
 
 }

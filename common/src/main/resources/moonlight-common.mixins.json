@@ -7,6 +7,7 @@
     "ClientLanguagesMixin",
     "ClientPacketListenerMixin",
     "DynamicTextureMixin",
+    "GameRendererMixin",
     "ItemInHandRendererMixin",
     "MapInstanceMixin",
     "MapRendererMixin",
@@ -38,6 +39,8 @@
   ],
   "injectors": {
     "defaultRequire": 1,
-    "injectionPoints": ["net.mehvahdjukaar.moonlight.api.misc.InvokeUnrestricted"]
+    "injectionPoints": [
+      "net.mehvahdjukaar.moonlight.api.misc.InvokeUnrestricted"
+    ]
   }
 }
