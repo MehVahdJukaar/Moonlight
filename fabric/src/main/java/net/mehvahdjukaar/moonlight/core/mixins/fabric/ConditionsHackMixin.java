@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
@@ -32,7 +33,6 @@ public abstract class ConditionsHackMixin {
             while (it.hasNext()) {
                 Map.Entry<ResourceLocation, JsonElement> entry = it.next();
                 JsonElement resourceData = entry.getValue();
-
                 if (resourceData.isJsonObject()) {
                     JsonObject obj = resourceData.getAsJsonObject();
                     if (!ResourceConditionsBridge.matchesForgeCondition(obj)) {

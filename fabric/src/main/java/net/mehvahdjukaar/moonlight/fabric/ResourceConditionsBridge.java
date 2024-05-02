@@ -29,8 +29,13 @@ public class ResourceConditionsBridge {
         try {
             ResourceConditions.register(new ResourceLocation("forge:not"), ResourceConditionsBridge::forgeNot);
         } catch (Exception ignored) {
-
         }
+
+        try {
+            ResourceConditions.register(new ResourceLocation("forge:or"), ResourceConditionsBridge::forgeOr);
+        } catch (Exception ignored) {
+        }
+
         try {
             ResourceConditions.register(new ResourceLocation("forge:and"), ResourceConditionsBridge::forgeAnd);
         } catch (Exception ignored) {
@@ -55,6 +60,11 @@ public class ResourceConditionsBridge {
     private static boolean forgeAnd(JsonObject jsonObject) {
         JsonArray jo = GsonHelper.getAsJsonArray(jsonObject, "values");
         return conditionsMatch(jo, true);
+    }
+
+    private static boolean forgeOr(JsonObject jsonObject) {
+          JsonArray jo = GsonHelper.getAsJsonArray(jsonObject, "values");
+          return conditionsMatch(jo, false);
     }
 
     private static boolean forgeModLoaded(JsonObject jsonObject) {

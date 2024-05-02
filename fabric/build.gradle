@@ -45,6 +45,10 @@ dependencies {
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-item:${project.cca_version}"
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
+    modRuntimeOnly("curse.maven:gardens-of-the-dead-683174:4784268")
+    modRuntimeOnly("curse.maven:architectury-api-419699:5137936")
+    modRuntimeOnly("curse.maven:terrablender-fabric-565956:5068219")
+    modRuntimeOnly("curse.maven:forge-config-api-port-fabric-547434:4583000")
 
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixin_extras_version}")))
     annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'

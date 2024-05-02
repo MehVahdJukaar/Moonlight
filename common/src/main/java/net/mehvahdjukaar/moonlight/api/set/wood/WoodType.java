@@ -20,9 +20,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class WoodType extends BlockType {
@@ -89,19 +87,22 @@ public class WoodType extends BlockType {
         String logN = Utils.getID(this.log).getPath();
 
         // SUPPORT: TFC & AFC
+        String path = id.getPath();
+        String namespace = id.getNamespace();
         if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
             var o = BuiltInRegistries.BLOCK.getOptional(
-                    new ResourceLocation(id.getNamespace(),
-                            "wood/" + prefix_ + postfix + "/" + id.getPath()));
+                    new ResourceLocation(namespace,
+                            "wood/" + prefix_ + postfix + "/" + path));
             if (o.isPresent()) return o.get();
         }
 
-        ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), logN + "_" + prefix_ + postfix),
-                new ResourceLocation(id.getNamespace(), prefix_ + logN + "_" + postfix),
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + prefix_ + postfix),
-                new ResourceLocation(id.getNamespace(), prefix_ + id.getPath() + "_" + postfix)
-        };
+        Set<ResourceLocation> targets = new HashSet<>();
+        Collections.addAll(targets,
+                new ResourceLocation(namespace, path + "_" + prefix_ + postfix),
+                new ResourceLocation(namespace, prefix_ + path + "_" + postfix),
+                new ResourceLocation(namespace, logN + "_" + prefix_ + postfix),
+                new ResourceLocation(namespace, prefix_ + logN + "_" + postfix)
+        );
         Block found = null;
         for (var r : targets) {
             if (BuiltInRegistries.BLOCK.containsKey(r)) {
