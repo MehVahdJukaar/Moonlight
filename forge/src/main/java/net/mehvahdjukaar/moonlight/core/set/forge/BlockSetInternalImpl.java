@@ -34,16 +34,6 @@ public class BlockSetInternalImpl {
 
     private static boolean hasFilledBlockSets = false;
 
-    static {
-        //if loaded registers post item init
-        Consumer<RegisterEvent> eventConsumer = e -> {
-            if (e.getRegistryKey().equals(ForgeRegistries.ENCHANTMENTS.getRegistryKey())) {
-                BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
-            }
-        };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
-    }
-
     //aaaa
     public static <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
@@ -118,24 +108,27 @@ public class BlockSetInternalImpl {
         }
 
         // fires right after items so we also have all modded items filled in (for EC)
-        if (!event.getRegistryKey().equals(ForgeRegistries.ENTITY_TYPES.getRegistryKey())) return;
-        //when the first registration function is called we find all block types
+        if (event.getRegistryKey().equals(ForgeRegistries.ENTITY_TYPES.getRegistryKey())) {
+            //when the first registration function is called we find all block types
 
-        if (!hasFilledBlockSets) {
-            BlockSetInternal.initializeBlockSets();
-            hasFilledBlockSets = true;
+            BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
+            // prob not needed
+            if (!hasFilledBlockSets) {
+                BlockSetInternal.initializeBlockSets();
+                hasFilledBlockSets = true;
+            }
+
+            //get the queue corresponding to this certain mod
+            String modId = ModLoadingContext.get().getActiveContainer().getModId();
+            var registrationQueues = LATE_REGISTRATION_QUEUE.get(modId);
+
+            if (registrationQueues != null) {
+                //register blocks
+                registrationQueues.forEach(Runnable::run);
+            }
+            //clears stuff that's been executed. not really needed but just to be safe its here
+            LATE_REGISTRATION_QUEUE.remove(modId);
         }
-
-        //get the queue corresponding to this certain mod
-        String modId = ModLoadingContext.get().getActiveContainer().getModId();
-        var registrationQueues = LATE_REGISTRATION_QUEUE.get(modId);
-
-        if (registrationQueues != null) {
-            //register blocks
-            registrationQueues.forEach(Runnable::run);
-        }
-        //clears stuff that's been executed. not really needed but just to be safe its here
-        LATE_REGISTRATION_QUEUE.remove(modId);
     }
 
     public static boolean hasFilledBlockSets() {
