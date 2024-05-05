@@ -12,6 +12,9 @@ mutable field net/minecraft/client/renderer/RenderStateShard setupState Ljava/la
 
 accessible method net/minecraft/world/entity/ai/village/poi/PoiTypes registerBlockStates (Lnet/minecraft/core/Holder;Ljava/util/Set;)V
 
+#render type
+transitive-accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
+
 #lighting
 accessible field com/mojang/blaze3d/platform/Lighting DIFFUSE_LIGHT_0 Lorg/joml/Vector3f;
 mutable field com/mojang/blaze3d/platform/Lighting DIFFUSE_LIGHT_0 Lorg/joml/Vector3f;

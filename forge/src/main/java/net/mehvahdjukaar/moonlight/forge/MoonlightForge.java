@@ -132,5 +132,10 @@ public class MoonlightForge {
         Moonlight.onPlayerCloned(event.getOriginal(), event.getEntity(), event.isWasDeath());
     }
 
+    @SubscribeEvent
+    public static void onLevelLoaded(LevelEvent.Load event) {
+        Moonlight.checkDatapackRegistry();
+    }
+
 }
 

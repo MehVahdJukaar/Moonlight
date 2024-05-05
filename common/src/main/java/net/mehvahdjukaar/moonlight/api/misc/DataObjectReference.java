@@ -52,6 +52,7 @@ public class DataObjectReference<T> implements Supplier<T> {
                 cache = reg.getHolderOrThrow(key);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get object from registry: " + key +
+                        ".\nCalled from " + Thread.currentThread() + ".\n"+
                         "Registry content was: " + reg.entrySet().stream().map(Map.Entry::getValue).toList(), e);
             }
         }

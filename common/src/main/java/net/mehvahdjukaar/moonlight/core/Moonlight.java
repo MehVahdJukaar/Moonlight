@@ -3,9 +3,11 @@ package net.mehvahdjukaar.moonlight.core;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
+import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
@@ -31,6 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -134,5 +137,16 @@ public class Moonlight {
         return d;
     }
 
+    public static void checkDatapackRegistry() {
+        try {
+            SoftFluidRegistry.getEmpty();
+            MapDataRegistry.getDefaultType();
+        } catch (Exception e) {
+            throw new RuntimeException("""
+                    Not all required entries were found in datapack registry. How did this happen?
+                    This MUST be some OTHER mod messing up datapack registries (currently Cyanide is known to cause this).
+                    Note that this could be caused by Paper or similar servers. Know that those are NOT meant to be used with mods""", e);
+        }
+    }
 
 }

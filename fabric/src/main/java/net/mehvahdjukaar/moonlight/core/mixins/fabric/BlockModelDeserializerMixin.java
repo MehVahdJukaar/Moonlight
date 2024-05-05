@@ -4,32 +4,29 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import net.fabricmc.fabric.mixin.client.indigo.renderer.BlockModelRendererMixin;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.MLFabricModelLoaderRegistry;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.lang.reflect.Type;
 
 @Mixin(BlockModel.Deserializer.class)
 public abstract class BlockModelDeserializerMixin {
 
-    //I dont remember why but head doesnt work
-    @Inject(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/client/renderer/block/model/BlockModel;",
-            at = @At("TAIL"), cancellable = true)
-    public void deserialize(JsonElement element, Type targetType, JsonDeserializationContext deserializationContext,
-                            CallbackInfoReturnable<BlockModel> cir) throws JsonParseException {
+    @ModifyReturnValue(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/client/renderer/block/model/BlockModel;",
+            at = @At("RETURN"))
+    public BlockModel deserialize(BlockModel original, JsonElement element, Type type, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonobject = element.getAsJsonObject();
         if (jsonobject.has("loader")) {
             ResourceLocation loader = new ResourceLocation(GsonHelper.getAsString(jsonobject, "loader"));
             BlockModel custom = MLFabricModelLoaderRegistry.getUnbakedModel(
-                    loader, deserializationContext, jsonobject, cir.getReturnValue());
-            if (custom != null) cir.setReturnValue(custom);
+                    loader, context, jsonobject, original);
+            if (custom != null) return custom;
         }
+        return original;
     }
 }
