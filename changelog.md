@@ -1,3 +1,2 @@
-added datapack sanity check because im tired of mods accidentally breaking them causing all sorts of issues down the line
-added some AW
-improved some mixins
+improved datapack check to only happen on server levels
+fixed piston move callback not being realiably called on clients

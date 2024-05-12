@@ -25,6 +25,10 @@ public class ModMessages {
 
             .register(NetworkDir.PLAY_TO_CLIENT,
                     ClientBoundSendLoginPacket.class, ClientBoundSendLoginPacket::new)
+
+            .register(NetworkDir.PLAY_TO_CLIENT,
+                    ClientBoundOnPistonMovedBlockPacket.class, ClientBoundOnPistonMovedBlockPacket::new)
+
             .build();
 
     public static void init() {

@@ -6,16 +6,16 @@
   "client": [
     "ItemMixin",
     "SelfCustomBakedModel",
-    "SelfExtraModelDataProvider",
     "SelfCustomModelLoaderMixin",
+    "SelfExtraModelDataProvider",
     "SelfModFluidRendererPropertiesMixin"
   ],
   "mixins": [
     "ConditionHackMixin",
     "FireBlockMixin",
-    "SelfModFlowingFluidMixin",
     "SelfEntitySpawnDataMixin",
-    "SelfItemDisplayTileMixin"
+    "SelfItemDisplayTileMixin",
+    "SelfModFlowingFluidMixin"
   ],
   "injectors": {
     "defaultRequire": 1

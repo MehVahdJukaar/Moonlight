@@ -3,6 +3,8 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import net.mehvahdjukaar.moonlight.api.block.IBlockHolder;
 import net.mehvahdjukaar.moonlight.api.block.IPistonMotionReact;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedPistonTile;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundOnPistonMovedBlockPacket;
+import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -50,7 +52,8 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
     @Shadow
     protected abstract float getExtendedProgress(float pProgress);
 
-    @Shadow private boolean extending;
+    @Shadow
+    private boolean extending;
 
     @Inject(method = "tick", at = @At("TAIL"))
     private static void whileMoving(Level pLevel, BlockPos pPos, BlockState pState, PistonMovingBlockEntity tile, CallbackInfo info) {
@@ -65,7 +68,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
             Block b = this.movedState.getBlock();
             if (b instanceof IPistonMotionReact mr && mr.ticksWhileMoved()) {
                 AABB aabb = this.moveByPositionAndProgress(pos, Shapes.block().bounds());
-                mr.moveTick(this.movedState, level, pos, aabb, (PistonMovingBlockEntity) (Object) this);
+                mr.moveTick(level, pos, this.movedState, aabb, (PistonMovingBlockEntity) (Object) this);
             }
         }
     }
@@ -79,17 +82,24 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
     @Inject(method = "finalTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;neighborChanged(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos;)V",
             shift = At.Shift.AFTER))
     public void onFinishedShortPulse(CallbackInfo ci) {
-        if (this.movedState.getBlock() instanceof IPistonMotionReact pr) {
-            pr.onMoved(this.movedState, this.level, this.worldPosition, this.direction, this.extending, (PistonMovingBlockEntity) (Object) this);
+        if (!level.isClientSide && this.movedState.getBlock() instanceof IPistonMotionReact pr) {
+            ModMessages.CHANNEL.sendToAllClientPlayersInDefaultRange(level, worldPosition,
+                    new ClientBoundOnPistonMovedBlockPacket(this.worldPosition, this.movedState, this.direction, this.extending));
+            pr.onMoved(this.level, this.worldPosition, this.movedState, this.direction, this.extending);
         }
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z",
             shift = At.Shift.AFTER), require = 2)
     private static void onFinishedMoving(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity, CallbackInfo ci) {
-        if (blockEntity.getMovedState().getBlock() instanceof IPistonMotionReact pr) {
-            pr.onMoved(blockEntity.getMovedState(), level, blockEntity.getBlockPos(), blockEntity.getDirection(), blockEntity.isExtending(),  blockEntity);
+        BlockState movedState = blockEntity.getMovedState();
+        if (!level.isClientSide && movedState.getBlock() instanceof IPistonMotionReact pr) {
+            ModMessages.CHANNEL.sendToAllClientPlayersInDefaultRange(level, pos,
+                    new ClientBoundOnPistonMovedBlockPacket(pos, movedState,
+                            blockEntity.getDirection(), blockEntity.isExtending()));
+            pr.onMoved(level, blockEntity.getBlockPos(), movedState, blockEntity.getDirection(), blockEntity.isExtending());
         }
+
     }
 
 }

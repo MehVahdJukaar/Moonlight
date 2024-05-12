@@ -163,8 +163,8 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     @Override
     public BakedQuadBuilder fromVanilla(BakedQuad quad) {
-        inner.fromVanilla(quad, RendererAccess.INSTANCE.getRenderer().materialFinder().find(), null);
-        return null;
+        inner.fromVanilla(quad, RendererAccess.INSTANCE.getRenderer().materialFinder().find(), quad.getDirection());
+        return this;
     }
 
     @Override

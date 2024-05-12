@@ -96,6 +96,10 @@ public abstract class ChannelHandler {
 
     public abstract void sendToAllClientPlayersInRange(Level level, BlockPos pos, double radius, Message message);
 
+    public void sendToAllClientPlayersInDefaultRange(Level level, BlockPos pos, Message message){
+        sendToAllClientPlayersInRange(level, pos, 64, message);
+    };
+
     public abstract void sentToAllClientPlayersTrackingEntity(Entity target, Message message);
 
     public abstract void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message);
