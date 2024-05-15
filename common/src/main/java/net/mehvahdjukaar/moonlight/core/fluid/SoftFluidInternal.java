@@ -32,7 +32,7 @@ public class SoftFluidInternal {
         fluidsMap.clear();
         for (var h : getHolders()) {
             var s = h.value();
-            if (PlatHelper.isModLoaded(s.getFromMod())) {
+            if (s.isEnabled()) {
                 s.getEquivalentFluids().forEach(f -> fluidsMap.put(f, h));
                 s.getContainerList().getPossibleFilled().forEach(i -> {
                     //don't associate water to potion bottle

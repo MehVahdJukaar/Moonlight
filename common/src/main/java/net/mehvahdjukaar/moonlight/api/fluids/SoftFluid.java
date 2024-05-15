@@ -32,10 +32,6 @@ import java.util.function.Function;
 @SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 public class SoftFluid {
 
-
-
-
-    private final String fromMod;
     private final String translationKey;
     private final List<Fluid> equivalentFluids;
     private final FluidContainerList containerList;
@@ -67,7 +63,6 @@ public class SoftFluid {
         this.emissivity = builder.emissivity;
         this.containerList = builder.containerList;
         this.food = builder.food;
-        this.fromMod = builder.fromMod;
         this.translationKey = builder.translationKey;
         this.NBTFromItem = builder.NBTFromItem;
 
@@ -113,8 +108,13 @@ public class SoftFluid {
         return translationKey;
     }
 
+    public boolean isEnabled() {
+        return !equivalentFluids.isEmpty() || !containerList.getPossibleFilled().isEmpty();
+    }
+
+    @Deprecated(forRemoval = true)
     public String getFromMod() {
-        return fromMod;
+        return "minecraft";
     }
 
     /**
@@ -572,7 +572,6 @@ public class SoftFluid {
     public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
             ResourceLocation.CODEC.fieldOf("flowing_texture").forGetter(SoftFluid::getFlowingTexture),
-            StrOpt.of(Codec.STRING, "from_mod").forGetter(getHackyOptional(SoftFluid::getFromMod)),
             StrOpt.of(Codec.STRING, "translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
             StrOpt.of(Codec.intRange(0, 15), "luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
             StrOpt.of(Codec.intRange(0, 15), "emissivity").forGetter(getHackyOptional(SoftFluid::getEmissivity)),
@@ -587,7 +586,7 @@ public class SoftFluid {
     ).apply(instance, SoftFluid::create));
 
 
-    protected static SoftFluid create(ResourceLocation still, ResourceLocation flowing, Optional<String> fromMod,
+    protected static SoftFluid create(ResourceLocation still, ResourceLocation flowing,
                                       Optional<String> translation, Optional<Integer> luminosity, Optional<Integer> emissivity,
                                       Optional<Integer> color, Optional<TintMethod> tint,
                                       Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
@@ -595,7 +594,6 @@ public class SoftFluid {
                                       Optional<ResourceLocation> textureFrom) {
 
         Builder builder = new Builder(still, flowing);
-        fromMod.ifPresent(builder::fromMod);
         translation.ifPresent(builder::translationKey);
         luminosity.ifPresent(builder::luminosity);
         emissivity.ifPresent(builder::emissivity);

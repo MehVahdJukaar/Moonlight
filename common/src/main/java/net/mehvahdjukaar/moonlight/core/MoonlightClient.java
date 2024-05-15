@@ -93,7 +93,6 @@ public class MoonlightClient {
         }
 
 
-
         @Override
         public void regenerateDynamicAssets(ResourceManager manager) {
             fixShade = ClientConfigs.FIX_SHADE.get();
@@ -137,13 +136,13 @@ public class MoonlightClient {
     private static ClientConfigs.ShadeFix fixShade = ClientConfigs.ShadeFix.FALSE;
 
     public static void beforeRenderGui() {
-        if (fixShade == ClientConfigs.ShadeFix.WORLD_ONLY) {
+        if (fixShade == ClientConfigs.ShadeFix.NO_GUI) {
             revertFixedShade();
         }
     }
 
     public static void afterRenderGui() {
-        if (fixShade == ClientConfigs.ShadeFix.WORLD_ONLY) {
+        if (fixShade == ClientConfigs.ShadeFix.NO_GUI) {
             applyFixedShade();
         }
     }

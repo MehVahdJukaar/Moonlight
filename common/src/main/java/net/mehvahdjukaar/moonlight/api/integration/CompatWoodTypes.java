@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.minecraft.resources.ResourceLocation;
+
 //place for all known weird hardcoded wood types from mods that aren't getting detected
 public class CompatWoodTypes {
 
@@ -12,7 +13,7 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus"),
                 new ResourceLocation("domum_ornamentum:green_cactus_extra"), new ResourceLocation("cactus")));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus_extra"),
-                    new ResourceLocation("domum_ornamentum:cactus_extra"), new ResourceLocation("cactus")));
+                new ResourceLocation("domum_ornamentum:cactus_extra"), new ResourceLocation("cactus")));
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "ars_nouveau", "archwood", "archwood_planks", "blue_archwood_log"));
@@ -46,6 +47,9 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "nethers_exoticism", "jabuticaba", "jaboticaba_planks", "jabuticaba_log"));
 
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
+                "mynethersdelight", "powdery", "powdery_planks", "block_of_powdery_cannon"
+        ));
 
         var verdant = WoodType.Finder.simple(
                 "nourished_end", "verdant", "verdant_planks", "verdant_stalk");

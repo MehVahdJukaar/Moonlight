@@ -28,8 +28,9 @@ public class ClientConfigs {
 
         FIX_SHADE = builder.comment("Fix minecraft entity shading to be exactly the same that blocks use. (1 for up,0.8 for north, 0.6 for west and 0.5 for down)." +
                         "This means that if you have a model and render it with a tile renderer or entity it will appear identical as one rendered via baked models." +
-                        "Using world only will prevent it from changing item rendered in GUIs, in case you dont like that look")
-                .define("fix_entity_renderer_shade", ShadeFix.WORLD_ONLY);
+                        "Using no gui will prevent it from changing item rendered in GUIs, in case you dont like that look." +
+                        "Note there is a known compat issue with Figura mod. Keep this True or False with that one")
+                .define("consistent_entity_renderer_shading", ShadeFix.NO_GUI);
         builder.pop();
         CONFIG = builder.buildAndRegister();
         CONFIG.loadFromFile();
@@ -40,7 +41,7 @@ public class ClientConfigs {
 
     public enum ShadeFix {
         FALSE,
-        WORLD_ONLY,
+        NO_GUI,
         TRUE;
 
     }

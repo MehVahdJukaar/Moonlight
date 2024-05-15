@@ -17,6 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -73,11 +74,11 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
         }
     }
 
+    @Unique
     private AABB moveByPositionAndProgress(BlockPos pos, AABB aabb) {
         double d0 = this.getExtendedProgress(this.progress);
         return aabb.move(pos.getX() + d0 * this.direction.getStepX(), pos.getY() + d0 * this.direction.getStepY(), pos.getZ() + d0 * this.direction.getStepZ());
     }
-
 
     @Inject(method = "finalTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;neighborChanged(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos;)V",
             shift = At.Shift.AFTER))
@@ -89,9 +90,22 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
         }
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z",
-            shift = At.Shift.AFTER), require = 2)
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;updateOrDestroy(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;I)V",
+            shift = At.Shift.AFTER), require = 1)
     private static void onFinishedMoving(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity, CallbackInfo ci) {
+        BlockState movedState = blockEntity.getMovedState();
+        if (!level.isClientSide && movedState.getBlock() instanceof IPistonMotionReact pr) {
+            ModMessages.CHANNEL.sendToAllClientPlayersInDefaultRange(level, pos,
+                    new ClientBoundOnPistonMovedBlockPacket(pos, movedState,
+                            blockEntity.getDirection(), blockEntity.isExtending()));
+            //calls on server here and client above
+            pr.onMoved(level, blockEntity.getBlockPos(), movedState, blockEntity.getDirection(), blockEntity.isExtending());
+        }
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;neighborChanged(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos;)V",
+            shift = At.Shift.AFTER), require = 1)
+    private static void onFinishedMoving2(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity, CallbackInfo ci) {
         BlockState movedState = blockEntity.getMovedState();
         if (!level.isClientSide && movedState.getBlock() instanceof IPistonMotionReact pr) {
             ModMessages.CHANNEL.sendToAllClientPlayersInDefaultRange(level, pos,
@@ -99,7 +113,6 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
                             blockEntity.getDirection(), blockEntity.isExtending()));
             pr.onMoved(level, blockEntity.getBlockPos(), movedState, blockEntity.getDirection(), blockEntity.isExtending());
         }
-
     }
 
 }

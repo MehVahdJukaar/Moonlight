@@ -1,2 +1,2 @@
-improved datapack check to only happen on server levels
-fixed piston move callback not being realiably called on clients
+added more harcoded wood types for some mods that didnt follow naming conventions
+fixed an issue with lightable interface

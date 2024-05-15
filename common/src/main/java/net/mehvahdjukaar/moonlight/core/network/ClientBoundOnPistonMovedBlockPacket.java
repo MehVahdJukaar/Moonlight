@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 
@@ -44,11 +43,11 @@ public class ClientBoundOnPistonMovedBlockPacket implements Message {
 
     @Override
     public void handle(ChannelHandler.Context context) {
-        handleOpenScreenPacket(this);
+        handlePacket(this);
     }
 
     @Environment(EnvType.CLIENT)
-    public static void handleOpenScreenPacket(ClientBoundOnPistonMovedBlockPacket message) {
+    public static void handlePacket(ClientBoundOnPistonMovedBlockPacket message) {
         var level = Minecraft.getInstance().level;
         if (level != null) {
             //Haaack. for some reason this gets received before the block there is actually set so we set it preeemptively
