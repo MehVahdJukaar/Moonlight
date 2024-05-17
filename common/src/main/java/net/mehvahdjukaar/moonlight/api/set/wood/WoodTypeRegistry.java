@@ -38,7 +38,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     //instance stuff
 
-    Map<net.minecraft.world.level.block.state.properties.WoodType, WoodType> fromVanilla = new IdentityHashMap<>();
+    private final Map<net.minecraft.world.level.block.state.properties.WoodType, WoodType> fromVanilla = new IdentityHashMap<>();
 
     public WoodTypeRegistry() {
         super(WoodType.class, "wood_type");
@@ -138,11 +138,6 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         return fromVanilla.get(woodType);
     }
 
-    void mapVanillaWood(WoodType woodType) {
-        var v = woodType.toVanilla();
-        if (v != null) fromVanilla.put(v, woodType);
-    }
-
     private static final List<net.minecraft.world.level.block.state.properties.WoodType> VANILLA_ORDER = List.of(
             net.minecraft.world.level.block.state.properties.WoodType.OAK,
             net.minecraft.world.level.block.state.properties.WoodType.SPRUCE,
@@ -159,6 +154,12 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     @Override
     protected void finalizeAndFreeze() {
+        //map vanilla
+        for (var w : builder) {
+            var vanilla = w.toVanilla();
+            if (vanilla != null) fromVanilla.put(vanilla, w);
+        }
+
         List<WoodType> temp = new ArrayList<>(builder);
         builder.clear();
         outer:

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
 
+import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
@@ -26,8 +27,11 @@ public class ClientBoundSendLoginPacket implements Message {
         try {
             //check on datapack registries on client
             SoftFluidRegistry.empty();
+            BuiltInSoftFluids.WATER.get();
         } catch (Exception e) {
-            throw new RuntimeException("Not all required entries were found in datapack registry. How did this happen?", e);
+            throw new IllegalStateException("Not all required entries were found in datapack registry. How did this happen?" +
+                    "This is NOT a Moonlight issue. Do not report there. This can only be caused by some other mod messing up mod added datapack registries."+
+                    "Crashing now to prevent inevitable random crashes in-game.", e);
         }
     }
 }

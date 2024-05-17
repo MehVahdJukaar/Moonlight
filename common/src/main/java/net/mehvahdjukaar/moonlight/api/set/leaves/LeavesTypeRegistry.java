@@ -50,9 +50,10 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         } else if (path.startsWith("leaves_")) {
             name = path.substring("leaves_".length());
         }
-        if (name != null && !baseRes.getNamespace().equals("securitycraft")) {
+        String namespace = baseRes.getNamespace();
+        if (name != null && !namespace.equals("securitycraft") && !path.contains("hanging")) {
             if (baseBlock instanceof LeavesBlock) {
-                ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
+                ResourceLocation id = new ResourceLocation(namespace, name);
                 return Optional.of(new LeavesType(id, baseBlock));
             }
         }

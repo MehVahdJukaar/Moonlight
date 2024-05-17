@@ -174,8 +174,6 @@ public class WoodType extends BlockType {
         this.addChild("wall_hanging_sign", this.findRelatedEntry("wall_hanging_sign", BuiltInRegistries.BLOCK));
         this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.BLOCK));
         this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK)); // TFC & AFC only
-
-        WoodTypeRegistry.INSTANCE.mapVanillaWood(this);
     }
 
     @Override

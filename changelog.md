@@ -1,2 +1,1 @@
-added more harcoded wood types for some mods that didnt follow naming conventions
-fixed an issue with lightable interface
+safety checks to prevent accidentally firing early reload when other mods would re create the vanilla resource manager very early
