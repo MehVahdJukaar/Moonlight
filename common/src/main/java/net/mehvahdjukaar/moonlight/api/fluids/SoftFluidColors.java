@@ -18,7 +18,6 @@ import net.minecraft.world.level.BlockAndTintGetter;
 // client class
 public class SoftFluidColors implements ResourceManagerReloadListener {
 
-
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
 
@@ -28,12 +27,10 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
         //also using for this
         TextureCache.clear();
 
-
-        refreshParticleColors(resourceManager);
+        refreshParticleColors();
     }
 
-    //TODO: possibly do it for ALL fluids, not only non grayscale ones
-    private void refreshParticleColors(ResourceManager resourceManager) {
+    public static void refreshParticleColors() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
         var fluids = SoftFluidRegistry.getRegistry(mc.level.registryAccess()).entrySet();
@@ -43,16 +40,14 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
             ResourceLocation location = fluid.getStillTexture();
             int averageColor = -1;
 
-            if (location == null) {
-                int tint = fluid.getTintMethod().appliesToStill() ? fluid.getTintColor() : -1;
+            int tint = fluid.getTintMethod().appliesToStill() ? fluid.getTintColor() : -1;
 
-                TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
-                TextureAtlasSprite sprite = textureMap.getSprite(location);
-                try {
-                    averageColor = getAverageColor(sprite, tint);
-                } catch (Exception e) {
-                    Moonlight.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
-                }
+            TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
+            TextureAtlasSprite sprite = textureMap.getSprite(location);
+            try {
+                averageColor = getAverageColor(sprite, tint);
+            } catch (Exception e) {
+                Moonlight.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
             }
             fluid.averageTextureTint = averageColor;
         }
@@ -60,7 +55,7 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
 
     //credits to Random832
     @SuppressWarnings("ConstantConditions")
-    private int getAverageColor(TextureAtlasSprite sprite, int tint) {
+    private static int getAverageColor(TextureAtlasSprite sprite, int tint) {
         var c = sprite.contents();
         if (sprite == null || c.getFrameCount() == 0) return -1;
 

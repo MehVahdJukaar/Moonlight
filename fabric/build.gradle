@@ -49,6 +49,10 @@ dependencies {
     modRuntimeOnly("curse.maven:architectury-api-419699:5137936")
     modRuntimeOnly("curse.maven:terrablender-fabric-565956:5068219")
     modRuntimeOnly("curse.maven:forge-config-api-port-fabric-547434:4583000")
+    //modImplementation("curse.maven:the-bumblezone-fabric-363949:5332804")
+   // modImplementation("curse.maven:midnightlib-488090:4576371")
+   // modImplementation("curse.maven:athena-841890:4764358")
+
 
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixin_extras_version}")))
     annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
@@ -81,7 +85,7 @@ remapJar {
     injectAccessWidener = true
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
+    archiveClassifier = null
     archiveClassifier = 'fabric'
 }
 

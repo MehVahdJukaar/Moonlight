@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.fluid;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundFinalizeFluidsMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
@@ -55,6 +56,7 @@ public class SoftFluidInternal {
     public static void postInitClient() {
         populateSlaveMaps();
         //ok so here the extra registered fluids should have already been sent to the client
+        SoftFluidColors.refreshParticleColors();
     }
 
     public static void onDataSyncToPlayer(ServerPlayer player, boolean isJoined) {

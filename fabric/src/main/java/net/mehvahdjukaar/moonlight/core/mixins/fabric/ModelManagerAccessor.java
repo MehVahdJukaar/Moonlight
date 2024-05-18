@@ -12,5 +12,5 @@ import java.util.Map;
 public interface ModelManagerAccessor {
 
     @Accessor("bakedRegistry")
-    public Map<ResourceLocation, BakedModel> getBakedRegistry();
+    Map<ResourceLocation, BakedModel> getBakedRegistry();
 }

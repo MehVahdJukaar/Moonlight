@@ -1,1 +1,3 @@
-safety checks to prevent accidentally firing early reload when other mods would re create the vanilla resource manager very early
+-fixed an issue with fluid textures on fabric
+-fixed fluid particle colors not being generated properly
+-improved fluid tank api

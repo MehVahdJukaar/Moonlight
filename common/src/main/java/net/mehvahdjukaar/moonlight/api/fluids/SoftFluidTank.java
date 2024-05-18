@@ -100,20 +100,18 @@ public class SoftFluidTank {
      * @return empty container item, PASS if it failed
      */
     public InteractionResultHolder<ItemStack> drainItem(ItemStack filledContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
-
         var extracted = SoftFluidStack.fromItem(filledContainer);
+        if (extracted == null) return InteractionResultHolder.pass(ItemStack.EMPTY);
+        SoftFluidStack fluidStack = extracted.getFirst();
 
-        if (extracted != null && this.canAddSoftFluid(extracted.getFirst())) {
-            SoftFluidStack fluidStack = extracted.getFirst();
+        //if it can add all of it
+        if (addFluid(fluidStack, true) == fluidStack.getCount()) {
             FluidContainerList.Category category = extracted.getSecond();
 
             ItemStack emptyContainer = category.getEmptyContainer().getDefaultInstance();
             if (!simulate) {
 
-                //set new fluid if empty
-                if (this.isEmpty()) {
-                    this.setFluid(fluidStack);
-                } else addFluidOntoExisting(fluidStack);
+                addFluid(fluidStack, false);
 
                 SoundEvent sound = category.getEmptySound();
                 if (sound != null && pos != null) {
@@ -123,6 +121,7 @@ public class SoftFluidTank {
             return InteractionResultHolder.sidedSuccess(emptyContainer, level.isClientSide);
         }
         return InteractionResultHolder.pass(ItemStack.EMPTY);
+
     }
 
 
@@ -190,41 +189,81 @@ public class SoftFluidTank {
 
     /**
      * Main method called when checking if fluid can be added to this or not
+     * Does check for size. Will not accept stacks too big even if some could be added
      */
+    @Deprecated(forRemoval = true)
     public boolean canAddSoftFluid(SoftFluidStack fluidStack) {
         if (this.getSpace() < fluidStack.getCount()) return false;
-        return this.fluidStack.isFluidEqual(fluidStack) || this.isEmpty();
+        return isFluidCompatible(fluidStack);
     }
 
     /**
-     * try adding provided soft fluid to the tank
-     *
-     * @return success
+     * Check if fluid TYPE is compatible with content. Does not care about count
      */
+    public boolean isFluidCompatible(SoftFluidStack fluidStack) {
+        return this.fluidStack.isFluidEqual(fluidStack) || this.isEmpty();
+    }
+
+    @Deprecated(forRemoval = true)
     public boolean addFluid(SoftFluidStack stack) {
-        if (this.canAddSoftFluid(stack)) {
-            if (this.isEmpty()) {
-                this.setFluid(stack);
-            } else {
-                addFluidOntoExisting(stack);
-            }
-            return true;
+        return addFluid(stack, false) == stack.getCount();
+    }
+
+    /**
+     * Like addFluid but can add only a part of the stack
+     *
+     * @return amount of fluid added. Given stack WILL be modified by subtracting that amount
+     */
+    public int addFluid(SoftFluidStack stack, boolean simulate) {
+        if (!isFluidCompatible(stack)) return 0;
+        int space = this.getSpace();
+        if (space == 0) return 0;
+
+        int amount = Math.min(space, stack.getCount());
+
+        if (simulate) return amount;
+
+        var toAdd = stack.split(amount);
+        if (this.isEmpty()) {
+            this.setFluid(toAdd);
+        } else {
+            this.addFluidOntoExisting(toAdd);
         }
-        return false;
+        return amount;
+    }
+
+    /**
+     * removes fluid from the tank
+     *
+     * @param amount   amount to remove
+     * @param simulate if true, it will not actually remove the fluid
+     * @return removed fluid
+     */
+    public SoftFluidStack removeFluid(int amount, boolean simulate) {
+        if (this.isEmpty()) return SoftFluidStack.empty();
+        int toRemove = Math.min(amount, this.fluidStack.getCount());
+        SoftFluidStack stack = this.fluidStack.copyWithCount(toRemove);
+        if (!simulate) {
+            this.fluidStack.shrink(toRemove);
+        }
+        return stack;
     }
 
     /**
      * Transfers between 2 soft fluid tanks
      */
+    @Deprecated(forRemoval = true)
     public boolean transferFluid(SoftFluidTank destination) {
         return this.transferFluid(destination, BOTTLE_COUNT);
     }
 
     //transfers between two fluid holders
+    @Deprecated(forRemoval = true)
     public boolean transferFluid(SoftFluidTank destination, int amount) {
         if (this.isEmpty()) return false;
-        if (this.getFluidCount() >= amount && destination.addFluid(this.fluidStack.copyWithCount(amount))) {
-            this.fluidStack.shrink(amount);
+        var removed = this.removeFluid(amount, false);
+        if (destination.addFluid(removed, true) == removed.getCount()) {
+            destination.addFluid(removed, false);
             return true;
         }
         return false;
