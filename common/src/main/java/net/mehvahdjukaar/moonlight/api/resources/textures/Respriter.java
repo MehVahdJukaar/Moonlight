@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,7 @@ public class Respriter {
         // assures that frame size and palette size match
         if (imageToRecolor.frameCount() > colorsToSwap.size()) {
             //if it does not have enough colors just uses the first one
+            colorsToSwap = new ArrayList<>(colorsToSwap); // in case its immutable
             var firstPalette = colorsToSwap.get(0);
             for (int i = 0; i < imageToRecolor.frameCount(); i++) {
                 colorsToSwap.set(i, firstPalette);

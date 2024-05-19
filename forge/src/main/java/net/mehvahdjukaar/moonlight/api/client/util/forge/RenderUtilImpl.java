@@ -17,17 +17,21 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.RenderTypeHelper;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.client.model.data.ModelData;
 
 public class RenderUtilImpl {
 
 
-    public static void renderBlock(BakedModel model, long seed, PoseStack matrixStack, MultiBufferSource buffer, BlockState blockstate,
-                                   Level level, BlockPos blockpos, BlockRenderDispatcher dispatcher) {
-        for (var renderType : model.getRenderTypes(blockstate, RandomSource.create(seed), ModelData.EMPTY)) {
-            dispatcher.getModelRenderer().tesselateBlock(level, model, blockstate, blockpos, matrixStack, buffer.getBuffer(renderType), false, RandomSource.create(), seed,
-                    OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
+    public static void renderBlock(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
+                                   Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
+        //same as ForgeHooksClient.renderPistonMovedBlocks (what pistons use)
+        for (var renderType : model.getRenderTypes(state, RandomSource.create(seed), ModelData.EMPTY))
+        {
+            VertexConsumer vertexConsumer = buffer.getBuffer(RenderTypeHelper.getMovingBlockRenderType(renderType));
+            dispatcher.getModelRenderer().tesselateBlock(level, model, state, pos, poseStack, vertexConsumer, false,
+                    RandomSource.create(), state.getSeed(pos), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
         }
     }
 

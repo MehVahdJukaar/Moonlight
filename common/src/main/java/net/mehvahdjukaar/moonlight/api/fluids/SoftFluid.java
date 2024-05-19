@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.core.Holder;
@@ -73,7 +74,7 @@ public class SoftFluid {
         int tint = builder.tintColor;
 
         Triplet<ResourceLocation, ResourceLocation, Integer> renderingData;
-        if (this.useTexturesFrom != null) {
+        if (this.useTexturesFrom != null && PlatHelper.getPhysicalSide().isClient()) {
             var data = getRenderingData(useTexturesFrom);
             if (data != null) {
                 still = data.left();
@@ -643,6 +644,7 @@ public class SoftFluid {
         throw new AssertionError(); //fabric gets nothing here :/
     }
 
+    //this is client only!
     @ApiStatus.Internal
     @Nullable
     @ExpectPlatform

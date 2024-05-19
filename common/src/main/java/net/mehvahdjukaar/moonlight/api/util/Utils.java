@@ -188,7 +188,7 @@ public class Utils {
         if (object instanceof CreativeModeTab t) return getID(t);
         if (object instanceof DamageType t) return getID(t);
         if (object instanceof StatType t) return getID(t);
-        throw new UnsupportedOperationException("Unknown class type " + object.getClass());
+        throw new UnsupportedOperationException("Unsupported class type " + object.getClass()+". Expected a registry entry for a call to Utils.getID()");
     }
 
     public static <T> boolean isTagged(T entry, Registry<T> registry, TagKey<T> tag) {
