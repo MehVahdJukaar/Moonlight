@@ -26,17 +26,12 @@ public class SoftFluidStackImpl extends SoftFluidStack {
         return this.isFluidEqual(SoftFluidStackImpl.fromForgeFluid(fluidStack));
     }
 
-    /**
-     * gets the equivalent forge fluid without draining the tank. returned stack might be empty
-     *
-     * @return forge fluid stacks
-     */
-    public FluidStack toForgeFluid() {
-        FluidStack stack = new FluidStack(this.fluid().getVanillaFluid(), bottlesToMB(this.getCount()));
+    public static FluidStack toForgeFluid(SoftFluidStack softFluid) {
+        FluidStack stack = new FluidStack(softFluid.fluid().getVanillaFluid(), bottlesToMB(softFluid.getCount()));
 
         // tag stuff
-        List<String> nbtKey = this.fluid().getNbtKeyFromItem();
-        CompoundTag tag = this.getTag();
+        List<String> nbtKey = softFluid.fluid().getNbtKeyFromItem();
+        CompoundTag tag = softFluid.getTag();
         if (tag != null && !tag.isEmpty() && !stack.isEmpty() && nbtKey != null) {
             CompoundTag newCom = new CompoundTag();
             for (String k : nbtKey) {
@@ -52,6 +47,15 @@ public class SoftFluidStackImpl extends SoftFluidStack {
             if (!newCom.isEmpty()) stack.setTag(newCom);
         }
         return stack;
+    }
+
+    /**
+     * gets the equivalent forge fluid without draining the tank. returned stack might be empty
+     *
+     * @return forge fluid stacks
+     */
+    public FluidStack toForgeFluid() {
+        return toForgeFluid(this);
     }
 
     public static SoftFluidStack fromForgeFluid(FluidStack fluidStack) {

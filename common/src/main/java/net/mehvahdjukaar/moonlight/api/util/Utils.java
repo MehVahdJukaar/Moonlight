@@ -276,8 +276,8 @@ public class Utils {
      * This is needed as vanilla handles most of its block altering actions from the item class which calls this.
      * In a Block class this should be called instead to allow adventure mode to work properly
      */
+    @Deprecated(forRemoval = true)
     public static boolean mayBuild(Player player, BlockPos pos) {
-        if (player.getAbilities().mayBuild) return true; //Exit early
         if (player instanceof ServerPlayer sp) {
             return !player.blockActionRestricted(player.level(), pos, sp.gameMode.getGameModeForPlayer());
         } else {
@@ -285,6 +285,16 @@ public class Utils {
         }
     }
 
+    /**
+     * Call when placing or modifying a block outside of the use methods. Those are already covered by vanilla
+     */
+    public static boolean mayPerformBlockAction(Player player, BlockPos pos) {
+        if (player instanceof ServerPlayer sp) {
+            return !player.blockActionRestricted(player.level(), pos, sp.gameMode.getGameModeForPlayer());
+        } else {
+            return !player.blockActionRestricted(player.level(), pos, Minecraft.getInstance().gameMode.getPlayerMode());
+        }
+    }
 
     public static boolean isMethodImplemented(Class<?> original, Class<?> subclass, String name) {
         Method declaredMethod = findMethodWithMatchingName(subclass, name);

@@ -52,7 +52,7 @@ public class SoftFluidStack {
 
     //TODO: make abstract and internal
     @ApiStatus.Internal
-    @Deprecated(forRemoval = true)
+    @Deprecated(forRemoval = true) //not for removal just make abstract
     public SoftFluidStack(Holder<SoftFluid> fluid, int count, CompoundTag tag) {
         this.fluidHolder = fluid;
         this.fluid = this.fluidHolder.value();
