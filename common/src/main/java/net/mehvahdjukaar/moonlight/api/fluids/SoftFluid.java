@@ -648,7 +648,7 @@ public class SoftFluid {
     }
 
     public enum Capacity implements StringRepresentable {
-        BOTTLE(1, 1), BOWL(2, 1), BUCKET(3, 4), BLOCK(4, 4);
+        BOTTLE(1, 1), BOWL(2, 1), BUCKET(4, 3), BLOCK(4, 4);
         public final int value;
 
         Capacity(int forge, int fabric) {

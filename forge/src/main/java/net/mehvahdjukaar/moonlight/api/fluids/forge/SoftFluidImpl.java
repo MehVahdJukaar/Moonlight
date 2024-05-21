@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.fluids.forge;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -16,8 +17,8 @@ public class SoftFluidImpl {
     public static void addFluidSpecificAttributes(SoftFluid.Builder builder, Fluid fluid) {
         FluidType type = fluid.getFluidType();
         builder.luminosity(type.getLightLevel());
-        String tr = type.getDescriptionId();
-        if (tr != null) builder.translationKey(tr);
+        Component tr = type.getDescription();
+        if (tr != null) builder.translation(tr);
     }
 
     public static Triplet<ResourceLocation, ResourceLocation, Integer> getRenderingData(ResourceLocation useTexturesFrom) {
