@@ -40,6 +40,7 @@ import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -48,6 +49,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
@@ -78,9 +80,10 @@ public class Utils {
     }
 
     public static void swapItem(Player player, InteractionHand hand, ItemStack newItem) {
-       swapItem(player, hand, player.getItemInHand(hand), newItem);
+        swapItem(player, hand, player.getItemInHand(hand), newItem);
     }
-//TODO: add more stuff from item utils
+
+    //TODO: add more stuff from item utils
     public static void addStackToExisting(Player player, ItemStack stack, boolean avoidHands) {
         var inv = player.getInventory();
         boolean added = false;
@@ -90,7 +93,7 @@ public class Utils {
                 break;
             }
         }
-        if(avoidHands && !added){
+        if (avoidHands && !added) {
             for (int j = 0; j < inv.items.size(); j++) {
                 if (inv.getItem(j).isEmpty() && j != inv.selected && inv.add(j, stack)) {
                     added = true;
@@ -123,7 +126,7 @@ public class Utils {
         return hackyGetRegistry(Registries.BIOME).getKey(object);
     }
 
-    public static ResourceLocation getID(DamageType type){
+    public static ResourceLocation getID(DamageType type) {
         return hackyGetRegistry(Registries.DAMAGE_TYPE).getKey(type);
     }
 
@@ -188,7 +191,7 @@ public class Utils {
         if (object instanceof CreativeModeTab t) return getID(t);
         if (object instanceof DamageType t) return getID(t);
         if (object instanceof StatType t) return getID(t);
-        throw new UnsupportedOperationException("Unsupported class type " + object.getClass()+". Expected a registry entry for a call to Utils.getID()");
+        throw new UnsupportedOperationException("Unsupported class type " + object.getClass() + ". Expected a registry entry for a call to Utils.getID()");
     }
 
     public static <T> boolean isTagged(T entry, Registry<T> registry, TagKey<T> tag) {
@@ -244,7 +247,7 @@ public class Utils {
         awardAdvancement(sp, name, "unlock");
     }
 
-    public static void awardAdvancement( ServerPlayer sp, ResourceLocation name, String unlockProp) {
+    public static void awardAdvancement(ServerPlayer sp, ResourceLocation name, String unlockProp) {
         Advancement advancement = sp.getServer().getAdvancements().getAdvancement(name);
         if (advancement != null) {
             PlayerAdvancements advancements = sp.getAdvancements();
@@ -271,29 +274,47 @@ public class Utils {
         return to;
     }
 
-    /**
-     * Call this instead of player.abilities.mayBuild. Mainly used for adventure mode ege case
-     * This is needed as vanilla handles most of its block altering actions from the item class which calls this.
-     * In a Block class this should be called instead to allow adventure mode to work properly
-     */
+    //Use below
     @Deprecated(forRemoval = true)
     public static boolean mayBuild(Player player, BlockPos pos) {
-        if (player instanceof ServerPlayer sp) {
-            return !player.blockActionRestricted(player.level(), pos, sp.gameMode.getGameModeForPlayer());
-        } else {
-            return !player.blockActionRestricted(player.level(), pos, Minecraft.getInstance().gameMode.getPlayerMode());
-        }
+        return mayPerformBlockAction(player, pos, player.getMainHandItem());
+    }
+
+    @Deprecated(forRemoval = true)
+    public static boolean mayPerformBlockAction(Player player, BlockPos pos) {
+        return mayPerformBlockAction(player, pos, player.getMainHandItem());
     }
 
     /**
-     * Call when placing or modifying a block outside of the use methods. Those are already covered by vanilla
+     * Call this instead of player.abilities.mayBuild. Mainly used for adventure mode ege case
+     * <p>
+     * This is needed as vanilla handles most of its block altering actions from the item class which calls this.
+     * In a Block class this should be called instead to allow adventure mode to work properly
+     * <p>
+     * Call when placing or modifying a block. Checks edge cases like spectator
+     * Needed also in BLOCK use methods. or other places. not item i believe
      */
-    public static boolean mayPerformBlockAction(Player player, BlockPos pos) {
+    public static boolean mayPerformBlockAction(Player player, BlockPos pos, ItemStack stack) {
+        GameType gameMode;
         if (player instanceof ServerPlayer sp) {
-            return !player.blockActionRestricted(player.level(), pos, sp.gameMode.getGameModeForPlayer());
+            gameMode = sp.gameMode.getGameModeForPlayer();
         } else {
-            return !player.blockActionRestricted(player.level(), pos, Minecraft.getInstance().gameMode.getPlayerMode());
+            gameMode = Minecraft.getInstance().gameMode.getPlayerMode();
         }
+        //this only checks the adventure mode canDestroyTag tag
+        boolean result = !player.blockActionRestricted(player.level(), pos, gameMode);
+        if (!result) {
+            //also checks this because vanilla doesnt as it does not place blocks in block use method
+            //also vanilla tends to allow a bunch of unpreventable adventure interactions
+            if (gameMode == GameType.ADVENTURE && !stack.isEmpty() &&
+                    stack.hasAdventureModePlaceTagForBlock(
+                            player.level().registryAccess().registryOrThrow(Registries.BLOCK),
+                            new BlockInWorld(player.level(), pos, false)
+                    )) {
+                return true;
+            }
+        }
+        return result;
     }
 
     public static boolean isMethodImplemented(Class<?> original, Class<?> subclass, String name) {
@@ -313,7 +334,7 @@ public class Utils {
 
 
     @ExpectPlatform
-    public static <K, V, C extends BaseMapCodec<K,V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec){
+    public static <K, V, C extends BaseMapCodec<K, V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec) {
         throw new AssertionError();
     }
 

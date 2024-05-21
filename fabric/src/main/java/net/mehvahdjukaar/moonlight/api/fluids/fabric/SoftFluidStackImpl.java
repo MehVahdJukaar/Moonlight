@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.fluids.fabric;
 
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
@@ -7,6 +8,9 @@ import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,7 +30,7 @@ public class SoftFluidStackImpl extends SoftFluidStack{
         List<String> nbtKey = softFluid.fluid().getNbtKeyFromItem();
         CompoundTag tag = softFluid.getTag();
         CompoundTag newCom = new CompoundTag();
-        if (tag != null && !tag.isEmpty() && !stack.isEmpty() && nbtKey != null) {
+        if (tag != null && !tag.isEmpty()  && nbtKey != null) {
             for (String k : nbtKey) {
 
                 Tag c = tag.get(k);
@@ -36,12 +40,13 @@ public class SoftFluidStackImpl extends SoftFluidStack{
             }
             if (newCom.isEmpty()) newCom = null;
         }
-        return new FluidVariant.of(softFluid.fluid().getVanillaFluid(), newCom);
+        Fluid vanillaFluid = softFluid.fluid().getVanillaFluid();
+        return FluidVariant.of(vanillaFluid, newCom);
     }
 
     public static SoftFluidStack fromFabricFluid(FluidVariant fluidStack, int bottlesAmount) {
         return SoftFluidStack.fromFluid(fluidStack.getFluid(), bottlesAmount,
-                fluidStack.hasTag() ? fluidStack.getTag().copy() : null);
+                fluidStack.hasNbt() ? fluidStack.getNbt().copy() : null);
     }
 
 }

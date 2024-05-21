@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -26,7 +27,7 @@ public class FoodProvider {
 
     public static final Codec<FoodProvider> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(f -> f.food),
-            Codec.INT.fieldOf("divider").forGetter(f -> f.divider)
+            StrOpt.of(SoftFluid.Capacity.INT_CODEC, "divider", 1).forGetter(f -> f.divider)
     ).apply(instance, FoodProvider::create));
 
     public static final FoodProvider EMPTY = new FoodProvider(Items.AIR, 1);

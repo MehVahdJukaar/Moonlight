@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
@@ -15,6 +16,7 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -33,7 +35,7 @@ import java.util.function.Function;
 @SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 public class SoftFluid {
 
-    private final String translationKey;
+    private final Component name;
     private final List<Fluid> equivalentFluids;
     private final FluidContainerList containerList;
     private final FoodProvider food;
@@ -64,7 +66,7 @@ public class SoftFluid {
         this.emissivity = builder.emissivity;
         this.containerList = builder.containerList;
         this.food = builder.food;
-        this.translationKey = builder.translationKey;
+        this.name = builder.name;
         this.NBTFromItem = builder.NBTFromItem;
 
         this.useTexturesFrom = builder.useTexturesFrom;
@@ -102,11 +104,12 @@ public class SoftFluid {
     }
 
     public Component getTranslatedName() {
-        return Component.translatable(this.translationKey);
+        return name;
     }
 
+    @Deprecated(forRemoval = true)
     public String getTranslationKey() {
-        return translationKey;
+        return "fluid";
     }
 
     public boolean isEnabled() {
@@ -253,8 +256,7 @@ public class SoftFluid {
         private ResourceLocation stillTexture;
         private ResourceLocation flowingTexture;
 
-        private String fromMod = "minecraft";
-        private String translationKey = "fluid.moonlight.generic_fluid";
+        private Component name = Component.translatable("fluid.moonlight.generic_fluid");
 
         private int luminosity = 0;
         private int emissivity = 0;
@@ -310,9 +312,17 @@ public class SoftFluid {
             return this;
         }
 
+        @Deprecated(forRemoval = true)
         public final Builder translationKey(String translationKey) {
             if (translationKey != null) {
-                this.translationKey = translationKey;
+                this.name = Component.translatable(translationKey);
+            }
+            return this;
+        }
+
+        public final Builder translation(Component component) {
+            if (component != null) {
+                this.name = component;
             }
             return this;
         }
@@ -529,16 +539,16 @@ public class SoftFluid {
             return new SoftFluid(this);
         }
 
+        @Deprecated(forRemoval = true)
         public final Builder fromMod(String s) {
-            this.fromMod = s;
             return this;
         }
     }
 
 
-    public static final int BOTTLE_COUNT = 1;
-    public static final int BOWL_COUNT = 2;
-    public static final int BUCKET_COUNT = 4;
+    public static final int BOTTLE_COUNT = Capacity.BOTTLE.getValue();
+    public static final int BOWL_COUNT = Capacity.BOWL.getValue();
+    public static final int BUCKET_COUNT = Capacity.BUCKET.getValue();
     public static final int WATER_BUCKET_COUNT = 3;
 
     /**
@@ -558,22 +568,26 @@ public class SoftFluid {
             return this.name().toLowerCase(Locale.ROOT);
         }
 
-        public boolean appliesToFlowing(){
+        public boolean appliesToFlowing() {
             return this == FLOWING || this == STILL_AND_FLOWING;
         }
 
-        public boolean appliesToStill(){
+        public boolean appliesToStill() {
             return this == STILL_AND_FLOWING;
         }
     }
 
     public static final Codec<Holder<SoftFluid>> HOLDER_CODEC = RegistryFileCodec.create(SoftFluidRegistry.KEY, SoftFluid.CODEC);
 
+    public static final Codec<Component> COMPONENT_CODEC = Codec.either(ExtraCodecs.COMPONENT, Codec.STRING).xmap(
+            either -> either.map(c -> c, Component::translatable), Either::left);
+
+
     //Direct codec
     public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
             ResourceLocation.CODEC.fieldOf("flowing_texture").forGetter(SoftFluid::getFlowingTexture),
-            StrOpt.of(Codec.STRING, "translation_key").forGetter(getHackyOptional(SoftFluid::getTranslationKey)),
+            StrOpt.of(COMPONENT_CODEC, "translation_key").forGetter(getHackyOptional(SoftFluid::getTranslatedName)),
             StrOpt.of(Codec.intRange(0, 15), "luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
             StrOpt.of(Codec.intRange(0, 15), "emissivity").forGetter(getHackyOptional(SoftFluid::getEmissivity)),
             StrOpt.of(ColorUtils.CODEC, "color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
@@ -588,14 +602,14 @@ public class SoftFluid {
 
 
     protected static SoftFluid create(ResourceLocation still, ResourceLocation flowing,
-                                      Optional<String> translation, Optional<Integer> luminosity, Optional<Integer> emissivity,
+                                      Optional<Component> translation, Optional<Integer> luminosity, Optional<Integer> emissivity,
                                       Optional<Integer> color, Optional<TintMethod> tint,
                                       Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
                                       Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,
                                       Optional<ResourceLocation> textureFrom) {
 
         Builder builder = new Builder(still, flowing);
-        translation.ifPresent(builder::translationKey);
+        translation.ifPresent(builder::translation);
         luminosity.ifPresent(builder::luminosity);
         emissivity.ifPresent(builder::emissivity);
         color.ifPresent(builder::color);
@@ -605,25 +619,6 @@ public class SoftFluid {
         containers.ifPresent(b -> builder.containers(new FluidContainerList(b)));
         equivalent.ifPresent(e -> e.forEach(builder::addEqFluid));
         textureFrom.ifPresent(builder::copyTexturesFrom);
-        return builder.build();
-    }
-
-    //merge 2 fluids together. TODO: remove?
-    protected static SoftFluid merge(SoftFluid originalFluid, SoftFluid newFluid) {
-        var builder = new Builder(newFluid.stillTexture, newFluid.flowingTexture);
-        builder.translationKey(newFluid.getTranslationKey());
-        builder.luminosity(newFluid.getLuminosity());
-        builder.color(newFluid.getTintColor());
-        builder.tintMethod(newFluid.getTintMethod());
-        newFluid.getNbtKeyFromItem().forEach(builder::keepNBTFromItem);
-        originalFluid.getNbtKeyFromItem().forEach(builder::keepNBTFromItem);
-        FluidContainerList containerList = newFluid.getContainerList();
-        containerList.merge(originalFluid.getContainerList());
-        builder.containers(containerList);
-        newFluid.getEquivalentFluids().forEach(builder::addEqFluid);
-        originalFluid.getEquivalentFluids().forEach(builder::addEqFluid);
-        if (originalFluid.useTexturesFrom != null) builder.copyTexturesFrom(originalFluid.useTexturesFrom);
-        if (newFluid.useTexturesFrom != null) builder.copyTexturesFrom(newFluid.useTexturesFrom);
         return builder.build();
     }
 
@@ -650,5 +645,28 @@ public class SoftFluid {
     @ExpectPlatform
     public static Triplet<ResourceLocation, ResourceLocation, Integer> getRenderingData(ResourceLocation useTexturesFrom) {
         throw new AssertionError();
+    }
+
+    public enum Capacity implements StringRepresentable {
+        BOTTLE(1, 1), BOWL(2, 1), BUCKET(3, 4), BLOCK(4, 4);
+        public final int value;
+
+        Capacity(int forge, int fabric) {
+            value = PlatHelper.getPlatform().isForge() ? forge : fabric;
+        }
+
+        public static final Codec<Capacity> CODEC = StringRepresentable.fromEnum(Capacity::values);
+        public static final Codec<Integer> INT_CODEC = Codec.either(Codec.INT, Capacity.CODEC).xmap(
+                either -> either.map(i -> i, Capacity::getValue), Either::left);
+
+
+        @Override
+        public String getSerializedName() {
+            return this.name().toUpperCase(Locale.ROOT);
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
 }

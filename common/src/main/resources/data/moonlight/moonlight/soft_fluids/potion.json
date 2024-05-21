@@ -6,7 +6,7 @@
         "immersiveengineering:potion_bucket"
       ],
       "empty": "minecraft:bucket",
-      "capacity": 4
+      "capacity": "BUCKET"
     },
     {
       "filled": [
@@ -15,21 +15,21 @@
         "minecraft:lingering_potion"
       ],
       "empty": "minecraft:glass_bottle",
-      "capacity": 1
+      "capacity": "BOTTLE"
     },
     {
       "filled": [
         "minecraft:lingering_potion"
       ],
       "empty": "inspirations:lingering_bottle",
-      "capacity": 1
+      "capacity": "BOTTLE"
     },
     {
       "filled": [
         "minecraft:splash_potion"
       ],
       "empty": "inspirations:splash_bottle",
-      "capacity": 1
+      "capacity": "BOTTLE"
     }
   ],
   "equivalent_fluids": [
@@ -39,7 +39,6 @@
   ],
   "flowing_texture": "moonlight:block/soft_fluids/potion_flow",
   "food": {
-    "divider": 1,
     "item": "minecraft:potion"
   },
   "preserved_tags_from_item": [

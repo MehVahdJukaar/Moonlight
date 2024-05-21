@@ -5,7 +5,7 @@
         "minecraft:slime_ball"
       ],
       "empty": "minecraft:air",
-      "capacity": 1
+      "capacity": "BOTTLE"
     },
     {
       "filled": [

@@ -9,7 +9,7 @@
       "fill_sound": "minecraft:item.bucket.fill_lava",
       "empty_sound": "minecraft:item.bucket.empty_lava",
       "empty": "minecraft:bucket",
-      "capacity": 4
+      "capacity": "BUCKET"
     },
     {
       "filled": [
@@ -18,7 +18,7 @@
       "fill_sound": "minecraft:item.bucket.fill_lava",
       "empty_sound": "minecraft:item.bucket.empty_lava",
       "empty": "minecraft:bottle",
-      "capacity": 1
+      "capacity": "BOTTLE"
     }
   ],
   "equivalent_fluids": [

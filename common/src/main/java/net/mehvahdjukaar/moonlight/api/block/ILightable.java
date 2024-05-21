@@ -99,8 +99,8 @@ public interface ILightable {
 
     //call on use
     default InteractionResult interactWithPlayer(BlockState state, Level level, BlockPos pos, Player player, InteractionHand handIn) {
-        if(Utils.mayBuild(player, pos)) {
-            ItemStack stack = player.getItemInHand(handIn);
+        ItemStack stack = player.getItemInHand(handIn);
+        if (Utils.mayPerformBlockAction(player, pos, stack)) {
             if (!this.isLitUp(state, level, pos)) {
                 Item item = stack.getItem();
                 if (item instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS)) {

@@ -6,7 +6,7 @@
         "minecraft:ghast_tear"
       ],
       "empty": "minecraft:air",
-      "capacity": 1
+      "capacity": "BOTTLE"
     }
   ],
   "flowing_texture": "moonlight:block/soft_fluids/potion_flow",

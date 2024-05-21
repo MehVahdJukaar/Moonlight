@@ -1,3 +1,6 @@
-fixed an issue where image respirter would not properly recolor an animated image
-added some stuff for fabric fluid api
-changed some utils class method to work better with spectator gamemode
+improved fluid api to have different units on fabric. 1 bucket = 3 bottles there.
+This also means that bowls were also set to 1 bottle instead of 2
+
+Other misc improvements to fluid api
+
+improved some things related to spectator mode with block interactions

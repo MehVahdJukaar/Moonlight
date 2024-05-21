@@ -10,21 +10,21 @@
       "fill_sound": "minecraft:item.bucket.fill",
       "empty_sound": "minecraft:item.bucket.empty",
       "empty": "minecraft:bucket",
-      "capacity": 4
+      "capacity": "BUCKET"
     },
     {
       "filled": [
         "minecraft:potion"
       ],
       "empty": "minecraft:glass_bottle",
-      "capacity": 1
+      "capacity": "BOTTLE"
     },
     {
       "filled": [
         "xercamod:item_glass_of_water"
       ],
       "empty": "xercamod:item_glass",
-      "capacity": 4
+      "capacity": "BUCKET"
     },
     {
       "filled": [

@@ -5,7 +5,7 @@
         "frozenup:mug_of_milk"
       ],
       "empty": "frozenup:empty_mug",
-      "capacity": 4
+      "capacity": "BUCKET"
     },
     {
       "filled": [
@@ -16,14 +16,14 @@
         "simplefarming:milk_bottle"
       ],
       "empty": "minecraft:glass_bottle",
-      "capacity": 1
+      "capacity": "BOTTLE"
     },
     {
       "filled": [
         "xercamod:item_glass_of_milk"
       ],
       "empty": "xercamod:item_glass",
-      "capacity": 4
+      "capacity": "BUCKET"
     },
     {
       "filled": [
@@ -32,7 +32,7 @@
       "fill_sound": "minecraft:item.bucket.fill",
       "empty_sound": "minecraft:item.bucket.empty",
       "empty": "minecraft:bucket",
-      "capacity": 4
+      "capacity": "BUCKET"
     }
   ],
   "equivalent_fluids": [
@@ -43,7 +43,7 @@
   ],
   "flowing_texture": "moonlight:block/soft_fluids/milk_liquid",
   "food": {
-    "divider": 3,
+    "divider": "BUCKET",
     "item": "minecraft:milk_bucket"
   },
   "still_texture": "moonlight:block/soft_fluids/milk_liquid",

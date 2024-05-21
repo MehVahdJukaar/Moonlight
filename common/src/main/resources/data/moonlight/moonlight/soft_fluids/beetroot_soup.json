@@ -6,7 +6,7 @@
         "minecraft:beetroot_soup"
       ],
       "empty": "minecraft:bowl",
-      "capacity": 2
+      "capacity": "BOWL"
     }
   ],
   "equivalent_fluids": [
@@ -14,7 +14,7 @@
   ],
   "flowing_texture": "moonlight:block/soft_fluids/potion_flow",
   "food": {
-    "divider": 2,
+    "divider": "BOWL",
     "item": "minecraft:beetroot_soup"
   },
   "still_texture": "moonlight:block/soft_fluids/soup_liquid",
