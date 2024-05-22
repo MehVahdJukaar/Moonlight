@@ -104,6 +104,12 @@ public abstract class ModFlowingFluid extends FlowingFluid {
                 viscosity = 1000;
         public Rarity rarity = Rarity.COMMON;
         public Map<String, SoundEvent> sounds;
+        public Fluid copyFluid = null;
+
+        public Properties copyFluid(Fluid fluid) {
+            this.copyFluid = fluid;
+            return this;
+        }
 
         /**
          * Sets the identifier representing the name of the fluid type.

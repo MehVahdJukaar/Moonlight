@@ -14,6 +14,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
 import javax.annotation.Nullable;
 
@@ -21,6 +22,7 @@ import javax.annotation.Nullable;
 @Mixin(ItemDisplayTile.class)
 public abstract class SelfItemDisplayTileMixin extends RandomizableContainerBlockEntity {
 
+    @Unique
     private final LazyOptional<? extends IItemHandler>[] handlers = SidedInvWrapper.create((WorldlyContainer) this, Direction.values());
 
     protected SelfItemDisplayTileMixin(BlockEntityType<?> entityType, BlockPos pos, BlockState state) {
