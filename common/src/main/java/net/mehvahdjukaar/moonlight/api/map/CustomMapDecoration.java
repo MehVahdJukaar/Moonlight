@@ -4,6 +4,8 @@ import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;

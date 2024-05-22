@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public abstract class SelfModFlowingFluidMixin extends FlowingFluid {
 
     @Unique
-    private ModFluidType type;
+    private FluidType type;
 
     /**
      * @author
@@ -23,7 +23,9 @@ public abstract class SelfModFlowingFluidMixin extends FlowingFluid {
      */
     @Overwrite(remap = false)
     private void afterInit(ModFlowingFluid.Properties properties, Supplier<? extends LiquidBlock> block) {
-        this.type = ModFluidType.create(properties, (ModFlowingFluid) (Object) this);
+        if (properties.copyFluid != null) {
+            this.type = properties.copyFluid.getFluidType();
+        } else this.type = ModFluidType.create(properties, (ModFlowingFluid) (Object) this);
     }
 
     @Override
