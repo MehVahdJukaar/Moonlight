@@ -43,6 +43,10 @@ public class MapDataRegistry {
     /**
      * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
      */
+    //TODO: this is bad. rethink type stuff
+    //we have instances of markers per map. these have a type which determines their type
+    //each type is assigned to one and one only json file. essntally the type is what is parsed from json.
+    //each type can intern have its own type.., the custom factory
     @Deprecated(forRemoval = true)
     public static <T extends CustomDecorationType<?, ?>> T registerCustomType(T decorationType) {
          MapDataInternal.registerCustomType(decorationType.getCustomFactoryID(), ()->decorationType);
@@ -76,7 +80,7 @@ public class MapDataRegistry {
     }
 
     public static CustomDecorationType<?, ?> getCustomType(ResourceLocation resourceLocation) {
-        return MapDataInternal.getCustomType(resourceLocation);
+        return MapDataInternal.createCustomType(resourceLocation);
     }
 
     public static MapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {

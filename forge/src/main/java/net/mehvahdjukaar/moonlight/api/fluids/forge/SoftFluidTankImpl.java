@@ -43,10 +43,11 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      * @param fluidStack forge fluid stack
      * @return success
      */
+    @Deprecated(forRemoval = true)
     public boolean addVanillaFluid(FluidStack fluidStack) {
         var s = SoftFluidStackImpl.fromForgeFluid(fluidStack);
         if (s.isEmpty()) return false;
-        return addFluid(s);
+        return addFluid(s, false) == s.getCount();
     }
 
     @NotNull

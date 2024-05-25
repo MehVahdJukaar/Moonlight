@@ -173,7 +173,6 @@ public class WoodType extends BlockType {
         this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign", BuiltInRegistries.BLOCK));
         this.addChild("wall_hanging_sign", this.findRelatedEntry("wall_hanging_sign", BuiltInRegistries.BLOCK));
         this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.BLOCK));
-        this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK)); // TFC & AFC only
     }
 
     @Override
@@ -181,6 +180,7 @@ public class WoodType extends BlockType {
         this.addChild("boat", this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
         this.addChild("chest_boat", this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
         this.addChild("sapling", this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
+        this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK)); // TFC & AFC only
     }
 
     public static class Finder implements SetFinder<WoodType> {

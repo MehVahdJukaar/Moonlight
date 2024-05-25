@@ -12,6 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -146,9 +147,12 @@ public abstract class BlockType {
      * Should be called after you register a block made out of this wood type
      */
     public void addChild(String genericName, @Nullable Object obj) {
+        if (obj == Items.AIR || obj == Blocks.AIR) {
+            //add better check than this...
+            throw new IllegalStateException("Tried to add air block/item to Block Type. Key " + genericName + ". This is a Moonlight bug, please report me");
+        }
         if (obj != null) {
             try {
-
                 this.children.put(genericName, obj);
                 var registry = BlockSetInternal.getRegistry(this.getClass());
                 if (registry != null) {
@@ -156,8 +160,8 @@ public abstract class BlockType {
                     // Will cause all sorts of issues. We'll worry about items later
                     registry.mapObjectToType(obj, this);
                 }
-            }catch (Exception e){
-                Moonlight.LOGGER.error("Failed to add block type child: value already present. Key {}, Object {}, BlockType {}", genericName,obj, this);
+            } catch (Exception e) {
+                Moonlight.LOGGER.error("Failed to add block type child: value already present. Key {}, Object {}, BlockType {}", genericName, obj, this);
             }
         }
     }

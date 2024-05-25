@@ -29,6 +29,7 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
     ).apply(instance, MapDataRegistry::getCustomType));
 
     //This is not the decoration id. Single instance will be registered with multiple ids based off json
+    //this is the type id?
     @ApiStatus.Internal
     public ResourceLocation factoryId;
 

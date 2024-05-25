@@ -194,8 +194,9 @@ public class Utils {
         throw new UnsupportedOperationException("Unsupported class type " + object.getClass() + ". Expected a registry entry for a call to Utils.getID()");
     }
 
+    @Deprecated(forRemoval = true)
     public static <T> boolean isTagged(T entry, Registry<T> registry, TagKey<T> tag) {
-        return registry.getHolder(registry.getId(entry)).map(h -> h.is(tag)).orElse(false);
+        return registry.wrapAsHolder(entry).is(tag);
     }
 
     //very hacky

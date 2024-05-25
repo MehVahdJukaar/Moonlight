@@ -57,7 +57,7 @@ public class LeavesType extends BlockType {
 
     @Override
     public void initializeChildrenBlocks() {
-        this.addChild("leaves", (Object) leaves);
+        this.addChild("leaves", leaves);
         this.woodType.get();
     }
 

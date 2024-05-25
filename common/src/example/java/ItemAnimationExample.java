@@ -48,7 +48,7 @@ public class ItemAnimationExample extends Item implements IFirstPersonAnimationP
 
     @Override
     public <T extends Player, M extends EntityModel<T> & ArmedModel & HeadedModel> void renderThirdPersonItem(M parentModel, LivingEntity entity, ItemStack stack, HumanoidArm humanoidArm, PoseStack poseStack, MultiBufferSource bufferSource, int light) {
-        // This method mimics hat spyglass do when they render onto the player face instead of its hand. Override to render your item similarly
+        // This method mimics hat spyglass do when they render onto the player face instead of its hand. Override to render your item similarly, in player space instead of hand space
     }
 
     @Override

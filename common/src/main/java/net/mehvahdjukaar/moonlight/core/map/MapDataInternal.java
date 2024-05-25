@@ -92,12 +92,14 @@ public class MapDataInternal {
         CODE_TYPES_FACTORIES.put(id, decorationType);
     }
 
-    public static CustomDecorationType<?, ?> getCustomType(ResourceLocation resourceLocation) {
-        var o = Objects.requireNonNull(CODE_TYPES_FACTORIES.get(resourceLocation),
-                "No map decoration type with id: " + resourceLocation);
-        var t = o.get();
+    //TODO: redo in 1.20.6
+    //maybe rename the decoration and decortion type to MapDecorationInstance and MapDecorationType to MapDecoration and the factory to type
+    public static CustomDecorationType<?, ?> createCustomType(ResourceLocation factoryID) {
+        var factory = Objects.requireNonNull(CODE_TYPES_FACTORIES.get(factoryID),
+                "No map decoration type with id: " + factoryID);
+        var t = factory.get();
         //TODO: improve
-        t.factoryId = resourceLocation;
+        t.factoryId = factoryID;
         return t;
     }
 

@@ -19,6 +19,7 @@ import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,7 +34,7 @@ public interface ILightable {
 
     TagKey<Item> FLINT_AND_STEELS = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "tools/flint_and_steel"));
 
-    default boolean isLitUp(BlockState state, LevelAccessor level, BlockPos pos) {
+    default boolean isLitUp(BlockState state, BlockGetter level, BlockPos pos) {
         return isLitUp(state);
     }
 

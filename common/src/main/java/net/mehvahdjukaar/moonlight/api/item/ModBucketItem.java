@@ -14,8 +14,8 @@ public class ModBucketItem extends BucketItem {
     private Supplier<Fluid> supplier;
 
     public ModBucketItem(Supplier<Fluid> fluid, Properties properties) {
-        super(PlatformHelper.getPlatform().isForge() ? Fluids.EMPTY : fluid.get(), properties);
-        if (PlatformHelper.getPlatform().isForge()) {
+        super(PlatHelper.getPlatform().isForge() ? Fluids.EMPTY : fluid.get(), properties);
+        if (PlatHelper.getPlatform().isForge()) {
             try {
                 //forge needs this to null
                 CONTENT.setAccessible(true);
