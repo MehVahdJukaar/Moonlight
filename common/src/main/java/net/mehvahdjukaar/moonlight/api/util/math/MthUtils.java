@@ -251,4 +251,33 @@ public class MthUtils {
             throw new IllegalArgumentException("Not in valid range for lambertW function. x has to be in [-1/e,0]");
         }
     }
+
+    /**
+     * Exponent function that passed by 0,0 and 1,1
+     */
+    private static float exp01(float t, float base) {
+        return (float) (base * Math.pow(1 / base + 1, t) - base);
+    }
+
+    /**
+     * An exponent function that passes by 0,0 and 1,1
+     *
+     * @param t     time
+     * @param curve determines the "curve" of the exponent graph.
+     *              0 will be a line
+     *              from 0 to 1 will curve with increasing severity (edge cases with vertical line at 1, which is not a valid input)
+     *              from 0 to -1 will curve downwards in the same manner
+     *              This parameter essentially controls the base of the exponent
+     *              0.55 happens to map to a base close to Euler's number
+     */
+    public static float normalizedExponent(float t, float curve) {
+        if (curve == 0) return t;
+        float base;
+        if (curve > 0) {
+            base = (float) -Math.log(curve);
+        } else {
+            base = (float) (Math.log(-curve) - 1);
+        }
+        return exp01(t, base);
+    }
 }

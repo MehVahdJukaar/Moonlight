@@ -33,7 +33,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,9 +77,7 @@ public class Moonlight {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.initClient();
         }
-
     }
-    //TODO: refactor respriter and palette to better acocunt for animated stuff
 
     private static void commonSetup() {
         BlocksColorInternal.setup();

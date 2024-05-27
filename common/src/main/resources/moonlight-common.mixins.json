@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "net.mehvahdjukaar.moonlight.core.mixins",
   "compatibilityLevel": "JAVA_17",
+  "plugin": "net.mehvahdjukaar.moonlight.core.mixins.MixinPlugin",
   "client": [
     "ClientLanguagesMixin",
     "ClientPacketListenerMixin",
@@ -35,7 +36,8 @@
     "VillagerMixin",
     "accessor.BrainAccessor",
     "accessor.DispenserBlockAccessor",
-    "accessor.DispenserBlockEntityAccessor"
+    "accessor.DispenserBlockEntityAccessor",
+    "compat.PistonReactQuarkMixin"
   ],
   "injectors": {
     "defaultRequire": 1,

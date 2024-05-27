@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.core.mixins.forge;
 
 import net.mehvahdjukaar.moonlight.api.client.forge.ModFluidType;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraftforge.fluids.FluidType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,21 +14,24 @@ import java.util.function.Supplier;
 public abstract class SelfModFlowingFluidMixin extends FlowingFluid {
 
     @Unique
-    private FluidType type;
+    private Supplier<FluidType> type;
 
     /**
      * @author
      * @reason
      */
     @Overwrite(remap = false)
-    private void afterInit(ModFlowingFluid.Properties properties, Supplier<? extends LiquidBlock> block) {
+    private void afterInit(ModFlowingFluid.Properties properties) {
         if (properties.copyFluid != null) {
-            this.type = properties.copyFluid.getFluidType();
-        } else this.type = ModFluidType.create(properties, (ModFlowingFluid) (Object) this);
+            this.type = properties.copyFluid::getFluidType;
+        } else {
+            var t = ModFluidType.create(properties, (ModFlowingFluid) (Object) this);
+            this.type = () -> t; //this also needs to be registered later
+        }
     }
 
     @Override
     public FluidType getFluidType() {
-        return type;
+        return type.get();
     }
 }

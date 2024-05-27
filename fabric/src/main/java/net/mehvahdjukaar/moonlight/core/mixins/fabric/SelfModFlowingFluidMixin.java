@@ -24,7 +24,7 @@ public abstract class SelfModFlowingFluidMixin extends FlowingFluid {
      * @reason
      */
     @Overwrite(remap = false)
-    private void afterInit(ModFlowingFluid.Properties properties, Supplier<? extends LiquidBlock> block) {
+    private void afterInit(ModFlowingFluid.Properties properties) {
         if (properties.copyFluid != null) {
             var handler = FluidVariantAttributes.getHandler(properties.copyFluid);
             if (handler != null) {

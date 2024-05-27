@@ -24,19 +24,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.Supplier;
 
+//I hate this class
 public abstract class ModFlowingFluid extends FlowingFluid {
 
     @Nullable
     private final Supplier<? extends LiquidBlock> block;
     private final boolean convertsToSource;
+    public final boolean hasCustomFluidType;
 
     protected ModFlowingFluid(Properties properties, Supplier<? extends LiquidBlock> block) {
         this.block = block;
         this.convertsToSource = properties.canConvertToSource;
-        this.afterInit(properties, block); //for mixin
+        this.hasCustomFluidType = properties.copyFluid == null;
+        this.afterInit(properties);
     }
 
-    private void afterInit(Properties properties, Supplier<? extends LiquidBlock> block) {
+    private void afterInit(ModFlowingFluid.Properties properties) {
     }
 
     public static Properties properties() {
@@ -105,10 +108,12 @@ public abstract class ModFlowingFluid extends FlowingFluid {
                 viscosity = 1000;
         public Rarity rarity = Rarity.COMMON;
         public Map<String, SoundEvent> sounds;
+        @Deprecated
         public Fluid copyFluid = null;
 
+        @Deprecated(forRemoval = true)
         public Properties copyFluid(Fluid fluid) {
-            this.copyFluid = fluid;
+            //this.copyFluid = fluid; //causes issues
             return this;
         }
 

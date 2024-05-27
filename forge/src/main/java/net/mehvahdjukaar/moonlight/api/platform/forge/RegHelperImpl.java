@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.forge;
 
 import com.google.common.collect.Lists;
+import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
@@ -118,7 +119,14 @@ public class RegHelperImpl {
             return r;
         });
         //forge we don't care about mod id since it's always the active container one
-        return new EntryWrapper<>(registry.register(name.getPath(), supplier));
+        return new EntryWrapper<>(registry.register(name.getPath(), ()->{
+            //super hack for mod fluids auto registering of fluid types
+            var obj = supplier.get();
+            if(regKey.equals(Registries.FLUID) && obj instanceof ModFlowingFluid fluid && fluid.hasCustomFluidType){
+                register(name, fluid::getFluidType, ForgeRegistries.Keys.FLUID_TYPES);
+            }
+            return obj;
+        }));
     }
 
     private static IEventBus getModEventBus(String modId) {
@@ -160,7 +168,7 @@ public class RegHelperImpl {
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
         var f = register(name, fluid, Registries.FLUID);
         //register fluid type
-        register(name, () -> f.get().getFluidType(), ForgeRegistries.Keys.FLUID_TYPES);
+        //register(name, () -> f.get().getFluidType(), ForgeRegistries.Keys.FLUID_TYPES);
         return f;
     }
 
