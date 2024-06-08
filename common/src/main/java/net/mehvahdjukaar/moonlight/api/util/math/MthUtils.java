@@ -103,6 +103,21 @@ public class MthUtils {
         return (float) (Mth.atan2(y, x) / (Math.PI * 2));
     }
 
+    // in degrees. Opposite of Vec3.fromRotation
+    public static double getPitch(Vec3 vec3) {
+        return -Math.toDegrees(Math.asin(vec3.y));
+    }
+
+    // in degrees
+    public static double getYaw(Vec3 vec3) {
+        return Math.toDegrees(Math.atan2(-vec3.x, vec3.z));
+    }
+
+    // not sure about this one tbh
+    public static double getRoll(Vec3 vec3) {
+        return Math.toDegrees(Math.atan2(vec3.y, vec3.x));
+    }
+
     public static double wrapRad(double pValue) {
         double p = Math.PI * 2;
         double d0 = pValue % p;
@@ -235,8 +250,7 @@ public class MthUtils {
         double maxError = 1e-6;
         if (x == -1 / Math.E) {
             return -1;
-        }
-        else if (x < 0 && x > -1 / Math.E) {
+        } else if (x < 0 && x > -1 / Math.E) {
             double nLog = Math.log(-x);
             double nLog0 = 1;
             while (Math.abs(nLog0 - nLog) > maxError) {

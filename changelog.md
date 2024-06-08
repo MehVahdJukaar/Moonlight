@@ -1,2 +1,4 @@
-fixed an issue with forge fluid types not being registered
-fixed another issue with ModBucketItem
+added some math utils
+improved mapRegistry class
+added more equivalent link liquids
+fixed some things with additive translucency render type

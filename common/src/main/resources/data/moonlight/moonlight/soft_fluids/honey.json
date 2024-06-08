@@ -20,13 +20,14 @@
     }
   ],
   "equivalent_fluids": [
+    "the_bumblezone:honey_fluid",
+    "the_bumblezone:honey_fluid_still",
     "create:honey",
     "minecraft:honey",
-    "forge:honey",
+    "#forge:honey",
     "cyclic:honey",
-    "inspirations:honey",
-    "the_bumblezone:honey_fluid",
-    "the_bumblezone:honey_fluid_still"
+    "brewing_and_chewing:honey",
+    "inspirations:honey"
   ],
   "flowing_texture": "moonlight:block/soft_fluids/honey_liquid",
   "food": {

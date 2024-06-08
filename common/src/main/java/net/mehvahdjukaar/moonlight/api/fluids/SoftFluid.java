@@ -11,11 +11,13 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
@@ -27,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 /**
@@ -36,7 +39,7 @@ import java.util.function.Function;
 public class SoftFluid {
 
     private final Component name;
-    private final List<Fluid> equivalentFluids;
+    private final LazyFluidSet equivalentFluids;
     private final FluidContainerList containerList;
     private final FoodProvider food;
     private final List<String> NBTFromItem;
@@ -61,7 +64,7 @@ public class SoftFluid {
 
     private SoftFluid(Builder builder) {
         this.tintMethod = builder.tintMethod;
-        this.equivalentFluids = builder.equivalentFluids;
+        this.equivalentFluids = new LazyFluidSet(builder.equivalentFluids);
         this.luminosity = builder.luminosity;
         this.emissivity = builder.emissivity;
         this.containerList = builder.containerList;
@@ -151,7 +154,7 @@ public class SoftFluid {
      * @return forge fluid
      */
     public List<Fluid> getEquivalentFluids() {
-        return this.equivalentFluids;
+        return this.equivalentFluids.getFluids();
     }
 
     /**
@@ -161,7 +164,7 @@ public class SoftFluid {
      * @return equivalent
      */
     public boolean isEquivalent(Fluid fluid) {
-        return this.equivalentFluids.contains(fluid);
+        return this.equivalentFluids.getFluids().contains(fluid);
     }
 
     @ApiStatus.Internal
@@ -267,7 +270,7 @@ public class SoftFluid {
         private FluidContainerList containerList = new FluidContainerList();
 
         private final List<String> NBTFromItem = new ArrayList<>();
-        private final List<Fluid> equivalentFluids = new ArrayList<>();
+        private final List<String> equivalentFluids = new ArrayList<>();
 
         //used to indicate automatically generated fluids
         private boolean isFromData = true;
@@ -392,7 +395,7 @@ public class SoftFluid {
          */
         public final Builder addEqFluid(Fluid fluid) {
             if (fluid != null && fluid != Fluids.EMPTY) {
-                this.equivalentFluids.add(fluid);
+                this.equivalentFluids.add(BuiltInRegistries.FLUID.getKey(fluid).toString());
                 Item i = fluid.getBucket();
                 if (i != Items.AIR && i != Items.BUCKET) this.bucket(i);
             }
@@ -595,8 +598,7 @@ public class SoftFluid {
             FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
             StrOpt.of(Codec.STRING.listOf(), "preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
             StrOpt.of(FluidContainerList.Category.CODEC.listOf(), "containers").forGetter(f -> f.getContainerList().encodeList()),
-            BuiltInRegistries.FLUID.byNameCodec().listOf().optionalFieldOf("equivalent_fluids")
-                    .forGetter(getHackyOptional(s -> s.getEquivalentFluids().stream().toList())),
+            StrOpt.of(LazyFluidSet.CODEC, "equivalent_fluids", LazyFluidSet.EMPTY).forGetter(s -> s.equivalentFluids),
             StrOpt.of(ResourceLocation.CODEC, "use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
     ).apply(instance, SoftFluid::create));
 
@@ -605,7 +607,8 @@ public class SoftFluid {
                                       Optional<Component> translation, Optional<Integer> luminosity, Optional<Integer> emissivity,
                                       Optional<Integer> color, Optional<TintMethod> tint,
                                       Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
-                                      Optional<List<FluidContainerList.Category>> containers, Optional<List<Fluid>> equivalent,
+                                      Optional<List<FluidContainerList.Category>> containers,
+                                      LazyFluidSet equivalent,
                                       Optional<ResourceLocation> textureFrom) {
 
         Builder builder = new Builder(still, flowing);
@@ -617,7 +620,7 @@ public class SoftFluid {
         food.ifPresent(builder::food);
         nbtKeys.ifPresent(k -> k.forEach(builder::keepNBTFromItem));
         containers.ifPresent(b -> builder.containers(new FluidContainerList(b)));
-        equivalent.ifPresent(e -> e.forEach(builder::addEqFluid));
+        LazyFluidSet.merge(new LazyFluidSet(builder.equivalentFluids), equivalent);
         textureFrom.ifPresent(builder::copyTexturesFrom);
         return builder.build();
     }
@@ -667,6 +670,53 @@ public class SoftFluid {
 
         public int getValue() {
             return value;
+        }
+    }
+
+    //can use tag. Ugly. We cant use HolderSet because tags are loaded after registry entries obviouslu
+    private static class LazyFluidSet {
+        protected static final LazyFluidSet EMPTY = new LazyFluidSet(Collections.emptyList());
+        protected static final Codec<LazyFluidSet> CODEC = Codec.STRING.listOf()
+                .xmap(LazyFluidSet::new, s -> s.keys);
+
+        private final List<String> keys;
+        private final List<Fluid> fluids; //respects insertion order
+        private final List<TagKey<Fluid>> tags = new ArrayList<>();
+
+        private LazyFluidSet(List<String> keys) {
+            this.keys = keys;
+            var set = new LinkedHashSet<Fluid>();
+
+            for (String key : keys) {
+                if (key.startsWith("#")) {
+                    //actually this wont work because we need these before tags are loaded...
+                    tags.add(TagKey.create(Registries.FLUID,
+                                    new ResourceLocation(key.substring(1))));
+                }
+                else BuiltInRegistries.FLUID.getOptional(new ResourceLocation(key)).ifPresent(set::add);
+            }
+            fluids = List.of(set.toArray(new Fluid[0]));
+        }
+
+        public static LazyFluidSet merge(LazyFluidSet first, LazyFluidSet second) {
+            if (first.isEmpty()) return second;
+            if (second.isEmpty()) return first;
+            List<String> keys = new ArrayList<>(first.keys);
+            keys.addAll(second.keys);
+            return new LazyFluidSet(keys);
+        }
+
+        public List<Fluid> getFluids() {
+            if(tags.isEmpty()) return fluids;
+            var list = new ArrayList<>(fluids);
+            for (TagKey<Fluid> tag : tags) {
+                BuiltInRegistries.FLUID.getTagOrEmpty(tag).forEach(e->list.add(e.value()));
+            }
+            return list;
+        }
+
+        public boolean isEmpty() {
+            return getFluids().isEmpty();
         }
     }
 }
