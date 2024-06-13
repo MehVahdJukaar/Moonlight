@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.ApiStatus;
@@ -115,12 +116,12 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     }
 
     @ApiStatus.Internal
-    public void onBlockInit(){
+    public void onBlockInit() {
         this.types.values().forEach(BlockType::initializeChildrenBlocks);
     }
 
     @ApiStatus.Internal
-    public void onItemInit(){
+    public void onItemInit() {
         this.types.values().forEach(BlockType::initializeChildrenItems);
     }
 
@@ -157,5 +158,10 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     protected void mapObjectToType(Object itemLike, BlockType type) {
         this.childrenToType.put(itemLike, (T) type);
+        if (itemLike instanceof BlockItem bi) {
+            if (!this.childrenToType.containsKey(bi.asItem())) {
+                this.childrenToType.put(bi.asItem(), (T) type);
+            }
+        }
     }
 }

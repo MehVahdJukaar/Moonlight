@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.*;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -112,7 +113,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         BlockState blockstate = level.getBlockState(blockpos);
         //sets on ground
         if (!blockstate.isAir() && !noPhysics) {
-            VoxelShape voxelshape = blockstate.getCollisionShape(level, blockpos);
+            VoxelShape voxelshape = blockstate.getCollisionShape(level, blockpos, CollisionContext.of(this));
             if (!voxelshape.isEmpty()) {
                 Vec3 vector3d1 = this.position();
 

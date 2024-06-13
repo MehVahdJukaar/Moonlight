@@ -8,7 +8,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -91,14 +90,12 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             //Can't check if the block is a full one, so I do this. Adding some checks here
             if (state.getProperties().size() <= 2 && !(baseBlock instanceof SlabBlock)) {
                 //needs to use wood sound type
-                if (state.instrument() == NoteBlockInstrument.BASS) {
-                    //we do not allow "/" in the wood name
-                    name = name.replace("/", "_");
-                    ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
-                    Block logBlock = findLog(id);
-                    if (logBlock != null) {
-                        return Optional.of(new WoodType(id, baseBlock, logBlock));
-                    }
+                //we do not allow "/" in the wood name
+                name = name.replace("/", "_");
+                ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
+                Block logBlock = findLog(id);
+                if (logBlock != null) {
+                    return Optional.of(new WoodType(id, baseBlock, logBlock));
                 }
             }
         }
