@@ -213,6 +213,13 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         return ChestMenu.threeRows(id, player, this);
     }
 
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
+        return null;
+    }
+
+
     @Override
     protected NonNullList<ItemStack> getItems() {
         return this.stacks;

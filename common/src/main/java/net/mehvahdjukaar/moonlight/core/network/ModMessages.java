@@ -29,6 +29,10 @@ public class ModMessages {
             .register(NetworkDir.PLAY_TO_CLIENT,
                     ClientBoundOnPistonMovedBlockPacket.class, ClientBoundOnPistonMovedBlockPacket::new)
 
+            .register(NetworkDir.PLAY_TO_SERVER,
+                    ServerBoundItemLeftClickPacket.class, ServerBoundItemLeftClickPacket::new)
+
+
             .build();
 
     public static void init() {

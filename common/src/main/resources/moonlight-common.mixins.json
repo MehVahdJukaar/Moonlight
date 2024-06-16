@@ -12,6 +12,7 @@
     "ItemInHandRendererMixin",
     "MapInstanceMixin",
     "MapRendererMixin",
+    "MinecraftMixin",
     "PlayerItemInHandLayerMixin",
     "ThirdPersonRendererMixin"
   ],

@@ -45,7 +45,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     }
 
     protected ImprovedProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, LivingEntity thrower, Level world) {
-        this(type, thrower.getX(), thrower.getEyeY() -  0.1F, thrower.getZ(), world);
+        this(type, thrower.getX(), thrower.getEyeY() - 0.1F, thrower.getZ(), world);
         this.setOwner(thrower);
     }
 
@@ -152,9 +152,6 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                 //no physics clips through blocks
             }
 
-            if (client) {
-                this.spawnTrailParticles(pos, newPos);
-            }
 
             double posX = newPos.x;
             double posY = newPos.y;
@@ -183,19 +180,27 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
             this.setPos(posX, posY, posZ);
             this.checkInsideBlocks();
 
+            if (client) {
+                this.spawnTrailParticles();
+            }
+
             //calls on hit
             if (!this.isRemoved()) {
                 //try hit entity
-                EntityHitResult hitEntity = this.findHitEntity(pos, newPos);
-                if (hitEntity != null) {
-                    blockHitResult = hitEntity;
+                EntityHitResult hitEntityResult = this.findHitEntity(pos, newPos);
+                if (hitEntityResult != null) {
+                    blockHitResult = hitEntityResult;
                 }
 
                 HitResult.Type type = blockHitResult.getType();
                 boolean portalHit = false;
                 if (type == HitResult.Type.ENTITY) {
-                    Entity entity = ((EntityHitResult) blockHitResult).getEntity();
-                    if (entity instanceof Player p1 && this.getOwner() instanceof Player p2 && !p2.canHarmPlayer(p1)) {
+                    Entity hitEntity = ((EntityHitResult) blockHitResult).getEntity();
+                    if (hitEntity == this.getOwner()) {
+                        if (!canHarmOwner()) {
+                            blockHitResult = null;
+                        }
+                    } else if (hitEntity instanceof Player p1 && this.getOwner() instanceof Player p2 && !p2.canHarmPlayer(p1)) {
                         blockHitResult = null;
                     }
                 } else if (type == HitResult.Type.BLOCK) {
@@ -226,10 +231,16 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         }
     }
 
+    public boolean canHarmOwner() {
+        if (getOwner() instanceof Player) {
+            return level().getDifficulty().getId() >= 1;
+        }
+        return false;
+    }
+
     protected float getDeceleration() {
         return 0.99F;
     }
-
 
     /**
      * do stuff before removing, then call remove. Called when age reaches max age
@@ -250,7 +261,12 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         return ProjectileUtil.getEntityHitResult(this.level(), this, oPos, pos, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity);
     }
 
-    public void spawnTrailParticles(Vec3 currentPos, Vec3 newPos) {
+    @Deprecated(forRemoval = true)
+    public void spawnTrailParticles(Vec3 oldPos, Vec3 newPos) {
+    }
+
+    public void spawnTrailParticles() {
+        spawnTrailParticles(new Vec3(xo, yo, zo), this.position());
     }
 
     @Override

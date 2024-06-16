@@ -11,10 +11,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -223,9 +220,11 @@ public class Utils {
         BlockState state = blockBehaviour.defaultBlockState();
         p.lightLevel(s -> state.getLightEmission());
         p.offsetType(BlockBehaviour.OffsetType.NONE);
-        p.isValidSpawn((blockState, blockGetter, blockPos, object) -> false);
+        p.isValidSpawn((blockState, blockGetter, pos, entityType) ->
+                blockState.isFaceSturdy(blockGetter, pos, Direction.UP) && blockState.getLightEmission() < 14);
         p.mapColor(blockBehaviour.defaultMapColor());
-        //TODO: this isnt safe anymore...
+        p.emissiveRendering((blockState, blockGetter, blockPos) -> false);
+        //TODO: this isnt safe anymore... in 1.21
         return p;
     }
 
