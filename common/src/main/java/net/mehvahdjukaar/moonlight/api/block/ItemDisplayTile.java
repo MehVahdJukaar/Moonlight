@@ -111,7 +111,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
             //remove
             if (handItem.isEmpty()) {
                 ItemStack it = this.removeItemNoUpdate(slot);
-                if(!it.isEmpty()) {
+                if (!it.isEmpty()) {
                     onItemRemoved(player, it, slot);
                     if (!this.level.isClientSide()) {
                         player.setItemInHand(handIn, it);
@@ -208,8 +208,9 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         return 1;
     }
 
+    @Deprecated
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory player) {
+    final public AbstractContainerMenu createMenu(int id, Inventory player) {
         return ChestMenu.threeRows(id, player, this);
     }
 
@@ -249,8 +250,6 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     public int[] getSlotsForFace(Direction side) {
         return IntStream.range(0, this.getContainerSize()).toArray();
     }
-
-
 
 
 }

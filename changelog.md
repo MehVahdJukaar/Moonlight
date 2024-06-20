@@ -1,2 +1,3 @@
-blacklisted smoldering wood from IW from wood detection
-improved mod projectile entity class
+add ILeftClickReact interface, allows items to react to left click
+improved some utility classes calls
+minor fixes related to projectile entity leading to inconsistent behavior

@@ -4,12 +4,7 @@ import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
@@ -25,18 +20,19 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+// A class that combines and streamlines AbstractHurtingProjectile, AbstractArrow and ThrowableItemProjectile
 public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
-    private static final EntityDataAccessor<Byte> ID_FLAGS = SynchedEntityData.defineId(ImprovedProjectileEntity.class, EntityDataSerializers.BYTE);
 
-    protected boolean touchedGround = false;
-    protected int groundTime = 0;
+    // Renamed inGround. This is used to check if the projectile has its center inside a bock
+    protected boolean isInBlock = false;
+    protected int inBlockTime = 0;
 
-    protected int maxAge = 200;
-    protected int maxGroundTime = 20;
-    protected float waterDeceleration = 0.8f;
+    protected int maxAge = 300;
+    protected int maxInBlockTime = 20;
 
     protected ImprovedProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, Level world) {
         super(type, world);
+        this.setMaxUpStep(0);
     }
 
     protected ImprovedProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, double x, double y, double z, Level world) {
@@ -50,91 +46,74 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ID_FLAGS, (byte) 0);
+    public float maxUpStep() {
+        return super.maxUpStep();
     }
 
-    private void setFlag(int id, boolean value) {
-        byte b0 = this.entityData.get(ID_FLAGS);
-        if (value) {
-            this.entityData.set(ID_FLAGS, (byte) (b0 | id));
-        } else {
-            this.entityData.set(ID_FLAGS, (byte) (b0 & ~id));
-        }
-
+    @Override
+    protected float getEyeHeight(Pose pose, EntityDimensions dimensions) {
+        return dimensions.height * 0.5f;
     }
 
-    public void setNoPhysics(boolean noPhysics) {
-        this.noPhysics = noPhysics;
-        this.setFlag(2, noPhysics);
+    // If its motion will be stopped by blocks. Will make this block call collide instead of setpos
+    public boolean collidesWithBlocks() {
+        return false;
     }
 
-    public boolean isNoPhysics() {
-        if (!this.level().isClientSide) {
-            return this.noPhysics;
-        } else {
-            return (this.entityData.get(ID_FLAGS) & 2) != 0;
-        }
-    }
-
+    //mix of projectile + arrow code to do what both do+  fix some issues
     @SuppressWarnings("ConstantConditions")
     @Override
     public void tick() {
-        //base tick stuff
-        this.baseTick();
-
+        // Projectile tick stuff
         if (!this.hasBeenShot) {
             this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner());
             this.hasBeenShot = true;
         }
 
+        if (!this.leftOwner) {
+            this.leftOwner = this.checkLeftOwner();
+        }
+        this.baseTick();
+
+        // end of projectile tick stuff
+
+        // some move() stuff
+        this.wasOnFire = this.isOnFire();
+        // end of move() stuff
+
+        // AbstractArrow + ThrowableProjectile stuff
+
         //fixed vanilla arrow code. You're welcome
         Vec3 movement = this.getDeltaMovement();
-
-        double velX = movement.x;
-        double velY = movement.y;
-        double velZ = movement.z;
-
-        /*
-        //set initial rot
-        if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
-            float horizontalVel = MathHelper.sqrt(getHorizontalDistanceSqr(movement));
-            this.yRot = (float) (MathHelper.atan2(velX, velZ) * (double) (180F / (float) Math.PI));
-            this.xRot = (float) (MathHelper.atan2(velY, horizontalVel) * (double) (180F / (float) Math.PI));
-            this.yRotO = this.yRot;
-            this.xRotO = this.xRot;
-        }*/
-
-        boolean noPhysics = this.isNoPhysics();
 
         BlockPos blockpos = this.blockPosition();
         Level level = this.level();
         BlockState blockstate = level.getBlockState(blockpos);
+
         //sets on ground
-        if (!blockstate.isAir() && !noPhysics) {
+        if (!blockstate.isAir()) {
             VoxelShape voxelshape = blockstate.getCollisionShape(level, blockpos, CollisionContext.of(this));
             if (!voxelshape.isEmpty()) {
-                Vec3 vector3d1 = this.position();
+                Vec3 centerPos = this.getEyePosition();
 
                 for (AABB aabb : voxelshape.toAabbs()) {
-                    if (aabb.move(blockpos).contains(vector3d1)) {
-                        this.touchedGround = true;
+                    if (aabb.move(blockpos).contains(centerPos)) {
+                        this.isInBlock = true;
                         break;
                     }
                 }
             }
         }
 
-        if (this.isInWaterOrRain()) {
+        if (this.isInWaterOrRain() || blockstate.is(Blocks.POWDER_SNOW)) {
             this.clearFire();
         }
 
 
-        if (this.touchedGround && !noPhysics) {
-            this.groundTime++;
+        if (this.isInBlock && !noPhysics) {
+            this.inBlockTime++;
         } else {
-            this.groundTime = 0;
+            this.inBlockTime = 0;
 
             this.updateRotation();
 
@@ -143,46 +122,30 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
             Vec3 newPos = pos.add(movement);
 
-            HitResult blockHitResult = level.clip(new ClipContext(pos, newPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
-            if (blockHitResult.getType() != HitResult.Type.MISS) {
-                //get correct land pos
-                if (!noPhysics) {
-                    newPos = blockHitResult.getLocation();
-                }
-                //no physics clips through blocks
+            //this just calculate the hit pos. Does NOT calculate our actual new position
+            HitResult blockHitResult = level.clip(new ClipContext(pos, newPos,
+                    ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+
+            // actually moves
+            if (this.collidesWithBlocks()) {
+                //gets the actual new pos
+                newPos = pos.add(this.collide(movement));
             }
+            this.setPos(newPos.x, newPos.y, newPos.z);
 
-
-            double posX = newPos.x;
-            double posY = newPos.y;
-            double posZ = newPos.z;
-
-
-            if (!this.isNoGravity() && !noPhysics) {
-                this.setDeltaMovement(velX, velY - this.getGravity(), velZ);
-            }
-
-            float deceleration = this.getDeceleration();
-
-            if (this.isInWater()) {
-                if (client) {
-                    for (int j = 0; j < 4; ++j) {
-                        double pY = posY + this.getBbHeight() / 2d;
-                        level.addParticle(ParticleTypes.BUBBLE, posX - velX * 0.25D, pY - velY * 0.25D, posZ - velZ * 0.25D, velX, velY, velZ);
-                    }
-                }
-                deceleration = this.waterDeceleration;
-            }
-
-            this.setDeltaMovement(this.getDeltaMovement().scale(deceleration));
-
-            //first sets correct position, then call hit
-            this.setPos(posX, posY, posZ);
-            this.checkInsideBlocks();
-
+            // update movement and particles
+            float deceleration = this.isInWater() ? this.getWaterInertia() : this.getInertia();
             if (client) {
                 this.spawnTrailParticles();
             }
+
+
+            this.setDeltaMovement(this.getDeltaMovement().scale(deceleration));
+            if (!this.isNoGravity() && !noPhysics) {
+                this.setDeltaMovement(this.getDeltaMovement().subtract(0, this.getGravity(), 0));
+            }
+
+            this.checkInsideBlocks();
 
             //calls on hit
             if (!this.isRemoved()) {
@@ -192,10 +155,9 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                     blockHitResult = hitEntityResult;
                 }
 
-                HitResult.Type type = blockHitResult.getType();
                 boolean portalHit = false;
-                if (type == HitResult.Type.ENTITY) {
-                    Entity hitEntity = ((EntityHitResult) blockHitResult).getEntity();
+                if (blockHitResult instanceof EntityHitResult ei) {
+                    Entity hitEntity = ei.getEntity();
                     if (hitEntity == this.getOwner()) {
                         if (!canHarmOwner()) {
                             blockHitResult = null;
@@ -203,9 +165,9 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                     } else if (hitEntity instanceof Player p1 && this.getOwner() instanceof Player p2 && !p2.canHarmPlayer(p1)) {
                         blockHitResult = null;
                     }
-                } else if (type == HitResult.Type.BLOCK) {
+                } else if (blockHitResult instanceof BlockHitResult bi) {
                     //portals. done here and not in onBlockHit to prevent any further calls
-                    BlockPos hitPos = ((BlockHitResult) blockHitResult).getBlockPos();
+                    BlockPos hitPos = bi.getBlockPos();
                     BlockState hitState = level.getBlockState(hitPos);
 
                     if (hitState.is(Blocks.NETHER_PORTAL)) {
@@ -219,7 +181,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                     }
                 }
 
-                if (!portalHit && blockHitResult != null && type != HitResult.Type.MISS && !noPhysics &&
+                if (!portalHit && blockHitResult != null && blockHitResult.getType() != HitResult.Type.MISS && !noPhysics &&
                         !ForgeHelper.onProjectileImpact(this, blockHitResult)) {
                     this.onHit(blockHitResult);
                     this.hasImpulse = true; //idk what this does
@@ -238,15 +200,21 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         return false;
     }
 
-    protected float getDeceleration() {
+    protected float getInertia() {
+        // normally 0.99 for everything
         return 0.99F;
+    }
+
+    protected float getWaterInertia() {
+        // normally 0.6 for arrows and 0.99 for tridents and 0.8 for other projectiles
+        return 0.6F;
     }
 
     /**
      * do stuff before removing, then call remove. Called when age reaches max age
      */
     public boolean hasReachedEndOfLife() {
-        return this.tickCount > this.maxAge || this.groundTime > maxGroundTime;
+        return this.tickCount > this.maxAge || this.inBlockTime > maxInBlockTime;
     }
 
     /**
@@ -258,27 +226,73 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
     @Nullable
     protected EntityHitResult findHitEntity(Vec3 oPos, Vec3 pos) {
-        return ProjectileUtil.getEntityHitResult(this.level(), this, oPos, pos, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity);
-    }
-
-    @Deprecated(forRemoval = true)
-    public void spawnTrailParticles(Vec3 oldPos, Vec3 newPos) {
+        return ProjectileUtil.getEntityHitResult(this.level(), this, oPos, pos,
+                this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity);
     }
 
     public void spawnTrailParticles() {
-        spawnTrailParticles(new Vec3(xo, yo, zo), this.position());
+
+        if (this.isInWater()) {
+            // Projectile particle code
+            var movement = this.getDeltaMovement();
+            double velX = movement.x;
+            double velY = movement.y;
+            double velZ = movement.z;
+            for (int j = 0; j < 4; ++j) {
+                double pY = this.getEyeY();
+                level().addParticle(ParticleTypes.BUBBLE,
+                        getX() - velX * 0.25D, pY - velY * 0.25D, getZ() - velZ * 0.25D,
+                        velX, velY, velZ);
+            }
+        }
     }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        tag.putBoolean("touchedGround", this.touchedGround);
+        tag.putBoolean("inBlock", this.isInBlock);
+        tag.putInt("inBlockTime", this.inBlockTime);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        this.touchedGround = tag.getBoolean("touchedGround");
+        this.isInBlock = tag.getBoolean("inBlock");
+        this.inBlockTime = tag.getInt("inBlockTime");
     }
 
+
+    @Override
+    public void shootFromRotation(Entity shooter, float x, float y, float z, float velocity, float inaccuracy) {
+        super.shootFromRotation(shooter, x, y, z, velocity, inaccuracy);
+    }
+
+    @Override
+    public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
+        super.shoot(x, y, z, velocity, inaccuracy);
+    }
+
+    public float getDefaultShootVelocity() {
+        return 1.5F;
+    }
+
+
+    @Deprecated(forRemoval = true)
+    public boolean touchedGround;
+    @Deprecated(forRemoval = true)
+    public int groundTime = 0;
+
+    @Deprecated(forRemoval = true)
+    public void setNoPhysics(boolean noGravity) {
+        super.setNoGravity(noGravity);
+    }
+
+    @Deprecated(forRemoval = true)
+    public boolean isNoPhysics() {
+        return super.isNoGravity();
+    }
+    @Deprecated(forRemoval = true)
+    protected float getDeceleration() {
+        return 0.99F;
+    }
 }
