@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -208,9 +209,11 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         return 1;
     }
 
-    @Deprecated
+    //use the one below
+    @Deprecated(forRemoval = true)
+    @ApiStatus.Internal
     @Override
-    final public AbstractContainerMenu createMenu(int id, Inventory player) {
+    public AbstractContainerMenu createMenu(int id, Inventory player) {
         return ChestMenu.threeRows(id, player, this);
     }
 
