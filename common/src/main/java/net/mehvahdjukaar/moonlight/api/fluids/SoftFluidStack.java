@@ -47,13 +47,14 @@ public class SoftFluidStack {
     private final Holder<SoftFluid> fluidHolder;
     private final SoftFluid fluid; //reference to avoid calling value all the times. these 2 should always match
     private int count;
+    @Nullable
     private CompoundTag tag;
     private boolean isEmptyCache;
 
     //TODO: make abstract and internal
     @ApiStatus.Internal
     @Deprecated(forRemoval = true) //not for removal just make abstract
-    public SoftFluidStack(Holder<SoftFluid> fluid, int count, CompoundTag tag) {
+    public SoftFluidStack(Holder<SoftFluid> fluid, int count, @Nullable CompoundTag tag) {
         this.fluidHolder = fluid;
         this.fluid = this.fluidHolder.value();
         this.tag = tag;
@@ -78,15 +79,15 @@ public class SoftFluidStack {
     }
 
     @ExpectPlatform
-    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, @Nullable CompoundTag tag){
+    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, @Nullable CompoundTag tag) {
         throw new AssertionError();
     }
 
-    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count){
+    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count) {
         return of(fluid, count, null);
     }
 
-    public static SoftFluidStack of(Holder<SoftFluid> fluid){
+    public static SoftFluidStack of(Holder<SoftFluid> fluid) {
         return of(fluid, 1, null);
     }
 
@@ -205,11 +206,12 @@ public class SoftFluidStack {
         return tag != null;
     }
 
+    @Nullable
     public CompoundTag getTag() {
         return tag;
     }
 
-    public void setTag(CompoundTag tag) {
+    public void setTag(@Nullable CompoundTag tag) {
         if (this == cachedEmptyInstance) {
             if (PlatHelper.isDev()) throw new AssertionError();
             return;
@@ -294,7 +296,9 @@ public class SoftFluidStack {
 
     @Override
     public String toString() {
-        return count + " " + getHolder().unwrapKey().get().location() + " [" + tag.toString() + "]";
+        String s = count + " " + getHolder().unwrapKey().get().location();
+        if (tag != null) s += " [" + tag + "]";
+        return s;
     }
 
     @NotNull

@@ -1,17 +1,26 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 public class MthUtils {
 
@@ -293,6 +302,152 @@ public class MthUtils {
             base = (float) (Math.log(-curve) - 1);
         }
         return exp01(t, base);
+    }
+
+
+
+    // collision code
+
+
+    public static BlockHitResult collideWithSweptAABB(Entity entity, Vec3 movement, double maxStep) {
+        AABB aabb = entity.getBoundingBox();
+        return collideWithSweptAABB(entity.position(), aabb, movement, entity.level(), maxStep);
+    }
+
+    /**
+     * Unlike vanilla .collide method this will have no tunnelling whatsoever and will stop the entity exactly when the first collision happens
+     * It's somehow also more efficient than the vanilla method, around 2 times.
+     */
+    public static BlockHitResult collideWithSweptAABB(Vec3 myPos, AABB myBox, Vec3 movement, Level level, double maxStep) {
+        double len = movement.length();
+        if (maxStep >= len) return collideWithSweptAABB(myPos, myBox, movement, level);
+        double step = 0;
+        while (step < len) {
+            Vec3 stepMovement = movement.scale(step / len);
+            BlockHitResult result = collideWithSweptAABB(myPos, myBox, stepMovement, level);
+            if (result.getType() != HitResult.Type.MISS) {
+                return result;
+            }
+            step += maxStep;
+            step = Math.min(step, len);
+        }
+        Vec3 missPos = myPos.add(movement);
+        return BlockHitResult.miss(missPos, Direction.UP, BlockPos.containing(missPos));
+    }
+
+    public static BlockHitResult collideWithSweptAABB(Vec3 myPos, AABB myBox, Vec3 movement, Level level) {
+        AABB encompassing = myBox.expandTowards(movement);
+        Set<BlockPos> positions = BlockPos.betweenClosedStream(encompassing)
+                .map(BlockPos::immutable).collect(Collectors.toSet());
+
+        CollisionResult earliestCollision = null;
+        BlockPos hitPos = null;
+
+        for (BlockPos pos : positions) {
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir()) continue;
+            List<AABB> boxes = state.getCollisionShape(level, pos).toAabbs();
+            for (AABB box : boxes) {
+                box = box.move(pos);
+                CollisionResult result = sweptAABB(myBox, box, movement);
+                if (result == null || result.entryTime < 0) continue;
+                if (earliestCollision == null) {
+                    earliestCollision = result;
+                    hitPos = pos;
+                } else if (result.entryTime == earliestCollision.entryTime) {
+                    Vec3 collidedPos = myPos.add(movement.scale(result.entryTime));
+                    if (pos.distToCenterSqr(collidedPos) < hitPos.distToCenterSqr(collidedPos)) {
+                        earliestCollision = result;
+                        hitPos = pos;
+                    }
+                } else if (result.entryTime < earliestCollision.entryTime) {
+                    earliestCollision = result;
+                    hitPos = pos;
+                }
+            }
+        }
+
+
+        if (earliestCollision != null && earliestCollision.entryTime < 1.0) {
+            movement = movement.scale(earliestCollision.entryTime);
+            Vec3 finalPos = myPos.add(movement);
+
+            return new BlockHitResult(finalPos, earliestCollision.direction, hitPos, false);
+        }
+
+        Vec3 missPos = myPos.add(movement);
+        return BlockHitResult.miss(missPos, Direction.UP, BlockPos.containing(missPos));
+    }
+
+    private static CollisionResult sweptAABB(AABB movingBox, AABB staticBox, Vec3 movement) {
+        double entryX, entryY, entryZ;
+        double exitX, exitY, exitZ;
+        Direction collisionDirection;
+
+        if (movement.x > 0.0) {
+            entryX = (staticBox.minX - movingBox.maxX) / movement.x;
+            exitX = (staticBox.maxX - movingBox.minX) / movement.x;
+        } else if (movement.x < 0.0) {
+            entryX = (staticBox.maxX - movingBox.minX) / movement.x;
+            exitX = (staticBox.minX - movingBox.maxX) / movement.x;
+        } else {
+            entryX = Double.NEGATIVE_INFINITY;
+            exitX = Double.POSITIVE_INFINITY;
+        }
+
+        if (movement.y > 0.0) {
+            entryY = (staticBox.minY - movingBox.maxY) / movement.y;
+            exitY = (staticBox.maxY - movingBox.minY) / movement.y;
+        } else if (movement.y < 0.0) {
+            entryY = (staticBox.maxY - movingBox.minY) / movement.y;
+            exitY = (staticBox.minY - movingBox.maxY) / movement.y;
+        } else {
+            entryY = Double.NEGATIVE_INFINITY;
+            exitY = Double.POSITIVE_INFINITY;
+        }
+
+        if (movement.z > 0.0) {
+            entryZ = (staticBox.minZ - movingBox.maxZ) / movement.z;
+            exitZ = (staticBox.maxZ - movingBox.minZ) / movement.z;
+        } else if (movement.z < 0.0) {
+            entryZ = (staticBox.maxZ - movingBox.minZ) / movement.z;
+            exitZ = (staticBox.minZ - movingBox.maxZ) / movement.z;
+        } else {
+            entryZ = Double.NEGATIVE_INFINITY;
+            exitZ = Double.POSITIVE_INFINITY;
+        }
+
+        double entryTime = Math.max(Math.max(entryX, entryY), entryZ);
+        double exitTime = Math.min(Math.min(exitX, exitY), exitZ);
+
+        if (entryTime > exitTime || (entryX < 0.0 && entryY < 0.0 && entryZ < 0.0) || entryX > 1.0 || entryY > 1.0 || entryZ > 1.0) {
+            return null;
+        }
+
+        if (entryX > entryY && entryX > entryZ) {
+            if (movement.x > 0.0) {
+                collisionDirection = Direction.EAST;
+            } else {
+                collisionDirection = Direction.WEST;
+            }
+        } else if (entryY > entryZ) {
+            if (movement.y > 0.0) {
+                collisionDirection = Direction.UP;
+            } else {
+                collisionDirection = Direction.DOWN;
+            }
+        } else {
+            if (movement.z > 0.0) {
+                collisionDirection = Direction.SOUTH;
+            } else {
+                collisionDirection = Direction.NORTH;
+            }
+        }
+
+        return new CollisionResult(entryTime, collisionDirection);
+    }
+
+    private record CollisionResult(double entryTime, Direction direction) {
     }
 
 }

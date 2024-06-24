@@ -598,7 +598,7 @@ public class SoftFluid {
             FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
             StrOpt.of(Codec.STRING.listOf(), "preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
             StrOpt.of(FluidContainerList.Category.CODEC.listOf(), "containers").forGetter(f -> f.getContainerList().encodeList()),
-            StrOpt.of(LazyFluidSet.CODEC, "equivalent_fluids", LazyFluidSet.EMPTY).forGetter(s -> s.equivalentFluids),
+            StrOpt.of(Codec.STRING.listOf(), "equivalent_fluids", new ArrayList<>()).forGetter(s -> s.equivalentFluids.keys),
             StrOpt.of(ResourceLocation.CODEC, "use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
     ).apply(instance, SoftFluid::create));
 
@@ -608,7 +608,7 @@ public class SoftFluid {
                                       Optional<Integer> color, Optional<TintMethod> tint,
                                       Optional<FoodProvider> food, Optional<List<String>> nbtKeys,
                                       Optional<List<FluidContainerList.Category>> containers,
-                                      LazyFluidSet equivalent,
+                                      List<String> equivalent,
                                       Optional<ResourceLocation> textureFrom) {
 
         Builder builder = new Builder(still, flowing);
@@ -620,7 +620,7 @@ public class SoftFluid {
         food.ifPresent(builder::food);
         nbtKeys.ifPresent(k -> k.forEach(builder::keepNBTFromItem));
         containers.ifPresent(b -> builder.containers(new FluidContainerList(b)));
-        LazyFluidSet.merge(new LazyFluidSet(builder.equivalentFluids), equivalent);
+        builder.equivalentFluids.addAll(equivalent);
         textureFrom.ifPresent(builder::copyTexturesFrom);
         return builder.build();
     }
@@ -676,8 +676,6 @@ public class SoftFluid {
     //can use tag. Ugly. We cant use HolderSet because tags are loaded after registry entries obviouslu
     private static class LazyFluidSet {
         protected static final LazyFluidSet EMPTY = new LazyFluidSet(Collections.emptyList());
-        protected static final Codec<LazyFluidSet> CODEC = Codec.STRING.listOf()
-                .xmap(LazyFluidSet::new, s -> s.keys);
 
         private final List<String> keys;
         private final List<Fluid> fluids; //respects insertion order
