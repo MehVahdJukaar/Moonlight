@@ -169,4 +169,8 @@ public class ForgeHelperImpl {
     public static Map<Block, Item> getBlockItemMap() {
         return Item.BY_BLOCK;
     }
+
+    public static boolean isInFluidThatCanExtinguish(Entity entity) {
+        return false;
+    }
 }

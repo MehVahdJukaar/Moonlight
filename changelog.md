@@ -1,5 +1,1 @@
-- fixed an issue with fluids registering twice when a forge equivalent was there, caused by them nor merging equivalent fluids list correctly
-- That caused some missing textures when viewing those extra erroneous fluids
-- added some new math utilities for AABB collision
-- improvedProjectileEntity will now use fancy new AABB collision by default.
-- Many improvements to said class
+- added back an internal method for backward compat reasons. still shouldnt be sed

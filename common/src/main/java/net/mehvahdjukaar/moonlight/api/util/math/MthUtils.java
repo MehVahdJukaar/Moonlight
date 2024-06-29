@@ -320,17 +320,27 @@ public class MthUtils {
      */
     public static BlockHitResult collideWithSweptAABB(Vec3 myPos, AABB myBox, Vec3 movement, Level level, double maxStep) {
         double len = movement.length();
-        if (maxStep >= len) return collideWithSweptAABB(myPos, myBox, movement, level);
-        double step = 0;
-        while (step < len) {
-            Vec3 stepMovement = movement.scale(step / len);
-            BlockHitResult result = collideWithSweptAABB(myPos, myBox, stepMovement, level);
+        if (maxStep >= len) return MthUtils.collideWithSweptAABB(myPos, myBox, movement, level);
+
+        // Divide movement into smaller steps
+        Vec3 stepMovement = movement.normalize().scale(maxStep);
+        Vec3 currentPos = myPos;
+        BlockHitResult result;
+
+        for (double moved = 0; moved < len; moved += maxStep) {
+            if (moved + maxStep > len) {
+                stepMovement = movement.scale((len - moved) / len);
+            }
+
+            result = MthUtils.collideWithSweptAABB(currentPos, myBox, stepMovement, level);
             if (result.getType() != HitResult.Type.MISS) {
                 return result;
             }
-            step += maxStep;
-            step = Math.min(step, len);
+
+            currentPos = currentPos.add(stepMovement);
+            myBox = myBox.move(stepMovement);
         }
+
         Vec3 missPos = myPos.add(movement);
         return BlockHitResult.miss(missPos, Direction.UP, BlockPos.containing(missPos));
     }
@@ -369,10 +379,11 @@ public class MthUtils {
 
 
         if (earliestCollision != null && earliestCollision.entryTime < 1.0) {
-            movement = movement.scale(earliestCollision.entryTime);
+            double entryTime = earliestCollision.entryTime - 0.00001f;
+            movement = movement.scale(entryTime);
             Vec3 finalPos = myPos.add(movement);
 
-            return new BlockHitResult(finalPos, earliestCollision.direction, hitPos, false);
+            return new BlockHitResult(finalPos, earliestCollision.direction.getOpposite(), hitPos, false);
         }
 
         Vec3 missPos = myPos.add(movement);

@@ -55,6 +55,7 @@ public class ForgeHelper {
         return ops; //TODO: 1.20.4
     }
 
+    @Contract
     @ExpectPlatform
     public static boolean onProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
         throw new AssertionError();
@@ -213,6 +214,12 @@ public class ForgeHelper {
 
     @ExpectPlatform
     public static Map<Block, Item> getBlockItemMap() {
+        throw new AssertionError();
+    }
+
+    @Contract
+    @ExpectPlatform
+    public static boolean isInFluidThatCanExtinguish(Entity entity) {
         throw new AssertionError();
     }
 }
