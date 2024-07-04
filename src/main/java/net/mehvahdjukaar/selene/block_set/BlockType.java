@@ -92,7 +92,7 @@ public abstract class   BlockType {
         ResourceLocation[] targets = {
                 // MODname:wood/planks/<woodTYPE>_append to include children of wood_type
             new ResourceLocation(id.getNamespace(), "wood/planks/" + id.getPath() + "_" + append), //Support TFC & AFC
-                // TFC's twig only: MODname:wood/twig/<woodTYPEe>, Similar to "stick"
+                // tfc:wood/twig/<woodTYPEe> also applied to boat, sign
             new ResourceLocation(id.getNamespace(), "wood/" + append + "/" + id.getPath()), //Support TFC & AFC
             new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
             new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post),
