@@ -10,21 +10,29 @@ public class CompatWoodTypes {
 
     public static void init() {
 
+            // Domum Oranmentum
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus"),
                 new ResourceLocation("domum_ornamentum:green_cactus_extra"), new ResourceLocation("cactus")));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(new ResourceLocation("domum_ornamentum:cactus_extra"),
                 new ResourceLocation("domum_ornamentum:cactus_extra"), new ResourceLocation("cactus")));
 
+            // Ars Nouveau
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "ars_nouveau", "archwood", "archwood_planks", "blue_archwood_log"));
 
+            // Blue Skies
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "blue_skies", "crystallized", "crystallized_planks", "crystallized_log"));
 
+            // Darker Depths
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "darkerdepths", "petrified", "petrified_planks", "petrified_log"));
+
+            // Pokecube Legends
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "pokecube_legends", "concrete", "concrete_planks", "concrete_log"));
+
+            // Terraqueous
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "terraqueous", "storm_cloud", "storm_cloud", "storm_cloud_column"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
@@ -32,9 +40,11 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "terraqueous", "dense_cloud", "dense_cloud", "dense_cloud_column"));
 
+            // Rats
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "rats", "pirat", "pirat_planks", "pirat_log"));
 
+            // Oh The Biomes You'll Go
         var embur = WoodType.Finder.simple(
                 "byg", "embur", "embur_planks", "embur_pedu");
         embur.addChild("stripped_log", "stripped_embur_pedu");
@@ -42,15 +52,17 @@ public class CompatWoodTypes {
         embur.addChild("stripped_wood", "stripped_embur_pedu_top");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, embur);
 
-
-        //mcreator mod with typos...
+        // mcreator mod with typos...
+            // Nethers Exoticism
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "nethers_exoticism", "jabuticaba", "jaboticaba_planks", "jabuticaba_log"));
 
+            // My Nether's Delight
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "mynethersdelight", "powdery", "powdery_planks", "block_of_powdery_cannon"
         ));
 
+            // Nourished End
         var verdant = WoodType.Finder.simple(
                 "nourished_end", "verdant", "verdant_planks", "verdant_stalk");
         verdant.addChild("wood", "verdant_hyphae");
@@ -58,13 +70,13 @@ public class CompatWoodTypes {
         verdant.addChild("stripped_log", "stripped_verdant_stem");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, verdant);
 
-
         var cerulean = WoodType.Finder.simple(
                 "nourished_end", "cerulean", "cerulean_planks", "cerulean_stem_thick");
         cerulean.addChild("stripped_wood", "stripped_cerulean_hyphae");
         cerulean.addChild("stripped_log", "cerulean_stem_stripped");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, cerulean);
 
+            // Gardens Of The Dead
         var soulblight = WoodType.Finder.simple("gardens_of_the_dead",
                 "soulblight", "soulblight_planks", "soulblight_stem");
         cerulean.addChild("stripped_wood", "stripped_soulblight_hyphae");
@@ -72,35 +84,37 @@ public class CompatWoodTypes {
         cerulean.addChild("stripped_log", "stripped_soulblight_stem");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, soulblight);
 
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("desolation",
-                "charred", "charredlog", "charred_planks"));
-
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("gardens_of_the_dead",
                 "whistlecane", "whistlecane_block", "whistlecane"));
 
+            // Desolation
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("desolation",
+                "charred", "charredlog", "charred_planks"));
+
+            // Damn Of Time Builder
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("dawnoftimebuilder",
                 "waxed_oak", "waxed_oak_log_stripped", "waxed_oak_planks"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("dawnoftimebuilder",
                 "charred_spruce", "charred_spruce_log_stripped", "charred_spruce_planks"));
 
 
+            // Habitat
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "habitat", "fairy_ring_mushroom", "fairy_ring_mushroom_planks", "enhanced_fairy_ring_mushroom_stem"));
 
+            // Ecologics
         var floweringAzalea = WoodType.Finder.simple(
                 "ecologics", "flowering_azalea", "flowering_azalea_planks", "flowering_azalea_log");
         floweringAzalea.addChild("stripped_log", "stripped_azalea_log");
         floweringAzalea.addChild("leaves", new ResourceLocation("minecraft:flowering_azalea_leaves"));
-
         BlockSetAPI.addBlockTypeFinder(WoodType.class, floweringAzalea);
-
 
         var azalea = WoodType.Finder.simple(
                 "ecologics", "azalea", "azalea_planks", "azalea_log");
         azalea.addChild("leaves", new ResourceLocation("minecraft:azalea_leaves"));
-
         BlockSetAPI.addBlockTypeFinder(WoodType.class, azalea);
 
+            // Quark
         var quarkAzalea = WoodType.Finder.simple(
                 "quark", "azalea", "azalea_planks", "azalea_log");
         quarkAzalea.addChild("leaves", new ResourceLocation("minecraft:azalea_leaves"));
@@ -108,7 +122,7 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, quarkAzalea);
 
 
-        //leaves
+// LEAVES
 
             // ARS NOUVEAU
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
