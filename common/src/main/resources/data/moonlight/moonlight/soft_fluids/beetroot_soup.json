@@ -8,6 +8,13 @@
       "empty": "minecraft:bowl",
       "capacity": "BOWL"
     }
+    {
+      "filled": [
+        "miners_delight:beetroot_soup_cup"
+      ],
+      "empty": "miners_delight:copper_cup",
+      "capacity": "1"
+    }
   ],
   "equivalent_fluids": [
     "inspirations:beetroot_soup"
@@ -16,6 +23,10 @@
   "food": {
     "divider": "BOWL",
     "item": "minecraft:beetroot_soup"
+  },
+    "food": {
+    "divider": "1",
+    "item": "miners_delight:beetroot_soup_cup"
   },
   "still_texture": "moonlight:block/soft_fluids/soup_liquid",
   "translation_key": "item.minecraft.beetroot_soup",
