@@ -16,7 +16,7 @@
         "miners_delight:powder_snow_cup"
       ],
       "empty": "miners_delight:copper_cup",
-      "capacity": "1"
+      "capacity": "3"
     }
   ],
   "flowing_texture": "minecraft:block/powder_snow",
