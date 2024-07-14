@@ -12,7 +12,7 @@
         "miners_delight:milk_cup"
       ],
       "empty": "miners_delight:copper_cup",
-      "capacity": "BOTTLE"
+      "capacity": "BUCKET"
     },
     {
       "filled": [
