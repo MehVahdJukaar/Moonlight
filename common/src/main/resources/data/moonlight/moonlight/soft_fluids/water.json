@@ -28,6 +28,13 @@
     },
     {
       "filled": [
+        "miners_delight:water_cup"
+      ],
+      "empty": "miners_delight:copper_cup",
+      "capacity": "BUCKET"
+    },
+    {
+      "filled": [
         "tea_kettle:water_kettle"
       ],
       "empty": "tea_kettle:empty_kettle",
