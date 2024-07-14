@@ -9,6 +9,13 @@
     },
     {
       "filled": [
+        "miners_delight:milk_cup"
+      ],
+      "empty": "miners_delight:copper_cup",
+      "capacity": "BOTTLE"
+    },
+    {
+      "filled": [
         "farmersdelight:milk_bottle",
         "neapolitan:milk_bottle",
         "fluffy_farmer:bottle_of_milk",
