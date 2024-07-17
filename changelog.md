@@ -1,1 +1,3 @@
-- added back an internal method for backward compat reasons. still shouldnt be sed
+### UPDATED: 
+- water.json, milk.json, .powder_snow.json, rabbit_stew.json, msuhroom_stew.json, beetroot_soup.json (thanks to CyberRat7*)
+- Fixed a few undetected from wood mod to be detected via **Every Compat**
