@@ -29,8 +29,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Suppliers;
 import org.apache.logging.log4j.LogManager;
@@ -142,11 +142,11 @@ public class ConfigHelper
      **/
     public static class ConfigObject<T> implements Supplier<T>
     {
-        private @Nonnull final ConfigValue<Object> value;
-        private @Nonnull final Codec<T> codec;
+        private @NotNull final ConfigValue<Object> value;
+        private @NotNull final Codec<T> codec;
         private @Nullable Object cachedObject;
-        private @Nonnull T parsedObject;
-        private final @Nonnull Supplier<T> defaultObject;
+        private @NotNull T parsedObject;
+        private final @NotNull Supplier<T> defaultObject;
 
         private ConfigObject(ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier)
         {
@@ -156,7 +156,7 @@ public class ConfigHelper
         }
 
         @Override
-        @Nonnull
+        @NotNull
         public T get()
         {
             Object freshObject = this.value.get();

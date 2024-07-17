@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.block;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public interface IOwnerProtected {

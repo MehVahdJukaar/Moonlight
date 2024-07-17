@@ -40,6 +40,7 @@ import java.util.function.Consumer;
 /**
  * Helper class dedicated to platform forge specific methods. Usually fabric methods here just call vanilla stuff while forge have extra logic usually calling events
  */
+@SuppressWarnings("unused")
 public class ForgeHelper {
 
     @ExpectPlatform
@@ -135,7 +136,7 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @javax.annotation.Nullable
+    @Nullable
     @ExpectPlatform
     public static DyeColor getColor(ItemStack stack) {
         throw new AssertionError();
@@ -159,7 +160,7 @@ public class ForgeHelper {
     }
 
     @ExpectPlatform
-    public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, @javax.annotation.Nullable AbstractMinecart o) {
+    public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, @Nullable AbstractMinecart o) {
         throw new AssertionError();
     }
 
@@ -188,7 +189,7 @@ public class ForgeHelper {
     }
 
     @ExpectPlatform
-    @javax.annotation.Nullable
+    @Nullable
     public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
         throw new AssertionError();
     }

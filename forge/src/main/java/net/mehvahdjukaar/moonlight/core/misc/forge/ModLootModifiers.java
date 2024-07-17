@@ -16,7 +16,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 public class ModLootModifiers {
@@ -49,7 +49,7 @@ public class ModLootModifiers {
             this.addedItemStack = addedItemStack;
         }
 
-        @Nonnull
+        @NotNull
         @Override
         protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
             ItemStack addedStack = addedItemStack.copy();
@@ -92,7 +92,7 @@ public class ModLootModifiers {
             this.itemStack = addedItemStack;
         }
 
-        @Nonnull
+        @NotNull
         @Override
         protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
             if (!generatedLoot.isEmpty()) {

@@ -19,7 +19,7 @@ import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -123,7 +123,7 @@ public class SoftFluidRegistry {
      * @param filledContainerItem item containing provided fluid
      * @return soft fluid. empty fluid if not found
      */
-    @Nonnull
+    @NotNull
     public static SoftFluid fromItem(Item filledContainerItem) {
         return getItemsMap().getOrDefault(filledContainerItem, getEmpty());
     }

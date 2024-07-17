@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
 import net.minecraft.util.Mth;
 
-import javax.annotation.concurrent.Immutable;
+import oshi.annotation.concurrent.Immutable;
 import java.util.Arrays;
 
 @Immutable

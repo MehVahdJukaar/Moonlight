@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.5-SNAPSHOT" apply false
     id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
     id "com.matthewprenger.cursegradle" version "1.4.0"
     id "com.modrinth.minotaur" version "2.+"
@@ -50,6 +50,7 @@ subprojects {
                     required.project "fabric-api"
                 }
             } else {
+
             }
         }
     }
@@ -72,6 +73,10 @@ subprojects {
                         requiredDependency "fabric-api"
                     }
                 } else {
+                    relations {
+                        optionalDependency("every-compat")
+                        optionalDependency("supplementaries")
+                    }
                 }
             }
         }
@@ -107,7 +112,7 @@ allprojects {
         }
     }
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
         options.release = 17
     }

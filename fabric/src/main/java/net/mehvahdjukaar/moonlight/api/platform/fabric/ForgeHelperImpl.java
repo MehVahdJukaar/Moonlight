@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public class ForgeHelperImpl {
 
     public static boolean onProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
@@ -144,7 +145,7 @@ public class ForgeHelperImpl {
     public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
     }
 
-    @javax.annotation.Nullable
+    @Nullable
     public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
         return null;
     }

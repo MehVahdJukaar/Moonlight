@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.util.math;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.concurrent.Immutable;
+import oshi.annotation.concurrent.Immutable;
 import java.util.Objects;
 
 @Immutable

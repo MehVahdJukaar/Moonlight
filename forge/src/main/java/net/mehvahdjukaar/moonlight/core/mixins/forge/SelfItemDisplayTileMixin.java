@@ -16,7 +16,7 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 //0.0
 @Mixin(ItemDisplayTile.class)
