@@ -128,6 +128,7 @@ public class WoodType extends BlockType {
         this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign", Registry.BLOCK));
         this.addChild("wall_hanging_sign", this.findRelatedEntry("wall_hanging_sign", Registry.BLOCK));
         this.addChild("sign", this.findRelatedEntry("sign", Registry.BLOCK));
+        this.addChild("sapling", this.findRelatedEntry("sapling", Registry.BLOCK));
     }
 
     @Override
