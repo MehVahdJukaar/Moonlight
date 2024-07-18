@@ -49,6 +49,7 @@ public class LeavesType extends BlockType {
     @Override
     public void initializeChildrenBlocks() {
         this.addChild("leaves", (Object) leaves);
+        this.addChild("sapling", (Object) this.findRelatedEntry("sapling", Registry.BLOCK));
         this.woodType.get();
     }
 
