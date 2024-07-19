@@ -7,13 +7,6 @@
       ],
       "empty": "minecraft:bowl",
       "capacity": "BOWL"
-    },
-    {
-      "filled": [
-        "miners_delight:rabbit_stew_cup"
-      ],
-      "empty": "miners_delight:copper_cup",
-      "capacity": "1"
     }
   ],
   "equivalent_fluids": [
@@ -23,10 +16,6 @@
   "food": {
     "divider": "BOWL",
     "item": "minecraft:rabbit_stew"
-  },
-    "food": {
-    "divider": "1",
-    "item": "miners_delight:rabbit_stew_cup"
   },
   "still_texture": "moonlight:block/soft_fluids/soup_liquid",
   "translation_key": "item.minecraft.rabbit_stew",

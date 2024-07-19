@@ -10,13 +10,6 @@
       "empty_sound": "minecraft:item.bucket.empty_powder_snow",
       "empty": "minecraft:bucket",
       "capacity": 3
-    },
-    {
-      "filled": [
-        "miners_delight:powder_snow_cup"
-      ],
-      "empty": "miners_delight:copper_cup",
-      "capacity": "3"
     }
   ],
   "flowing_texture": "minecraft:block/powder_snow",
