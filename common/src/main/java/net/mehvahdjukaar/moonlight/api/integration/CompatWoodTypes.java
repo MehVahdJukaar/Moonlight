@@ -123,6 +123,10 @@ public class CompatWoodTypes {
 
 
 // LEAVES
+            // Ecologics
+        var coconut = LeavesType.Finder.simple("ecologics", "coconut", "coconut_leaves", "ecologics:coconut");
+        coconut.addChild("sapling", new ResourceLocation("ecologics:coconut_seedling"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, coconut);
 
             // ARS NOUVEAU
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
