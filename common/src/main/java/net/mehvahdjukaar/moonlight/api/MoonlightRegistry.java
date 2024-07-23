@@ -48,8 +48,7 @@ public class MoonlightRegistry {
             res("optional_block_state_property"), () ->
                     new LootItemConditionType(new OptionalPropertyCondition.ConditionSerializer()), Registries.LOOT_CONDITION_TYPE);
 
-    public static final GrindItemTrigger GRIND_TRIGGER = CriteriaTriggers.register(new GrindItemTrigger());
-
-    public static final Supplier<SimpleCriterionTrigger<?>> OPTIONAL_ITEM_TRIGGER
+    public static final Supplier<GrindItemTrigger> GRIND_TRIGGER = RegHelper.registerTriggerType(
+            res("grind_item"), GrindItemTrigger::new);
 
 }

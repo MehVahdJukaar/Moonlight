@@ -1,49 +1,40 @@
 package net.mehvahdjukaar.moonlight.core.criteria_triggers;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.advancements.critereon.*;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class GrindItemTrigger extends SimpleCriterionTrigger<GrindItemTrigger.Instance> {
-    private static final ResourceLocation ID = Moonlight.res("grind_item");
 
     @Override
-    public @NotNull ResourceLocation getId() {
-        return ID;
-    }
-
-    @Override
-    public Instance createInstance(JsonObject json, ContextAwarePredicate predicate, DeserializationContext deserializationContext) {
-        ItemPredicate itempredicate = ItemPredicate.fromJson(json.get("item"));
-        return new Instance(predicate, itempredicate);
+    public Codec<Instance> codec() {
+        return Instance.CODEC;
     }
 
     public void trigger(ServerPlayer playerEntity, ItemStack stack) {
         this.trigger(playerEntity, (instance) -> instance.matches(stack));
     }
 
-    protected static class Instance extends AbstractCriterionTriggerInstance {
-        private final ItemPredicate item;
-
-        public Instance(ContextAwarePredicate contextAwarePredicate, ItemPredicate item) {
-            super(GrindItemTrigger.ID, contextAwarePredicate);
-            this.item = item;
-        }
-
+    public record Instance(Optional<ContextAwarePredicate> player,
+                           ItemPredicate item) implements SimpleCriterionTrigger.SimpleInstance {
+        public static final Codec<Instance> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+                EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf( "player").forGetter(Instance::player),
+                ItemPredicate.CODEC.fieldOf("item").forGetter(Instance::item)
+        ).apply(instance, Instance::new));
 
         public boolean matches(ItemStack stack) {
-            return this.item.matches(stack);
+            return this.item.test(stack);
         }
 
-        @Override
-        public JsonObject serializeToJson(SerializationContext serializer) {
-            JsonObject jsonobject = super.serializeToJson(serializer);
-            jsonobject.add("item", this.item.serializeToJson());
-            return jsonobject;
-        }
     }
 }
