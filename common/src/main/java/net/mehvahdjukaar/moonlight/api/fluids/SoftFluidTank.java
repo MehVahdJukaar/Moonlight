@@ -313,7 +313,7 @@ public class SoftFluidTank {
     }
 
     public void setFluid(SoftFluidStack fluid) {
-        this.fluidStack = fluid;
+        this.fluidStack = fluid.isEmpty() ? SoftFluidStack.empty() : fluid;
         refreshTintCache();
     }
 
@@ -403,8 +403,7 @@ public class SoftFluidTank {
     public void load(CompoundTag compound) {
         if (compound.contains("FluidHolder")) {
             CompoundTag cmp = compound.getCompound("FluidHolder");
-            this.fluidStack = SoftFluidStack.load(cmp);
-            if (this.isEmpty()) this.fluidStack = SoftFluidStack.empty();
+            this.setFluid(SoftFluidStack.load(cmp));
         }
     }
 
@@ -416,7 +415,7 @@ public class SoftFluidTank {
      */
     public CompoundTag save(CompoundTag compound) {
         CompoundTag cmp = new CompoundTag();
-        if (this.isEmpty()) this.fluidStack = SoftFluidStack.empty();
+        this.setFluid(this.fluidStack);
         this.fluidStack.save(cmp);
         compound.put("FluidHolder", cmp);
         return compound;
