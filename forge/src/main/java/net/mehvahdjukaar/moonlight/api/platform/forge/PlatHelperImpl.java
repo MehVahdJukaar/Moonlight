@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
@@ -20,7 +19,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -30,7 +28,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -54,12 +51,10 @@ import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.EventHooks;
-import net.neoforged.neoforge.network.NetworkHooks;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.Nullable;
@@ -76,10 +71,6 @@ public class PlatHelperImpl {
 
     public static boolean isDev() {
         return !FMLLoader.isProduction();
-    }
-
-    public static boolean isData() {
-        return FMLLoader.getLaunchHandler().isData();
     }
 
     public static PlatHelper.Side getPhysicalSide() {
@@ -131,7 +122,6 @@ public class PlatHelperImpl {
 
 
 
-
     public static int getBurnTime(ItemStack stack) {
         return CommonHooks.getBurnTime(stack, null);
     }
@@ -169,10 +159,6 @@ public class PlatHelperImpl {
         return new FlowerPotBlock(emptyPot, supplier, properties);
     }
 
-    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> soundSupplier, Item.Properties properties, int duration) {
-        return new RecordItem(power, soundSupplier, properties, duration*20);
-    }
-
     public static SimpleParticleType newParticle() {
         return new SimpleParticleType(true);
     }
@@ -192,7 +178,7 @@ public class PlatHelperImpl {
 
 
     public static boolean isModLoadingValid() {
-        return ModLoader.isLoadingStateValid();
+        return !ModLoader.hasErrors();
     }
 
     public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataProvider) {

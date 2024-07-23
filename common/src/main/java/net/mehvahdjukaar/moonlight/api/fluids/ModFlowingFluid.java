@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -99,8 +99,8 @@ public abstract class ModFlowingFluid extends FlowingFluid {
         public boolean supportsBoating = false;
         public boolean canConvertToSource = false;
         @Nullable
-        public BlockPathTypes pathType = BlockPathTypes.WATER,
-                adjacentPathType = BlockPathTypes.WATER_BORDER;
+        public PathType pathType = PathType.WATER,
+                adjacentPathType = PathType.WATER_BORDER;
         public boolean canHydrate = false;
         public int lightLevel = 0,
                 density = 1000,
@@ -193,7 +193,7 @@ public abstract class ModFlowingFluid extends FlowingFluid {
          * @param pathType the path type of this fluid
          * @return the property holder instance
          */
-        public Properties pathType(@Nullable BlockPathTypes pathType) {
+        public Properties pathType(@Nullable PathType pathType) {
             this.pathType = pathType;
             return this;
         }
@@ -206,7 +206,7 @@ public abstract class ModFlowingFluid extends FlowingFluid {
          * @param adjacentPathType the path type of this fluid
          * @return the property holder instance
          */
-        public Properties adjacentPathType(@Nullable BlockPathTypes adjacentPathType) {
+        public Properties adjacentPathType(@Nullable PathType adjacentPathType) {
             this.adjacentPathType = adjacentPathType;
             return this;
         }

@@ -100,7 +100,7 @@ public class MoonlightClient {
             if (fixShade != ClientConfigs.ShadeFix.FALSE) {
                 applyFixedShade();
 
-                dynamicPack.addBytes(new ResourceLocation("shaders/include/light.glsl"),
+                dynamicPack.addBytes(ResourceLocation.parse("shaders/include/light.glsl"),
                         ("""
                                 #version 150
 

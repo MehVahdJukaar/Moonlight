@@ -1,11 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.item.additional_placements;
 
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.ForgeOverride;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
@@ -70,14 +74,9 @@ public final class BlockPlacerItem extends BlockItem {
     }
 
     @Nullable
-    @Override
-    public FoodProperties getFoodProperties() {
+    @ForgeOverride
+    public FoodProperties getFoodProperties(ItemStack stack, @Nullable LivingEntity entity) {
         return mimicFood;
-    }
-
-    @Override
-    public boolean isEdible() {
-        return mimicFood != null;
     }
 
     @Override

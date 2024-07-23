@@ -18,10 +18,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -32,6 +29,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -52,6 +50,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent;
 import net.neoforged.neoforge.event.village.VillagerTradesEvent;
 import net.neoforged.neoforge.event.village.WandererTradesEvent;
@@ -126,7 +125,7 @@ public class RegHelperImpl {
             //super hack for mod fluids auto registering of fluid types
             var obj = supplier.get();
             if(regKey.equals(Registries.FLUID) && obj instanceof ModFlowingFluid fluid && fluid.hasCustomFluidType){
-                register(name, fluid::getFluidType, ForgeRegistries.Keys.FLUID_TYPES);
+                register(name, fluid::getFluidType, NeoForgeRegistries.Keys.FLUID_TYPES);
             }
             return obj;
         });
@@ -255,18 +254,18 @@ public class RegHelperImpl {
         NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
-    record PlacementEventImpl(SpawnPlacementRegisterEvent event) implements RegHelper.SpawnPlacementEvent {
+    record PlacementEventImpl(RegisterSpawnPlacementsEvent event) implements RegHelper.SpawnPlacementEvent {
         @Override
-        public <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
+        public <T extends Entity> void register(EntityType<T> entityType, SpawnPlacementType decoratorType,
                                                 Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
-            event.register(entityType, decoratorType, heightMapType, decoratorPredicate, SpawnPlacementRegisterEvent.Operation.AND);
+            event.register(entityType, decoratorType, heightMapType, decoratorPredicate, RegisterSpawnPlacementsEvent.Operation.AND);
         }
     }
 
     public static void addSpawnPlacementsRegistration(Consumer<RegHelper.SpawnPlacementEvent> eventListener) {
         Moonlight.assertInitPhase();
 
-        Consumer<SpawnPlacementRegisterEvent> eventConsumer = event -> {
+        Consumer<RegisterSpawnPlacementsEvent> eventConsumer = event -> {
             RegHelper.SpawnPlacementEvent spawnPlacementEvent = new PlacementEventImpl(event);
             eventListener.accept(spawnPlacementEvent);
         };
@@ -346,7 +345,7 @@ public class RegHelperImpl {
         NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
-    public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient) {
+    public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {
         FireworkStarRecipe.SHAPE_BY_ITEM = new HashMap<>(FireworkStarRecipe.SHAPE_BY_ITEM);
         FireworkStarRecipe.SHAPE_BY_ITEM.put(ingredient, shape);
         FireworkStarRecipe.SHAPE_INGREDIENT = CompoundIngredient.of(

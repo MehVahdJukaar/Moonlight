@@ -27,7 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -68,11 +68,6 @@ public class PlatHelper {
     @Contract
     @ExpectPlatform
     public static boolean isDev() {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static boolean isData() {
         throw new AssertionError();
     }
 
@@ -261,11 +256,6 @@ public class PlatHelper {
 
     @ExpectPlatform
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties, int secondDuration) {
         throw new AssertionError();
     }
 

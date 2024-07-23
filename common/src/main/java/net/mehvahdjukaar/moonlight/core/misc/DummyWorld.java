@@ -19,6 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -30,8 +31,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityTypeTest;
@@ -39,6 +40,7 @@ import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
@@ -61,7 +63,7 @@ public class DummyWorld extends Level {
     private static final Map<String, DummyWorld> INSTANCES = new Object2ObjectArrayMap<>();
 
     private final Scoreboard scoreboard = new Scoreboard();
-    private final RecipeManager recipeManager = new RecipeManager();
+    private final RecipeManager recipeManager ;
     private final ChunkSource chunkManager = new DummyChunkManager();
     private final DummyLevelEntityGetter<Entity> entityGetter = new DummyLevelEntityGetter<>();
     private final TickRateManager tickRateManager = new TickRateManager();
@@ -72,10 +74,11 @@ public class DummyWorld extends Level {
 
     protected DummyWorld(boolean clientSide, boolean debug) {
         super(new DummyData(),
-                ResourceKey.create(Registries.DIMENSION, new ResourceLocation("dummy_" + INSTANCES.size())),
+                ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse("dummy_" + INSTANCES.size())),
                 Utils.hackyGetRegistryAccess(),
                 Utils.hackyGetRegistryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
                 () -> InactiveProfiler.INSTANCE, clientSide, debug, 0, 0);
+       recipeManager = new RecipeManager(Utils.hackyGetRegistryAccess());
     }
 
     @Deprecated(forRemoval = true)
@@ -144,18 +147,20 @@ public class DummyWorld extends Level {
         return tickRateManager;
     }
 
+    @Nullable
     @Override
-    public MapItemSavedData getMapData(String id) {
+    public MapItemSavedData getMapData(MapId mapId) {
         return null;
     }
 
     @Override
-    public void setMapData(String pMapId, MapItemSavedData pData) {
+    public void setMapData(MapId mapId, MapItemSavedData mapData) {
+
     }
 
     @Override
-    public int getFreeMapId() {
-        return -1;
+    public MapId getFreeMapId() {
+        return new MapId(0);
     }
 
     @Override
@@ -188,12 +193,8 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public void gameEvent(GameEvent p_220404_, Vec3 p_220405_, GameEvent.Context p_220406_) {
+    public void gameEvent(Holder<GameEvent> gameEvent, Vec3 pos, GameEvent.Context context) {
 
-    }
-
-    @Override
-    public void gameEvent(@Nullable Entity pEntity, GameEvent pEvent, BlockPos pPos) {
     }
 
     @Override
@@ -212,6 +213,11 @@ public class DummyWorld extends Level {
     }
 
     @Override
+    public PotionBrewing potionBrewing() {
+        return null;
+    }
+
+    @Override
     public FeatureFlagSet enabledFeatures() {
         return FeatureFlags.DEFAULT_FLAGS;
     }
@@ -224,7 +230,7 @@ public class DummyWorld extends Level {
     @NotNull
     private static Holder.Reference<Biome> getPlains() {
         return Utils.hackyGetRegistryAccess().registry(Registries.BIOME)
-                .get().getHolder(ResourceKey.create(Registries.BIOME, new ResourceLocation("minecraft:plains")))
+                .get().getHolder(ResourceKey.create(Registries.BIOME, ResourceLocation.parse("minecraft:plains")))
                 .get();
     }
 
@@ -290,35 +296,10 @@ public class DummyWorld extends Level {
 
         GameRules gameRules = new GameRules();
 
-        @Override
-        public void setXSpawn(int xSpawn) {
-        }
 
         @Override
-        public void setYSpawn(int ySpawn) {
-        }
-
-        @Override
-        public void setZSpawn(int zSpawn) {
-        }
-
-        @Override
-        public void setSpawnAngle(float spawnAngle) {
-        }
-
-        @Override
-        public int getXSpawn() {
-            return 0;
-        }
-
-        @Override
-        public int getYSpawn() {
-            return 0;
-        }
-
-        @Override
-        public int getZSpawn() {
-            return 0;
+        public BlockPos getSpawnPos() {
+            return null;
         }
 
         @Override
@@ -368,6 +349,11 @@ public class DummyWorld extends Level {
         @Override
         public boolean isDifficultyLocked() {
             return false;
+        }
+
+        @Override
+        public void setSpawn(BlockPos spawnPoint, float spawnAngle) {
+
         }
     }
 

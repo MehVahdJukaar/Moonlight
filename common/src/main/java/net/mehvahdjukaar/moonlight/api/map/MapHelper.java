@@ -20,6 +20,8 @@ import java.util.Arrays;
 
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.MAP_ATLASES;
 
+//TODO: change
+@Deprecated(forRemoval = true)
 public class MapHelper {
 
     @Nullable
@@ -31,13 +33,6 @@ public class MapHelper {
         return data;
     }
 
-    @Deprecated(forRemoval = true)
-    public static Integer getMapId(ItemStack stack, Player player, Object data) {
-        Integer i = MapItem.getMapId(stack);
-        if (i == null && MAP_ATLASES) i = MapAtlasCompat.getMapIdFromAtlas(stack, player.level(), data);
-        return i;
-    }
-
     /**
      * adds a vanilla decoration
      *
@@ -46,11 +41,11 @@ public class MapHelper {
      * @param type     vanilla decorationType
      * @param mapColor map item tint color
      */
-    public static void addVanillaDecorations(ItemStack stack, BlockPos pos, MapDecoration.Type type, int mapColor) {
-        MapItemSavedData.addTargetDecoration(stack, pos, "+", type);
+    public static void addVanillaDecorations(ItemStack stack, BlockPos pos, net.minecraft.world.level.saveddata.maps.MapDecorationType type, int mapColor) {
+        //MapItemSavedData.addTargetDecoration(stack, pos, "+", type);
         if (mapColor != 0) {
-            CompoundTag com = stack.getOrCreateTagElement("display");
-            com.putInt("MapColor", mapColor);
+           // CompoundTag com = stack.getOrCreateTagElement("display");
+           // com.putInt("MapColor", mapColor);
         }
     }
 
@@ -66,7 +61,7 @@ public class MapHelper {
      * @param mapColor map item tint color
      */
     public static void addDecorationToMap(ItemStack stack, BlockPos pos, MapDecorationType<?, ?> type, int mapColor) {
-
+/*
         ListTag tags;
         if (stack.hasTag() && stack.getTag().contains("CustomDecorations", 9)) {
             tags = stack.getTag().getList("CustomDecorations", 10);
@@ -82,7 +77,7 @@ public class MapHelper {
         if (mapColor != 0) {
             CompoundTag com = stack.getOrCreateTagElement("display");
             com.putInt("MapColor", mapColor);
-        }
+        }*/
     }
 
     /**
@@ -91,6 +86,8 @@ public class MapHelper {
      *
      * @param id decoration type id. if invalid will default to generic structure decoration
      */
+        /*
+
     public static void addDecorationToMap(ItemStack stack, BlockPos pos, ResourceLocation id, int mapColor) {
         if (id.getNamespace().equals("minecraft")) {
             MapDecoration.Type type = getVanillaType(id);
@@ -108,11 +105,11 @@ public class MapHelper {
     }
 
     @Nullable
-    private static MapDecoration.Type getVanillaType(ResourceLocation id) {
-        return Arrays.stream(MapDecoration.Type.values()).filter(t -> t.toString().toLowerCase().equals(id.getPath())).findFirst()
+    private static net.minecraft.world.level.saveddata.maps.MapDecorationType getVanillaType(ResourceLocation id) {
+        return Arrays.stream(MapDecorationType.values()).filter(t -> t.toString().toLowerCase().equals(id.getPath())).findFirst()
                 .orElse(null);
     }
-
+*/
     /**
      * Adds all the map markers that can originate from the block at a given position
      */

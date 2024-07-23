@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
 import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -42,14 +43,14 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
     }
 
     @Override
-    public void load(CompoundTag compound) {
-        super.load(compound);
-        this.mimic = Utils.readBlockState(compound.getCompound("Mimic"), level);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        this.mimic = Utils.readBlockState(tag.getCompound("Mimic"), level);
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.put("Mimic", NbtUtils.writeBlockState(mimic));
     }
 
@@ -59,8 +60,8 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        return this.saveWithoutMetadata();
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
     }
 
 }

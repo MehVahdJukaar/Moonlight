@@ -41,6 +41,7 @@ import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
@@ -411,7 +412,7 @@ public class RegHelper {
 
     @FunctionalInterface
     public interface SpawnPlacementEvent {
-        <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
+        <T extends Entity> void register(EntityType<T> entityType, SpawnPlacementType decoratorType,
                                          Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate);
     }
 
@@ -565,7 +566,7 @@ public class RegHelper {
 
     // Only relevant on forge
     @ExpectPlatform
-    public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient) {
+    public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {
         throw new AssertionError();
     }
 

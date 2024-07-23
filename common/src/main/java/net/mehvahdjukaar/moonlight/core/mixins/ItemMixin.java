@@ -29,11 +29,6 @@ public abstract class ItemMixin implements IExtendedItem {
     @Nullable
     @Unique Object moonlight$clientAnimationProvider;
 
-    @Shadow
-    @Final
-    @Nullable
-    private FoodProperties foodProperties;
-
     //delegates stuff to internal blockItem
     @Inject(method = "useOn", at = @At("HEAD"), cancellable = true)
     private void onUseOnBlock(UseOnContext pContext, CallbackInfoReturnable<InteractionResult> cir) {

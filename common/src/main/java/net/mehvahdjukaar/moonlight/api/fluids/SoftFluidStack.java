@@ -19,7 +19,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.material.Fluid;
@@ -139,7 +138,7 @@ public class SoftFluidStack {
             tag.remove("count");
         }
 
-        var fluid = SoftFluidRegistry.getHolder(new ResourceLocation(tag.getString("id")));
+        var fluid = SoftFluidRegistry.getHolder(ResourceLocation.parse(tag.getString("id")));
         var amount = tag.getByte("count");
         CompoundTag nbt = null;
         if (tag.contains("tag", 10)) {

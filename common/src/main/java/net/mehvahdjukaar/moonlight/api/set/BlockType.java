@@ -98,12 +98,12 @@ public abstract class BlockType {
         String post = postPend.isEmpty() ? "" : "_" + postPend;
         ResourceLocation[] targets = {
                 // TFC & AFC: Include children of wood_type: stairs, slab...
-                new ResourceLocation(id.getNamespace(), "wood/planks/" + id.getPath() + "_" + append),
+                id.withPath("wood/planks/" + id.getPath() + "_" + append),
                 // TFC & AFC: Include twig (sticks), leaves, planks
-                new ResourceLocation(id.getNamespace(), "wood/" + append + post + "/" + id.getPath()),
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + append + post),
-                new ResourceLocation(id.getNamespace(), append + "_" + id.getPath() + post),
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_planks_" + append + post),
+                id.withPath("wood/" + append + post + "/" + id.getPath()),
+                id.withPath(id.getPath() + "_" + append + post),
+                id.withPath(append + "_" + id.getPath() + post),
+                id.withPath(id.getPath() + "_planks_" + append + post),
         };
         V found = null;
         for (var r : targets) {

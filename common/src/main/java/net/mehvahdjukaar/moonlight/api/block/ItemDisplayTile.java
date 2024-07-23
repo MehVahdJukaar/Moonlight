@@ -4,6 +4,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -167,25 +168,25 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     @Override
-    public void load(CompoundTag compound) {
-        super.load(compound);
-        if (!this.tryLoadLootTable(compound)) {
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        if (!this.tryLoadLootTable(tag)) {
             this.stacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         }
-        ContainerHelper.loadAllItems(compound, this.stacks);
+        ContainerHelper.loadAllItems(tag, this.stacks, registries);
         if (this.level != null) {
             if (this.level.isClientSide) this.updateClientVisualsOnLoad();
                 //this doesn't work on first load cause world is null on server. You need to save stuff on nbt
             else this.updateTileOnInventoryChanged();
         }
-        this.loadOwner(compound);
+        this.loadOwner(tag);
     }
 
     @Override
-    public void saveAdditional(CompoundTag compound) {
-        super.saveAdditional(compound);
+    public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries) {
+        super.saveAdditional(compound, registries);
         if (!this.trySaveLootTable(compound)) {
-            ContainerHelper.saveAllItems(compound, this.stacks);
+            ContainerHelper.saveAllItems(compound, this.stacks, registries);
         }
         this.saveOwner(compound);
     }
@@ -196,8 +197,8 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        return this.saveWithoutMetadata();
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
     }
 
     @Override

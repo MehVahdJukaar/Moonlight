@@ -4,7 +4,9 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
+import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
@@ -57,7 +59,7 @@ public class TextUtil {
 
     public static FormattedText parseText(String s) {
         try {
-            FormattedText mutableComponent = Component.Serializer.fromJson(s);
+            FormattedText mutableComponent = Component.Serializer.fromJson(s, Utils.hackyGetRegistryAccess());
             if (mutableComponent != null) {
                 return mutableComponent;
             }

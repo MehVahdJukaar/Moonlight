@@ -29,7 +29,7 @@ public class DataObjectReference<T> implements Supplier<T> {
     private Holder<T> cache;
 
     public DataObjectReference(String id, ResourceKey<Registry<T>> registry) {
-        this(new ResourceLocation(id), registry);
+        this(ResourceLocation.parse(id), registry);
     }
 
     public DataObjectReference(ResourceLocation location, ResourceKey<Registry<T>> registry) {

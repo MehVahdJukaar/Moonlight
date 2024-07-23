@@ -21,7 +21,7 @@ public interface CustomModelLoader {
     static BakedModel parseModel(JsonElement j, ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
         BlockModel model;
         if (j.isJsonPrimitive()) {
-            model = (BlockModel) modelBaker.getModel(ResourceLocation.tryParse(j.getAsString()));
+            model = (BlockModel) modelBaker.getModel(ResourceLocation.parse(j.getAsString()));
         } else {
             model = ClientHelper.parseBlockModel(j);
         }

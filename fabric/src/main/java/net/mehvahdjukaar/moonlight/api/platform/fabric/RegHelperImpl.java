@@ -37,6 +37,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
@@ -269,7 +270,7 @@ public class RegHelperImpl {
                 }));
     }
 
-    public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient) {
+    public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {
     }
 
 

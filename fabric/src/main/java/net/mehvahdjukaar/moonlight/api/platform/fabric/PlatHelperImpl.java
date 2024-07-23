@@ -73,10 +73,6 @@ public class PlatHelperImpl {
         return PlatHelper.Platform.FABRIC;
     }
 
-    public static boolean isData() {
-        return false;
-    }
-
     public static boolean isModLoaded(String name) {
         return FabricLoader.getInstance().isModLoaded(name);
     }
@@ -190,15 +186,6 @@ public class PlatHelperImpl {
 
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {
         return new FlowerPotBlock(supplier.get(), properties);
-    }
-
-    public static RecordItem newMusicDisc(int power, Supplier<SoundEvent> music, Item.Properties properties, int secondDuration) {
-        class ModRecord extends RecordItem {
-            protected ModRecord(int i, SoundEvent soundEvent, Properties properties) {
-                super(i, soundEvent, properties, secondDuration);
-            }
-        }
-        return new ModRecord(power, music.get(), properties);
     }
 
     public static SimpleParticleType newParticle() {
