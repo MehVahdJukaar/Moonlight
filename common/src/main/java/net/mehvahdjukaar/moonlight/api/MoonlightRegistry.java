@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.core.loot.OptionalItemPool;
 import net.mehvahdjukaar.moonlight.core.loot.OptionalPropertyCondition;
 import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -48,5 +49,7 @@ public class MoonlightRegistry {
                     new LootItemConditionType(new OptionalPropertyCondition.ConditionSerializer()), Registries.LOOT_CONDITION_TYPE);
 
     public static final GrindItemTrigger GRIND_TRIGGER = CriteriaTriggers.register(new GrindItemTrigger());
+
+    public static final Supplier<SimpleCriterionTrigger<?>> OPTIONAL_ITEM_TRIGGER
 
 }
