@@ -17,7 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -32,25 +31,11 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface ILightable {
 
-    TagKey<Item> FLINT_AND_STEELS = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "tools/flint_and_steel"));
+    TagKey<Item> FLINT_AND_STEELS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "tools/igniter"));
 
-    default boolean isLitUp(BlockState state, BlockGetter level, BlockPos pos) {
-        return isLitUp(state);
-    }
+    boolean isLitUp(BlockState state, BlockGetter level, BlockPos pos);
 
-    default void setLitUp(BlockState state, LevelAccessor world, BlockPos pos, boolean lit) {
-        world.setBlock(pos, toggleLitState(state, lit), 3);
-    }
-
-    @Deprecated(forRemoval = true)
-    default boolean isLitUp(BlockState state) {
-        return false;
-    }
-
-    @Deprecated(forRemoval = true)
-    default BlockState toggleLitState(BlockState state, boolean lit) {
-        return state;
-    }
+    void setLitUp(BlockState state, LevelAccessor world, BlockPos pos, boolean lit);
 
     default boolean lightUp(@Nullable Entity player, BlockState state, BlockPos pos, LevelAccessor world, FireSourceType fireSourceType) {
         if (!isLitUp(state, world, pos)) {
