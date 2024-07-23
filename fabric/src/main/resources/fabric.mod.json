@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "id": "moonlight",
-  "version": "${version}",
-  "name": "Moonlight",
-  "description": "Custom Villagers AI and Map Markers, First and third person item animations, dynamic assets and registration & more",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
   "authors": [
-    "MehVahdJukaar"
+    "${mod_authors}"
   ],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/selene",
-    "sources": "https://github.com/MehVahdJukaar/Moonlight"
+    "homepage": "${mod_homepage}",
+    "sources": "${mod_github}"
   },
-  "license": "gplv3",
+  "license": "${mod_license}",
   "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
@@ -33,8 +33,8 @@
     "${mod_id}-common.mixins.json"
   ],
   "depends": {
-    "fabric": ">=0.86.0",
-    "minecraft": "1.20.1"
+    "fabric": ">=0.92.0+1.20.1",
+    "minecraft": ">=${minecraft_min_version} <${minecraft_max_version}"
   },
   "custom": {
     "modmenu": {
