@@ -101,12 +101,8 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
             this.setDeltaMovement(Vec3.ZERO);
         }
 
-        if (!noPhysics && tickCount > 1) {
-            this.isStuck = this.position().equals(new Vec3(xo, yo, zo));
-
-            if (this.isStuck) {
-                this.stuckTime++;
-            }
+        if (!noPhysics && this.isStuck) {
+            this.stuckTime++;
         }
 
         this.move(MoverType.SELF, movement);
