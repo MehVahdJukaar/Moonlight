@@ -1,11 +1,9 @@
 package net.mehvahdjukaar.moonlight.forge;
 
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
@@ -19,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -46,6 +45,7 @@ public class MoonlightForge {
             .buildAndRegister()).getSpec();
 
     public MoonlightForge(IEventBus bus) {
+
         Moonlight.commonInit();
         NeoForge.EVENT_BUS.register(MoonlightForge.class);
         bus.addListener(MoonlightForge::configsLoaded);
@@ -138,18 +138,9 @@ public class MoonlightForge {
         if (!event.getLevel().isClientSide()) Moonlight.checkDatapackRegistry();
     }
 
-    private static WeakReference<IEventBus> currentModBus = null;
-
-    @Deprecated
-    public static IEventBus getCurrentModBus() {
-        if(currentModBus == null){
-            throw new IllegalStateException("Mod bus not initialized. You must call MoonlightForge.initRegistrationFor() before you start to register things");
-        }
-        return currentModBus.get();
+    public static IEventBus getBusForId(String modId) {
+       return ModList.get().getModContainerById(modId).get().getEventBus();
     }
 
-    public static void initRegistrationFor(IEventBus eventBus){
-        currentModBus = new WeakReference<>(eventBus);
-    }
 }
 

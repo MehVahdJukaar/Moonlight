@@ -82,18 +82,18 @@ public class LeavesType extends BlockType {
         }
 
         public static Finder simple(String modId, String leavesTypeName, String leavesName) {
-            return new Finder(new ResourceLocation(modId, leavesTypeName),
-                    () -> BuiltInRegistries.BLOCK.get(new ResourceLocation(modId, leavesName)), null);
+            return new Finder(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName),
+                    () -> BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(modId, leavesName)), null);
         }
 
         public static Finder simple(String modId, String leavesTypeName, String leavesName, String woodTypeName) {
-            return new Finder(new ResourceLocation(modId, leavesTypeName),
-                    () -> BuiltInRegistries.BLOCK.get(new ResourceLocation(modId, leavesName)),
-                    () -> WoodTypeRegistry.INSTANCE.get(new ResourceLocation(woodTypeName)));
+            return new Finder(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName),
+                    () -> BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(modId, leavesName)),
+                    () -> WoodTypeRegistry.INSTANCE.get(ResourceLocation.parse(woodTypeName)));
         }
 
         public void addChild(String childType, String childName) {
-            addChild(childType, new ResourceLocation(id.getNamespace(), childName));
+            addChild(childType, id.withPath(childName));
         }
 
         public void addChild(String childType, ResourceLocation childName) {

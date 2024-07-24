@@ -14,7 +14,7 @@ import java.util.*;
 
 public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
-    public static final WoodType OAK_TYPE = new WoodType(new ResourceLocation("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
+    public static final WoodType OAK_TYPE = new WoodType(ResourceLocation.parse("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
 
     public static final WoodTypeRegistry INSTANCE = new WoodTypeRegistry();
 
@@ -42,7 +42,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     public WoodTypeRegistry() {
         super(WoodType.class, "wood_type");
         this.addFinder(() -> {
-            var b = new WoodType(new ResourceLocation("bamboo"), Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_BLOCK);
+            var b = new WoodType(ResourceLocation.parse("bamboo"), Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_BLOCK);
             b.addChild("stripped_log", Blocks.STRIPPED_BAMBOO_BLOCK);
             return Optional.of(b);
         });
@@ -65,9 +65,9 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             // Needs to contain palnks in its path
             if (path.contains("wood/planks/")) {
                 var log = BuiltInRegistries.BLOCK.getOptional(
-                        new ResourceLocation(baseRes.getNamespace(), path.replace("planks", "log")));
+                        baseRes.withPath(path.replace("planks", "log")));
                 if (log.isPresent()) {
-                    ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), path.replace("wood/planks/", ""));
+                    ResourceLocation id = baseRes.withPath(path.replace("wood/planks/", ""));
                     return Optional.of(new WoodType(id, baseBlock, log.get()));
                 }
             }
@@ -92,7 +92,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 //needs to use wood sound type
                 //we do not allow "/" in the wood name
                 name = name.replace("/", "_");
-                ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
+                ResourceLocation id = baseRes.withPath(name);
                 Block logBlock = findLog(id);
                 if (logBlock != null) {
                     return Optional.of(new WoodType(id, baseBlock, logBlock));
@@ -107,10 +107,10 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         List<String> keywords = List.of("log", "stem", "stalk", "hyphae");
         List<ResourceLocation> resources = new ArrayList<>();
         for (String keyword : keywords) {
-            resources.add(new ResourceLocation(id.getNamespace(), id.getPath() + "_" + keyword));
-            resources.add(new ResourceLocation(id.getNamespace(), keyword + "_" + id.getPath()));
-            resources.add(new ResourceLocation(id.getPath() + "_" + keyword));
-            resources.add(new ResourceLocation(keyword + "_" + id.getPath()));
+            resources.add(id.withPath(id.getPath() + "_" + keyword));
+            resources.add(id.withPath(keyword + "_" + id.getPath()));
+            resources.add(ResourceLocation.parse(id.getPath() + "_" + keyword));
+            resources.add(ResourceLocation.parse(keyword + "_" + id.getPath()));
         }
         ResourceLocation[] test = resources.toArray(new ResourceLocation[0]);
         Block temp = null;

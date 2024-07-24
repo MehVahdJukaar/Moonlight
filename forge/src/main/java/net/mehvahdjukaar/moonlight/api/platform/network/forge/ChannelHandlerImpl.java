@@ -35,7 +35,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
     public ChannelHandlerImpl(String modId, IntSupplier v) {
         super(modId);
         Supplier<String> ver = () -> String.valueOf(v.getAsInt());
-        this.channel = NetworkRegistry.newSimpleChannel(new ResourceLocation(modId, "channel"), ver,
+        this.channel = NetworkRegistry.newSimpleChannel(ResourceLocation.parse(modId, "channel"), ver,
                 ver.get()::equals, ver.get()::equals);
     }
 

@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -13,6 +12,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -288,7 +288,7 @@ public class SoftFluid {
          * @param fluid equivalent forge fluid
          */
         public Builder(Fluid fluid) {
-            this(new ResourceLocation("block/water_still"), new ResourceLocation("minecraft:block/water_flowing"));
+            this(ResourceLocation.parse("block/water_still"), ResourceLocation.parse("minecraft:block/water_flowing"));
             //these textures are later overwritten by copy textures from;
             this.copyTexturesFrom(Utils.getID(fluid));
             this.addEqFluid(fluid);
@@ -409,7 +409,7 @@ public class SoftFluid {
         }
 
         public final Builder copyTexturesFrom(String fluidRes) {
-            return copyTexturesFrom(new ResourceLocation(fluidRes));
+            return copyTexturesFrom(ResourceLocation.parse(fluidRes));
         }
 
         /**
@@ -577,7 +577,7 @@ public class SoftFluid {
 
     public static final Codec<Holder<SoftFluid>> HOLDER_CODEC = RegistryFileCodec.create(SoftFluidRegistry.KEY, SoftFluid.CODEC);
 
-    public static final Codec<Component> COMPONENT_CODEC = Codec.either(ExtraCodecs.COMPONENT, Codec.STRING).xmap(
+    public static final Codec<Component> COMPONENT_CODEC = Codec.either(ComponentSerialization.FLAT_CODEC, Codec.STRING).xmap(
             either -> either.map(c -> c, Component::translatable), Either::left);
 
 
@@ -585,16 +585,16 @@ public class SoftFluid {
     public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
             ResourceLocation.CODEC.fieldOf("flowing_texture").forGetter(SoftFluid::getFlowingTexture),
-            StrOpt.of(COMPONENT_CODEC, "translation_key").forGetter(getHackyOptional(SoftFluid::getTranslatedName)),
-            StrOpt.of(Codec.intRange(0, 15), "luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
-            StrOpt.of(Codec.intRange(0, 15), "emissivity").forGetter(getHackyOptional(SoftFluid::getEmissivity)),
-            StrOpt.of(ColorUtils.CODEC, "color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
-            StrOpt.of(TintMethod.CODEC, "tint_method").forGetter(getHackyOptional(SoftFluid::getTintMethod)),
+            COMPONENT_CODEC.optionalFieldOf( "translation_key").forGetter(getHackyOptional(SoftFluid::getTranslatedName)),
+            Codec.intRange(0, 15).optionalFieldOf( "luminosity").forGetter(getHackyOptional(SoftFluid::getLuminosity)),
+            Codec.intRange(0, 15).optionalFieldOf("emissivity").forGetter(getHackyOptional(SoftFluid::getEmissivity)),
+            ColorUtils.CODEC.optionalFieldOf( "color").forGetter(getHackyOptional(SoftFluid::getTintColor)),
+            TintMethod.CODEC.optionalFieldOf( "tint_method").forGetter(getHackyOptional(SoftFluid::getTintMethod)),
             FoodProvider.CODEC.optionalFieldOf("food").forGetter(getHackyOptional(SoftFluid::getFoodProvider)),
-            StrOpt.of(Codec.STRING.listOf(), "preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
-            StrOpt.of(FluidContainerList.Category.CODEC.listOf(), "containers").forGetter(f -> f.getContainerList().encodeList()),
-            StrOpt.of(Codec.STRING.listOf(), "equivalent_fluids", new ArrayList<>()).forGetter(s -> s.equivalentFluids.keys),
-            StrOpt.of(ResourceLocation.CODEC, "use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
+           Codec.STRING.listOf().optionalFieldOf( "preserved_tags_from_item").forGetter(getHackyOptional(SoftFluid::getNbtKeyFromItem)),
+           FluidContainerList.Category.CODEC.listOf().optionalFieldOf( "containers").forGetter(f -> f.getContainerList().encodeList()),
+           Codec.STRING.listOf().optionalFieldOf( "equivalent_fluids", new ArrayList<>()).forGetter(s -> s.equivalentFluids.keys),
+           ResourceLocation.CODEC.optionalFieldOf( "use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
     ).apply(instance, SoftFluid::create));
 
 
@@ -620,7 +620,7 @@ public class SoftFluid {
         return builder.build();
     }
 
-    private static final SoftFluid DEFAULT_DUMMY = new SoftFluid(new Builder(new ResourceLocation(""), new ResourceLocation("")));
+    private static final SoftFluid DEFAULT_DUMMY = new SoftFluid(new Builder(ResourceLocation.parse(""), ResourceLocation.parse("")));
 
     //hacky. gets an optional if the fluid value is its default one
     private static <T> Function<SoftFluid, Optional<T>> getHackyOptional(final Function<SoftFluid, T> getter) {
@@ -684,9 +684,9 @@ public class SoftFluid {
                 if (key.startsWith("#")) {
                     //actually this wont work because we need these before tags are loaded...
                     tags.add(TagKey.create(Registries.FLUID,
-                                    new ResourceLocation(key.substring(1))));
+                                    ResourceLocation.parse(key.substring(1))));
                 }
-                else BuiltInRegistries.FLUID.getOptional(new ResourceLocation(key)).ifPresent(set::add);
+                else BuiltInRegistries.FLUID.getOptional(ResourceLocation.parse(key)).ifPresent(set::add);
             }
             fluids = List.of(set.toArray(new Fluid[0]));
         }

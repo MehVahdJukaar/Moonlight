@@ -35,7 +35,7 @@ public abstract class ConfigBuilder {
     }
 
     public static ConfigBuilder create(String modId, ConfigType type) {
-        return create(new ResourceLocation(modId, type.toString().toLowerCase(Locale.ROOT)), type);
+        return create(ResourceLocation.fromNamespaceAndPath(modId, type.toString().toLowerCase(Locale.ROOT)), type);
     }
 
     private final ResourceLocation name;
@@ -126,7 +126,7 @@ public abstract class ConfigBuilder {
         private String oldString;
 
         public ResourceLocationConfigValue(ConfigBuilder builder, String path, ResourceLocation defaultValue) {
-            this.inner = builder.define(path, defaultValue.toString(), s -> s != null && ResourceLocation.isValidResourceLocation((String) s));
+            this.inner = builder.define(path, defaultValue.toString(), s -> s != null && ResourceLocation.tryParse((String) s) != null);
         }
 
         @Override
@@ -134,7 +134,7 @@ public abstract class ConfigBuilder {
             String s = inner.get();
             if (!s.equals(oldString)) cache = null;
             oldString = s;
-            if (cache == null) cache = new ResourceLocation(s);
+            if (cache == null) cache = ResourceLocation.parse(s);
             return cache;
         }
     }

@@ -316,18 +316,6 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    @Deprecated(forRemoval = true)
-    @ExpectPlatform
-    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    @ExpectPlatform
-    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        throw new AssertionError();
-    }
-
     @ExpectPlatform
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         throw new AssertionError();
@@ -519,7 +507,7 @@ public class RegHelper {
             if (type.equals(VariantType.BLOCK)) continue;
             String name = baseName.getPath();
             name += "_" + type.name().toLowerCase(Locale.ROOT);
-            ResourceLocation blockId = new ResourceLocation(modId, name);
+            ResourceLocation blockId = ResourceLocation.parse(modId, name);
             var block = registerBlock(blockId, () ->
                     type.create(BlockBehaviour.Properties.ofFullCopy(baseBlock.get()), baseBlock::get));
             registerItem(blockId, () -> new BlockItem(block.get(), new Item.Properties()));
@@ -543,25 +531,6 @@ public class RegHelper {
     @ExpectPlatform
     public static void addLootTableInjects(Consumer<LootInjectEvent> eventListener) {
         throw new AssertionError();
-    }
-
-
-    // Animal food stuff
-
-    public static void registerChickenFood(ItemLike... food) {
-        List<ItemStack> chickenFood = new ArrayList<>(List.of(Chicken.FOOD_ITEMS.getItems()));
-        Arrays.stream(food).forEach(f -> chickenFood.add(f.asItem().getDefaultInstance()));
-        Chicken.FOOD_ITEMS = Ingredient.of(chickenFood.stream());
-    }
-
-    public static void registerHorseFood(ItemLike... food) {
-        List<ItemStack> horseFood = new ArrayList<>(List.of(AbstractHorse.FOOD_ITEMS.getItems()));
-        Arrays.stream(food).forEach(f -> horseFood.add(f.asItem().getDefaultInstance()));
-        AbstractHorse.FOOD_ITEMS = Ingredient.of(horseFood.stream());
-    }
-
-    public static void registerParrotFood(ItemLike... food) {
-        Arrays.stream(food).forEach(f -> Parrot.TAME_FOOD.add(f.asItem()));
     }
 
     // Only relevant on forge

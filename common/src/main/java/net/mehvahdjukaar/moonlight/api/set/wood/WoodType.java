@@ -88,20 +88,18 @@ public class WoodType extends BlockType {
 
         // SUPPORT: TFC & AFC
         String path = id.getPath();
-        String namespace = id.getNamespace();
         if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
             var o = BuiltInRegistries.BLOCK.getOptional(
-                    new ResourceLocation(namespace,
-                            "wood/" + prefix_ + postfix + "/" + path));
+                    id.withPath("wood/" + prefix_ + postfix + "/" + path));
             if (o.isPresent()) return o.get();
         }
 
         Set<ResourceLocation> targets = new HashSet<>();
         Collections.addAll(targets,
-                new ResourceLocation(namespace, path + "_" + prefix_ + postfix),
-                new ResourceLocation(namespace, prefix_ + path + "_" + postfix),
-                new ResourceLocation(namespace, logN + "_" + prefix_ + postfix),
-                new ResourceLocation(namespace, prefix_ + logN + "_" + postfix)
+                id.withPath(path + "_" + prefix_ + postfix),
+                id.withPath(prefix_ + path + "_" + postfix),
+                id.withPath(logN + "_" + prefix_ + postfix),
+                id.withPath(prefix_ + logN + "_" + postfix)
         );
         Block found = null;
         for (var r : targets) {
@@ -198,7 +196,8 @@ public class WoodType extends BlockType {
         }
 
         public static Finder simple(String modId, String woodTypeName, String planksName, String logName) {
-            return simple(new ResourceLocation(modId, woodTypeName), new ResourceLocation(modId, planksName), new ResourceLocation(modId, logName));
+            return simple(ResourceLocation.fromNamespaceAndPath(modId, woodTypeName), ResourceLocation.fromNamespaceAndPath(modId, planksName),
+                    ResourceLocation.fromNamespaceAndPath(modId, logName));
         }
 
         public static Finder simple(ResourceLocation woodTypeName, ResourceLocation planksName, ResourceLocation logName) {
@@ -208,7 +207,7 @@ public class WoodType extends BlockType {
         }
 
         public void addChild(String childType, String childName) {
-            addChild(childType, new ResourceLocation(id.getNamespace(), childName));
+            addChild(childType, id.withPath(childName));
         }
 
         public void addChild(String childType, ResourceLocation childName) {

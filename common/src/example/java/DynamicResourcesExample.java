@@ -43,7 +43,7 @@ public class DynamicResourcesExample {
                     () -> TextureUtilsExample.createRecoloredTexture(manager));
 
             // Helper object to handle resources multiple times
-            StaticResource resource = StaticResource.getOrFail(manager, new ResourceLocation("models/block/stone_bricks.json"));
+            StaticResource resource = StaticResource.getOrFail(manager, ResourceLocation.parse("models/block/stone_bricks.json"));
 
             // Helper method to add similar resources, just string replaces its content. You can also do more complex operations
             this.addSimilarJsonResource(manager, resource, "stone_bricks", "sturdy_stone_bricks");

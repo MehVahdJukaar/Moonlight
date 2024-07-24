@@ -22,9 +22,7 @@ import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
-import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 
 import java.util.Map;
@@ -34,7 +32,7 @@ import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry.KEY;
 public class SoftFluidInternalImpl {
 
     public static void init() {
-        IEventBus bus = MoonlightForge.getCurrentModBus();
+        IEventBus bus = MoonlightForge.getBusForId();
         bus.register(SoftFluidInternalImpl.class);
     }
 

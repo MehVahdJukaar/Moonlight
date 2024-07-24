@@ -134,10 +134,10 @@ public class RenderedTexturesManager {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1);
             BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            bufferBuilder.vertex(matrix, 0.0f, 16, 0).uv(0, 0).endVertex();
-            bufferBuilder.vertex(matrix, 16, 16, 0).uv(1, 0).endVertex();
-            bufferBuilder.vertex(matrix, 16, 0.0f, 0).uv(1, 1).endVertex();
-            bufferBuilder.vertex(matrix, 0.0f, 0.0f, 0).uv(0, 1).endVertex();
+            bufferBuilder.addVertex(matrix, 0.0f, 16, 0).setUv(0, 0).endVertex();
+            bufferBuilder.addVertex(matrix, 16, 16, 0).setUv(1, 0).endVertex();
+            bufferBuilder.addVertex(matrix, 16, 0.0f, 0).setUv(1, 1).endVertex();
+            bufferBuilder.addVertex(matrix, 0.0f, 0.0f, 0).setUv(0, 1).endVertex();
             BufferUploader.drawWithShader(bufferBuilder.end());
         });
     }

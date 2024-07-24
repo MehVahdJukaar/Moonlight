@@ -13,15 +13,15 @@ import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
-import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
-import net.minecraft.world.flag.FeatureFlagSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -64,12 +64,12 @@ public abstract class DynamicResourcePack implements PackResources {
 
     protected static final Logger LOGGER = LogManager.getLogger();
 
+    protected final PackLocationInfo locationInfo;
     protected final boolean hidden;
     protected final boolean fixed;
     protected final Pack.Position position;
     protected final PackType packType;
     protected final Supplier<PackMetadataSection> metadata;
-    protected final Component title;
     protected final ResourceLocation resourcePackName;
     protected final Set<String> namespaces = new HashSet<>();
     protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
@@ -94,7 +94,7 @@ public abstract class DynamicResourcePack implements PackResources {
         this.resourcePackName = name;
         this.mainNamespace = name.getNamespace();
         this.namespaces.add(name.getNamespace());
-        this.title = Component.translatable(LangBuilder.getReadableName(name.toString()));
+        var title = Component.translatable(LangBuilder.getReadableName(name.toString()));
 
         this.position = position;
         this.fixed = fixed;
@@ -102,6 +102,11 @@ public abstract class DynamicResourcePack implements PackResources {
         this.metadata = Suppliers.memoize(() -> new PackMetadataSection(this.makeDescription(),
                 SharedConstants.getCurrentVersion().getPackVersion(type), Optional.empty()));
         this.generateDebugResources = PlatHelper.isDev();
+    }
+
+    @Override
+    public PackLocationInfo location() {
+        return locationInfo;
     }
 
     public Component makeDescription() {
@@ -168,24 +173,30 @@ public abstract class DynamicResourcePack implements PackResources {
         if (!INSTANCES.contains(this)) {
             PlatHelper.registerResourcePack(this.packType, () ->
                     Pack.readMetaAndCreate(
-                            this.packId(),    // id
-                            this.getTitle(), // title
-                            true,    // required -- this MAY need to be true for the pack to be enabled by default
+                            new PackLocationInfo(
+                                    this.packId(),    // id
+                                    this.getTitle(), // title
+                                    PackSource.BUILT_IN,
+                                    Optional.empty() //no clue what this is
+                            ),
                             new Pack.ResourcesSupplier() {
                                 @Override
-                                public PackResources openPrimary(String id) {
+                                public PackResources openPrimary(PackLocationInfo location) {
                                     return DynamicResourcePack.this;
                                 }
 
                                 @Override
-                                public PackResources openFull(String id, Pack.Info info) {
+                                public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
                                     return DynamicResourcePack.this;
                                 }
                             },// pack supplier
                             this.packType,
-                            Pack.Position.TOP,
-                            //this.fixed, // fixed position? no
-                            PackSource.BUILT_IN));
+                            new PackSelectionConfig(
+                                    true,    // required -- this MAY need to be true for the pack to be enabled by default
+                                    Pack.Position.TOP,
+                                    false // fixed position
+                            )
+                    ));
             INSTANCES.add(this);
         }
     }
@@ -206,7 +217,7 @@ public abstract class DynamicResourcePack implements PackResources {
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
         try {
             return serializer == PackMetadataSection.TYPE ? (T) this.metadata.get() : null;
-        } catch (Exception exception){
+        } catch (Exception exception) {
             return null;
         }
     }

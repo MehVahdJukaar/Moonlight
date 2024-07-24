@@ -50,7 +50,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder) {
 
-        ResourceLocation res = new ResourceLocation(name, String.valueOf(id++));
+        ResourceLocation res = ResourceLocation.parse(name, String.valueOf(id++));
         ID_MAP.put(messageClass, res);
 
         if (direction != NetworkDir.PLAY_TO_CLIENT) {

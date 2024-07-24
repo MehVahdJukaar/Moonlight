@@ -51,7 +51,7 @@ public class FakeLocalPlayer extends AbstractClientPlayer {
     }
 
     @Override
-    public EntityDimensions getDimensions(Pose pose) {
+    public EntityDimensions getDefaultDimensions(Pose pose) {
         return dimensions;
     }
 

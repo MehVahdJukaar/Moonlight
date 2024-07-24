@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.item.crafting.Recipe;
@@ -41,8 +42,7 @@ public class DynamicDataPack extends DynamicResourcePack {
         String tagPath = type.location().getPath();
         if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item") || tagPath.equals("fluid"))
             tagPath = tagPath + "s";
-        ResourceLocation loc = ResType.TAGS.getPath(new ResourceLocation(tagId.getNamespace(),
-                tagPath + "/" + tagId.getPath()));
+        ResourceLocation loc = ResType.TAGS.getPath(tagId.withPath(tagPath + "/" + tagId.getPath()));
         //merge tags
         if (this.resources.containsKey(loc)) {
             var r = resources.get(loc);
@@ -82,7 +82,7 @@ public class DynamicDataPack extends DynamicResourcePack {
                                 .add(LootItem.lootTableItem(itemLike)).unwrap());
     }
 
-    public void addRecipe(RecipeHolder<?> holder){
+    public void addRecipe(RecipeHolder<?> holder) {
         addRecipe(holder.value(), holder.id());
     }
 
@@ -101,6 +101,7 @@ public class DynamicDataPack extends DynamicResourcePack {
     public void addRecipeNoAdvancement(Recipe<?> recipe, ResourceLocation id) {
         this.addJson(id, RPUtils.writeRecipe(recipe), ResType.RECIPES);
     }
+
 
 
 }

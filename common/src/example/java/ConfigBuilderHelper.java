@@ -41,7 +41,7 @@ public class ConfigBuilderHelper {
         builder.push("misc");
         BOOL_CONFIG = builder.comment("This is a boolean config").define("bool_config", true);
         COLOR_CONFIG = builder.comment("Hex color config").defineColor("color", 0xff0000);
-        RESOURCE_CONFIG = builder.comment("Resource location config").define("res", new ResourceLocation("hello"));
+        RESOURCE_CONFIG = builder.comment("Resource location config").define("res", ResourceLocation.parse("hello"));
         ENUM_CONFIG = builder.comment("Enum config").define("direction", Direction.UP);
         LIST_CONFIG = builder.comment("This is a list").define("list_config", List.of("dog"));
         OBJECT_CONFIG = builder.comment("Custom object. Note that this wont show up on config screens")

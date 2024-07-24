@@ -39,9 +39,9 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
     private static int count = 0;
 
     static{
-        REGISTRY.register(new ResourceLocation("simple"), SimpleItemListing.CODEC);
-        REGISTRY.register(new ResourceLocation("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
-        REGISTRY.register(new ResourceLocation("no_op"), NoOpListing.CODEC);
+        REGISTRY.register(ResourceLocation.parse("simple"), SimpleItemListing.CODEC);
+        REGISTRY.register(ResourceLocation.parse("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
+        REGISTRY.register(ResourceLocation.parse("no_op"), NoOpListing.CODEC);
     }
 
 

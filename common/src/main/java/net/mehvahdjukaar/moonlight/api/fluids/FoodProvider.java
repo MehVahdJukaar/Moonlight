@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -18,33 +17,33 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SuspiciousEffectHolder;
+import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class FoodProvider {
 
     public static final Codec<FoodProvider> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(f -> f.food),
-            StrOpt.of(SoftFluid.Capacity.INT_CODEC, "divider", 1).forGetter(f -> f.divider)
+            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(f -> f.foodItem),
+            SoftFluid.Capacity.INT_CODEC.optionalFieldOf("divider", 1).forGetter(f -> f.divider)
     ).apply(instance, FoodProvider::create));
 
     public static final FoodProvider EMPTY = new FoodProvider(Items.AIR, 1);
 
-    protected final Item food;
+    protected final Item foodItem;
     protected final int divider;
 
     private FoodProvider(Item food, int divider) {
-        this.food = food;
+        this.foodItem = food;
         this.divider = divider;
     }
 
-    public Item getFood() {
-        return food;
+    public Item getFoodItem() {
+        return foodItem;
     }
 
     public int getDivider() {
@@ -62,25 +61,25 @@ public class FoodProvider {
      */
     public boolean consume(Player player, Level world, @Nullable Consumer<ItemStack> nbtApplier) {
 
-        ItemStack stack = this.food.getDefaultInstance();
-        if (nbtApplier != null) nbtApplier.accept(stack);
+        ItemStack foodStack = this.foodItem.getDefaultInstance();
+        if (nbtApplier != null) nbtApplier.accept(foodStack);
 
         //food
 
-        FoodProperties foodProperties = PlatHelper.getFoodProperties(this.food, stack, player);
+        FoodProperties foodProperties = PlatHelper.getFoodProperties(foodStack, player);
         //single items are handled by items themselves
         if (this.divider == 1) {
-            this.food.finishUsingItem(stack.copy(), world, player);
-            if (foodProperties == null || stack.getItem().isEdible()) {
-                player.playSound(this.food.getDrinkingSound(), 1, 1);
+            this.foodItem.finishUsingItem(foodStack.copy(), world, player);
+            if (foodProperties != null) {
+                player.playSound(this.foodItem.getDrinkingSound(), 1, 1);
             }
             //player already plays sound
             return true;
         }
         if (foodProperties != null && player.canEat(false)) {
 
-            player.getFoodData().eat(foodProperties.getNutrition() / this.divider, foodProperties.getSaturationModifier() / (float) this.divider);
-            player.playSound(this.food.getDrinkingSound(), 1, 1);
+            player.getFoodData().eat(foodProperties.nutrition() / this.divider, foodProperties.saturation() / (float) this.divider);
+            player.playSound(this.foodItem.getDrinkingSound(), 1, 1);
             return true;
         }
         return false;
@@ -104,7 +103,7 @@ public class FoodProvider {
 
         @Override
         public boolean consume(Player player, Level world, @Nullable Consumer<ItemStack> nbtApplier) {
-            ItemStack stack = this.food.getDefaultInstance();
+            ItemStack stack = this.foodItem.getDefaultInstance();
             if (nbtApplier != null) nbtApplier.accept(stack);
             for (MobEffectInstance effect : player.getActiveEffectsMap().values()) {
                 if (ForgeHelper.isCurativeItem(stack, effect)) {
@@ -112,7 +111,7 @@ public class FoodProvider {
                     break;
                 }
             }
-            player.playSound(this.food.getDrinkingSound(), 1, 1);
+            player.playSound(this.foodItem.getDrinkingSound(), 1, 1);
             return true;
         }
     };
@@ -122,9 +121,9 @@ public class FoodProvider {
         @Override
         public boolean consume(Player player, Level world, @Nullable Consumer<ItemStack> nbtApplier) {
 
-            ItemStack stack = this.food.getDefaultInstance();
+            ItemStack stack = this.foodItem.getDefaultInstance();
             if (nbtApplier != null) nbtApplier.accept(stack);
-            FoodProperties foodProperties = this.food.getFoodProperties();
+            FoodProperties foodProperties = PlatHelper.getFoodProperties(stack, player);
             if (foodProperties != null && player.canEat(false)) {
                 List<SuspiciousEffectHolder.EffectEntry> list = new ArrayList<>();
                 CompoundTag compoundTag = stack.getTag();
@@ -136,8 +135,8 @@ public class FoodProvider {
                     int j = effect.duration() / this.divider;
                     player.addEffect(new MobEffectInstance(effect.effect(), j));
                 }
-                player.getFoodData().eat(foodProperties.getNutrition() / this.divider, foodProperties.getSaturationModifier() / (float) this.divider);
-                player.playSound(this.food.getDrinkingSound(), 1, 1);
+                player.getFoodData().eat(foodProperties.nutrition() / this.divider, foodProperties.saturation() / (float) this.divider);
+                player.playSound(this.foodItem.getDrinkingSound(), 1, 1);
                 return true;
             }
             return false;

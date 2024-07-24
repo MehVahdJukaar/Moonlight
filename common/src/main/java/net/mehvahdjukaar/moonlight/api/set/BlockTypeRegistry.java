@@ -41,7 +41,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
      * @return wood type
      */
     public T getFromNBT(String name) {
-        return this.types.getOrDefault(new ResourceLocation(name), this.getDefaultType());
+        return this.types.getOrDefault(ResourceLocation.parse(name), this.getDefaultType());
     }
 
     @Nullable

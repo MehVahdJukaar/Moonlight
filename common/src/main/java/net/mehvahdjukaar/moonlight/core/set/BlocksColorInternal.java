@@ -66,10 +66,10 @@ public class BlocksColorInternal {
             for (var c : colorPriority) {
                 ResourceLocation newId = null;
                 if (name.startsWith(c + "_")) {
-                    newId = new ResourceLocation(id.getNamespace(), name.substring((c + "_").length()));
+                    newId = ResourceLocation.parse(id.getNamespace(), name.substring((c + "_").length()));
                 }
                 if (name.endsWith("_" + c)) {
-                    newId = new ResourceLocation(id.getNamespace(), name.substring(0, name.length() - ("_" + c).length()));
+                    newId = ResourceLocation.parse(id.getNamespace(), name.substring(0, name.length() - ("_" + c).length()));
                 }
                 if (newId != null) {
                     DyeColor dyeColor = colors.get(c);
@@ -188,13 +188,13 @@ public class BlocksColorInternal {
 
     @Nullable
     private static ColoredSet<Block> getBlockSet(String key) {
-        key = new ResourceLocation(key).toString();
+        key = ResourceLocation.parse(key).toString();
         return BLOCK_COLOR_SETS.get(key);
     }
 
     @Nullable
     private static ColoredSet<Item> getItemSet(String key) {
-        key = new ResourceLocation(key).toString();
+        key = ResourceLocation.parse(key).toString();
         return ITEM_COLOR_SETS.get(key);
     }
 
@@ -242,7 +242,7 @@ public class BlocksColorInternal {
 
                 for (var mod : newColorMods) {
                     for (var s : new String[]{namespace + ":" + path + "_%s", namespace + ":%s_" + path, mod + ":" + path + "_%s", mod + ":%s_" + path}) {
-                        var o = registry.getOptional(new ResourceLocation(String.format(s, c.getName())));
+                        var o = registry.getOptional(ResourceLocation.parse(String.format(s, c.getName())));
                         if (o.isPresent()) {
                             colorsToObj.put(c, o.get());
                             continue colors;
@@ -257,20 +257,20 @@ public class BlocksColorInternal {
 
         private T computeDefault(ResourceLocation id, Registry<T> registry) {
             if (id.getNamespace().equals("minecraft") && id.getPath().contains("stained_glass")) {
-                id = new ResourceLocation(id.getPath().replace("stained_", ""));
+                id = ResourceLocation.parse(id.getPath().replace("stained_", ""));
             } else if (id.getNamespace().equals("quark")) {
                 if (id.getPath().equals("rune")) {
-                    id = new ResourceLocation("quark", "blank_rune");
+                    id = ResourceLocation.parse("quark", "blank_rune");
                 } else if (id.getPath().equals("shard")) {
-                    id = new ResourceLocation("quark", "clear_shard");
+                    id = ResourceLocation.parse("quark", "clear_shard");
                 }
-            } else if (id.equals(new ResourceLocation("suppsquared:sack"))) {
-                id = new ResourceLocation("supplementaries:sack");
+            } else if (id.equals(ResourceLocation.parse("suppsquared:sack"))) {
+                id = ResourceLocation.parse("supplementaries:sack");
             }
             ResourceLocation finalId = id;
             var o = registry.getOptional(id);
             if (o.isEmpty()) {
-                return registry.getOptional(new ResourceLocation(finalId.getPath()))
+                return registry.getOptional(ResourceLocation.parse(finalId.getPath()))
                         .orElseGet(() -> colorsToObj.get(DyeColor.WHITE));
             } else {
                 return o.get();
@@ -283,10 +283,10 @@ public class BlocksColorInternal {
         private HolderSet<T> makeHolderSet(Registry<T> registry) {
             //standard tag location
             var v = registry.getTag(TagKey.create(registry.key(),
-                    new ResourceLocation(id.getNamespace(), id.getPath() + "s")));
+                    ResourceLocation.parse(id.getNamespace(), id.getPath() + "s")));
             if (v.isEmpty()) {
                 v = registry.getTag(TagKey.create(registry.key(),
-                        new ResourceLocation(PlatHelper.getPlatform().isForge() ? "forge" : "c", id.getPath() + "s")));
+                        ResourceLocation.parse(PlatHelper.getPlatform().isForge() ? "forge" : "c", id.getPath() + "s")));
             }
             if (v.isPresent()) {
                 var tag = v.get();

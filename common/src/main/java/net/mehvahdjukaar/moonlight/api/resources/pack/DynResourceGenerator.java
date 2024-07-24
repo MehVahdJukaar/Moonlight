@@ -180,7 +180,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             } else builder.append(partial[i]);
         }
         //adds modified under my namespace
-        ResourceLocation newRes = new ResourceLocation(this.modId, builder.toString());
+        ResourceLocation newRes = ResourceLocation.fromNamespaceAndPath(this.modId, builder.toString());
         if (!alreadyHasAssetAtLocation(manager, newRes)) {
 
             String fullText = new String(resource.data, StandardCharsets.UTF_8);

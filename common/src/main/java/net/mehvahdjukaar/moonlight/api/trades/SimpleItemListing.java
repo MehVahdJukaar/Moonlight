@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.trades;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ExtraCodecs;
@@ -28,8 +27,8 @@ public record SimpleItemListing(ItemStack price, ItemStack price2, ItemStack off
                                 int level, LootItemFunction func) implements ModItemListing {
 
     public static SimpleItemListing createDefault(ItemStack price, ItemStack price2, ItemStack offer,
-                                       int maxTrades, Optional<Integer> xp, float priceMult,
-                                       int level) {
+                                                  int maxTrades, Optional<Integer> xp, float priceMult,
+                                                  int level) {
         boolean buying = offer.is(Items.EMERALD);
         return new SimpleItemListing(price, price2, offer, maxTrades, xp.orElse(ModItemListing.defaultXp(buying, level)),
                 priceMult, level, null);
@@ -54,12 +53,12 @@ public record SimpleItemListing(ItemStack price, ItemStack price2, ItemStack off
     //TODO
     public static final Codec<SimpleItemListing> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             ItemStack.CODEC.fieldOf("price").forGetter(SimpleItemListing::price),
-            StrOpt.of(ItemStack.CODEC, "price_secondary", ItemStack.EMPTY).forGetter(SimpleItemListing::price2),
+            ItemStack.CODEC.optionalFieldOf("price_secondary", ItemStack.EMPTY).forGetter(SimpleItemListing::price2),
             ItemStack.CODEC.fieldOf("offer").forGetter(SimpleItemListing::offer),
-            StrOpt.of(ExtraCodecs.POSITIVE_INT, "max_trades", 16).forGetter(SimpleItemListing::maxTrades),
-            StrOpt.of(ExtraCodecs.POSITIVE_INT, "xp").forGetter(s -> Optional.of(s.xp)),
-            StrOpt.of(ExtraCodecs.POSITIVE_FLOAT, "price_multiplier", 0.05f).forGetter(SimpleItemListing::priceMult),
-            StrOpt.of(Codec.intRange(1, 5), "level", 1).forGetter(SimpleItemListing::level)
+            ExtraCodecs.POSITIVE_INT.optionalFieldOf("max_trades", 16).forGetter(SimpleItemListing::maxTrades),
+            ExtraCodecs.POSITIVE_INT.optionalFieldOf("xp").forGetter(s -> Optional.of(s.xp)),
+            ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("price_multiplier", 0.05f).forGetter(SimpleItemListing::priceMult),
+            Codec.intRange(1, 5).optionalFieldOf("level", 1).forGetter(SimpleItemListing::level)
             //StrOpt.of(, "loot_function").forGetter(s->Optional.ofNullable(s.func))
     ).apply(instance, SimpleItemListing::createDefault));
 
@@ -67,7 +66,7 @@ public record SimpleItemListing(ItemStack price, ItemStack price2, ItemStack off
     public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
         AtomicReference<ItemStack> stack = new AtomicReference<>();
         stack.set(offer);
-        if(func != null && entity.level() instanceof ServerLevel serverLevel){
+        if (func != null && entity.level() instanceof ServerLevel serverLevel) {
             LootParams lootParams = new LootParams.Builder(serverLevel)
                     .withParameter(LootContextParams.ORIGIN, entity.position())
                     .withParameter(LootContextParams.THIS_ENTITY, entity)

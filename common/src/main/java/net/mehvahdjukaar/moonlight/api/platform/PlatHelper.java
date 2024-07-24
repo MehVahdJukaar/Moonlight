@@ -234,10 +234,9 @@ public class PlatHelper {
 
     @ExpectPlatform
     @Nullable
-    public static FoodProperties getFoodProperties(Item food, ItemStack stack, Player player) {
+    public static FoodProperties getFoodProperties(ItemStack stack, Player player) {
         throw new AssertionError();
     }
-
 
     @ExpectPlatform
     public static int getBurnTime(ItemStack stack) {

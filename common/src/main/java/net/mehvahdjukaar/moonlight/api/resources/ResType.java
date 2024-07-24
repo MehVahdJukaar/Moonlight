@@ -42,11 +42,11 @@ public enum ResType {
 
 
     public ResourceLocation getPath(ResourceLocation relativeLocation) {
-        return new ResourceLocation(relativeLocation.getNamespace(), String.format(this.loc, relativeLocation.getPath()));
+        return relativeLocation.withPath(String.format(this.loc, relativeLocation.getPath()));
     }
 
     public ResourceLocation getPath(String relativeLocation) {
-        return this.getPath(new ResourceLocation(relativeLocation));
+        return this.getPath(ResourceLocation.parse(relativeLocation));
     }
 
     public static ResourceLocation getTagPath(TagKey<?> tag) {

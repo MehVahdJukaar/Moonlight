@@ -10,7 +10,6 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
-import net.mehvahdjukaar.moonlight.core.mixins.MapItemMixin;
 import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -19,14 +18,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.FireworkExplosion;
@@ -34,7 +29,6 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -52,8 +46,6 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent;
-import net.neoforged.neoforge.event.village.VillagerTradesEvent;
-import net.neoforged.neoforge.event.village.WandererTradesEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -137,7 +129,7 @@ public class RegHelperImpl {
         IEventBus bus;
         if (!(cont instanceof FMLModContainer container)) {
             Moonlight.LOGGER.warn("Failed to get mod container for mod {}", modId);
-            bus = MoonlightForge.getCurrentModBus();
+            bus = MoonlightForge.getBusForId();
         } else bus = container.getEventBus();
         return bus;
     }
@@ -152,7 +144,7 @@ public class RegHelperImpl {
                 eventListener.accept((r, o) -> Registry.register(reg, r, o));
             }
         };
-        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
+        MoonlightForge.getBusForId().addListener(eventConsumer);
     }
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
@@ -207,42 +199,13 @@ public class RegHelperImpl {
         ((FireBlock) Blocks.FIRE).setFlammable(item, fireSpread, flammability);
     }
 
-    //TODO change these 2
-    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<
-            List<VillagerTrades.ItemListing>> factories) {
-        Moonlight.assertInitPhase();
-
-        Consumer<VillagerTradesEvent> eventConsumer = event -> {
-            if (event.getType() == profession) {
-                var list = event.getTrades().get(level);
-                factories.accept(list);
-            }
-        };
-        NeoForge.EVENT_BUS.addListener(eventConsumer);
-    }
-
-    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>>
-            factories) {
-        Moonlight.assertInitPhase();
-
-        //0 = common, 1 = rare
-        Consumer<WandererTradesEvent> eventConsumer = event -> {
-            if (level == 0) {
-                factories.accept(event.getGenericTrades());
-            } else {
-                factories.accept(event.getRareTrades());
-            }
-        };
-        NeoForge.EVENT_BUS.addListener(eventConsumer);
-    }
-
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
         Moonlight.assertInitPhase();
 
         Consumer<EntityAttributeCreationEvent> eventConsumer = event -> {
             eventListener.accept((e, b) -> event.put(e, b.build()));
         };
-        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
+        MoonlightForge.getBusForId().addListener(eventConsumer);
     }
 
     public static void addCommandRegistration(RegHelper.CommandRegistration eventListener) {
@@ -269,7 +232,7 @@ public class RegHelperImpl {
             RegHelper.SpawnPlacementEvent spawnPlacementEvent = new PlacementEventImpl(event);
             eventListener.accept(spawnPlacementEvent);
         };
-        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
+        MoonlightForge.getBusForId().addListener(eventConsumer);
     }
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
@@ -322,7 +285,7 @@ public class RegHelperImpl {
             });
             eventListener.accept(itemToTabEvent);
         };
-        MoonlightForge.getCurrentModBus().addListener(EventPriority.LOW, eventConsumer);
+        MoonlightForge.getBusForId().addListener(EventPriority.LOW, eventConsumer);
     }
 
 

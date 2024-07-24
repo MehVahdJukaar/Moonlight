@@ -49,7 +49,7 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
 
     private static <T extends CustomMapDecoration> DecorationRenderer<T> createRenderer(MapDecorationType<T, ?> type) {
         var id = Utils.getID(type);
-        ResourceLocation texture = new ResourceLocation(id.getNamespace(), "map_marker/" + id.getPath());
+        ResourceLocation texture = id.withPath( "map_marker/" + id.getPath());
         var custom = CUSTOM_RENDERERS_FACTORIES.get(type.getCustomFactoryID());
         if (custom != null) return (DecorationRenderer<T>) custom.apply(texture);
         else return new DecorationRenderer<>(texture);

@@ -61,11 +61,6 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         this.setOwner(thrower);
     }
 
-    @Override
-    protected float getEyeHeight(Pose pose, EntityDimensions dimensions) {
-        return dimensions.height * 0.5f;
-    }
-
     //mix of projectile + arrow code to do what both do+  fix some issues
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -327,33 +322,6 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     // Has no effect. Give this to shoot method manually
     public float getDefaultShootVelocity() {
         return 1.5F;
-    }
-
-
-    @Deprecated(forRemoval = true)
-    public boolean touchedGround;
-    @Deprecated(forRemoval = true)
-    public int groundTime = 0;
-
-    @Deprecated(forRemoval = true)
-    public void setNoPhysics(boolean noGravity) {
-        super.setNoGravity(noGravity);
-    }
-
-    @Deprecated(forRemoval = true)
-    public boolean isNoPhysics() {
-        return super.isNoGravity();
-    }
-
-    @Deprecated(forRemoval = true)
-    protected float getDeceleration() {
-        return 0.99F;
-    }
-
-    @Deprecated(forRemoval = true)
-    @Nullable
-    protected EntityHitResult findHitEntity(Vec3 oPos, Vec3 pos) {
-        return ProjectileUtil.getEntityHitResult(this.level(), this, oPos, pos, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity);
     }
 
     /**

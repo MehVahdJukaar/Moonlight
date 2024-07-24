@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.markers.SimpleMapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
@@ -30,11 +29,11 @@ public final class JsonDecorationType implements MapDecorationType<CustomMapDeco
 
 
     public static final Codec<JsonDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            StrOpt.of(RuleTest.CODEC, "target_block").forGetter(JsonDecorationType::getTarget),
-            StrOpt.of(Codec.STRING, "name").forGetter(JsonDecorationType::getName),
-            StrOpt.of(Codec.INT, "rotation", 0).forGetter(JsonDecorationType::getRotation),
-            StrOpt.of(ColorUtils.CODEC, "map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
-            StrOpt.of(RegistryCodecs.homogeneousList(Registries.STRUCTURE), "target_structures").forGetter(
+            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(JsonDecorationType::getTarget),
+            Codec.STRING.optionalFieldOf("name").forGetter(JsonDecorationType::getName),
+            Codec.INT.optionalFieldOf("rotation", 0).forGetter(JsonDecorationType::getRotation),
+            ColorUtils.CODEC.optionalFieldOf("map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
+            RegistryCodecs.homogeneousList(Registries.STRUCTURE).optionalFieldOf("target_structures").forGetter(
                     JsonDecorationType::getAssociatedStructure), Codec.STRING.xmap(PlatHelper::isModLoaded, b -> "minecraft")
                     .optionalFieldOf("from_mod", true)
                     .forGetter(t -> t.enabled)
@@ -42,10 +41,10 @@ public final class JsonDecorationType implements MapDecorationType<CustomMapDeco
 
     //we cant reference other data pack registries in network codec...
     public static final Codec<JsonDecorationType> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            StrOpt.of(RuleTest.CODEC, "target_block").forGetter(JsonDecorationType::getTarget),
-            StrOpt.of(Codec.STRING, "name").forGetter(JsonDecorationType::getName),
-            StrOpt.of(Codec.INT, "rotation", 0).forGetter(JsonDecorationType::getRotation),
-            StrOpt.of(ColorUtils.CODEC, "map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
+            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(JsonDecorationType::getTarget),
+            Codec.STRING.optionalFieldOf("name").forGetter(JsonDecorationType::getName),
+            Codec.INT.optionalFieldOf("rotation", 0).forGetter(JsonDecorationType::getRotation),
+            ColorUtils.CODEC.optionalFieldOf("map_color", 0).forGetter(JsonDecorationType::getDefaultMapColor),
             Codec.BOOL.fieldOf("enabled").forGetter(t -> t.enabled)
     ).apply(instance, JsonDecorationType::new));
 

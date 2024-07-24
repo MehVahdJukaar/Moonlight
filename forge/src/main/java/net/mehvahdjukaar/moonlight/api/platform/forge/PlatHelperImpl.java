@@ -116,11 +116,9 @@ public class PlatHelperImpl {
     }
 
     @Nullable
-    public static FoodProperties getFoodProperties(Item food, ItemStack stack, Player player) {
-        return food.getFoodProperties(stack, player);
+    public static FoodProperties getFoodProperties(ItemStack stack, Player player) {
+        return stack.getFoodProperties(player);
     }
-
-
 
     public static int getBurnTime(ItemStack stack) {
         return CommonHooks.getBurnTime(stack, null);
@@ -132,7 +130,7 @@ public class PlatHelperImpl {
     }
 
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
-        return NetworkHooks.getEntitySpawningPacket(entity);
+        return CommonHooks.getEntitySpawningPacket(entity);
     }
 
     public static Path getGamePath() {
@@ -182,7 +180,7 @@ public class PlatHelperImpl {
     }
 
     public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataProvider) {
-        NetworkHooks.openScreen(player, menuProvider, extraDataProvider);
+        CommonHooks.openScreen(player, menuProvider, extraDataProvider);
     }
 
     public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
@@ -205,7 +203,7 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLCommonSetupEvent> eventConsumer = event -> event.enqueueWork(commonSetup);
-        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
+        MoonlightForge.getBusForId().addListener(eventConsumer);
     }
 
 
@@ -213,7 +211,7 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLCommonSetupEvent> eventConsumer = event -> commonSetup.run();
-        MoonlightForge.getCurrentModBus().addListener(eventConsumer);
+        MoonlightForge.getBusForId().addListener(eventConsumer);
     }
 
 
@@ -230,7 +228,7 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         if (packSupplier == null) return;
-        var bus = MoonlightForge.getCurrentModBus();
+        var bus = MoonlightForge.getBusForId();
         Consumer<AddPackFindersEvent> consumer = event -> {
             if (event.getPackType() == packType) {
                 var p = packSupplier.get();

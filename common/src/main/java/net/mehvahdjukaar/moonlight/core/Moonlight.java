@@ -49,7 +49,7 @@ public class Moonlight {
     public static final ThreadLocal<Boolean> CAN_EARLY_RELOAD_HACK = ThreadLocal.withInitial(() -> true);
 
     public static ResourceLocation res(String name) {
-        return new ResourceLocation(MOD_ID, name);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
     }
 
     //called on mod creation
@@ -119,17 +119,6 @@ public class Moonlight {
         if (!PlatHelper.isInitializing() && PlatHelper.getPlatform().isForge()) {
             throw new AssertionError("Method has to be called during main mod initialization phase. Client and Server initializer are not valid, you must call in the main one");
         }
-    }
-
-    public static MapItemSavedData getMapDataFromKnownKeys(ServerLevel level, int mapId) {
-        var d = level.getMapData(MapItem.makeKey(mapId));
-        if (d == null) {
-            d = level.getMapData("magicmap_" + mapId);
-            if (d == null) {
-                d = level.getMapData("mazemap_" + mapId);
-            }
-        }
-        return d;
     }
 
     public static void checkDatapackRegistry() {

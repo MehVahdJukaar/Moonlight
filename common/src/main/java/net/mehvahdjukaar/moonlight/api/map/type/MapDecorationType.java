@@ -24,7 +24,7 @@ public interface MapDecorationType<D extends CustomMapDecoration, M extends MapB
     boolean isFromWorld();
 
     default ResourceLocation getCustomFactoryID() {
-        return new ResourceLocation("");
+        return ResourceLocation.parse("");
     }
 
     @Nullable

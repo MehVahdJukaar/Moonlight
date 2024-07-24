@@ -137,7 +137,7 @@ public class MapDataInternal {
 
     @Nullable
     public static MapDecorationType<? extends CustomMapDecoration, ?> get(String id) {
-        return get(new ResourceLocation(id));
+        return get(ResourceLocation.parse(id));
     }
 
     public static MapDecorationType<?, ?> get(ResourceLocation id) {
@@ -171,7 +171,7 @@ public class MapDataInternal {
     @Nullable
     public static MapBlockMarker<?> readWorldMarker(CompoundTag compound) {
         for (var id : compound.getAllKeys()) {
-            return get(new ResourceLocation(id)).loadMarkerFromNBT(compound.getCompound(id));
+            return get(ResourceLocation.parse(id)).loadMarkerFromNBT(compound.getCompound(id));
         }
         return null;
     }

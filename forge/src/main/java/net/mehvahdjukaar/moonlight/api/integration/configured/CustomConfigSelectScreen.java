@@ -64,7 +64,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     }
 
     public static ResourceLocation ensureNotNull(ResourceLocation background) {
-        return background == null ? new ResourceLocation("minecraft:textures/gui/options_background.png") : background;
+        return background == null ? ResourceLocation.parse("minecraft:textures/gui/options_background.png") : background;
     }
 
     public ItemStack getMainIcon() {

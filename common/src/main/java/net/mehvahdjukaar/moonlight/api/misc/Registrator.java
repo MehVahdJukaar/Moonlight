@@ -8,7 +8,7 @@ public interface Registrator<T> {
     void register(ResourceLocation name, T instance);
 
     default void register(String name, T instance) {
-        register(new ResourceLocation(name), instance);
+        register(ResourceLocation.parse(name), instance);
     }
 
 }

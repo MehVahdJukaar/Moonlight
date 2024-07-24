@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.minecraft.core.BlockPos;
@@ -15,16 +16,17 @@ import java.util.List;
 
 public class CaveFilter extends PlacementFilter {
 
-    public static final Codec<CaveFilter> CODEC =
-            RecordCodecBuilder.create((instance) -> instance.group(
+    public static final MapCodec<CaveFilter> CODEC =
+            RecordCodecBuilder.mapCodec((instance) -> instance.group(
                             Heightmap.Types.CODEC.listOf().fieldOf("heightmaps").forGetter((p) -> p.belowHeightMaps),
                             Codec.BOOL.fieldOf("below_sea_level").forGetter(p -> p.belowSeaLevel)
                     )
                     .apply(instance, CaveFilter::new));
 
     public static class Type implements PlacementModifierType<CaveFilter> {
+
         @Override
-        public Codec<CaveFilter> codec() {
+        public MapCodec<CaveFilter> codec() {
             return CODEC;
         }
     }

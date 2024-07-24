@@ -108,7 +108,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
     public BlockTypeResTransformer<T> replaceOakLeaves() {
         return this.replaceWithTextureFromChild("minecraft:block/oak_leaves", "leaves", s -> {
-          return   !s.contains("_snow") && !s.contains("snow_") && !s.contains("snowy_");
+            return !s.contains("_snow") && !s.contains("snow_") && !s.contains("snowy_");
         });
     }
 
@@ -209,7 +209,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
         ResourceLocation oldPath = resource.location;
 
         String id = idModifiers.apply(oldPath.getPath(), blockId, type);
-        ResourceLocation newLocation = new ResourceLocation(blockId.getNamespace(), id);
+        ResourceLocation newLocation = blockId.withPath(id);
 
         return StaticResource.create(newText.getBytes(), newLocation);
     }

@@ -22,7 +22,7 @@ public abstract class BlockModelDeserializerMixin {
     public BlockModel deserialize(BlockModel original, JsonElement element, Type type, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonobject = element.getAsJsonObject();
         if (jsonobject.has("loader")) {
-            ResourceLocation loader = new ResourceLocation(GsonHelper.getAsString(jsonobject, "loader"));
+            ResourceLocation loader = ResourceLocation.parse(GsonHelper.getAsString(jsonobject, "loader"));
             BlockModel custom = MLFabricModelLoaderRegistry.getUnbakedModel(
                     loader, context, jsonobject, original);
             if (custom != null) return custom;

@@ -74,7 +74,7 @@ public class RPUtils {
     public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
         var cached = TextureCache.getCached(block, texturePredicate);
         if (cached != null) {
-            return new ResourceLocation(cached);
+            return ResourceLocation.parse(cached);
         }
         ResourceLocation blockId = Utils.getID(block);
         var blockState = manager.getResource(ResType.BLOCKSTATES.getPath(blockId));
@@ -89,7 +89,7 @@ public class RPUtils {
 
                 for (var t : textures) {
                     TextureCache.add(block, t);
-                    if (texturePredicate.test(t)) return new ResourceLocation(t);
+                    if (texturePredicate.test(t)) return ResourceLocation.parse(t);
                 }
             }
         } catch (Exception ignored) {
@@ -98,7 +98,7 @@ public class RPUtils {
         var hack = guessBlockTextureLocation(blockId, block);
         for (var t : hack) {
             TextureCache.add(block, t);
-            if (texturePredicate.test(t)) return new ResourceLocation(t);
+            if (texturePredicate.test(t)) return ResourceLocation.parse(t);
         }
 
         throw new FileNotFoundException("Could not find any texture associated to the given block " + blockId);
@@ -159,7 +159,7 @@ public class RPUtils {
      */
     public static ResourceLocation findFirstItemTextureLocation(ResourceManager manager, Item item, Predicate<String> texturePredicate) throws FileNotFoundException {
         var cached = TextureCache.getCached(item, texturePredicate);
-        if (cached != null) return new ResourceLocation(cached);
+        if (cached != null) return ResourceLocation.parse(cached);
         ResourceLocation itemId = Utils.getID(item);
 
         Set<String> textures;
@@ -174,7 +174,7 @@ public class RPUtils {
         }
         for (var t : textures) {
             TextureCache.add(item, t);
-            if (texturePredicate.test(t)) return new ResourceLocation(t);
+            if (texturePredicate.test(t)) return ResourceLocation.parse(t);
         }
 
         throw new FileNotFoundException("Could not find any texture associated to the given item " + itemId);
@@ -232,11 +232,11 @@ public class RPUtils {
     }
 
     public static Recipe<?> readRecipe(JsonElement element) {
-        return Util.getOrThrow(Recipe.CODEC.parse(JsonOps.INSTANCE, element), JsonParseException::new);
+        return Recipe.CODEC.parse(JsonOps.INSTANCE, element).getOrThrow();
     }
 
     public static <T extends Recipe<?>> JsonElement writeRecipe(T recipe) {
-        return Util.getOrThrow(Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe), RuntimeException::new);
+        return Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow();
     }
 
     public static <T extends BlockType> RecipeHolder<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, String baseID) {
@@ -252,7 +252,7 @@ public class RPUtils {
             ItemLike newRes = BlockType.changeItemType(originalRes, originalMat, destinationMat);
             if (newRes == null) throw new UnsupportedOperationException("Failed to convert recipe");
             ItemStack result = newRes.asItem().getDefaultInstance();
-            ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
+            ResourceLocation newId = ResourceLocation.parse(baseID + "/" + destinationMat.getAppendableId());
             NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
             ShapedRecipePattern pattern = new ShapedRecipePattern(or.getWidth(), or.getHeight(), ingredients, Optional.empty());
             return new RecipeHolder<>(newId, new ShapedRecipe(or.getGroup(), or.category(),   pattern, result));
@@ -268,7 +268,7 @@ public class RPUtils {
             ItemLike newRes = BlockType.changeItemType(originalRes, originalMat, destinationMat);
             if (newRes == null) throw new UnsupportedOperationException("Failed to convert recipe");
             ItemStack result = newRes.asItem().getDefaultInstance();
-            ResourceLocation newId = new ResourceLocation(baseID + "/" + destinationMat.getAppendableId());
+            ResourceLocation newId = ResourceLocation.parse(baseID + "/" + destinationMat.getAppendableId());
             NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
             return new RecipeHolder<>(newId, new ShapelessRecipe(or.getGroup(), or.category(), result, ingredients));
         } else {

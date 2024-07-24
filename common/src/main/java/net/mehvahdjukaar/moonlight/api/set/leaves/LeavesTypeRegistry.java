@@ -15,7 +15,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     public static final LeavesTypeRegistry INSTANCE = new LeavesTypeRegistry();
 
-    public static final LeavesType OAK_TYPE = new LeavesType(new ResourceLocation("oak"), Blocks.OAK_LEAVES);
+    public static final LeavesType OAK_TYPE = new LeavesType(ResourceLocation.parse("oak"), Blocks.OAK_LEAVES);
 
     public static Collection<LeavesType> getTypes() {
         return INSTANCE.getValues();
@@ -53,7 +53,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         String namespace = baseRes.getNamespace();
         if (name != null && !namespace.equals("securitycraft") && !path.contains("hanging")) {
             if (baseBlock instanceof LeavesBlock) {
-                ResourceLocation id = new ResourceLocation(namespace, name);
+                ResourceLocation id = baseRes.withPath(name);
                 return Optional.of(new LeavesType(id, baseBlock));
             }
         }

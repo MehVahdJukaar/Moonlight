@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Transformation;
 import dev.architectury.injectables.annotations.ExpectPlatform;
@@ -7,7 +8,6 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import java.util.function.Consumer;
@@ -56,14 +56,14 @@ public interface BakedQuadBuilder extends VertexConsumer {
 
 
     @Override
-    default BakedQuadBuilder vertex(Matrix4f matrix, float x, float y, float z) {
-        VertexConsumer.super.vertex(matrix, x, y, z);
+    default BakedQuadBuilder addVertex(Matrix4f matrix, float x, float y, float z) {
+        VertexConsumer.super.addVertex(matrix, x, y, z);
         return this;
     }
 
     @Override
-    default BakedQuadBuilder normal(Matrix3f matrix, float x, float y, float z) {
-        VertexConsumer.super.normal(matrix, x, y, z);
+    default VertexConsumer setNormal(PoseStack.Pose pose, float f, float g, float h) {
+        VertexConsumer.super.setNormal(pose, f, g, h);
         return this;
     }
 }

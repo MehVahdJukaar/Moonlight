@@ -37,7 +37,6 @@ transitive-accessible method net/minecraft/world/level/block/state/properties/Wo
 transitive-accessible method net/minecraft/world/level/block/DoorBlock <init> (Lnet/minecraft/world/level/block/state/properties/BlockSetType;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
 transitive-accessible method net/minecraft/world/level/block/TrapDoorBlock <init> (Lnet/minecraft/world/level/block/state/properties/BlockSetType;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
 
-accessible method net/minecraft/world/level/saveddata/maps/MapItemSavedData addDecoration (Lnet/minecraft/world/level/saveddata/maps/MapDecoration$Type;Lnet/minecraft/world/level/LevelAccessor;Ljava/lang/String;DDDLnet/minecraft/network/chat/Component;)V
 #shader stuff
 accessible field com/mojang/blaze3d/systems/RenderSystem shaderLightDirections [Lorg/joml/Vector3f;
 transitive-accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
@@ -74,9 +73,6 @@ transitive-accessible field net/minecraft/world/entity/item/FallingBlockEntity c
 #arrow
 transitive-accessible field net/minecraft/world/entity/projectile/Projectile hasBeenShot Z
 
-#registry stuff
-accessible class net/minecraft/core/RegistrySynchronization$NetworkedRegistryData
-
 #fox sleeping for cages
 transitive-accessible method net/minecraft/world/entity/animal/Fox setSleeping (Z)V
 transitive-accessible method net/minecraft/world/entity/animal/Fox trusts (Ljava/util/UUID;)Z
@@ -88,15 +84,6 @@ transitive-accessible field net/minecraft/world/entity/Mob goalSelector Lnet/min
 
 #bee growable
 transitive-accessible method net/minecraft/world/entity/animal/Bee incrementNumCropsGrownSincePollination ()V
-
-#food
-transitive-mutable field net/minecraft/world/entity/animal/Chicken FOOD_ITEMS Lnet/minecraft/world/item/crafting/Ingredient;
-transitive-accessible field net/minecraft/world/entity/animal/Chicken FOOD_ITEMS Lnet/minecraft/world/item/crafting/Ingredient;
-
-transitive-accessible field net/minecraft/world/entity/animal/horse/AbstractHorse FOOD_ITEMS Lnet/minecraft/world/item/crafting/Ingredient;
-transitive-mutable field net/minecraft/world/entity/animal/horse/AbstractHorse FOOD_ITEMS Lnet/minecraft/world/item/crafting/Ingredient;
-
-transitive-accessible field net/minecraft/world/entity/animal/Parrot TAME_FOOD Ljava/util/Set;
 
 #key mapping
 transitive-accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
@@ -150,11 +137,6 @@ transitive-accessible method net/minecraft/client/renderer/ItemInHandRenderer re
 #sensor type constructor fabric
 transitive-accessible method net/minecraft/world/entity/schedule/Activity <init> (Ljava/lang/String;)V
 transitive-accessible method net/minecraft/world/entity/ai/sensing/SensorType <init> (Ljava/util/function/Supplier;)V
-#trunk placer fabric
-transitive-accessible method net/minecraft/world/level/levelgen/feature/treedecorators/TreeDecoratorType <init> (Lcom/mojang/serialization/Codec;)V
-transitive-accessible method net/minecraft/world/level/levelgen/feature/foliageplacers/FoliagePlacerType <init> (Lcom/mojang/serialization/Codec;)V
-transitive-accessible method net/minecraft/world/level/levelgen/feature/rootplacers/RootPlacerType <init> (Lcom/mojang/serialization/Codec;)V
-transitive-accessible method net/minecraft/world/level/levelgen/feature/trunkplacers/TrunkPlacerType <init> (Lcom/mojang/serialization/Codec;)V
 
 
 

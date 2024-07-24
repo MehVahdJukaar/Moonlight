@@ -252,7 +252,7 @@ public abstract class BlockType {
 
     public SoundType getSound() {
         if (this.mainChild() instanceof Block b) {
-            return b.getSoundType(b.defaultBlockState());
+            return b.defaultBlockState().getSoundType();
         }
         return SoundType.STONE;
     }

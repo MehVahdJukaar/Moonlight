@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacement;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.food.FoodProperties;
@@ -34,7 +35,7 @@ public abstract class ItemMixin implements IExtendedItem {
     private void onUseOnBlock(UseOnContext pContext, CallbackInfoReturnable<InteractionResult> cir) {
         AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
-            var result = behavior.overrideUseOn(pContext, foodProperties);
+            var result = behavior.overrideUseOn(pContext, PlatHelper.getFoodProperties(pContext.getItemInHand(), pContext.getPlayer()));
             if (result.consumesAction()) cir.setReturnValue(result);
         }
     }

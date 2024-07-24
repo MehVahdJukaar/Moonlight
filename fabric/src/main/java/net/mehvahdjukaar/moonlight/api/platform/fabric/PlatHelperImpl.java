@@ -27,6 +27,7 @@ import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -105,8 +106,8 @@ public class PlatHelperImpl {
     }
 
     @Nullable
-    public static FoodProperties getFoodProperties(Item food, ItemStack stack, Player player) {
-        return food.getFoodProperties();
+    public static FoodProperties getFoodProperties(ItemStack stack, Player player) {
+        return stack.get(DataComponents.FOOD);
     }
 
     public static boolean isDev() {

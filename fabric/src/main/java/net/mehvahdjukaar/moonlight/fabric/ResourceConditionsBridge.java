@@ -27,27 +27,27 @@ public class ResourceConditionsBridge {
 
     public static void init() {
         try {
-            ResourceConditions.register(new ResourceLocation("forge:not"), ResourceConditionsBridge::forgeNot);
+            ResourceConditions.register(ResourceLocation.parse("forge:not"), ResourceConditionsBridge::forgeNot);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(new ResourceLocation("forge:or"), ResourceConditionsBridge::forgeOr);
+            ResourceConditions.register(ResourceLocation.parse("forge:or"), ResourceConditionsBridge::forgeOr);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(new ResourceLocation("forge:and"), ResourceConditionsBridge::forgeAnd);
+            ResourceConditions.register(ResourceLocation.parse("forge:and"), ResourceConditionsBridge::forgeAnd);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(new ResourceLocation("forge:mod_loaded"), ResourceConditionsBridge::forgeModLoaded);
+            ResourceConditions.register(ResourceLocation.parse("forge:mod_loaded"), ResourceConditionsBridge::forgeModLoaded);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(new ResourceLocation("forge:tag_empty"), ResourceConditionsBridge::forgeTagEmpty);
+            ResourceConditions.register(ResourceLocation.parse("forge:tag_empty"), ResourceConditionsBridge::forgeTagEmpty);
         } catch (Exception ignored) {
         }
     }
@@ -72,7 +72,7 @@ public class ResourceConditionsBridge {
     }
 
     private static Boolean forgeTagEmpty(JsonObject object) {
-        var id = new ResourceLocation(GsonHelper.getAsString(object, "tag"));
+        var id = ResourceLocation.parse(GsonHelper.getAsString(object, "tag"));
         Map<ResourceKey<?>, Map<ResourceLocation, Collection<Holder<?>>>> allTags = ResourceConditionsImpl.LOADED_TAGS.get();
         if (allTags == null) {
             Moonlight.LOGGER.warn("Can't retrieve deserialized tags. Failing tag resource condition check.");
@@ -120,7 +120,7 @@ public class ResourceConditionsBridge {
      */
     public static boolean conditionMatches(JsonObject condition) throws RuntimeException {
         if (condition.has(CONDITION_ID)) {
-            ResourceLocation conditionId = new ResourceLocation(GsonHelper.getAsString(condition, CONDITION_ID));
+            ResourceLocation conditionId = ResourceLocation.parse(GsonHelper.getAsString(condition, CONDITION_ID));
             Predicate<JsonObject> jrc = ResourceConditions.get(conditionId);
 
             if (jrc == null) {

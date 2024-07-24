@@ -48,8 +48,8 @@ public class RegHelperExample {
 
     // Adds diamond loot to stone block
     private static void registerLootInjects(RegHelper.LootInjectEvent event) {
-        if(event.getTable().equals(new ResourceLocation("stone"))){
-            event.addTableReference(new ResourceLocation("diamond"));
+        if(event.getTable().equals(ResourceLocation.parse("stone"))){
+            event.addTableReference(ResourceLocation.parse("diamond"));
         }
     }
 
