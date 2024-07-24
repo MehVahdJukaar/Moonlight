@@ -2,9 +2,11 @@ package net.mehvahdjukaar.moonlight.api.trades;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.mehvahdjukaar.moonlight.api.misc.CodecMapRegistry;
@@ -38,7 +40,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
     private static int count = 0;
 
-    static{
+    static {
         REGISTRY.register(ResourceLocation.parse("simple"), SimpleItemListing.CODEC);
         REGISTRY.register(ResourceLocation.parse("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
         REGISTRY.register(ResourceLocation.parse("no_op"), NoOpListing.CODEC);
@@ -135,8 +137,8 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
     private static ModItemListing parseOrThrow(JsonElement j, ResourceLocation id, DynamicOps<JsonElement> ops) {
         return ModItemListing.CODEC.decode(ops, j)
-                .getOrThrow(false, errorMsg -> Moonlight.LOGGER.warn("Failed to parse custom trade with id {} - error: {}",
-                        id, errorMsg)).getFirst();
+                .getOrThrow(errorMsg -> new JsonParseException("Failed to parse custom trade with id " + id + " - error: " + errorMsg))
+                .getFirst();
     }
 
     public static List<? extends VillagerTrades.ItemListing> getVillagerListings(VillagerProfession profession, int level) {
@@ -160,7 +162,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
     /**
      * Call on mod setup. Register a new serializer for your trade
      */
-    public static void registerSerializer(ResourceLocation id, Codec<? extends ModItemListing> trade) {
+    public static void registerSerializer(ResourceLocation id, MapCodec<? extends ModItemListing> trade) {
         REGISTRY.register(id, trade);
     }
 
@@ -174,7 +176,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
     private static class SpecialListing implements ModItemListing {
 
-        private final Codec<ModItemListing> codec = Codec.unit(this);
+        private final MapCodec<ModItemListing> codec = MapCodec.unit(this);
         private final VillagerTrades.ItemListing listing;
         private final int level;
 
@@ -184,7 +186,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
         }
 
         @Override
-        public Codec<? extends ModItemListing> getCodec() {
+        public MapCodec<? extends ModItemListing> getCodec() {
             return codec;
         }
 

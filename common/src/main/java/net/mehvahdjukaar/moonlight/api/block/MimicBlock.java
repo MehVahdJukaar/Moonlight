@@ -68,11 +68,6 @@ public abstract class MimicBlock extends Block {
         return drops;
     }
 
-    @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
-        return false;
-    }
-
     //@Override
     @PlatformOnly(PlatformOnly.FORGE)
     public float getExplosionResistance(BlockState state, BlockGetter world, BlockPos pos, Explosion explosion) {

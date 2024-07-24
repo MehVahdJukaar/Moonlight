@@ -14,27 +14,27 @@ import java.util.function.Consumer;
 public interface ExpandedMapData {
 
     @ApiStatus.Internal
-    Map<String, CustomMapDecoration> getCustomDecorations();
+    Map<String, CustomMapDecoration> ml$getCustomDecorations();
 
     @ApiStatus.Internal
-    Map<String, MapBlockMarker<?>> getCustomMarkers();
+    Map<String, MapBlockMarker<?>> ml$getCustomMarkers();
 
     @ApiStatus.Internal
-    Map<ResourceLocation, CustomMapData<?>> getCustomData();
+    Map<ResourceLocation, CustomMapData<?>> ml$getCustomData();
 
-    boolean toggleCustomDecoration(LevelAccessor world, BlockPos pos);
+    boolean ml$toggleCustomDecoration(LevelAccessor world, BlockPos pos);
 
-    void resetCustomDecoration();
+    void ml$resetCustomDecoration();
 
-    int getVanillaDecorationSize();
+    int ml$getVanillaDecorationSize();
 
-    <M extends MapBlockMarker<?>> void addCustomMarker(M fromMarker);
+    <M extends MapBlockMarker<?>> void ml$addCustomMarker(M fromMarker);
 
-    boolean removeCustomMarker(String id);
+    boolean ml$removeCustomMarker(String id);
 
-    MapItemSavedData copy();
+    MapItemSavedData ml$copy();
 
-    void setCustomDecorationsDirty();
+    void ml$setCustomDecorationsDirty();
 
-    <H extends CustomMapData.DirtyCounter> void setCustomDataDirty(CustomMapData.Type<?> type, Consumer<H> dirtySetter);
+    <H extends CustomMapData.DirtyCounter> void ml$setCustomDataDirty(CustomMapData.Type<?> type, Consumer<H> dirtySetter);
 }

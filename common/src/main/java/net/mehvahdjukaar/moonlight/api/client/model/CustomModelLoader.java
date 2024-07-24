@@ -29,6 +29,7 @@ public interface CustomModelLoader {
         if (model == modelBaker.getModel(ModelBakery.MISSING_MODEL_LOCATION)) {
             throw new JsonParseException("Found missing model while parsing nested model " + location);
         }
-        return model.bake(modelBaker, model, spriteGetter, transform, location, true);
+
+        return model.bake(modelBaker, spriteGetter, transform);
     }
 }

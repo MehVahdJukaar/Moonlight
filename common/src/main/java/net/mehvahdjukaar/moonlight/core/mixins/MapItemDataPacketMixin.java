@@ -1,9 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.EncoderException;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
@@ -16,7 +13,6 @@ import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
@@ -32,7 +28,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -172,7 +167,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
 
         if (mapData instanceof ExpandedMapData ed) {
-            Map<String, CustomMapDecoration> decorations = ed.getCustomDecorations();
+            Map<String, CustomMapDecoration> decorations = ed.ml$getCustomDecorations();
 
 
             //mapData = MapItemSavedData.createForClient(message.scale, message.locked, Minecraft.getInstance().level.dimension());
@@ -191,7 +186,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
             }
             if (serverData != null) {
-                var customData = ed.getCustomData();
+                var customData = ed.ml$getCustomData();
                 for (var v : customData.values()) {
                     v.loadUpdateTag(this.moonlight$customData);
                 }

@@ -27,7 +27,7 @@ public class MapRegistry<T> implements Codec<T> {
     }
 
     public static <B> CodecMapRegistry<B> ofCodec() {
-        return new CodecMapRegistry<>("unnamed");
+        return new CodecMapRegistry<>("unnamed codec registry");
     }
 
     public <B extends T> T register(ResourceLocation name, B value) {
@@ -88,5 +88,9 @@ public class MapRegistry<T> implements Codec<T> {
 
     public void clear() {
         this.map.clear();
+    }
+
+    public <E> Codec<E> dispatch(Function<? super E, ? extends T> type) {
+        return Codec.super.dispatch(type, c -> (MapCodec<? extends E>) c);
     }
 }

@@ -2,21 +2,15 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
 
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.MAP_ATLASES;
 
@@ -116,7 +110,7 @@ public class MapHelper {
     public static boolean toggleMarkersAtPos(Level level, BlockPos pos, ItemStack stack, @Nullable Player player) {
         MapItemSavedData data = getMapData(stack, level, player);
         if (data instanceof ExpandedMapData expandedMapData) {
-            return expandedMapData.toggleCustomDecoration(level, pos);
+            return expandedMapData.ml$toggleCustomDecoration(level, pos);
         }
         return false;
     }
@@ -125,7 +119,7 @@ public class MapHelper {
         MapItemSavedData data = getMapData(stack, level, player);
         if (data instanceof ExpandedMapData expandedMapData) {
             if (!level.isClientSide) {
-                expandedMapData.resetCustomDecoration();
+                expandedMapData.ml$resetCustomDecoration();
                 return true;
             }
         }
@@ -143,7 +137,7 @@ public class MapHelper {
             marker.setPersistent(true);
             marker.setPos(pos);
             marker.setName(name);
-            ((ExpandedMapData) data).addCustomMarker(marker);
+            ((ExpandedMapData) data).ml$addCustomMarker(marker);
             return true;
         }
         return false;

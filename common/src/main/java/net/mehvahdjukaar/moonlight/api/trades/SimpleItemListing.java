@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.trades;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.server.level.ServerLevel;
@@ -9,6 +10,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -22,11 +24,11 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Simple item listing implementation
  */
-public record SimpleItemListing(ItemStack price, ItemStack price2, ItemStack offer,
+public record SimpleItemListing(ItemCost price, Optional<ItemCost> price2, ItemStack offer,
                                 int maxTrades, int xp, float priceMult,
                                 int level, LootItemFunction func) implements ModItemListing {
 
-    public static SimpleItemListing createDefault(ItemStack price, ItemStack price2, ItemStack offer,
+    public static SimpleItemListing createDefault(ItemCost price, Optional<ItemCost> price2, ItemStack offer,
                                                   int maxTrades, Optional<Integer> xp, float priceMult,
                                                   int level) {
         boolean buying = offer.is(Items.EMERALD);
@@ -34,16 +36,16 @@ public record SimpleItemListing(ItemStack price, ItemStack price2, ItemStack off
                 priceMult, level, null);
     }
 
-    public SimpleItemListing(ItemStack price, ItemStack forSale, int maxTrades, int xp, float priceMult) {
-        this(price, ItemStack.EMPTY, forSale, maxTrades, xp, priceMult, 1, null);
+    public SimpleItemListing(ItemCost price, ItemStack forSale, int maxTrades, int xp, float priceMult) {
+        this(price, Optional.empty(), forSale, maxTrades, xp, priceMult, 1, null);
     }
 
     public SimpleItemListing(int emeralds, ItemStack forSale, int maxTrades, int xp, float mult) {
-        this(new ItemStack(Items.EMERALD, emeralds), forSale, maxTrades, xp, mult);
+        this(new ItemCost(Items.EMERALD, emeralds), forSale, maxTrades, xp, mult);
     }
 
     public SimpleItemListing(int emeralds, ItemStack forSale, int maxTrades, int xp) {
-        this(new ItemStack(Items.EMERALD, emeralds), forSale, maxTrades, xp, 0.05f);
+        this(new ItemCost(Items.EMERALD, emeralds), forSale, maxTrades, xp, 0.05f);
     }
 
     /*
@@ -51,9 +53,9 @@ public record SimpleItemListing(ItemStack price, ItemStack price2, ItemStack off
            .dispatch("function",LootItemFunction::getType, LootItemFunctionType::codec);
 */
     //TODO
-    public static final Codec<SimpleItemListing> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            ItemStack.CODEC.fieldOf("price").forGetter(SimpleItemListing::price),
-            ItemStack.CODEC.optionalFieldOf("price_secondary", ItemStack.EMPTY).forGetter(SimpleItemListing::price2),
+    public static final MapCodec<SimpleItemListing> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
+            ItemCost.CODEC.fieldOf("price").forGetter(SimpleItemListing::price),
+            ItemCost.CODEC.optionalFieldOf("price_secondary").forGetter(SimpleItemListing::price2),
             ItemStack.CODEC.fieldOf("offer").forGetter(SimpleItemListing::offer),
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("max_trades", 16).forGetter(SimpleItemListing::maxTrades),
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("xp").forGetter(s -> Optional.of(s.xp)),
@@ -72,7 +74,8 @@ public record SimpleItemListing(ItemStack price, ItemStack price2, ItemStack off
                     .withParameter(LootContextParams.THIS_ENTITY, entity)
                     .create(LootContextParamSets.GIFT);
 
-            LootContext context = new LootContext.Builder(lootParams).create(Moonlight.res("trading_sequence"));
+            LootContext context = new LootContext.Builder(lootParams)
+                    .create(Optional.of(Moonlight.res("trading_sequence")));
             LootItemFunction.decorate(func, stack::set, context).accept(offer.copy());
         }
         return new MerchantOffer(price, price2, stack.get(), maxTrades, xp, priceMult);
@@ -84,7 +87,7 @@ public record SimpleItemListing(ItemStack price, ItemStack price2, ItemStack off
     }
 
     @Override
-    public Codec<SimpleItemListing> getCodec() {
+    public MapCodec<SimpleItemListing> getCodec() {
         return CODEC;
     }
 }

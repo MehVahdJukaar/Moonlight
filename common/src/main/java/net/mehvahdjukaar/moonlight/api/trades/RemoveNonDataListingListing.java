@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.trades;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -8,12 +9,12 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import org.jetbrains.annotations.Nullable;
 
 public record RemoveNonDataListingListing(int level) implements ModItemListing{
-    public static final Codec<RemoveNonDataListingListing> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+    public static final MapCodec<RemoveNonDataListingListing> CODEC = RecordCodecBuilder.mapCodec((i) -> i.group(
             Codec.intRange(1, 5).optionalFieldOf( "level", 1).forGetter(RemoveNonDataListingListing::level)
-    ).apply(instance, RemoveNonDataListingListing::new));
+    ).apply(i, RemoveNonDataListingListing::new));
 
     @Override
-    public Codec<? extends ModItemListing> getCodec() {
+    public MapCodec<? extends ModItemListing> getCodec() {
         return CODEC;
     }
 

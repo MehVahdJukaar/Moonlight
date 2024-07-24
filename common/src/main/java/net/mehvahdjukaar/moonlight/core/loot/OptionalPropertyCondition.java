@@ -8,7 +8,6 @@ import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -23,11 +22,10 @@ import java.util.Set;
 
 public class OptionalPropertyCondition implements LootItemCondition {
 
-    public static final Codec<OptionalPropertyCondition> CODEC = ExtraCodecs.validate(RecordCodecBuilder.create((instance) -> instance.group(
-                    ResourceLocation.CODEC.fieldOf("block").forGetter(o -> o.blockId),
-                    StatePropertiesPredicate.CODEC.optionalFieldOf("properties").forGetter(o -> o.properties)
-            ).apply(instance, OptionalPropertyCondition::new)),
-            OptionalPropertyCondition::validate);
+    public static final Codec<OptionalPropertyCondition> CODEC = RecordCodecBuilder.<OptionalPropertyCondition>create((i) -> i.group(
+            ResourceLocation.CODEC.fieldOf("block").forGetter(o -> o.blockId),
+            StatePropertiesPredicate.CODEC.optionalFieldOf("properties").forGetter(o -> o.properties)
+    ).apply(i, OptionalPropertyCondition::new)).validate(OptionalPropertyCondition::validate);
 
 
     @Nullable

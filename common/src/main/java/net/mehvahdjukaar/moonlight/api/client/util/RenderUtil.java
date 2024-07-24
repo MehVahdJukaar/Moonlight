@@ -34,10 +34,7 @@ import java.util.function.BiConsumer;
 
 public class RenderUtil {
 
-    static final ModelResourceLocation TRIDENT_MODEL = ModelResourceLocation.vanilla("trident", "inventory");
-    static final ModelResourceLocation SPYGLASS_MODEL = ModelResourceLocation.vanilla("spyglass", "inventory");
-
-
+    //TODO: fix shading so it can be rotated and have consistent shading and is also rendered like a block
     @ExpectPlatform
     public static void renderBlock(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
                                    Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
@@ -79,7 +76,7 @@ public class RenderUtil {
         poseStack.pushPose();
 
         poseStack.translate((x + 8), (y + 8), (150 + (model.isGui3d() ? l : 0)));
-        poseStack.mulPoseMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
+        poseStack.mulPose((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
         poseStack.scale(16.0F, 16.0F, 16.0F);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -171,10 +168,10 @@ public class RenderUtil {
         float v0s = Mth.lerp(shrink, v0, k);
         float v1s = Mth.lerp(shrink, v1, k);
 
-        vertexBuilder.vertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).color(r, g, b, a).uv(u0s, v1s).uv2(light).endVertex();
-        vertexBuilder.vertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).color(r, g, b, a).uv(u1s, v1s).uv2(light).endVertex();
-        vertexBuilder.vertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).color(r, g, b, a).uv(u1s, v0s).uv2(light).endVertex();
-        vertexBuilder.vertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).color(r, g, b, a).uv(u0s, v0s).uv2(light).endVertex();
+        vertexBuilder.addVertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).setColor(r, g, b, a).setUv(u0s, v1s).setLight(light);
+        vertexBuilder.addVertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).setColor(r, g, b, a).setUv(u1s, v1s).setLight(light);
+        vertexBuilder.addVertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).setColor(r, g, b, a).setUv(u1s, v0s).setLight(light);
+        vertexBuilder.addVertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).setColor(r, g, b, a).setUv(u0s, v0s).setLight(light);
     }
 
 

@@ -37,7 +37,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     public void initializeDirty(MapItemSavedData mapItemSavedData, Player player, CallbackInfo ci) {
         //just to be sure. we HAVE to send this on the very first update packet
         moonlight$customMarkersDirty = true;
-        for (var v : ((ExpandedMapData) mapItemSavedData).getCustomData().values()) {
+        for (var v : ((ExpandedMapData) mapItemSavedData).ml$getCustomData().values()) {
             moonlight$customDataDirty.put(v.getType(), v.createDirtyCounter());
         }
     }
@@ -122,7 +122,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
                 ep.moonlight$sendCustomMapDataTag(customDataTag);
             }
             if (updateDeco) {
-                List<CustomMapDecoration> decorations = new ArrayList<>(ed.getCustomDecorations().values());
+                List<CustomMapDecoration> decorations = new ArrayList<>(ed.ml$getCustomDecorations().values());
                 decorations.addAll(extra);
 
                 ep.moonlight$sendCustomDecorations(decorations);
@@ -135,7 +135,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     private static <C extends CustomMapData.DirtyCounter, D extends CustomMapData<C>> void saveDataToUpdateTag(
             ExpandedMapData ed, CompoundTag customDataTag,
             Map.Entry<CustomMapData.Type<?>, CustomMapData.DirtyCounter> e) {
-        D d = (D) ed.getCustomData().get(e.getKey().id());
+        D d = (D) ed.ml$getCustomData().get(e.getKey().id());
         //TODO: put this in a separate compound. cant cause of backwards compat
         C value = (C) e.getValue();
         d.saveToUpdateTag(customDataTag, value);

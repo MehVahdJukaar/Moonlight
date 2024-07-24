@@ -21,7 +21,7 @@ public interface CustomMapData<H extends CustomMapData.DirtyCounter> {
         @SuppressWarnings("unchecked")
         @NotNull
         public T get(MapItemSavedData mapData) {
-            return (T) ((ExpandedMapData) mapData).getCustomData().get(this.id);
+            return (T) ((ExpandedMapData) mapData).ml$getCustomData().get(this.id);
         }
 
     }
@@ -53,7 +53,7 @@ public interface CustomMapData<H extends CustomMapData.DirtyCounter> {
 
     default void setDirty(MapItemSavedData data, Consumer<H> dirtySetter) {
         Type<?> type = this.getType();
-        ((ExpandedMapData) data).setCustomDataDirty(type, dirtySetter);
+        ((ExpandedMapData) data).ml$setCustomDataDirty(type, dirtySetter);
     }
 
     class SimpleDirtyCounter implements DirtyCounter {

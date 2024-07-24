@@ -20,8 +20,8 @@ public abstract class MapRendererMixin {
     @Inject(method = "render", at = @At("RETURN"))
     private void render(PoseStack poseStack, MultiBufferSource buffer, int mapId, MapItemSavedData mapData, boolean isOnFrame, int light, CallbackInfo ci) {
         if (mapData instanceof ExpandedMapData data) {
-            int index = data.getVanillaDecorationSize();
-            for (CustomMapDecoration decoration : data.getCustomDecorations().values()) {
+            int index = data.ml$getVanillaDecorationSize();
+            for (CustomMapDecoration decoration : data.ml$getCustomDecorations().values()) {
                 //this shouldn't texture swap if we didn't draw complex shit in their renderers.
                 //still need to create a new one because we might have
                 VertexConsumer vertexBuilder = buffer.getBuffer(MapDecorationClientManager.MAP_MARKERS_RENDER_TYPE);
