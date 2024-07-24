@@ -32,7 +32,6 @@ import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -45,7 +44,6 @@ import net.neoforged.neoforge.event.LootTableLoadEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
-import net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -129,7 +127,7 @@ public class RegHelperImpl {
         IEventBus bus;
         if (!(cont instanceof FMLModContainer container)) {
             Moonlight.LOGGER.warn("Failed to get mod container for mod {}", modId);
-            bus = MoonlightForge.getBusForId();
+            bus = MoonlightForge.getCurrentBus();
         } else bus = container.getEventBus();
         return bus;
     }
@@ -144,7 +142,7 @@ public class RegHelperImpl {
                 eventListener.accept((r, o) -> Registry.register(reg, r, o));
             }
         };
-        MoonlightForge.getBusForId().addListener(eventConsumer);
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
@@ -205,7 +203,7 @@ public class RegHelperImpl {
         Consumer<EntityAttributeCreationEvent> eventConsumer = event -> {
             eventListener.accept((e, b) -> event.put(e, b.build()));
         };
-        MoonlightForge.getBusForId().addListener(eventConsumer);
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addCommandRegistration(RegHelper.CommandRegistration eventListener) {
@@ -232,11 +230,11 @@ public class RegHelperImpl {
             RegHelper.SpawnPlacementEvent spawnPlacementEvent = new PlacementEventImpl(event);
             eventListener.accept(spawnPlacementEvent);
         };
-        MoonlightForge.getBusForId().addListener(eventConsumer);
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
-        register(id, () -> OptionalRecipeCondition.createCodec(id.getPath(), predicate), NeoForgeRegistries.Keys.CONDITION_CODECS);
+        register(id, () -> OptionalRecipeCondition.createCodec(id, predicate), NeoForgeRegistries.Keys.CONDITION_CODECS);
     }
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
@@ -285,7 +283,7 @@ public class RegHelperImpl {
             });
             eventListener.accept(itemToTabEvent);
         };
-        MoonlightForge.getBusForId().addListener(EventPriority.LOW, eventConsumer);
+        MoonlightForge.getCurrentBus().addListener(EventPriority.LOW, eventConsumer);
     }
 
 

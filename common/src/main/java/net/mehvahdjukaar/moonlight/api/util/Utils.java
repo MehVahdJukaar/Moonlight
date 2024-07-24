@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -191,11 +192,6 @@ public class Utils {
         throw new UnsupportedOperationException("Unsupported class type " + object.getClass() + ". Expected a registry entry for a call to Utils.getID()");
     }
 
-    @Deprecated(forRemoval = true)
-    public static <T> boolean isTagged(T entry, Registry<T> registry, TagKey<T> tag) {
-        return registry.wrapAsHolder(entry).is(tag);
-    }
-
     //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
         var s = PlatHelper.getCurrentServer();
@@ -228,27 +224,12 @@ public class Utils {
         return p;
     }
 
-    @Deprecated(forRemoval = true)
-    public static HitResult rayTrace(LivingEntity entity, Level world, ClipContext.Block blockMode, ClipContext.Fluid fluidMode) {
-        return rayTrace(entity, world, blockMode, fluidMode, ForgeHelper.getReachDistance(entity));
-    }
-
-    // use entity.clip
-    @Deprecated(forRemoval = true)
-    public static HitResult rayTrace(Entity entity, Level world, ClipContext.Block blockMode, ClipContext.Fluid fluidMode, double range) {
-        Vec3 startPos = entity.getEyePosition();
-        Vec3 ray = entity.getViewVector(1).scale(range);
-        Vec3 endPos = startPos.add(ray);
-        ClipContext context = new ClipContext(startPos, endPos, blockMode, fluidMode, entity);
-        return world.clip(context);
-    }
-
     public static void awardAdvancement(ServerPlayer sp, ResourceLocation name) {
         awardAdvancement(sp, name, "unlock");
     }
 
     public static void awardAdvancement(ServerPlayer sp, ResourceLocation name, String unlockProp) {
-        Advancement advancement = sp.getServer().getAdvancements().getAdvancement(name);
+        AdvancementHolder advancement = sp.getServer().getAdvancements().get(name);
         if (advancement != null) {
             PlayerAdvancements advancements = sp.getAdvancements();
             if (!advancements.getOrStartProgress(advancement).isDone()) {
@@ -272,17 +253,6 @@ public class Utils {
             return to.setValue(property, from.getValue(property));
         }
         return to;
-    }
-
-    //Use below
-    @Deprecated(forRemoval = true)
-    public static boolean mayBuild(Player player, BlockPos pos) {
-        return mayPerformBlockAction(player, pos, player.getMainHandItem());
-    }
-
-    @Deprecated(forRemoval = true)
-    public static boolean mayPerformBlockAction(Player player, BlockPos pos) {
-        return mayPerformBlockAction(player, pos, player.getMainHandItem());
     }
 
     /**

@@ -203,7 +203,7 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLCommonSetupEvent> eventConsumer = event -> event.enqueueWork(commonSetup);
-        MoonlightForge.getBusForId().addListener(eventConsumer);
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
 
@@ -211,7 +211,7 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLCommonSetupEvent> eventConsumer = event -> commonSetup.run();
-        MoonlightForge.getBusForId().addListener(eventConsumer);
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
 
@@ -228,7 +228,7 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         if (packSupplier == null) return;
-        var bus = MoonlightForge.getBusForId();
+        var bus = MoonlightForge.getCurrentBus();
         Consumer<AddPackFindersEvent> consumer = event -> {
             if (event.getPackType() == packType) {
                 var p = packSupplier.get();

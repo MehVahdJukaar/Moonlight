@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.item.FuelBlockItem;
@@ -17,6 +18,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -122,11 +124,13 @@ public class RegHelper {
         return register(name, instance, Registries.PLACEMENT_MODIFIER_TYPE);
     }
 
-    public static <T extends LootPoolEntryContainer> RegSupplier<LootPoolEntryType> registerLootPoolEntry(ResourceLocation name, Supplier<Codec<T>> instance) {
+    public static <T extends LootPoolEntryContainer> RegSupplier<LootPoolEntryType> registerLootPoolEntry(ResourceLocation name,
+                                                                                                          Supplier<MapCodec<T>> instance) {
         return register(name, () -> new LootPoolEntryType(instance.get()), Registries.LOOT_POOL_ENTRY_TYPE);
     }
 
-    public static <T extends LootItemCondition> RegSupplier<LootItemConditionType> registerLootCondition(ResourceLocation name, Supplier<Codec<T>> instance) {
+    public static <T extends LootItemCondition> RegSupplier<LootItemConditionType> registerLootCondition(ResourceLocation name,
+                                                                                                         Supplier<MapCodec<T>> instance) {
         return register(name, () -> new LootItemConditionType(instance.get()), Registries.LOOT_CONDITION_TYPE);
     }
 
@@ -185,10 +189,6 @@ public class RegHelper {
 
     public static RegSupplier<SoundEvent> registerSound(ResourceLocation name, float fixedRange) {
         return registerSound(name, () -> SoundEvent.createFixedRangeEvent(name, fixedRange));
-    }
-
-    public static <T extends PaintingVariant> RegSupplier<T> registerPainting(ResourceLocation name, Supplier<T> painting) {
-        return register(name, painting, Registries.PAINTING_VARIANT);
     }
 
     @ExpectPlatform
@@ -275,9 +275,6 @@ public class RegHelper {
         return register(name, PlatHelper::newParticle, Registries.PARTICLE_TYPE);
     }
 
-    public static RegSupplier<BannerPattern> registerBannerPattern(ResourceLocation name, String patternId) {
-        return register(name, () -> new BannerPattern(patternId), Registries.BANNER_PATTERN);
-    }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
                                                                                    MobCategory category, float width, float height) {
@@ -507,7 +504,7 @@ public class RegHelper {
             if (type.equals(VariantType.BLOCK)) continue;
             String name = baseName.getPath();
             name += "_" + type.name().toLowerCase(Locale.ROOT);
-            ResourceLocation blockId = ResourceLocation.parse(modId, name);
+            ResourceLocation blockId = ResourceLocation.fromNamespaceAndPath(modId, name);
             var block = registerBlock(blockId, () ->
                     type.create(BlockBehaviour.Properties.ofFullCopy(baseBlock.get()), baseBlock::get));
             registerItem(blockId, () -> new BlockItem(block.get(), new Item.Properties()));

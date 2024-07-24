@@ -67,11 +67,11 @@ public class DynamicDataPack extends DynamicResourcePack {
     }
 
     public void addLootTable(Block block, LootTable.Builder table) {
-        this.addLootTable(block.getLootTable(), table.build());
+        this.addLootTable(block.getLootTable().location(), table.build());
     }
 
     public void addLootTable(ResourceLocation id, LootTable table) {
-        this.addJson(id, Util.getOrThrow(LootDataType.TABLE.codec.encodeStart(JsonOps.INSTANCE, table), RuntimeException::new), ResType.LOOT_TABLES);
+        this.addJson(id, LootDataType.TABLE.codec.encodeStart(JsonOps.INSTANCE, table).getOrThrow(), ResType.LOOT_TABLES);
     }
 
     protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {

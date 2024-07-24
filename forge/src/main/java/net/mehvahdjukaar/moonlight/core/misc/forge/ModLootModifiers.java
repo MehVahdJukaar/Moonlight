@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public class ModLootModifiers {
 
     public static void register() {
-        LOOT_MODIFIERS.register(MoonlightForge.getBusForId());
+        LOOT_MODIFIERS.register(MoonlightForge.getCurrentBus());
     }
 
     public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIERS = DeferredRegister.create(

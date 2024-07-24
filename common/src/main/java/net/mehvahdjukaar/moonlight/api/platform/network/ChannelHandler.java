@@ -3,8 +3,9 @@ package net.mehvahdjukaar.moonlight.api.platform.network;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -39,7 +40,15 @@ public abstract class ChannelHandler {
             return this;
         }
 
-        public Builder and(Consumer<Builder> consumer){
+        public <M> Builder register(
+                NetworkDir direction,
+                Class<M> messageClass,
+                StreamCodec<RegistryFriendlyByteBuf,M> codec) {
+            instance.register(direction, messageClass, codec);
+            return this;
+        }
+
+        public Builder and(Consumer<Builder> consumer) {
             consumer.accept(this);
             return this;
         }
@@ -90,9 +99,9 @@ public abstract class ChannelHandler {
 
     public abstract void sendToAllClientPlayersInRange(Level level, BlockPos pos, double radius, Message message);
 
-    public void sendToAllClientPlayersInDefaultRange(Level level, BlockPos pos, Message message){
+    public void sendToAllClientPlayersInDefaultRange(Level level, BlockPos pos, Message message) {
         sendToAllClientPlayersInRange(level, pos, 64, message);
-    };
+    }
 
     public abstract void sentToAllClientPlayersTrackingEntity(Entity target, Message message);
 

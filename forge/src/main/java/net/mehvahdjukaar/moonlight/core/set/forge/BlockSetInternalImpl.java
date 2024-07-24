@@ -38,7 +38,7 @@ public class BlockSetInternalImpl {
                 BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
             }
         };
-        MoonlightForge.getBusForId().addListener(eventConsumer);
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
     //aaaa
@@ -79,14 +79,14 @@ public class BlockSetInternalImpl {
             }
         };
         //registering block event to the bus
-        IEventBus bus = MoonlightForge.getBusForId();
+        IEventBus bus = MoonlightForge.getCurrentBus();
         bus.addListener(EventPriority.HIGHEST, eventConsumer);
     }
 
     @NotNull
     private static List<Runnable> getOrAddQueue() {
         //this is horrible. worst shit ever
-        IEventBus bus = MoonlightForge.getBusForId();
+        IEventBus bus = MoonlightForge.getCurrentBus();
         //get the queue corresponding to this certain mod
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         return LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {

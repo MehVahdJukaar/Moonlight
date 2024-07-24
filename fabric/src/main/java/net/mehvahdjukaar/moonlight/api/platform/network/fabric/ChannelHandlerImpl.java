@@ -50,7 +50,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
             Class<M> messageClass,
             Function<FriendlyByteBuf, M> decoder) {
 
-        ResourceLocation res = ResourceLocation.parse(name, String.valueOf(id++));
+        ResourceLocation res = ResourceLocation.fromNamespaceAndPath(name, String.valueOf(id++));
         ID_MAP.put(messageClass, res);
 
         if (direction != NetworkDir.PLAY_TO_CLIENT) {
@@ -102,7 +102,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
         //for (ServerPlayer player : PlayerLookup.tracking(entity)) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         message.writeToBuffer(buf);
-        ServerPlayNetworking.send(serverPlayer, ID_MAP.get(message.getClass()), buf);
+        ServerPlayNetworking.send(serverPlayer, ID_MAP.get(message.getClass()) buf);
         // }
     }
 

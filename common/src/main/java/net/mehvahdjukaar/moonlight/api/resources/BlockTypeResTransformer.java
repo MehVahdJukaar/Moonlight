@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
  *
  * @param <T>
  */
+//I hate this class so much
 public class BlockTypeResTransformer<T extends BlockType> {
 
     @FunctionalInterface

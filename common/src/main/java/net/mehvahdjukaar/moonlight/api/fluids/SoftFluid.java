@@ -110,18 +110,8 @@ public class SoftFluid {
         return name;
     }
 
-    @Deprecated(forRemoval = true)
-    public String getTranslationKey() {
-        return "fluid";
-    }
-
     public boolean isEnabled() {
         return !equivalentFluids.isEmpty() || !containerList.getPossibleFilled().isEmpty();
-    }
-
-    @Deprecated(forRemoval = true)
-    public String getFromMod() {
-        return "minecraft";
     }
 
     /**
@@ -160,13 +150,6 @@ public class SoftFluid {
      */
     public boolean isEquivalent(Fluid fluid) {
         return this.equivalentFluids.getFluids().contains(fluid);
-    }
-
-    @ApiStatus.Internal
-    //todo: rename or remove
-    @Deprecated(forRemoval = true)
-    public boolean isEmpty() {
-        return this == SoftFluidRegistry.empty();
     }
 
     public boolean isEmptyFluid() {
@@ -310,7 +293,6 @@ public class SoftFluid {
             return this;
         }
 
-        @Deprecated(forRemoval = true)
         public final Builder translationKey(String translationKey) {
             if (translationKey != null) {
                 this.name = Component.translatable(translationKey);

@@ -30,12 +30,10 @@ public abstract class ModFlowingFluid extends FlowingFluid {
     @Nullable
     private final Supplier<? extends LiquidBlock> block;
     private final boolean convertsToSource;
-    public final boolean hasCustomFluidType;
 
     protected ModFlowingFluid(Properties properties, Supplier<? extends LiquidBlock> block) {
         this.block = block;
         this.convertsToSource = properties.canConvertToSource;
-        this.hasCustomFluidType = properties.copyFluid == null;
         this.afterInit(properties);
     }
 
@@ -108,14 +106,6 @@ public abstract class ModFlowingFluid extends FlowingFluid {
                 viscosity = 1000;
         public Rarity rarity = Rarity.COMMON;
         public Map<String, SoundEvent> sounds;
-        @Deprecated
-        public Fluid copyFluid = null;
-
-        @Deprecated(forRemoval = true)
-        public Properties copyFluid(Fluid fluid) {
-            //this.copyFluid = fluid; //causes issues
-            return this;
-        }
 
         /**
          * Sets the identifier representing the name of the fluid type.

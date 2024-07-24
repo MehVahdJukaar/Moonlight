@@ -32,33 +32,4 @@ public class RenderUtilImpl {
         return model;
     }
 
-    public static void renderGuiItem(BakedModel model, ItemStack stack, ItemRenderer renderer, int combinedLight, int combinedOverlay, PoseStack poseStack, MultiBufferSource.BufferSource buffer, boolean flatItem) {
-
-        poseStack.pushPose();
-
-        poseStack.translate(-0.5, -0.5, -0.5);
-        if (model.isCustomRenderer() || stack.is(Items.TRIDENT) && !flatItem) {
-            ((ItemRendererAccessor) renderer).getBlockEntityRenderer().renderByItem(stack, ItemDisplayContext.GUI,
-                    poseStack, buffer, combinedLight, combinedOverlay);
-        } else {
-            VertexConsumer vertexConsumer;
-            boolean fabulous = true;
-            RenderType renderType = ItemBlockRenderTypes.getRenderType(stack, fabulous);
-            if (stack.is(ItemTags.COMPASSES) && stack.hasFoil()) {
-                poseStack.pushPose();
-                PoseStack.Pose pose = poseStack.last();
-
-                pose.pose().scale(0.5f);
-
-                vertexConsumer = ItemRenderer.getCompassFoilBufferDirect(buffer, renderType, pose);
-                poseStack.popPose();
-            } else {
-                vertexConsumer = ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil());
-            }
-            renderer.renderModelLists(model, stack, combinedLight, combinedOverlay, poseStack, vertexConsumer);
-        }
-        poseStack.popPose();
-    }
-
-
 }

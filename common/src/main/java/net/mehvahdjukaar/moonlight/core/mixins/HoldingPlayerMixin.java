@@ -12,6 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -64,13 +65,13 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     public Player player;
 
     @Inject(method = "nextUpdatePacket", at = @At("HEAD"), cancellable = true)
-    public void checkLocked(int mapId, CallbackInfoReturnable<@Nullable Packet<?>> cir) {
+    public void checkLocked(MapId mapId, CallbackInfoReturnable<@Nullable Packet<?>> cir) {
         //we won't wait here. if its locked too bad we cant block the main thread
         if (moonlight$concurrentLock.isLocked()) cir.setReturnValue(null);
     }
 
     @ModifyReturnValue(method = "nextUpdatePacket", at = @At("TAIL"))
-    public Packet<?> addExtraPacketData(@Nullable Packet<?> packet, int mapId) {
+    public Packet<?> addExtraPacketData(@Nullable Packet<?> packet, MapId mapId) {
         MapItemSavedData data = field_132;
         ExpandedMapData ed = ((ExpandedMapData) data);
 

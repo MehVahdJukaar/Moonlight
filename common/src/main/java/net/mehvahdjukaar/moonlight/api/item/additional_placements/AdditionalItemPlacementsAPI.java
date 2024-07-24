@@ -34,27 +34,6 @@ public class AdditionalItemPlacementsAPI {
     /**
      * Adds a behavior to an existing block. can be called at any time but ideally before registration. Less ideally during mod setup
      */
-    @Deprecated(forRemoval = true)
-    public static void register(Supplier<? extends AdditionalItemPlacement> placement, Supplier<? extends Item> itemSupplier) {
-        if (PlatHelper.isDev() && isAfterRegistration) {
-            throw new IllegalStateException("Attempted to add placeable behavior after registration");
-        }
-        PLACEMENTS.add(Pair.of(placement, itemSupplier));
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void register(Function<Item, ? extends AdditionalItemPlacement> placement, Predicate<Item> itemPredicate) {
-        if (PlatHelper.isDev() && isAfterRegistration) {
-            throw new IllegalStateException("Attempted to add placeable behavior after registration");
-        }
-        PLACEMENTS_GENERIC.add(Pair.of(placement, itemPredicate));
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void registerSimple(Supplier<? extends Block> block, Supplier<? extends Item> itemSupplier) {
-        register(() -> new AdditionalItemPlacement(block.get()), itemSupplier);
-    }
-
     public static void addRegistration(Consumer<Event> eventConsumer){
         Moonlight.assertInitPhase();
         registrationListeners.add(eventConsumer);

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.block;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -69,16 +71,13 @@ public interface ILightable {
         if (projectile.isOnFire()) {
             Entity entity = projectile.getOwner();
             if (entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity)) {
-                if (lightUp(projectile, state, pos, level, FireSourceType.FLAMING_ARROW)) {
-                    return true;
-                }
+                return lightUp(projectile, state, pos, level, FireSourceType.FLAMING_ARROW);
             }
-        } else if (projectile instanceof ThrownPotion potion && PotionUtils.getPotion(potion.getItem()) == Potions.WATER) {
+        } else if (projectile instanceof ThrownPotion potion &&
+                potion.getItem().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).is(Potions.WATER)) {
             Entity entity = projectile.getOwner();
             boolean flag = entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity);
-            if (flag && extinguish(projectile, state, pos, level)) {
-                return true;
-            }
+            return flag && extinguish(projectile, state, pos, level);
         }
         return false;
     }
@@ -96,7 +95,6 @@ public interface ILightable {
                     }
                 } else if (item instanceof FireChargeItem) {
                     if (lightUp(player, state, pos, level, FireSourceType.FIRE_CHANGE)) {
-                        stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
                         if (!player.isCreative()) stack.shrink(1);
                         return InteractionResult.sidedSuccess(level.isClientSide);
                     }

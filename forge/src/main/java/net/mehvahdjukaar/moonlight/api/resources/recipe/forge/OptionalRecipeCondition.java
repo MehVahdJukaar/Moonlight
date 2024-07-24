@@ -1,31 +1,27 @@
 package net.mehvahdjukaar.moonlight.api.resources.recipe.forge;
 
-import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.forge.PlatHelperImpl;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.LenientUnboundedMapCodec;
-import net.minecraft.world.level.block.state.properties.BlockSetType;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 /**
  * Simple recipe condition implementation for conditional recipes
  */
-public record OptionalRecipeCondition(AtomicReference<Codec<OptionalRecipeCondition>> codecRef, String name, Predicate<String> predicate,
+public record OptionalRecipeCondition(ResourceLocation id,
+                                      Predicate<String> predicate,
                                       String conditionValue) implements ICondition {
 
-    public static Codec<OptionalRecipeCondition> createCodec(String name, Predicate<String> predicate) {
-        AtomicReference<Codec<OptionalRecipeCondition>> ref= new AtomicReference<>();
-        Codec<OptionalRecipeCondition> codec = RecordCodecBuilder.create(builder -> builder.group(
-                Codec.STRING.fieldOf(name).forGetter(OptionalRecipeCondition::name)
-        ).apply(builder, s -> new OptionalRecipeCondition(ref, name, predicate, s)));
-        ref.set(codec);
-        return codec;
+    public static MapCodec<OptionalRecipeCondition> createCodec(ResourceLocation id, Predicate<String> predicate) {
+        String name = id.getPath();
+        return RecordCodecBuilder.mapCodec(builder -> builder.group(
+                Codec.STRING.fieldOf(name).forGetter(o -> o.id().getPath())
+        ).apply(builder, s -> new OptionalRecipeCondition(id, predicate, s)));
     }
 
     @Override
@@ -34,8 +30,8 @@ public record OptionalRecipeCondition(AtomicReference<Codec<OptionalRecipeCondit
     }
 
     @Override
-    public Codec<? extends ICondition> codec() {
-        return codecRef.get();
+    public MapCodec<? extends ICondition> codec() {
+        return NeoForgeRegistries.CONDITION_SERIALIZERS.get(id);
     }
 
 }

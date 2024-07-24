@@ -35,43 +35,6 @@ public class RenderUtilImpl {
         }
     }
 
-    public static void renderGuiItem(BakedModel model, ItemStack stack, ItemRenderer renderer, int combinedLight, int pCombinedOverlay,
-                                     PoseStack poseStack, MultiBufferSource.BufferSource buffer, boolean flatItem) {
-
-        poseStack.pushPose();
-
-        poseStack.translate(-0.5D, -0.5D, -0.5D);
-
-        if (!model.isCustomRenderer() && (!stack.is(Items.TRIDENT) || flatItem)) {
-            boolean fabulous = true;
-
-            for (var m : model.getRenderPasses(stack, fabulous)) {
-                for (var renderType : m.getRenderTypes(stack, fabulous)) {
-
-                    VertexConsumer vertexconsumer;
-                    if (stack.is(Items.COMPASS) && stack.hasFoil()) {
-                        poseStack.pushPose();
-                        PoseStack.Pose pose = poseStack.last();
-                        pose.pose().scale(0.5F);
-
-                        vertexconsumer = ItemRenderer.getCompassFoilBufferDirect(buffer, renderType, pose);
-
-                        poseStack.popPose();
-                    } else {
-                        vertexconsumer = ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil());
-                    }
-
-                    renderer.renderModelLists(model, stack, combinedLight, pCombinedOverlay, poseStack, vertexconsumer);
-                }
-            }
-        } else {
-            IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.GUI,
-                    poseStack, buffer, combinedLight, pCombinedOverlay);
-        }
-
-        poseStack.popPose();
-    }
-
     public static BakedModel handleCameraTransforms(BakedModel model, PoseStack poseStack, ItemDisplayContext transform) {
         return ClientHooks.handleCameraTransforms(poseStack, model, transform, false);
     }

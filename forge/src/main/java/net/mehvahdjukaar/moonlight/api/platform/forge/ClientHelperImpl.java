@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static net.mehvahdjukaar.moonlight.forge.MoonlightForge.getBusForId;
+import static net.mehvahdjukaar.moonlight.forge.MoonlightForge.getCurrentBus;
 
 public class ClientHelperImpl {
 
@@ -73,7 +73,7 @@ public class ClientHelperImpl {
         Consumer<RegisterParticleProvidersEvent> eventConsumer = event -> {
             eventListener.accept(new ParticleEventImpl(event));
         };
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     private record ParticleEventImpl(RegisterParticleProvidersEvent event) implements ClientHelper.ParticleEvent {
@@ -90,7 +90,7 @@ public class ClientHelperImpl {
 
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerEntityRenderer);
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {
@@ -98,7 +98,7 @@ public class ClientHelperImpl {
 
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerBlockEntityRenderer);
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addBlockColorsRegistration(Consumer<ClientHelper.BlockColorEvent> eventListener) {
@@ -118,7 +118,7 @@ public class ClientHelperImpl {
 
             });
         };
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addItemColorsRegistration(Consumer<ClientHelper.ItemColorEvent> eventListener) {
@@ -137,7 +137,7 @@ public class ClientHelperImpl {
                 }
             });
         };
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -145,7 +145,7 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<RegisterClientReloadListenersEvent> eventConsumer = event -> event.registerReloadListener(listener.get());
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addModelLayerRegistration(Consumer<ClientHelper.ModelLayerEvent> eventListener) {
@@ -154,7 +154,7 @@ public class ClientHelperImpl {
         Consumer<EntityRenderersEvent.RegisterLayerDefinitions> eventConsumer = event -> {
             eventListener.accept(event::registerLayerDefinition);
         };
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
@@ -163,7 +163,7 @@ public class ClientHelperImpl {
         Consumer<ModelEvent.RegisterAdditional> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
@@ -172,7 +172,7 @@ public class ClientHelperImpl {
         Consumer<RegisterClientTooltipComponentFactoriesEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addModelLoaderRegistration(Consumer<ClientHelper.ModelLoaderEvent> eventListener) {
@@ -181,7 +181,7 @@ public class ClientHelperImpl {
         Consumer<ModelEvent.RegisterGeometryLoaders> eventConsumer = event -> {
             eventListener.accept((i, l) -> event.register(i, (IGeometryLoader<?>) l));
         };
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addItemDecoratorsRegistration(Consumer<ClientHelper.ItemDecoratorEvent> eventListener) {
@@ -198,7 +198,7 @@ public class ClientHelperImpl {
                 event.register(i, deco);
             });
         };
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addKeyBindRegistration(Consumer<ClientHelper.KeyBindEvent> eventListener) {
@@ -207,7 +207,7 @@ public class ClientHelperImpl {
         Consumer<RegisterKeyMappingsEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
         };
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
 
@@ -245,14 +245,14 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLClientSetupEvent> eventConsumer = event -> event.enqueueWork(clientSetup);
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addClientSetupAsync(Runnable clientSetup) {
         Moonlight.assertInitPhase();
 
         Consumer<FMLClientSetupEvent> eventConsumer = event -> clientSetup.run();
-        getBusForId().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
 

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.loot;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -24,7 +25,7 @@ import java.util.function.Consumer;
 
 public class OptionalItemPool extends LootPoolSingletonContainer {
 
-    public static final Codec<OptionalItemPool> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+    public static final MapCodec<OptionalItemPool> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
             Codec.STRING.fieldOf("name").forGetter(o -> o.tagOrItemId)
     ).and(singletonFields(instance)).apply(instance, OptionalItemPool::new));
 

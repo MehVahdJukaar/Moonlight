@@ -10,15 +10,19 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.*;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.material.Fluid;
@@ -31,12 +35,13 @@ import java.util.List;
 import java.util.Objects;
 
 // do NOT have these in a static field as they contain registry holders
-public class SoftFluidStack {
+public class SoftFluidStack implements DataComponentHolder {
 
     public static final Codec<SoftFluidStack> CODEC = RecordCodecBuilder.create(i -> i.group(
             SoftFluid.HOLDER_CODEC.fieldOf("id").forGetter(SoftFluidStack::getHolder),
-            Codec.INT.optionalFieldOf("count", 1).forGetter(SoftFluidStack::getCount),
-            CompoundTag.CODEC.optionalFieldOf("tag", null).forGetter(SoftFluidStack::getTag)
+            ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SoftFluidStack::getCount),
+            DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
+                    .forGetter(stack -> stack.components.asPatch())
     ).apply(i, SoftFluidStack::of));
 
     // this is not a singleton. Many empty instances might exist. We keep this just as a minor optimization
@@ -46,17 +51,13 @@ public class SoftFluidStack {
     private final Holder<SoftFluid> fluidHolder;
     private final SoftFluid fluid; //reference to avoid calling value all the times. these 2 should always match
     private int count;
-    @Nullable
-    private CompoundTag tag;
+    private final PatchedDataComponentMap components;
     private boolean isEmptyCache;
 
-    //TODO: make abstract and internal
-    @ApiStatus.Internal
-    @Deprecated(forRemoval = true) //not for removal just make abstract
-    public SoftFluidStack(Holder<SoftFluid> fluid, int count, @Nullable CompoundTag tag) {
+    protected SoftFluidStack(Holder<SoftFluid> fluid, int count, DataComponentPatch components) {
         this.fluidHolder = fluid;
         this.fluid = this.fluidHolder.value();
-        this.tag = tag;
+        this.components = PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, components);
         this.setCount(count);
 
         //even more hardcoded shit
@@ -67,18 +68,16 @@ public class SoftFluidStack {
         }
     }
 
-    @Deprecated(forRemoval = true)
-    public SoftFluidStack(Holder<SoftFluid> fluid, int count) {
-        this(fluid, count, null);
+    protected SoftFluidStack(Holder<SoftFluid> fluid, int count) {
+        this(fluid, count, DataComponentPatch.EMPTY);
     }
 
-    @Deprecated(forRemoval = true)
-    public SoftFluidStack(Holder<SoftFluid> fluid) {
-        this(fluid, 1, null);
+    protected SoftFluidStack(Holder<SoftFluid> fluid) {
+        this(fluid, 1);
     }
 
     @ExpectPlatform
-    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, @Nullable CompoundTag tag) {
+    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, DataComponentPatch tag) {
         throw new AssertionError();
     }
 
@@ -123,28 +122,12 @@ public class SoftFluidStack {
         return compoundTag;
     }
 
-    public static SoftFluidStack load(CompoundTag tag) {
-        //backwards compat
-        if (tag.contains("Fluid")) {
-            tag.putString("id", tag.getString("Fluid"));
-            tag.remove("Fluid");
-        }
-        if (tag.contains("NBT")) {
-            tag.put("tag", tag.get("NBT"));
-            tag.remove("NBT");
-        }
-        if (tag.contains("Count")) {
-            tag.putByte("count", (byte) tag.getInt("Count"));
-            tag.remove("count");
-        }
+    public static SoftFluidStack load(HolderLookup.Provider lookupProvider, CompoundTag tag) {
 
-        var fluid = SoftFluidRegistry.getHolder(ResourceLocation.parse(tag.getString("id")));
-        var amount = tag.getByte("count");
-        CompoundTag nbt = null;
-        if (tag.contains("tag", 10)) {
-            nbt = tag.getCompound("tag");
-        }
-        return of(fluid, amount, nbt);
+        //TODO: add components backwards compat
+
+        return CODEC.parse(lookupProvider.createSerializationContext(NbtOps.INSTANCE), tag)
+                .resultOrPartial(error -> LOGGER.error("Tried to load invalid soft fluid stack: '{}'", error));
     }
 
     public boolean is(TagKey<SoftFluid> tag) {
@@ -159,8 +142,7 @@ public class SoftFluidStack {
         return is(fluid.value());
     }
 
-    @Deprecated(forRemoval = true)    //just make private
-    public final Holder<SoftFluid> getFluid() {
+    private Holder<SoftFluid> getFluid() {
         return isEmptyCache ? SoftFluidRegistry.getEmpty() : fluidHolder;
     }
 
@@ -199,42 +181,6 @@ public class SoftFluidStack {
 
     public void shrink(int amount) {
         setCount(this.count - amount);
-    }
-
-    public boolean hasTag() {
-        return tag != null;
-    }
-
-    @Nullable
-    public CompoundTag getTag() {
-        return tag;
-    }
-
-    public void setTag(@Nullable CompoundTag tag) {
-        if (this == cachedEmptyInstance) {
-            if (PlatHelper.isDev()) throw new AssertionError();
-            return;
-        }
-        this.tag = tag;
-    }
-
-    public CompoundTag getOrCreateTag() {
-        if (tag == null) setTag(new CompoundTag());
-        return tag;
-    }
-
-    public CompoundTag getOrCreateTagElement(String key) {
-        if (this.tag != null && this.tag.contains(key, 10)) {
-            return this.tag.getCompound(key);
-        } else {
-            CompoundTag compoundTag = new CompoundTag();
-            this.addTagElement(key, compoundTag);
-            return compoundTag;
-        }
-    }
-
-    public void addTagElement(String key, Tag tag) {
-        this.getOrCreateTag().put(key, tag);
     }
 
     public SoftFluidStack copy() {
@@ -336,13 +282,13 @@ public class SoftFluidStack {
                 CompoundTag itemTag = itemStack.getTag();
 
                 //convert potions to water bottles
-                Potion potion = PotionUtils.getPotion(itemStack);
+                PotionContents potion = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
                 boolean hasCustomPot = (itemTag != null && itemTag.contains("CustomPotionEffects"));
-                if (potion == Potions.WATER && !hasCustomPot) {
+                if (potion.is(Potions.WATER) && !hasCustomPot) {
                     fluid = BuiltInSoftFluids.WATER.getHolder();
                 }
                 //add tags to splash and lingering potions
-                else if (potion != Potions.EMPTY || hasCustomPot) {
+                else if (potion != PotionContents.EMPTY || hasCustomPot) {
                     PotionNBTHelper.Type type = PotionNBTHelper.getPotionType(filledContainer);
                     if (type == null) type = PotionNBTHelper.Type.REGULAR;
                     type.applyToTag(fluidTag);
@@ -395,7 +341,7 @@ public class SoftFluidStack {
 
                 //converts water bottles into potions
                 if (emptyContainer.is(Items.GLASS_BOTTLE) && this.is(BuiltInSoftFluids.WATER.get())) {
-                    filledStack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
+                    filledStack = PotionContents.createItemStack(Items.POTION, Potions.WATER);
                 }
 
                 this.applyNBTtoItemStack(filledStack);
@@ -483,4 +429,8 @@ public class SoftFluidStack {
         return tintColor;
     }
 
+    @Override
+    public DataComponentMap getComponents() {
+        return this.isEmpty() ? DataComponentMap.EMPTY : this.components;
+    }
 }

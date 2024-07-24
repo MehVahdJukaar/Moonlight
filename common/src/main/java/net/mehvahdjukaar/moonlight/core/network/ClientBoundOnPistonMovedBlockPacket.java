@@ -22,7 +22,7 @@ public class ClientBoundOnPistonMovedBlockPacket implements Message {
     public ClientBoundOnPistonMovedBlockPacket(FriendlyByteBuf buffer) {
         this.pos = buffer.readBlockPos();
         this.dir = Direction.from3DDataValue(buffer.readVarInt());
-        this.movedState = buffer.readById(Block.BLOCK_STATE_REGISTRY);
+        this.movedState = buffer.readById(Block.BLOCK_STATE_REGISTRY::byIdOrThrow);
         this.extending = buffer.readBoolean();
     }
 
@@ -37,7 +37,7 @@ public class ClientBoundOnPistonMovedBlockPacket implements Message {
     public void writeToBuffer(FriendlyByteBuf buffer) {
         buffer.writeBlockPos(this.pos);
         buffer.writeVarInt(this.dir.get3DDataValue());
-        buffer.writeId(Block.BLOCK_STATE_REGISTRY, this.movedState);
+        buffer.writeById(Block.BLOCK_STATE_REGISTRY::getIdOrThrow, this.movedState);
         buffer.writeBoolean(this.extending);
     }
 

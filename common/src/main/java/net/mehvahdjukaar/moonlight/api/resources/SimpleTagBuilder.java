@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -108,13 +109,11 @@ public class SimpleTagBuilder extends TagBuilder {
 
 
     public JsonElement serializeToJson() {
-        return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(this.build(), false))
-                .getOrThrow(false, Moonlight.LOGGER::error);
+        return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(this.build(), false)).getOrThrow();
     }
 
     public void addFromJson(JsonObject oldTag) {
-        TagFile tagfile = TagFile.CODEC.parse(new Dynamic<>(JsonOps.INSTANCE, oldTag))
-                .getOrThrow(false, Moonlight.LOGGER::error);
+        TagFile tagfile = TagFile.CODEC.parse(new Dynamic<>(JsonOps.INSTANCE, oldTag)).getOrThrow();
         if (tagfile.replace()) {
             //TODO: figure oout how to remove stuff
         }

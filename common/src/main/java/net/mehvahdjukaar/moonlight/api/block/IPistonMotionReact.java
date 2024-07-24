@@ -16,12 +16,7 @@ public interface IPistonMotionReact {
     /**
      * Called on movement finished
      */
-    @Deprecated(forRemoval = true)
-    default void onMoved(BlockState movedState, Level level, BlockPos pos, Direction direction, boolean extending,  PistonMovingBlockEntity tile) {
-    }
-
     default void onMoved(Level level, BlockPos pos, BlockState movedState,  Direction direction, boolean extending) {
-        this.onMoved(movedState, level, pos, direction, extending, null);
     }
 
     default boolean ticksWhileMoved() {
@@ -31,13 +26,7 @@ public interface IPistonMotionReact {
     /**
      * Called while moving
      */
-    @Deprecated
-    default void moveTick(BlockState movedState, Level level, BlockPos pos, AABB aabb, PistonMovingBlockEntity tile) {
-
-    }
-
     default void moveTick(Level level, BlockPos pos, BlockState movedState, AABB aabb, PistonMovingBlockEntity tile) {
-        this.moveTick(movedState, level, pos, aabb, tile);
     }
 
     /**

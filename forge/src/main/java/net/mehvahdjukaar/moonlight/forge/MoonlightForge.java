@@ -17,7 +17,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -138,8 +137,17 @@ public class MoonlightForge {
         if (!event.getLevel().isClientSide()) Moonlight.checkDatapackRegistry();
     }
 
-    public static IEventBus getBusForId(String modId) {
-       return ModList.get().getModContainerById(modId).get().getEventBus();
+    private static WeakReference<IEventBus> currentBus = null;
+
+    public static IEventBus getCurrentBus() {
+        var b = currentBus.get();
+        if (b == null)
+            throw new IllegalStateException("Bus is null. You must call startRegistering before registering events");
+        return b;
+    }
+
+    public static void startRegistering(IEventBus bus) {
+        currentBus = new WeakReference<>(bus);
     }
 
 }

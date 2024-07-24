@@ -32,7 +32,7 @@ import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry.KEY;
 public class SoftFluidInternalImpl {
 
     public static void init() {
-        IEventBus bus = MoonlightForge.getBusForId();
+        IEventBus bus = MoonlightForge.getCurrentBus();
         bus.register(SoftFluidInternalImpl.class);
     }
 

@@ -15,7 +15,7 @@ public class MapDataInternalImpl {
     }
 
     public static void init() {
-        var bus = MoonlightForge.getBusForId();
+        var bus = MoonlightForge.getCurrentBus();
         bus.register(MapDataInternalImpl.class);
     }
 }

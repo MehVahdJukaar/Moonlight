@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -151,7 +152,7 @@ public class MapDataInternal {
         return hackyGetRegistry().getOptional(id);
     }
 
-    public static Set<MapBlockMarker<?>> getDynamicServer(Player player, int mapId, MapItemSavedData data) {
+    public static Set<MapBlockMarker<?>> getDynamicServer(Player player, MapId mapId, MapItemSavedData data) {
         Set<MapBlockMarker<?>> dynamic = new HashSet<>();
         for (var v : DYNAMIC_SERVER) {
             dynamic.addAll(v.apply(player, mapId, data));
@@ -194,7 +195,7 @@ public class MapDataInternal {
 
     //dynamic markers
 
-    private static final List<TriFunction<Player, Integer, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_SERVER = new ArrayList<>();
+    private static final List<TriFunction<Player, MapId, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_SERVER = new ArrayList<>();
     private static final List<BiFunction<Integer, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_CLIENT = new ArrayList<>();
 
 
@@ -202,7 +203,7 @@ public class MapDataInternal {
         DYNAMIC_CLIENT.add(event);
     }
 
-    public static void addDynamicServerMarkersEvent(TriFunction<Player, Integer, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+    public static void addDynamicServerMarkersEvent(TriFunction<Player, MapId, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
         DYNAMIC_SERVER.add(event);
     }
 

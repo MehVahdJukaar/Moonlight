@@ -7,6 +7,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.ItemStack;
 
+import net.minecraft.world.item.alchemy.PotionContents;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -17,11 +18,7 @@ import java.util.stream.Collectors;
 public class PotionNBTHelper {
     private static final MutableComponent EMPTY = (Component.translatable("effect.none")).withStyle(ChatFormatting.GRAY);
 
-    //I need this because I'm using block entity tag, so I can't give PotionUtil methods an itemStack directly
-    public static void addPotionTooltip(@Nullable CompoundTag com, List<Component> tooltip, float durationFactor, float g) {
-       PotionUtils.addPotionTooltip(getAllEffects(com), tooltip, durationFactor, g);
-    }
-
+    @Deprecated(forRemoval = true)
     public static int getColorFromNBT(@Nullable CompoundTag com) {
         if (com != null && com.contains("CustomPotionColor", 99)) {
             return com.getInt("CustomPotionColor");

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.loot;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
@@ -22,7 +23,7 @@ import java.util.Set;
 
 public class OptionalPropertyCondition implements LootItemCondition {
 
-    public static final Codec<OptionalPropertyCondition> CODEC = RecordCodecBuilder.<OptionalPropertyCondition>create((i) -> i.group(
+    public static final MapCodec<OptionalPropertyCondition> CODEC = RecordCodecBuilder.<OptionalPropertyCondition>mapCodec((i) -> i.group(
             ResourceLocation.CODEC.fieldOf("block").forGetter(o -> o.blockId),
             StatePropertiesPredicate.CODEC.optionalFieldOf("properties").forGetter(o -> o.properties)
     ).apply(i, OptionalPropertyCondition::new)).validate(OptionalPropertyCondition::validate);

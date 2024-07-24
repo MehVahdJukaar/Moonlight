@@ -232,7 +232,7 @@ public class ForgeHelperImpl {
             event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, type, (container, side) -> new InvWrapper(container));
 
         };
-        MoonlightForge.getBusForId().addListener(eventConsumer);
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
     public static boolean isInFluidThatCanExtinguish(Entity entity) {
