@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
@@ -68,8 +67,8 @@ public class FluidContainerList {
     }
 
 
-    protected Optional<List<Category>> encodeList() {
-        return emptyToFilledMap.isEmpty() ? Optional.empty() : Optional.of(new ArrayList<>(emptyToFilledMap.values()));
+    protected List<Category> encodeList() {
+        return new ArrayList<>(emptyToFilledMap.values());
     }
 
     public Collection<Item> getPossibleFilled() {
@@ -108,9 +107,9 @@ public class FluidContainerList {
                 new Category(BuiltInRegistries.ITEM.get(BuiltInRegistries.ITEM.getDefaultKey()), 1));
 
         public static final Codec<Category> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-                ResourceLocation.CODEC.fieldOf("empty").forGetter(c -> Utils.getID(c.emptyContainer)),
+                BuiltInRegistries.ITEM.byNameCodec().fieldOf("empty").forGetter(c -> c.emptyContainer),
                 SoftFluid.Capacity.INT_CODEC.fieldOf("capacity").forGetter(Category::getCapacity),
-                ResourceLocation.CODEC.listOf().fieldOf("filled").forGetter(c -> c.filled.stream().map(Utils::getID).toList()),
+                Utils.optionalRegistryListCodec(BuiltInRegistries.ITEM).fieldOf("filled").forGetter(c -> c.filled),
                 BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
                 BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
         ).apply(instance, Category::decode));
@@ -133,20 +132,14 @@ public class FluidContainerList {
             this(emptyContainer, capacity, null, null);
         }
 
-        private static Category decode(ResourceLocation empty, int capacity, List<ResourceLocation> filled) {
+        private static Category decode(Item empty, int capacity, List<Item> filled) {
             return decode(empty, capacity, filled, Optional.empty(), Optional.empty());
         }
 
-        private static Category decode(ResourceLocation empty, int capacity, List<ResourceLocation> filled,
+        private static Category decode(Item empty, int capacity, List<Item> filled,
                                        Optional<SoundEvent> fillSound, Optional<SoundEvent> emptySound) {
-            var opt = BuiltInRegistries.ITEM.getOptional(empty);
-            if (opt.isEmpty()) return EMPTY.get();
-            var category = new Category(opt.get(), capacity, fillSound.orElse(null), emptySound.orElse(null));
-
-            filled.forEach(f -> {
-                var opt2 = BuiltInRegistries.ITEM.getOptional(f);
-                opt2.ifPresent(category::addItem);
-            });
+            var category = new Category(empty, capacity, fillSound.orElse(null), emptySound.orElse(null));
+            filled.forEach(category::addItem);
             if (category.isEmpty()) return EMPTY.get();
             return category;
         }

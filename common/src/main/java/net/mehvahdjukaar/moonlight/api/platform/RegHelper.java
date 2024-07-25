@@ -17,8 +17,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -31,12 +31,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.animal.Parrot;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.decoration.PaintingVariant;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
@@ -51,7 +45,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.WallBlock;
-import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -134,6 +127,10 @@ public class RegHelper {
         return register(name, () -> new LootItemConditionType(instance.get()), Registries.LOOT_CONDITION_TYPE);
     }
 
+    public static <T> Supplier<DataComponentType<T>> registerDataComponent(ResourceLocation name,
+                                                                           Supplier<DataComponentType<T>> component) {
+        return register(name, component, Registries.DATA_COMPONENT_TYPE);
+    }
 
     public static RegSupplier<PoiType> registerPOI(ResourceLocation name, Supplier<PoiType> poi) {
         return register(name, poi, Registries.POINT_OF_INTEREST_TYPE);
@@ -341,6 +338,7 @@ public class RegHelper {
     public static void addItemsToTabsRegistration(Consumer<ItemToTabEvent> event) {
         throw new AssertionError();
     }
+
 
     public record ItemToTabEvent(
             QuadConsumer<ResourceKey<CreativeModeTab>, @Nullable Predicate<ItemStack>, Boolean, Collection<ItemStack>> action) {

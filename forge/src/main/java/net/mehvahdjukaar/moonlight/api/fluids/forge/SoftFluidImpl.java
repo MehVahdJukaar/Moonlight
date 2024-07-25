@@ -1,11 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.fluids.forge;
 
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -15,11 +14,11 @@ import net.neoforged.neoforge.fluids.FluidType;
 
 public class SoftFluidImpl {
 
-    public static void addFluidSpecificAttributes(SoftFluid.Builder builder, Fluid fluid) {
+    public static Pair<Integer, Component> getFluidSpecificAttributes(Fluid fluid) {
         FluidType type = fluid.getFluidType();
-        builder.luminosity(type.getLightLevel());
+        int l = type.getLightLevel();
         Component tr = type.getDescription();
-        if (tr != null) builder.translation(tr);
+        return Pair.of(l, tr);
     }
 
     public static Triplet<ResourceLocation, ResourceLocation, Integer> getRenderingData(ResourceLocation useTexturesFrom) {

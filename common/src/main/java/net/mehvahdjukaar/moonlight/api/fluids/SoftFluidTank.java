@@ -201,7 +201,7 @@ public class SoftFluidTank {
      * Check if fluid TYPE is compatible with content. Does not care about count
      */
     public boolean isFluidCompatible(SoftFluidStack fluidStack) {
-        return this.fluidStack.isFluidEqual(fluidStack) || this.isEmpty();
+        return this.fluidStack.isSameFluidSameComponents(fluidStack) || this.isEmpty();
     }
 
     @Deprecated(forRemoval = true)
@@ -402,6 +402,11 @@ public class SoftFluidTank {
      */
     public void load(CompoundTag compound) {
         if (compound.contains("FluidHolder")) {
+            compound.put("fluid", compound.get("FluidHolder"));
+            compound.remove("FluidHolder");
+        }
+        if(compound.contains("fluid")) {
+            //TODO: use codecs
             CompoundTag cmp = compound.getCompound("FluidHolder");
             this.setFluid(SoftFluidStack.load(cmp));
         }
@@ -417,7 +422,7 @@ public class SoftFluidTank {
         CompoundTag cmp = new CompoundTag();
         this.setFluid(this.fluidStack);
         this.fluidStack.save(cmp);
-        compound.put("FluidHolder", cmp);
+        compound.put("fluid", cmp);
         return compound;
     }
 

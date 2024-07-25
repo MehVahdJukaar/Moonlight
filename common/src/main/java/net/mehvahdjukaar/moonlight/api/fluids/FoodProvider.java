@@ -5,9 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
@@ -15,13 +14,10 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.SuspiciousEffectHolder;
-import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -120,21 +116,17 @@ public class FoodProvider {
 
         @Override
         public boolean consume(Player player, Level world, @Nullable Consumer<ItemStack> nbtApplier) {
-
             ItemStack stack = this.foodItem.getDefaultInstance();
             if (nbtApplier != null) nbtApplier.accept(stack);
             FoodProperties foodProperties = PlatHelper.getFoodProperties(stack, player);
             if (foodProperties != null && player.canEat(false)) {
-                List<SuspiciousEffectHolder.EffectEntry> list = new ArrayList<>();
-                CompoundTag compoundTag = stack.getTag();
-                if (compoundTag != null && compoundTag.contains("effects", 9)) {
-                    SuspiciousEffectHolder.EffectEntry.LIST_CODEC.parse(NbtOps.INSTANCE, compoundTag.getList("effects", 10)).result()
-                            .ifPresent(list::addAll);
+                SuspiciousStewEffects suspiciousStewEffects = stack.getOrDefault(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY);
+
+                for (SuspiciousStewEffects.Entry entry : suspiciousStewEffects.effects()) {
+                    int j = entry.duration() / this.divider;
+                    player.addEffect(new MobEffectInstance(entry.effect(), j));
                 }
-                for (var effect : list) {
-                    int j = effect.duration() / this.divider;
-                    player.addEffect(new MobEffectInstance(effect.effect(), j));
-                }
+
                 player.getFoodData().eat(foodProperties.nutrition() / this.divider, foodProperties.saturation() / (float) this.divider);
                 player.playSound(this.foodItem.getDrinkingSound(), 1, 1);
                 return true;

@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.fluids.fabric;
 
+import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -12,11 +12,11 @@ import net.minecraft.world.level.material.Fluid;
 
 public class SoftFluidImpl {
 
-    public static void addFluidSpecificAttributes(SoftFluid.Builder builder, Fluid fluid) {
+    public static Pair<Integer, Component> getFluidSpecificAttributes(Fluid fluid) {
         FluidVariant variant = FluidVariant.of(fluid);
-        builder.luminosity(FluidVariantAttributes.getLuminance(variant));
+        int l = FluidVariantAttributes.getLuminance(variant);
         Component tr = FluidVariantAttributes.getName(variant);
-        if (tr != null) builder.translation(tr);
+        return Pair.of(l, tr);
     }
 
     public static Triplet<ResourceLocation, ResourceLocation, Integer> getRenderingData(ResourceLocation useTexturesFrom) {

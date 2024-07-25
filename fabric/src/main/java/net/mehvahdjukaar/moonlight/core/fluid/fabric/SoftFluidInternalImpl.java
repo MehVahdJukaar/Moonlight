@@ -10,6 +10,7 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -35,12 +36,12 @@ public class SoftFluidInternalImpl {
                 if (fluidMap.containsKey(f)) continue;
                 //is not equivalent: create new SoftFluid from forge fluid
 
-                SoftFluid sf = (new SoftFluid.Builder(f)).build();
+                SoftFluid sf = (new SoftFluid(BuiltInRegistries.FLUID.wrapAsHolder(f)));
                 //calling vanilla register function because calling that deferred register or forge registry now does nothing
                 //cope
                 //SOFT_FLUIDS.get().register(sf.getRegistryName(),sf);
                 Registry.register(reg, Utils.getID(f), sf);
-                fluidMap.put(f, reg.getHolder(reg.getId(sf)).orElseThrow());
+                fluidMap.put(f, reg.wrapAsHolder(sf));
 
             } catch (Exception ignored) {
             }
@@ -48,6 +49,11 @@ public class SoftFluidInternalImpl {
         //adds empty fluid
         //Registry.register(reg, Moonlight.res("empty"), SoftFluidRegistry.EMPTY);
         reg.freeze();
+
+        //TODO: check
+        for(var f : SoftFluidRegistry.getValues()){
+           f.afterInit();
+        }
     }
 
 }

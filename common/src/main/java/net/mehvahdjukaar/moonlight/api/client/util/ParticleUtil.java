@@ -25,6 +25,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL13;
 
 import java.util.function.Supplier;
@@ -194,8 +195,9 @@ public class ParticleUtil {
     public static Supplier<ShaderInstance> particleShader = GameRenderer::getParticleShader;
 
     public static final ParticleRenderType ADDITIVE_TRANSLUCENCY_RENDER_TYPE = new ParticleRenderType() {
+
         @Override
-        public void begin(BufferBuilder builder, TextureManager textureManager) {
+        public BufferBuilder begin(Tesselator tesselator, TextureManager textureManager) {
             Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
             RenderSystem.activeTexture(GL13.GL_TEXTURE2);
             RenderSystem.activeTexture(GL13.GL_TEXTURE0);
@@ -206,12 +208,7 @@ public class ParticleUtil {
             RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
-            builder.begin(VertexFormat.Mode.QUADS, PARTICLE);
-        }
-
-        @Override
-        public void end(Tesselator tesselator) {
-            tesselator.end();
+            return tesselator.begin(VertexFormat.Mode.QUADS, PARTICLE);
         }
 
         public String toString() {

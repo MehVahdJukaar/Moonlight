@@ -4,8 +4,9 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
+import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.minecraft.core.BlockPos;
@@ -15,7 +16,6 @@ import net.minecraft.core.component.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
@@ -44,7 +44,7 @@ public class SoftFluidStack implements DataComponentHolder {
                     .forGetter(stack -> stack.components.asPatch())
     ).apply(i, SoftFluidStack::of));
 
-    // this is not a singleton. Many empty instances might exist. We keep this just as a minor optimization
+    // this is not a singleton. Many empty instances might exist (due to world reload). We keep this just as a minor optimization
     private static SoftFluidStack cachedEmptyInstance = null;
 
     // dont access directly
@@ -59,13 +59,6 @@ public class SoftFluidStack implements DataComponentHolder {
         this.fluid = this.fluidHolder.value();
         this.components = PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, components);
         this.setCount(count);
-
-        //even more hardcoded shit
-        if (fluid.is(BuiltInSoftFluids.POTION.getID())) {
-            if (this.tag == null || PotionNBTHelper.getPotionType(this.tag) == null) {
-                PotionNBTHelper.Type.REGULAR.applyToTag(this.getOrCreateTag());
-            }
-        }
     }
 
     protected SoftFluidStack(Holder<SoftFluid> fluid, int count) {
@@ -108,26 +101,19 @@ public class SoftFluidStack implements DataComponentHolder {
         return cachedEmptyInstance;
     }
 
+
     @ApiStatus.Internal
     public static void invalidateEmptyInstance() {
         cachedEmptyInstance = null;
     }
 
-    public CompoundTag save(CompoundTag compoundTag) {
-        compoundTag.putString("id", getHolder().unwrapKey().get().location().toString());
-        compoundTag.putByte("count", (byte) this.count);
-        if (this.tag != null) {
-            compoundTag.put("tag", this.tag.copy());
-        }
-        return compoundTag;
+    public Tag save(HolderLookup.Provider lookupProvider) {
+        return CODEC.encodeStart(lookupProvider.createSerializationContext(NbtOps.INSTANCE), this).getOrThrow();
     }
 
-    public static SoftFluidStack load(HolderLookup.Provider lookupProvider, CompoundTag tag) {
-
+    public static SoftFluidStack load(HolderLookup.Provider lookupProvider, Tag tag) {
         //TODO: add components backwards compat
-
-        return CODEC.parse(lookupProvider.createSerializationContext(NbtOps.INSTANCE), tag)
-                .resultOrPartial(error -> LOGGER.error("Tried to load invalid soft fluid stack: '{}'", error));
+        return CODEC.parse(lookupProvider.createSerializationContext(NbtOps.INSTANCE), tag).getOrThrow();
     }
 
     public boolean is(TagKey<SoftFluid> tag) {
@@ -184,7 +170,7 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     public SoftFluidStack copy() {
-        return of(getHolder(), count, tag == null ? null : tag.copy());
+        return of(getHolder(), count, components.copy().asPatch());
     }
 
     public SoftFluidStack copyWithCount(int count) {
@@ -205,52 +191,36 @@ public class SoftFluidStack implements DataComponentHolder {
     /**
      * Checks if the fluids and NBT Tags are equal. This does not check amounts.
      */
-    public boolean isFluidEqual(SoftFluidStack other) {
-        return fluid() == other.fluid() && isFluidStackTagEqual(other);
-    }
-
-    /**
-     * Just checks if nbt is the same
-     */
-    public boolean isFluidStackTagEqual(SoftFluidStack other) {
-        return Objects.equals(this.tag, other.tag);
-    }
-
-    // these do not take count into account for some reason
-    @Override
-    public final int hashCode() {
-        int code = 1;
-        code = 31 * code + fluid().hashCode();
-        if (tag != null)
-            code = 31 * code + tag.hashCode();
-        return code;
-    }
-
-    /**
-     * Default equality comparison for a FluidStack. Same functionality as isFluidEqual().
-     * <p>
-     * This is included for use in data structures.
-     */
-    @Override
-    public final boolean equals(Object o) {
-        if (o instanceof SoftFluidStack ss) {
-            return isFluidEqual(ss);
+    public boolean isSameFluidSameComponents(SoftFluidStack other) {
+        if (!this.is(other.getFluid())) {
+            return false;
+        } else {
+            return this.isEmpty() && other.isEmpty() || Objects.equals(this.components, other.components);
         }
-        return false;
+    }
+
+    /**
+     * Hashes the fluid and components of this stack, ignoring the amount.
+     */
+    public static int hashFluidAndComponents(@Nullable SoftFluidStack stack) {
+        if (stack != null) {
+            int i = 31 + stack.getFluid().hashCode();
+            return 31 * i + stack.getComponents().hashCode();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public String toString() {
-        String s = count + " " + getHolder().unwrapKey().get().location();
-        if (tag != null) s += " [" + tag + "]";
-        return s;
+        return this.getCount() + " " + this.getFluid();
     }
 
     @NotNull
-    public static SoftFluidStack fromFluid(Fluid fluid, int amount, @Nullable CompoundTag tag) {
+    public static SoftFluidStack fromFluid(Fluid fluid, int amount, DataComponentPatch component) {
         Holder<SoftFluid> f = SoftFluidInternal.FLUID_MAP.get(fluid);
         if (f == null) return empty();
-        return of(f, amount, tag);
+        return of(f, amount, component);
     }
 
     @NotNull
@@ -277,26 +247,22 @@ public class SoftFluidStack implements DataComponentHolder {
 
                 int count = category.get().getAmount();
 
-                CompoundTag fluidTag = new CompoundTag();
-
-                CompoundTag itemTag = itemStack.getTag();
+                DataComponentPatch.Builder fluidComponents = DataComponentPatch.builder();
 
                 //convert potions to water bottles
                 PotionContents potion = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
-                boolean hasCustomPot = (itemTag != null && itemTag.contains("CustomPotionEffects"));
-                if (potion.is(Potions.WATER) && !hasCustomPot) {
+                if (potion.is(Potions.WATER)) {
                     fluid = BuiltInSoftFluids.WATER.getHolder();
                 }
                 //add tags to splash and lingering potions
-                else if (potion != PotionContents.EMPTY || hasCustomPot) {
-                    PotionNBTHelper.Type type = PotionNBTHelper.getPotionType(filledContainer);
-                    if (type == null) type = PotionNBTHelper.Type.REGULAR;
-                    type.applyToTag(fluidTag);
+                else if (potion.hasEffects()) {
+                    PotionBottleType bottleType = PotionBottleType.getOrDefault(filledContainer);
+                    fluidComponents.set(MoonlightRegistry.BOTTLE_TYPE.get(), bottleType);
                 }
 
                 //copy nbt from item
                 if (itemTag != null) {
-                    for (String k : fluid.value().getNbtKeyFromItem()) {
+                    for (String k : fluid.value().getPreservedComponents()) {
                         Tag c = itemTag.get(k);
                         if (c != null) {
                             fluidTag.put(k, c);
@@ -306,7 +272,7 @@ public class SoftFluidStack implements DataComponentHolder {
 
                 if (fluidTag.isEmpty()) fluidTag = null;
 
-                return Pair.of(SoftFluidStack.of(fluid, count, fluidTag), category.get());
+                return Pair.of(SoftFluidStack.of(fluid, count, fluidComponents.build()), category.get());
             }
         }
         return null;
@@ -358,7 +324,7 @@ public class SoftFluidStack implements DataComponentHolder {
 
     //handles special nbt items such as potions or soups
     protected void applyNBTtoItemStack(ItemStack stack) {
-        List<String> nbtKey = this.fluid().getNbtKeyFromItem();
+        List<String> nbtKey = this.fluid().getPreservedComponents();
         if (this.tag != null && !this.tag.isEmpty()) {
             CompoundTag newCom = new CompoundTag();
             for (String s : nbtKey) {
@@ -430,7 +396,12 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     @Override
-    public DataComponentMap getComponents() {
-        return this.isEmpty() ? DataComponentMap.EMPTY : this.components;
+    public PatchedDataComponentMap getComponents() {
+        return this.components;
+    }
+
+    @Nullable
+    public <T> T set(DataComponentType<? super T> type, @Nullable T component) {
+        return this.components.set(type, component);
     }
 }
