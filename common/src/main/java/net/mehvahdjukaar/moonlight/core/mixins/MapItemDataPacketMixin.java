@@ -18,6 +18,7 @@ import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -30,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 //I hope this won't break with mods. We need this as all data needs to be received at the same time
 @Mixin(ClientboundMapItemDataPacket.class)
@@ -39,9 +41,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Final
     @Nullable
     private MapItemSavedData.MapPatch colorPatch;
-    @Shadow
-    @Final
-    private int mapId;
+    @Shadow @Final private MapId mapId;
     @Unique
     private CustomMapDecoration[] moonlight$customDecorations = null;
     @Unique
@@ -54,9 +54,9 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     private ResourceLocation moonlight$dimension = Level.OVERWORLD.location();
 
     //new constructor expansion
-    @Inject(method = "<init>(IBZLjava/util/Collection;Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData$MapPatch;)V",
+    @Inject(method = "<init>(Lnet/minecraft/world/level/saveddata/maps/MapId;BZLjava/util/Optional;Ljava/util/Optional;)V",
             at = @At("RETURN"))
-    private void addExtraCenterAndDimension(int mapId, byte b, boolean bl, Collection collection, MapItemSavedData.MapPatch mapPatch, CallbackInfo ci) {
+    private void addExtraCenterAndDimension(MapId mapId, byte b, boolean bl, Optional optional, Optional optional2, CallbackInfo ci) {
         var level = PlatHelper.getCurrentServer().getLevel(Level.OVERWORLD);
         moonlight$dimension = null;
         if (level != null) {

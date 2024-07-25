@@ -203,26 +203,6 @@ public final class SpriteUtils {
         });
     }
 
-    @Deprecated(forRemoval = true)
-    @NotNull
-    public static final Predicate<String> LOOKS_LIKE_TOP_LOG_TEXTURE = s -> {
-        s = ResourceLocation.parse(s).getPath();
-        if(s.contains("_overlay"))return false;
-        return s.contains("_top") || s.contains("_end") || s.contains("_up");
-    };
-
-    @Deprecated(forRemoval = true)
-    @NotNull
-    public static final Predicate<String> LOOKS_LIKE_SIDE_LOG_TEXTURE =
-            s -> !LOOKS_LIKE_TOP_LOG_TEXTURE.test(s) && !ResourceLocation.parse(s).getPath().contains("_overlay");
-
-    @Deprecated(forRemoval = true)
-    @NotNull
-    public static final Predicate<String> LOOKS_LIKE_LEAF_TEXTURE = s -> {
-        s = ResourceLocation.parse(s).getPath();
-        return !s.contains("_bushy") && !s.contains("_snow") && !s.contains("_overlay");
-    };
-
     /**
      * @param manager         resource manager
      * @param fullTexturePath texture location

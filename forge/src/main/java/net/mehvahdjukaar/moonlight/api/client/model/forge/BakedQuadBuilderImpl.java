@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.model.forge;
 
 import com.google.common.base.Preconditions;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -60,58 +61,52 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         return this;
     }
 
-
     @Override
-    public BakedQuadBuilderImpl vertex(double x, double y, double z) {
+    public BakedQuadBuilderImpl addVertex(float x, float y, float z) {
         if (globalTransform != null) {
-            inner.vertex(new Matrix4f(globalTransform), (float) x, (float) y, (float) z);
+            inner.addVertex(new Matrix4f(globalTransform),  x,  y,  z);
         } else {
-            inner.vertex(x, y, z);
+            inner.addVertex(x, y, z);
         }
         return this;
     }
 
     @Override
-    public BakedQuadBuilderImpl color(int red, int green, int blue, int alpha) {
-        inner.color(red, green, blue, alpha);
+    public BakedQuadBuilderImpl setColor(int red, int green, int blue, int alpha) {
+        inner.setColor(red, green, blue, alpha);
         return this;
     }
 
     //given in sprite coords
     @Override
-    public BakedQuadBuilderImpl uv(float u, float v) {
-        inner.uv(sprite.getU(u * 16), sprite.getV(v * 16));
+    public BakedQuadBuilderImpl setUv(float u, float v) {
+        inner.setUv(sprite.getU(u * 16), sprite.getV(v * 16));
         return this;
     }
 
     @Override
-    public BakedQuadBuilderImpl overlayCoords(int u, int v) {
-        inner.overlayCoords(u, v);
+    public BakedQuadBuilderImpl setUv1(int u, int v) {
+        inner.setUv1(u, v);
         return this;
     }
 
     @Override
-    public BakedQuadBuilderImpl uv2(int u, int v) {
-        inner.uv2(u, v);
+    public BakedQuadBuilderImpl setUv2(int u, int v) {
+        inner.setUv2(u, v);
         return this;
     }
 
     @Override
-    public BakedQuadBuilderImpl normal(float x, float y, float z) {
+    public BakedQuadBuilderImpl setNormal(float x, float y, float z) {
         if (globalTransform != null) {
             Vector3f normal = normalTransf.transform(new Vector3f(x, y, z));
             normal.normalize();
-            inner.normal(normal.x, normal.y, normal.z);
-        } else inner.normal(x, y, z);
+            inner.setNormal(normal.x, normal.y, normal.z);
+        } else inner.setNormal(x, y, z);
         if (autoDirection) {
             this.setDirection(Direction.getNearest(x, y, z));
         }
         return this;
-    }
-
-    @Override
-    public void endVertex() {
-        inner.endVertex();
     }
 
     @Override

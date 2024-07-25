@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.minecraft.resources.ResourceLocation;
@@ -102,8 +103,8 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 if (repository != null) {
                     Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
                     //no resource pack support, just include these
-                    FilteredResManager vanillaManager = FilteredResManager.including(repository,this.dynamicPack.packType,
-                            "vanilla","mod_resources");
+                    FilteredResManager vanillaManager = FilteredResManager.including(repository, this.dynamicPack.packType,
+                            "vanilla", "mod_resources");
                     Moonlight.CAN_EARLY_RELOAD_HACK.set(true);
                     this.regenerateDynamicAssets(vanillaManager);
                     vanillaManager.close();
@@ -118,7 +119,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             var repository = this.getRepository();
             // only needed on second reload since there will be no pack on first
             // and only if the pack itself doesn't get cleared
-            if(repository != null && hasBeenInitialized && !dynamicPack.clearOnReload) {
+            if (repository != null && hasBeenInitialized && !dynamicPack.clearOnReload) {
                 Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
                 FilteredResManager nonSelfManager = FilteredResManager.excluding(repository, this.dynamicPack.packType,
                         dynamicPack.packId());
@@ -128,12 +129,9 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             }
             this.regenerateDynamicAssets(manager);
         }
-        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms" +
-                        (this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : ""),
-                this.dynamicPack.getPackType(),
-                this.dynamicPack.packId(),
-                this.modId,
-                watch.elapsed().toMillis());
+        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{}",
+                this.dynamicPack.getPackType(), this.dynamicPack.packId(),
+                LangBuilder.getReadableName(this.modId), watch.elapsed().toMillis(), this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
     }
 
     @Nullable

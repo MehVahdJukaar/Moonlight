@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.map.type;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -33,7 +34,7 @@ public interface MapDecorationType<D extends CustomMapDecoration, M extends MapB
     M createEmptyMarker();
 
     @Nullable
-    M loadMarkerFromNBT(CompoundTag compound);
+    M load(CompoundTag compound, HolderLookup.Provider registries);
 
     @Nullable
     M getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos);
@@ -45,5 +46,4 @@ public interface MapDecorationType<D extends CustomMapDecoration, M extends MapB
     default Optional<HolderSet<Structure>> getAssociatedStructure() {
         return Optional.empty();
     }
-
 }

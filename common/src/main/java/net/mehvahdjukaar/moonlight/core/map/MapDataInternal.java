@@ -160,7 +160,7 @@ public class MapDataInternal {
         return dynamic;
     }
 
-    public static Set<MapBlockMarker<?>> getDynamicClient(int mapId, MapItemSavedData data) {
+    public static Set<MapBlockMarker<?>> getDynamicClient(MapId mapId, MapItemSavedData data) {
         Set<MapBlockMarker<?>> dynamic = new HashSet<>();
         for (var v : DYNAMIC_CLIENT) {
             dynamic.addAll(v.apply(mapId, data));
@@ -172,7 +172,7 @@ public class MapDataInternal {
     @Nullable
     public static MapBlockMarker<?> readWorldMarker(CompoundTag compound) {
         for (var id : compound.getAllKeys()) {
-            return get(ResourceLocation.parse(id)).loadMarkerFromNBT(compound.getCompound(id));
+            return get(ResourceLocation.parse(id)).load(compound.getCompound(id));
         }
         return null;
     }
@@ -196,10 +196,10 @@ public class MapDataInternal {
     //dynamic markers
 
     private static final List<TriFunction<Player, MapId, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_SERVER = new ArrayList<>();
-    private static final List<BiFunction<Integer, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_CLIENT = new ArrayList<>();
+    private static final List<BiFunction<MapId, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_CLIENT = new ArrayList<>();
 
 
-    public static void addDynamicClientMarkersEvent(BiFunction<Integer, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+    public static void addDynamicClientMarkersEvent(BiFunction<MapId, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
         DYNAMIC_CLIENT.add(event);
     }
 

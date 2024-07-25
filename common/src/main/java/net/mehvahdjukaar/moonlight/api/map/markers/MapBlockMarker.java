@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -36,9 +37,10 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      * load a world marker to nbt. must match saveToNBT
      * implement if you are adding extra data
      */
-    public void loadFromNBT(CompoundTag compound) {
-        this.pos = NbtUtils.readBlockPos(compound.getCompound("Pos"));
-        this.name = compound.contains("Name") ? Component.Serializer.fromJson(compound.getString("Name")) : null;
+    public void load(CompoundTag compound,  HolderLookup.Provider registries) {
+        this.pos = NbtUtils.readBlockPos(compound, "Pos").orElse(BlockPos.ZERO);
+        this.name = compound.contains("Name") ? Component.Serializer.fromJson(
+                compound.getString("Name"), registries) : null;
         this.persistent = compound.getBoolean("Persistent");
     }
 
@@ -48,13 +50,13 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
      *
      * @return nbt
      */
-    public CompoundTag saveToNBT() {
+    public CompoundTag save( HolderLookup.Provider registries) {
         var compound = new CompoundTag();
         if (this.pos != null) {
             compound.put("Pos", NbtUtils.writeBlockPos(this.pos));
         }
         if (this.name != null) {
-            compound.putString("Name", Component.Serializer.toJson(this.name));
+            compound.putString("Name", Component.Serializer.toJson(this.name, registries));
         }
         if (this.persistent) compound.putBoolean("Persistent", true);
         return compound;

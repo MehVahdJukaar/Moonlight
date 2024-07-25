@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.google.common.collect.Maps;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
@@ -276,7 +277,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         for (MapBlockMarker<?> marker : this.moonlight$customMapMarkers.values()) {
             if(marker.shouldSave()) {
                 CompoundTag com2 = new CompoundTag();
-                com2.put(marker.getTypeId(), marker.saveToNBT());
+                com2.put(marker.getTypeId(), marker.save());
                 listNBT.add(com2);
             }
         }
@@ -314,5 +315,16 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         for(var d : MapDataInternal.CUSTOM_MAP_DATA_TYPES.values()){
             moonlight$customData.put(d.id(), d.factory().get());
         }
+    }
+
+    @ModifyReturnValue(method = "isExplorationMap", at = @At("RETURN"))
+    public boolean ml$isExplorationMap(boolean b){
+        if(b) return true;
+        for(var mapDecoration : this.moonlight$customDecorations.values()) {
+            if (mapDecoration.isFromExplorationMap()) {
+                return true;
+            }
+        }
+        return b;
     }
 }

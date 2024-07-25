@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 // Equivalent of TileEntityType.
 // Singleton, which will be in charge of creating CustomDecoration and MapBlockMarker instances
@@ -102,10 +101,10 @@ public final class CustomDecorationType<D extends CustomMapDecoration, M extends
 
     @Override
     @Nullable
-    public M loadMarkerFromNBT(CompoundTag compound) {
+    public M load(CompoundTag compound) {
         M marker = markerFactory.apply(this);
         try {
-            marker.loadFromNBT(compound);
+            marker.load(compound);
             return marker;
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to load world map marker for decoration type" + this + ": " + e);

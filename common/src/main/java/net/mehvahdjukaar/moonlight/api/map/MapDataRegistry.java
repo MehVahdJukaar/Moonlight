@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,7 +65,7 @@ public class MapDataRegistry {
      *
      * @param event callback
      */
-    public static void addDynamicClientMarkersEvent(BiFunction<Integer, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+    public static void addDynamicClientMarkersEvent(BiFunction<MapId, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
         MapDataInternal.addDynamicClientMarkersEvent(event);
     }
 
@@ -75,7 +76,7 @@ public class MapDataRegistry {
      *
      * @param event callback
      */
-    public static void addDynamicServerMarkersEvent(TriFunction<Player, Integer, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+    public static void addDynamicServerMarkersEvent(TriFunction<Player, MapId, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
         MapDataInternal.addDynamicServerMarkersEvent(event);
     }
 

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api;
 
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.BlockPlacerItem;
+import net.mehvahdjukaar.moonlight.api.map.CustomMapDecorationsComponent;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -9,6 +10,7 @@ import net.mehvahdjukaar.moonlight.core.loot.OptionalItemPool;
 import net.mehvahdjukaar.moonlight.core.loot.OptionalPropertyCondition;
 import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -54,6 +56,13 @@ public class MoonlightRegistry {
     public static final Supplier<DataComponentType<PotionBottleType>> BOTTLE_TYPE = RegHelper.registerDataComponent(
             res("bottle_type"), () -> DataComponentType.<PotionBottleType>builder()
                     .persistent(PotionBottleType.CODEC)
+                    .build()
+    );
+
+    public static final Supplier<DataComponentType<CustomMapDecorationsComponent>> CUSTOM_MAP_DECORATIONS = RegHelper.registerDataComponent(
+            res("custom_map_decorations"), () -> DataComponentType.<CustomMapDecorationsComponent>builder()
+                    .persistent(CustomMapDecorationsComponent.CODEC)
+                    .cacheEncoding()
                     .build()
     );
 

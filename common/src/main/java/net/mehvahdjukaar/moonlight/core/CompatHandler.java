@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.ApiStatus;
 public class CompatHandler {
 
     public static final boolean MAP_ATLASES = PlatHelper.isModLoaded("map_atlases") &&
-            compareVersions(PlatHelper.getModVersion("map_atlases"),"1.20-2.7.0")>=0;
+            compareVersions(PlatHelper.getModVersion("map_atlases"), "1.20-2.7.0") >= 0;
     public static final boolean MODERNFIX = PlatHelper.isModLoaded("modernfix");
     public static final boolean YACL = PlatHelper.isModLoaded("yet-another-config-lib");
     public static final boolean CLOTH_CONFIG = PlatHelper.isModLoaded("cloth-config");
@@ -38,14 +38,16 @@ public class CompatHandler {
         }
         return 0;
     }
-    public static MapItemSavedData getMapDataFromKnownKeys(ServerLevel level, int mapId) {
-        var d = level.getMapData(MapItem.makeKey(mapId));
+
+    public static MapItemSavedData getMapDataFromKnownKeys(ServerLevel level, MapId mapId) {
+        var d = level.getMapData(mapId);
+        /* //TODO: fix this
         if (d == null) {
             d = level.getMapData("magicmap_" + mapId);
             if (d == null) {
                 d = level.getMapData("mazemap_" + mapId);
             }
-        }
+        }*/
         return d;
     }
 }

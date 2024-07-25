@@ -130,7 +130,7 @@ public class RenderedTexturesManager {
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
             RenderSystem.disableBlend();
-            RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1);
             BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
             bufferBuilder.addVertex(matrix, 0.0f, 16, 0).setUv(0, 0);
@@ -173,9 +173,9 @@ public class RenderedTexturesManager {
         RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 
         //model view stuff
-        PoseStack posestack = RenderSystem.getModelViewStack();
-        posestack.pushPose();
-        posestack.setIdentity();
+        var posestack = RenderSystem.getModelViewStack();
+        posestack.pushMatrix();
+        posestack.set(new Matrix4f().identity());
 
         //apply new model view transformation
         RenderSystem.applyModelViewMatrix();
@@ -186,7 +186,7 @@ public class RenderedTexturesManager {
         drawFunction.accept(new PoseStack());
 
         //reset stuff
-        posestack.popPose();
+        posestack.popMatrix();
         //reset model view
         RenderSystem.applyModelViewMatrix();
 

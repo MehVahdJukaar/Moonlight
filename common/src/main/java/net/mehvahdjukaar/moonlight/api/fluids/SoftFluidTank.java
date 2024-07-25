@@ -4,6 +4,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -401,14 +402,15 @@ public class SoftFluidTank {
      * @param compound nbt
      */
     public void load(CompoundTag compound) {
+        //backward compat
         if (compound.contains("FluidHolder")) {
             compound.put("fluid", compound.get("FluidHolder"));
             compound.remove("FluidHolder");
         }
         if(compound.contains("fluid")) {
-            //TODO: use codecs
-            CompoundTag cmp = compound.getCompound("FluidHolder");
-            this.setFluid(SoftFluidStack.load(cmp));
+            this.setFluid(SoftFluidStack.load(
+                    Utils.hackyGetRegistryAccess(),
+                    compound.getCompound("fluid")));
         }
     }
 
@@ -419,10 +421,9 @@ public class SoftFluidTank {
      * @return nbt
      */
     public CompoundTag save(CompoundTag compound) {
-        CompoundTag cmp = new CompoundTag();
         this.setFluid(this.fluidStack);
-        this.fluidStack.save(cmp);
-        compound.put("fluid", cmp);
+        Tag tag = this.fluidStack.save(Utils.hackyGetRegistryAccess());
+        compound.put("fluid", tag);
         return compound;
     }
 
@@ -435,7 +436,7 @@ public class SoftFluidTank {
      */
     public boolean tryDrinkUpFluid(Player player, Level world) {
         if (!this.isEmpty() && this.containsFood()) {
-            if (this.fluidStack.getFoodProvider().consume(player, world, this.fluidStack::applyNBTtoItemStack)) { //crap code right there
+            if (this.fluidStack.getFoodProvider().consume(player, world, this.fluidStack::copyComponentsTo)) { //crap code right there
                 fluidStack.shrink(1);
                 return true;
             }

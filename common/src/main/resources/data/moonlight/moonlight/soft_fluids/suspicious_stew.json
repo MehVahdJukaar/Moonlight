@@ -14,8 +14,8 @@
     "divider": "BOWL",
     "item": "minecraft:suspicious_stew"
   },
-  "preserved_tags_from_item": [
-    "Effects"
+  "preserved_components_from_item": [
+    "suspicious_stew_effects"
   ],
   "still_texture": "moonlight:block/soft_fluids/soup_liquid",
   "translation_key": "item.minecraft.suspicious_stew",

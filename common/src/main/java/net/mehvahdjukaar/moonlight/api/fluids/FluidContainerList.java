@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.LenientListCodec;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -17,11 +17,9 @@ import java.util.function.Supplier;
 
 public class FluidContainerList {
 
-    /*
-    public static final Codec<FluidContainerList> CODEC = RecordCodecBuilder.merge((instance) -> instance.group(
-            Category.CODEC.listOf().fieldOf("containers").forGetter(FluidContainerList::encodeList)
+    public static final Codec<FluidContainerList> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+            LenientListCodec.of(Category.CODEC).fieldOf("containers").forGetter(a->new ArrayList<>(a.emptyToFilledMap.values()))
     ).apply(instance, FluidContainerList::new));
-    */
 
     private final Map<Item, Category> emptyToFilledMap = new IdentityHashMap<>();
 
@@ -66,11 +64,6 @@ public class FluidContainerList {
         return this.getEmpty(filledContainer).map(this.emptyToFilledMap::get);
     }
 
-
-    protected List<Category> encodeList() {
-        return new ArrayList<>(emptyToFilledMap.values());
-    }
-
     public Collection<Item> getPossibleFilled() {
         List<Item> list = new ArrayList<>();
         this.emptyToFilledMap.values().forEach(c -> list.addAll(c.filled));
@@ -109,7 +102,7 @@ public class FluidContainerList {
         public static final Codec<Category> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
                 BuiltInRegistries.ITEM.byNameCodec().fieldOf("empty").forGetter(c -> c.emptyContainer),
                 SoftFluid.Capacity.INT_CODEC.fieldOf("capacity").forGetter(Category::getCapacity),
-                Utils.optionalRegistryListCodec(BuiltInRegistries.ITEM).fieldOf("filled").forGetter(c -> c.filled),
+                BuiltInRegistries.ITEM.byNameCodec().listOf().fieldOf("filled").forGetter(c -> c.filled),
                 BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
                 BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
         ).apply(instance, Category::decode));

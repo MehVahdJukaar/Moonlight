@@ -12,8 +12,8 @@ import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.*;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.tags.FluidTags;
@@ -31,7 +31,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Objects;
 
 // do NOT have these in a static field as they contain registry holders
@@ -259,20 +258,11 @@ public class SoftFluidStack implements DataComponentHolder {
                     PotionBottleType bottleType = PotionBottleType.getOrDefault(filledContainer);
                     fluidComponents.set(MoonlightRegistry.BOTTLE_TYPE.get(), bottleType);
                 }
+                SoftFluidStack sfStack = SoftFluidStack.of(fluid, count, fluidComponents.build());
 
-                //copy nbt from item
-                if (itemTag != null) {
-                    for (String k : fluid.value().getPreservedComponents()) {
-                        Tag c = itemTag.get(k);
-                        if (c != null) {
-                            fluidTag.put(k, c);
-                        }
-                    }
-                }
+                copyComponentsTo(itemStack, sfStack, fluid.value().getPreservedComponents());
 
-                if (fluidTag.isEmpty()) fluidTag = null;
-
-                return Pair.of(SoftFluidStack.of(fluid, count, fluidComponents.build()), category.get());
+                return Pair.of(sfStack, category.get());
             }
         }
         return null;
@@ -295,22 +285,13 @@ public class SoftFluidStack implements DataComponentHolder {
             if (shrinkAmount <= this.getCount()) {
 
                 ItemStack filledStack = new ItemStack(category.getFirstFilled().get());
-                //case for lingering potions
-                if (this.is(BuiltInSoftFluids.POTION.getHolder()) && this.tag != null) {
-                    var type = PotionNBTHelper.getPotionType(this.tag);
-                    if (type != null && !Utils.getID(emptyContainer.getItem()).getNamespace().equals("inspirations")) {
-                        if (type != PotionNBTHelper.Type.REGULAR) {
-                            filledStack = type.getDefaultItem();
-                        }
-                    }
-                }
 
                 //converts water bottles into potions
                 if (emptyContainer.is(Items.GLASS_BOTTLE) && this.is(BuiltInSoftFluids.WATER.get())) {
                     filledStack = PotionContents.createItemStack(Items.POTION, Potions.WATER);
                 }
 
-                this.applyNBTtoItemStack(filledStack);
+                copyComponentsTo(this, filledStack, this.fluid.getPreservedComponents());
 
                 if (!dontModifyStack) this.shrink(shrinkAmount);
 
@@ -323,18 +304,23 @@ public class SoftFluidStack implements DataComponentHolder {
     //TODO: clean this nbt hardcoded stuff up
 
     //handles special nbt items such as potions or soups
-    protected void applyNBTtoItemStack(ItemStack stack) {
-        List<String> nbtKey = this.fluid().getPreservedComponents();
-        if (this.tag != null && !this.tag.isEmpty()) {
-            CompoundTag newCom = new CompoundTag();
-            for (String s : nbtKey) {
-                //ignores bottle tag, handled separately since it's a diff item
-                Tag c = this.tag.get(s);
-                if (c != null && !s.equals(PotionNBTHelper.POTION_TYPE_KEY)) {
-                    newCom.put(s, c);
-                }
-            }
-            if (!newCom.isEmpty()) stack.setTag(newCom);
+    protected static void copyComponentsTo(DataComponentHolder from,
+                                           DataComponentHolder to,
+                                           HolderSet<DataComponentType<?>> types) {
+        for (Holder<DataComponentType<?>> h : types) {
+            //ignores bottle tag, handled separately since it's a diff item
+            DataComponentType<?> type = h.value();
+            copyComponentTo(from, to, type);
+        }
+    }
+
+    private static <A> void copyComponentTo(DataComponentHolder from, DataComponentHolder to, DataComponentType<A> comp) {
+        var componentValue = from.get(comp);
+        if (componentValue != null) {
+            if (to instanceof ItemStack is)
+                is.set(comp, componentValue);
+            else if (to instanceof SoftFluidStack sf)
+                sf.set(comp, componentValue);
         }
     }
 
@@ -349,11 +335,11 @@ public class SoftFluidStack implements DataComponentHolder {
         return fluid().getFoodProvider();
     }
 
-    public boolean isEquivalent(Fluid fluid) {
+    public boolean isEquivalent(Holder<Fluid> fluid) {
         return this.fluid().isEquivalent(fluid);
     }
 
-    public Fluid getVanillaFluid() {
+    public Holder<Fluid> getVanillaFluid() {
         return this.fluid().getVanillaFluid();
     }
 

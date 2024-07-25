@@ -302,12 +302,21 @@ public class Utils {
     }
 
     /**
-     * Like Registry::byNameCodec::listOf but won't fail for missing entries
+     * Like Registry::byNameCodec::listOf but won't fail for missing entries.
+     * No reason to use this really, use HolderSet codec instead
      */
     public static <T> Codec<List<T>> optionalRegistryListCodec(Registry<T> reg) {
         return ResourceLocation.CODEC.listOf().xmap(
                 l -> l.stream().filter(reg::containsKey).map(reg::get).toList(),
                 a -> a.stream().map(reg::getKey).toList());
+    }
+
+
+    /**
+     * Like listOf but won't fail for missing entries.
+     */
+    public static <A> LenientListCodec<A> lenientListCodec(final Codec<A> elementCodec) {
+        return new LenientListCodec<>(elementCodec);
     }
 
 }

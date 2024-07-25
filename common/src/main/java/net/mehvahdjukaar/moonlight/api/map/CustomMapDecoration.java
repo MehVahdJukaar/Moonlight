@@ -122,5 +122,6 @@ public class CustomMapDecoration {
         this(type, buffer.readByte(), buffer.readByte(), (byte)(buffer.readByte() & 15), buffer.readBoolean() ? buffer.readComponent() : null);
     }
 
+   public abstract boolean isFromExplorationMap();
 }
 

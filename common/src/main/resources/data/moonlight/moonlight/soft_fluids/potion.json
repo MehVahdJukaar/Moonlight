@@ -33,20 +33,18 @@
     }
   ],
   "equivalent_fluids": [
-    "create:potion",
-    "cofh_core:potion",
-    "immersiveengineering:potion"
+    {"id":"create:potion","required":false},
+    {"id":"cofh_core:potion","required":false},
+    {"id":"immersiveengineering:potion","required":false}
   ],
   "flowing_texture": "moonlight:block/soft_fluids/potion_flow",
   "food": {
     "item": "minecraft:potion"
   },
-  "preserved_tags_from_item": [
-    "Potion",
-    "Bottle",
-    "CustomPotionEffects",
-    "CustomPotionColor",
-    "IsExtendedByCleric"
+  "preserved_components_from_item": [
+    "potion_contents",
+    "moonlight:bottle_type",
+    {"id":"origins:is_extended_by_cleric","required":false}
   ],
   "emissivity": 5,
   "still_texture": "moonlight:block/soft_fluids/potion_still",

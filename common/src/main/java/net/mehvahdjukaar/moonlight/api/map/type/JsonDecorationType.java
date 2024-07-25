@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
@@ -122,10 +123,10 @@ public final class JsonDecorationType implements MapDecorationType<CustomMapDeco
 
     @Nullable
     @Override
-    public SimpleMapBlockMarker loadMarkerFromNBT(CompoundTag compound) {
+    public SimpleMapBlockMarker load(CompoundTag compound, HolderLookup.Provider registries) {
         SimpleMapBlockMarker marker = new SimpleMapBlockMarker(this);
         try {
-            marker.loadFromNBT(compound);
+            marker.load(compound, registries);
             return marker;
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to load world map marker for decoration type" + this.getId() + ": " + e);

@@ -9,6 +9,7 @@ import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,10 +18,10 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class ClientPacketListenerMixin {
 
     @WrapOperation(method = "handleMapItemData",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/MapRenderer;update(ILnet/minecraft/world/level/saveddata/maps/MapItemSavedData;)V"))
-    private void handleExtraData(MapRenderer instance, int mapId, MapItemSavedData mapData, Operation<Void> operation,
-                                 @Local ClientboundMapItemDataPacket packet) {
-        IMapDataPacketExtension ext = (IMapDataPacketExtension) packet;
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/MapRenderer;update(Lnet/minecraft/world/level/saveddata/maps/MapId;Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;)V"))
+    private void handleExtraData(MapRenderer instance, MapId mapId, MapItemSavedData mapData, Operation<Void> operation,
+                                 @Local(argsOnly = true) ClientboundMapItemDataPacket packet) {
+        IMapDataPacketExtension ext = (IMapDataPacketExtension) (Object) packet;
         CompoundTag customServerData = ext.moonlight$getCustomMapDataTag();
         boolean updateTexture = ext.moonlight$getColorPatch() != null;
         if (customServerData != null) {

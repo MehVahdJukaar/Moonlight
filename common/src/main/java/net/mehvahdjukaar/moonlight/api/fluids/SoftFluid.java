@@ -7,13 +7,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -28,7 +26,6 @@ import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -43,7 +40,7 @@ public class SoftFluid {
     private final HolderSet<Fluid> equivalentFluids;
     private final FluidContainerList containerList;
     private final FoodProvider food;
-    private final List<DataComponentType<?>> preservedComponentsFromItem;
+    private final HolderSet<DataComponentType<?>> preservedComponentsFromItem;
 
     //used to indicate if it has been directly converted from a forge fluid
     public final boolean isGenerated;
@@ -66,15 +63,15 @@ public class SoftFluid {
     protected SoftFluid(ResourceLocation still, ResourceLocation flowing,
                         Component name, int luminosity, int emissivity,
                         int color, TintMethod tintMethod,
-                        FoodProvider food, List<DataComponentType<?>> components,
-                        List<FluidContainerList.Category> containers, HolderSet<Fluid> equivalent,
+                        FoodProvider food, HolderSet<DataComponentType<?>> components,
+                        FluidContainerList containers, HolderSet<Fluid> equivalent,
                         Optional<ResourceLocation> textureFrom) {
 
         this.tintMethod = tintMethod;
         this.equivalentFluids = equivalent;
         this.luminosity = luminosity;
         this.emissivity = Math.max(emissivity, luminosity);
-        this.containerList = new FluidContainerList(containers);
+        this.containerList = containers;
         this.food = food;
         this.name = name;
         this.preservedComponentsFromItem = components;
@@ -105,7 +102,7 @@ public class SoftFluid {
         this.tintMethod = TintMethod.STILL_AND_FLOWING;
         this.containerList = new FluidContainerList();
         this.food = FoodProvider.EMPTY;
-        this.preservedComponentsFromItem = List.of();
+        this.preservedComponentsFromItem = HolderSet.empty();
 
         //these textures are later overwritten by copy textures from;
         this.useTexturesFrom = fluid.unwrapKey().get().location();
@@ -134,11 +131,10 @@ public class SoftFluid {
     }
 
 
-
-    public void afterInit(){
-        for(var f : equivalentFluids){
+    public void afterInit() {
+        for (var f : equivalentFluids) {
             Item i = f.value().getBucket();
-            if (i != Items.AIR && i != Items.BUCKET){
+            if (i != Items.AIR && i != Items.BUCKET) {
                 this.containerList.add(i, Items.BUCKET, BUCKET_COUNT, SoundEvents.BUCKET_FILL, SoundEvents.BUCKET_EMPTY);
             }
         }
@@ -179,7 +175,7 @@ public class SoftFluid {
     /**
      * @return name of nbt tag that will be transferred from container item to fluid
      */
-    public List<DataComponentType<?>> getPreservedComponents() {
+    public HolderSet<DataComponentType<?>> getPreservedComponents() {
         return preservedComponentsFromItem;
     }
 
@@ -327,10 +323,10 @@ public class SoftFluid {
             ColorUtils.CODEC.optionalFieldOf("color", -1).forGetter(SoftFluid::getTintColor),
             TintMethod.CODEC.optionalFieldOf("tint_method", TintMethod.STILL_AND_FLOWING).forGetter(SoftFluid::getTintMethod),
             FoodProvider.CODEC.optionalFieldOf("food", FoodProvider.EMPTY).forGetter(SoftFluid::getFoodProvider),
-            Utils.optionalRegistryListCodec(BuiltInRegistries.DATA_COMPONENT_TYPE).optionalFieldOf("preserved_components_from_item", List.of())
+            RegistryCodecs.homogeneousList(Registries.DATA_COMPONENT_TYPE)
+                    .optionalFieldOf("preserved_components_from_item", HolderSet.empty())
                     .forGetter(SoftFluid::getPreservedComponents),
-            FluidContainerList.Category.CODEC.listOf().optionalFieldOf("containers", List.of())
-                    .forGetter(f -> f.getContainerList().encodeList()),
+            FluidContainerList.CODEC.optionalFieldOf("containers", new FluidContainerList()).forGetter(SoftFluid::getContainerList),
             RegistryCodecs.homogeneousList(Registries.FLUID).optionalFieldOf("equivalent_fluids", HolderSet.empty())
                     .forGetter(s -> s.equivalentFluids),
             ResourceLocation.CODEC.optionalFieldOf("use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))

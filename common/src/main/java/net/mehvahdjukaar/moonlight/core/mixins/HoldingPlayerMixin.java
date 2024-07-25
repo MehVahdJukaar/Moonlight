@@ -24,10 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
@@ -110,7 +107,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             // creates a new packet or modify existing one
             if (packet == null) {
                 packet = new ClientboundMapItemDataPacket(mapId,
-                        field_132.scale, field_132.locked, null, null);
+                        field_132.scale, field_132.locked, Optional.empty(), Optional.empty());
             }
             IMapDataPacketExtension ep = ((IMapDataPacketExtension) packet);
 
