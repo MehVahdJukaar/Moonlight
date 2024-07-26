@@ -12,6 +12,7 @@ import net.minecraft.client.resources.metadata.animation.AnimationMetadataSectio
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.FastColor;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 
@@ -262,29 +263,55 @@ public class TextureImage implements AutoCloseable {
         return obj;
     }
 
+    //local frame coord from global
+    public int getFrameStartX(int frameIndex) {
+        return (frameIndex % frameScale) * frameWidth(); //(2 % 1) * 16
+    }
+
+    public int getFrameStartY(int frameIndex) {
+        return (frameIndex / frameScale) * frameHeight(); // (2/1) * 32
+    }
+
+    public int getFrameX(int frameIndex, int globalX) {
+        return globalX - this.getFrameStartX(frameIndex);
+    }
+
+    public int getFrameY(int frameIndex, int globalY) {
+        return globalY - this.getFrameStartY(frameIndex);
+    }
+
     /**
      * Creates an image by combining two others taking alpha into consideration. Overlays are applied first in first out
      * Closes all given overlays images
      */
-    public void applyOverlay(TextureImage... overlays) throws IllegalStateException {
+    private void applyOverlay(boolean onlyOnExisting, TextureImage... overlays) throws IllegalStateException {
         for (var o : overlays) {
-            if (o.frameW < frameW) {
-                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay W: " + o.frameW + ", image W: " + frameW);
+            if (o.frameWidth() < frameWidth()) {
+                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay W: " + o.frameWidth() + ", image W: " + frameWidth());
             }
-            if (o.frameH < frameH) {
-                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay H: " + o.frameH + ", image H: " + frameH);
+            if (o.frameHeight() < frameHeight()) {
+                throw new IllegalStateException("Could not apply overlay onto images because overlay was too small (overlay H: " + o.frameHeight() + ", image H: " + frameHeight());
             }
         }
         for (var o : overlays) {
             this.forEachFrame((frameIndex, globalX, globalY) -> {
-                int frameX = globalX - this.getFrameX(frameIndex);
-                int frameY = globalY - this.getFrameY(frameIndex);
-                int targetOverlayFrame = Math.max(frameIndex, o.maxFrames-1);
+                int frameX = getFrameX(frameIndex, globalX);
+                int frameY = getFrameY(frameIndex, globalY);
+                int targetOverlayFrame = Math.min(frameIndex, o.maxFrames - 1);
                 int overlayPixel = o.getFramePixel(targetOverlayFrame, frameX, frameY);
+                if (onlyOnExisting && FastColor.ARGB32.alpha(overlayPixel) == 0) return;
                 image.blendPixel(globalX, globalY, overlayPixel);
             });
             o.close();
         }
+    }
+
+    /**
+     * Creates an image by combining two others taking alpha into consideration. Overlays are applied first in first out
+     * Closes all given overlay images
+     */
+    public void applyOverlay(TextureImage... overlays) throws IllegalStateException {
+        applyOverlay(false, overlays);
     }
 
     /**
@@ -293,22 +320,7 @@ public class TextureImage implements AutoCloseable {
      * Closes all given overlays images
      */
     public void applyOverlayOnExisting(TextureImage... overlays) throws IllegalStateException {
-        int width = imageWidth();
-        int height = imageHeight();
-        if (Arrays.stream(overlays).anyMatch(n -> n.imageHeight() < height || n.imageWidth() < width)) {
-            throw new IllegalStateException("Could not merge images because they had different dimensions");
-        }
-
-        for (var o : overlays) {
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    if (NativeImage.getA(image.getPixelRGBA(x, y)) != 0) {
-                        image.blendPixel(x, y, o.image.getPixelRGBA(x, y));
-                    }
-                }
-            }
-            o.close();
-        }
+        applyOverlay(true, overlays);
     }
 
     /**
