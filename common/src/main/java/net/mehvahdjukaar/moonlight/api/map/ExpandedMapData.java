@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
+import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
@@ -14,7 +15,7 @@ import java.util.function.Consumer;
 public interface ExpandedMapData {
 
     @ApiStatus.Internal
-    Map<String, CustomMapDecoration> ml$getCustomDecorations();
+    Map<String, MLMapDecoration> ml$getCustomDecorations();
 
     @ApiStatus.Internal
     Map<String, MapBlockMarker<?>> ml$getCustomMarkers();

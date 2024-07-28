@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
-import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -20,10 +20,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 
-public class DecorationRenderer<T extends CustomMapDecoration> {
+public class MapDecorationRenderer<T extends MLMapDecoration> {
     protected final ResourceLocation textureId;
 
-    public DecorationRenderer(ResourceLocation texture) {
+    public MapDecorationRenderer(ResourceLocation texture) {
         this.textureId = texture;
     }
 

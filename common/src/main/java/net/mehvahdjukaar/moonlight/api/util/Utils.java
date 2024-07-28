@@ -5,12 +5,13 @@ import com.mojang.serialization.codecs.BaseMapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -26,10 +27,7 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.GameType;
@@ -145,7 +143,7 @@ public class Utils {
         return SoftFluidRegistry.hackyGetRegistry().getKey(object);
     }
 
-    public static ResourceLocation getID(MapDecorationType<?, ?> object) {
+    public static ResourceLocation getID(MlMapDecorationType<?, ?> object) {
         return MapDataInternal.hackyGetRegistry().getKey(object);
     }
 
@@ -178,7 +176,7 @@ public class Utils {
         if (object instanceof MobEffect c) return getID(c);
         if (object instanceof Supplier<?> s) return getID(s.get());
         if (object instanceof SoftFluid s) return getID(s);
-        if (object instanceof MapDecorationType<?, ?> s) return getID(s);
+        if (object instanceof MlMapDecorationType<?, ?> s) return getID(s);
         if (object instanceof CreativeModeTab t) return getID(t);
         if (object instanceof DamageType t) return getID(t);
         if (object instanceof StatType t) return getID(t);
@@ -267,14 +265,15 @@ public class Utils {
         //this only checks the adventure mode canDestroyTag tag
         boolean result = !player.blockActionRestricted(player.level(), pos, gameMode);
         if (!result) {
-            //also checks this because vanilla doesnt as it does not place blocks in block use method
+            //also checks this because vanilla doesn't as it does not place blocks in block use method
             //also vanilla tends to allow a bunch of unpreventable adventure interactions
-            if (gameMode == GameType.ADVENTURE && !stack.isEmpty() &&
-                    stack.hasAdventureModePlaceTagForBlock(
-                            player.level().registryAccess().registryOrThrow(Registries.BLOCK),
-                            new BlockInWorld(player.level(), pos, false)
-                    )) {
-                return true;
+
+            if (gameMode == GameType.ADVENTURE && !stack.isEmpty()) {
+                AdventureModePredicate adventureModePredicate = stack.get(DataComponents.CAN_PLACE_ON);
+                if (adventureModePredicate != null && adventureModePredicate.test(
+                        new BlockInWorld(player.level(), pos, false))) {
+                    return true;
+                }
             }
         }
         return result;

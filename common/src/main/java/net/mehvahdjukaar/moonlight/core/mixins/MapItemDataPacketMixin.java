@@ -1,19 +1,19 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import io.netty.buffer.Unpooled;
-import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -30,8 +30,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 //I hope this won't break with mods. We need this as all data needs to be received at the same time
 @Mixin(ClientboundMapItemDataPacket.class)
@@ -41,11 +43,13 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Final
     @Nullable
     private MapItemSavedData.MapPatch colorPatch;
-    @Shadow @Final private MapId mapId;
+    @Shadow
+    @Final
+    private MapId mapId;
     @Unique
-    private CustomMapDecoration[] moonlight$customDecorations = null;
+    private Optional<List<MLMapDecoration>> moonlight$customDecorations = Optional.empty();
     @Unique
-    private CompoundTag moonlight$customData = null;
+    private Optional<CompoundTag> moonlight$customData = Optional.empty();
     @Unique
     private int moonlight$mapCenterX = 0;
     @Unique
@@ -56,7 +60,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     //new constructor expansion
     @Inject(method = "<init>(Lnet/minecraft/world/level/saveddata/maps/MapId;BZLjava/util/Optional;Ljava/util/Optional;)V",
             at = @At("RETURN"))
-    private void addExtraCenterAndDimension(MapId mapId, byte b, boolean bl, Optional optional, Optional optional2, CallbackInfo ci) {
+    private void moonlight$addExtraCenterAndDimension(MapId mapId, byte b, boolean bl, Optional optional, Optional optional2, CallbackInfo ci) {
         var level = PlatHelper.getCurrentServer().getLevel(Level.OVERWORLD);
         moonlight$dimension = null;
         if (level != null) {
@@ -69,85 +73,54 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         }
     }
 
-
-    @Inject(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V",
-            at = @At("RETURN"))
-    private void readExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
-        //we always need to send enough data to create the correct map type because we dont know if client has it
-        if (buf.readBoolean()) {
-            moonlight$dimension = buf.readResourceLocation();
-            moonlight$mapCenterX = buf.readVarInt();
-            moonlight$mapCenterZ = buf.readVarInt();
-        }
-        if (buf.readBoolean()) {
-            this.moonlight$customDecorations = new CustomMapDecoration[buf.readVarInt()];
-            for (int m = 0; m < moonlight$customDecorations.length; ++m) {
-                MapDecorationType<?, ?> type = MapDataInternal.get(buf.readResourceLocation());
-                if (type != null) {
-                    moonlight$customDecorations[m] = type.loadDecorationFromBuffer(buf);
+    @ModifyReturnValue(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/StreamCodec;composite(Lnet/minecraft/network/codec/StreamCodec;Ljava/util/function/Function;Lnet/minecraft/network/codec/StreamCodec;Ljava/util/function/Function;Lnet/minecraft/network/codec/StreamCodec;Ljava/util/function/Function;Lnet/minecraft/network/codec/StreamCodec;Ljava/util/function/Function;Lnet/minecraft/network/codec/StreamCodec;Ljava/util/function/Function;Lcom/mojang/datafixers/util/Function5;)Lnet/minecraft/network/codec/StreamCodec;"))
+    private static StreamCodec<RegistryFriendlyByteBuf, ClientboundMapItemDataPacket> moonlight$modifyMapPacketCodec(
+            StreamCodec<RegistryFriendlyByteBuf, ClientboundMapItemDataPacket> original) {
+        return StreamCodec.composite(original, Function.identity(),
+                MLMapDecoration.CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs::optional),
+                p -> ((IMapDataPacketExtension) (Object) p).moonlight$getCustomDecorations(),
+                ByteBufCodecs.OPTIONAL_COMPOUND_TAG,
+                p -> ((IMapDataPacketExtension) (Object) p).moonlight$getCustomMapDataTag(),
+                (old, deco, tag) -> {
+                    ((IMapDataPacketExtension) (Object) old).moonlight$setCustomDecorations(deco);
+                    ((IMapDataPacketExtension) (Object) old).moonlight$sendCustomMapDataTag(tag);
+                    return old;
                 }
-            }
-        }
-        if (buf.readBoolean()) {
-            //TODO: I really could have merged the 2 systems
-            this.moonlight$customData = buf.readNbt(); //readCompressedNbt(buf);
-        }
-    }
-
-    @Inject(method = "write", at = @At("RETURN"))
-    private void writeExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
-        buf.writeBoolean(moonlight$dimension != null);
-        if (moonlight$dimension != null) {
-            buf.writeResourceLocation(moonlight$dimension);
-            buf.writeVarInt(moonlight$mapCenterX);
-            buf.writeVarInt(moonlight$mapCenterZ);
-        }
-
-        buf.writeBoolean(moonlight$customDecorations != null);
-        if (moonlight$customDecorations != null) {
-            buf.writeVarInt(moonlight$customDecorations.length);
-
-            for (CustomMapDecoration decoration : moonlight$customDecorations) {
-                buf.writeResourceLocation(Utils.getID(decoration.getType()));
-                decoration.saveToBuffer(buf);
-            }
-        }
-
-        buf.writeBoolean(moonlight$customData != null);
-        if (moonlight$customData != null) {
-            buf.writeNbt(moonlight$customData);
-            // writeCompressedNbt(buf, moonlight$customData);
-        }
+        );
     }
 
     @Override
-    public void moonlight$sendCustomDecorations(Collection<CustomMapDecoration> decorations) {
-
+    public void moonlight$sendCustomDecorations(Collection<MLMapDecoration> decorations) {
         //packet will be passed to client no decoding. if we are on an integrated server we need to create new objects
         if (PlatHelper.getPhysicalSide().isClient()) {
-            var buffer = new FriendlyByteBuf(Unpooled.buffer());
-            decorations = decorations.stream().map(e -> {
-                e.saveToBuffer(buffer);
-                CustomMapDecoration d = e.getType().loadDecorationFromBuffer(buffer);
-                return d;
-            }).toList();
+            //make a copy?
         }
-        moonlight$customDecorations = decorations.toArray(CustomMapDecoration[]::new);
+        moonlight$customDecorations = Optional.of(List.copyOf(decorations));
     }
 
     @Override
-    public void moonlight$sendCustomMapDataTag(CompoundTag dataTag) {
+    public void moonlight$sendCustomMapDataTag(Optional<CompoundTag> dataTag) {
         moonlight$customData = dataTag;
     }
 
     @Override
-    public CompoundTag moonlight$getCustomMapDataTag() {
+    public Optional<CompoundTag> moonlight$getCustomMapDataTag() {
         return moonlight$customData;
     }
 
     @Override
     public MapItemSavedData.MapPatch moonlight$getColorPatch() {
         return colorPatch;
+    }
+
+    @Override
+    public Optional<List<MLMapDecoration>> moonlight$getCustomDecorations() {
+        return moonlight$customDecorations;
+    }
+
+    @Override
+    public void moonlight$setCustomDecorations(Optional<List<MLMapDecoration>> deco) {
+        moonlight$customDecorations = deco;
     }
 
     @Override
@@ -167,17 +140,17 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
 
         if (mapData instanceof ExpandedMapData ed) {
-            Map<String, CustomMapDecoration> decorations = ed.ml$getCustomDecorations();
+            Map<String, MLMapDecoration> decorations = ed.ml$getCustomDecorations();
 
 
             //mapData = MapItemSavedData.createForClient(message.scale, message.locked, Minecraft.getInstance().level.dimension());
             //Minecraft.getInstance().level.setMapData(string, mapData);
 
-            if (serverDeco != null) {
+            if (serverDeco.isPresent()) {
                 decorations.clear();
                 int i;
-                for (i = 0; i < serverDeco.length; ++i) {
-                    CustomMapDecoration customDecoration = serverDeco[i];
+                for (i = 0; i < serverDeco.get().size(); ++i) {
+                    MLMapDecoration customDecoration = serverDeco.get().get(i);
                     if (customDecoration != null) decorations.put("icon-" + i, customDecoration);
                     else {
                         Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");
@@ -185,10 +158,10 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                 }
 
             }
-            if (serverData != null) {
+            if (serverData.isPresent()) {
                 var customData = ed.ml$getCustomData();
                 for (var v : customData.values()) {
-                    v.loadUpdateTag(this.moonlight$customData);
+                    v.loadFromUpdateTag(serverData.get());
                 }
             }
 

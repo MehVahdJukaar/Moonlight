@@ -28,7 +28,7 @@ public interface CustomMapData<H extends CustomMapData.DirtyCounter> {
 
     Type<?> getType();
 
-    default boolean persistOnCopyOrLock(){
+    default boolean persistOnCopyOrLock() {
         return true;
     }
 
@@ -45,11 +45,15 @@ public interface CustomMapData<H extends CustomMapData.DirtyCounter> {
 
     void load(CompoundTag tag);
 
-    void loadUpdateTag(CompoundTag tag);
+    default void loadFromUpdateTag(CompoundTag tag) {
+        load(tag);
+    }
 
     void save(CompoundTag tag);
 
-    void saveToUpdateTag(CompoundTag tag, H dirtyCounter);
+    default void saveToUpdateTag(CompoundTag tag, H dirtyCounter) {
+        save(tag);
+    }
 
     default void setDirty(MapItemSavedData data, Consumer<H> dirtySetter) {
         Type<?> type = this.getType();

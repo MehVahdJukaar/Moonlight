@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
@@ -65,12 +66,12 @@ public abstract class DynamicResourcePack implements PackResources {
     protected static final Logger LOGGER = LogManager.getLogger();
 
     protected final PackLocationInfo locationInfo;
+    protected final ResourceLocation resourcePackName;
     protected final boolean hidden;
     protected final boolean fixed;
     protected final Pack.Position position;
     protected final PackType packType;
     protected final Supplier<PackMetadataSection> metadata;
-    protected final ResourceLocation resourcePackName;
     protected final Set<String> namespaces = new HashSet<>();
     protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
@@ -90,11 +91,17 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
+        this.locationInfo = new PackLocationInfo(
+                name.toString(),    // id
+                Component.translatable(LangBuilder.getReadableName(name.toString())), // title
+                PackSource.BUILT_IN,
+                Optional.empty() //no clue what this is
+        );
+
         this.packType = type;
         this.resourcePackName = name;
         this.mainNamespace = name.getNamespace();
         this.namespaces.add(name.getNamespace());
-        var title = Component.translatable(LangBuilder.getReadableName(name.toString()));
 
         this.position = position;
         this.fixed = fixed;
@@ -142,15 +149,6 @@ public abstract class DynamicResourcePack implements PackResources {
         this.namespaces.addAll(Arrays.asList(namespaces));
     }
 
-    public Component getTitle() {
-        return this.title;
-    }
-
-    @Override
-    public String packId() {
-        return title.getString();
-    }
-
     public ResourceLocation id() {
         return resourcePackName;
     }
@@ -158,6 +156,10 @@ public abstract class DynamicResourcePack implements PackResources {
     @Override
     public String toString() {
         return packId();
+    }
+
+    public Component getTitle() {
+        return location().title();
     }
 
     /**
@@ -168,12 +170,7 @@ public abstract class DynamicResourcePack implements PackResources {
         if (!INSTANCES.contains(this)) {
             PlatHelper.registerResourcePack(this.packType, () ->
                     Pack.readMetaAndCreate(
-                            new PackLocationInfo(
-                                    this.packId(),    // id
-                                    this.getTitle(), // title
-                                    PackSource.BUILT_IN,
-                                    Optional.empty() //no clue what this is
-                            ),
+                            this.locationInfo,
                             new Pack.ResourcesSupplier() {
                                 @Override
                                 public PackResources openPrimary(PackLocationInfo location) {

@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MLSpecialMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.Holder;
@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 
 public class MapDataRegistry {
 
-    public static final ResourceKey<Registry<MapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.KEY;
+    public static final ResourceKey<Registry<MlMapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.KEY;
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
@@ -37,7 +37,7 @@ public class MapDataRegistry {
         return registerCustomMapSavedData(new CustomMapData.Type<>(id, factory));
     }
 
-    public static MapDecorationType<?, ?> getDefaultType() {
+    public static MlMapDecorationType<?, ?> getDefaultType() {
         return MapDataInternal.getGenericStructure();
     }
 
@@ -49,12 +49,12 @@ public class MapDataRegistry {
     //each type is assigned to one and one only json file. essntally the type is what is parsed from json.
     //each type can intern have its own type.., the custom factory
     @Deprecated(forRemoval = true)
-    public static <T extends CustomDecorationType<?, ?>> T registerCustomType(T decorationType) {
+    public static <T extends MLSpecialMapDecorationType<?, ?>> T registerCustomType(T decorationType) {
          MapDataInternal.registerCustomType(decorationType.getCustomFactoryID(), ()->decorationType);
          return decorationType;
     }
 
-    public static void registerCustomType(ResourceLocation factoryId, Supplier<CustomDecorationType<?,?>> decorationTypeFactory) {
+    public static void registerCustomType(ResourceLocation factoryId, Supplier<MLSpecialMapDecorationType<?,?>> decorationTypeFactory) {
          MapDataInternal.registerCustomType(factoryId, decorationTypeFactory);
     }
 
@@ -80,23 +80,23 @@ public class MapDataRegistry {
         MapDataInternal.addDynamicServerMarkersEvent(event);
     }
 
-    public static CustomDecorationType<?, ?> getCustomType(ResourceLocation resourceLocation) {
+    public static MLSpecialMapDecorationType<?, ?> getCustomType(ResourceLocation resourceLocation) {
         return MapDataInternal.createCustomType(resourceLocation);
     }
 
-    public static MapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
+    public static MlMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
         return MapDataInternal.getAssociatedType(structure);
     }
 
-    public static Registry<MapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
+    public static Registry<MlMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
         return MapDataInternal.getRegistry(registryAccess);
     }
 
-    public static MapDecorationType<?, ?> get(ResourceLocation id) {
+    public static MlMapDecorationType<?, ?> get(ResourceLocation id) {
         return MapDataInternal.get(id);
     }
 
-    public static Optional<MapDecorationType<?, ?>> getOptional(ResourceLocation id) {
+    public static Optional<MlMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
         return MapDataInternal.getOptional(id);
     }
 

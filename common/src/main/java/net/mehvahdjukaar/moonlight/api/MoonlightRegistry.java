@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api;
 
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.BlockPlacerItem;
-import net.mehvahdjukaar.moonlight.api.map.CustomMapDecorationsComponent;
+import net.mehvahdjukaar.moonlight.api.map.MLMapDecorationsComponent;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -10,7 +10,6 @@ import net.mehvahdjukaar.moonlight.core.loot.OptionalItemPool;
 import net.mehvahdjukaar.moonlight.core.loot.OptionalPropertyCondition;
 import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -59,9 +58,9 @@ public class MoonlightRegistry {
                     .build()
     );
 
-    public static final Supplier<DataComponentType<CustomMapDecorationsComponent>> CUSTOM_MAP_DECORATIONS = RegHelper.registerDataComponent(
-            res("custom_map_decorations"), () -> DataComponentType.<CustomMapDecorationsComponent>builder()
-                    .persistent(CustomMapDecorationsComponent.CODEC)
+    public static final Supplier<DataComponentType<MLMapDecorationsComponent>> CUSTOM_MAP_DECORATIONS = RegHelper.registerDataComponent(
+            res("custom_map_decorations"), () -> DataComponentType.<MLMapDecorationsComponent>builder()
+                    .persistent(MLMapDecorationsComponent.CODEC)
                     .cacheEncoding()
                     .build()
     );

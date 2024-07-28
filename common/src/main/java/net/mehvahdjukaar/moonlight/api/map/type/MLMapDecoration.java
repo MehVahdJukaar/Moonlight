@@ -1,35 +1,55 @@
-package net.mehvahdjukaar.moonlight.api.map;
+package net.mehvahdjukaar.moonlight.api.map.type;
 
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
+ * Extensible class
  * Represents the actual map marker displayed on a map
  * default base simple decoration. This will be instanced in a map. Equivalent of a tile entity or decorations for maps themselves
  */
-public class CustomMapDecoration {
-    private final MapDecorationType<?,?> type;
+public class MLMapDecoration {
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, MLMapDecoration> CODEC =
+            MlMapDecorationType.STREAM_CODEC.dispatch(MLMapDecoration::getType,
+                    MlMapDecorationType::getDecorationCodec);
+
+
+    static final StreamCodec<RegistryFriendlyByteBuf, MLMapDecoration> DIRECT_CODEC = StreamCodec.composite(
+            ByteBufCodecs.BYTE, MLMapDecoration::getX,
+            ByteBufCodecs.BYTE, MLMapDecoration::getY,
+            ByteBufCodecs.BYTE, MLMapDecoration::getRot,
+            ComponentSerialization.OPTIONAL_STREAM_CODEC, m -> Optional.ofNullable(m.displayName),
+            ByteBufCodecs.BOOL, MLMapDecoration::isFromExplorationMap,
+            MLMapDecoration::new
+    );
+
+    MlMapDecorationType<?, ?> type;
     private Component displayName;
     private byte x;
     private byte y;
     private byte rot;
 
-    boolean isClientOnly; //if client wont be able to remove this.
+    boolean isFromExplorationMap;
 
-    public CustomMapDecoration(MapDecorationType<?,?> type, byte x, byte y, byte rot, @Nullable Component displayName) {
-        this.type = type;
+    public MLMapDecoration(byte x, byte y, byte rot, Optional<Component> displayName, boolean isFromExplorationMap) {
         this.x = x;
         this.y = y;
         this.rot = rot;
-        this.displayName = displayName;
+        this.displayName = displayName.orElse(null);
+        this.isFromExplorationMap = isFromExplorationMap;
     }
 
-    public MapDecorationType<?,?> getType() {
+    public final MlMapDecorationType<?, ?> getType() {
         return this.type;
     }
 
@@ -61,6 +81,14 @@ public class CustomMapDecoration {
         this.y = y;
     }
 
+    public void setFromExplorationMap(boolean fromExplorationMap) {
+        isFromExplorationMap = fromExplorationMap;
+    }
+
+    public boolean isFromExplorationMap() {
+        return isFromExplorationMap;
+    }
+
     @Nullable
     public Component getDisplayName() {
         return this.displayName;
@@ -70,7 +98,7 @@ public class CustomMapDecoration {
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-        } else if (obj instanceof CustomMapDecoration mapDecoration) {
+        } else if (obj instanceof MLMapDecoration mapDecoration) {
             if (this.type != mapDecoration.type) {
                 return false;
             } else if (this.rot != mapDecoration.rot) {
@@ -82,7 +110,7 @@ public class CustomMapDecoration {
             } else {
                 return Objects.equals(this.displayName, mapDecoration.displayName);
             }
-        }else{
+        } else {
             return false;
         }
     }
@@ -95,33 +123,5 @@ public class CustomMapDecoration {
         i = 31 * i + this.rot;
         return 31 * i + Objects.hashCode(this.displayName);
     }
-
-    /**
-     * used to send decoration data to client
-     * implement this if you are adding new data to this base decoration class
-     * @param buffer packed buffer
-     */
-    public void saveToBuffer(FriendlyByteBuf buffer){
-        buffer.writeByte(this.getX());
-        buffer.writeByte(this.getY());
-        buffer.writeByte(this.getRot() & 15);
-        if (this.getDisplayName() != null) {
-            buffer.writeBoolean(true);
-            buffer.writeComponent(this.getDisplayName());
-        } else {
-            buffer.writeBoolean(false);
-        }
-    }
-
-    /**
-     * used to load decoration data on a client. must match saveToBuffer
-     * implement this if you are adding new data to this base decoration class
-     * @param buffer packed buffer
-     */
-    public CustomMapDecoration(MapDecorationType<?,?> type, FriendlyByteBuf buffer){
-        this(type, buffer.readByte(), buffer.readByte(), (byte)(buffer.readByte() & 15), buffer.readBoolean() ? buffer.readComponent() : null);
-    }
-
-   public abstract boolean isFromExplorationMap();
 }
 

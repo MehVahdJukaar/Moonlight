@@ -1,20 +1,20 @@
 package net.mehvahdjukaar.moonlight.api.map.markers;
 
-import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
 
 /**
  * used to add decorations for decoration types that don't have a block marker (for structure decorations for example)
  * also used for json defined ones
  */
-public class SimpleMapBlockMarker extends MapBlockMarker<CustomMapDecoration> {
+public class SimpleMapBlockMarker extends MapBlockMarker<MLMapDecoration> {
 
-    public SimpleMapBlockMarker(MapDecorationType<CustomMapDecoration, ?> type) {
+    public SimpleMapBlockMarker(MlMapDecorationType<MLMapDecoration, ?> type) {
         super(type);
     }
 
     @Override
-    protected CustomMapDecoration doCreateDecoration(byte mapX, byte mapY, byte rot) {
-        return new CustomMapDecoration(this.getType(), mapX, mapY, rot, getName());
+    protected MLMapDecoration doCreateDecoration(byte mapX, byte mapY, byte rot) {
+        return new MLMapDecoration(this.getType(), mapX, mapY, rot, getName());
     }
 }

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.events.forge;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.BushBlock;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
 

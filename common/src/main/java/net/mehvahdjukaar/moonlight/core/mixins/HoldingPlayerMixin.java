@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
-import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
@@ -89,7 +89,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             updateDeco = true;
         }
         //update every 5 sec
-        List<CustomMapDecoration> extra = new ArrayList<>();
+        List<MLMapDecoration> extra = new ArrayList<>();
         //we got to update every darn time if we want other heartstone players to be updated properly. Cant use client info because client doesnt have them
         //re any time check optimization will be done by those getDynamic functions
         //if ((moonlight$volatileDecorationRefreshTicks++ % (20 * 4)) == 0 || updateDeco) {
@@ -120,7 +120,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
                 ep.moonlight$sendCustomMapDataTag(customDataTag);
             }
             if (updateDeco) {
-                List<CustomMapDecoration> decorations = new ArrayList<>(ed.ml$getCustomDecorations().values());
+                List<MLMapDecoration> decorations = new ArrayList<>(ed.ml$getCustomDecorations().values());
                 decorations.addAll(extra);
 
                 ep.moonlight$sendCustomDecorations(decorations);
@@ -134,7 +134,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             ExpandedMapData ed, CompoundTag customDataTag,
             Map.Entry<CustomMapData.Type<?>, CustomMapData.DirtyCounter> e) {
         D d = (D) ed.ml$getCustomData().get(e.getKey().id());
-        //TODO: put this in a separate compound. cant cause of backwards compat
+        //TODO: !!!!put this in a separate compound. cant cause of backwards compat
         C value = (C) e.getValue();
         d.saveToUpdateTag(customDataTag, value);
     }

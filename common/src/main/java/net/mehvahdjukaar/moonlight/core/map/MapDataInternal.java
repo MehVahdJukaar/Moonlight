@@ -2,15 +2,12 @@ package net.mehvahdjukaar.moonlight.core.map;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
-import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.map.type.CustomDecorationType;
-import net.mehvahdjukaar.moonlight.api.map.type.JsonDecorationType;
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MLSpecialMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -33,33 +30,6 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public class MapDataInternal {
 
-    //pain
-    public static final Codec<MapDecorationType<?, ?>> CODEC =
-            Codec.either(CustomDecorationType.CODEC, JsonDecorationType.CODEC).xmap(
-                    either -> either.map(s -> s, c -> c),
-                    type -> {
-                        if (type == null) {
-                            Moonlight.LOGGER.error("map decoration type cant be null. how did this happen?");
-                        }
-                        if (type instanceof CustomDecorationType<?, ?> c) {
-                            return Either.left(c);
-                        }
-                        return Either.right((JsonDecorationType) type);
-                    });
-
-    public static final Codec<MapDecorationType<?, ?>> NETWORK_CODEC =
-            Codec.either(CustomDecorationType.CODEC, JsonDecorationType.NETWORK_CODEC).xmap(
-                    either -> either.map(s -> s, c -> c),
-                    type -> {
-                        if (type == null) {
-                            Moonlight.LOGGER.error("map decoration type cant be null. how did this happen?");
-                        }
-                        if (type instanceof CustomDecorationType<?, ?> c) {
-                            return Either.left(c);
-                        }
-                        return Either.right((JsonDecorationType) type);
-                    });
-
     //data holder
     @ApiStatus.Internal
     public static final Map<ResourceLocation, CustomMapData.Type<?>> CUSTOM_MAP_DATA_TYPES = new LinkedHashMap<>();
@@ -78,24 +48,24 @@ public class MapDataInternal {
 
     //map markers
 
-    public static final ResourceKey<Registry<MapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(Moonlight.res("map_markers"));
+    public static final ResourceKey<Registry<MlMapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(Moonlight.res("map_markers"));
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
-    private static final BiMap<ResourceLocation, Supplier<CustomDecorationType<?, ?>>> CODE_TYPES_FACTORIES = HashBiMap.create();
+    private static final BiMap<ResourceLocation, Supplier<MLSpecialMapDecorationType<?, ?>>> CODE_TYPES_FACTORIES = HashBiMap.create();
 
-    public static MapDecorationType<?, ?> getGenericStructure() {
+    public static MlMapDecorationType<?, ?> getGenericStructure() {
         return get(GENERIC_STRUCTURE_ID);
     }
 
     /**
      * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
      */
-    public static void registerCustomType(ResourceLocation id, Supplier<CustomDecorationType<?, ?>> decorationType) {
+    public static void registerCustomType(ResourceLocation id, Supplier<MLSpecialMapDecorationType<?, ?>> decorationType) {
         CODE_TYPES_FACTORIES.put(id, decorationType);
     }
 
     //TODO: redo in 1.20.6
     //maybe rename the decoration and decortion type to MapDecorationInstance and MapDecorationType to MapDecoration and the factory to type
-    public static CustomDecorationType<?, ?> createCustomType(ResourceLocation factoryID) {
+    public static MLSpecialMapDecorationType<?, ?> createCustomType(ResourceLocation factoryID) {
         var factory = Objects.requireNonNull(CODE_TYPES_FACTORIES.get(factoryID),
                 "No map decoration type with id: " + factoryID);
         var t = factory.get();
@@ -104,7 +74,7 @@ public class MapDataInternal {
         return t;
     }
 
-    public static MapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
+    public static MlMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
         for (var v : getValues()) {
             Optional<HolderSet<Structure>> associatedStructure = v.getAssociatedStructure();
             if (associatedStructure.isPresent() && associatedStructure.get().contains(structure)) {
@@ -120,35 +90,35 @@ public class MapDataInternal {
         throw new AssertionError();
     }
 
-    public static Registry<MapDecorationType<?, ?>> hackyGetRegistry() {
+    public static Registry<MlMapDecorationType<?, ?>> hackyGetRegistry() {
         return Utils.hackyGetRegistryAccess().registryOrThrow(KEY);
     }
 
-    public static Registry<MapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
+    public static Registry<MlMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
         return registryAccess.registryOrThrow(KEY);
     }
 
-    public static Collection<MapDecorationType<?, ?>> getValues() {
+    public static Collection<MlMapDecorationType<?, ?>> getValues() {
         return hackyGetRegistry().stream().toList();
     }
 
-    public static Set<Map.Entry<ResourceKey<MapDecorationType<?, ?>>, MapDecorationType<?, ?>>> getEntries() {
+    public static Set<Map.Entry<ResourceKey<MlMapDecorationType<?, ?>>, MlMapDecorationType<?, ?>>> getEntries() {
         return hackyGetRegistry().entrySet();
     }
 
     @Nullable
-    public static MapDecorationType<? extends CustomMapDecoration, ?> get(String id) {
+    public static MlMapDecorationType<? extends MLMapDecoration, ?> get(String id) {
         return get(ResourceLocation.parse(id));
     }
 
-    public static MapDecorationType<?, ?> get(ResourceLocation id) {
+    public static MlMapDecorationType<?, ?> get(ResourceLocation id) {
         var reg = hackyGetRegistry();
         var r = reg.get(id);
         if (r == null) return reg.get(GENERIC_STRUCTURE_ID);
         return r;
     }
 
-    public static Optional<MapDecorationType<?, ?>> getOptional(ResourceLocation id) {
+    public static Optional<MlMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
         return hackyGetRegistry().getOptional(id);
     }
 
@@ -186,7 +156,7 @@ public class MapDataInternal {
      */
     public static List<MapBlockMarker<?>> getMarkersFromWorld(BlockGetter reader, BlockPos pos) {
         List<MapBlockMarker<?>> list = new ArrayList<>();
-        for (MapDecorationType<?, ?> type : getValues()) {
+        for (MlMapDecorationType<?, ?> type : getValues()) {
             MapBlockMarker<?> c = type.getWorldMarkerFromWorld(reader, pos);
             if (c != null) list.add(c);
         }

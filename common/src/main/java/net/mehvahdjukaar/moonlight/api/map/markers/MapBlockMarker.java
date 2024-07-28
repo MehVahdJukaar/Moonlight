@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map.markers;
 
-import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -19,9 +19,9 @@ import java.util.Objects;
  *
  * @param <D> decoration
  */
-public abstract class MapBlockMarker<D extends CustomMapDecoration> {
+public abstract class MapBlockMarker<D extends MLMapDecoration> {
     //Static ref is fine as data registry cant change with reload command. Just don't hold ref outside of a world
-    protected final MapDecorationType<D, ?> type;
+    protected final MlMapDecorationType<D, ?> type;
     @Nullable
     private BlockPos pos;
     private int rot = 0;
@@ -29,7 +29,7 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
     private Component name;
     private boolean persistent;
 
-    protected MapBlockMarker(MapDecorationType<D, ?> type) {
+    protected MapBlockMarker(MlMapDecorationType<D, ?> type) {
         this.type = type;
     }
 
@@ -112,7 +112,7 @@ public abstract class MapBlockMarker<D extends CustomMapDecoration> {
         return pos == null ? "" : pos.getX() + "," + pos.getY() + "," + pos.getZ();
     }
 
-    public MapDecorationType<D, ?> getType() {
+    public MlMapDecorationType<D, ?> getType() {
         return type;
     }
 
