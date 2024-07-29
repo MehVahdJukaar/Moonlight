@@ -6,9 +6,8 @@ import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.MLMapDecorationsComponent;
-import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
@@ -17,11 +16,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapBanner;
@@ -68,7 +71,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     //world markers (stuff that gets saved)
     @Unique
-    private final Map<String, MapBlockMarker<?>> moonlight$customMapMarkers = Maps.newHashMap();
+    private final Map<String, MLMapMarker<?>> moonlight$customMapMarkers = Maps.newHashMap();
 
     //custom data that can be stored in maps
     @Unique
@@ -100,7 +103,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Override
-    public Map<String, MapBlockMarker<?>> ml$getCustomMarkers() {
+    public Map<String, MLMapMarker<?>> ml$getCustomMarkers() {
         return moonlight$customMapMarkers;
     }
 
@@ -110,12 +113,12 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Override
-    public <M extends MapBlockMarker<?>> void ml$addCustomMarker(M marker) {
+    public <M extends MLMapMarker<?>> void ml$addCustomMarker(M marker) {
         var decoration = marker.createDecorationFromMarker((MapItemSavedData) (Object) this);
         if (decoration != null) {
-            this.moonlight$customDecorations.put(marker.getMarkerId(), decoration);
+            this.moonlight$customDecorations.put(marker.getMarkerUniqueId(), decoration);
             if (marker.shouldSave()) {
-                this.moonlight$customMapMarkers.put(marker.getMarkerId(), marker);
+                this.moonlight$customMapMarkers.put(marker.getMarkerUniqueId(), marker);
             }
             //so packet is sent
             ml$setCustomDecorationsDirty();
@@ -164,7 +167,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Override
     public boolean ml$toggleCustomDecoration(LevelAccessor world, BlockPos pos) {
         if (world.isClientSide()) {
-            List<MapBlockMarker<?>> markers = MapDataInternal.getMarkersFromWorld(world, pos);
+            List<MLMapMarker<?>> markers = MapDataInternal.getMarkersFromWorld(world, pos);
             return !markers.isEmpty();
         }
 
@@ -174,13 +177,13 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         double d2 = (d0 - this.centerX) / i;
         double d3 = (d1 - this.centerZ) / i;
         if (d2 >= -63.0D && d3 >= -63.0D && d2 <= 63.0D && d3 <= 63.0D) {
-            List<MapBlockMarker<?>> markers = MapDataInternal.getMarkersFromWorld(world, pos);
+            List<MLMapMarker<?>> markers = MapDataInternal.getMarkersFromWorld(world, pos);
 
             boolean changed = false;
-            for (MapBlockMarker<?> marker : markers) {
+            for (MLMapMarker<?> marker : markers) {
                 if (marker != null) {
                     //toggle
-                    String id = marker.getMarkerId();
+                    String id = marker.getMarkerUniqueId();
                     if (marker.equals(this.moonlight$customMapMarkers.get(id))) {
                         ml$removeCustomMarker(id);
                     } else {
@@ -214,12 +217,12 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Unique
     private void moonlight$copyCustomData(MapItemSavedData data) {
         if (data instanceof ExpandedMapData ed) {
-            for (var d : this.moonlight$customData.entrySet()) {
-                var v = d.getValue();
-                if (v.persistOnCopyOrLock()) {
+            for (var entry : this.moonlight$customData.entrySet()) {
+                CustomMapData<?> customData = entry.getValue();
+                if (customData.persistOnCopyOrLock()) {
                     CompoundTag t = new CompoundTag();
-                    v.save(t);
-                    ed.ml$getCustomData().get(d.getKey()).load(t);
+                    customData.save(t);
+                    ed.ml$getCustomData().get(entry.getKey()).load(t);
                 }
             }
         }
@@ -235,26 +238,9 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             if (!this.moonlight$customMapMarkers.keySet().containsAll(customDecoComponent.decorations().keySet())) {
                 customDecoComponent.decorations().forEach((string, entry) -> {
                     if (!this.decorations.containsKey(string)) {
-                        this.addDecoration(entry.type(), player.level(), string, entry.x(), entry.z(), (double)entry.rotation(), null);
+                        this.ml$addCustomMarker(entry);
                     }
                 });
-            }
-
-            for (int j = 0; j < listTag.size(); ++j) {
-                CompoundTag com = listTag.getCompound(j);
-                if (!this.decorations.containsKey(com.getString("id"))) {
-                    String name = com.getString("type");
-
-                    MlMapDecorationType<? extends MLMapDecoration, ?> type = MapDataInternal.get(name);
-                    if (type != null) {
-                        BlockPos pos = new BlockPos(com.getInt("x"), 64, com.getInt("z"));
-                        MapBlockMarker<?> marker = type.createEmptyMarker();
-                        marker.setPos(pos);
-                        this.ml$addCustomMarker(marker);
-                    } else {
-                        Moonlight.LOGGER.warn("Failed to load map decoration " + name + ". Skipping it");
-                    }
-                }
             }
         }
     }
@@ -266,13 +252,17 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         if (compound.contains("customMarkers") && data instanceof ExpandedMapData mapData) {
             ListTag listNBT = compound.getList("customMarkers", 10);
 
+            RegistryOps<Tag> registryOps = registries.createSerializationContext(NbtOps.INSTANCE);
+
             for (int j = 0; j < listNBT.size(); ++j) {
-                MapBlockMarker<?> marker = MapDataInternal.readWorldMarker(listNBT.getCompound(j));
-                if (marker != null) {
-                    mapData.ml$getCustomMarkers().put(marker.getMarkerId(), marker);
-                    mapData.ml$addCustomMarker(marker);
-                }
+                MLMapMarker.CODEC.parse(registryOps, listNBT.getCompound(j))
+                        .resultOrPartial(string -> Moonlight.LOGGER.warn("Failed to parse moonlight map marker: '{}'", string))
+                        .ifPresent(marker -> {
+                            mapData.ml$getCustomMarkers().put(marker.getMarkerUniqueId(), marker);
+                            mapData.ml$addCustomMarker(marker);
+                        });
             }
+
             mapData.ml$getCustomData().values().forEach(customMapData -> customMapData.load(compound));
         }
     }
@@ -283,11 +273,11 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
         ListTag listNBT = new ListTag();
 
-        for (MapBlockMarker<?> marker : this.moonlight$customMapMarkers.values()) {
+        RegistryOps<Tag> registryOps = registries.createSerializationContext(NbtOps.INSTANCE);
+
+        for (MLMapMarker<?> marker : this.moonlight$customMapMarkers.values()) {
             if (marker.shouldSave()) {
-                CompoundTag com2 = new CompoundTag();
-                com2.put(marker.getTypeId(), marker.save(registries));
-                listNBT.add(com2);
+                listNBT.add(MLMapMarker.CODEC.encodeStart(registryOps, marker).getOrThrow());
             }
         }
         com.put("customMarkers", listNBT);
@@ -299,12 +289,12 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Inject(method = "checkBanners", at = @At("TAIL"))
     public void checkCustomDeco(BlockGetter world, int x, int z, CallbackInfo ci) {
         List<String> toRemove = new ArrayList<>();
-        List<MapBlockMarker<?>> toAdd = new ArrayList<>();
+        List<MLMapMarker<?>> toAdd = new ArrayList<>();
         for (var e : this.moonlight$customMapMarkers.entrySet()) {
             var marker = e.getValue();
             if (marker.getPos().getX() == x && marker.getPos().getZ() == z) {
-                if (marker.shouldRefresh()) {
-                    MapBlockMarker<?> newMarker = marker.getType().getWorldMarkerFromWorld(world, marker.getPos());
+                if (marker.shouldRefreshFromWorld()) {
+                    MLMapMarker<?> newMarker = marker.getType().value().createMarkerFromWorld(world, marker.getPos());
                     String id = e.getKey();
                     if (newMarker == null) {
                         toRemove.add(id);
@@ -320,21 +310,21 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void initCustomData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3, ResourceKey
-            resourceKey, CallbackInfo ci) {
+    public void initCustomData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3,
+                               ResourceKey<Level> resourceKey, CallbackInfo ci) {
         for (var d : MapDataInternal.CUSTOM_MAP_DATA_TYPES.values()) {
             moonlight$customData.put(d.id(), d.factory().get());
         }
     }
 
     @ModifyReturnValue(method = "isExplorationMap", at = @At("RETURN"))
-    public boolean ml$isExplorationMap(boolean b) {
-        if (b) return true;
-        for (var mapDecoration : this.moonlight$customDecorations.values()) {
-            if (mapDecoration.isFromExplorationMap()) {
+    public boolean ml$isExplorationMap(boolean original) {
+        if (original) return true;
+        for (var mapDecoration : this.moonlight$customMapMarkers.values()) {
+            if (mapDecoration.preventsExtending()) {
                 return true;
             }
         }
-        return b;
+        return false;
     }
 }

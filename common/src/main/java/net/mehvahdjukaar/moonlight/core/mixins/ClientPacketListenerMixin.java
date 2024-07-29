@@ -22,9 +22,9 @@ public abstract class ClientPacketListenerMixin {
     private void handleExtraData(MapRenderer instance, MapId mapId, MapItemSavedData mapData, Operation<Void> operation,
                                  @Local(argsOnly = true) ClientboundMapItemDataPacket packet) {
         IMapDataPacketExtension ext = (IMapDataPacketExtension) (Object) packet;
-        CompoundTag customServerData = ext.moonlight$getCustomMapDataTag();
-        boolean updateTexture = ext.moonlight$getColorPatch() != null;
-        if (customServerData != null) {
+        var customServerData = ext.moonlight$getCustomMapDataTag();
+        boolean updateTexture = packet.colorPatch().isPresent();
+        if (customServerData.isPresent()) {
             updateTexture = true;
         }
         updateTexture = updateTexture || !ClientConfigs.LAZY_MAP_DATA.get();

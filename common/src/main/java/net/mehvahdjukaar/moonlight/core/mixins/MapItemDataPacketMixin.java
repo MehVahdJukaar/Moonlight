@@ -2,8 +2,8 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
-import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -37,15 +37,14 @@ import java.util.function.Function;
 
 //I hope this won't break with mods. We need this as all data needs to be received at the same time
 @Mixin(ClientboundMapItemDataPacket.class)
-public class MapItemDataPacketMixin implements IMapDataPacketExtension {
+public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
     @Shadow
     @Final
-    @Nullable
-    private MapItemSavedData.MapPatch colorPatch;
-    @Shadow
-    @Final
     private MapId mapId;
+
+    @Shadow public abstract Optional<MapItemSavedData.MapPatch> colorPatch();
+
     @Unique
     private Optional<List<MLMapDecoration>> moonlight$customDecorations = Optional.empty();
     @Unique
@@ -83,34 +82,15 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
                 p -> ((IMapDataPacketExtension) (Object) p).moonlight$getCustomMapDataTag(),
                 (old, deco, tag) -> {
                     ((IMapDataPacketExtension) (Object) old).moonlight$setCustomDecorations(deco);
-                    ((IMapDataPacketExtension) (Object) old).moonlight$sendCustomMapDataTag(tag);
+                    ((IMapDataPacketExtension) (Object) old).moonlight$setCustomMapDataTag(tag);
                     return old;
                 }
         );
     }
 
     @Override
-    public void moonlight$sendCustomDecorations(Collection<MLMapDecoration> decorations) {
-        //packet will be passed to client no decoding. if we are on an integrated server we need to create new objects
-        if (PlatHelper.getPhysicalSide().isClient()) {
-            //make a copy?
-        }
-        moonlight$customDecorations = Optional.of(List.copyOf(decorations));
-    }
-
-    @Override
-    public void moonlight$sendCustomMapDataTag(Optional<CompoundTag> dataTag) {
-        moonlight$customData = dataTag;
-    }
-
-    @Override
     public Optional<CompoundTag> moonlight$getCustomMapDataTag() {
         return moonlight$customData;
-    }
-
-    @Override
-    public MapItemSavedData.MapPatch moonlight$getColorPatch() {
-        return colorPatch;
     }
 
     @Override
@@ -120,7 +100,12 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
 
     @Override
     public void moonlight$setCustomDecorations(Optional<List<MLMapDecoration>> deco) {
-        moonlight$customDecorations = deco;
+        moonlight$customDecorations = deco.map(List::copyOf);
+    }
+
+    @Override
+    public void moonlight$setCustomMapDataTag(Optional<CompoundTag> tag) {
+        moonlight$customData = tag;
     }
 
     @Override
@@ -168,10 +153,10 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
             //adds dynamic todo use deco instead
             // aaa not optimal but needed for player like behavior
             // update immediately all the times
-            for (MapBlockMarker<?> m : MapDataInternal.getDynamicClient(mapId, mapData)) {
+            for (MLMapMarker<?> m : MapDataInternal.getDynamicClient(mapId, mapData)) {
                 var d = m.createDecorationFromMarker(mapData);
                 if (d != null) {
-                    decorations.put(m.getMarkerId(), d);
+                    decorations.put(m.getMarkerUniqueId(), d);
                 }
             }
         }

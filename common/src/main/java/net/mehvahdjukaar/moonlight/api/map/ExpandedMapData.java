@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
 
-import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
@@ -18,7 +18,7 @@ public interface ExpandedMapData {
     Map<String, MLMapDecoration> ml$getCustomDecorations();
 
     @ApiStatus.Internal
-    Map<String, MapBlockMarker<?>> ml$getCustomMarkers();
+    Map<String, MLMapMarker<?>> ml$getCustomMarkers();
 
     @ApiStatus.Internal
     Map<ResourceLocation, CustomMapData<?>> ml$getCustomData();
@@ -29,7 +29,7 @@ public interface ExpandedMapData {
 
     int ml$getVanillaDecorationSize();
 
-    <M extends MapBlockMarker<?>> void ml$addCustomMarker(M fromMarker);
+    <M extends MLMapMarker<?>> void ml$addCustomMarker(M fromMarker);
 
     boolean ml$removeCustomMarker(String id);
 

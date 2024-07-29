@@ -1,7 +1,7 @@
-package net.mehvahdjukaar.moonlight.api.map.type;
+package net.mehvahdjukaar.moonlight.api.map.decoration;
 
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -19,37 +19,37 @@ import java.util.Optional;
  */
 public class MLMapDecoration {
 
+    // network codec. only send stuff needed on client
     public static final StreamCodec<RegistryFriendlyByteBuf, MLMapDecoration> CODEC =
-            MlMapDecorationType.STREAM_CODEC.dispatch(MLMapDecoration::getType,
-                    MlMapDecorationType::getDecorationCodec);
+            MLMapDecorationType.STREAM_CODEC.dispatch(MLMapDecoration::getType,
+                    h -> h.value().getDecorationCodec());
 
 
     static final StreamCodec<RegistryFriendlyByteBuf, MLMapDecoration> DIRECT_CODEC = StreamCodec.composite(
+            MLMapDecorationType.STREAM_CODEC, MLMapDecoration::getType,
             ByteBufCodecs.BYTE, MLMapDecoration::getX,
             ByteBufCodecs.BYTE, MLMapDecoration::getY,
             ByteBufCodecs.BYTE, MLMapDecoration::getRot,
-            ComponentSerialization.OPTIONAL_STREAM_CODEC, m -> Optional.ofNullable(m.displayName),
-            ByteBufCodecs.BOOL, MLMapDecoration::isFromExplorationMap,
+            ComponentSerialization.OPTIONAL_STREAM_CODEC, m -> Optional.ofNullable(m.getDisplayName()),
             MLMapDecoration::new
     );
 
-    MlMapDecorationType<?, ?> type;
-    private Component displayName;
-    private byte x;
-    private byte y;
-    private byte rot;
+    private final Holder<MLMapDecorationType<?, ?>> type;
+    protected Component displayName;
+    protected byte x;
+    protected byte y;
+    protected byte rot;
 
-    boolean isFromExplorationMap;
-
-    public MLMapDecoration(byte x, byte y, byte rot, Optional<Component> displayName, boolean isFromExplorationMap) {
+    public MLMapDecoration(Holder<MLMapDecorationType<?, ?>> type,
+                           byte x, byte y, byte rot, Optional<Component> displayName) {
+        this.type = type;
         this.x = x;
         this.y = y;
         this.rot = rot;
         this.displayName = displayName.orElse(null);
-        this.isFromExplorationMap = isFromExplorationMap;
     }
 
-    public final MlMapDecorationType<?, ?> getType() {
+    public final Holder<MLMapDecorationType<?, ?>> getType() {
         return this.type;
     }
 
@@ -63,30 +63,6 @@ public class MLMapDecoration {
 
     public byte getRot() {
         return this.rot;
-    }
-
-    public void setDisplayName(Component displayName) {
-        this.displayName = displayName;
-    }
-
-    public void setRot(byte rot) {
-        this.rot = rot;
-    }
-
-    public void setX(byte x) {
-        this.x = x;
-    }
-
-    public void setY(byte y) {
-        this.y = y;
-    }
-
-    public void setFromExplorationMap(boolean fromExplorationMap) {
-        isFromExplorationMap = fromExplorationMap;
-    }
-
-    public boolean isFromExplorationMap() {
-        return isFromExplorationMap;
     }
 
     @Nullable

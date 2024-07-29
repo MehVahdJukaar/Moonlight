@@ -1,19 +1,15 @@
-package net.mehvahdjukaar.moonlight.api.map.type;
+package net.mehvahdjukaar.moonlight.api.map.decoration;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
-import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
@@ -22,7 +18,7 @@ import java.util.function.Function;
 // Equivalent of TileEntityType.
 // Singleton, which will be in charge of creating CustomDecoration and MapBlockMarker instances
 // Used for custom implementations
-public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M extends MapBlockMarker<D>> implements MlMapDecorationType<D, M> {
+public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M extends MLMapMarker<D>> extends MLMapDecorationType<D, M> {
 
     static final Codec<MLSpecialMapDecorationType<?, ?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("custom_type").forGetter(MLSpecialMapDecorationType::getCustomFactoryID)
@@ -33,12 +29,6 @@ public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M exten
     @ApiStatus.Internal
     public ResourceLocation factoryId;
 
-    //used to restore decorations from nbt
-    private final StreamCodec<RegistryFriendlyByteBuf, D> decorationCodec;
-
-    //creates empty marker
-    @NotNull
-    private final Function<MLSpecialMapDecorationType<D, M>, M> markerFactory;
     //creates marker from world
     @Nullable
     private final BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory;
@@ -46,28 +36,22 @@ public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M exten
     /**
      * Normal constructor for a decoration type that has a world marker associated. i.e: banners
      *
-     * @param markerFactory          world marker factory
      * @param markerFromWorldFactory function that retrieves an optional world marker from the world at a certain pos
      * @param decorationCodec        read decoration data from buffer
      */
     private MLSpecialMapDecorationType(ResourceLocation typeId,
+                                       MapCodec<M> markerCodec,
                                        StreamCodec<RegistryFriendlyByteBuf, D> decorationCodec,
-                                       Function<MLSpecialMapDecorationType<D, M>, M> markerFactory,
                                        @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory) {
+        super(markerCodec, decorationCodec);
         this.factoryId = typeId;
-        this.markerFactory = markerFactory;
         this.markerFromWorldFactory = markerFromWorldFactory;
-
-        this.decorationCodec = decorationCodec.map(d -> {
-            d.type = this;
-            return d;
-        }, Function.identity());
     }
 
     /**
      * Use for decoration that is tied to an in world block (represented by their marker)
      */
-    public static <D extends MLMapDecoration, M extends MapBlockMarker<D>> MLSpecialMapDecorationType<D, M> withWorldMarker(
+    public static <D extends MLMapDecoration, M extends MLMapMarker<D>> MLSpecialMapDecorationType<D, M> withWorldMarker(
             Function<MLSpecialMapDecorationType<D, M>, M> markerFactory,
             @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory,
             StreamCodec<RegistryFriendlyByteBuf, D> decorationFactory) {
@@ -77,7 +61,7 @@ public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M exten
     /**
      * For persistent decoration that is not associated to a world block. Still have a marker as they need to be saved
      */
-    public static <D extends MLMapDecoration, M extends MapBlockMarker<D>> MLSpecialMapDecorationType<D, M> simple(
+    public static <D extends MLMapDecoration, M extends MLMapMarker<D>> MLSpecialMapDecorationType<D, M> simple(
             Function<MLSpecialMapDecorationType<D, M>, M> markerFactory,
             StreamCodec<RegistryFriendlyByteBuf, D> decorationFactory) {
         return new MLSpecialMapDecorationType<>(null, decorationFactory, markerFactory, null);
@@ -95,26 +79,8 @@ public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M exten
 
     @Override
     @Nullable
-    public M load(CompoundTag compound, HolderLookup.Provider registries) {
-        M marker = markerFactory.apply(this);
-        try {
-            marker.load(compound, registries);
-            return marker;
-        } catch (Exception e) {
-            Moonlight.LOGGER.warn("Failed to load world map marker for decoration type{}: {}", this, e);
-        }
-        return null;
-    }
-
-    @Override
-    @Nullable
-    public M getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos) {
+    public M createMarkerFromWorld(BlockGetter reader, BlockPos pos) {
         return markerFromWorldFactory != null ? markerFromWorldFactory.apply(reader, pos) : null;
-    }
-
-    @Override
-    public StreamCodec<? super RegistryFriendlyByteBuf, ? extends MLMapDecoration> getDecorationCodec() {
-        return decorationCodec;
     }
 
     @Override

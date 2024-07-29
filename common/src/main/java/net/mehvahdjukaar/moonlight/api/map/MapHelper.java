@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
-import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -54,7 +54,7 @@ public class MapHelper {
      * @param type     custom decorationType
      * @param mapColor map item tint color
      */
-    public static void addDecorationToMap(ItemStack stack, BlockPos pos, MlMapDecorationType<?, ?> type, int mapColor) {
+    public static void addDecorationToMap(ItemStack stack, BlockPos pos, MLMapDecorationType<?, ?> type, int mapColor) {
 /*
         ListTag tags;
         if (stack.hasTag() && stack.getTag().contains("CustomDecorations", 9)) {
@@ -131,7 +131,7 @@ public class MapHelper {
      */
     public static boolean addSimpleDecorationToMap(MapItemSavedData data, Level level, ResourceLocation id,
                                                    BlockPos pos, @Nullable Component name) {
-        MlMapDecorationType<?, ?> type = MapDataRegistry.get(id);
+        MLMapDecorationType<?, ?> type = MapDataRegistry.get(id);
         if (type != null) {
             var marker = type.createEmptyMarker();
             marker.setPersistent(true);

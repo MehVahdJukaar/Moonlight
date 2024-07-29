@@ -2,9 +2,9 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
-import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
-import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
@@ -94,7 +94,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
         //re any time check optimization will be done by those getDynamic functions
         //if ((moonlight$volatileDecorationRefreshTicks++ % (20 * 4)) == 0 || updateDeco) {
         //adds dynamic decoration and sends them to a client
-        for (MapBlockMarker<?> m : MapDataInternal.getDynamicServer(player, mapId, data)) {
+        for (MLMapMarker<?> m : MapDataInternal.getDynamicServer(player, mapId, data)) {
             var d = m.createDecorationFromMarker(data);
             if (d != null) extra.add(d);
         }

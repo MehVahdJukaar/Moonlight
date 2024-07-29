@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
-import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.map.type.MLSpecialMapDecorationType;
-import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.Holder;
@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 
 public class MapDataRegistry {
 
-    public static final ResourceKey<Registry<MlMapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.KEY;
+    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.KEY;
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
@@ -37,7 +37,7 @@ public class MapDataRegistry {
         return registerCustomMapSavedData(new CustomMapData.Type<>(id, factory));
     }
 
-    public static MlMapDecorationType<?, ?> getDefaultType() {
+    public static MLMapDecorationType<?, ?> getDefaultType() {
         return MapDataInternal.getGenericStructure();
     }
 
@@ -65,7 +65,7 @@ public class MapDataRegistry {
      *
      * @param event callback
      */
-    public static void addDynamicClientMarkersEvent(BiFunction<MapId, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+    public static void addDynamicClientMarkersEvent(BiFunction<MapId, MapItemSavedData, Set<MLMapMarker<?>>> event) {
         MapDataInternal.addDynamicClientMarkersEvent(event);
     }
 
@@ -76,7 +76,7 @@ public class MapDataRegistry {
      *
      * @param event callback
      */
-    public static void addDynamicServerMarkersEvent(TriFunction<Player, MapId, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+    public static void addDynamicServerMarkersEvent(TriFunction<Player, MapId, MapItemSavedData, Set<MLMapMarker<?>>> event) {
         MapDataInternal.addDynamicServerMarkersEvent(event);
     }
 
@@ -84,25 +84,20 @@ public class MapDataRegistry {
         return MapDataInternal.createCustomType(resourceLocation);
     }
 
-    public static MlMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
+    public static MLMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
         return MapDataInternal.getAssociatedType(structure);
     }
 
-    public static Registry<MlMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
+    public static Registry<MLMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
         return MapDataInternal.getRegistry(registryAccess);
     }
 
-    public static MlMapDecorationType<?, ?> get(ResourceLocation id) {
+    public static MLMapDecorationType<?, ?> get(ResourceLocation id) {
         return MapDataInternal.get(id);
     }
 
-    public static Optional<MlMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
+    public static Optional<MLMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
         return MapDataInternal.getOptional(id);
-    }
-
-    @Nullable
-    public static MapBlockMarker<?> readMarker(CompoundTag tag) {
-        return MapDataInternal.readWorldMarker(tag);
     }
 
 }

@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.BaseMapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.advancements.AdvancementHolder;
@@ -143,7 +143,7 @@ public class Utils {
         return SoftFluidRegistry.hackyGetRegistry().getKey(object);
     }
 
-    public static ResourceLocation getID(MlMapDecorationType<?, ?> object) {
+    public static ResourceLocation getID(MLMapDecorationType<?, ?> object) {
         return MapDataInternal.hackyGetRegistry().getKey(object);
     }
 
@@ -176,7 +176,7 @@ public class Utils {
         if (object instanceof MobEffect c) return getID(c);
         if (object instanceof Supplier<?> s) return getID(s.get());
         if (object instanceof SoftFluid s) return getID(s);
-        if (object instanceof MlMapDecorationType<?, ?> s) return getID(s);
+        if (object instanceof MLMapDecorationType<?, ?> s) return getID(s);
         if (object instanceof CreativeModeTab t) return getID(t);
         if (object instanceof DamageType t) return getID(t);
         if (object instanceof StatType t) return getID(t);

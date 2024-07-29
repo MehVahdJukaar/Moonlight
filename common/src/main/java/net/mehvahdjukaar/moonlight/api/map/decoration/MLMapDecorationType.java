@@ -1,15 +1,13 @@
-package net.mehvahdjukaar.moonlight.api.map.type;
+package net.mehvahdjukaar.moonlight.api.map.decoration;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
-import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -22,13 +20,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-//type itself can have two types: json defined or custom code defined. Do not subclass
 //these are what is in json. Each json = a new instance of these Types
-public interface MlMapDecorationType<D extends MLMapDecoration, M extends MapBlockMarker<D>> {
+public sealed abstract class MLMapDecorationType<D extends MLMapDecoration, M extends MLMapMarker<D>> permits MLJsonMapDecorationType, MLSpecialMapDecorationType {
 
     //pain
-    Codec<MlMapDecorationType<?, ?>> DIRECT_CODEC =
-            Codec.either(MLSpecialMapDecorationType.CODEC, MLJsonMapDecorationType.CODEC).xmap(
+    public static final Codec<MLMapDecorationType<?, ?>> DIRECT_CODEC =
+            Codec.lazyInitialized(() -> Codec.either(MLSpecialMapDecorationType.CODEC, MLJsonMapDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
                         if (type == null) {
@@ -38,10 +35,10 @@ public interface MlMapDecorationType<D extends MLMapDecoration, M extends MapBlo
                             return Either.left(c);
                         }
                         return Either.right((MLJsonMapDecorationType) type);
-                    });
+                    }));
 
-    Codec<MlMapDecorationType<?, ?>> DIRECT_NETWORK_CODEC =
-            Codec.either(MLSpecialMapDecorationType.CODEC, MLJsonMapDecorationType.NETWORK_CODEC).xmap(
+    public static final Codec<MLMapDecorationType<?, ?>> DIRECT_NETWORK_CODEC =
+            Codec.lazyInitialized(() -> Codec.either(MLSpecialMapDecorationType.CODEC, MLJsonMapDecorationType.NETWORK_CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
                         if (type == null) {
@@ -51,39 +48,52 @@ public interface MlMapDecorationType<D extends MLMapDecoration, M extends MapBlo
                             return Either.left(c);
                         }
                         return Either.right((MLJsonMapDecorationType) type);
-                    });
+                    }));
 
 
     // registry reference codec
-    Codec<Holder<MlMapDecorationType<?, ?>>> CODEC = RegistryFileCodec.create(MapDataRegistry.REGISTRY_KEY, DIRECT_CODEC);
+    public static final Codec<Holder<MLMapDecorationType<?, ?>>> CODEC = RegistryFileCodec.create(MapDataRegistry.REGISTRY_KEY, DIRECT_CODEC);
     // registry reference network codec
-    StreamCodec<RegistryFriendlyByteBuf, MlMapDecorationType<?, ?>> STREAM_CODEC = ByteBufCodecs.registry(MapDataRegistry.REGISTRY_KEY);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<MLMapDecorationType<?, ?>>> STREAM_CODEC = ByteBufCodecs.holderRegistry(MapDataRegistry.REGISTRY_KEY);
+
+    private final StreamCodec<RegistryFriendlyByteBuf, D> decorationCodec;
+    private final MapCodec<M> markerCodec;
+
+    protected MLMapDecorationType( MapCodec<M> markerCodec, StreamCodec<RegistryFriendlyByteBuf, D> decorationCodec) {
+        this.decorationCodec = decorationCodec;
+        this.markerCodec = markerCodec;
+    }
+
 
     /**
-     * If this marker should be saved to disk
+     * If this marker should be saved to disk as its been grabbed from a world block
      */
     @ApiStatus.Internal
-    boolean isFromWorld();
+    abstract boolean isFromWorld();
 
-    default ResourceLocation getCustomFactoryID() {
+    public ResourceLocation getCustomFactoryID() {
         return ResourceLocation.parse("");
     }
 
-    M createEmptyMarker();
-
     @Nullable
-    M load(CompoundTag compound, HolderLookup.Provider registries);
+    public abstract M createMarkerFromWorld(BlockGetter reader, BlockPos pos);
 
-    @Nullable
-    M getWorldMarkerFromWorld(BlockGetter reader, BlockPos pos);
-
-    default int getDefaultMapColor() {
+    public int getDefaultMapColor() {
         return 1;
     }
 
-    default Optional<HolderSet<Structure>> getAssociatedStructure() {
+    public Optional<HolderSet<Structure>> getAssociatedStructure() {
         return Optional.empty();
     }
 
-    StreamCodec<? super RegistryFriendlyByteBuf,? extends MLMapDecoration> getDecorationCodec();
+    //decoration, not saved, sent to the client
+    public StreamCodec<? super RegistryFriendlyByteBuf, D> getDecorationCodec() {
+        return decorationCodec;
+    }
+
+    //markers. saved and stored in nbt
+    public MapCodec<M> getMarkerCodec() {
+        return markerCodec;
+    }
+
 }

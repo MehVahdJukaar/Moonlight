@@ -3,8 +3,8 @@ package net.mehvahdjukaar.moonlight.api.map.client;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
@@ -44,10 +44,10 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
 
     private static final Map<ResourceLocation, Function<ResourceLocation, MapDecorationRenderer<?>>> CUSTOM_RENDERERS_FACTORIES = Maps.newHashMap();
 
-    private static final Map<MlMapDecorationType<?, ?>, MapDecorationRenderer<?>> RENDERERS = Maps.newHashMap();
+    private static final Map<MLMapDecorationType<?, ?>, MapDecorationRenderer<?>> RENDERERS = Maps.newHashMap();
 
 
-    private static <T extends MLMapDecoration> MapDecorationRenderer<T> createRenderer(MlMapDecorationType<T, ?> type) {
+    private static <T extends MLMapDecoration> MapDecorationRenderer<T> createRenderer(MLMapDecorationType<T, ?> type) {
         var id = Utils.getID(type);
         ResourceLocation texture = id.withPath( "map_marker/" + id.getPath());
         var custom = CUSTOM_RENDERERS_FACTORIES.get(type.getCustomFactoryID());
@@ -59,7 +59,7 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
         return (MapDecorationRenderer<E>) getRenderer(decoration.getType());
     }
 
-    public static <E extends MLMapDecoration, T extends MlMapDecorationType<E, ?>> MapDecorationRenderer<E> getRenderer(T type) {
+    public static <E extends MLMapDecoration, T extends MLMapDecorationType<E, ?>> MapDecorationRenderer<E> getRenderer(T type) {
         return (MapDecorationRenderer<E>) RENDERERS.computeIfAbsent(type, t -> createRenderer(type));
     }
 

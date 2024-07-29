@@ -1,81 +1,82 @@
-package net.mehvahdjukaar.moonlight.api.map.markers;
+package net.mehvahdjukaar.moonlight.api.map.decoration;
 
-import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import com.mojang.datafixers.Products;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * represents a block tracker instance which keeps track of a placed block and creates its associated map decoration
  *
  * @param <D> decoration
  */
-public abstract class MapBlockMarker<D extends MLMapDecoration> {
+public abstract class MLMapMarker<D extends MLMapDecoration> {
     //Static ref is fine as data registry cant change with reload command. Just don't hold ref outside of a world
-    protected final MlMapDecorationType<D, ?> type;
-    @Nullable
-    private BlockPos pos;
-    private int rot = 0;
-    @Nullable
-    private Component name;
-    private boolean persistent;
 
-    protected MapBlockMarker(MlMapDecorationType<D, ?> type) {
+    private final Holder<MLMapDecorationType<?, ?>> type;
+    @NotNull
+    protected final BlockPos pos;
+    protected final float rot;
+    protected final Optional<Component> name;
+
+    protected final boolean preventsExtending;
+    protected final boolean shouldRefresh;
+    protected final boolean shouldSave;
+
+    public static final Codec<MLMapMarker<?>> CODEC =
+            MLMapDecorationType.CODEC.dispatch("type", MLMapMarker::getType,
+                    mapWorldMarker -> mapWorldMarker.value().getMarkerCodec());
+
+    public static <T extends MLMapMarker<?>> Products.P7<RecordCodecBuilder.Mu<T>, Holder<MLMapDecorationType<?, ?>>, BlockPos, Float, Optional<Component>, Optional<Boolean>, Optional<Boolean>, Boolean> baseCodecGroup(
+            RecordCodecBuilder.Instance<T> instance) {
+        return instance.group(
+                MLMapDecorationType.CODEC.fieldOf("type").forGetter(m -> m.getType()),
+                BlockPos.CODEC.fieldOf("pos").forGetter(m -> m.getPos()),
+                Codec.FLOAT.optionalFieldOf("rot", 0f).forGetter(m -> m.getRotation()),
+                ComponentSerialization.FLAT_CODEC.optionalFieldOf("name").forGetter(m -> m.getDisplayName()),
+                Codec.BOOL.optionalFieldOf("should_refresh").forGetter(m -> Optional.of(m.shouldRefreshFromWorld())),
+                Codec.BOOL.optionalFieldOf("should_save").forGetter(m -> Optional.of(m.shouldSave())),
+                Codec.BOOL.optionalFieldOf("prevents_extending", false).forGetter(m -> m.preventsExtending())
+        );
+    }
+
+    public MLMapMarker(Holder<MLMapDecorationType<?, ?>> type, BlockPos pos,
+                       float rotation, Optional<Component> component,
+                       Optional<Boolean> shouldRefresh, Optional<Boolean> shouldSave, boolean preventsExtending) {
         this.type = type;
+        this.pos = pos;
+        this.rot = rotation;
+        this.name = component;
+
+        this.shouldRefresh = shouldRefresh.orElse(type.value().isFromWorld());
+        this.shouldSave = shouldSave.orElse(type.value().isFromWorld());
+        this.preventsExtending = preventsExtending;
     }
 
-    /**
-     * load a world marker to nbt. must match saveToNBT
-     * implement if you are adding extra data
-     */
-    public void load(CompoundTag compound,  HolderLookup.Provider registries) {
-        this.pos = NbtUtils.readBlockPos(compound, "Pos").orElse(BlockPos.ZERO);
-        this.name = compound.contains("Name") ? Component.Serializer.fromJson(
-                compound.getString("Name"), registries) : null;
-        this.persistent = compound.getBoolean("Persistent");
+    public Holder<MLMapDecorationType<?, ?>> getType() {
+        return type;
     }
 
-    /**
-     * save a world marker to nbt. must match the factory function provided to the decoration type
-     * implement if you are adding extra data
-     *
-     * @return nbt
-     */
-    public CompoundTag save( HolderLookup.Provider registries) {
-        var compound = new CompoundTag();
-        if (this.pos != null) {
-            compound.put("Pos", NbtUtils.writeBlockPos(this.pos));
-        }
-        if (this.name != null) {
-            compound.putString("Name", Component.Serializer.toJson(this.name, registries));
-        }
-        if (this.persistent) compound.putBoolean("Persistent", true);
-        return compound;
-    }
-
-    public boolean shouldRefresh() {
-        if (persistent) return false;
-        return type.isFromWorld();
+    public boolean shouldRefreshFromWorld() {
+        return shouldRefresh;
     }
 
     public boolean shouldSave() {
-        return persistent || type.isFromWorld();
+        return shouldSave;
     }
 
-    /**
-     * Forces this to be always saved, disregarding the one from the world
-     */
-    public void setPersistent(boolean persistent) {
-        this.persistent = persistent;
+    //TODO: add flag system instead?
+    public boolean preventsExtending() {
+        return false;
     }
 
     /**
@@ -89,7 +90,7 @@ public abstract class MapBlockMarker<D extends MLMapDecoration> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MapBlockMarker<?> that = (MapBlockMarker<?>) o;
+        MLMapMarker<?> that = (MLMapMarker<?>) o;
         return Objects.equals(type, that.type) && Objects.equals(pos, that.pos) && Objects.equals(name, that.name);
     }
 
@@ -108,44 +109,20 @@ public abstract class MapBlockMarker<D extends MLMapDecoration> {
      *
      * @return suffix
      */
-    private String getPosSuffix() {
-        return pos == null ? "" : pos.getX() + "," + pos.getY() + "," + pos.getZ();
-    }
-
-    public MlMapDecorationType<D, ?> getType() {
-        return type;
-    }
-
-    public String getTypeId() {
-        return Utils.getID(this.type).toString();
-    }
-
-    public String getMarkerId() {
-        return this.getTypeId() + "-" + getPosSuffix();
+    public String getMarkerUniqueId() {
+        return this.type.getRegisteredName() + "-" + pos.getX() + "," + pos.getY() + "," + pos.getZ();
     }
 
     public BlockPos getPos() {
         return this.pos;
     }
 
-    public void setPos(BlockPos pos) {
-        this.pos = pos;
-    }
-
-    public void setRotation(int rot) {
-        this.rot = rot;
-    }
-
     public float getRotation() {
         return rot;
     }
 
-    public Component getName() {
+    public Optional<Component> getDisplayName() {
         return name;
-    }
-
-    public void setName(Component name) {
-        this.name = name;
     }
 
     /**
@@ -174,7 +151,6 @@ public abstract class MapBlockMarker<D extends MLMapDecoration> {
         double worldX = pos.getX();
         double worldZ = pos.getZ();
         double rotation = this.getRotation();
-
         int i = 1 << data.scale;
         float f = (float) (worldX - data.centerX) / i;
         float f1 = (float) (worldZ - data.centerZ) / i;
@@ -190,11 +166,11 @@ public abstract class MapBlockMarker<D extends MLMapDecoration> {
     }
 
     // override to give special behaviors
-    public int getFlags(){
+    public int getFlags() {
         return 0;
     }
 
-    public boolean hasFlag(int flag){
+    public boolean hasFlag(int flag) {
         return (getFlags() & flag) != 0;
     }
 

@@ -4,10 +4,10 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
-import net.mehvahdjukaar.moonlight.api.map.type.MLMapDecoration;
-import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
-import net.mehvahdjukaar.moonlight.api.map.type.MLSpecialMapDecorationType;
-import net.mehvahdjukaar.moonlight.api.map.type.MlMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -48,11 +48,11 @@ public class MapDataInternal {
 
     //map markers
 
-    public static final ResourceKey<Registry<MlMapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(Moonlight.res("map_markers"));
+    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(Moonlight.res("map_markers"));
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
     private static final BiMap<ResourceLocation, Supplier<MLSpecialMapDecorationType<?, ?>>> CODE_TYPES_FACTORIES = HashBiMap.create();
 
-    public static MlMapDecorationType<?, ?> getGenericStructure() {
+    public static MLMapDecorationType<?, ?> getGenericStructure() {
         return get(GENERIC_STRUCTURE_ID);
     }
 
@@ -74,7 +74,7 @@ public class MapDataInternal {
         return t;
     }
 
-    public static MlMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
+    public static MLMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
         for (var v : getValues()) {
             Optional<HolderSet<Structure>> associatedStructure = v.getAssociatedStructure();
             if (associatedStructure.isPresent() && associatedStructure.get().contains(structure)) {
@@ -90,61 +90,52 @@ public class MapDataInternal {
         throw new AssertionError();
     }
 
-    public static Registry<MlMapDecorationType<?, ?>> hackyGetRegistry() {
+    public static Registry<MLMapDecorationType<?, ?>> hackyGetRegistry() {
         return Utils.hackyGetRegistryAccess().registryOrThrow(KEY);
     }
 
-    public static Registry<MlMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
+    public static Registry<MLMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
         return registryAccess.registryOrThrow(KEY);
     }
 
-    public static Collection<MlMapDecorationType<?, ?>> getValues() {
+    public static Collection<MLMapDecorationType<?, ?>> getValues() {
         return hackyGetRegistry().stream().toList();
     }
 
-    public static Set<Map.Entry<ResourceKey<MlMapDecorationType<?, ?>>, MlMapDecorationType<?, ?>>> getEntries() {
+    public static Set<Map.Entry<ResourceKey<MLMapDecorationType<?, ?>>, MLMapDecorationType<?, ?>>> getEntries() {
         return hackyGetRegistry().entrySet();
     }
 
     @Nullable
-    public static MlMapDecorationType<? extends MLMapDecoration, ?> get(String id) {
+    public static MLMapDecorationType<? extends MLMapDecoration, ?> get(String id) {
         return get(ResourceLocation.parse(id));
     }
 
-    public static MlMapDecorationType<?, ?> get(ResourceLocation id) {
+    public static MLMapDecorationType<?, ?> get(ResourceLocation id) {
         var reg = hackyGetRegistry();
         var r = reg.get(id);
         if (r == null) return reg.get(GENERIC_STRUCTURE_ID);
         return r;
     }
 
-    public static Optional<MlMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
+    public static Optional<MLMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
         return hackyGetRegistry().getOptional(id);
     }
 
-    public static Set<MapBlockMarker<?>> getDynamicServer(Player player, MapId mapId, MapItemSavedData data) {
-        Set<MapBlockMarker<?>> dynamic = new HashSet<>();
+    public static Set<MLMapMarker<?>> getDynamicServer(Player player, MapId mapId, MapItemSavedData data) {
+        Set<MLMapMarker<?>> dynamic = new HashSet<>();
         for (var v : DYNAMIC_SERVER) {
             dynamic.addAll(v.apply(player, mapId, data));
         }
         return dynamic;
     }
 
-    public static Set<MapBlockMarker<?>> getDynamicClient(MapId mapId, MapItemSavedData data) {
-        Set<MapBlockMarker<?>> dynamic = new HashSet<>();
+    public static Set<MLMapMarker<?>> getDynamicClient(MapId mapId, MapItemSavedData data) {
+        Set<MLMapMarker<?>> dynamic = new HashSet<>();
         for (var v : DYNAMIC_CLIENT) {
             dynamic.addAll(v.apply(mapId, data));
         }
         return dynamic;
-    }
-
-
-    @Nullable
-    public static MapBlockMarker<?> readWorldMarker(CompoundTag compound) {
-        for (var id : compound.getAllKeys()) {
-            return get(ResourceLocation.parse(id)).load(compound.getCompound(id));
-        }
-        return null;
     }
 
     /**
@@ -154,10 +145,10 @@ public class MapDataInternal {
      * @param pos    world position
      * @return markers found, empty list if none found
      */
-    public static List<MapBlockMarker<?>> getMarkersFromWorld(BlockGetter reader, BlockPos pos) {
-        List<MapBlockMarker<?>> list = new ArrayList<>();
-        for (MlMapDecorationType<?, ?> type : getValues()) {
-            MapBlockMarker<?> c = type.getWorldMarkerFromWorld(reader, pos);
+    public static List<MLMapMarker<?>> getMarkersFromWorld(BlockGetter reader, BlockPos pos) {
+        List<MLMapMarker<?>> list = new ArrayList<>();
+        for (MLMapDecorationType<?, ?> type : getValues()) {
+            MLMapMarker<?> c = type.createMarkerFromWorld(reader, pos);
             if (c != null) list.add(c);
         }
         return list;
@@ -165,15 +156,15 @@ public class MapDataInternal {
 
     //dynamic markers
 
-    private static final List<TriFunction<Player, MapId, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_SERVER = new ArrayList<>();
-    private static final List<BiFunction<MapId, MapItemSavedData, Set<MapBlockMarker<?>>>> DYNAMIC_CLIENT = new ArrayList<>();
+    private static final List<TriFunction<Player, MapId, MapItemSavedData, Set<MLMapMarker<?>>>> DYNAMIC_SERVER = new ArrayList<>();
+    private static final List<BiFunction<MapId, MapItemSavedData, Set<MLMapMarker<?>>>> DYNAMIC_CLIENT = new ArrayList<>();
 
 
-    public static void addDynamicClientMarkersEvent(BiFunction<MapId, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+    public static void addDynamicClientMarkersEvent(BiFunction<MapId, MapItemSavedData, Set<MLMapMarker<?>>> event) {
         DYNAMIC_CLIENT.add(event);
     }
 
-    public static void addDynamicServerMarkersEvent(TriFunction<Player, MapId, MapItemSavedData, Set<MapBlockMarker<?>>> event) {
+    public static void addDynamicServerMarkersEvent(TriFunction<Player, MapId, MapItemSavedData, Set<MLMapMarker<?>>> event) {
         DYNAMIC_SERVER.add(event);
     }
 

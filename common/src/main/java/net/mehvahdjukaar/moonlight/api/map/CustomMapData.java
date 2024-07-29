@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 public interface CustomMapData<H extends CustomMapData.DirtyCounter> {
 
 
+
     record Type<T extends CustomMapData<?>>(ResourceLocation id, Supplier<T> factory) {
 
         @SuppressWarnings("unchecked")
