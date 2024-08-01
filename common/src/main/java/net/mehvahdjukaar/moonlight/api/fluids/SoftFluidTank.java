@@ -189,25 +189,10 @@ public class SoftFluidTank {
     }
 
     /**
-     * Main method called when checking if fluid can be added to this or not
-     * Does check for size. Will not accept stacks too big even if some could be added
-     */
-    @Deprecated(forRemoval = true)
-    public boolean canAddSoftFluid(SoftFluidStack fluidStack) {
-        if (this.getSpace() < fluidStack.getCount()) return false;
-        return isFluidCompatible(fluidStack);
-    }
-
-    /**
      * Check if fluid TYPE is compatible with content. Does not care about count
      */
     public boolean isFluidCompatible(SoftFluidStack fluidStack) {
         return this.fluidStack.isSameFluidSameComponents(fluidStack) || this.isEmpty();
-    }
-
-    @Deprecated(forRemoval = true)
-    public boolean addFluid(SoftFluidStack stack) {
-        return addFluid(stack, false) == stack.getCount();
     }
 
     /**
@@ -259,6 +244,7 @@ public class SoftFluidTank {
     }
 
     //transfers between two fluid holders
+    //I forgot why this was deprecated
     @Deprecated(forRemoval = true)
     public boolean transferFluid(SoftFluidTank destination, int amount) {
         if (this.isEmpty()) return false;
@@ -359,21 +345,6 @@ public class SoftFluidTank {
         needsColorRefresh = false;
     }
 
-    @Deprecated(forRemoval = true)
-    public int getTintColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        return getCachedStillColor(world, pos);
-    }
-
-    @Deprecated(forRemoval = true)
-    public int getFlowingTint(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        return getCachedFlowingColor(world, pos);
-    }
-
-    @Deprecated(forRemoval = true)
-    public int getParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        return getCachedParticleColor(world, pos);
-    }
-
     public int getCachedStillColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
         if (needsColorRefresh) cacheColors(world, pos);
         return stillTintCache;
@@ -407,7 +378,7 @@ public class SoftFluidTank {
             compound.put("fluid", compound.get("FluidHolder"));
             compound.remove("FluidHolder");
         }
-        if(compound.contains("fluid")) {
+        if (compound.contains("fluid")) {
             this.setFluid(SoftFluidStack.load(
                     Utils.hackyGetRegistryAccess(),
                     compound.getCompound("fluid")));
@@ -436,7 +407,7 @@ public class SoftFluidTank {
      */
     public boolean tryDrinkUpFluid(Player player, Level world) {
         if (!this.isEmpty() && this.containsFood()) {
-            if (this.fluidStack.getFoodProvider().consume(player, world, this.fluidStack::copyComponentsTo)) { //crap code right there
+            if (this.fluidStack.getFoodProvider().consume(player, world, fluidStack::copyComponentsTo)) { //crap code right there
                 fluidStack.shrink(1);
                 return true;
             }

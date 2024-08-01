@@ -117,13 +117,13 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
                     saveDataToUpdateTag(ed, customDataTag, e);
                     e.getValue().clearDirty();
                 }
-                ep.moonlight$sendCustomMapDataTag(customDataTag);
+                ep.moonlight$setCustomMapDataTag(Optional.of(customDataTag));
             }
             if (updateDeco) {
                 List<MLMapDecoration> decorations = new ArrayList<>(ed.ml$getCustomDecorations().values());
                 decorations.addAll(extra);
 
-                ep.moonlight$sendCustomDecorations(decorations);
+                ep.moonlight$setCustomDecorations(Optional.of(decorations));
             }
         }
         return packet;

@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -47,7 +48,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigSpecWrapper build() {
-        return new ConfigSpecWrapper(this.getName(), this.builder.build(), this.type, this.synced,
+        return new ConfigSpecWrapper(this.getName(), this.builder.build(), this.type,
                 this.changeCallback, this.requireGameRestart, specialValues);
     }
 
@@ -95,8 +96,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public Supplier<Integer> defineColor(String name, int defaultValue) {
         maybeAddTranslationString(name);
-        String def = ColorUtils.CODEC.encodeStart(JsonOps.INSTANCE, defaultValue)
-                .result().get().getAsString();
+        String def = (String) ColorUtils.CODEC.encodeStart(JavaOps.INSTANCE, defaultValue).getOrThrow();
         var value = builder.define(name, def,
                 o -> o instanceof String s && ColorUtils.isValidString(s));
 
@@ -106,8 +106,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var wrapper = new SpecialValue<Integer, String>(value) {
             @Override
             Integer map(String value) {
-                return ColorUtils.CODEC.decode(JsonOps.INSTANCE, new JsonPrimitive(value))
-                        .get().left().get().getFirst();
+                return ColorUtils.CODEC.parse(JavaOps.INSTANCE, value).getOrThrow();
             }
         };
         specialValues.add(wrapper);
@@ -153,7 +152,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return super.defineObjectList(name, defaultSupplier, codec);
     }
 
-    @Deprecated(forRemoval = true)
     private static class StringCodecConfigValue<T> implements Supplier<T> {
 
         private final StringJsonConfigValue inner;
@@ -293,7 +291,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     // wrapper class for special configs. ugly and hacky just to allow cachind as defualt config entries arent extendable
-    abstract class SpecialValue<T, C> implements Supplier<T> {
+   abstract static class SpecialValue<T, C> implements Supplier<T> {
         private final ModConfigSpec.ConfigValue<C> original;
         private T cachedValue = null;
 

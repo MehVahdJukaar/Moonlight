@@ -25,7 +25,7 @@ public class ClothConfigCompat {
     }
     @ApiStatus.Internal
     public static Screen makeScreen(Screen parent, FabricConfigSpec spec, @Nullable ResourceLocation background) {
-        spec.loadFromFile();
+        spec.forceLoad();
 
         ConfigBuilder builder = ConfigBuilder.create();
 

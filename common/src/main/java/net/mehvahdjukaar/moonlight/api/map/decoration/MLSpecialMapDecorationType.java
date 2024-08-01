@@ -9,11 +9,9 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 // Equivalent of TileEntityType.
 // Singleton, which will be in charge of creating CustomDecoration and MapBlockMarker instances
@@ -23,11 +21,6 @@ public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M exten
     static final Codec<MLSpecialMapDecorationType<?, ?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("custom_type").forGetter(MLSpecialMapDecorationType::getCustomFactoryID)
     ).apply(instance, MapDataRegistry::getCustomType));
-
-    //This is not the decoration id. Single instance will be registered with multiple ids based off json
-    //this is the type id?
-    @ApiStatus.Internal
-    public ResourceLocation factoryId;
 
     //creates marker from world
     @Nullable
@@ -39,12 +32,10 @@ public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M exten
      * @param markerFromWorldFactory function that retrieves an optional world marker from the world at a certain pos
      * @param decorationCodec        read decoration data from buffer
      */
-    private MLSpecialMapDecorationType(ResourceLocation typeId,
-                                       MapCodec<M> markerCodec,
+    private MLSpecialMapDecorationType(MapCodec<M> markerCodec,
                                        StreamCodec<RegistryFriendlyByteBuf, D> decorationCodec,
                                        @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory) {
         super(markerCodec, decorationCodec);
-        this.factoryId = typeId;
         this.markerFromWorldFactory = markerFromWorldFactory;
     }
 
@@ -52,24 +43,19 @@ public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M exten
      * Use for decoration that is tied to an in world block (represented by their marker)
      */
     public static <D extends MLMapDecoration, M extends MLMapMarker<D>> MLSpecialMapDecorationType<D, M> withWorldMarker(
-            Function<MLSpecialMapDecorationType<D, M>, M> markerFactory,
-            @Nullable BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory,
-            StreamCodec<RegistryFriendlyByteBuf, D> decorationFactory) {
-        return new MLSpecialMapDecorationType<>(null, decorationFactory, markerFactory, markerFromWorldFactory);
+            MapCodec<M> markerCodec,
+            StreamCodec<RegistryFriendlyByteBuf, D> decorationCodec,
+            BiFunction<BlockGetter, BlockPos, M> markerFromWorldFactory) {
+        return new MLSpecialMapDecorationType<>(markerCodec, decorationCodec, markerFromWorldFactory);
     }
 
     /**
      * For persistent decoration that is not associated to a world block. Still have a marker as they need to be saved
      */
     public static <D extends MLMapDecoration, M extends MLMapMarker<D>> MLSpecialMapDecorationType<D, M> simple(
-            Function<MLSpecialMapDecorationType<D, M>, M> markerFactory,
-            StreamCodec<RegistryFriendlyByteBuf, D> decorationFactory) {
-        return new MLSpecialMapDecorationType<>(null, decorationFactory, markerFactory, null);
-    }
-
-    @Override
-    public ResourceLocation getCustomFactoryID() {
-        return factoryId;
+            MapCodec<M> markerCodec,
+            StreamCodec<RegistryFriendlyByteBuf, D> decorationCode) {
+        return new MLSpecialMapDecorationType<>(markerCodec, decorationCode, null);
     }
 
     @Override
@@ -81,10 +67,5 @@ public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M exten
     @Nullable
     public M createMarkerFromWorld(BlockGetter reader, BlockPos pos) {
         return markerFromWorldFactory != null ? markerFromWorldFactory.apply(reader, pos) : null;
-    }
-
-    @Override
-    public M createEmptyMarker() {
-        return markerFactory.apply(this);
     }
 }

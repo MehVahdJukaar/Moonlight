@@ -7,7 +7,6 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -291,7 +290,7 @@ public class SoftFluidStack implements DataComponentHolder {
                     filledStack = PotionContents.createItemStack(Items.POTION, Potions.WATER);
                 }
 
-                copyComponentsTo(this, filledStack, this.fluid.getPreservedComponents());
+                this.copyComponentsTo(filledStack);
 
                 if (!dontModifyStack) this.shrink(shrinkAmount);
 
@@ -301,7 +300,9 @@ public class SoftFluidStack implements DataComponentHolder {
         return null;
     }
 
-    //TODO: clean this nbt hardcoded stuff up
+    protected void copyComponentsTo(DataComponentHolder to) {
+        copyComponentsTo(this, to, this.fluid.getPreservedComponents());
+    }
 
     //handles special nbt items such as potions or soups
     protected static void copyComponentsTo(DataComponentHolder from,

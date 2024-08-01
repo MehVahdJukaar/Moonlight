@@ -5,14 +5,15 @@ import com.google.common.collect.HashBiMap;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
-import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.misc.CodecMapRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.*;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -30,9 +31,7 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public class MapDataInternal {
 
-    //data holder
-    @ApiStatus.Internal
-    public static final Map<ResourceLocation, CustomMapData.Type<?>> CUSTOM_MAP_DATA_TYPES = new LinkedHashMap<>();
+    public static final MapRegistry<CustomMapData.Type<?>> CUSTOM_MAP_DATA_TYPES = new MapRegistry<>("custom_map_data_types");
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
@@ -41,7 +40,7 @@ public class MapDataInternal {
         if (CUSTOM_MAP_DATA_TYPES.containsKey(type.id())) {
             throw new IllegalArgumentException("Duplicate custom map data registration " + type.id());
         } else {
-            CUSTOM_MAP_DATA_TYPES.put(type.id(), type);
+            CUSTOM_MAP_DATA_TYPES.register(type.id(), type);
         }
         return type;
     }
@@ -50,28 +49,23 @@ public class MapDataInternal {
 
     public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(Moonlight.res("map_markers"));
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
-    private static final BiMap<ResourceLocation, Supplier<MLSpecialMapDecorationType<?, ?>>> CODE_TYPES_FACTORIES = HashBiMap.create();
+    private static final MapRegistry<Supplier<MLSpecialMapDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new MapRegistry<>("code_map_decoration_types_factories");
 
     public static MLMapDecorationType<?, ?> getGenericStructure() {
-        return get(GENERIC_STRUCTURE_ID);
+        return getOrDefault(GENERIC_STRUCTURE_ID);
     }
 
     /**
      * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
      */
     public static void registerCustomType(ResourceLocation id, Supplier<MLSpecialMapDecorationType<?, ?>> decorationType) {
-        CODE_TYPES_FACTORIES.put(id, decorationType);
+        CODE_TYPES_FACTORIES.register(id, decorationType);
     }
 
-    //TODO: redo in 1.20.6
-    //maybe rename the decoration and decortion type to MapDecorationInstance and MapDecorationType to MapDecoration and the factory to type
     public static MLSpecialMapDecorationType<?, ?> createCustomType(ResourceLocation factoryID) {
-        var factory = Objects.requireNonNull(CODE_TYPES_FACTORIES.get(factoryID),
+        var factory = Objects.requireNonNull(CODE_TYPES_FACTORIES.getValue(factoryID),
                 "No map decoration type with id: " + factoryID);
-        var t = factory.get();
-        //TODO: improve
-        t.factoryId = factoryID;
-        return t;
+        return factory.get();
     }
 
     public static MLMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
@@ -107,15 +101,20 @@ public class MapDataInternal {
     }
 
     @Nullable
-    public static MLMapDecorationType<? extends MLMapDecoration, ?> get(String id) {
-        return get(ResourceLocation.parse(id));
+    public static MLMapDecorationType<? extends MLMapDecoration, ?> getOrDefault(String id) {
+        return getOrDefault(ResourceLocation.parse(id));
     }
 
-    public static MLMapDecorationType<?, ?> get(ResourceLocation id) {
+    public static MLMapDecorationType<?, ?> getOrDefault(ResourceLocation id) {
         var reg = hackyGetRegistry();
         var r = reg.get(id);
         if (r == null) return reg.get(GENERIC_STRUCTURE_ID);
         return r;
+    }
+
+    @Nullable
+    public static Holder<MLMapDecorationType<?, ?>> getHolder(ResourceLocation id) {
+        return hackyGetRegistry().getHolder(id).orElse(null);
     }
 
     public static Optional<MLMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
@@ -167,5 +166,6 @@ public class MapDataInternal {
     public static void addDynamicServerMarkersEvent(TriFunction<Player, MapId, MapItemSavedData, Set<MLMapMarker<?>>> event) {
         DYNAMIC_SERVER.add(event);
     }
+
 
 }

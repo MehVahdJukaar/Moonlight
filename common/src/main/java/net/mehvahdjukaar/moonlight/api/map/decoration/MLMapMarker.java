@@ -16,6 +16,7 @@ import java.util.Optional;
 
 /**
  * represents a block tracker instance which keeps track of a placed block and creates its associated map decoration
+ * You can extend this class to add extra data to your markers
  *
  * @param <D> decoration
  */

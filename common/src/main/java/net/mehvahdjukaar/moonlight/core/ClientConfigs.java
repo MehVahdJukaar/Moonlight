@@ -32,8 +32,8 @@ public class ClientConfigs {
                         "Note there is a known compat issue with Figura mod. Keep this True or False with that one")
                 .define("consistent_entity_renderer_shading", ShadeFix.NO_GUI);
         builder.pop();
-        CONFIG = builder.buildAndRegister();
-        CONFIG.loadFromFile();
+        CONFIG = builder.build();
+        CONFIG.forceLoad();
     }
 
     public static void init() {

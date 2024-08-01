@@ -17,15 +17,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public interface IFirstPersonAnimationProvider {
 
-    @Deprecated(forRemoval = true)
-    default void animateItemFirstPerson(final LivingEntity entity, final ItemStack stack, final InteractionHand hand, final PoseStack matrixStack,
-                                        float partialTicks, float pitch, float attackAnim, float handHeight) {
-    }
-
-    default void animateItemFirstPerson(final Player entity, final ItemStack stack, final InteractionHand hand, final HumanoidArm arm, final PoseStack poseStack,
-                                        float partialTicks, float pitch, float attackAnim, float handHeight) {
-        animateItemFirstPerson(entity, stack, hand, poseStack, partialTicks, pitch, attackAnim, handHeight);
-    }
+    void animateItemFirstPerson(final Player entity, final ItemStack stack, final InteractionHand hand, final HumanoidArm arm, final PoseStack poseStack,
+                                        float partialTicks, float pitch, float attackAnim, float handHeight);
 
     /**
      * Alternatively, if you don't own the item and cant implement this interface in it you can use this call to attach your interface to an item

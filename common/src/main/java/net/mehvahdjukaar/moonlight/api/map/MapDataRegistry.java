@@ -8,7 +8,6 @@ import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -48,12 +47,6 @@ public class MapDataRegistry {
     //we have instances of markers per map. these have a type which determines their type
     //each type is assigned to one and one only json file. essntally the type is what is parsed from json.
     //each type can intern have its own type.., the custom factory
-    @Deprecated(forRemoval = true)
-    public static <T extends MLSpecialMapDecorationType<?, ?>> T registerCustomType(T decorationType) {
-         MapDataInternal.registerCustomType(decorationType.getCustomFactoryID(), ()->decorationType);
-         return decorationType;
-    }
-
     public static void registerCustomType(ResourceLocation factoryId, Supplier<MLSpecialMapDecorationType<?,?>> decorationTypeFactory) {
          MapDataInternal.registerCustomType(factoryId, decorationTypeFactory);
     }
@@ -92,12 +85,16 @@ public class MapDataRegistry {
         return MapDataInternal.getRegistry(registryAccess);
     }
 
-    public static MLMapDecorationType<?, ?> get(ResourceLocation id) {
-        return MapDataInternal.get(id);
+    public static MLMapDecorationType<?, ?> getOrDefault(ResourceLocation id) {
+        return MapDataInternal.getOrDefault(id);
     }
 
     public static Optional<MLMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
         return MapDataInternal.getOptional(id);
     }
 
+    @Nullable
+    public static Holder<MLMapDecorationType<?, ?>> getHolder(ResourceLocation id) {
+        return MapDataInternal.getHolder(id);
+    }
 }

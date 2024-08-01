@@ -7,6 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.List;
 

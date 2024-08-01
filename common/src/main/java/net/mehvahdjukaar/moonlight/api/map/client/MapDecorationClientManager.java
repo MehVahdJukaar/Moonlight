@@ -56,7 +56,7 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
     }
 
     public static <E extends MLMapDecoration> MapDecorationRenderer<E> getRenderer(E decoration) {
-        return (MapDecorationRenderer<E>) getRenderer(decoration.getType());
+        return (MapDecorationRenderer<E>) getRenderer(decoration.getType().value());
     }
 
     public static <E extends MLMapDecoration, T extends MLMapDecorationType<E, ?>> MapDecorationRenderer<E> getRenderer(T type) {

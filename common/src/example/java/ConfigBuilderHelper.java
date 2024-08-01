@@ -52,9 +52,9 @@ public class ConfigBuilderHelper {
         builder.setSynced();
 
         // Builds and register out config
-        CONFIG_SPEC = builder.buildAndRegister();
+        CONFIG_SPEC = builder.build();
         // If this is called, the config file wil be loaded immediately
-        CONFIG_SPEC.loadFromFile();
+        CONFIG_SPEC.forceLoad();
     }
 
 

@@ -12,7 +12,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
@@ -34,14 +33,13 @@ public final class FabricConfigSpec extends ConfigSpec {
 
     @ApiStatus.Internal
     public static void loadAllConfigs() {
-        for (var c : CONFIG_STORAGE.entrySet()) {
-            for (var m : c.getValue().values()) {
-                if (m.isLoaded()) continue;
-                try {
-                    m.loadFromFile();
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to load config from mod:" + c.getKey(), e);
-                }
+        for (var en : CONFIG_STORAGE.entrySet()) {
+            var m = en.getValue();
+            if (m.isLoaded()) continue;
+            try {
+                m.forceLoad();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load config from mod:" + en.getKey(), e);
             }
         }
     }
@@ -53,8 +51,8 @@ public final class FabricConfigSpec extends ConfigSpec {
     private final File file;
     private boolean initialized = false;
 
-    public FabricConfigSpec(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, boolean synced, Runnable changeCallback) {
-        super(name.getNamespace(), name.getNamespace() + "-" + name.getPath() + ".json", FabricLoader.getInstance().getConfigDir(), type, synced, changeCallback);
+    public FabricConfigSpec(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, Runnable changeCallback) {
+        super(name, "json", FabricLoader.getInstance().getConfigDir(), type, changeCallback);
         this.file = this.getFullPath().toFile();
         this.mainEntry = mainEntry;
         this.res = name;
@@ -73,12 +71,7 @@ public final class FabricConfigSpec extends ConfigSpec {
     }
 
     @Override
-    public void register() {
-        FabricConfigSpec.addTrackedSpec(this);
-    }
-
-    @Override
-    public void loadFromFile() {
+    public void forceLoad() {
         JsonElement config = null;
 
         if (file.exists() && file.isFile()) {
@@ -108,7 +101,7 @@ public final class FabricConfigSpec extends ConfigSpec {
              Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
 
             JsonObject jo = new JsonObject();
-            jo.addProperty("#README", "This config file does not support comments. To see them configure it in-game using YACL or Cloth Config");
+            jo.addProperty("#README", "This config file does not support comments. To see them configure it in-game using YACL or Cloth Config (or just use Forge)");
             mainEntry.getEntries().forEach(e -> e.saveToJson(jo));
 
             GSON.toJson(jo, writer);

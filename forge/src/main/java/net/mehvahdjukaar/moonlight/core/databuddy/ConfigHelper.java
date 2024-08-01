@@ -1,7 +1,7 @@
-package net.mehvahdjukaar.moonlight.core.databuddy;
-/*
+package net.mehvahdjukaar.moonlight.core.databuddy;/*
 The MIT License (MIT)
 Copyright (c) 2020 Joseph Bettendorff aka "Commoble"
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -17,6 +17,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
 // DataFixerUpper is Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 */
 
@@ -27,16 +28,17 @@ import com.google.common.base.Suppliers;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DataResult.PartialResult;
 import com.mojang.serialization.DynamicOps;
-import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.Function;
@@ -57,6 +59,7 @@ public class ConfigHelper {
      * Register a config using a default config filename for your mod.
      *
      * @param <T>           The class of your config implementation
+     * @param modid         String of your modid
      * @param configType    Forge config type:
      *                      <ul>
      *                      <li>SERVER configs are defined by the server and synced to clients; individual configs are generated per-save. Filename will be modid-server.toml
@@ -67,15 +70,17 @@ public class ConfigHelper {
      * @return An instance of your config class
      */
     public static <T> T register(
+            final String modid,
             final ModConfig.Type configType,
             final Function<ModConfigSpec.Builder, T> configFactory) {
-        return register(configType, configFactory, null);
+        return register(modid, configType, configFactory, null);
     }
 
     /**
      * Register a config using a custom filename.
      *
      * @param <T>           Your config class
+     * @param modid         String of your modid
      * @param configType    Forge config type:
      *                      <ul>
      *                      <li>SERVER configs are defined by the server and synced to clients; individual configs are generated per-save.
@@ -87,18 +92,19 @@ public class ConfigHelper {
      * @return An instance of your config class
      */
     public static <T> T register(
+            final String modid,
             final ModConfig.Type configType,
             final Function<ModConfigSpec.Builder, T> configFactory,
             final @Nullable String configName) {
-        final ModLoadingContext modContext = ModLoadingContext.get();
+        final var mod = ModList.get().getModContainerById(modid).get();
         final org.apache.commons.lang3.tuple.Pair<T, ModConfigSpec> entry = new ModConfigSpec.Builder()
                 .configure(configFactory);
         final T config = entry.getLeft();
         final ModConfigSpec spec = entry.getRight();
         if (configName == null) {
-            modContext.registerConfig(configType, spec);
+            mod.registerConfig(configType, spec);
         } else {
-            modContext.registerConfig(configType, spec, configName + ".toml");
+            mod.registerConfig(configType, spec, configName + ".toml");
         }
 
         return config;
@@ -107,20 +113,20 @@ public class ConfigHelper {
     /**
      * Define a config value for a complex object.
      *
-     * @param <T>             The type of the thing in the config we are making a listener for
-     * @param builder         Builder to build configs with
-     * @param name            The name of the field in your config that will hold objects of this type
-     * @param codec           A Codec for de/serializing your object type.
+     * @param <T>           The type of the thing in the config we are making a listener for
+     * @param builder       Builder to build configs with
+     * @param name          The name of the field in your config that will hold objects of this type
+     * @param codec         A Codec for de/serializing your object type.
      * @param defaultSupplier The default instance of your config field. The given codec must be able to serialize this;
-     *                        if it cannot, an exception will be intentionally thrown the first time the config attempts to load.
-     *                        If the codec fails to deserialize the config field at a later time, an error message will be logged and this default instance will be used instead.
+     *                      if it cannot, an exception will be intentionally thrown the first time the config attempts to load.
+     *                      If the codec fails to deserialize the config field at a later time, an error message will be logged and this default instance will be used instead.
      * @return A reload-sensitive wrapper around your config object value. Use ConfigObject#get to get the most up-to-date object.
      */
     public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
         com.google.common.base.Supplier<Object> lazyDefaultValue = Suppliers.memoize(() -> {
             T defaultValue = defaultSupplier.get();
             var encodeResult = codec.encodeStart(TomlConfigOps.INSTANCE, defaultValue);
-            return encodeResult.getOrThrow(false, s -> LOGGER.error("Unable to encode default value: {}", s));
+            return encodeResult.getOrThrow(s -> new IllegalArgumentException(String.format("Unable to encode default value %s: %s", defaultValue, s)));
         });
 
         ModConfigSpec.ConfigValue<Object> value = builder.define(name, lazyDefaultValue, o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass()));
@@ -131,12 +137,12 @@ public class ConfigHelper {
      * A config-reload-sensitive wrapper around a config field for a complex object
      **/
     public static class ConfigObject<T> implements Supplier<T> {
-        private @NotNull
-        final ModConfigSpec.ConfigValue<Object> value;
-        private @NotNull
+        private @Nonnull
+        final ConfigValue<Object> value;
+        private @Nonnull
         final Codec<T> codec;
-        private @Nullable Object cachedObject;
-        private @NotNull T parsedObject;
+        private @Nonnull Object cachedObject;
+        private @Nonnull T parsedObject;
         private final @NotNull Supplier<T> defaultObject;
 
         private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
@@ -146,7 +152,7 @@ public class ConfigHelper {
         }
 
         @Override
-        @NotNull
+        @Nonnull
         public T get() {
             Object freshObject = this.value.get();
             if (!Objects.equals(this.cachedObject, freshObject)) {
@@ -156,9 +162,25 @@ public class ConfigHelper {
             return this.parsedObject;
         }
 
+        /**
+         * Sets the config field to a new value and saves the config
+         *
+         * @param value Value to serialize to the config. If object cannot be serialized, an error will be logged and no change will occur.
+         */
+        public void set(T value) {
+            this.codec.encodeStart(TomlConfigOps.INSTANCE, value)
+                    .resultOrPartial(e -> LOGGER.error("Config failure: Could not save value {} due to encoding error: {}", value, e))
+                    .ifPresent(serializedObject -> {
+                        this.value.set(serializedObject);
+                        this.value.save();
+                        this.parsedObject = value;
+                        this.cachedObject = serializedObject;
+                    });
+        }
+
         private T getReparsedObject(Object obj) {
             DataResult<T> parseResult = this.codec.parse(TomlConfigOps.INSTANCE, obj);
-            return parseResult.get().map(
+            return parseResult.mapOrElse(
                     result -> result,
                     failure ->
                     {
@@ -290,7 +312,7 @@ public class ConfigHelper {
                 return DataResult.error(() -> "mergeToMap called with not a map: " + map, map);
             }
             DataResult<String> stringResult = this.getStringValue(key);
-            Optional<PartialResult<String>> badResult = stringResult.error();
+            Optional<DataResult.Error<String>> badResult = stringResult.error();
             if (badResult.isPresent()) {
                 return DataResult.error(() -> "key is not a string: " + key, map);
             }
@@ -318,8 +340,7 @@ public class ConfigHelper {
         @Override
         public Object createMap(Stream<Pair<Object, Object>> map) {
             final Config result = TomlFormat.newConfig();
-            map.forEach(p -> result.add(this.getStringValue(p.getFirst()).getOrThrow(false, s -> {
-            }), p.getSecond()));
+            map.forEach(p -> result.add(this.getStringValue(p.getFirst()).getOrThrow(), p.getSecond()));
             return result;
         }
 

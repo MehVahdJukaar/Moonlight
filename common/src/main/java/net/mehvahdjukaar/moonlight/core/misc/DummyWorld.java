@@ -81,11 +81,6 @@ public class DummyWorld extends Level {
        recipeManager = new RecipeManager(Utils.hackyGetRegistryAccess());
     }
 
-    @Deprecated(forRemoval = true)
-    public static DummyWorld getInstance() {
-        return getCachedInstance();
-    }
-
     public static DummyWorld getCachedInstance() {
         return getCachedInstance("dummy_world", DummyWorld::new);
     }

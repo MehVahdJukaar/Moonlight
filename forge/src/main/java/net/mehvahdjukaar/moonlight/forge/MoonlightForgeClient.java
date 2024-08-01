@@ -3,10 +3,8 @@ package net.mehvahdjukaar.moonlight.forge;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
-import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
-import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
@@ -14,24 +12,25 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
 @EventBusSubscriber(modid = MoonlightForge.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class MoonlightForgeClient {
 
     public static void init(IEventBus modEventBus) {
         modEventBus.addListener(MoonlightForgeClient::registerShader);
+        modEventBus.addListener(MoonlightForgeClient::afterLoad);
         modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
     }
 
@@ -45,6 +44,15 @@ public class MoonlightForgeClient {
 
     public static ShaderInstance getTextColorShader() {
         return textColorShader;
+    }
+
+    public static void afterLoad(FMLLoadCompleteEvent event) {
+        for (var config : ConfigSpec.getTrackedSpecs()) {
+            if (!config.hasConfigScreen()) {
+                ModList.get().getModContainerById(config.getModId()).ifPresent(c ->
+                        c.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new));
+            }
+        }
     }
 
     public static void registerShader(RegisterShadersEvent event) {

@@ -23,7 +23,6 @@ public abstract class ConfigBuilder {
     protected final Map<String, String> comments = new HashMap<>();
     private String currentComment;
     private String currentKey;
-    protected boolean synced;
     protected Runnable changeCallback;
 
     //always on. can be called to disable
@@ -48,12 +47,6 @@ public abstract class ConfigBuilder {
             if (e.isDefault()) comments.forEach(e::addEntry);
         };
         MoonlightEventsHelper.addListener(consumer, AfterLanguageLoadEvent.class);
-    }
-
-    public ConfigSpec buildAndRegister() {
-        var spec = this.build();
-        spec.register();
-        return spec;
     }
 
     public abstract ConfigSpec build();
@@ -167,14 +160,6 @@ public abstract class ConfigBuilder {
             this.currentComment = null;
             this.currentKey = null;
         }
-        return this;
-    }
-
-    public ConfigBuilder setSynced() {
-        if (this.type == ConfigType.CLIENT) {
-            throw new UnsupportedOperationException("Config syncing cannot be used for client config as its not needed");
-        }
-        this.synced = true;
         return this;
     }
 

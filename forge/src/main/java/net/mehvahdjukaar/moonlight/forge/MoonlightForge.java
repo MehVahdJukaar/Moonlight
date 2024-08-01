@@ -17,7 +17,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -41,7 +40,7 @@ import java.lang.ref.WeakReference;
 public class MoonlightForge {
     public static final String MOD_ID = Moonlight.MOD_ID;
     public static final ModConfigSpec SPEC = ((ConfigSpecWrapper) ConfigBuilder.create(MOD_ID, ConfigType.COMMON)
-            .buildAndRegister()).getSpec();
+            .build()).getSpec();
 
     public MoonlightForge(IEventBus bus) {
 
@@ -60,9 +59,9 @@ public class MoonlightForge {
 
     public static void configsLoaded(ModConfigEvent.Loading event) {
         if (event.getConfig().getSpec() == SPEC) {
-            if (!ModLoader.hasCompletedState("LOAD_REGISTRIES")) {
-                throw new IllegalStateException("Some OTHER mod has forcefully loaded ALL other mods configs before the registry phase. This should not be done. Dont report this to Moonlight. Refusing to proceed further");
-            }
+            //if (!ModLoader.hasCompletedState("LOAD_REGISTRIES")) {
+            //    throw new IllegalStateException("Some OTHER mod has forcefully loaded ALL other mods configs before the registry phase. This should not be done. Dont report this to Moonlight. Refusing to proceed further");
+            //}
         }
     }
 

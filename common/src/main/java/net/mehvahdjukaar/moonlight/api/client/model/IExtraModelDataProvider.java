@@ -9,7 +9,6 @@ import java.util.Objects;
  */
 public interface IExtraModelDataProvider {
 
-    @Deprecated(forRemoval = true)
     @ApiStatus.Internal
     default ExtraModelData getExtraModelData() {
         var builder = ExtraModelData.builder();

@@ -14,6 +14,8 @@ accessible field net/minecraft/world/entity/projectile/Projectile leftOwner Z
 accessible method net/minecraft/world/entity/projectile/Projectile checkLeftOwner ()Z
 accessible method net/minecraft/world/entity/Entity collide (Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
 
+transitive-accessible class net/minecraft/world/level/block/entity/BlockEntity$ComponentHelper
+
 #hand stuff
 transitive-accessible method net/minecraft/client/renderer/ItemInHandRenderer applyItemArmTransform (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V
 transitive-accessible method net/minecraft/client/renderer/ItemInHandRenderer applyItemArmAttackTransform (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V

@@ -2,7 +2,9 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.map.decoration.SimpleMapMarker;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -11,6 +13,8 @@ import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.MAP_ATLASES;
 
@@ -127,18 +131,18 @@ public class MapHelper {
     }
 
     /**
-     * Helper that map decoration directly to map data using a persistent map marker. Only supports moonlight markers
+     * Helper that map decoration directly to map data using a persistent map marker. Only supports moonlight markers that have a simple marker type
      */
     public static boolean addSimpleDecorationToMap(MapItemSavedData data, Level level, ResourceLocation id,
-                                                   BlockPos pos, @Nullable Component name) {
-        MLMapDecorationType<?, ?> type = MapDataRegistry.get(id);
+                                                   BlockPos pos, float rotation, @Nullable Component name) {
+        Holder<MLMapDecorationType<?, ?>> type = MapDataRegistry.getHolder(id);
         if (type != null) {
-            var marker = type.createEmptyMarker();
-            marker.setPersistent(true);
-            marker.setPos(pos);
-            marker.setName(name);
-            ((ExpandedMapData) data).ml$addCustomMarker(marker);
-            return true;
+            //hack only works with these
+            if(type.value().getMarkerCodec() == SimpleMapMarker.CODEC) {
+                var marker = new SimpleMapMarker(type, pos, rotation, Optional.ofNullable(name));
+                ((ExpandedMapData) data).ml$addCustomMarker(marker);
+                return true;
+            }
         }
         return false;
     }

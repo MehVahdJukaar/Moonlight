@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.entity;
 
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -11,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
@@ -79,7 +80,9 @@ public class ImprovedFallingBlockEntity extends FallingBlockEntity {
     public ItemEntity spawnAtLocation(ItemLike itemIn, int offset) {
         ItemStack stack = new ItemStack(itemIn);
         if (itemIn instanceof Block && this.saveTileDataToItem && this.blockData != null) {
-            stack.applyComponents(blockEntity.collectComponents());
+            BlockEntity be = BlockEntity.loadStatic(BlockPos.ZERO, getBlockState(), blockData, level().registryAccess());
+            if (be != null) stack.applyComponents(be.collectComponents());
+            else Moonlight.LOGGER.warn("Failed to load block entity for falling block. Block Entity data: {}", blockData);
         }
         return this.spawnAtLocation(stack, offset);
     }

@@ -39,12 +39,6 @@ public class ModBucketItem extends BucketItem {
         }
     }
 
-
-    @Deprecated(forRemoval = true)
-    public ModBucketItem(Fluid fluid, Properties properties) {
-        this(() -> fluid, properties);
-    }
-
     public Fluid getFluid() {
         return this.supplier.get();
     }

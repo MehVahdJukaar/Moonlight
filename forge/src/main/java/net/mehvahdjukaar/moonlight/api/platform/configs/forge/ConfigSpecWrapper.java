@@ -1,15 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
-import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.core.ConfigFormat;
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -19,17 +14,16 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.fml.config.ConfigFileTypeHandler;
 import net.neoforged.fml.config.ConfigTracker;
-import net.neoforged.fml.config.IConfigEvent;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.client.ConfigScreenHandler;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
@@ -37,34 +31,34 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("all")
 public final class ConfigSpecWrapper extends ConfigSpec {
 
-    private static final Method SET_CONFIG_DATA = ObfuscationReflectionHelper.findMethod(ModConfig.class, "setConfigData", CommentedConfig.class);
-    private static final Method SETUP_CONFIG_FILE = ObfuscationReflectionHelper.findMethod(ConfigFileTypeHandler.class,
-            "setupConfigFile", ModConfig.class, Path.class, ConfigFormat.class);
+    private static final Method LOAD_CONFIG = ObfuscationReflectionHelper.findMethod(
+            ConfigTracker.class, "loadConfig",
+            ModConfig.class, Path.class, Function.class);
 
     private final ModConfigSpec spec;
-
     private final ModConfig modConfig;
-    private final ModContainer modContainer;
 
     private final Map<ModConfigSpec.ConfigValue<?>, Object> requireRestartValues;
-    private final List<ConfigBuilderImpl.SpecialValue<?,?>> specialValues;
+    private final List<ConfigBuilderImpl.SpecialValue<?, ?>> specialValues;
 
-    public ConfigSpecWrapper(ResourceLocation name, ModConfigSpec spec, ConfigType type, boolean synced,
-                             @Nullable Runnable onChange, List<ModConfigSpec.ConfigValue<?>> requireRestart,
-                             List<ConfigBuilderImpl.SpecialValue<?,?>> specialValues) {
-        super(name.getNamespace(), name.getNamespace() + "-" + name.getPath() + ".toml",
-                FMLPaths.CONFIGDIR.get(), type, synced, onChange);
+    private ConfigSpecWrapper(ResourceLocation name, ModConfigSpec spec, ConfigType type,
+                              @Nullable Runnable onChange, List<ModConfigSpec.ConfigValue<?>> requireRestart,
+                              List<ConfigBuilderImpl.SpecialValue<?, ?>> specialValues) {
+        super(name, "toml", FMLPaths.CONFIGDIR.get(), type, onChange);
         this.spec = spec;
         this.specialValues = specialValues;
 
-        ModConfig.Type t = this.getConfigType() == ConfigType.COMMON ? ModConfig.Type.COMMON : ModConfig.Type.CLIENT;
+        ModConfig.Type forgeType = this.getConfigType() == ConfigType.CLIENT ? ModConfig.Type.CLIENT : ModConfig.Type.COMMON;
 
-        this.modContainer = ModLoadingContext.get().getActiveContainer();
-        this.modConfig = new ModConfig(t, spec, modContainer, this.getFileName());
+        ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
+        // create config and registers immediately
+        this.modConfig = ConfigTracker.INSTANCE.registerConfig(forgeType, spec, modContainer, this.getFileName());
 
         var bus = modContainer.getEventBus();
         if (onChange != null || this.isSynced() || !specialValues.isEmpty()) bus.addListener(this::onConfigChange);
@@ -74,10 +68,9 @@ public final class ConfigSpecWrapper extends ConfigSpec {
             NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         }
         //for event
-        ConfigSpec.addTrackedSpec(this);
 
         if (!requireRestart.isEmpty()) {
-            loadFromFile(); //Early load if this has world reload ones as we need to get their current values. Isn't there a better way?
+            forceLoad(); //Early load if this has world reload ones as we need to get their current values. Isn't there a better way?
         }
         this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ModConfigSpec.ConfigValue::get));
 
@@ -95,47 +88,19 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     }
 
     @Override
-    public void register() {
-        ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
-        modContainer.addConfig(this.modConfig);
-    }
-
-    @Override
-    public void loadFromFile() {
-        //same stuff that forge config tracker does
+    public void forceLoad() {
+        if (this.isLoaded()) return;
         try {
-            CommentedFileConfig configData = readConfig(ConfigFileTypeHandler.TOML, FMLPaths.CONFIGDIR.get(), modConfig);
-            SET_CONFIG_DATA.setAccessible(true);
-            SET_CONFIG_DATA.invoke(modConfig, configData);
-            IConfigEvent.loading(modConfig).post();
-            modConfig.save();
+            LOAD_CONFIG.invoke(ConfigTracker.INSTANCE, this.modConfig, this.getFullPath(),
+                    (Function<ModConfig, ModConfigEvent>) ModConfigEvent.Loading::new);
         } catch (Exception e) {
             throw new ConfigLoadingException(modConfig, e);
         }
     }
 
-    //We need this, so we don't add a second file watcher. Same as handler::reader
-    private CommentedFileConfig readConfig(ConfigFileTypeHandler handler, Path configBasePath, ModConfig c) {
-        Path configPath = configBasePath.resolve(c.getFileName());
-        CommentedFileConfig configData = CommentedFileConfig.builder(configPath).sync().
-                preserveInsertionOrder().
-                autosave().
-                onFileNotFound((newfile, configFormat) -> {
-                    try {
-                        return (Boolean) SETUP_CONFIG_FILE.invoke(handler, c, newfile, configFormat);
-                    } catch (Exception e) {
-                        throw new ConfigLoadingException(c, e);
-                    }
-                }).
-                writingMode(WritingMode.REPLACE).
-                build();
-        configData.load();
-        return configData;
-    }
-
     private static class ConfigLoadingException extends RuntimeException {
         public ConfigLoadingException(ModConfig config, Exception cause) {
-            super("Failed loading config file " + config.getFileName() + " of type " + config.getType() + " for modid " + config.getModId() + ". Try deleting it", cause);
+            super("Failed early loading config file " + config.getFileName() + " of type " + config.getType() + " for modid " + config.getModId() + ". Try deleting it", cause);
         }
     }
 
@@ -148,10 +113,6 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         return modConfig;
     }
 
-    public ModConfig.Type getModConfigType() {
-        return this.getConfigType() == ConfigType.CLIENT ? ModConfig.Type.CLIENT : ModConfig.Type.COMMON;
-    }
-
     @Override
     public boolean isLoaded() {
         return spec.isLoaded();
@@ -161,21 +122,21 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     @Override
     @OnlyIn(Dist.CLIENT)
     public Screen makeScreen(Screen parent, @Nullable ResourceLocation background) {
-        var container = ModList.get().getModContainerById(this.getModId());
-        if (container.isPresent()) {
-            var factory = container.get().getCustomExtension(ConfigScreenHandler.ConfigScreenFactory.class);
-            if (factory.isPresent()) return factory.get().screenFunction().apply(Minecraft.getInstance(), parent);
-        }
-        return null;
+        return ModList.get().getModContainerById(this.getModId())
+                .flatMap(container -> container.getCustomExtension(IConfigScreenFactory.class)
+                        .map(factory -> factory.createScreen(container, parent)))
+                .orElse(null);
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public boolean hasConfigScreen() {
         return ModList.get().getModContainerById(this.getModId())
-                .map(container -> container.getCustomExtension(ConfigScreenHandler.ConfigScreenFactory.class)
+                .map(container -> container.getCustomExtension(IConfigScreenFactory.class)
                         .isPresent()).orElse(false);
     }
 
+    @ApiStatus.Internal
     @EventCalled
     private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
@@ -184,15 +145,17 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         }
     }
 
+    @ApiStatus.Internal
     @EventCalled
-    protected void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+    public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity().level().isClientSide) {
             onRefresh();
         }
     }
 
+    @ApiStatus.Internal
     @EventCalled
-    protected void onConfigChange(ModConfigEvent event) {
+    public void onConfigChange(ModConfigEvent event) {
         if (event.getConfig().getSpec() == this.getSpec()) {
             //send this configuration to connected clients if on server
             if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()) sendSyncedConfigsToAllPlayers();
@@ -204,8 +167,8 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     @Override
     public void loadFromBytes(InputStream stream) {
         try { //this should work the same as below and internaly calls refresh
-            var b = stream.readAllBytes();
-            this.modConfig.acceptSyncedConfig(b);
+            byte[] b = stream.readAllBytes();
+            ConfigTracker.acceptSyncedConfig(this.modConfig, b);
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to sync config file {}:", this.getFileName(), e);
         }

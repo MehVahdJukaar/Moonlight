@@ -14,6 +14,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownPotion;
@@ -83,14 +84,14 @@ public interface ILightable {
     }
 
     //call on use
-    default InteractionResult interactWithPlayer(BlockState state, Level level, BlockPos pos, Player player, InteractionHand handIn) {
-        ItemStack stack = player.getItemInHand(handIn);
+    default InteractionResult interactWithPlayer(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
         if (Utils.mayPerformBlockAction(player, pos, stack)) {
             if (!this.isLitUp(state, level, pos)) {
                 Item item = stack.getItem();
                 if (item instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS)) {
                     if (lightUp(player, state, pos, level, FireSourceType.FLINT_AND_STEEL)) {
-                        stack.hurtAndBreak(1, player, (playerIn) -> playerIn.broadcastBreakEvent(handIn));
+                        stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
                         return InteractionResult.sidedSuccess(level.isClientSide);
                     }
                 } else if (item instanceof FireChargeItem) {

@@ -15,19 +15,18 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
-import net.minecraft.world.level.saveddata.maps.MapBanner;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 //Base type for simple data-driven type. Basically a simple version of CustomDecorationType that can be serialized
-public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDecoration, SimpleMapWorldMarker> {
+public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDecoration, SimpleMapMarker> {
 
 
     static final Codec<MLJsonMapDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             RuleTest.CODEC.optionalFieldOf("target_block").forGetter(MLJsonMapDecorationType::getTarget),
             ComponentSerialization.FLAT_CODEC.optionalFieldOf("name").forGetter(MLJsonMapDecorationType::getDisplayName),
-            Codec.FLOAT.optionalFieldOf("rotation", 0).forGetter(MLJsonMapDecorationType::getRotation),
+            Codec.FLOAT.optionalFieldOf("rotation", 0f).forGetter(MLJsonMapDecorationType::getRotation),
             ColorUtils.CODEC.optionalFieldOf("map_color", 0).forGetter(MLJsonMapDecorationType::getDefaultMapColor),
             RegistryCodecs.homogeneousList(Registries.STRUCTURE).optionalFieldOf("target_structures").forGetter(
                     MLJsonMapDecorationType::getAssociatedStructure), Codec.STRING.xmap(PlatHelper::isModLoaded, b -> "minecraft")
@@ -65,7 +64,7 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
 
     public MLJsonMapDecorationType(Optional<RuleTest> target, Optional<Component> name, float rotation,
                                    int mapColor, Optional<HolderSet<Structure>> structure, Boolean enabled) {
-        super(SimpleMapWorldMarker.DIRECT_CODEC, MLMapDecoration.DIRECT_CODEC);
+        super(SimpleMapMarker.DIRECT_CODEC, MLMapDecoration.DIRECT_CODEC);
         this.target = target;
         this.name = name;
         this.defaultRotation = rotation;
@@ -102,10 +101,10 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
 
     @Nullable
     @Override
-    public SimpleMapWorldMarker createMarkerFromWorld(BlockGetter reader, BlockPos pos) {
+    public SimpleMapMarker createMarkerFromWorld(BlockGetter reader, BlockPos pos) {
         if (this.target.isPresent() && enabled) {
             if (target.get().test(reader.getBlockState(pos), RandomSource.create())) {
-                return new SimpleMapWorldMarker(
+                return new SimpleMapMarker(
                         MapDataInternal.hackyGetRegistry().wrapAsHolder(this),
                         pos, defaultRotation, name);
             }

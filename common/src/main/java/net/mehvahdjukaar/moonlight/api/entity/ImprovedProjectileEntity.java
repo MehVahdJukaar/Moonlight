@@ -8,10 +8,14 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -23,7 +27,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Improved version of the projectile entity. Combines the functionality of AbstractArrow and ThrowableItemProjectile
@@ -48,7 +51,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     protected ImprovedProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, Level world) {
         super(type, world);
         this.movementOld = this.getDeltaMovement();
-        this.setMaxUpStep(0);
+        //remember to add STEP_HEIGHT attribute!
     }
 
     protected ImprovedProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, double x, double y, double z, Level world) {
@@ -224,7 +227,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
             //portals. done here and not in onBlockHit to prevent any further calls
             BlockPos hitPos = bi.getBlockPos();
             BlockState hitState = level.getBlockState(hitPos);
-
+            ThrowableProjectile
             if (hitState.is(Blocks.NETHER_PORTAL)) {
                 this.handleInsidePortal(hitPos);
                 portalHit = true;
@@ -273,12 +276,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         this.remove(RemovalReason.DISCARDED);
     }
 
-    @Deprecated(forRemoval = true)
-    public void spawnTrailParticles(Vec3 oldPos, Vec3 newPos) {
-    }
-
     public void spawnTrailParticles() {
-        spawnTrailParticles(new Vec3(xo, yo, zo), this.position());
 
         if (this.isInWater()) {
             // Projectile particle code
