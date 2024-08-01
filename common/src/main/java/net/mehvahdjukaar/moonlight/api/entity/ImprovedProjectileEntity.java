@@ -227,15 +227,16 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
             //portals. done here and not in onBlockHit to prevent any further calls
             BlockPos hitPos = bi.getBlockPos();
             BlockState hitState = level.getBlockState(hitPos);
-            ThrowableProjectile
+            //ThrowableProjectile
+            //TODO:!!!! fafactor this whole class!!
             if (hitState.is(Blocks.NETHER_PORTAL)) {
-                this.handleInsidePortal(hitPos);
-                portalHit = true;
+                //this.handleInsidePortal(hitPos);
+              //  portalHit = true;
             } else if (hitState.is(Blocks.END_GATEWAY)) {
-                if (level.getBlockEntity(hitPos) instanceof TheEndGatewayBlockEntity tile && TheEndGatewayBlockEntity.canEntityTeleport(this)) {
-                    TheEndGatewayBlockEntity.teleportEntity(level, hitPos, hitState, this, tile);
-                }
-                portalHit = true;
+                //if (level.getBlockEntity(hitPos) instanceof TheEndGatewayBlockEntity tile && TheEndGatewayBlockEntity.canEntityTeleport(this)) {
+                  //  TheEndGatewayBlockEntity.teleportEntity(level, hitPos, hitState, this, tile);
+                //}
+               // portalHit = true;
             }
         }
 

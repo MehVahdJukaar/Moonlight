@@ -148,7 +148,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         if (vertexIndex == 4) {
             vertexIndex = 0;
             if (quadConsumer != null) {
-                quadConsumer.accept(this.build());
+                quadConsumer.accept(this.getQuad());
             }
         }
     }
@@ -168,7 +168,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     }
 
     @Override
-    public BakedQuad build() {
+    public BakedQuad getQuad() {
         Preconditions.checkNotNull(sprite, "sprite cannot be null");
         return inner.toBakedQuad(sprite);
     }

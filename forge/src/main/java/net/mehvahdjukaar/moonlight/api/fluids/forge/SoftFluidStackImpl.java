@@ -33,9 +33,9 @@ public class SoftFluidStackImpl extends SoftFluidStack {
         FluidStack stack = new FluidStack(softFluid.fluid().getVanillaFluid(), bottlesToMB(softFluid.getCount()));
 
         // tag stuff
-        List<String> nbtKey = softFluid.fluid().getPreservedComponents();
-        CompoundTag tag = softFluid.getTag();
-        if (tag != null && !tag.isEmpty() && !stack.isEmpty() && nbtKey != null) {
+        var preservedComponentKeys = softFluid.fluid().getPreservedComponents();
+        var components = softFluid.getComponents();
+        if (!stack.isEmpty() && !components.isEmpty()) {
             CompoundTag newCom = new CompoundTag();
             for (String k : nbtKey) {
                 //special case to convert to IE pot fluid

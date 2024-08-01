@@ -1,9 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.model.forge;
 
 import com.google.common.base.Preconditions;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
-import net.mehvahdjukaar.moonlight.api.client.util.RotHlpr;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -34,9 +32,11 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     private boolean autoDirection = false;
     private Consumer<BakedQuad> quadConsumer = s -> output = s;
 
+    private boolean building = false;
+
 
     private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
-        this.inner = new QuadBakingVertexConsumer(s -> quadConsumer.accept(s));
+        this.inner = new QuadBakingVertexConsumer();
         this.globalTransform = transformation;// == null ? null : new Matrix4f(new Matrix3f(transformation)); //gets rid of translation
         this.sprite = sprite;
         inner.setShade(true);
@@ -47,12 +47,27 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     }
 
     @Override
-    public BakedQuad build() {
+    public BakedQuad getQuad() {
+        end();
         Preconditions.checkNotNull(output, "vertex data has not been fully filled");
-        if (emissivity != 0) {
-            QuadTransformers.settingEmissivity(emissivity).processInPlace(output);
-        }
         return output;
+    }
+
+    public void end() {
+        if (building) {
+            bakeQuad();
+        }
+    }
+
+    private void bakeQuad() {
+        if (building) {
+            BakedQuad quad = inner.bakeQuad();
+            if (emissivity != 0) {
+                QuadTransformers.settingEmissivity(emissivity).processInPlace(quad);
+            }
+            quadConsumer.accept(quad);
+            building = false;
+        }
     }
 
     @Override
@@ -63,8 +78,10 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     @Override
     public BakedQuadBuilderImpl addVertex(float x, float y, float z) {
+        bakeQuad();
+        building = true;
         if (globalTransform != null) {
-            inner.addVertex(new Matrix4f(globalTransform),  x,  y,  z);
+            inner.addVertex(new Matrix4f(globalTransform), x, y, z);
         } else {
             inner.addVertex(x, y, z);
         }
@@ -108,17 +125,6 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         }
         return this;
     }
-
-    @Override
-    public void defaultColor(int defaultR, int defaultG, int defaultB, int defaultA) {
-        inner.defaultColor(defaultR, defaultG, defaultB, defaultA);
-    }
-
-    @Override
-    public void unsetDefaultColor() {
-        inner.unsetDefaultColor();
-    }
-
 
     @Override
     public BakedQuadBuilder setDirection(Direction direction) {

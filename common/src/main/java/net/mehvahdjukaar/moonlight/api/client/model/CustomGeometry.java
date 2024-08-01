@@ -11,7 +11,6 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface CustomGeometry {
 
-    CustomBakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter,
-                          ModelState transform, ResourceLocation location);
+    CustomBakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform);
 
 }

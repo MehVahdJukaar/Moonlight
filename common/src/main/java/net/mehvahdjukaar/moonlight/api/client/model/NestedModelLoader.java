@@ -29,9 +29,9 @@ public class NestedModelLoader implements CustomModelLoader {
     @Override
     public CustomGeometry deserialize(JsonObject json, JsonDeserializationContext context) throws JsonParseException {
         var j = json.get(path);
-        return (modelBaker, spriteGetter, transform, location) -> {
+        return (modelBaker, spriteGetter, transform) -> {
 
-            var baked = CustomModelLoader.parseModel(j, modelBaker, spriteGetter, transform, location);
+            var baked = CustomModelLoader.parseModel(j, modelBaker, spriteGetter, transform);
             return factory.apply(baked, transform);
         };
     }

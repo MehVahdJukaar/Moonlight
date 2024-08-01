@@ -112,11 +112,6 @@ public class ForgeHelper {
     }
 
     @ExpectPlatform
-    public static double getReachDistance(LivingEntity entity) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
     public static float getExplosionResistance(BlockState state, Level level, BlockPos pos, Explosion explosion) {
         throw new AssertionError();
     }

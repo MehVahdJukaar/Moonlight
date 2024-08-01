@@ -98,7 +98,7 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
             BakedQuadBuilder builder = BakedQuadBuilderImpl.create(sprite, null);
             builder.fromVanilla(newQuad);
             builder.lightEmission(emissivity);
-            newQuad = builder.build();
+            newQuad = builder.getQuad();
         }
         return newQuad;
     }

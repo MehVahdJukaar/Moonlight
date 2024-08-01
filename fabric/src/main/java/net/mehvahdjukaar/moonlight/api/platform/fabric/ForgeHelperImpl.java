@@ -82,10 +82,6 @@ public class ForgeHelperImpl {
         return true;
     }
 
-    public static double getReachDistance(LivingEntity entity) {
-        return 4.5;
-    }
-
     public static float getExplosionResistance(BlockState state, Level level, BlockPos pos, Explosion explosion) {
         return state.getBlock().getExplosionResistance();
     }

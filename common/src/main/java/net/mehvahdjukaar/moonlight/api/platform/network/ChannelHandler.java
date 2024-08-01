@@ -44,7 +44,7 @@ public abstract class ChannelHandler {
                 NetworkDir direction,
                 Class<M> messageClass,
                 StreamCodec<RegistryFriendlyByteBuf,M> codec) {
-            instance.register(direction, messageClass, codec);
+           // instance.register(direction, messageClass, codec);
             return this;
         }
 

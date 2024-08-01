@@ -169,7 +169,7 @@ public class ClientHelper {
 
     @FunctionalInterface
     public interface SpecialModelEvent {
-        void register(ResourceLocation modelLocation);
+        void register(ModelResourceLocation modelLocation);
     }
 
     @ExpectPlatform
@@ -182,11 +182,11 @@ public class ClientHelper {
         void register(ResourceLocation id, CustomModelLoader loader);
 
         default void register(ResourceLocation id, Supplier<CustomBakedModel> bakedModelFactory) {
-            register(id, (CustomModelLoader) (json, context) -> (modelBaker, spriteGetter, transform, location) -> bakedModelFactory.get());
+            register(id, (CustomModelLoader) (json, context) -> (modelBaker, spriteGetter, transform) -> bakedModelFactory.get());
         }
 
         default void register(ResourceLocation id, BiFunction<ModelState, Function<Material, TextureAtlasSprite>, CustomBakedModel> bakedModelFactory) {
-            register(id, (CustomModelLoader) (json, context) -> (modelBaker, spriteGetter, transform, location) -> bakedModelFactory.apply(transform, spriteGetter));
+            register(id, (CustomModelLoader) (json, context) -> (modelBaker, spriteGetter, transform) -> bakedModelFactory.apply(transform, spriteGetter));
         }
     }
 

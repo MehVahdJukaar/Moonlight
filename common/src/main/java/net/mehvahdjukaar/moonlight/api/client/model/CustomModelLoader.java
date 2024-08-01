@@ -18,7 +18,7 @@ public interface CustomModelLoader {
 
 
     // helper function you'll likely only need here
-    static BakedModel parseModel(JsonElement j, ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ResourceLocation location) {
+    static BakedModel parseModel(JsonElement j, ModelBaker modelBaker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform) {
         BlockModel model;
         if (j.isJsonPrimitive()) {
             model = (BlockModel) modelBaker.getModel(ResourceLocation.parse(j.getAsString()));
@@ -27,7 +27,7 @@ public interface CustomModelLoader {
         }
         model.resolveParents(modelBaker::getModel);
         if (model == modelBaker.getModel(ModelBakery.MISSING_MODEL_LOCATION)) {
-            throw new JsonParseException("Found missing model while parsing nested model " + location);
+            throw new JsonParseException("Found missing model while parsing nested model " + j);
         }
 
         return model.bake(modelBaker, spriteGetter, transform);

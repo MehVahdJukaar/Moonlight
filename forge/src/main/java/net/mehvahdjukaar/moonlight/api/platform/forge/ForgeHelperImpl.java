@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -72,36 +73,6 @@ public class ForgeHelperImpl {
         return originalRecipe;
     }
 
-    private record Wrapper(FinishedRecipe cond, FinishedRecipe original) implements FinishedRecipe {
-
-        @Override
-        public void serializeRecipeData(JsonObject json) {
-            cond.serializeRecipeData(json);
-        }
-
-        @Override
-        public ResourceLocation getId() {
-            return cond.getId();
-        }
-
-        @Override
-        public RecipeSerializer<?> getType() {
-            return cond.getType();
-        }
-
-        @Nullable
-        @Override
-        public JsonObject serializeAdvancement() {
-            return original.serializeAdvancement();
-        }
-
-        @Nullable
-        @Override
-        public ResourceLocation getAdvancementId() {
-            return original.getAdvancementId();
-        }
-    }
-
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
         EffectCure cure = null;
         // somehow worse api...
@@ -143,10 +114,6 @@ public class ForgeHelperImpl {
 
     public static boolean canLivingConvert(LivingEntity entity, EntityType<? extends LivingEntity> outcome, Consumer<Integer> timer) {
         return EventHooks.canLivingConvert(entity, outcome, timer);
-    }
-
-    public static double getReachDistance(LivingEntity entity) {
-        return entity.getAttribute(NeoForgeMod.BLOCK_REACH.value()).getValue();
     }
 
     public static float getExplosionResistance(BlockState state, Level level, BlockPos pos, Explosion explosion) {

@@ -50,7 +50,10 @@ public interface BakedQuadBuilder extends VertexConsumer {
 
     BakedQuadBuilder setTint(int tintIndex);
 
-    BakedQuad build();
+    BakedQuad getQuad();
+
+    // if using auto build call this after you are done
+    void end();
 
     BakedQuadBuilder setAutoBuild(Consumer<BakedQuad> quadConsumer);
 
