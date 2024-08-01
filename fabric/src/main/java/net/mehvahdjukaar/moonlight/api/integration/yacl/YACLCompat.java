@@ -6,6 +6,7 @@ import dev.isxander.yacl.gui.controllers.LabelController;
 import dev.isxander.yacl.gui.controllers.TickBoxController;
 import dev.isxander.yacl.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl.gui.controllers.slider.DoubleSliderController;
+import dev.isxander.yacl.gui.controllers.slider.FloatSliderController;
 import dev.isxander.yacl.gui.controllers.slider.IntegerSliderController;
 import dev.isxander.yacl.gui.controllers.string.StringController;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigEntry;
@@ -32,7 +33,7 @@ public class YACLCompat {
 
         YetAnotherConfigLib.Builder builder = YetAnotherConfigLib.createBuilder();
 
-        builder.title(spec.getName());
+        builder.title(spec.getReadableName());
         builder.save(spec::saveConfig);
 
 
@@ -104,7 +105,16 @@ public class YACLCompat {
             var description = dc.getDescription();
             if (description != null) e.tooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof StringConfigValue sc) {
+        } else if(entry instanceof FloatConfigValue fc){
+            var e = Option.createBuilder(Float.class)
+                    .name(fc.getTranslation())
+                    .binding(fc.getDefaultValue(), fc, fc::set)
+                    .controller(o -> new FloatSliderController(o, fc.getMin(), fc.getMax(), 0.0001f, FLOAT_FORMATTER));
+            var description = fc.getDescription();
+            if (description != null) e.tooltip(description);// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
+        }
+        else if (entry instanceof StringConfigValue sc) {
             var e = Option.createBuilder(String.class)
                     .name(sc.getTranslation())
                     .binding(sc.getDefaultValue(), sc, sc::set)
@@ -142,7 +152,8 @@ public class YACLCompat {
         }
         throw new UnsupportedOperationException("unknown entry: " + entry.getClass().getName());
     }
-    public static final Function<Double, Component> DOUBLE_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
+    private static final Function<Double, Component> DOUBLE_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
+    private static final Function<Float, Component> FLOAT_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
 
     private static <T extends Enum<T>> Option<T> addEnum(EnumConfigValue<T> ec) {
         var e = Option.createBuilder(ec.getEnumClass())

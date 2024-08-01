@@ -45,11 +45,11 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     private final ModConfig modConfig;
 
     private final Map<ModConfigSpec.ConfigValue<?>, Object> requireRestartValues;
-    private final List<ConfigBuilderImpl.SpecialValue<?, ?>> specialValues;
+    private final List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues;
 
     private ConfigSpecWrapper(ResourceLocation name, ModConfigSpec spec, ConfigType type,
                               @Nullable Runnable onChange, List<ModConfigSpec.ConfigValue<?>> requireRestart,
-                              List<ConfigBuilderImpl.SpecialValue<?, ?>> specialValues) {
+                              List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues) {
         super(name, "toml", FMLPaths.CONFIGDIR.get(), type, onChange);
         this.spec = spec;
         this.specialValues = specialValues;
@@ -77,11 +77,6 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     }
 
     @Override
-    public Component getName() {
-        return Component.literal(getFileName());
-    }
-
-    @Override
     public Path getFullPath() {
         return FMLPaths.CONFIGDIR.get().resolve(this.getFileName());
         // return modConfig.getFullPath();
@@ -94,13 +89,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
             LOAD_CONFIG.invoke(ConfigTracker.INSTANCE, this.modConfig, this.getFullPath(),
                     (Function<ModConfig, ModConfigEvent>) ModConfigEvent.Loading::new);
         } catch (Exception e) {
-            throw new ConfigLoadingException(modConfig, e);
-        }
-    }
-
-    private static class ConfigLoadingException extends RuntimeException {
-        public ConfigLoadingException(ModConfig config, Exception cause) {
-            super("Failed early loading config file " + config.getFileName() + " of type " + config.getType() + " for modid " + config.getModId() + ". Try deleting it", cause);
+            throw new ConfigLoadingException(this, e);
         }
     }
 
@@ -160,7 +149,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
             //send this configuration to connected clients if on server
             if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()) sendSyncedConfigsToAllPlayers();
             onRefresh();
-            specialValues.forEach(ConfigBuilderImpl.SpecialValue::clearCache);
+            specialValues.forEach(ConfigBuilderImpl.ValueWrapper::clearCache);
         }
     }
 

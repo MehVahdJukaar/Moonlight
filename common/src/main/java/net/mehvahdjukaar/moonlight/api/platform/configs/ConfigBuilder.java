@@ -68,6 +68,8 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<Double> define(String name, double defaultValue, double min, double max);
 
+    public abstract Supplier<Float> define(String name, float defaultValue, float min, float max);
+
     public abstract Supplier<Integer> define(String name, int defaultValue, int min, int max);
 
     public abstract Supplier<Integer> defineColor(String name, int defaultValue);
@@ -88,7 +90,7 @@ public abstract class ConfigBuilder {
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
-    //be very careful with these as you might use some objects that arent registered yet and things will break
+    //be very careful with these as you might use some objects that aren't registered yet and things will break
     public abstract <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec);
 
     public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec) {

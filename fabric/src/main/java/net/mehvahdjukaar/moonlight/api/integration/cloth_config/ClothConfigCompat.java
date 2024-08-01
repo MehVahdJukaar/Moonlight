@@ -30,7 +30,7 @@ public class ClothConfigCompat {
         ConfigBuilder builder = ConfigBuilder.create();
 
         builder.setParentScreen(parent);
-        builder.setTitle(spec.getName());
+        builder.setTitle(spec.getReadableName());
         builder.setSavingRunnable(spec::saveConfig);
 
         if (background != null) builder.setDefaultBackgroundTexture(background);
@@ -96,7 +96,18 @@ public class ClothConfigCompat {
             var description = dc.getDescription();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof StringConfigValue sc) {
+        } else if ( entry instanceof FloatConfigValue fc) {
+            var e = builder.entryBuilder()
+                    .startFloatField(fc.getTranslation(), fc.get())
+                    .setMax(fc.getMax())
+                    .setMin(fc.getMin())
+                    .setDefaultValue(fc.getDefaultValue()) // Recommended: Used when user click "Reset"
+                    .setSaveConsumer(fc::set); // Recommended: Called when user save the config
+            var description = fc.getDescription();
+            if (description != null) e.setTooltip(description);// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
+        }
+        else if (entry instanceof StringConfigValue sc) {
             var e = builder.entryBuilder()
                     .startStrField(sc.getTranslation(), sc.get())
                     .setDefaultValue(sc.getDefaultValue()) // Recommended: Used when user click "Reset"

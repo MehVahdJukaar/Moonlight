@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.http.annotation.Experimental;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
@@ -38,8 +39,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @NotNull
     public FabricConfigSpec build() {
         assert categoryStack.size() == 1;
-        return new FabricConfigSpec(this.getName(),
-                mainCategory, this.type, this.synced, this.changeCallback);
+        return new FabricConfigSpec(this.getName(), mainCategory, this.type, this.changeCallback);
     }
 
     @Override
@@ -86,6 +86,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
         var config = new DoubleConfigValue(name, defaultValue, min, max);
+        doAddConfig(name, config);
+        return config;
+    }
+
+    @Experimental
+    @Override
+    public Supplier<Float> define(String name, float defaultValue, float min, float max) {
+        var config = new FloatConfigValue(name, defaultValue, min, max);
         doAddConfig(name, config);
         return config;
     }

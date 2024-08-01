@@ -14,10 +14,8 @@ import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -33,20 +31,13 @@ public final class FabricConfigSpec extends ConfigSpec {
 
     @ApiStatus.Internal
     public static void loadAllConfigs() {
-        for (var en : CONFIG_STORAGE.entrySet()) {
-            var m = en.getValue();
-            if (m.isLoaded()) continue;
-            try {
-                m.forceLoad();
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to load config from mod:" + en.getKey(), e);
-            }
+        for (var spec : getTrackedSpecs()) {
+            spec.forceLoad();
         }
     }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private final ResourceLocation res;
     private final ConfigSubCategory mainEntry;
     private final File file;
     private boolean initialized = false;
@@ -55,7 +46,6 @@ public final class FabricConfigSpec extends ConfigSpec {
         super(name, "json", FabricLoader.getInstance().getConfigDir(), type, changeCallback);
         this.file = this.getFullPath().toFile();
         this.mainEntry = mainEntry;
-        this.res = name;
         if (this.isSynced()) {
             ServerPlayConnectionEvents.JOIN.register(this::onPlayerLoggedIn);
         }
@@ -72,27 +62,31 @@ public final class FabricConfigSpec extends ConfigSpec {
 
     @Override
     public void forceLoad() {
-        JsonElement config = null;
+        if (this.isLoaded()) return;
 
-        if (file.exists() && file.isFile()) {
-            try (FileInputStream fileInputStream = new FileInputStream(file);
-                 InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+        try {
+            JsonElement config = null;
 
-                config = GSON.fromJson(bufferedReader, JsonElement.class);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to load config", e);
+            if (file.exists() && file.isFile()) {
+                try (FileInputStream fileInputStream = new FileInputStream(file);
+                     InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+                     BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+
+                    config = GSON.fromJson(bufferedReader, JsonElement.class);
+                }
             }
-        }
 
-        if (config instanceof JsonObject jo) {
-            //don't call a load directly, so we skip the main category name
-            mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
-        }
-        if (!initialized) {
-            this.initialized = true;
-            this.saveConfig();
-            Moonlight.LOGGER.info("Loaded config {}", this.getFileName());
+            if (config instanceof JsonObject jo) {
+                //don't call a load directly, so we skip the main category name
+                mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
+            }
+            if (!initialized) {
+                this.initialized = true;
+                this.saveConfig();
+                Moonlight.LOGGER.info("Loaded config {}", this.getFileName());
+            }
+        } catch (Exception e) {
+            throw new ConfigLoadingException(this, e);
         }
     }
 
@@ -106,13 +100,9 @@ public final class FabricConfigSpec extends ConfigSpec {
 
             GSON.toJson(jo, writer);
         } catch (IOException e) {
-            Moonlight.LOGGER.error("Failed to save config {}:", this.getName(), e);
+            Moonlight.LOGGER.error("Failed to save config {}:", this.getReadableName(), e);
         }
         this.onRefresh();
-    }
-
-    public Component getName() {
-        return Component.literal(LangBuilder.getReadableName(this.res.getPath() + "_configs"));
     }
 
 

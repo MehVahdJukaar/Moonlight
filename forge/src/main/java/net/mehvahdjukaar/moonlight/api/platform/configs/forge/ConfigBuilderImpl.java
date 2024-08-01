@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
@@ -14,6 +13,7 @@ import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import org.apache.http.annotation.Experimental;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -25,7 +25,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private final List<ModConfigSpec.ConfigValue<?>> requireGameRestart = new ArrayList<>();
     private boolean currentGameRestart;
     private ModConfigSpec.ConfigValue<?> currentValue;
-    private final List<SpecialValue<?, ?>> specialValues = new ArrayList<>();
+    private final List<ValueWrapper<?, ?>> specialValues = new ArrayList<>();
 
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         return new ConfigBuilderImpl(name, type);
@@ -76,7 +76,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public Supplier<Double> define(String name, double defaultValue, double min, double max) {
+    public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
         maybeAddTranslationString(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
         this.currentValue = value;
@@ -85,12 +85,34 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
+    public Supplier<Double> define(String name, double defaultValue, double min, double max) {
         maybeAddTranslationString(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
         this.currentValue = value;
         maybeAddGameRestart();
         return value;
+    }
+
+
+    @Experimental
+    @Override
+    public Supplier<Float> define(String name, float defaultValue, float min, float max) {
+        maybeAddTranslationString(name);
+
+        var value = builder.defineInRange(name, defaultValue, min, max);
+
+        this.currentValue = value;
+        maybeAddGameRestart();
+
+        var wrapper = new ValueWrapper<Float, Double>(value) {
+            @Override
+            Float map(Double value) {
+                return value.floatValue();
+            }
+        };
+        specialValues.add(wrapper);
+
+        return wrapper;
     }
 
     @Override
@@ -103,7 +125,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         this.currentValue = value;
         maybeAddGameRestart();
 
-        var wrapper = new SpecialValue<Integer, String>(value) {
+        var wrapper = new ValueWrapper<Integer, String>(value) {
             @Override
             Integer map(String value) {
                 return ColorUtils.CODEC.parse(JavaOps.INSTANCE, value).getOrThrow();
@@ -274,6 +296,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public ConfigBuilder gameRestart() {
         this.currentGameRestart = true;
+        maybeAddGameRestart();
         return this;
     }
 
@@ -291,11 +314,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     // wrapper class for special configs. ugly and hacky just to allow cachind as defualt config entries arent extendable
-   abstract static class SpecialValue<T, C> implements Supplier<T> {
+   abstract static class ValueWrapper<T, C> implements Supplier<T> {
         private final ModConfigSpec.ConfigValue<C> original;
         private T cachedValue = null;
 
-        SpecialValue(ModConfigSpec.ConfigValue<C> original) {
+        ValueWrapper(ModConfigSpec.ConfigValue<C> original) {
             this.original = original;
         }
 

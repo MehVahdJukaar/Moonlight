@@ -3,11 +3,13 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -44,6 +46,7 @@ public abstract class ConfigSpec {
 
     private final ResourceLocation configId;
     private final String fileName;
+    private final Component readableName;
     private final Path filePath;
     private final ConfigType type;
     @Nullable
@@ -55,11 +58,14 @@ public abstract class ConfigSpec {
         this.filePath = configDirectory.resolve(fileName);
         this.type = type;
         this.changeCallback = changeCallback;
+        this.readableName = Component.literal(LangBuilder.getReadableName(id.toDebugFileName()+"_configs"));
 
         ConfigSpec.addTrackedSpec(this);
     }
 
-    public abstract Component getName();
+    public Component getReadableName(){
+        return readableName;
+    }
 
     protected void onRefresh() {
         if (this.changeCallback != null) {
@@ -138,4 +144,9 @@ public abstract class ConfigSpec {
         } else throw new UnsupportedOperationException();
     }
 
+    public static class ConfigLoadingException extends RuntimeException {
+        public ConfigLoadingException(ConfigSpec config, Exception cause) {
+            super("Failed to load config file " + config.getFileName() + " of type " + config.getConfigType() + " for mod " + config.getModId() + ". Try deleting it", cause);
+        }
+    }
 }
