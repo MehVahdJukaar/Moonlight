@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
-import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.FriendlyByteBuf;

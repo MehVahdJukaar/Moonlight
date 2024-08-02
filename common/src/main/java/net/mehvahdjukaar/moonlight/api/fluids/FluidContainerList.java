@@ -17,9 +17,9 @@ import java.util.function.Supplier;
 
 public class FluidContainerList {
 
-    public static final Codec<FluidContainerList> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            LenientListCodec.of(Category.CODEC).fieldOf("containers").forGetter(a->new ArrayList<>(a.emptyToFilledMap.values()))
-    ).apply(instance, FluidContainerList::new));
+    public static final Codec<FluidContainerList> CODEC = LenientListCodec.of(Category.CODEC)
+            .xmap(FluidContainerList::new, FluidContainerList::getCategories);
+
 
     private final Map<Item, Category> emptyToFilledMap = new IdentityHashMap<>();
 
@@ -74,8 +74,8 @@ public class FluidContainerList {
         return this.emptyToFilledMap.keySet();
     }
 
-    public Collection<Category> getCategories() {
-        return this.emptyToFilledMap.values();
+    public List<Category> getCategories() {
+        return List.copyOf(this.emptyToFilledMap.values());
     }
 
     protected void merge(FluidContainerList other) {

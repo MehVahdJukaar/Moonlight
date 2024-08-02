@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.core.network;
 
 import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;

@@ -1,8 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.network.neoforge;
 
-import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
-import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -58,13 +56,13 @@ public class NetworkHelperImpl {
         };
     }
 
-    private record ContextWrapper(IPayloadContext c) implements Context {
+    private record ContextWrapper(IPayloadContext c) implements Message.Context {
 
         @Override
-        public NetworkDir getDirection() {
+        public Message.NetworkDir getDirection() {
             var flow = c.connection().getDirection();
-            if (flow == PacketFlow.SERVERBOUND) return NetworkDir.SERVER_BOUND;
-            else return NetworkDir.CLIENT_BOUND;
+            if (flow == PacketFlow.SERVERBOUND) return Message.NetworkDir.SERVER_BOUND;
+            else return Message.NetworkDir.CLIENT_BOUND;
         }
 
         @Override

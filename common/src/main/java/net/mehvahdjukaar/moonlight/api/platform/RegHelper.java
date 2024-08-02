@@ -526,6 +526,13 @@ public class RegHelper {
         throw new AssertionError();
     }
 
+    /**
+     * Very hack solution for forge. Call this as soon as your mod is created in its constructor, offering your mod bus
+     */
+    @ExpectPlatform
+    public static void startRegisteringFor(Object bus){
+        throw new AssertionError();
+    }
 
 }
 

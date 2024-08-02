@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+// very dumb and bare bone string based variable share system for low coupling dependencies
 public class ModSharedVariables {
 
     private static final Map<String, Supplier<String>> STRINGS = new HashMap<>();

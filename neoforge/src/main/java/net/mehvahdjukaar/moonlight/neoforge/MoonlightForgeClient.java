@@ -24,14 +24,16 @@ import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.common.NeoForge;
 
-@EventBusSubscriber(modid = MoonlightForge.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class MoonlightForgeClient {
 
     public static void init(IEventBus modEventBus) {
         modEventBus.addListener(MoonlightForgeClient::registerShader);
         modEventBus.addListener(MoonlightForgeClient::afterLoad);
         modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
+
+        NeoForge.EVENT_BUS.addListener(MoonlightForgeClient::onInputUpdate);
     }
 
 
@@ -55,6 +57,9 @@ public class MoonlightForgeClient {
         }
     }
 
+    public static void onTextureStitch(TextureAtlasStitchedEvent event) {
+        MoonlightClient.afterTextureReload();
+    }
 
     public static void registerShader(RegisterShadersEvent event) {
         try {
@@ -79,11 +84,6 @@ public class MoonlightForgeClient {
     }
 
 
-    @SubscribeEvent
-    public static void registerShaders(RegisterShadersEvent event) {
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onInputUpdate(MovementInputUpdateEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
@@ -95,11 +95,6 @@ public class MoonlightForgeClient {
                         mc.options.keySprint.isDown(), movementInput.jumping);
             }
         }
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onTextureStitch(TextureAtlasStitchedEvent event) {
-        MoonlightClient.afterTextureReload();
     }
 
 

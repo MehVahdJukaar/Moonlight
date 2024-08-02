@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.neoforge;
 
+import com.google.common.base.Preconditions;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
@@ -123,7 +124,9 @@ public class RegHelperImpl {
     }
 
     private static IEventBus getModEventBus(String modId) {
-        var cont = ModList.get().getModContainerById(modId).get();
+        ModList modList = ModList.get();
+        Preconditions.checkNotNull(modList, "ModList was null. This means that some mod registry classes were loaded way too early, likely by mixins");
+        var cont = modList.getModContainerById(modId).get();
         IEventBus bus;
         if (!(cont instanceof FMLModContainer container)) {
             Moonlight.LOGGER.warn("Failed to get mod container for mod {}", modId);
@@ -298,7 +301,6 @@ public class RegHelperImpl {
     }
 
 
-
     public static void addLootTableInjects(Consumer<RegHelper.LootInjectEvent> eventListener) {
         Moonlight.assertInitPhase();
 
@@ -312,7 +314,7 @@ public class RegHelperImpl {
                     @Override
                     public void addTableReference(ResourceLocation targetId) {
                         LootPool pool = LootPool.lootPool().add(NestedLootTable.lootTableReference(
-                               ResourceKey.create(Registries.LOOT_TABLE, targetId))).build();
+                                ResourceKey.create(Registries.LOOT_TABLE, targetId))).build();
                         event.getTable().addPool(pool);
                     }
                 });
@@ -327,6 +329,11 @@ public class RegHelperImpl {
                 Ingredient.of(ingredient));
     }
 
-
-
+    public static void startRegisteringFor(Object bus) {
+        if (bus instanceof IEventBus b) {
+            MoonlightForge.startRegistering(b);
+        } else {
+            throw new IllegalArgumentException("Invalid bus type. Must be of IEventBus type: " + bus);
+        }
+    }
 }

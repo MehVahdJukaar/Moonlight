@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.mixins.neoforge;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.api.events.IFireConsumeBlockEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.core.BlockPos;
@@ -22,15 +21,16 @@ public abstract class FireBlockMixin extends BaseFireBlock {
         super(settings, damage);
     }
 
-    @Inject(method = "tryCatchFire",
+    @Inject(method = "checkBurnOut",
             at = @At(value = "INVOKE",
                     target = "net/minecraft/world/level/Level.removeBlock (Lnet/minecraft/core/BlockPos;Z)Z",
                     shift = At.Shift.AFTER))
     private void afterRemoveBlock(Level level, BlockPos pos, int chance, RandomSource pRandom, int age,
-                                  Direction face, CallbackInfo ci, @Local BlockState before) {
-        var event = IFireConsumeBlockEvent.create(pos, level, before, chance, age, face);
+                                  Direction face, CallbackInfo ci) {
+        BlockState previousState = level.getBlockState(pos);
+        var event = IFireConsumeBlockEvent.create(pos, level, previousState, chance, age, face);
         MoonlightEventsHelper.postEvent(event, IFireConsumeBlockEvent.class);
         BlockState newState = event.getFinalState();
-        if (newState != null) level.setBlockAndUpdate(pos, newState);
+        if (newState != null && newState != previousState) level.setBlockAndUpdate(pos, newState);
     }
 }

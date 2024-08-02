@@ -28,7 +28,6 @@
     "LevelChunkMixin",
     "LightningEntityMixin",
     "MapDataMixin",
-    "MapExtendingRecipeMixin",
     "MapItemDataPacketMixin",
     "MapItemMixin",
     "MultiPackResourceManagerMixin",

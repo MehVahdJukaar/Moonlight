@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.set;
 import com.google.common.base.Stopwatch;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
+import net.mehvahdjukaar.moonlight.api.MoonlightTags;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.HolderSet;
@@ -145,7 +146,7 @@ public class BlocksColorInternal {
      */
     @Nullable
     public static Block changeColor(Block old, @Nullable DyeColor newColor) {
-        if (old.builtInRegistryHolder().is(MoonlightRegistry.NON_RECOLORABLE_BLOCKS_TAG)) return null;
+        if (old.builtInRegistryHolder().is(MoonlightTags.NON_RECOLORABLE_BLOCKS_TAG)) return null;
         String key = getKey(old);
         if (key != null) {
             var set = getBlockSet(key);
@@ -164,7 +165,7 @@ public class BlocksColorInternal {
      */
     @Nullable
     public static Item changeColor(Item old, @Nullable DyeColor newColor) {
-        if (old.builtInRegistryHolder().is(MoonlightRegistry.NON_RECOLORABLE_ITEMS_TAG)) return null;
+        if (old.builtInRegistryHolder().is(MoonlightTags.NON_RECOLORABLE_ITEMS_TAG)) return null;
         String key = getKey(old);
         if (key != null) {
             var set = getItemSet(key);

@@ -32,9 +32,6 @@ public class MoonlightRegistry {
     public static void init() {
     }
 
-    public static final TagKey<Block> SHEARABLE_TAG = TagKey.create(Registries.BLOCK, ResourceLocation.parse("mineable/shear"));
-    public static final TagKey<Block> NON_RECOLORABLE_BLOCKS_TAG = TagKey.create(Registries.BLOCK, ResourceLocation.parse("non_recolorable"));
-    public static final TagKey<Item> NON_RECOLORABLE_ITEMS_TAG = TagKey.create(Registries.ITEM, ResourceLocation.parse("non_recolorable"));
 
     public static final Supplier<PlacementModifierType<CaveFilter>> CAVE_MODIFIER = RegHelper.registerPlacementModifier(
             res("below_heightmaps"), CaveFilter.Type::new);

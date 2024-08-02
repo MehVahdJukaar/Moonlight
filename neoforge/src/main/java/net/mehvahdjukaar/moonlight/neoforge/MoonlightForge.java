@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.neoforge;
 
 import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.neoforge.ConfigSpecWrapper;
@@ -53,6 +54,7 @@ public class MoonlightForge {
             .build()).getSpec();
 
     public MoonlightForge(IEventBus bus) {
+        RegHelper.startRegisteringFor(bus);
 
         Moonlight.commonInit();
         NeoForge.EVENT_BUS.register(MoonlightForge.class);
@@ -166,6 +168,9 @@ public class MoonlightForge {
         return b;
     }
 
+    /**
+     * Call this before registering events
+     */
     public static void startRegistering(IEventBus bus) {
         currentBus = new WeakReference<>(bus);
     }
