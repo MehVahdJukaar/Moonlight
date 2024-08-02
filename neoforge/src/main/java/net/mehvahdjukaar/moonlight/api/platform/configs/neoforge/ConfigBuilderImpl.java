@@ -47,8 +47,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
 
     @Override
-    public ConfigSpecWrapper build() {
-        return new ConfigSpecWrapper(this.getName(), this.builder.build(), this.type,
+    public ForgeConfigHolder build() {
+        return new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
                 this.changeCallback, this.requireGameRestart, specialValues);
     }
 

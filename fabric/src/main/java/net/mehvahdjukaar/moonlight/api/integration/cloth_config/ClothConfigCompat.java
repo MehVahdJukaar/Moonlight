@@ -7,7 +7,7 @@ import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigEntry;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigSubCategory;
-import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,11 +20,11 @@ import org.jetbrains.annotations.Nullable;
 public class ClothConfigCompat {
     //call FabricConfigListScreen.makeScreen instead
     @ApiStatus.Internal
-    public static Screen makeScreen(Screen parent, FabricConfigSpec spec) {
+    public static Screen makeScreen(Screen parent, FabricConfigHolder spec) {
         return makeScreen(parent, spec, null);
     }
     @ApiStatus.Internal
-    public static Screen makeScreen(Screen parent, FabricConfigSpec spec, @Nullable ResourceLocation background) {
+    public static Screen makeScreen(Screen parent, FabricConfigHolder spec, @Nullable ResourceLocation background) {
         spec.forceLoad();
 
         ConfigBuilder builder = ConfigBuilder.create();

@@ -2,7 +2,50 @@ package net.mehvahdjukaar.moonlight.api.integration.configured;
 
 
 //TODO: add back
-/*
+
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import com.mrcrayfish.configured.api.IConfigEntry;
+import com.mrcrayfish.configured.api.IConfigValue;
+import com.mrcrayfish.configured.api.ValueEntry;
+import com.mrcrayfish.configured.client.screen.ConfigScreen;
+import com.mrcrayfish.configured.client.screen.widget.IconButton;
+import com.mrcrayfish.configured.impl.neoforge.NeoForgeConfig;
+import com.mrcrayfish.configured.impl.neoforge.NeoForgeValue;
+import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.neoforge.ForgeConfigHolder;
+import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.blockentity.ChestRenderer;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+
 //credits to MrCrayfish's Configured Mod
 //this is just a more customized version of Configured default config screen with some extra icons and such
 public abstract class CustomConfigScreen extends ConfigScreen {
@@ -20,8 +63,8 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
     protected final String modId;
     protected final Map<String, ItemStack> icons = new HashMap<>();
+    public final ForgeConfigHolder mlConfig;
     public final ItemStack mainIcon;
-
 
     @Nullable
     static Method findMethodOrNull(Class<?> c, String methodName) {
@@ -30,6 +73,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             field = ObfuscationReflectionHelper.findMethod(c, methodName);
         } catch (Exception ignored) {
         }
+        ChestRenderer
         return field;
     }
 
@@ -38,32 +82,24 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         Field field = null;
         try {
             field = ObfuscationReflectionHelper.findField(c, fieldName);
+            field.setAccessible(true);
         } catch (Exception ignored) {
         }
         return field;
     }
 
-    //shorthand
-    protected CustomConfigScreen(CustomConfigSelectScreen parent, IModConfig config) {
-        this(parent.getModId(), parent.getMainIcon(), parent.getBackgroundTexture(), parent.getTitle(), parent, config);
-    }
-
     protected CustomConfigScreen(CustomConfigSelectScreen parent, ModConfig config) {
-        this(parent.getModId(), parent.getMainIcon(), parent.getBackgroundTexture(), parent.getTitle(), parent, config);
+        this(parent.getModId(), parent.getMainIcon(), parent.getTitle(), parent, config);
     }
 
-    protected CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
-                                 Screen parent, ModConfig config) {
-        this(modId, mainIcon, background, title, parent, new ForgeConfig(config, (ModConfigSpec) config.getSpec()));
-
-    }
 
     //needed for custom title
-    protected CustomConfigScreen(String modId, ItemStack mainIcon, ResourceLocation background, Component title,
-                                 Screen parent, IModConfig config) {
-        super(parent, title, config, CustomConfigSelectScreen.ensureNotNull(background));
+    protected CustomConfigScreen(String modId, ItemStack mainIcon, Component title,
+                                 Screen parent, ModConfig config) {
+        super(parent, title, new NeoForgeConfig(config));
         this.modId = modId;
         this.mainIcon = mainIcon;
+        this.mlConfig = ForgeConfigHolder.getFromForgeConfig(config);
     }
 
     @Override
@@ -90,7 +126,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         last = last.toLowerCase(Locale.ROOT).replace("_", " ");
         if (!icons.containsKey(last)) {
             String formatted = last.toLowerCase(Locale.ROOT).replace(" ", "_");
-            var item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(modId, formatted));
+            var item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath(modId, formatted));
             String finalLast = last;
             item.ifPresent(value -> addIcon(finalLast, value.asItem().getDefaultInstance()));
         }
@@ -175,7 +211,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     }
 
     @Nullable
-    public FolderWrapper wrapFolderItem(FolderItem old) {
+    private FolderWrapper wrapFolderItem(FolderItem old) {
         try {
             String oldName = old.getLabel();
             //find correct folder
@@ -192,8 +228,8 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             if (found != null) {
                 return new FolderWrapper(found, oldName);
             }
-        } catch (Exception ignored) {
-            Moonlight.LOGGER.error("error", ignored);
+        } catch (Exception e) {
+            Moonlight.LOGGER.error("Failed to wrap folder entry for config screen: ", e);
         }
 
         return null;
@@ -204,12 +240,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     public String getEnabledKeyword() {
         return "enabled";
     }
-
-    //ugly
-    public List<ConfigSpec> getCustomSpecs() {
-        return List.of();
-    }
-
 
     private class FolderWrapper extends FolderItem {
 
@@ -293,7 +323,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     }
 
     @Nullable
-    public BooleanWrapper wrapBooleanItem(BooleanItem old) {
+    private BooleanWrapper wrapBooleanItem(BooleanItem old) {
         try {
             IConfigValue<Boolean> holder = (IConfigValue<Boolean>) CONFIG_VALUE_HOLDER.get(old);
 
@@ -305,7 +335,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                 }
             }
             if (found != null) {
-                var path = ((ForgeValue<Boolean>) holder).configValue.getPath().toArray(String[]::new);
+                var path = ((NeoForgeValue<Boolean>) holder).configValue.getPath().toArray(String[]::new);
                 ItemStack icon = getIcon(path);
                 return new BooleanWrapper(holder, icon);
             }
@@ -337,7 +367,8 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             }
             button.setMessage(Component.literal(""));
 
-            this.needsGameRestart = hackyCheckIfValueNeedsGameRestart(holder);
+            this.needsGameRestart = mlConfig.requiresGameRestart(((NeoForgeValue<Boolean>) holder).configValue);
+
             this.item = item;
             this.iconOffset = item.isEmpty() ? 0 : 7;
         }
@@ -405,15 +436,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             }
         }
 
-        private boolean hackyCheckIfValueNeedsGameRestart(IConfigValue<Boolean> value) {
-            for (var v : CustomConfigScreen.this.getCustomSpecs()) {
-                if (v.getFileName().equals(CustomConfigScreen.this.config.getFileName())) {
-                    return ((ConfigSpecWrapper) v).requiresGameRestart(((ForgeValue<Boolean>) value).configValue);
-                }
-            }
-            return false;
-        }
-
         @Override
         public void onResetValue() {
             this.button.setMessage(Component.literal(""));
@@ -433,7 +455,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         }
     }
 }
-*/
+
 
 
     /*

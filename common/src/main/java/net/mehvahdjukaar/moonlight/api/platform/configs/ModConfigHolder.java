@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
-import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,23 +23,23 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class ConfigSpec {
+public abstract class ModConfigHolder {
 
-    private static final Map<ResourceLocation, ConfigSpec> CONFIG_STORAGE = new ConcurrentHashMap<>(); //wack. multithreading mod loading
+    private static final Map<ResourceLocation, ModConfigHolder> CONFIG_STORAGE = new ConcurrentHashMap<>(); //wack. multithreading mod loading
 
-    public static void addTrackedSpec(ConfigSpec spec) {
+    public static void addTrackedSpec(ModConfigHolder spec) {
         var old = CONFIG_STORAGE.put(spec.getId(), spec);
         if (old != null) {
             throw new IllegalStateException("Duplicate config type for with id " + spec.getId());
         }
     }
 
-    public static Collection<ConfigSpec> getTrackedSpecs() {
+    public static Collection<ModConfigHolder> getTrackedSpecs() {
         return CONFIG_STORAGE.values();
     }
 
     @Nullable
-    public static ConfigSpec getConfigSpec(ResourceLocation configId) {
+    public static ModConfigHolder getConfigSpec(ResourceLocation configId) {
         return CONFIG_STORAGE.get(configId);
     }
 
@@ -52,7 +51,7 @@ public abstract class ConfigSpec {
     @Nullable
     private final Runnable changeCallback;
 
-    protected ConfigSpec(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
+    protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
         this.configId = id;
         this.fileName = id.getNamespace() + "-" + id.getPath() + "." + fileExtension;
         this.filePath = configDirectory.resolve(fileName);
@@ -60,7 +59,7 @@ public abstract class ConfigSpec {
         this.changeCallback = changeCallback;
         this.readableName = Component.literal(LangBuilder.getReadableName(id.toDebugFileName()+"_configs"));
 
-        ConfigSpec.addTrackedSpec(this);
+        ModConfigHolder.addTrackedSpec(this);
     }
 
     public Component getReadableName(){
@@ -145,7 +144,7 @@ public abstract class ConfigSpec {
     }
 
     public static class ConfigLoadingException extends RuntimeException {
-        public ConfigLoadingException(ConfigSpec config, Exception cause) {
+        public ConfigLoadingException(ModConfigHolder config, Exception cause) {
             super("Failed to load config file " + config.getFileName() + " of type " + config.getConfigType() + " for mod " + config.getModId() + ". Try deleting it", cause);
         }
     }

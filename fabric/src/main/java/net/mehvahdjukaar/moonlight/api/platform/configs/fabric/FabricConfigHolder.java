@@ -12,7 +12,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.CLOTH_CONFIG;
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.YACL;
 
-public final class FabricConfigSpec extends ConfigSpec {
+public final class FabricConfigHolder extends ModConfigHolder {
 
     @ApiStatus.Internal
     public static void loadAllConfigs() {
@@ -42,7 +42,7 @@ public final class FabricConfigSpec extends ConfigSpec {
     private final File file;
     private boolean initialized = false;
 
-    public FabricConfigSpec(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, Runnable changeCallback) {
+    public FabricConfigHolder(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, Runnable changeCallback) {
         super(name, "json", FabricLoader.getInstance().getConfigDir(), type, changeCallback);
         this.file = this.getFullPath().toFile();
         this.mainEntry = mainEntry;

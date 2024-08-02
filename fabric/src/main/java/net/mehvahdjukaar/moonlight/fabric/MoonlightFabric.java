@@ -6,14 +6,13 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.misc.DummyWorld;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
-import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.Queue;
@@ -54,7 +53,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
 
         RegHelperImpl.lateRegisterEntries();
-        FabricConfigSpec.loadAllConfigs();
+        FabricConfigHolder.loadAllConfigs();
 
         isInit = false;
 

@@ -1,8 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.fabric;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -16,7 +15,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +26,7 @@ import java.util.List;
 public class FabricConfigListScreen extends Screen {
 
     protected final Screen parent;
-    protected final ConfigSpec[] configs;
+    protected final ModConfigHolder[] configs;
     @Nullable
     protected final ResourceLocation background;
     private final ItemStack mainIcon;
@@ -39,7 +37,7 @@ public class FabricConfigListScreen extends Screen {
 
     public FabricConfigListScreen(String modId, ItemStack mainIcon, Component displayName, @Nullable ResourceLocation background,
                                   Screen parent,
-                                  ConfigSpec... specs) {
+                                  ModConfigHolder... specs) {
         super(displayName);
         this.parent = parent;
         this.configs = specs;
@@ -102,7 +100,7 @@ public class FabricConfigListScreen extends Screen {
 
     protected class ConfigList extends ContainerObjectSelectionList<ConfigButton> {
 
-        public ConfigList(Minecraft minecraft, int width, int height, int y0, int itemHeight, ConfigSpec... specs) {
+        public ConfigList(Minecraft minecraft, int width, int height, int y0, int itemHeight, ModConfigHolder... specs) {
             super(minecraft, width, height, y0,  itemHeight);
             this.centerListVertically = true;
             for (var s : specs) {
@@ -191,7 +189,7 @@ public class FabricConfigListScreen extends Screen {
             this.children = List.of(widget);
         }
 
-        protected ConfigButton(ConfigSpec spec, int width, int buttonWidth) {
+        protected ConfigButton(ModConfigHolder spec, int width, int buttonWidth) {
             this(Button.builder(Component.literal(spec.getFileName()), b ->
                     Minecraft.getInstance().setScreen(spec.makeScreen(FabricConfigListScreen.this, FabricConfigListScreen.this.background))
             ).bounds(width / 2 - buttonWidth / 2, 0, buttonWidth, 20).build());

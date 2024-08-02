@@ -1,17 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.integration.yacl;
 
-import dev.isxander.yacl.api.*;
-import dev.isxander.yacl.gui.controllers.ColorController;
-import dev.isxander.yacl.gui.controllers.LabelController;
-import dev.isxander.yacl.gui.controllers.TickBoxController;
-import dev.isxander.yacl.gui.controllers.cycling.EnumController;
-import dev.isxander.yacl.gui.controllers.slider.DoubleSliderController;
-import dev.isxander.yacl.gui.controllers.slider.FloatSliderController;
-import dev.isxander.yacl.gui.controllers.slider.IntegerSliderController;
-import dev.isxander.yacl.gui.controllers.string.StringController;
+import dev.isxander.yacl3.api.*;
+import dev.isxander.yacl3.api.controller.*;
+import dev.isxander.yacl3.gui.controllers.LabelController;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigEntry;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigSubCategory;
-import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -19,15 +13,14 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.util.function.Function;
 
 public class YACLCompat {
 
-    public static Screen makeScreen(Screen parent, FabricConfigSpec spec) {
+    public static Screen makeScreen(Screen parent, FabricConfigHolder spec) {
         return makeScreen(parent, spec, null);
     }
 
-    public static Screen makeScreen(Screen parent, FabricConfigSpec spec, @Nullable ResourceLocation background) {
+    public static Screen makeScreen(Screen parent, FabricConfigHolder spec, @Nullable ResourceLocation background) {
 
         spec.forceLoad();
 
@@ -71,7 +64,7 @@ public class YACLCompat {
                 //not nested subcat not supported. merging
                 var scb = OptionGroup.createBuilder()
                         .name(Component.translatable(entry.getName()))
-                        .tooltip(Component.literal("Unsupported"));
+                        .description(OptionDescription.of(Component.literal("Unsupported")));
                 // optional
                 addEntriesRecursive(builder, subCategoryBuilder, cc);
                 //subCategoryBuilder.group(scb.build());
@@ -82,86 +75,105 @@ public class YACLCompat {
     private static Option<?> buildEntry(ConfigEntry entry) {
 
         if (entry instanceof ColorConfigValue col) {
-            var e = Option.createBuilder(Color.class)
+            var e = Option.<Color>createBuilder()
                     .name(col.getTranslation())
                     .binding(new Color(col.getDefaultValue()), () -> new Color(col.get()), v -> col.set(v.getRGB()))
-                    .controller(o -> new ColorController(o, true));
+                    .controller(ColorControllerBuilder::create);
             var description = col.getDescription();
-            if (description != null) e.tooltip(description);// Shown when the user hover over this option
+            if (description != null)
+                e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof IntConfigValue ic) {
-            var e = Option.createBuilder(Integer.class)
+            var e = Option.<Integer>createBuilder()
                     .name(ic.getTranslation())
                     .binding(ic.getDefaultValue(), ic, ic::set)
-                    .controller(o -> new IntegerSliderController(o, ic.getMin(), ic.getMax(), 1));
+                    .controller(o -> IntegerSliderControllerBuilder.create(o)
+                            .range(ic.getMin(), ic.getMax())
+                            .step(1)
+                    );
             var description = ic.getDescription();
-            if (description != null) e.tooltip(description);// Shown when the user hover over this option
+            if (description != null)
+                e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof DoubleConfigValue dc) {
-            var e = Option.createBuilder(Double.class)
+            var e = Option.<Double>createBuilder()
                     .name(dc.getTranslation())
                     .binding(dc.getDefaultValue(), dc, dc::set)
-                    .controller(o -> new DoubleSliderController(o, dc.getMin(), dc.getMax(), 0.0001, DOUBLE_FORMATTER));
+                    .controller(o -> DoubleSliderControllerBuilder.create(o)
+                            .range(dc.getMin(), dc.getMax())
+                            .step(0.0001d)
+                            .formatValue(DOUBLE_FORMATTER)
+                    );
             var description = dc.getDescription();
-            if (description != null) e.tooltip(description);// Shown when the user hover over this option
+            if (description != null)
+                e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if(entry instanceof FloatConfigValue fc){
-            var e = Option.createBuilder(Float.class)
+        } else if (entry instanceof FloatConfigValue fc) {
+            var e = Option.<Float>createBuilder()
                     .name(fc.getTranslation())
                     .binding(fc.getDefaultValue(), fc, fc::set)
-                    .controller(o -> new FloatSliderController(o, fc.getMin(), fc.getMax(), 0.0001f, FLOAT_FORMATTER));
+                    .controller(o -> FloatSliderControllerBuilder.create(o)
+                            .range(fc.getMin(), fc.getMax())
+                            .step(0.0001f)
+                            .formatValue(FLOAT_FORMATTER)
+                    );
             var description = fc.getDescription();
-            if (description != null) e.tooltip(description);// Shown when the user hover over this option
+            if (description != null)
+                e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        }
-        else if (entry instanceof StringConfigValue sc) {
+        } else if (entry instanceof StringConfigValue sc) {
             var e = Option.createBuilder(String.class)
                     .name(sc.getTranslation())
                     .binding(sc.getDefaultValue(), sc, sc::set)
-                    .controller(StringController::new);
+                    .controller(StringControllerBuilder::create);
             var description = sc.getDescription();
-            if (description != null) e.tooltip(description);// Shown when the user hover over this option
+            if (description != null)
+                e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof BoolConfigValue bc) {
-            var e = Option.createBuilder(Boolean.class)
+            var e = Option.<Boolean>createBuilder()
                     .name(bc.getTranslation())
                     .binding(bc.getDefaultValue(), bc, bc::set)
-                    .controller(TickBoxController::new);
+                    .controller(TickBoxControllerBuilder::create);
             var description = bc.getDescription();
-            if (description != null) e.tooltip(description);// Shown when the user hover over this option
+            if (description != null)
+                e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof EnumConfigValue<?> ec) {
             return addEnum(ec);
         } else if (entry instanceof ListStringConfigValue<?> lc) {
-            var e = Option.createBuilder(Component.class)
+            var e = Option.<Component>createBuilder()
                     .name(lc.getTranslation())
                     .binding(Binding.immutable(Component.literal("String Lists are not supported")))
-                    .controller(LabelController::new);
-              var description = lc.getDescription();
-              if (description != null) e.tooltip(description);// Shown when the user hover over this option
-              return e.build(); // Builds the option entry for cloth config
-        } else if(entry instanceof JsonConfigValue || entry instanceof ObjectConfigValue<?>){
-            var lc = (ConfigValue)entry;
-            var e = Option.createBuilder(Component.class)
+                    .customController(LabelController::new);
+            var description = lc.getDescription();
+            if (description != null)
+                e.description(OptionDescription.of(description));// Shown when the user hover over this option
+            return e.build(); // Builds the option entry for cloth config
+        } else if (entry instanceof JsonConfigValue || entry instanceof ObjectConfigValue<?>) {
+            var lc = (ConfigValue) entry;
+            var e = Option.<Component>createBuilder()
                     .name(lc.getTranslation())
                     .binding(Binding.immutable(Component.literal("Object fields are not supported. Edit the config manually instead")))
-                    .controller(LabelController::new);
+                    .customController(LabelController::new);
             var description = lc.getDescription();
-            if (description != null) e.tooltip(description);// Shown when the user hover over this option
+            if (description != null) e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         }
         throw new UnsupportedOperationException("unknown entry: " + entry.getClass().getName());
     }
-    private static final Function<Double, Component> DOUBLE_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
-    private static final Function<Float, Component> FLOAT_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
+
+    private static final ValueFormatter<Double> DOUBLE_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
+    private static final ValueFormatter<Float> FLOAT_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
 
     private static <T extends Enum<T>> Option<T> addEnum(EnumConfigValue<T> ec) {
         var e = Option.createBuilder(ec.getEnumClass())
                 .name(ec.getTranslation())
                 .binding(ec.getDefaultValue(), ec, ec::set)
-                .controller(EnumController::new);
+                .controller(EnumControllerBuilder::create);
         var description = ec.getDescription();
-        if (description != null) e.tooltip(description);// Shown when the user hover over this option
+        if (description != null)
+            e.description(OptionDescription.of(description));// Shown when the user hover over this option
         return e.build(); // Builds the option entry for cloth config
     }
 

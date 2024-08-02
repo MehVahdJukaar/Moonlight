@@ -37,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
  * - Handy overrides such as spawnTrailParticles and hasReachedEndOfLife
  * - Streamlined deceleration and gravity logic
  */
+//TODO: update to 1.21!!!!
 public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
     protected Vec3 movementOld;

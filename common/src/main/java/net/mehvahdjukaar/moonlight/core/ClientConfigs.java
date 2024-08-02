@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 
 import java.util.function.Supplier;
@@ -13,7 +13,7 @@ public class ClientConfigs {
     public static final Supplier<Integer> MAPS_MIPMAP;
     public static final Supplier<ShadeFix> FIX_SHADE;
 
-    public static final ConfigSpec CONFIG;
+    public static final ModConfigHolder CONFIG;
 
     static {
         ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.CLIENT);

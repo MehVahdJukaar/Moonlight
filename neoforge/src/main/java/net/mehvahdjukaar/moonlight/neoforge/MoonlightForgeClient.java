@@ -4,7 +4,7 @@ package net.mehvahdjukaar.moonlight.neoforge;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
@@ -12,12 +12,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.entity.Entity;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
@@ -49,7 +46,7 @@ public class MoonlightForgeClient {
     }
 
     public static void afterLoad(FMLLoadCompleteEvent event) {
-        for (var config : ConfigSpec.getTrackedSpecs()) {
+        for (var config : ModConfigHolder.getTrackedSpecs()) {
             if (!config.hasConfigScreen()) {
                 ModList.get().getModContainerById(config.getModId()).ifPresent(c ->
                         c.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new));

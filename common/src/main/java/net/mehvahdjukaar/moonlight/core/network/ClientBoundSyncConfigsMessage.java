@@ -1,9 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +35,7 @@ public class ClientBoundSyncConfigsMessage implements Message {
 
     @Override
     public void handle(Context context) {
-        var config = ConfigSpec.getConfigSpec(this.configId);
+        var config = ModConfigHolder.getConfigSpec(this.configId);
         if (config != null) {
             try(var stream =  new ByteArrayInputStream(this.configData)) {
                 config.loadFromBytes(stream);

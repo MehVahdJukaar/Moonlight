@@ -30,12 +30,12 @@ dependencies {
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
         exclude group: 'net.fabricmc.fabric-api'
     }
-    modCompileOnly(include("curse.maven:modmenu-308702:3850113"))
+
     modCompileOnly "com.terraformersmc:modmenu:4.0.6", {
         exclude module: "fabric-api"
     }
 
-    modCompileOnly("curse.maven:yacl-667299:4523734")
+    modImplementation("curse.maven:yacl-667299:5424169")
     //modCompileOnly("curse.maven:super-better-grass-911433:4744836")
     modCompileOnly("curse.maven:map-atlases-436298:5018173")
     //modImplementation ("curse.maven:supplementaries-412082:4987505")

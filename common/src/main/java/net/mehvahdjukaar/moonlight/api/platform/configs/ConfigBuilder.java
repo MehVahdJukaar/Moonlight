@@ -49,7 +49,7 @@ public abstract class ConfigBuilder {
         MoonlightEventsHelper.addListener(consumer, AfterLanguageLoadEvent.class);
     }
 
-    public abstract ConfigSpec build();
+    public abstract ModConfigHolder build();
 
     public ResourceLocation getName() {
         return name;
@@ -181,7 +181,7 @@ public abstract class ConfigBuilder {
             this.currentComment = null;
             this.currentKey = null;
         }
-        if (this.currentCategory() == null && PlatHelper.isDev()) throw new AssertionError();
+        if (this.currentCategory() == null && PlatHelper.isDev()) throw new AssertionError("Current config category was null. How?");
     }
 
     public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;

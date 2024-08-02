@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.neoforge;
 
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
@@ -28,13 +28,20 @@ import org.jetbrains.annotations.Nullable;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("all")
-public final class ConfigSpecWrapper extends ConfigSpec {
+public final class ForgeConfigHolder extends ModConfigHolder {
+
+    private static final Map<ModConfig, ForgeConfigHolder> BY_FORGE_CONFIG = new HashMap<>();
+
+    public static ForgeConfigHolder getFromForgeConfig(ModConfig config) {
+        return BY_FORGE_CONFIG.get(config);
+    }
 
     private static final Method LOAD_CONFIG = ObfuscationReflectionHelper.findMethod(
             ConfigTracker.class, "loadConfig",
@@ -46,9 +53,9 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     private final Map<ModConfigSpec.ConfigValue<?>, Object> requireRestartValues;
     private final List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues;
 
-    ConfigSpecWrapper(ResourceLocation name, ModConfigSpec spec, ConfigType type,
-                              @Nullable Runnable onChange, List<ModConfigSpec.ConfigValue<?>> requireRestart,
-                              List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues) {
+    ForgeConfigHolder(ResourceLocation name, ModConfigSpec spec, ConfigType type,
+                      @Nullable Runnable onChange, List<ModConfigSpec.ConfigValue<?>> requireRestart,
+                      List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues) {
         super(name, "toml", FMLPaths.CONFIGDIR.get(), type, onChange);
         this.spec = spec;
         this.specialValues = specialValues;
@@ -73,6 +80,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         }
         this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ModConfigSpec.ConfigValue::get));
 
+        BY_FORGE_CONFIG.put(this.modConfig, this);
     }
 
     @Override

@@ -1,7 +1,7 @@
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Direction;
@@ -32,7 +32,7 @@ public class ConfigBuilderHelper {
     public static final Supplier<List<String>> LIST_CONFIG;
     public static final Supplier<MyObj> OBJECT_CONFIG;
 
-    public static final ConfigSpec CONFIG_SPEC;
+    public static final ModConfigHolder CONFIG_SPEC;
 
     static {
         // Creates a common config builder. Works pretty much like forge one with a few added features

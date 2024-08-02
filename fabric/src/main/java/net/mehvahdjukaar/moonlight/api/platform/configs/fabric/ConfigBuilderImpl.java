@@ -37,9 +37,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     //doesn't load it immediately. happens after registration to mimic forge
     @NotNull
-    public FabricConfigSpec build() {
+    public FabricConfigHolder build() {
         assert categoryStack.size() == 1;
-        return new FabricConfigSpec(this.getName(), mainCategory, this.type, this.changeCallback);
+        return new FabricConfigHolder(this.getName(), mainCategory, this.type, this.changeCallback);
     }
 
     @Override
