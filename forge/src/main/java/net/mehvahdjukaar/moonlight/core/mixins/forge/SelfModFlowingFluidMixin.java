@@ -10,24 +10,17 @@ import org.spongepowered.asm.mixin.Unique;
 
 import java.util.function.Supplier;
 
+@SuppressWarnings("all")
 @Mixin(ModFlowingFluid.class)
 public abstract class SelfModFlowingFluidMixin extends FlowingFluid {
 
     @Unique
     private Supplier<FluidType> type;
 
-    /**
-     * @author
-     * @reason
-     */
     @Overwrite(remap = false)
     private void afterInit(ModFlowingFluid.Properties properties) {
-        if (properties.copyFluid != null) {
-            this.type = properties.copyFluid::getFluidType;
-        } else {
-            var t = ModFluidType.create(properties, (ModFlowingFluid) (Object) this);
-            this.type = () -> t; //this also needs to be registered later
-        }
+        var t = ModFluidType.create(properties, (ModFlowingFluid) (Object) this);
+        this.type = () -> t; //this also needs to be registered later
     }
 
     @Override

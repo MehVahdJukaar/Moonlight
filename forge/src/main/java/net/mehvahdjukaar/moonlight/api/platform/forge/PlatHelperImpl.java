@@ -6,14 +6,20 @@ import com.mojang.serialization.DynamicOps;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.IdMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -29,6 +35,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -104,7 +111,7 @@ public class PlatHelperImpl {
     }
 
     public static boolean isMobGriefingOn(Level level, Entity entity) {
-        return EventHooks.getMobGriefingEvent(level, entity);
+        return EventHooks.canEntityGrief(level, entity);
     }
 
     public static boolean isAreaLoaded(LevelReader level, BlockPos pos, int maxRange) {
@@ -121,16 +128,12 @@ public class PlatHelperImpl {
     }
 
     public static int getBurnTime(ItemStack stack) {
-        return CommonHooks.getBurnTime(stack, null);
+        return stack.getBurnTime(RecipeType.SMELTING);
     }
 
     @Nullable
     public static MinecraftServer getCurrentServer() {
         return ServerLifecycleHooks.getCurrentServer();
-    }
-
-    public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
-        return CommonHooks.getEntitySpawningPacket(entity);
     }
 
     public static Path getGamePath() {
@@ -179,8 +182,8 @@ public class PlatHelperImpl {
         return !ModLoader.hasErrors();
     }
 
-    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataProvider) {
-        CommonHooks.openScreen(player, menuProvider, extraDataProvider);
+    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataProvider) {
+        player.openMenu(menuProvider, extraDataProvider);
     }
 
     public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
@@ -242,6 +245,10 @@ public class PlatHelperImpl {
 
     public static String getModVersion(String modId) {
         return ModList.get().getModContainerById(modId).map(v->v.getModInfo().getVersion().toString()).orElse(null);
+    }
+
+    public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
+        return new ClientboundAddEntityPacket(entity, serverEntity);
     }
 
 

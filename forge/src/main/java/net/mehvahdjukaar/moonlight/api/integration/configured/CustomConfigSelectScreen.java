@@ -23,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.client.ConfigScreenHandler;
 
 import java.lang.reflect.Field;
 import java.net.URL;

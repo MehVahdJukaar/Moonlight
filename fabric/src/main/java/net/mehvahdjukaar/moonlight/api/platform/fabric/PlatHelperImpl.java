@@ -21,8 +21,8 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundSpawnCustomEntityMessage;
-import net.mehvahdjukaar.moonlight.core.network.ModMessages;
-import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
+import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
+import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenCustomMenuMessage;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -30,17 +30,18 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.*;
@@ -130,7 +131,7 @@ public class PlatHelperImpl {
         var packet = new ClientBoundSpawnCustomEntityMessage(entity);
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         packet.writeToBuffer(buf);
-        var p =(Packet) ServerPlayNetworking.createS2CPacket(ModMessages.SPAWN_PACKET_ID, buf);
+        var p =(Packet) ServerPlayNetworking.createS2CPacket(ModNetworking.SPAWN_PACKET_ID, buf);
         return (Packet<ClientGamePacketListener>) p;
     }
 
@@ -223,8 +224,8 @@ public class PlatHelperImpl {
         });
     }
 
-    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataProvider) {
-        ClientBoundOpenScreenMessage.openMenu(player, menuProvider, extraDataProvider);
+    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataProvider) {
+        ClientBoundOpenCustomMenuMessage.openMenu(player, menuProvider, extraDataProvider);
     }
 
     public static boolean isModLoadingValid() {
@@ -263,5 +264,11 @@ public class PlatHelperImpl {
                 .orElse(null);
     }
 
+    public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
+        ClientBoundSpawnCustomEntityMessage packet = new ClientBoundSpawnCustomEntityMessage(entity);
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        packet.writeToBuffer(buf);
+        return ServerPlayNetworking.createS2CPacket(ModNetworking.SPAWN_PACKET_ID, buf);
+    }
 
 }

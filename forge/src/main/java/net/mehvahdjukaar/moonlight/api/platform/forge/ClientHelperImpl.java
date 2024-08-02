@@ -14,15 +14,14 @@ import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.PathPackResources;
+import net.minecraft.server.packs.*;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -38,6 +37,7 @@ import net.neoforged.neoforge.client.IItemDecorator;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.locating.IModFile;
@@ -46,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -215,7 +216,7 @@ public class ClientHelperImpl {
         return sprite.getPixelRGBA(frameIndex, x, y);
     }
 
-    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation) {
+    public static BakedModel getModel(ModelManager modelManager, ModelResourceLocation modelLocation) {
         return modelManager.getModel(modelLocation);
     }
 
@@ -262,38 +263,40 @@ public class ClientHelperImpl {
         PlatHelper.registerResourcePack(PackType.CLIENT_RESOURCES,
                 () -> {
                     IModFile file = ModList.get().getModFileById(folderName.getNamespace()).getFile();
-                    try (PathPackResources pack = new PathPackResources(
+                    PackLocationInfo locationInfo = new PackLocationInfo(
                             folderName.toString(),
-                            file.findResource("resourcepacks/" + folderName.getPath()),
-                            true)) {
+                            displayName,
+                            PackSource.BUILT_IN,
+                            Optional.empty()
+                    );
+                    try (PathPackResources pack = new PathPackResources(
+                            locationInfo,
+                            file.findResource("resourcepacks/" + folderName.getPath()))) {
                         return Pack.readMetaAndCreate(
-                                folderName.toString(),
-                                displayName,
-                                defaultEnabled,
+                                locationInfo,
                                 new Pack.ResourcesSupplier() {
                                     @Override
-                                    public PackResources openPrimary(String id) {
+                                    public PackResources openPrimary(PackLocationInfo location) {
                                         return pack;
                                     }
 
                                     @Override
-                                    public PackResources openFull(String id, Pack.Info info) {
+                                    public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
                                         return pack;
                                     }
                                 },
                                 PackType.CLIENT_RESOURCES,
-                                Pack.Position.TOP,
-                                PackSource.BUILT_IN);
+                                new PackSelectionConfig(
+                                        defaultEnabled,
+                                        Pack.Position.TOP,
+                                        false
+                                ));
                     } catch (Exception ee) {
                         if (!DatagenModLoader.isRunningDataGen()) ee.printStackTrace();
                     }
                     return null;
                 }
         );
-    }
-
-    public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
-        return modelManager.getModelBakery().getModel(modelLocation);
     }
 
 

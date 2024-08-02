@@ -1,19 +1,22 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.block.IPistonMotionReact;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
-import net.minecraft.client.Minecraft;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 
 public class ClientBoundOnPistonMovedBlockPacket implements Message {
+
+    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundOnPistonMovedBlockPacket> TYPE =
+            Message.makeType(Moonlight.res("s2c_on_piston_moved_block"), ClientBoundOnPistonMovedBlockPacket::new);
+
     public final BlockPos pos;
     private final Direction dir;
     private final BlockState movedState;
@@ -34,7 +37,7 @@ public class ClientBoundOnPistonMovedBlockPacket implements Message {
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buffer) {
+    public void write(FriendlyByteBuf buffer) {
         buffer.writeBlockPos(this.pos);
         buffer.writeVarInt(this.dir.get3DDataValue());
         buffer.writeById(Block.BLOCK_STATE_REGISTRY::getIdOrThrow, this.movedState);
@@ -42,21 +45,18 @@ public class ClientBoundOnPistonMovedBlockPacket implements Message {
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
-        handlePacket(this);
-    }
-
-    @Environment(EnvType.CLIENT)
-    public static void handlePacket(ClientBoundOnPistonMovedBlockPacket message) {
-        var level = Minecraft.getInstance().level;
-        if (level != null) {
-            //Haaack. for some reason this gets received before the block there is actually set so we set it preeemptively
-            level.setBlock(message.pos, message.movedState, 0);
-            if ( message.movedState.getBlock() instanceof IPistonMotionReact p) {
-                p.onMoved(level, message.pos,  message.movedState, message.dir, message.extending);
-            }
+    public void handle(Context context) {
+        var level = context.getPlayer().level();
+        //Haaack. for some reason this gets received before the block there is actually set so we set it preemptively
+        level.setBlock(this.pos, this.movedState, 0);
+        if (this.movedState.getBlock() instanceof IPistonMotionReact p) {
+            p.onMoved(level, this.pos, this.movedState, this.dir, this.extending);
         }
     }
 
 
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE.type();
+    }
 }

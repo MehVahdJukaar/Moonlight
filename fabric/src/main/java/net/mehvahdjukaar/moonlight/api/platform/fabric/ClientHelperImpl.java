@@ -31,6 +31,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -210,7 +211,7 @@ public class ClientHelperImpl {
         return ((ITextureAtlasSpriteExtension) sprite).getPixelRGBA(frameIndex, x, y);
     }
 
-    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation) {
+    public static BakedModel getModel(ModelManager modelManager, ModelResourceLocation modelLocation) {
         return ((ModelManagerAccessor) modelManager).getBakedRegistry().getOrDefault(modelLocation, modelManager.getMissingModel());
     }
 
@@ -248,10 +249,6 @@ public class ClientHelperImpl {
                         defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL);
             });
         }
-    }
-
-    public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
-        return null;
     }
 
 }

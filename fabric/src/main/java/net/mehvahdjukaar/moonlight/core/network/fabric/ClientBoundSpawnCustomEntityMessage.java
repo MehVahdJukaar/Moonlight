@@ -3,12 +3,13 @@ package net.mehvahdjukaar.moonlight.core.network.fabric;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -19,6 +20,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class ClientBoundSpawnCustomEntityMessage implements Message {
+
+    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundSpawnCustomEntityMessage> TYPE = Message.makeType(
+            Moonlight.res("s2c_spawn_entity"), ClientBoundSpawnCustomEntityMessage::new);
+
     private final Entity entity;
     private final int typeId;
     private final int entityId;
@@ -76,7 +81,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeVarInt(this.typeId);
         buf.writeInt(this.entityId);
         buf.writeLong(this.uuid.getMostSignificantBits());
@@ -97,10 +102,10 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
+    public void handle(Context context) {
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.byId(this.typeId);
 
-        Level world = context.getSender().level();
+        Level world = context.getPlayer().level();
         Entity e = type.create(world);
         if (e != null) {
             e.syncPacketPositionCodec(this.posX, this.posY, this.posZ);
@@ -126,4 +131,8 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         ((ClientLevel) world).addEntity(e);
     }
 
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE.type();
+    }
 }

@@ -25,7 +25,6 @@ public interface IFirstPersonSpecialItemRenderer {
     boolean renderFirstPersonItem(final AbstractClientPlayer player, final ItemStack stack,  final InteractionHand hand, final HumanoidArm arm, final PoseStack poseStack,
                                   float partialTicks, float pitch, float attackAnim, float equipAnim,
                                   MultiBufferSource buffer, int light, ItemInHandRenderer renderer);
-//TODO: replace all interaction hands with HumanoidHand!!
     /**
      * Alternatively, if you don't own the item and cant implement this interface in it you can use this call to attach your interface to an item
      * Note that when using other any of these 3 extensions only 1 object can be attached to any item, so be sure what you attach implements all of them

@@ -35,6 +35,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity implements WorldlyContainer, IOwnerProtected {
+
     @Nullable
     private UUID owner = null;
     private NonNullList<ItemStack> stacks;
@@ -46,6 +47,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     protected ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state, int slots) {
         super(type, pos, state);
         this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
+
     }
 
     @Override

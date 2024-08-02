@@ -1,16 +1,19 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.ByteArrayInputStream;
 
 public class ClientBoundSyncConfigsMessage implements Message {
+
+    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundSyncConfigsMessage> TYPE = Message.makeType(
+            Moonlight.res("s2c_sync_configs"), ClientBoundSyncConfigsMessage::new);
 
     public final ResourceLocation configId;
     public final byte[] configData;
@@ -26,13 +29,13 @@ public class ClientBoundSyncConfigsMessage implements Message {
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeResourceLocation(this.configId);
         buf.writeByteArray(this.configData);
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
+    public void handle(Context context) {
         var config = ConfigSpec.getConfigSpec(this.configId);
         if (config != null) {
             try(var stream =  new ByteArrayInputStream(this.configData)) {
@@ -44,5 +47,8 @@ public class ClientBoundSyncConfigsMessage implements Message {
         }
     }
 
-
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE.type();
+    }
 }

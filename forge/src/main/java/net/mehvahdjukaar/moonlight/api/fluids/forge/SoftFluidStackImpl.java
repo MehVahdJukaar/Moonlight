@@ -31,23 +31,8 @@ public class SoftFluidStackImpl extends SoftFluidStack {
 
     public static FluidStack toForgeFluid(SoftFluidStack softFluid) {
         FluidStack stack = new FluidStack(softFluid.fluid().getVanillaFluid(), bottlesToMB(softFluid.getCount()));
-
-        // tag stuff
-        var preservedComponentKeys = softFluid.fluid().getPreservedComponents();
-        var components = softFluid.getComponents();
-        if (!stack.isEmpty() && !components.isEmpty()) {
-            CompoundTag newCom = new CompoundTag();
-            for (String k : nbtKey) {
-                //special case to convert to IE pot fluid
-                if (k.equals(PotionNBTHelper.POTION_TYPE_KEY) && Utils.getID(stack.getFluid()).getNamespace().equals("immersiveengineering")) {
-                    continue;
-                }
-                Tag c = tag.get(k);
-                if (c != null) {
-                    newCom.put(k, c);
-                }
-            }
-            if (!newCom.isEmpty()) stack.setTag(newCom);
+        if (!stack.isEmpty()) {
+            softFluid.copyComponentsTo(stack);
         }
         return stack;
     }
@@ -63,8 +48,9 @@ public class SoftFluidStackImpl extends SoftFluidStack {
 
     public static SoftFluidStack fromForgeFluid(FluidStack fluidStack) {
         int amount = MBtoBottles(fluidStack.getAmount());
-        return SoftFluidStack.fromFluid(fluidStack.getFluid(), amount,
-                fluidStack.hasTag() ? fluidStack.getTag().copy() : null);
+        SoftFluidStack sf = SoftFluidStack.fromFluid(fluidStack.getFluid(), amount);
+        SoftFluidStack.copyComponentsTo(fluidStack, sf, sf.fluid().getPreservedComponents());
+        return sf;
     }
 
     public static int bottlesToMB(int bottles) {

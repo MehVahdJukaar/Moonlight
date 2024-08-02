@@ -3,13 +3,13 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
-import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -123,7 +123,7 @@ public abstract class ConfigSpec {
         if (this.getConfigType() == ConfigType.COMMON && this.isSynced()) {
             try {
                 final byte[] configData = Files.readAllBytes(this.getFullPath());
-                ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundSyncConfigsMessage(configData, this.getId()));
+                NetworkHelper.sendToClientPlayer(player, new ClientBoundSyncConfigsMessage(configData, this.getId()));
             } catch (IOException e) {
                 Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
             }

@@ -3,19 +3,17 @@ package net.mehvahdjukaar.moonlight.api.item;
 import com.google.common.base.Suppliers;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.minecraft.world.item.Item;
 
 import java.util.function.Supplier;
 
-public class BlockTypeBasedItem<T extends BlockType> extends FuelItem {
+// no longer a fuel item. Use platform specific class on fabric. On forge add a fuel data map entry to its json data map. Dont skip on API!
+public class BlockTypeBasedItem<T extends BlockType> extends Item {
 
     private final T blockType;
 
     public BlockTypeBasedItem(Properties pProperties, T blockType) {
-        this(pProperties, blockType, Suppliers.memoize(() -> PlatHelper.getBurnTime(blockType.mainChild().asItem().getDefaultInstance())));
-    }
-
-    public BlockTypeBasedItem(Properties pProperties, T blockType, Supplier<Integer> burnTime) {
-        super(pProperties, burnTime);
+        super(pProperties);
         this.blockType = blockType;
     }
 

@@ -44,6 +44,8 @@ import net.neoforged.neoforge.event.LootTableLoadEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -111,10 +113,10 @@ public class RegHelperImpl {
             return r;
         });
         //forge we don't care about mod id since it's always the active container one
-        DeferredHolder<T, E> register = registry.register(name.getPath(), ()->{
+        DeferredHolder<T, E> register = registry.register(name.getPath(), () -> {
             //super hack for mod fluids auto registering of fluid types
             var obj = supplier.get();
-            if(regKey.equals(Registries.FLUID) && obj instanceof ModFlowingFluid fluid && fluid.hasCustomFluidType){
+            if (regKey.equals(Registries.FLUID) && obj instanceof ModFlowingFluid fluid && fluid.hasCustomFluidType) {
                 register(name, fluid::getFluidType, NeoForgeRegistries.Keys.FLUID_TYPES);
             }
             return obj;
@@ -313,5 +315,7 @@ public class RegHelperImpl {
                 FireworkStarRecipe.SHAPE_INGREDIENT,
                 Ingredient.of(ingredient));
     }
+
+
 
 }

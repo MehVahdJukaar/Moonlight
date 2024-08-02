@@ -47,7 +47,7 @@ public final class ConfigSpecWrapper extends ConfigSpec {
     private final Map<ModConfigSpec.ConfigValue<?>, Object> requireRestartValues;
     private final List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues;
 
-    private ConfigSpecWrapper(ResourceLocation name, ModConfigSpec spec, ConfigType type,
+    ConfigSpecWrapper(ResourceLocation name, ModConfigSpec spec, ConfigType type,
                               @Nullable Runnable onChange, List<ModConfigSpec.ConfigValue<?>> requireRestart,
                               List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues) {
         super(name, "toml", FMLPaths.CONFIGDIR.get(), type, onChange);

@@ -196,14 +196,10 @@ public class ClientHelper {
     }
 
     @ExpectPlatform
-    public static BakedModel getModel(ModelManager modelManager, ResourceLocation modelLocation) {
+    public static BakedModel getModel(ModelManager modelManager, ModelResourceLocation modelLocation) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
-    public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
-        throw new AssertionError();
-    }
 
     @FunctionalInterface
     public interface TooltipComponentEvent {
@@ -248,8 +244,8 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    public static void registerOptionalTexturePack(ResourceLocation folderName) {
-        registerOptionalTexturePack(folderName, Component.literal(LangBuilder.getReadableName(folderName.getPath())), false);
+    public static void registerOptionalTexturePack(ResourceLocation folderName, boolean defaultEnabled) {
+        registerOptionalTexturePack(folderName, Component.literal(LangBuilder.getReadableName(folderName.getPath())), defaultEnabled);
     }
 
 

@@ -4,8 +4,9 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.BuiltInSoftFluids;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundFinalizeFluidsMessage;
-import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -59,7 +60,7 @@ public class SoftFluidInternal {
     public static void onDataSyncToPlayer(ServerPlayer player, boolean isJoined) {
         //just sends on login
         if(isJoined) {
-            ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundFinalizeFluidsMessage());
+            NetworkHelper.sendToClientPlayer(player, new ClientBoundFinalizeFluidsMessage());
         }
     }
 

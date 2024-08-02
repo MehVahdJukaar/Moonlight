@@ -19,7 +19,7 @@ public class ChannelHandlerExample {
 
     // Create your channel and register its messages
     private static final ChannelHandler CHANNEL = ChannelHandler.builder(Moonlight.MOD_ID)
-            .register(NetworkDir.PLAY_TO_CLIENT, S2CTestMessage.class, S2CTestMessage::new)
+            .register(NetworkDir.CLIENT_BOUND, S2CTestMessage.class, S2CTestMessage::new)
             .build();
 
     public record S2CTestMessage(int data) implements Message {

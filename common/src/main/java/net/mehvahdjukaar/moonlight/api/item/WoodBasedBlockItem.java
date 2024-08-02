@@ -7,16 +7,7 @@ import net.minecraft.world.level.block.Block;
 public class WoodBasedBlockItem extends BlockTypeBasedBlockItem<WoodType> {
 
     public WoodBasedBlockItem(Block blockIn, Properties builder, WoodType woodType) {
-        this(blockIn, builder, woodType, 300);
+        super(blockIn, builder, woodType);
     }
-
-    public WoodBasedBlockItem(Block blockIn, Properties builder, int burnTicks) {
-        this(blockIn, builder, WoodTypeRegistry.OAK_TYPE, burnTicks);
-    }
-
-    public WoodBasedBlockItem(Block blockIn, Properties builder, WoodType woodType, int burnTicks) {
-        super(blockIn, builder, woodType, woodType.canBurn() ? () -> burnTicks : () -> 0);
-    }
-
 
 }

@@ -1,17 +1,22 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.IScreenProvider;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
-import net.minecraft.client.Minecraft;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 
 public class ClientBoundOpenScreenPacket implements Message {
+
+    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundOpenScreenPacket> TYPE = Message.makeType(
+            Moonlight.res("s2c_open_screen"), ClientBoundOpenScreenPacket::new);
+
     public final BlockPos pos;
     private final Direction dir;
 
@@ -26,27 +31,24 @@ public class ClientBoundOpenScreenPacket implements Message {
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buffer) {
+    public void write(FriendlyByteBuf buffer) {
         buffer.writeBlockPos(this.pos);
         buffer.writeVarInt(this.dir.get3DDataValue());
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
-        handleOpenScreenPacket(this);
-    }
+    public void handle(Context context) {
+        Player player = context.getPlayer();
+        Level level = player.level();
 
-    @Environment(EnvType.CLIENT)
-    public static void handleOpenScreenPacket(ClientBoundOpenScreenPacket message) {
-        var level = Minecraft.getInstance().level;
-        var p = Minecraft.getInstance().player;
-        if (level != null && p != null) {
-            BlockPos pos = message.pos;
-            if (level.getBlockEntity(pos) instanceof IScreenProvider tile) {
-                tile.openScreen(level, pos, p, message.dir);
-            }
+        BlockPos pos = this.pos;
+        if (level.getBlockEntity(pos) instanceof IScreenProvider tile) {
+            tile.openScreen(level, pos, player, this.dir);
         }
     }
 
-
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE.type();
+    }
 }

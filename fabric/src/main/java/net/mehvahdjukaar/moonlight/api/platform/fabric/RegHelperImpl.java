@@ -273,5 +273,8 @@ public class RegHelperImpl {
     public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {
     }
 
+    public static void addNetworkRegistration(Consumer<RegHelper.RegisterMessagesEvent> eventListener) {
+    }
+
 
 }

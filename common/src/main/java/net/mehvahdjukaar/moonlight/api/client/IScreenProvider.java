@@ -2,8 +2,9 @@ package net.mehvahdjukaar.moonlight.api.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundOpenScreenPacket;
-import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,7 +24,7 @@ public interface IScreenProvider {
     }
 
     default void sendOpenGuiPacket(Level level, BlockPos pos, Player player, Direction hitFace) {
-        ModMessages.CHANNEL.sendToClientPlayer((ServerPlayer) player,
+        NetworkHelper.sendToClientPlayer((ServerPlayer) player,
                 new ClientBoundOpenScreenPacket(pos, hitFace));
     }
 }

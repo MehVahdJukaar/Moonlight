@@ -6,11 +6,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
-import net.mehvahdjukaar.moonlight.api.item.FuelBlockItem;
 import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -21,6 +21,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -93,19 +94,12 @@ public class RegHelper {
 
     //helpers
     public static <T extends Block> RegSupplier<T> registerBlockWithItem(ResourceLocation name, Supplier<T> blockFactory) {
-        return registerBlockWithItem(name, blockFactory, 0);
+        return registerBlockWithItem(name, blockFactory, new Item.Properties());
     }
 
-    public static <T extends Block> RegSupplier<T> registerBlockWithItem(ResourceLocation name, Supplier<T> blockFactory, int burnTime) {
-        return registerBlockWithItem(name, blockFactory, new Item.Properties(), burnTime);
-    }
-
-    public static <T extends Block> RegSupplier<T> registerBlockWithItem(ResourceLocation name, Supplier<T> blockFactory, Item.Properties properties, int burnTime) {
+    public static <T extends Block> RegSupplier<T> registerBlockWithItem(ResourceLocation name, Supplier<T> blockFactory, Item.Properties properties) {
         RegSupplier<T> block = registerBlock(name, blockFactory);
-        registerItem(name, () -> {
-            if (burnTime == 0) return new BlockItem(block.get(), properties);
-            else return new FuelBlockItem(block.get(), properties, () -> burnTime);
-        });
+        registerItem(name, () -> new BlockItem(block.get(), properties));
         return block;
     }
 
@@ -533,6 +527,7 @@ public class RegHelper {
     public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {
         throw new AssertionError();
     }
+
 
 }
 

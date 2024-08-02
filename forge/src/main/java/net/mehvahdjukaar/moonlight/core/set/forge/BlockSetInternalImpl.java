@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.forge.MoonlightForge;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.EventPriority;
@@ -34,7 +35,8 @@ public class BlockSetInternalImpl {
     static {
         //if loaded registers post item init
         Consumer<RegisterEvent> eventConsumer = e -> {
-            if (e.getRegistryKey().equals(BuiltInRegistries.ENCHANTMENT.key())) {
+            //fired right after items
+            if (e.getRegistryKey().equals(BuiltInRegistries.POTION.key())) {
                 BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
             }
         };
@@ -45,9 +47,9 @@ public class BlockSetInternalImpl {
     public static <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
         if (registry == BuiltInRegistries.BLOCK) {
-            addEvent(ForgeRegistries.BLOCKS, (BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
+            addEvent(BuiltInRegistries.BLOCK, (BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
         } else if (registry == BuiltInRegistries.ITEM) {
-            addEvent(ForgeRegistries.ITEMS, (BlockSetAPI.BlockTypeRegistryCallback<Item, T>) registrationFunction, blockType);
+            addEvent(BuiltInRegistries.ITEM, (BlockSetAPI.BlockTypeRegistryCallback<Item, T>) registrationFunction, blockType);
         } else if (registry == BuiltInRegistries.FLUID || registry == BuiltInRegistries.SOUND_EVENT) {
             throw new IllegalArgumentException("Fluid and Sound Events registry not supported here");
         } else {
@@ -59,7 +61,7 @@ public class BlockSetInternalImpl {
     }
 
 
-    public static <T extends BlockType, E> void addEvent(IForgeRegistry<E> reg,
+    public static <T extends BlockType, E> void addEvent(Registry<E> reg,
                                                          BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction,
                                                          Class<T> blockType) {
 
@@ -72,7 +74,8 @@ public class BlockSetInternalImpl {
             if (e.getRegistryKey().equals(BuiltInRegistries.BLOCK.key())) {
                 //actual runnable which will registers the blocks
                 Runnable lateRegistration = () -> {
-                    registrationFunction.accept((r, o) -> Registry.register(BuiltInRegistries.BLOCK, r, o), BlockSetAPI.getBlockSet(blockType).getValues());
+                    registrationFunction.accept((r, o) -> Registry.register(BuiltInRegistries.BLOCK, r, (Block) o),
+                            BlockSetAPI.getBlockSet(blockType).getValues());
                 };
                 //when this reg block event fires we only add a runnable to the queue
                 registrationQueues.add(lateRegistration);
@@ -108,7 +111,7 @@ public class BlockSetInternalImpl {
         }
 
         // fires right after items so we also have all modded items filled in (for EC)
-        if (event.getRegistryKey().equals(ForgeRegistries.ENTITY_TYPES.getRegistryKey())) {
+        if (event.getRegistryKey().equals(Registries.ENTITY_TYPE)) {
             //when the first registration function is called we find all block types
 
             BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);

@@ -1,10 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.mixins.forge;
 
-import dev.architectury.patchedmixin.staticmixin.spongepowered.asm.mixin.Overwrite;
-import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadsTransformer;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
 import net.mehvahdjukaar.moonlight.api.client.model.forge.ExtraModelDataImpl;
-import net.mehvahdjukaar.moonlight.api.entity.ImprovedProjectileEntity;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -19,6 +17,10 @@ import org.spongepowered.asm.mixin.Overwrite;
 public interface SelfExtraModelDataProvider extends IBlockEntityExtension, IExtraModelDataProvider {
 
     //overwrite since it already has a default
+    /**
+     * @author me
+     * @reason it's my own class!
+     */
     @Overwrite
     default void requestModelReload() {
         BlockEntity be = (BlockEntity) this;
@@ -40,15 +42,15 @@ public interface SelfExtraModelDataProvider extends IBlockEntityExtension, IExtr
     }
 
     @Override
-    default void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+    default void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
         BlockEntity be = (BlockEntity) this;
         var level = be.getLevel();
         if (level != null && level.isClientSide) {
             var oldData = this.getExtraModelData();
             CompoundTag tag = pkt.getTag();
             //this calls load
-            if (tag != null) {
-                be.load(tag);
+            if (!tag.isEmpty()) {
+                IBlockEntityExtension.super.onDataPacket(net, pkt, registries);
                 afterDataPacket(oldData);
             }
         }

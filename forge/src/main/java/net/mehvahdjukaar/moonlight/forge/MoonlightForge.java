@@ -1,9 +1,11 @@
 package net.mehvahdjukaar.moonlight.forge;
 
+import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
@@ -12,13 +14,20 @@ import net.mehvahdjukaar.moonlight.core.misc.DummyWorld;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
-import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -29,6 +38,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -47,6 +58,7 @@ public class MoonlightForge {
         Moonlight.commonInit();
         NeoForge.EVENT_BUS.register(MoonlightForge.class);
         bus.addListener(MoonlightForge::configsLoaded);
+        bus.addListener(MoonlightForge::registerCapabilities);
         ModLootModifiers.register();
         ModLootConditions.register();
 
@@ -64,6 +76,17 @@ public class MoonlightForge {
             //}
         }
     }
+
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        for (BlockEntityType<?> beType : BuiltInRegistries.BLOCK_ENTITY_TYPE) {
+            var instance = beType.create(BlockPos.ZERO, beType.getValidBlocks().stream().findFirst().get().defaultBlockState());
+            if (instance instanceof ItemDisplayTile) {
+                event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, beType,
+                        (sidedContainer, side) -> side == null ? new InvWrapper((Container) sidedContainer) : new SidedInvWrapper((WorldlyContainer) sidedContainer, side));
+            }
+        }
+    }
+
 
     //hacky but eh
     @SubscribeEvent
@@ -107,8 +130,7 @@ public class MoonlightForge {
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             try {
-                ModMessages.CHANNEL.sendToClientPlayer(player,
-                        new ClientBoundSendLoginPacket());
+                NetworkHelper.sendToClientPlayer(player, new ClientBoundSendLoginPacket());
             } catch (Exception ignored) {
             }
         } else Moonlight.checkDatapackRegistry();

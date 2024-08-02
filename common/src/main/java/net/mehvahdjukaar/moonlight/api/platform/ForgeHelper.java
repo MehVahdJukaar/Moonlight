@@ -194,10 +194,6 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
-    public static boolean canItemStack(ItemStack i, ItemStack i1) {
-        throw new AssertionError();
-    }
 
     @ExpectPlatform
     public static int getLightEmission(BlockState state, Level level, BlockPos pos) {

@@ -92,6 +92,25 @@ public class SoftFluidStack implements DataComponentHolder {
         return of(fluid, SoftFluid.BOTTLE_COUNT);
     }
 
+    public static SoftFluidStack fromFluid(Fluid fluid, int amount) {
+        return fromFluid(fluid, amount, DataComponentPatch.EMPTY);
+    }
+
+    @NotNull
+    public static SoftFluidStack fromFluid(Fluid fluid, int amount, DataComponentPatch component) {
+        Holder<SoftFluid> f = SoftFluidInternal.FLUID_MAP.get(fluid);
+        if (f == null) return empty();
+        return of(f, amount, component);
+    }
+
+    @NotNull
+    public static SoftFluidStack fromFluid(FluidState fluid) {
+        if (fluid.is(FluidTags.WATER)) {
+            return fromFluid(fluid.getType(), SoftFluid.WATER_BUCKET_COUNT, DataComponentPatch.EMPTY);
+        }
+        return fromFluid(fluid.getType(), SoftFluid.BUCKET_COUNT, DataComponentPatch.EMPTY);
+    }
+
     public static SoftFluidStack empty() {
         if (cachedEmptyInstance == null) {
             cachedEmptyInstance = of(SoftFluidRegistry.getEmpty(), 0, null);
@@ -214,20 +233,7 @@ public class SoftFluidStack implements DataComponentHolder {
         return this.getCount() + " " + this.getFluid();
     }
 
-    @NotNull
-    public static SoftFluidStack fromFluid(Fluid fluid, int amount, DataComponentPatch component) {
-        Holder<SoftFluid> f = SoftFluidInternal.FLUID_MAP.get(fluid);
-        if (f == null) return empty();
-        return of(f, amount, component);
-    }
 
-    @NotNull
-    public static SoftFluidStack fromFluid(FluidState fluid) {
-        if (fluid.is(FluidTags.WATER)) {
-            return fromFluid(fluid.getType(), SoftFluid.WATER_BUCKET_COUNT, null);
-        }
-        return fromFluid(fluid.getType(), SoftFluid.BUCKET_COUNT, null);
-    }
 
 
     // item conversion
@@ -300,7 +306,7 @@ public class SoftFluidStack implements DataComponentHolder {
         return null;
     }
 
-    protected void copyComponentsTo(DataComponentHolder to) {
+    public void copyComponentsTo(DataComponentHolder to) {
         copyComponentsTo(this, to, this.fluid.getPreservedComponents());
     }
 

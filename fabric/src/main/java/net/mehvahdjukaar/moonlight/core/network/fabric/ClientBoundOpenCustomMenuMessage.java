@@ -3,25 +3,24 @@ package net.mehvahdjukaar.moonlight.core.network.fabric;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
-import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
+import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.MenuScreensAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.MenuTypeAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ServerPlayerAccessor;
-import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -30,37 +29,40 @@ import net.minecraft.world.inventory.MenuType;
 
 import java.util.function.Consumer;
 
-public class ClientBoundOpenScreenMessage implements Message {
+public class ClientBoundOpenCustomMenuMessage implements Message {
+
+    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundOpenCustomMenuMessage> TYPE = Message.makeType(
+            Moonlight.res("s2c_open_menu"), ClientBoundOpenCustomMenuMessage::new);
 
     private final int containerId;
     private final MenuType<?> type;
     private final Component title;
     private final FriendlyByteBuf additionalData;
 
-    public ClientBoundOpenScreenMessage(int i, MenuType<?> menuType, Component component, FriendlyByteBuf additionalData) {
+    public ClientBoundOpenCustomMenuMessage(int i, MenuType<?> menuType, Component component, FriendlyByteBuf additionalData) {
         this.containerId = i;
         this.type = menuType;
         this.title = component;
         this.additionalData = additionalData;
     }
 
-    public ClientBoundOpenScreenMessage(FriendlyByteBuf buf) {
+    public ClientBoundOpenCustomMenuMessage(FriendlyByteBuf buf) {
         this.containerId = buf.readVarInt();
-        this.type = buf.readById(BuiltInRegistries.MENU);
+        this.type = buf.readById(BuiltInRegistries.MENU::byId);
         this.title = buf.readComponent();
         this.additionalData = new FriendlyByteBuf(Unpooled.wrappedBuffer(buf.readByteArray(32600)));
     }
 
     @Override
-    public void writeToBuffer(FriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeVarInt(this.containerId);
-        buf.writeId(BuiltInRegistries.MENU, this.type);
+        buf.writeById(BuiltInRegistries.MENU::getId, this.type);
         buf.writeComponent(this.title);
         buf.writeByteArray(this.additionalData.readByteArray());
     }
 
     @Override
-    public void handle(ChannelHandler.Context context) {
+    public void handle(Context context) {
         clientHandle();
     }
 
@@ -73,7 +75,7 @@ public class ClientBoundOpenScreenMessage implements Message {
 
             AbstractContainerMenu menu;
 
-            var containerConstructor = ((MenuTypeAccessor<?>)type).getConstructor();
+            var containerConstructor = ((MenuTypeAccessor<?>) type).getConstructor();
 
             if (containerConstructor instanceof IFabricMenuType.Factory customFactory) {
                 menu = customFactory.create(containerId, inventory, additionalData);
@@ -92,7 +94,7 @@ public class ClientBoundOpenScreenMessage implements Message {
     }
 
 
-    public static void openMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataWriter) {
+    public static void openMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataWriter) {
         if (player.containerMenu != player.inventoryMenu) {
             player.closeContainer();
         }
@@ -111,12 +113,18 @@ public class ClientBoundOpenScreenMessage implements Message {
             FriendlyByteBuf output = new FriendlyByteBuf(Unpooled.buffer());
             output.writeVarInt(extraData.readableBytes());
             output.writeBytes(extraData);
-            ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundOpenScreenMessage(containerMenu.containerId,
+
+            NetworkHelper.sendToClientPlayer(player, new ClientBoundOpenCustomMenuMessage(containerMenu.containerId,
                     containerMenu.getType(), menuProvider.getDisplayName(), output));
+
             p.invokeInitMenu(containerMenu);
             player.containerMenu = containerMenu;
-             
+
         }
     }
 
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE.type();
+    }
 }

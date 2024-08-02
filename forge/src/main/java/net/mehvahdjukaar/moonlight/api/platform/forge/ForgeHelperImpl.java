@@ -26,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -162,11 +163,11 @@ public class ForgeHelperImpl {
 
 
     public static boolean onCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
-        return CommonHooks.onCropsGrowPre(level, pos, state, b);
+        return CommonHooks.canCropGrow(level, pos, state, b);
     }
 
     public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
-        CommonHooks.onCropsGrowPost(level, pos, state);
+        CommonHooks.fireCropGrowPost(level, pos, state);
     }
 
     public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
@@ -178,10 +179,6 @@ public class ForgeHelperImpl {
         var ev = CommonHooks.onRightClickBlock(player, hand, below, rayTraceResult);
         if (ev.isCanceled()) return ev.getCancellationResult();
         return null;
-    }
-
-    public static boolean canItemStack(ItemStack selected, ItemStack item) {
-        return ItemHandlerHelper.canItemStacksStack(selected, item);
     }
 
     public static int getLightEmission(BlockState state, Level level, BlockPos pos) {

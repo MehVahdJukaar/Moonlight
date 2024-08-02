@@ -49,7 +49,7 @@ public class RenderUtil {
 
     //should be a weaker version of what's above as it doesnt take in level so stuff like offset isnt there
     //from resource location
-    public static void renderModel(ResourceLocation modelLocation, PoseStack matrixStack, MultiBufferSource buffer,
+    public static void renderModel(ModelResourceLocation modelLocation, PoseStack matrixStack, MultiBufferSource buffer,
                                    BlockRenderDispatcher blockRenderer, int light, int overlay, boolean cutout) {
 
         blockRenderer.getModelRenderer().renderModel(matrixStack.last(),
