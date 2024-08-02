@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -50,6 +51,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,7 +118,7 @@ public class RegHelperImpl {
         DeferredHolder<T, E> register = registry.register(name.getPath(), () -> {
             //super hack for mod fluids auto registering of fluid types
             var obj = supplier.get();
-            if (regKey.equals(Registries.FLUID) && obj instanceof ModFlowingFluid fluid && fluid.hasCustomFluidType) {
+            if (regKey.equals(Registries.FLUID) && obj instanceof ModFlowingFluid fluid) {
                 register(name, fluid::getFluidType, NeoForgeRegistries.Keys.FLUID_TYPES);
             }
             return obj;
@@ -243,50 +245,62 @@ public class RegHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<BuildCreativeModeTabContentsEvent> eventConsumer = event -> {
-            RegHelper.ItemToTabEvent itemToTabEvent = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
-                if (tab != event.getTabKey()) return;
-
-                if (target == null) {
-                    event.acceptAll(items);
-                } else {
-
-                    var entries = event.getEntries();
-                    ItemStack lastValid = null;
-
-
-                    for (var e : entries) {
-                        ItemStack item = e.getKey();
-
-                        if (!item.isItemEnabled(event.getFlags())) continue;
-
-                        boolean isValid = target.test(item);
-                        if (after && lastValid != null && !isValid) {
-                            var rev = Lists.reverse(new ArrayList<>(items));
-                            for (var ni : rev) {
-                                entries.putAfter(lastValid, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                            }
-                            return;
-                        }
-
-                        if (isValid) {
-                            lastValid = item;
-                        }
-
-                        if (!after && isValid) {
-                            items.forEach(ni -> entries.putBefore(item, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
-                            return;
-                        }
-                    }
-                    //add at the end if it fails
-                    for (var ni : items) {
-                        entries.put(ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                    }
-                }
-            });
+            RegHelper.ItemToTabEvent itemToTabEvent = new ItemToTabEventImpl(event);
             eventListener.accept(itemToTabEvent);
         };
         MoonlightForge.getCurrentBus().addListener(EventPriority.LOW, eventConsumer);
     }
+
+    private record ItemToTabEventImpl(BuildCreativeModeTabContentsEvent event) implements RegHelper.ItemToTabEvent {
+
+        public void removeItems(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target) {
+            event.getParentEntries().removeIf(target);
+            event.getSearchEntries().removeIf(target);
+        }
+
+        @Override
+        public void addItems(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> target, boolean after, List<ItemStack> items) {
+            if (target == null) {
+                event.acceptAll(items);
+            } else {
+                if (after) {
+                    ItemStack last = findLast(event, target);
+                    for (int j = items.size(); j > 0; j--) {
+                        event.insertAfter(last, items.get(j - 1), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    }
+                } else {
+                    ItemStack first = findFirst(event, target);
+                    for (var s : items) {
+                        event.insertBefore(first, s, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    }
+                }
+            }
+        }
+
+        private ItemStack findFirst(BuildCreativeModeTabContentsEvent event, Predicate<ItemStack> target) {
+            for (var s : event.getParentEntries()) {
+                if (target.test(s)) {
+                    return s;
+                }
+            }
+            return ItemStack.EMPTY;
+        }
+
+        private ItemStack findLast(BuildCreativeModeTabContentsEvent event, Predicate<ItemStack> target) {
+            boolean foundOne = false;
+            ItemStack previous = ItemStack.EMPTY;
+            for (var s : event.getParentEntries()) {
+                if (target.test(s)) {
+                    foundOne = true;
+                    previous = s;
+                } else {
+                    if (foundOne) return previous;
+                }
+            }
+            return ItemStack.EMPTY;
+        }
+    }
+
 
 
     public static void addLootTableInjects(Consumer<RegHelper.LootInjectEvent> eventListener) {
@@ -301,7 +315,8 @@ public class RegHelperImpl {
 
                     @Override
                     public void addTableReference(ResourceLocation targetId) {
-                        LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();
+                        LootPool pool = LootPool.lootPool().add(NestedLootTable.lootTableReference(
+                               ResourceKey.create(Registries.LOOT_TABLE, targetId))).build();
                         event.getTable().addPool(pool);
                     }
                 });

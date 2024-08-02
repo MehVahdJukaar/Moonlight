@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.forge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
+import net.mehvahdjukaar.moonlight.api.item.IFirstPersonAnimationProvider;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidType;
 
@@ -44,6 +45,7 @@ public class ModFluidType extends FluidType {
         );
     }
 
+    //TODO:
     @Override
     public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
         consumer.accept((IClientFluidTypeExtensions) HACK.get().createRenderProperties());

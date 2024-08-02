@@ -13,7 +13,7 @@ import static net.mehvahdjukaar.moonlight.api.fluids.forge.SoftFluidStackImpl.bo
 /**
  * instance this fluid tank in your tile entity
  */
-@Deprecated(forRemoval = true)
+@Deprecated() //forgot why
 public class SoftFluidTankImpl extends SoftFluidTank {
 
     public static SoftFluidTank create(int capacity) {
@@ -22,18 +22,6 @@ public class SoftFluidTankImpl extends SoftFluidTank {
 
     protected SoftFluidTankImpl(int capacity) {
         super(capacity);
-    }
-
-    /**
-     * checks if current tank holds equivalent fluid as provided forge fluids stack & nbt
-     *
-     * @param fluidStack forge fluid stack
-     * @param com        fluid nbt
-     * @return is same
-     */
-    @Deprecated(forRemoval = true)
-    public boolean isSameFluidAs(FluidStack fluidStack, CompoundTag com) {
-        return this.fluidStack.isEquivalent(fluidStack.getFluid()) && Objects.equal(com, this.fluidStack.getTag());
     }
 
     /**
@@ -49,14 +37,6 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         return addFluid(s, false) == s.getCount();
     }
 
-    @NotNull
-    @Deprecated(forRemoval = true)
-    public static SoftFluidStack convertForgeFluid(FluidStack fluidStack) {
-        int amount = MBtoBottles(fluidStack.getAmount());
-        return SoftFluidStack.fromFluid(fluidStack.getFluid(), amount,
-                fluidStack.hasTag() ? fluidStack.getTag().copy() : null);
-    }
-
     //TODO: re check all the ones below here. I blindly ported
 
     /**
@@ -68,8 +48,8 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      */
     public boolean transferToFluidTank(IFluidHandler fluidDestination, int bottles) {
         if (this.isEmpty() || this.getFluidCount() < bottles) return false;
-        int milliBuckets = bottlesToMB(bottles);
-        FluidStack stack = this.toEquivalentVanillaFluid(milliBuckets);
+        FluidStack stack = ((SoftFluidStackImpl) this.fluidStack).toForgeFluid();
+        int milliBuckets = stack.getAmount();
         if (!stack.isEmpty()) {
             int fillableAmount = fluidDestination.fill(stack, IFluidHandler.FluidAction.SIMULATE);
             if (fillableAmount == milliBuckets) {
@@ -92,11 +72,10 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         FluidStack drainable = fluidSource.drain(milliBuckets, IFluidHandler.FluidAction.SIMULATE);
         if (!drainable.isEmpty() && drainable.getAmount() == milliBuckets) {
             boolean transfer = false;
-            CompoundTag fsTag = drainable.getTag();
             if (this.fluidStack.isEmpty()) {
                 this.setFluid(drainable);
                 transfer = true;
-            } else if (this.isSameFluidAs(drainable, fsTag)) {
+            } else if (((SoftFluidStackImpl)fluidStack).isFluidEqual(drainable)) {
                 transfer = true;
             }
             if (transfer) {
@@ -109,22 +88,6 @@ public class SoftFluidTankImpl extends SoftFluidTank {
 
     public boolean drainFluidTank(IFluidHandler fluidSource) {
         return this.drainFluidTank(fluidSource, BOTTLE_COUNT);
-    }
-
-    /**
-     * gets the equivalent forge fluid without draining the tank. returned stack might be empty
-     *
-     * @param mb forge minecraft buckets
-     * @return forge fluid stacks
-     */
-    @Deprecated(forRemoval = true)
-    public FluidStack toEquivalentVanillaFluid(int mb) {
-        if (!(fluidStack instanceof SoftFluidStackImpl)) {
-            return FluidStack.EMPTY;
-        }
-        var s = ((SoftFluidStackImpl) this.fluidStack).toForgeFluid();
-        s.setAmount(mb);
-        return s;
     }
 
     /**

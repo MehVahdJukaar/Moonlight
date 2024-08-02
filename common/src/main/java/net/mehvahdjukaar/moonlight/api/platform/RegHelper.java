@@ -6,11 +6,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
-import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
-import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -21,7 +19,6 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -334,47 +331,48 @@ public class RegHelper {
     }
 
 
-    public record ItemToTabEvent(
-            QuadConsumer<ResourceKey<CreativeModeTab>, @Nullable Predicate<ItemStack>, Boolean, Collection<ItemStack>> action) {
+    @FunctionalInterface
+    public interface ItemToTabEvent {
 
+        void addItems(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> target, boolean after, List<ItemStack> items);
 
-        public void add(ResourceKey<CreativeModeTab> tab, ItemLike... items) {
+        default void add(ResourceKey<CreativeModeTab> tab, ItemLike... items) {
             addAfter(tab, null, items);
         }
 
-        public void add(ResourceKey<CreativeModeTab> tab, ItemStack... items) {
+        default void add(ResourceKey<CreativeModeTab> tab, ItemStack... items) {
             addAfter(tab, null, items);
         }
 
-        public void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
+        default void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
+            List<ItemStack> stacks = new ArrayList<>();
+
+            for (var i : items) {
+                if (i.asItem().getDefaultInstance().isEmpty()) {
+                    throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs");
+                } else stacks.add(i.asItem().getDefaultInstance());
+            }
+            addItems(tab, target, true, stacks);
+        }
+
+        default void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
+            addItems(tab, target, true, java.util.List.of(items));
+        }
+
+        default void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
             List<ItemStack> stacks = new ArrayList<>();
             for (var i : items) {
                 if (i.asItem().getDefaultInstance().isEmpty()) {
-                    if (PlatHelper.isDev())
-                        throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs");
+                    throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs");
                 } else stacks.add(i.asItem().getDefaultInstance());
             }
-            action.accept(tab, target, true, stacks);
+            addItems(tab, target, false, stacks);
         }
 
-        public void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
-            action.accept(tab, target, true, java.util.List.of(items));
+        default void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
+            addItems(tab, target, false, java.util.List.of(items));
         }
 
-        public void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
-            List<ItemStack> stacks = new ArrayList<>();
-            for (var i : items) {
-                if (i.asItem().getDefaultInstance().isEmpty()) {
-                    if (PlatHelper.isDev())
-                        throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs");
-                } else stacks.add(i.asItem().getDefaultInstance());
-            }
-            action.accept(tab, target, false, stacks);
-        }
-
-        public void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
-            action.accept(tab, target, false, java.util.List.of(items));
-        }
     }
 
     @FunctionalInterface

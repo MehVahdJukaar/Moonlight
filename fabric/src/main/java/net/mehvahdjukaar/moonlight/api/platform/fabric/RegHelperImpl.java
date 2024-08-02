@@ -25,7 +25,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -34,9 +33,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -47,6 +45,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -222,19 +221,18 @@ public class RegHelperImpl {
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
         Moonlight.assertInitPhase();
-         MoonlightFabric.AFTER_SETUP_WORK.add(() -> {
-            RegHelper.ItemToTabEvent event = new RegHelper.ItemToTabEvent((tab, target, after, items) -> {
-                ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
-                    if (target == null) {
-                        entries.acceptAll(items);
+        MoonlightFabric.AFTER_SETUP_WORK.add(() -> {
+            RegHelper.ItemToTabEvent event = (tab, target, after, items) ->
+                    ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
+                if (target == null) {
+                    entries.acceptAll(items);
+                } else {
+                    if (after) {
+                        entries.addAfter(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                     } else {
-                        if (after) {
-                            entries.addAfter(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                        } else {
-                            entries.addBefore(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                        }
+                        entries.addBefore(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                     }
-                });
+                }
             });
             eventListener.accept(event);
         });

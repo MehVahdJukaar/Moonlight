@@ -343,7 +343,11 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     public boolean isEquivalent(Holder<Fluid> fluid) {
-        return this.fluid().isEquivalent(fluid);
+        return this.isEquivalent(fluid, DataComponentPatch.EMPTY);
+    }
+
+    public boolean isEquivalent(Holder<Fluid> fluid, DataComponentPatch componentPatch) {
+        return this.fluid().isEquivalent(fluid) && Objects.equals(this.components.asPatch(), componentPatch);
     }
 
     public Holder<Fluid> getVanillaFluid() {
