@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class ClientBoundOnPistonMovedBlockPacket implements Message {
 
-    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundOnPistonMovedBlockPacket> TYPE =
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundOnPistonMovedBlockPacket> TYPE =
             Message.makeType(Moonlight.res("s2c_on_piston_moved_block"), ClientBoundOnPistonMovedBlockPacket::new);
 
     public final BlockPos pos;
@@ -21,7 +22,7 @@ public class ClientBoundOnPistonMovedBlockPacket implements Message {
     private final BlockState movedState;
     private final boolean extending;
 
-    public ClientBoundOnPistonMovedBlockPacket(FriendlyByteBuf buffer) {
+    public ClientBoundOnPistonMovedBlockPacket(RegistryFriendlyByteBuf buffer) {
         this.pos = buffer.readBlockPos();
         this.dir = Direction.from3DDataValue(buffer.readVarInt());
         this.movedState = buffer.readById(Block.BLOCK_STATE_REGISTRY::byIdOrThrow);
@@ -36,7 +37,7 @@ public class ClientBoundOnPistonMovedBlockPacket implements Message {
     }
 
     @Override
-    public void write(FriendlyByteBuf buffer) {
+    public void write(RegistryFriendlyByteBuf buffer) {
         buffer.writeBlockPos(this.pos);
         buffer.writeVarInt(this.dir.get3DDataValue());
         buffer.writeById(Block.BLOCK_STATE_REGISTRY::getIdOrThrow, this.movedState);

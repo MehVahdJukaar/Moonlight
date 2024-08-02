@@ -34,9 +34,8 @@ public class UnbakedModelWrapper extends BlockModel {
 
 
     @Override
-    public BakedModel bake(ModelBaker modelBakery, Function<Material, TextureAtlasSprite> spriteGetter,
-                           ModelState transform, ResourceLocation location) {
-        return geometry.bake(modelBakery, spriteGetter, transform, location);
+    public BakedModel bake(ModelBaker modelBakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform) {
+        return geometry.bake(modelBakery, spriteGetter, transform);
     }
 
 

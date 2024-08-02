@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -19,21 +20,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.Function;
 
-public class MapDecorationClientManager extends TextureAtlasHolder {
+public class MapDecorationClientManager {
 
-    public static final ResourceLocation LOCATION_MAP_MARKERS = Moonlight.res("textures/atlas/map_markers.png");
+    public static final ResourceLocation LOCATION_MAP_MARKERS = ResourceLocation.withDefaultNamespace("textures/atlas/map_decorations.png");
     public static final RenderType MAP_MARKERS_RENDER_TYPE = RenderType.text(LOCATION_MAP_MARKERS);
-    private static MapDecorationClientManager instance;
 
     public MapDecorationClientManager() {
-        super(Minecraft.getInstance().getTextureManager(), LOCATION_MAP_MARKERS, Moonlight.res("map_markers"));
-        instance = this;
     }
-
-    public static TextureAtlasSprite getAtlasSprite(ResourceLocation location) {
-        return instance.getSprite(location);
-    }
-
 
     /**
      * Registers a renderer for this decoration. Use it to add fancy ones
@@ -74,6 +67,5 @@ public class MapDecorationClientManager extends TextureAtlasHolder {
         }
         return false;
     }
-
 
 }

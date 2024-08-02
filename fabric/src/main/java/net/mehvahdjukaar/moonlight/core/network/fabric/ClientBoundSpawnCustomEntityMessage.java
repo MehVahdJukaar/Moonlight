@@ -3,12 +3,12 @@ package net.mehvahdjukaar.moonlight.core.network.fabric;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
-import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -21,7 +21,7 @@ import java.util.UUID;
 
 public class ClientBoundSpawnCustomEntityMessage implements Message {
 
-    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundSpawnCustomEntityMessage> TYPE = Message.makeType(
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundSpawnCustomEntityMessage> TYPE = Message.makeType(
             Moonlight.res("s2c_spawn_entity"), ClientBoundSpawnCustomEntityMessage::new);
 
     private final Entity entity;
@@ -62,7 +62,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         //idk why this is needed but synced data fails to load correctly sometimes
     }
 
-    public ClientBoundSpawnCustomEntityMessage(FriendlyByteBuf buf) {
+    public ClientBoundSpawnCustomEntityMessage(RegistryFriendlyByteBuf buf) {
         this.entity = null;
         this.typeId = buf.readVarInt();
         this.entityId = buf.readInt();
@@ -81,7 +81,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(this.typeId);
         buf.writeInt(this.entityId);
         buf.writeLong(this.uuid.getMostSignificantBits());

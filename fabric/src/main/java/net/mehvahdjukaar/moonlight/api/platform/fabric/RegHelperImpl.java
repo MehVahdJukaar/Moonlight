@@ -34,7 +34,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -43,9 +42,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.entries.LootTableReference;
+import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -96,11 +94,11 @@ public class RegHelperImpl {
     }
 
     static class SpawnPlacementsImpl implements RegHelper.SpawnPlacementEvent {
+
         @Override
-        public <T extends Entity> void register(EntityType<T> entityType, SpawnPlacements.Type decoratorType,
-                                                Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
+        public <T extends Mob> void register(EntityType<T> entityType, SpawnPlacementType decoratorType, Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
             try {
-                SpawnPlacements.register((EntityType<Mob>) entityType, decoratorType, heightMapType, (SpawnPlacements.SpawnPredicate<Mob>) decoratorPredicate);
+                SpawnPlacements.register(entityType, decoratorType, heightMapType, decoratorPredicate);
             } catch (Exception e) {
                 Moonlight.LOGGER.warn("Skipping placement registration for {} as its not of Mob type", entityType);
             }
@@ -224,16 +222,16 @@ public class RegHelperImpl {
         MoonlightFabric.AFTER_SETUP_WORK.add(() -> {
             RegHelper.ItemToTabEvent event = (tab, target, after, items) ->
                     ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
-                if (target == null) {
-                    entries.acceptAll(items);
-                } else {
-                    if (after) {
-                        entries.addAfter(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                    } else {
-                        entries.addBefore(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                    }
-                }
-            });
+                        if (target == null) {
+                            entries.acceptAll(items);
+                        } else {
+                            if (after) {
+                                entries.addAfter(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                            } else {
+                                entries.addBefore(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                            }
+                        }
+                    });
             eventListener.accept(event);
         });
     }
@@ -253,19 +251,23 @@ public class RegHelperImpl {
     public static void addLootTableInjects(Consumer<RegHelper.LootInjectEvent> eventListener) {
         Moonlight.assertInitPhase();
 
-        LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) ->
-                eventListener.accept(new RegHelper.LootInjectEvent() {
-                    @Override
-                    public ResourceLocation getTable() {
-                        return id;
-                    }
+        LootTableEvents.MODIFY.register(
+                (key, tableBuilder, source) -> {
+                    eventListener.accept(new RegHelper.LootInjectEvent() {
+                        @Override
+                        public ResourceLocation getTable() {
+                            return key.location();
+                        }
 
-                    @Override
-                    public void addTableReference(ResourceLocation targetId) {
-                        LootPool pool = LootPool.lootPool().add(LootTableReference.lootTableReference(targetId)).build();
-                        tableBuilder.pool(pool);
-                    }
-                }));
+                        @Override
+                        public void addTableReference(ResourceLocation targetId) {
+                            LootPool pool = LootPool.lootPool().add(NestedLootTable.lootTableReference(
+                                    ResourceKey.create(Registries.LOOT_TABLE, targetId))).build();
+                            tableBuilder.pool(pool);
+                        }
+                    });
+                }
+        );
     }
 
     public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {

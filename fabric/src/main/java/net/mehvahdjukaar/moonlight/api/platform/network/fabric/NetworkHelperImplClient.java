@@ -1,23 +1,20 @@
 package net.mehvahdjukaar.moonlight.api.platform.network.fabric;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.mehvahdjukaar.moonlight.api.platform.network.Context;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
-import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
-import java.util.function.Function;
 
 public class NetworkHelperImplClient {
 
-    public static <M extends Message> void register(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M> messageType) {
+    public static <M extends Message> void register(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
+        PayloadTypeRegistry.playS2C().register(messageType.type(), messageType.codec());
+
         ClientPlayNetworking.registerGlobalReceiver(messageType.type(),
                 (message, context) -> {
                     context.client().execute(() -> {
@@ -26,11 +23,11 @@ public class NetworkHelperImplClient {
                 });
     }
 
-    public record ContextWrapper(ClientPlayNetworking.Context c) implements Context {
+    public record ContextWrapper(ClientPlayNetworking.Context c) implements Message.Context {
 
         @Override
-        public NetworkDir getDirection() {
-            return NetworkDir.CLIENT_BOUND;
+        public Message.NetworkDir getDirection() {
+            return Message.NetworkDir.CLIENT_BOUND;
         }
 
         @Override

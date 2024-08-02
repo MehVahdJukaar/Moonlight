@@ -164,7 +164,7 @@ public class MoonlightForge {
     public static IEventBus getCurrentBus() {
         var b = currentBus.get();
         if (b == null)
-            throw new IllegalStateException("Bus is null. You must call startRegistering before registering events");
+            throw new IllegalStateException("Bus is null. You must call RegHelper.startRegistering(IEventBus) before registering events");
         return b;
     }
 

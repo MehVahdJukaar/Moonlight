@@ -4,7 +4,6 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
-import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -20,6 +19,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 
 public class ClientBoundOpenCustomMenuMessage implements Message {
 
-    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundOpenCustomMenuMessage> TYPE = Message.makeType(
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundOpenCustomMenuMessage> TYPE = Message.makeType(
             Moonlight.res("s2c_open_menu"), ClientBoundOpenCustomMenuMessage::new);
 
     private final int containerId;
@@ -46,18 +46,21 @@ public class ClientBoundOpenCustomMenuMessage implements Message {
         this.additionalData = additionalData;
     }
 
-    public ClientBoundOpenCustomMenuMessage(FriendlyByteBuf buf) {
+    //replace with fabric screen handler
+    public ClientBoundOpenCustomMenuMessage(RegistryFriendlyByteBuf buf) {
         this.containerId = buf.readVarInt();
         this.type = buf.readById(BuiltInRegistries.MENU::byId);
-        this.title = buf.readComponent();
+        this.title = ComponentSerialization.STREAM_CODEC.decode(buf);
+
         this.additionalData = new FriendlyByteBuf(Unpooled.wrappedBuffer(buf.readByteArray(32600)));
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(this.containerId);
         buf.writeById(BuiltInRegistries.MENU::getId, this.type);
-        buf.writeComponent(this.title);
+        ComponentSerialization.STREAM_CODEC.encode(buf, this.title);
+
         buf.writeByteArray(this.additionalData.readByteArray());
     }
 
@@ -66,6 +69,7 @@ public class ClientBoundOpenCustomMenuMessage implements Message {
         clientHandle();
     }
 
+    //TODO: use fabric api stuff
     @Environment(EnvType.CLIENT)
     private void clientHandle() {
         try {
@@ -107,7 +111,7 @@ public class ClientBoundOpenCustomMenuMessage implements Message {
                 player.displayClientMessage(Component.translatable("container.spectatorCantOpen").withStyle(ChatFormatting.RED), true);
             }
         } else {
-            FriendlyByteBuf extraData = new FriendlyByteBuf(Unpooled.buffer());
+            RegistryFriendlyByteBuf extraData = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.level().registryAccess());
             extraDataWriter.accept(extraData);
             extraData.readerIndex(0);
             FriendlyByteBuf output = new FriendlyByteBuf(Unpooled.buffer());

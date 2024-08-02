@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -27,6 +28,8 @@ import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -129,10 +132,7 @@ public class PlatHelperImpl {
 
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
         var packet = new ClientBoundSpawnCustomEntityMessage(entity);
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        packet.writeToBuffer(buf);
-        var p =(Packet) ServerPlayNetworking.createS2CPacket(ModNetworking.SPAWN_PACKET_ID, buf);
-        return (Packet<ClientGamePacketListener>) p;
+        return (Packet<ClientGamePacketListener>) (Packet) ServerPlayNetworking.createS2CPacket(packet);
     }
 
     public static Path getGamePath() {
@@ -243,7 +243,8 @@ public class PlatHelperImpl {
     }
 
     public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
-        if (jo instanceof JsonObject j) ResourceConditions.objectMatchesConditions(j);
+        //TODO: re add
+        //if (jo instanceof JsonObject j) ResourceConditionsImpl.conditionsMet(j);
         return true;
     }
 
@@ -266,9 +267,10 @@ public class PlatHelperImpl {
 
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
         ClientBoundSpawnCustomEntityMessage packet = new ClientBoundSpawnCustomEntityMessage(entity);
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        packet.writeToBuffer(buf);
-        return ServerPlayNetworking.createS2CPacket(ModNetworking.SPAWN_PACKET_ID, buf);
+        return (Packet<ClientGamePacketListener>) (Packet) ServerPlayNetworking.createS2CPacket(packet);
+    }
+
+    public static <A> void setComponent(DataComponentHolder to, DataComponentType<A> type, A componentValue) {
     }
 
 }

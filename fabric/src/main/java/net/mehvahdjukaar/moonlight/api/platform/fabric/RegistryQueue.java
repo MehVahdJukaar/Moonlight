@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -86,7 +87,7 @@ public class RegistryQueue<T> {
 
         void initialize() {
             this.holder = ((WritableRegistry) BuiltInRegistries.REGISTRY.get(registryKey.location()))
-                    .register(ResourceKey.create(registryKey, id), regSupplier.get(), Lifecycle.stable());
+                    .register(ResourceKey.create(registryKey, id), regSupplier.get(), RegistrationInfo.BUILT_IN);
             this.entry = this.holder.value();
             regSupplier = null;
             registryKey = null;

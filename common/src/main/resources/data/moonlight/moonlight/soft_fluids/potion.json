@@ -42,9 +42,9 @@
     "item": "minecraft:potion"
   },
   "preserved_components_from_item": [
-    "potion_contents",
+    "minecraft:potion_contents",
     "moonlight:bottle_type",
-    {"id":"origins:is_extended_by_cleric","required":false}
+    "origins:is_extended_by_cleric"
   ],
   "emissivity": 5,
   "still_texture": "moonlight:block/soft_fluids/potion_still",

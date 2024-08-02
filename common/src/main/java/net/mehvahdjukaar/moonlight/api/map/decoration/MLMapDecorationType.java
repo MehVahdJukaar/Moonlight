@@ -38,7 +38,7 @@ public sealed abstract class MLMapDecorationType<D extends MLMapDecoration, M ex
                     }));
 
     public static final Codec<MLMapDecorationType<?, ?>> DIRECT_NETWORK_CODEC =
-            Codec.lazyInitialized(() -> Codec.either(MLSpecialMapDecorationType.CODEC, MLJsonMapDecorationType.NETWORK_CODEC).xmap(
+            Codec.lazyInitialized(() -> Codec.either(MLSpecialMapDecorationType.CODEC, MLJsonMapDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
                         if (type == null) {

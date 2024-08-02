@@ -6,6 +6,8 @@ import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -88,6 +90,11 @@ public class PlatHelper {
 
     @ExpectPlatform
     public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static <A> void setComponent(DataComponentHolder to, DataComponentType<A> type, A componentValue) {
         throw new AssertionError();
     }
 

@@ -3,16 +3,11 @@ package net.mehvahdjukaar.moonlight.api.fluids.fabric;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
-import net.mehvahdjukaar.moonlight.api.util.PotionNBTHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.core.component.DataComponentType;
 
-import java.util.List;
-
-public class SoftFluidStackImpl extends SoftFluidStack{
+public class SoftFluidStackImpl extends SoftFluidStack {
 
     public SoftFluidStackImpl(Holder<SoftFluid> fluid, int count, DataComponentPatch tag) {
         super(fluid, count, tag);
@@ -20,34 +15,37 @@ public class SoftFluidStackImpl extends SoftFluidStack{
 
     public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, DataComponentPatch components) {
         var f = new SoftFluidStackImpl(fluid, count, components);
-        if(f.isEmpty()){
+        if (f.isEmpty()) {
             return SoftFluidStack.empty();
         }
         return f;
     }
 
     public static FluidVariant toFabricFluid(SoftFluidStack softFluid) {
-        // tag stuff
-        List<String> nbtKey = softFluid.fluid().getPreservedComponents();
-        CompoundTag tag = softFluid.getTag();
-        CompoundTag newCom = new CompoundTag();
-        if (tag != null && !tag.isEmpty()  && nbtKey != null) {
-            for (String k : nbtKey) {
-
-                Tag c = tag.get(k);
-                if (c != null) {
-                    newCom.put(k, c);
-                }
-            }
-            if (newCom.isEmpty()) newCom = null;
+        var comps = softFluid.getComponents().asPatch();
+        var patch = DataComponentPatch.builder();
+        for (var t : softFluid.fluid().getPreservedComponents()) {
+            setComp(t.value(), comps, patch);
         }
-        Fluid vanillaFluid = softFluid.fluid().getVanillaFluid();
-        return FluidVariant.of(vanillaFluid, newCom);
+        return FluidVariant.of(softFluid.fluid().getVanillaFluid().value(), patch.build());
     }
 
-    public static SoftFluidStack fromFabricFluid(FluidVariant fluidStack, int bottlesAmount) {
-        return SoftFluidStack.fromFluid(fluidStack.getFluid(), bottlesAmount,
-                fluidStack.hasNbt() ? fluidStack.getNbt().copy() : null);
+    private static <A> void setComp(DataComponentType<A> t, DataComponentPatch comps, DataComponentPatch.Builder patch) {
+        var val = comps.get(t);
+        if (val != null && val.isPresent()) {
+            patch.set(t, val.get());
+        }
+    }
+
+    public static SoftFluidStack fromFabricFluid(FluidVariant variant, int bottlesAmount) {
+        var comps = variant.getComponents();
+        var patch = DataComponentPatch.builder();
+        var softFluid = SoftFluidStack.fromFluid(variant.getFluid(), bottlesAmount);
+        for (var t : softFluid.fluid().getPreservedComponents()) {
+            setComp(t.value(), comps, patch);
+        }
+
+        return SoftFluidStackImpl.of(softFluid.getHolder(), softFluid.getCount(), patch.build());
     }
 
 }

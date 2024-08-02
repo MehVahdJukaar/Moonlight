@@ -27,27 +27,26 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
 
-    //implementation fg.deobf("curse.maven:cloth-config-348521:3782775")
-    modImplementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
+    modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
         exclude group: 'net.fabricmc.fabric-api'
     }
-    // modImplementation(include("curse.maven:modmenu-308702:3850113"))
+    modCompileOnly(include("curse.maven:modmenu-308702:3850113"))
     modCompileOnly "com.terraformersmc:modmenu:4.0.6", {
         exclude module: "fabric-api"
     }
 
     modCompileOnly("curse.maven:yacl-667299:4523734")
-    modImplementation("curse.maven:super-better-grass-911433:4744836")
+    //modCompileOnly("curse.maven:super-better-grass-911433:4744836")
     modCompileOnly("curse.maven:map-atlases-436298:5018173")
     //modImplementation ("curse.maven:supplementaries-412082:4987505")
     // modRuntimeOnly("net.mehvahdjukaar:supplementaries-fabric:1.20-2.7.17")
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-item:${project.cca_version}"
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
-    modRuntimeOnly("curse.maven:gardens-of-the-dead-683174:4784268")
-    modRuntimeOnly("curse.maven:architectury-api-419699:5137936")
-    modRuntimeOnly("curse.maven:terrablender-fabric-565956:5068219")
-    modRuntimeOnly("curse.maven:forge-config-api-port-fabric-547434:4583000")
+    modCompileOnly "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
+    modCompileOnly "dev.onyxstudios.cardinal-components-api:cardinal-components-item:${project.cca_version}"
+    modCompileOnly "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
+    //modRuntimeOnly("curse.maven:gardens-of-the-dead-683174:4784268")
+    //modRuntimeOnly("curse.maven:architectury-api-419699:5137936")
+    //modRuntimeOnly("curse.maven:terrablender-fabric-565956:5068219")
+    //modRuntimeOnly("curse.maven:forge-config-api-port-fabric-547434:4583000")
     //modImplementation("curse.maven:the-bumblezone-fabric-363949:5332804")
     // modImplementation("curse.maven:midnightlib-488090:4576371")
     // modImplementation("curse.maven:athena-841890:4764358")

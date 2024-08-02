@@ -16,6 +16,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.HolderSetCodec;
+import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
@@ -316,6 +318,13 @@ public class Utils {
      */
     public static <A> LenientListCodec<A> lenientListCodec(final Codec<A> elementCodec) {
         return new LenientListCodec<>(elementCodec);
+    }
+
+    /**
+     * Lenient holder set
+     */
+    public static <E> Codec<HolderSet<E>> lenientHomogeneousList(ResourceKey<? extends Registry<E>> registryKey) {
+        return LenientHolderSetCodec.create(registryKey, RegistryFixedCodec.create(registryKey), false);
     }
 
 }

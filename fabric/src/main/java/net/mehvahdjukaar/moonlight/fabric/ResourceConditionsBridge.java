@@ -17,6 +17,7 @@ import net.minecraft.world.item.Items;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class ResourceConditionsBridge {
@@ -26,30 +27,32 @@ public class ResourceConditionsBridge {
     public static final String CONDITION_ID = "type";
 
     public static void init() {
+        //TODO: re add
+        /*
         try {
-            ResourceConditions.register(ResourceLocation.parse("forge:not"), ResourceConditionsBridge::forgeNot);
+            ResourceConditions.register(ResourceLocation.parse("neoforge:not"), ResourceConditionsBridge::forgeNot);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(ResourceLocation.parse("forge:or"), ResourceConditionsBridge::forgeOr);
+            ResourceConditions.register(ResourceLocation.parse("neoforge:or"), ResourceConditionsBridge::forgeOr);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(ResourceLocation.parse("forge:and"), ResourceConditionsBridge::forgeAnd);
+            ResourceConditions.register(ResourceLocation.parse("neoforge:and"), ResourceConditionsBridge::forgeAnd);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(ResourceLocation.parse("forge:mod_loaded"), ResourceConditionsBridge::forgeModLoaded);
+            ResourceConditions.register(ResourceLocation.parse("neoforge:mod_loaded"), ResourceConditionsBridge::forgeModLoaded);
         } catch (Exception ignored) {
         }
 
         try {
-            ResourceConditions.register(ResourceLocation.parse("forge:tag_empty"), ResourceConditionsBridge::forgeTagEmpty);
+            ResourceConditions.register(ResourceLocation.parse("neoforge:tag_empty"), ResourceConditionsBridge::forgeTagEmpty);
         } catch (Exception ignored) {
-        }
+        }*/
     }
 
     private static boolean forgeNot(JsonObject jsonObject) {
@@ -73,27 +76,22 @@ public class ResourceConditionsBridge {
 
     private static Boolean forgeTagEmpty(JsonObject object) {
         var id = ResourceLocation.parse(GsonHelper.getAsString(object, "tag"));
-        Map<ResourceKey<?>, Map<ResourceLocation, Collection<Holder<?>>>> allTags = ResourceConditionsImpl.LOADED_TAGS.get();
+        Map<ResourceKey<?>, Set<ResourceLocation>> allTags = ResourceConditionsImpl.LOADED_TAGS.get();
         if (allTags == null) {
             Moonlight.LOGGER.warn("Can't retrieve deserialized tags. Failing tag resource condition check.");
             return true;
         }
-        Map<ResourceLocation, Collection<Holder<?>>> registryTags = allTags.get(Registries.ITEM);
+        var registryTags = allTags.get(Registries.ITEM);
         if (registryTags == null) {
             // No tag for this registry
             return true;
         }
-        Collection<Holder<?>> tags = registryTags.get(id);
-        if (tags == null) return true;
-        if (tags.size() == 1 && tags.stream().findFirst().get().value() == Items.AIR) {
-            Moonlight.LOGGER.warn("Found broken tag which just contained the empty item: " + id);
-            return true;
-        }
-        return tags.isEmpty();
+        return registryTags.contains(id);
     }
 
     public static void registerSimple(ResourceLocation id, Predicate<String> predicate) {
-        ResourceConditions.register(id, j -> predicate.test(j.get(id.getPath()).getAsString()));
+        //TODO: re add
+        //ResourceConditions.register(id, j -> predicate.test(j.get(id.getPath()).getAsString()));
     }
 
     public static boolean matchesForgeCondition(JsonObject obj) {
@@ -119,6 +117,9 @@ public class ResourceConditionsBridge {
      * @throws RuntimeException If some condition failed to parse.
      */
     public static boolean conditionMatches(JsonObject condition) throws RuntimeException {
+        if(true)return true;
+        //TODO: re add
+        /*
         if (condition.has(CONDITION_ID)) {
             ResourceLocation conditionId = ResourceLocation.parse(GsonHelper.getAsString(condition, CONDITION_ID));
             Predicate<JsonObject> jrc = ResourceConditions.get(conditionId);
@@ -128,7 +129,8 @@ public class ResourceConditionsBridge {
             } else {
                 return jrc.test(condition);
             }
-        } else return ResourceConditions.conditionMatches(condition);
+        } else return ResourceConditions.conditionMatches(condition);*/
+        return true;
     }
 
     public static boolean conditionsMatch(JsonArray conditions, boolean and) throws RuntimeException {

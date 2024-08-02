@@ -64,7 +64,7 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    archiveClassifier = "forge"
+    archiveClassifier = "neoforge"
 
     exclude('net/mehvahdjukaar/moonlight/example/**')
 }
@@ -87,11 +87,11 @@ sourcesJar {
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 
-    archiveClassifier = "forge-sources"
+    archiveClassifier = "neoforge-sources"
 }
 
 remapSourcesJar{
-    archiveClassifier = "forge-sources"
+    archiveClassifier = "neoforge-sources"
 }
 
 components.java {

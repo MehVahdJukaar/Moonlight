@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.item.ILeftClickReact;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -11,15 +12,15 @@ import net.minecraft.world.item.ItemStack;
 
 public record ServerBoundItemLeftClickPacket(InteractionHand hand) implements Message {
 
-    public static final TypeAndCodec<FriendlyByteBuf, ServerBoundItemLeftClickPacket> TYPE =
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ServerBoundItemLeftClickPacket> TYPE =
             Message.makeType(Moonlight.res("c2s_item_left_click"), ServerBoundItemLeftClickPacket::new);
 
-    public ServerBoundItemLeftClickPacket(FriendlyByteBuf buf) {
+    public ServerBoundItemLeftClickPacket(RegistryFriendlyByteBuf buf) {
         this(buf.readEnum(InteractionHand.class));
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
         buf.writeEnum(this.hand);
     }
 

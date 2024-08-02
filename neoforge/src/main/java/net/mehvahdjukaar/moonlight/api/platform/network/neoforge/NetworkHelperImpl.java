@@ -1,9 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.platform.network.neoforge;
 
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
+import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -26,7 +29,7 @@ public class NetworkHelperImpl {
             NetworkHelper.RegisterMessagesEvent registerMessagesEvent = new NetworkHelper.RegisterMessagesEvent() {
 
                 @Override
-                public <M extends Message> void registerServerBound(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M> messageType) {
+                public <M extends Message> void registerServerBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
                     event.registrar(messageType.type().id().getPath())
                             .versioned(versionStr)
                             .executesOn(HandlerThread.MAIN)
@@ -35,7 +38,7 @@ public class NetworkHelperImpl {
                 }
 
                 @Override
-                public <M extends Message> void registerClientBound(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M> messageType) {
+                public <M extends Message> void registerClientBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
                     event.registrar(messageType.type().id().getPath())
                             .versioned(versionStr)
                             .executesOn(HandlerThread.MAIN)
@@ -44,7 +47,7 @@ public class NetworkHelperImpl {
                 }
 
                 @Override
-                public <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M> messageType) {
+                public <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
                     event.registrar(messageType.type().id().getPath())
                             .versioned(versionStr)
                             .executesOn(HandlerThread.MAIN)
@@ -54,6 +57,8 @@ public class NetworkHelperImpl {
             };
             eventListener.accept(registerMessagesEvent);
         };
+
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
     private record ContextWrapper(IPayloadContext c) implements Message.Context {

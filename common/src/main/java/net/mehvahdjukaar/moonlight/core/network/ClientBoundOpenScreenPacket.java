@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -13,13 +14,13 @@ import net.minecraft.world.level.Level;
 
 public class ClientBoundOpenScreenPacket implements Message {
 
-    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundOpenScreenPacket> TYPE = Message.makeType(
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundOpenScreenPacket> TYPE = Message.makeType(
             Moonlight.res("s2c_open_screen"), ClientBoundOpenScreenPacket::new);
 
     public final BlockPos pos;
     private final Direction dir;
 
-    public ClientBoundOpenScreenPacket(FriendlyByteBuf buffer) {
+    public ClientBoundOpenScreenPacket(RegistryFriendlyByteBuf buffer) {
         this.pos = buffer.readBlockPos();
         this.dir = Direction.from3DDataValue(buffer.readVarInt());
     }
@@ -30,7 +31,7 @@ public class ClientBoundOpenScreenPacket implements Message {
     }
 
     @Override
-    public void write(FriendlyByteBuf buffer) {
+    public void write(RegistryFriendlyByteBuf buffer) {
         buffer.writeBlockPos(this.pos);
         buffer.writeVarInt(this.dir.get3DDataValue());
     }

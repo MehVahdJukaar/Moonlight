@@ -328,6 +328,7 @@ public class SoftFluidStack implements DataComponentHolder {
                 is.set(comp, componentValue);
             else if (to instanceof SoftFluidStack sf)
                 sf.set(comp, componentValue);
+            else PlatHelper.setComponent(to, comp, componentValue);
         }
     }
 

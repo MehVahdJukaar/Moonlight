@@ -145,7 +145,7 @@ public class ForgeHelperImpl {
     }
 
     public static boolean canEquipItem(LivingEntity entity, ItemStack stack, EquipmentSlot slot) {
-        return slot == Mob.getEquipmentSlotForItem(stack);
+        return entity.getEquipmentSlotForItem(stack) == slot;
     }
 
     public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {

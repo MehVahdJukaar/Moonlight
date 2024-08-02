@@ -28,8 +28,8 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     private final Matrix3f normalTransf;
 
     private int emissivity = 0;
-    private BakedQuad output;
     private boolean autoDirection = false;
+    private BakedQuad output;
     private Consumer<BakedQuad> quadConsumer = s -> output = s;
 
     private boolean building = false;
@@ -55,11 +55,11 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     public void end() {
         if (building) {
-            bakeQuad();
+            tryBaking();
         }
     }
 
-    private void bakeQuad() {
+    private void tryBaking() {
         if (building) {
             BakedQuad quad = inner.bakeQuad();
             if (emissivity != 0) {
@@ -78,7 +78,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     @Override
     public BakedQuadBuilderImpl addVertex(float x, float y, float z) {
-        bakeQuad();
+        tryBaking();
         building = true;
         if (globalTransform != null) {
             inner.addVertex(new Matrix4f(globalTransform), x, y, z);

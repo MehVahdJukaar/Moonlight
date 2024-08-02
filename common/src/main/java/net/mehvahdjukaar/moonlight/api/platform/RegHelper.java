@@ -387,7 +387,7 @@ public class RegHelper {
 
     @FunctionalInterface
     public interface SpawnPlacementEvent {
-        <T extends Entity> void register(EntityType<T> entityType, SpawnPlacementType decoratorType,
+        <T extends Mob> void register(EntityType<T> entityType, SpawnPlacementType decoratorType,
                                          Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate);
     }
 

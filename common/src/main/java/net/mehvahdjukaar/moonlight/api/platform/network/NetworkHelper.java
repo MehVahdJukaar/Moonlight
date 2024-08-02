@@ -1,14 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.platform.network;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 
@@ -20,11 +18,12 @@ public class NetworkHelper {
     }
 
     public interface RegisterMessagesEvent {
-        <M extends Message> void registerServerBound(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M>  messageType);
-        <M extends Message> void registerClientBound(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M>  messageType);
-        <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M>  messageType);
-    }
+        <M extends Message> void registerServerBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType);
 
+        <M extends Message> void registerClientBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType);
+
+        <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType);
+    }
 
 
     @ExpectPlatform

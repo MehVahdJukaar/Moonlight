@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
@@ -11,13 +12,13 @@ import java.io.ByteArrayInputStream;
 
 public class ClientBoundSyncConfigsMessage implements Message {
 
-    public static final TypeAndCodec<FriendlyByteBuf, ClientBoundSyncConfigsMessage> TYPE = Message.makeType(
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundSyncConfigsMessage> TYPE = Message.makeType(
             Moonlight.res("s2c_sync_configs"), ClientBoundSyncConfigsMessage::new);
 
     public final ResourceLocation configId;
     public final byte[] configData;
 
-    public ClientBoundSyncConfigsMessage(FriendlyByteBuf buf) {
+    public ClientBoundSyncConfigsMessage(RegistryFriendlyByteBuf buf) {
         this.configId = buf.readResourceLocation();
         this.configData = buf.readByteArray();
     }
@@ -28,7 +29,7 @@ public class ClientBoundSyncConfigsMessage implements Message {
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
         buf.writeResourceLocation(this.configId);
         buf.writeByteArray(this.configData);
     }

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.network;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.codec.StreamDecoder;
@@ -10,12 +11,12 @@ import net.minecraft.world.entity.player.Player;
 
 public interface Message extends CustomPacketPayload {
 
-    static <T extends Message> TypeAndCodec<FriendlyByteBuf, T> makeType(
-            ResourceLocation id, StreamDecoder<FriendlyByteBuf, T> decoder) {
+    static <T extends Message> TypeAndCodec<RegistryFriendlyByteBuf, T> makeType(
+            ResourceLocation id, StreamDecoder<RegistryFriendlyByteBuf, T> decoder) {
         return new TypeAndCodec<>(new Type<>(id), StreamCodec.ofMember(Message::write, decoder));
     }
 
-    void write(FriendlyByteBuf buf);
+    void write(RegistryFriendlyByteBuf buf);
 
     void handle(Context context);
 

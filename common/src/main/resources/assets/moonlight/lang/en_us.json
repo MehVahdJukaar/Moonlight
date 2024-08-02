@@ -6,6 +6,10 @@
   "message.moonlight.anti_repost": "You seem to have downloaded %1$s from a malicious site :( Get the real version %2$s.",
   "message.moonlight.anti_repost_link": "here",
 
+  "tag.item.moonlight.non_recolorable": "Non recolorable",
+  "tag.block.moonlight.non_recolorable": "Non recolorable",
+  "tag.block.minecraft.mineable.shear": "Mineable by Shears",
+
   "wood_type.twilightforest.dark": "Darkwood",
   "leaves_type.twilightforest.dark": "Darkwood",
   "leaves_type.ulterlands.souldrained": "Petrified"

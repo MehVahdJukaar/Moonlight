@@ -47,7 +47,7 @@ subprojects {
             } else loaders = [modLoader]
             changelog = changelogText
             versionNumber = modLoader +"_"+ mod_version
-            versionType = "release"
+            versionType = "beta"
             if (modLoader == "fabric") {
                 dependencies {
                     required.project "fabric-api"
@@ -65,7 +65,7 @@ subprojects {
             project {
                 id = project_id
                 changelog = changelogText
-                releaseType = 'release'
+                releaseType = 'beta'
                 addGameVersion minecraft_version
 
                 if (modLoader == "forge") {

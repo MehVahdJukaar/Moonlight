@@ -15,7 +15,7 @@
     "item": "minecraft:suspicious_stew"
   },
   "preserved_components_from_item": [
-    "suspicious_stew_effects"
+    "minecraft:suspicious_stew_effects"
   ],
   "still_texture": "moonlight:block/soft_fluids/soup_liquid",
   "translation_key": "item.minecraft.suspicious_stew",

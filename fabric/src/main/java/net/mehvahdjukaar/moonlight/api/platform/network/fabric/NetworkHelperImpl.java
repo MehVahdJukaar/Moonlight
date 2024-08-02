@@ -4,13 +4,10 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
-import net.mehvahdjukaar.moonlight.api.platform.network.Context;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
-import net.mehvahdjukaar.moonlight.api.platform.network.NetworkDir;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
@@ -29,7 +26,7 @@ public class NetworkHelperImpl {
         eventListener.accept(new NetworkHelper.RegisterMessagesEvent() {
 
             @Override
-            public <M extends Message> void registerServerBound(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M> messageType) {
+            public <M extends Message> void registerServerBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
                 PayloadTypeRegistry.playC2S().register(messageType.type(), messageType.codec());
 
                 ServerPlayNetworking.registerGlobalReceiver(messageType.type(),
@@ -42,14 +39,14 @@ public class NetworkHelperImpl {
 
 
             @Override
-            public <M extends Message> void registerClientBound(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M> messageType) {
+            public <M extends Message> void registerClientBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
                 if (!PlatHelper.getPhysicalSide().isClient()) return;
 
                 NetworkHelperImplClient.register(messageType);
             }
 
             @Override
-            public <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, M> messageType) {
+            public <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
                 this.registerServerBound(messageType);
                 this.registerClientBound(messageType);
             }
@@ -57,11 +54,11 @@ public class NetworkHelperImpl {
 
     }
 
-    public record ContextWrapper(ServerPlayNetworking.Context c) implements Context {
+    public record ContextWrapper(ServerPlayNetworking.Context c) implements Message.Context {
 
         @Override
-        public NetworkDir getDirection() {
-            return NetworkDir.SERVER_BOUND;
+        public Message.NetworkDir getDirection() {
+            return Message.NetworkDir.SERVER_BOUND;
         }
 
         @Override

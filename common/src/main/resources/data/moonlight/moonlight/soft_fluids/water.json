@@ -42,10 +42,11 @@
     }
   ],
   "equivalent_fluids": [
-    "minecraft:water"
+    "minecraft:water",
+    "#c:water"
   ],
   "preserved_components_from_item": [
-    {"id":"purity:purity","required":false}
+    "purity:purity"
   ],
   "flowing_texture": "minecraft:block/water_flow",
   "still_texture": "minecraft:block/water_still",

@@ -4,9 +4,14 @@ import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.util.LenientListCodec;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.minecraft.Util;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.TagKey;
+import net.minecraft.tags.TagManager;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +33,7 @@ public class FluidContainerList {
     }
 
     public FluidContainerList() {
+
     }
 
     private void addCategory(Category newCategory) {

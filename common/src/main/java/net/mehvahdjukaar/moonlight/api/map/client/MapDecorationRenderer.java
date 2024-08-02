@@ -88,7 +88,7 @@ public class MapDecorationRenderer<T extends MLMapDecoration> {
         int r = FastColor.ARGB32.red(color);
 
         RenderSystem.enableDepthTest();
-        TextureAtlasSprite sprite = MapDecorationClientManager.getAtlasSprite(textureId);
+        TextureAtlasSprite sprite = Minecraft.getInstance().getMapDecorationTextures().getSprite(textureId);
         //so we can use local coordinates
         //idk wy wrap doesnt work, it does the same as here
         //vertexBuilder = sprite.wrap(vertexBuilder);

@@ -220,7 +220,7 @@ public class RegHelperImpl {
 
     record PlacementEventImpl(RegisterSpawnPlacementsEvent event) implements RegHelper.SpawnPlacementEvent {
         @Override
-        public <T extends Entity> void register(EntityType<T> entityType, SpawnPlacementType decoratorType,
+        public <T extends Mob> void register(EntityType<T> entityType, SpawnPlacementType decoratorType,
                                                 Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
             event.register(entityType, decoratorType, heightMapType, decoratorPredicate, RegisterSpawnPlacementsEvent.Operation.AND);
         }
