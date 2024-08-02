@@ -1,0 +1,14 @@
+package net.mehvahdjukaar.moonlight.api.events.neoforge;
+
+import net.mehvahdjukaar.moonlight.api.events.ILightningStruckBlockEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+
+public class ILightningStruckBlockEventImpl {
+    public static ILightningStruckBlockEvent create(BlockState state, LevelAccessor level, BlockPos pos, LightningBolt entity) {
+        return new LightningStruckBlockEvent(state, level, pos, entity);
+    }
+
+}

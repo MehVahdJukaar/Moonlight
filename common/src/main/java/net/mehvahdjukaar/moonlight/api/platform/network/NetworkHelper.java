@@ -37,6 +37,7 @@ public class NetworkHelper {
         throw new AssertionError();
     }
 
+    @ExpectPlatform
     public static void sendToAllClientPlayersInRange(ServerLevel level, BlockPos pos, double radius, CustomPacketPayload message) {
         throw new AssertionError();
     }
@@ -51,7 +52,7 @@ public class NetworkHelper {
     }
 
     @ExpectPlatform
-    public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
+    public static void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         throw new AssertionError();
     }
 
