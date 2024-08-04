@@ -25,6 +25,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -41,18 +42,18 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     private final String modId;
     private final String modURL;
 
-    public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
+    public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName,
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, com.mrcrayfish.configured.api.IModConfig, CustomConfigScreen> configScreenFactory,
                                     ModConfigHolder... specs) {
-        this(modId, mainIcon, displayName, background, parent, configScreenFactory, createConfigMap(specs));
+        this(modId, mainIcon, displayName, parent, configScreenFactory, createConfigMap(specs));
     }
 
-    public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
+    public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName,
                                     Screen parent,
                                     BiFunction<CustomConfigSelectScreen, com.mrcrayfish.configured.api.IModConfig, CustomConfigScreen> configScreenFactory,
                                     Map<ConfigType, Set<com.mrcrayfish.configured.api.IModConfig>> configMap) {
-        super(parent, Component.literal(displayName), ensureNotNull(background), configMap);
+        super(parent, Component.literal(displayName), configMap);
         this.configScreenFactory = configScreenFactory;
         this.mainIcon = mainIcon;
         this.modId = modId;
@@ -82,7 +83,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         for (var ss : specs) {
             ForgeConfigHolder s = (ForgeConfigHolder) ss;
             ModConfig modConfig = s.getModConfig();
-            var forgeConfig = new NeoForgeConfig(modConfig, ((ForgeConfigHolder) ss).getSpec()){};
+            var forgeConfig = new NeoForgeConfig(modConfig);
             var set = modConfigMap.computeIfAbsent(
                     forgeConfig.getType(), a -> new HashSet<>());
             set.add(forgeConfig);

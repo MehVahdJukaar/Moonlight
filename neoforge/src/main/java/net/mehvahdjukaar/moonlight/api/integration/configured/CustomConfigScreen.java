@@ -73,7 +73,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             field = ObfuscationReflectionHelper.findMethod(c, methodName);
         } catch (Exception ignored) {
         }
-        ChestRenderer
         return field;
     }
 

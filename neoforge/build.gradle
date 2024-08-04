@@ -65,7 +65,7 @@ remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     archiveClassifier = "neoforge"
-
+    atAccessWideners.add("${rootProject.mod_id}.accesswidener") // this is a path inside the mod jar
     exclude('net/mehvahdjukaar/moonlight/example/**')
 }
 
