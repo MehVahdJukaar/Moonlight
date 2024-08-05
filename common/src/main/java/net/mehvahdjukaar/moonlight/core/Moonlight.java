@@ -37,6 +37,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 @ApiStatus.Internal
 public class Moonlight {
@@ -76,6 +77,10 @@ public class Moonlight {
         //client init
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.initClient();
+        }
+
+        if(PlatHelper.isDev()){
+            MixinEnvironment.getCurrentEnvironment().audit();
         }
     }
 

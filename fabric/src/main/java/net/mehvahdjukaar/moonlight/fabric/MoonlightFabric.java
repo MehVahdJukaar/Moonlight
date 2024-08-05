@@ -30,6 +30,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
         Moonlight.commonInit();
 
+
         ModMessages.CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundOpenScreenMessage.class, ClientBoundOpenScreenMessage::new);
 

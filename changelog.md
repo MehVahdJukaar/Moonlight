@@ -1,3 +1,1 @@
-- improved Palette recoloring code
-- fixed an issue with fluid tank and its color caching capacity not refreshing sometimes
-- added more utility methods to palette class
+fixed an issue with first person animations on fabric
