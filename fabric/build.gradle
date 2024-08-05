@@ -56,27 +56,8 @@ dependencies {
 
 
 processResources {
-    // input variables of this task:
-    var replaceProperties = [
-            minecraft_version    : minecraft_version,
-            minecraft_min_version: minecraft_min_version,
-            minecraft_max_version: minecraft_max_version,
-
-            mod_id               : mod_id,
-            mod_name             : mod_name,
-            mod_version          : mod_version,
-            mod_license          : mod_license,
-            mod_authors          : mod_authors,
-            mod_description      : mod_description,
-            mod_credits          : mod_credits,
-            mod_homepage         : mod_homepage,
-            mod_github           : mod_github
-    ]
-    // setting them as input
-    inputs.properties replaceProperties
-
     filesMatching("fabric.mod.json") {
-        expand replaceProperties + [project: project]
+        expand rootProject.ext.replaceProperties + [project: project]
     }
 }
 
