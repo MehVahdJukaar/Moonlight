@@ -57,12 +57,12 @@ public abstract class ModConfigHolder {
         this.filePath = configDirectory.resolve(fileName);
         this.type = type;
         this.changeCallback = changeCallback;
-        this.readableName = Component.literal(LangBuilder.getReadableName(id.toDebugFileName()+"_configs"));
+        this.readableName = Component.literal(LangBuilder.getReadableName(id.toDebugFileName() + "_configs"));
 
         ModConfigHolder.addTrackedSpec(this);
     }
 
-    public Component getReadableName(){
+    public Component getReadableName() {
         return readableName;
     }
 
@@ -119,20 +119,20 @@ public abstract class ModConfigHolder {
 
     //send configs from server -> client
     public void syncConfigsToPlayer(ServerPlayer player) {
-        if (this.getConfigType() == ConfigType.COMMON && this.isSynced()) {
+        if (this.isSynced()) {
             try {
                 final byte[] configData = Files.readAllBytes(this.getFullPath());
                 NetworkHelper.sendToClientPlayer(player, new ClientBoundSyncConfigsMessage(configData, this.getId()));
             } catch (IOException e) {
                 Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
             }
-        } else throw new UnsupportedOperationException();
+        } else throw new UnsupportedOperationException("Tried to sync a config of type " + this.getConfigType());
     }
 
 
     //called on server. sync server -> all clients
     public void sendSyncedConfigsToAllPlayers() {
-        if (this.getConfigType() == ConfigType.COMMON && this.isSynced()) {
+        if (this.isSynced()) {
             MinecraftServer currentServer = PlatHelper.getCurrentServer();
             if (currentServer != null) {
                 PlayerList playerList = currentServer.getPlayerList();
@@ -140,7 +140,7 @@ public abstract class ModConfigHolder {
                     syncConfigsToPlayer(player);
                 }
             }
-        } else throw new UnsupportedOperationException();
+        } else throw new UnsupportedOperationException("Tried to sync a config of type " + this.getConfigType());
     }
 
     public static class ConfigLoadingException extends RuntimeException {

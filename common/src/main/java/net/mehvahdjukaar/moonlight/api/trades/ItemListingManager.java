@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.trades;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
@@ -28,8 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-//TODO: rename to ItemListingManager
-public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
+public class ItemListingManager extends RegistryAccessJsonReloadListener {
 
     protected static final CodecMapRegistry<ModItemListing> REGISTRY = MapRegistry.ofCodec();
     private static final Map<EntityType<?>, Int2ObjectArrayMap<List<ModItemListing>>> SPECIAL_CUSTOM_TRADES = new HashMap<>();
@@ -47,7 +45,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
     }
 
 
-    public ItemListingRegistry() {
+    public ItemListingManager() {
         super(new Gson(), "moonlight/villager_trades");
     }
 

@@ -1,22 +1,17 @@
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
-import net.mehvahdjukaar.moonlight.api.trades.ItemListingRegistry;
+import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class VillagerTradesExample {
@@ -27,7 +22,7 @@ public class VillagerTradesExample {
 
     // To remove a trade you can use the "no_op" type
     public static void init() {
-        ItemListingRegistry.registerSerializer(Moonlight.res("example_custom_trade_type"), CustomTradeType.CODEC);
+        ItemListingManager.registerSerializer(Moonlight.res("example_custom_trade_type"), CustomTradeType.CODEC);
     }
 
     public record CustomTradeType(ItemStack emeralds, ItemStack priceSecondary, int rockets,

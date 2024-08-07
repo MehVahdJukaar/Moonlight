@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.neoforge.ForgeConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
+import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
@@ -62,6 +63,7 @@ public class MoonlightForge {
         bus.addListener(MoonlightForge::registerCapabilities);
         ModLootModifiers.register();
         ModLootConditions.register();
+        ResourceConditionsBridge.init();
 
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init(bus);

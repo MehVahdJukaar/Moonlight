@@ -47,7 +47,7 @@ public class MapDataInternal {
 
     //map markers
 
-    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(Moonlight.res("map_markers"));
+    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(Moonlight.res("map_marker"));
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
     private static final MapRegistry<Supplier<MLSpecialMapDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new MapRegistry<>("code_map_decoration_types_factories");
 

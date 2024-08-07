@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface MenuScreensAccessor {
 
     @Invoker("getConstructor")
-    public static <T extends AbstractContainerMenu> MenuScreens.ScreenConstructor<T, ?> invokeGetConstructor(MenuType<T> type) {
+    static <T extends AbstractContainerMenu> MenuScreens.ScreenConstructor<T, ?> invokeGetConstructor(MenuType<T> type) {
         throw new AssertionError();
     }
 }

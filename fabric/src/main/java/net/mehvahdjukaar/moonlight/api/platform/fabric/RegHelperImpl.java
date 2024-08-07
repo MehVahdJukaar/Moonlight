@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
+import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -8,17 +9,22 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.fabric.impl.resource.conditions.conditions.AllModsLoadedResourceCondition;
 import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
-import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
+import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.ResourceConditionsBridge;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -213,8 +219,9 @@ public class RegHelperImpl {
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         Moonlight.assertInitPhase();
-
-        ResourceConditionsBridge.registerSimple(id, predicate);
+        var codec = OptionalRecipeCondition.createCodec(id, predicate);
+        ResourceConditionType<OptionalRecipeCondition> type = ResourceConditionType.create(id, codec);
+        ResourceConditions.register(type);
     }
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {

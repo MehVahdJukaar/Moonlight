@@ -139,7 +139,7 @@ allprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
-        options.release = rootProject.java_version
+        options.release = rootProject.java_version.toInteger()
     }
 
     java {

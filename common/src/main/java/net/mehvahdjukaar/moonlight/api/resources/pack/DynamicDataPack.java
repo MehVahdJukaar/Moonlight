@@ -9,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.item.crafting.Recipe;

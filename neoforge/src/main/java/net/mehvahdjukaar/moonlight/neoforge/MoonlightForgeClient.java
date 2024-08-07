@@ -11,7 +11,10 @@ import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -22,6 +25,7 @@ import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.conditions.ConditionalOps;
 
 public class MoonlightForgeClient {
 

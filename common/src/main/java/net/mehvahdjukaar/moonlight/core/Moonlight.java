@@ -18,7 +18,7 @@ import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
-import net.mehvahdjukaar.moonlight.api.trades.ItemListingRegistry;
+import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
@@ -64,7 +64,7 @@ public class Moonlight {
 
         PlatHelper.addCommonSetup(Moonlight::commonSetup);
 
-        PlatHelper.addServerReloadListener(new ItemListingRegistry(), Moonlight.res("villager_trades"));
+        PlatHelper.addServerReloadListener(new ItemListingManager(), Moonlight.res("villager_trade"));
 
         //hack
         BlockSetAPI.addDynamicRegistration((reg, wood) -> AdditionalItemPlacementsAPI.afterItemReg(),

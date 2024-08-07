@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.map.fabric;
 
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 
 public class MapDataInternalImpl {

@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.FabricConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
+import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.misc.DummyWorld;

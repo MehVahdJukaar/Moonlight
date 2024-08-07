@@ -11,6 +11,7 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.OptionalRecipeC
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
+import net.minecraft.client.server.IntegratedPlayerList;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -125,6 +126,8 @@ public class RegHelperImpl {
 
     private static IEventBus getModEventBus(String modId) {
         ModList modList = ModList.get();
+        //hack for condition bridge
+        if(modId.equals("fabric") || modId.equals("neoforge")) modId = MoonlightForge.MOD_ID;
         Preconditions.checkNotNull(modList, "ModList was null. This means that some mod registry classes were loaded way too early, likely by mixins");
         var cont = modList.getModContainerById(modId).get();
         IEventBus bus;

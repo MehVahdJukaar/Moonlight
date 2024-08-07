@@ -1,24 +1,12 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
-import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Iterator;
-import java.util.Map;
 
 @Mixin(SimplePreparableReloadListener.class)
 public abstract class ConditionsHackMixin {
 
+/*
     //TODO: refactor in 1.20 and mixin into forge side instead. Then use fabric stuff everywhere directly
     //literally copies what fabric does
     @Inject(at = @At("HEAD"), method = "method_18790")
@@ -36,5 +24,6 @@ public abstract class ConditionsHackMixin {
                 }
             }
         }
-    }
+    }*/
+
 }

@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.impl.resource.conditions.conditions.AllModsLoadedResourceCondition;
+import net.fabricmc.loader.impl.discovery.ModLoadCondition;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
