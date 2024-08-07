@@ -35,6 +35,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @ApiStatus.Internal
 public class Moonlight {
 
@@ -43,6 +46,9 @@ public class Moonlight {
     public static final Logger LOGGER = LogManager.getLogger("Moonlight");
     public static final boolean HAS_BEEN_INIT = true;
     public static final ThreadLocal<Boolean> CAN_EARLY_RELOAD_HACK = ThreadLocal.withInitial(() -> true);
+
+    private static final Set<String> DEPENDENTS = new HashSet<>();
+
 
     public static ResourceLocation res(String name) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
@@ -129,4 +135,14 @@ public class Moonlight {
         }
     }
 
+    @ApiStatus.Internal
+    public static void addDependent(String modId) {
+        if (!Set.of("minecraft", "neoforge", "fabric").contains(modId)) {
+            DEPENDENTS.add(modId);
+        }
+    }
+
+    public static Set<String> getDependents() {
+        return Set.copyOf(DEPENDENTS);
+    }
 }

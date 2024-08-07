@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.neoforge.ForgeConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.neoforge.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -80,14 +81,25 @@ public class MoonlightForge {
         }
     }
 
+    //TODO: change or remove
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        for (BlockEntityType<?> beType : BuiltInRegistries.BLOCK_ENTITY_TYPE) {
-            var instance = beType.create(BlockPos.ZERO, beType.getValidBlocks().stream().findFirst().get().defaultBlockState());
-            if (instance instanceof ItemDisplayTile) {
-                event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, beType,
-                        (sidedContainer, side) -> side == null ? new InvWrapper((Container) sidedContainer) : new SidedInvWrapper((WorldlyContainer) sidedContainer, side));
+        for (var e : BuiltInRegistries.BLOCK_ENTITY_TYPE.entrySet()) {
+            String modId = e.getKey().location().getNamespace();
+            if (!Moonlight.getDependents().contains(modId)) continue;
+            try {
+                var beType = e.getValue();
+                var instance = beType.create(BlockPos.ZERO, beType.getValidBlocks().stream().findFirst().get().defaultBlockState());
+                if (instance instanceof ItemDisplayTile) {
+                    registerDefaultItemCap(event, beType);
+                }
+            } catch (Exception ignored) {
             }
         }
+    }
+
+    private static void registerDefaultItemCap(RegisterCapabilitiesEvent event, BlockEntityType<?> beType) {
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, beType,
+                (sidedContainer, side) -> side == null ? new InvWrapper((Container) sidedContainer) : new SidedInvWrapper((WorldlyContainer) sidedContainer, side));
     }
 
 

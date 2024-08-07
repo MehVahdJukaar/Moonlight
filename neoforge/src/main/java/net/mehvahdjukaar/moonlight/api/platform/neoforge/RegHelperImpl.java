@@ -9,9 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
-import net.minecraft.client.server.IntegratedPlayerList;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -102,10 +100,11 @@ public class RegHelperImpl {
         if (name.getNamespace().equals("minecraft")) {
             throw new IllegalArgumentException("Registering under minecraft namespace is not supported");
         }
+
         var m = REGISTRIES.computeIfAbsent(regKey, h -> new ConcurrentHashMap<>());
         String modId = name.getNamespace();
         DeferredRegister<T> registry = (DeferredRegister<T>) m.computeIfAbsent(modId, c -> {
-            if (PlatHelper.getPhysicalSide().isClient()) AntiRepostWarning.addMod(modId);
+            Moonlight.addDependent(modId);
 
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
             var bus = getModEventBus(modId);
@@ -127,7 +126,7 @@ public class RegHelperImpl {
     private static IEventBus getModEventBus(String modId) {
         ModList modList = ModList.get();
         //hack for condition bridge
-        if(modId.equals("fabric") || modId.equals("neoforge")) modId = MoonlightForge.MOD_ID;
+        if (modId.equals("fabric") || modId.equals("neoforge")) modId = MoonlightForge.MOD_ID;
         Preconditions.checkNotNull(modList, "ModList was null. This means that some mod registry classes were loaded way too early, likely by mixins");
         var cont = modList.getModContainerById(modId).get();
         IEventBus bus;
@@ -224,7 +223,7 @@ public class RegHelperImpl {
     record PlacementEventImpl(RegisterSpawnPlacementsEvent event) implements RegHelper.SpawnPlacementEvent {
         @Override
         public <T extends Mob> void register(EntityType<T> entityType, SpawnPlacementType decoratorType,
-                                                Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
+                                             Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate) {
             event.register(entityType, decoratorType, heightMapType, decoratorPredicate, RegisterSpawnPlacementsEvent.Operation.AND);
         }
     }
@@ -262,21 +261,27 @@ public class RegHelperImpl {
 
         @Override
         public void addItems(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> target, boolean after, List<ItemStack> items) {
-            if (target == null) {
-                event.acceptAll(items);
-            } else {
+            if (event.getTabKey() != tab) return;
+            if (target != null) {
                 if (after) {
                     ItemStack last = findLast(event, target);
-                    for (int j = items.size(); j > 0; j--) {
-                        event.insertAfter(last, items.get(j - 1), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    if (!last.isEmpty()) {
+                        for (int j = items.size(); j > 0; j--) {
+                            event.insertAfter(last, items.get(j - 1), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                        }
+                        return;
                     }
                 } else {
                     ItemStack first = findFirst(event, target);
-                    for (var s : items) {
-                        event.insertBefore(first, s, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    if (!first.isEmpty()) {
+                        for (var s : items) {
+                            event.insertBefore(first, s, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                        }
+                        return;
                     }
                 }
             }
+            event.acceptAll(items);
         }
 
         private ItemStack findFirst(BuildCreativeModeTabContentsEvent event, Predicate<ItemStack> target) {

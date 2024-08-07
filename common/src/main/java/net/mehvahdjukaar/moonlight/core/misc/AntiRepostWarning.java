@@ -17,19 +17,11 @@ import java.util.stream.Collectors;
 
 public class AntiRepostWarning {
 
-    private static final Set<String> MODS = new HashSet<>();
-
-    public static void addMod(String id) {
-        if (!Objects.equals(id, "minecraft")) {
-            MODS.add(id);
-        }
-    }
-
     public static void run() {
         if (PlatHelper.isDev()) return;
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
-        Set<String> reposted = MODS.stream().filter(AntiRepostWarning::isFileNameSus).collect(Collectors.toSet());
+        Set<String> reposted = Moonlight.getDependents().stream().filter(AntiRepostWarning::isFileNameSus).collect(Collectors.toSet());
 
         try {
             for (var m : reposted) {
