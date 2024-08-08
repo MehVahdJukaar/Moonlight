@@ -185,6 +185,17 @@ public class Utils {
         throw new UnsupportedOperationException("Unsupported class type " + object.getClass() + ". Expected a registry entry for a call to Utils.getID()");
     }
 
+    public static Level hackyGetALevel() {
+        var s = PlatHelper.getCurrentServer();
+        if (s != null) return s.getLevel(Level.OVERWORLD);
+        if (PlatHelper.getPhysicalSide().isClient()) {
+            var level = Minecraft.getInstance().level;
+            if (level != null) return level;
+            throw new UnsupportedOperationException("Failed to get overworld client level");
+        }
+        throw new UnsupportedOperationException("Failed to get a level. This is a bug");
+    }
+
     //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
         var s = PlatHelper.getCurrentServer();
@@ -326,5 +337,6 @@ public class Utils {
     public static <E> Codec<HolderSet<E>> lenientHomogeneousList(ResourceKey<? extends Registry<E>> registryKey) {
         return LenientHolderSetCodec.create(registryKey, RegistryFixedCodec.create(registryKey), false);
     }
+
 
 }

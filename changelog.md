@@ -1,1 +1,1 @@
-fixed villager trades directory being pluralized
+fixed a crash on server due to map data

@@ -1,11 +1,10 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
-import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
@@ -18,6 +17,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -30,7 +30,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,12 +43,12 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
     @Final
     private MapId mapId;
 
-    @Shadow public abstract Optional<MapItemSavedData.MapPatch> colorPatch();
-
+    @Nullable
     @Unique
-    private Optional<List<MLMapDecoration>> moonlight$customDecorations = Optional.empty();
+    private List<MLMapDecoration> moonlight$customDecorations = null;
+    @Nullable
     @Unique
-    private Optional<CompoundTag> moonlight$customData = Optional.empty();
+    private CompoundTag moonlight$customData = null;
     @Unique
     private int moonlight$mapCenterX = 0;
     @Unique
@@ -61,10 +60,11 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
     @Inject(method = "<init>(Lnet/minecraft/world/level/saveddata/maps/MapId;BZLjava/util/Optional;Ljava/util/Optional;)V",
             at = @At("RETURN"))
     private void moonlight$addExtraCenterAndDimension(MapId mapId, byte b, boolean bl, Optional optional, Optional optional2, CallbackInfo ci) {
-        var level = PlatHelper.getCurrentServer().getLevel(Level.OVERWORLD);
+        var level = Utils.hackyGetALevel();
         moonlight$dimension = null;
-        if (level != null) {
-            MapItemSavedData data = CompatHandler.getMapDataFromKnownKeys(level, mapId);
+        // on server side we add extra data like this
+        if (level instanceof ServerLevel sl) {
+            MapItemSavedData data = CompatHandler.getMapDataFromKnownKeys(sl, mapId);
             if (data != null) {
                 this.moonlight$mapCenterX = data.centerX;
                 this.moonlight$mapCenterZ = data.centerZ;
@@ -82,39 +82,66 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
                 p -> ((IMapDataPacketExtension) (Object) p).moonlight$getCustomDecorations(),
                 ByteBufCodecs.OPTIONAL_COMPOUND_TAG,
                 p -> ((IMapDataPacketExtension) (Object) p).moonlight$getCustomMapDataTag(),
-                (old, deco, tag) -> {
-                    ((IMapDataPacketExtension) (Object) old).moonlight$setCustomDecorations(deco);
-                    ((IMapDataPacketExtension) (Object) old).moonlight$setCustomMapDataTag(tag);
+                ResourceLocation.STREAM_CODEC, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getDimension(),
+                ByteBufCodecs.VAR_INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterX(),
+                ByteBufCodecs.VAR_INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterZ(),
+                (old, deco, tag, res, x, y) -> {
+                    IMapDataPacketExtension ext = (IMapDataPacketExtension) (Object) old;
+                    ext.moonlight$setCustomDecorations(deco);
+                    ext.moonlight$setCustomMapDataTag(tag);
+                    ext.moonlight$setDimension(res);
+                    ext.moonlight$setMapCenter(x, y);
                     return old;
                 }
         );
     }
 
+
     @Override
     public Optional<CompoundTag> moonlight$getCustomMapDataTag() {
-        return moonlight$customData;
+        return Optional.ofNullable(moonlight$customData);
     }
 
     @Override
     public Optional<List<MLMapDecoration>> moonlight$getCustomDecorations() {
-        return moonlight$customDecorations;
+        return Optional.ofNullable(moonlight$customDecorations);
     }
 
     @Override
     public void moonlight$setCustomDecorations(Optional<List<MLMapDecoration>> deco) {
-        moonlight$customDecorations = deco.map(List::copyOf);
+        moonlight$customDecorations = deco.map(List::copyOf).orElse(null);
     }
 
     @Override
     public void moonlight$setCustomMapDataTag(Optional<CompoundTag> tag) {
-        moonlight$customData = tag;
+        moonlight$customData = tag.orElse(null);
     }
 
     @Override
-    public ResourceKey<Level> moonlight$getDimension() {
-        return ResourceKey.create(Registries.DIMENSION, moonlight$dimension);
+    public ResourceLocation moonlight$getDimension() {
+        return moonlight$dimension;
     }
 
+    @Override
+    public void moonlight$setDimension(ResourceLocation dim) {
+        this.moonlight$dimension = dim;
+    }
+
+    @Override
+    public int moonlight$getMapCenterX() {
+        return this.moonlight$mapCenterX;
+    }
+
+    @Override
+    public int moonlight$getMapCenterZ() {
+        return this.moonlight$mapCenterZ;
+    }
+
+    @Override
+    public void moonlight$setMapCenter(int x, int z) {
+        this.moonlight$mapCenterX = x;
+        this.moonlight$mapCenterZ = z;
+    }
 
     @Inject(method = "applyToMap", at = @At("HEAD"))
     private void handleExtraData(MapItemSavedData mapData, CallbackInfo ci) {
@@ -123,7 +150,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
 
         mapData.centerX = this.moonlight$mapCenterX;
         mapData.centerZ = this.moonlight$mapCenterZ;
-        mapData.dimension = this.moonlight$getDimension();
+        mapData.dimension = ResourceKey.create(Registries.DIMENSION, this.moonlight$dimension);
 
 
         if (mapData instanceof ExpandedMapData ed) {
@@ -133,11 +160,11 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
             //mapData = MapItemSavedData.createForClient(message.scale, message.locked, Minecraft.getInstance().level.dimension());
             //Minecraft.getInstance().level.setMapData(string, mapData);
 
-            if (serverDeco.isPresent()) {
+            if (serverDeco != null) {
                 decorations.clear();
                 int i;
-                for (i = 0; i < serverDeco.get().size(); ++i) {
-                    MLMapDecoration customDecoration = serverDeco.get().get(i);
+                for (i = 0; i < serverDeco.size(); ++i) {
+                    MLMapDecoration customDecoration = serverDeco.get(i);
                     if (customDecoration != null) decorations.put("icon-" + i, customDecoration);
                     else {
                         Moonlight.LOGGER.warn("Failed to load custom map decoration, skipping");
@@ -145,10 +172,10 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
                 }
 
             }
-            if (serverData.isPresent()) {
+            if (serverData != null) {
                 var customData = ed.ml$getCustomData();
                 for (var v : customData.values()) {
-                    v.loadFromUpdateTag(serverData.get());
+                    v.loadFromUpdateTag(serverData);
                 }
             }
 
