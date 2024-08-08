@@ -1,1 +1,1 @@
-improved some hacky capability code
+fixed villager trades directory being pluralized

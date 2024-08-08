@@ -46,7 +46,7 @@ public class ItemListingManager extends RegistryAccessJsonReloadListener {
 
 
     public ItemListingManager() {
-        super(new Gson(), "moonlight/villager_trades");
+        super(new Gson(), "moonlight/villager_trade");
     }
 
     @Override
