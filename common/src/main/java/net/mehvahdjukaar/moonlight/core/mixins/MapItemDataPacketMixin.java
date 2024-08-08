@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -60,10 +61,10 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
     @Inject(method = "<init>(Lnet/minecraft/world/level/saveddata/maps/MapId;BZLjava/util/Optional;Ljava/util/Optional;)V",
             at = @At("RETURN"))
     private void moonlight$addExtraCenterAndDimension(MapId mapId, byte b, boolean bl, Optional optional, Optional optional2, CallbackInfo ci) {
-        var level = Utils.hackyGetALevel();
+        var server = PlatHelper.getCurrentServer();
         moonlight$dimension = null;
         // on server side we add extra data like this
-        if (level instanceof ServerLevel sl) {
+        if (server != null && server.getLevel(Level.OVERWORLD) instanceof ServerLevel sl) {
             MapItemSavedData data = CompatHandler.getMapDataFromKnownKeys(sl, mapId);
             if (data != null) {
                 this.moonlight$mapCenterX = data.centerX;
@@ -83,14 +84,14 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
                 ByteBufCodecs.OPTIONAL_COMPOUND_TAG,
                 p -> ((IMapDataPacketExtension) (Object) p).moonlight$getCustomMapDataTag(),
                 ResourceLocation.STREAM_CODEC, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getDimension(),
-                ByteBufCodecs.VAR_INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterX(),
-                ByteBufCodecs.VAR_INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterZ(),
-                (old, deco, tag, res, x, y) -> {
+                ByteBufCodecs.INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterX(),
+                ByteBufCodecs.INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterZ(),
+                (old, deco, tag, res, x, z) -> {
                     IMapDataPacketExtension ext = (IMapDataPacketExtension) (Object) old;
                     ext.moonlight$setCustomDecorations(deco);
                     ext.moonlight$setCustomMapDataTag(tag);
                     ext.moonlight$setDimension(res);
-                    ext.moonlight$setMapCenter(x, y);
+                    ext.moonlight$setMapCenter(x, z);
                     return old;
                 }
         );

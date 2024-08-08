@@ -16,7 +16,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.HolderSetCodec;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -183,17 +182,6 @@ public class Utils {
         if (object instanceof DamageType t) return getID(t);
         if (object instanceof StatType t) return getID(t);
         throw new UnsupportedOperationException("Unsupported class type " + object.getClass() + ". Expected a registry entry for a call to Utils.getID()");
-    }
-
-    public static Level hackyGetALevel() {
-        var s = PlatHelper.getCurrentServer();
-        if (s != null) return s.getLevel(Level.OVERWORLD);
-        if (PlatHelper.getPhysicalSide().isClient()) {
-            var level = Minecraft.getInstance().level;
-            if (level != null) return level;
-            throw new UnsupportedOperationException("Failed to get overworld client level");
-        }
-        throw new UnsupportedOperationException("Failed to get a level. This is a bug");
     }
 
     //very hacky
