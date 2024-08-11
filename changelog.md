@@ -1,1 +1,1 @@
-fixed a crash on server due to map data
+fixed a fabric bug on servers

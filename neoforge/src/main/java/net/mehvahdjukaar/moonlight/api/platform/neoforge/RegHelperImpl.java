@@ -5,7 +5,6 @@ import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -270,6 +269,8 @@ public class RegHelperImpl {
                             event.insertAfter(last, items.get(j - 1), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                         }
                         return;
+                    } else {
+                        Moonlight.crashIfInDev();
                     }
                 } else {
                     ItemStack first = findFirst(event, target);
@@ -278,6 +279,8 @@ public class RegHelperImpl {
                             event.insertBefore(first, s, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                         }
                         return;
+                    } else {
+                        Moonlight.crashIfInDev();
                     }
                 }
             }
@@ -304,7 +307,7 @@ public class RegHelperImpl {
                     if (foundOne) return previous;
                 }
             }
-            return ItemStack.EMPTY;
+            return previous;
         }
     }
 

@@ -13,7 +13,6 @@ import net.minecraft.world.entity.player.Player;
 public class NetworkHelperImplClient {
 
     public static <M extends Message> void register(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
-        PayloadTypeRegistry.playS2C().register(messageType.type(), messageType.codec());
 
         ClientPlayNetworking.registerGlobalReceiver(messageType.type(),
                 (message, context) -> {

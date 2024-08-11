@@ -32,7 +32,7 @@ public abstract class ConditionHackMixin extends ContextAwareReloadListener {
                 if (resourceData.isJsonObject()) {
                     JsonObject obj = resourceData.getAsJsonObject();
 
-                    if (!ResourceConditionsBridge.matchesForgeConditions(obj, ops)) {
+                    if (!ResourceConditionsBridge.matchesForgeConditions(obj, ops, "fabric:load_conditions")) {
                         it.remove();
                     }
                 }

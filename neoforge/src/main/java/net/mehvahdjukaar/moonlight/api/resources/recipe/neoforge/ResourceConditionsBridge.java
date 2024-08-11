@@ -1,41 +1,50 @@
 package net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
-import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.conditions.AndCondition;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 public class ResourceConditionsBridge {
 
-    private static final Codec<ICondition> CODEC = NeoForgeRegistries.CONDITION_SERIALIZERS.byNameCodec()
-            .dispatch("condition", ICondition::codec, Function.identity());
-    private static final Codec<List<ICondition>> LIST_CODEC = Utils.lenientListCodec(CODEC);
-    private static final Codec<ICondition> SINGLE_OR_LIST = Codec.withAlternative(CODEC, LIST_CODEC,
+    private static final Codec<ICondition> REMAPPING_CODEC =
+            byNameCodecRemap(NeoForgeRegistries.CONDITION_SERIALIZERS, "fabric", "neoforge")
+                    .dispatch("condition", ICondition::codec, Function.identity());
+    private static final Codec<List<ICondition>> LIST_CODEC = Utils.lenientListCodec(REMAPPING_CODEC);
+    private static final Codec<ICondition> SINGLE_OR_LIST = Codec.withAlternative(REMAPPING_CODEC, LIST_CODEC,
             AndCondition::new);
 
 
-    public static boolean matchesForgeConditions(JsonObject obj, ICondition.IContext context) {
-        JsonElement je = obj.get("fabric:load_conditions");
+    private static <T> Codec<T> byNameCodecRemap(Registry<T> registry, String from, String to) {
+        return ResourceLocation.CODEC
+                .xmap(r -> ResourceLocation.fromNamespaceAndPath(r.getNamespace().replace(from, to),
+                        r.getPath()), Function.identity())
+                .comapFlatMap(
+                        arg -> registry.getOptional(arg)
+                                .map(DataResult::success)
+                                .orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + registry.key() + ": " + arg)),
+                        registry::getKey
+                );
+    }
+
+    public static boolean matchesForgeConditions(JsonObject obj, ICondition.IContext context, String conditionKey) {
+        JsonElement je = obj.get(conditionKey);
         if (je != null) {
-            je = replaceKeys(je, "fabric", "neoforge");
 
             var c = SINGLE_OR_LIST.parse(JsonOps.INSTANCE, je);
             if (c.result().isPresent()) {
@@ -43,39 +52,6 @@ public class ResourceConditionsBridge {
             }
         }
         return true;
-    }
-
-    public static JsonElement replaceKeys(JsonElement element, String targetKey, String newKey) {
-        if (element.isJsonObject()) {
-            JsonObject jsonObject = element.getAsJsonObject();
-            JsonObject newJsonObject = new JsonObject();
-
-            for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-                String key = entry.getKey();
-                JsonElement value = entry.getValue();
-
-                // Replace key if it matches targetKey
-                if (key.equals(targetKey)) {
-                    newJsonObject.add(newKey, replaceKeys(value, targetKey, newKey));
-                } else {
-                    newJsonObject.add(key, replaceKeys(value, targetKey, newKey));
-                }
-            }
-            return newJsonObject;
-
-        } else if (element.isJsonArray()) {
-            JsonArray jsonArray = element.getAsJsonArray();
-            JsonArray newJsonArray = new JsonArray();
-
-            for (JsonElement arrayElement : jsonArray) {
-                newJsonArray.add(replaceKeys(arrayElement, targetKey, newKey));
-            }
-            return newJsonArray;
-
-        } else {
-            // For primitive values and null, just return the element
-            return element;
-        }
     }
 
     //registers equivalent of fabric conditions

@@ -40,6 +40,8 @@ public class NetworkHelperImpl {
 
             @Override
             public <M extends Message> void registerClientBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
+                PayloadTypeRegistry.playS2C().register(messageType.type(), messageType.codec());
+
                 if (!PlatHelper.getPhysicalSide().isClient()) return;
 
                 NetworkHelperImplClient.register(messageType);

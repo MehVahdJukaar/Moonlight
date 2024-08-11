@@ -183,7 +183,10 @@ public class RenderUtil {
         return MLRenderTypes.ENTITY_SOLID_MIP.apply(texture);
     }
 
-    public static RenderType getTextColorRenderType(ResourceLocation texture) {
+    /**
+     * A render type that colors a texture entirely using the shader color. Just takes the shape of it into account (non transparent pixels)
+     */
+    public static RenderType getColoredTextureRenderType(ResourceLocation texture) {
         return MLRenderTypes.COLOR_TEXT.apply(texture);
     }
 
