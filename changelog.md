@@ -1,1 +1,1 @@
-fixed an issue with first person animations on fabric
+fixed an issue with map decoration outline. added more particle utilities. fixed some stuff in dev

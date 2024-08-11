@@ -78,14 +78,14 @@ public class Moonlight {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.initClient();
         }
-
-        if(PlatHelper.isDev()){
-            MixinEnvironment.getCurrentEnvironment().audit();
-        }
     }
 
     private static void commonSetup() {
         BlocksColorInternal.setup();
+
+        if(PlatHelper.isDev()){
+            MixinEnvironment.getCurrentEnvironment().audit();
+        }
     }
 
     @EventCalled
