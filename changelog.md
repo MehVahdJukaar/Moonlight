@@ -1,1 +1,3 @@
-fixed an issue with map decoration outline. added more particle utilities. fixed some stuff in dev
+fixed a very rare issue due to null jsons in a reload listener map
+added some utilities for double crops
+added a frequency ordered collection data structure
