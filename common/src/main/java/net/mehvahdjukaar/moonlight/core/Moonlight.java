@@ -84,7 +84,7 @@ public class Moonlight {
         BlocksColorInternal.setup();
 
         if(PlatHelper.isDev()){
-            MixinEnvironment.getCurrentEnvironment().audit();
+            //MixinEnvironment.getCurrentEnvironment().audit();
         }
     }
 

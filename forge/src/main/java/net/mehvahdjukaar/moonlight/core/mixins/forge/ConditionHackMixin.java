@@ -33,6 +33,9 @@ public abstract class ConditionHackMixin {
             while (it.hasNext()) {
                 Map.Entry<ResourceLocation, JsonElement> entry = it.next();
                 JsonElement resourceData = entry.getValue();
+                if(resourceData == null){
+                    int i = 0;
+                }
                 if (resourceData.isJsonObject()) {
                     JsonObject obj = resourceData.getAsJsonObject();
                     if (!CraftingHelper.processConditions(obj, "global_conditions", context)) {
