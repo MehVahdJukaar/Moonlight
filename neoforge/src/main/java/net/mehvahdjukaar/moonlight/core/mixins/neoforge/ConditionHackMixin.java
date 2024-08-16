@@ -8,6 +8,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.neoforged.neoforge.common.loot.LootModifierManager;
 import net.neoforged.neoforge.resource.ContextAwareReloadListener;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,6 +30,9 @@ public abstract class ConditionHackMixin extends ContextAwareReloadListener {
             while (it.hasNext()) {
                 Map.Entry<ResourceLocation, JsonElement> entry = it.next();
                 JsonElement resourceData = entry.getValue();
+                if(resourceData == null){
+                    continue; //BS neoforge loot modifiers allowing null in their maps
+                }
                 if (resourceData.isJsonObject()) {
                     JsonObject obj = resourceData.getAsJsonObject();
 

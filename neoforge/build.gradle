@@ -110,6 +110,9 @@ dependencies {
     modCompileOnly("curse.maven:quark-oddities-301051:3575623")
     modCompileOnly("curse.maven:quark-243121:4463411")
     modCompileOnly("curse.maven:the-twilight-forest-227639:4755494")
+
+    modImplementation ("curse.maven:piglin-proliferation-657831:5524520")
+
     //modRuntimeOnly("curse.maven:productivetrees-867074:5290721")
     // modRuntimeOnly("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
     //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
