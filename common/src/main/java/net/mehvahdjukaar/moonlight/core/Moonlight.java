@@ -34,6 +34,7 @@ import net.minecraft.world.level.GameRules;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -84,6 +85,10 @@ public class Moonlight {
 
     private static void commonSetup() {
         BlocksColorInternal.setup();
+
+        if(PlatHelper.isDev()){
+            MixinEnvironment.getCurrentEnvironment().audit();
+        }
     }
 
     @EventCalled

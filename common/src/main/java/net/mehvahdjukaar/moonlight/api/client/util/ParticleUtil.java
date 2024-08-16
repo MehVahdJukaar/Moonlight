@@ -36,6 +36,33 @@ public class ParticleUtil {
 
     //call with packet
 
+    public static void spawnParticleInASphere(Level level, double x, double y, double z, Supplier<ParticleOptions> type,
+                                              int amount, float speed,
+                                              float angleVariation, float speedVariation) {
+        double azimuthIncrement = Math.PI * (3 - Math.sqrt(5)); // Golden angle
+
+        for (int i = 0; i < amount; i++) {
+            double inclination = Math.acos(1 - (2 * (i + 0.5) / amount)); // Angle from the pole
+            double azimuth = azimuthIncrement * i; // Rotation around the axis
+
+            if (angleVariation != 0) {
+                inclination += level.random.nextFloat() * angleVariation - angleVariation / 2;
+                azimuth += level.random.nextFloat() * angleVariation - angleVariation / 2;
+            }
+
+            float s = speed;
+            if (speedVariation != 0) {
+                s += level.random.nextFloat() * speedVariation - speedVariation / 2;
+            }
+
+            double vx = s * Math.sin(inclination) * Math.cos(azimuth);
+            double vy = s * Math.sin(inclination) * Math.sin(azimuth);
+            double vz = s * Math.cos(inclination);
+
+            level.addParticle(type.get(), x, y, z, vx, vy, vz);
+        }
+    }
+
     public static void spawnParticleOnBlockShape(Level level, BlockPos pos, ParticleOptions particleOptions,
                                                  UniformInt uniformInt, float maxSpeed) {
         spawnParticleOnBoundingBox(level.getBlockState(pos).getShape(level, pos).bounds().move(pos), level,
