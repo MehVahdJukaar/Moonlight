@@ -114,12 +114,6 @@ public abstract class DynamicResourcePack implements PackResources {
         this.metadata = Suppliers.memoize(() -> new PackMetadataSection(this.makeDescription(),
                 SharedConstants.getCurrentVersion().getPackVersion(type), Optional.empty()));
         this.generateDebugResources = PlatHelper.isDev();
-
-
-        for(int j = 0; j<10000; j++){
-            this.addBytes(ResourceLocation.fromNamespaceAndPath(mainNamespace, "blockstate"+j),
-                    new byte[]{0});
-        }
     }
 
     @Override
@@ -291,9 +285,9 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     public void removeResource(ResourceLocation res) {
-        //this.resources.remove(res);
-        //this.staticResources.remove(res);
-        //this.locationsByNamespace.get(res.getNamespace()).remove(res);
+        this.resources.remove(res);
+        this.staticResources.remove(res);
+        this.locationsByNamespace.get(res.getNamespace()).remove(res);
     }
 
     public void addResource(StaticResource resource) {
@@ -337,8 +331,8 @@ public abstract class DynamicResourcePack implements PackResources {
     @ApiStatus.Internal
     protected void clearAllContent() {
         if (this.clearOnReload) {
-          //  this.resources.clear();
-            //this.locationsByNamespace.clear();
+            this.resources.clear();
+            this.locationsByNamespace.clear();
         }
     }
 
