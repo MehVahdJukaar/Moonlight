@@ -1,1 +1,1 @@
-fixed a fabric bug on servers
+fixed a rare issue with reload listeners conditions causing very rare crashes with some mods

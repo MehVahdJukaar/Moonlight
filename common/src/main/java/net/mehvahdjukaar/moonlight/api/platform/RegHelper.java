@@ -287,8 +287,8 @@ public class RegHelper {
         return register(name, type, Registries.ENTITY_TYPE);
     }
 
-    public static void registerCompostable(ItemLike name, float chance) {
-        ComposterBlock.COMPOSTABLES.put(name, chance);
+    public static void registerCompostable(ItemLike itemLike, float chance) {
+        ComposterBlock.COMPOSTABLES.put(itemLike.asItem(), chance);
     }
 
     @ExpectPlatform //fabric
