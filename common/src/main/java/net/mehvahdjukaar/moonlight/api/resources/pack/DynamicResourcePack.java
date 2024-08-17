@@ -1,6 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Suppliers;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
@@ -11,6 +14,7 @@ import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
@@ -73,6 +77,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final ResourceLocation resourcePackName;
     protected final Set<String> namespaces = new HashSet<>();
     protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
+    protected final Multimap<String, ResourceLocation> locationsByNamespace = HashMultimap.create();
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final String mainNamespace;
 
@@ -93,7 +98,7 @@ public abstract class DynamicResourcePack implements PackResources {
         this.packType = type;
         this.resourcePackName = name;
         this.mainNamespace = name.getNamespace();
-        this.namespaces.add(name.getNamespace());
+        this.namespaces.add(mainNamespace);
         this.title = Component.translatable(LangBuilder.getReadableName(name.toString()));
 
         this.position = position;
@@ -102,6 +107,12 @@ public abstract class DynamicResourcePack implements PackResources {
         this.metadata = Suppliers.memoize(() -> new PackMetadataSection(this.makeDescription(),
                 SharedConstants.getCurrentVersion().getPackVersion(type)));
         this.generateDebugResources = PlatHelper.isDev();
+
+
+        for(int j = 0; j<10000; j++){
+            this.addBytes(ResourceLocation.fromNamespaceAndPath(mainNamespace, "blockstate"+j),
+                    new byte[]{0});
+        }
     }
 
     public Component makeDescription() {
@@ -209,12 +220,12 @@ public abstract class DynamicResourcePack implements PackResources {
     @Override
     public void listResources(PackType packType, String namespace, String id, ResourceOutput output) {
         //why are we only using server resources here?
-        if (packType == this.packType && this.namespaces.contains(namespace)) {
+        if (packType == this.packType) {
             //idk why but somebody had an issue with concurrency here during world load
 
-            this.resources.entrySet().stream()
-                    .filter(r -> (r.getKey().getNamespace().equals(namespace) && r.getKey().getPath().startsWith(id)))
-                    .forEach(r -> output.accept(r.getKey(), () -> new ByteArrayInputStream(r.getValue())));
+            this.locationsByNamespace.get(namespace).stream().filter(r->
+                    r.getPath().startsWith(id))
+                    .forEach(r -> output.accept(r, () -> new ByteArrayInputStream(resources.get(r))));
         }
     }
 
@@ -245,6 +256,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected void addBytes(ResourceLocation path, byte[] bytes) {
         this.namespaces.add(path.getNamespace());
         this.resources.put(path, bytes);
+        this.locationsByNamespace.put(path.getNamespace(), path);
         if (addToStatic) markNotClearable(path);
         //debug
         if (generateDebugResources) {
@@ -258,8 +270,9 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     public void removeResource(ResourceLocation res) {
-        this.resources.remove(res);
-        this.staticResources.remove(res);
+        //this.resources.remove(res);
+        //this.staticResources.remove(res);
+        //this.locationsByNamespace.get(res.getNamespace()).remove(res);
     }
 
     public void addResource(StaticResource resource) {
@@ -294,7 +307,7 @@ public abstract class DynamicResourcePack implements PackResources {
         for (var r : this.resources.keySet()) {
             if (mf && modernFixHack(r)) continue;
             if (!this.staticResources.contains(r)) {
-                this.resources.remove(r);
+                this.removeResource(r);
             }
         }
     }
@@ -303,9 +316,8 @@ public abstract class DynamicResourcePack implements PackResources {
     @ApiStatus.Internal
     protected void clearAllContent() {
         if (this.clearOnReload) {
-            for (var r : this.resources.keySet()) {
-                this.resources.remove(r);
-            }
+          //  this.resources.clear();
+            //this.locationsByNamespace.clear();
         }
     }
 
