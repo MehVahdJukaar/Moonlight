@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -90,6 +92,11 @@ public class ForgeHelperImpl {
         level.setBlock(blockpos, Blocks.AIR.defaultBlockState(), 3);
         blockstate.getBlock().wasExploded(level, blockpos, explosion);
     }
+
+    public static boolean areStacksEqual(ItemStack stack, ItemStack other, boolean sameNbt) {
+        return stack.equals(other);
+    }
+
 
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
         return blockState.is(level.dimensionType().infiniburn());

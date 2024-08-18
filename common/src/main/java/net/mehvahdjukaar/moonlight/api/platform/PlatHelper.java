@@ -238,11 +238,6 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
-    public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction face) {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
     @Nullable
     public static FoodProperties getFoodProperties(ItemStack stack, Player player) {
         throw new AssertionError();
@@ -250,6 +245,21 @@ public class PlatHelper {
 
     @ExpectPlatform
     public static int getBurnTime(ItemStack stack) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction){
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         throw new AssertionError();
     }
 

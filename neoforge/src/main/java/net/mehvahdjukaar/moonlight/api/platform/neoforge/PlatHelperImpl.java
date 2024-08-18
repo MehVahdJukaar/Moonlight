@@ -116,10 +116,6 @@ public class PlatHelperImpl {
         return level.isAreaLoaded(pos, maxRange);
     }
 
-    public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction face) {
-        return state.getFlammability(level, pos, face);
-    }
-
     @Nullable
     public static FoodProperties getFoodProperties(ItemStack stack, Player player) {
         return stack.getFoodProperties(player);
@@ -127,6 +123,18 @@ public class PlatHelperImpl {
 
     public static int getBurnTime(ItemStack stack) {
         return stack.getBurnTime(RecipeType.SMELTING);
+    }
+
+    public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        return state.getFireSpreadSpeed(level, pos, direction);
+    }
+
+    public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        return state.getFlammability(level, pos, direction);
+    }
+
+    public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
+        return blockState.isFireSource(level, pos, up);
     }
 
     @Nullable

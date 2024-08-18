@@ -100,10 +100,6 @@ public class PlatHelperImpl {
         return level.hasChunksAt(pos.offset(-maxRange, -maxRange, -maxRange), pos.offset(maxRange, maxRange, maxRange));
     }
 
-    public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction face) {
-        return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnChance();
-    }
-
     public static PlatHelper.Side getPhysicalSide() {
         return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
     }
@@ -122,6 +118,18 @@ public class PlatHelperImpl {
         var v = FuelRegistry.INSTANCE.get(stack.getItem());
         if (v == null) return 0;
         return v;
+    }
+
+    public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getSpreadChance();
+    }
+
+    public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnChance();
+    }
+
+    public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
+        return blockState.is(level.dimensionType().infiniburn());
     }
 
     @Nullable
