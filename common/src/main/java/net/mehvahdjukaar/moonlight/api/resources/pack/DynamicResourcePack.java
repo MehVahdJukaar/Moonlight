@@ -1,12 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Suppliers;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
+import net.mehvahdjukaar.moonlight.api.misc.PathTrie;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
@@ -14,7 +12,6 @@ import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
@@ -77,7 +74,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final ResourceLocation resourcePackName;
     protected final Set<String> namespaces = new HashSet<>();
     protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
-    protected final Multimap<String, ResourceLocation> locationsByNamespace = HashMultimap.create();
+    protected final PathTrie<ResourceLocation> searchTrie = new PathTrie<>();
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final String mainNamespace;
 
@@ -217,8 +214,7 @@ public abstract class DynamicResourcePack implements PackResources {
         if (packType == this.packType) {
             //idk why but somebody had an issue with concurrency here during world load
 
-            this.locationsByNamespace.get(namespace).stream().filter(r->
-                    r.getPath().startsWith(id))
+            this.searchTrie.search(namespace + "/" + id)
                     .forEach(r -> output.accept(r, () -> new ByteArrayInputStream(resources.get(r))));
         }
     }
@@ -247,15 +243,15 @@ public abstract class DynamicResourcePack implements PackResources {
         return new FileNotFoundException(String.format("'%s' in ResourcePack '%s'", path, this.resourcePackName));
     }
 
-    protected void addBytes(ResourceLocation path, byte[] bytes) {
-        this.namespaces.add(path.getNamespace());
-        this.resources.put(path, bytes);
-        this.locationsByNamespace.put(path.getNamespace(), path);
-        if (addToStatic) markNotClearable(path);
+    protected void addBytes(ResourceLocation id, byte[] bytes) {
+        this.namespaces.add(id.getNamespace());
+        this.resources.put(id, bytes);
+        this.searchTrie.insert(id, id);
+        if (addToStatic) markNotClearable(id);
         //debug
         if (generateDebugResources) {
             try {
-                Path p = Paths.get("debug", "generated_resource_pack").resolve(path.getNamespace() + "/" + path.getPath());
+                Path p = Paths.get("debug", "generated_resource_pack").resolve(id.getNamespace() + "/" + id.getPath());
                 Files.createDirectories(p.getParent());
                 Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException ignored) {
@@ -266,7 +262,7 @@ public abstract class DynamicResourcePack implements PackResources {
     public void removeResource(ResourceLocation res) {
         this.resources.remove(res);
         this.staticResources.remove(res);
-        this.locationsByNamespace.get(res.getNamespace()).remove(res);
+        this.searchTrie.remove(res);
     }
 
     public void addResource(StaticResource resource) {
@@ -311,7 +307,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected void clearAllContent() {
         if (this.clearOnReload) {
             this.resources.clear();
-            this.locationsByNamespace.clear();
+            this.searchTrie.clear();
         }
     }
 
