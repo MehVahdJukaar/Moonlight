@@ -22,11 +22,13 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
@@ -156,10 +158,6 @@ public class ForgeHelperImpl {
 
     public static boolean areStacksEqual(ItemStack stack, ItemStack other, boolean sameNbt) {
         return stack.equals(other, sameNbt);
-    }
-
-    public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
-        return blockState.isFireSource(level, pos, up);
     }
 
     public static boolean canDropFromExplosion(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
