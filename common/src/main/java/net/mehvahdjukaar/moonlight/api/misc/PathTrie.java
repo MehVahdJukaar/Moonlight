@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -35,17 +36,8 @@ public class PathTrie<T> {
     }
 
     public Collection<T> search(String path) {
-        String[] folders = path.split("/");
-        TrieNode<T> current = root;
-
-        // Traverse the trie to the target node
-        for (String folder : folders) {
-            current = current.children.get(folder);
-            if (current == null) {
-                return Collections.emptyList(); // Return empty if the path doesn't exist
-            }
-        }
-
+        TrieNode<T> current = getNode(path);
+        if (current == null) return Collections.emptyList();
         // Once at the target node, collect all objects from this node and its children
         return current.collectObjects();
     }
@@ -55,26 +47,39 @@ public class PathTrie<T> {
     }
 
     public boolean remove(String path) {
-        String[] folders = path.split("/");
-        TrieNode<T> current = root;
-
-        // Traverse the trie to the target node
-        for (String folder : folders) {
-            current = current.children.get(folder);
-            if (current == null) {
-                return false; // Path doesn't exist
-            }
-        }
-
+        TrieNode<T> current = getNode(path);
+        if (current == null) return false;
         // Once at the target node, clear all its contents
         current.children.clear();
         current.objects.clear();
         return true;
     }
 
+    @Nullable
+    private TrieNode<T> getNode(String path) {
+        String[] folders = path.split("/");
+        TrieNode<T> current = root;
+        for (String folder : folders) {
+            current = current.children.get(folder);
+            if (current == null) {
+                return null; // Path doesn't exist
+            }
+        }
+        return current;
+    }
+
     public void clear() {
         root.children.clear();
         root.objects.clear();
+    }
+
+
+    public Collection<String> listFolders(String path) {
+        TrieNode<T> startNode = getNode(path);
+        if (startNode != null) {
+            return startNode.children.keySet();
+        }
+        return Collections.emptyList();
     }
 
     private static class TrieNode<T> {
