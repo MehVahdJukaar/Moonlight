@@ -315,10 +315,35 @@ public abstract class DynamicResourcePack implements PackResources {
     @ApiStatus.Internal
     protected void clearNonStatic() {
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
+        boolean hasLessStatic = staticResources.size() < (resources.size() - staticResources.size());
         for (var r : this.resources.keySet()) {
-            if (mf && modernFixHack(r)) continue;
+            if (mf && modernFixHack(r.getPath())) {
+                continue;
+            }
             if (!this.staticResources.contains(r)) {
-                this.removeResource(r);
+                this.resources.remove(r);
+                //removing is slow
+                if (!hasLessStatic) this.searchTrie.remove(r);
+            }
+        }
+        // clear trie entirely and re populate as we always expect to have way less staitc resources than others
+        if (hasLessStatic) {
+
+            if (!mf) this.searchTrie.clear();
+            else {
+                List<String> toRemove = new ArrayList<>();
+                for (String namespace : this.searchTrie.listFolders("")) {
+                    for (String f : this.searchTrie.listFolders(namespace)) {
+                        if (!modernFixHack(f)) {
+                            toRemove.add(namespace + "/" + f);
+                        }
+                    }
+                }
+                toRemove.forEach(this.searchTrie::remove);
+            }
+            // rebuild search trie with just static
+            for (var s : staticResources) {
+                this.searchTrie.insert(s, s);
             }
         }
     }
@@ -334,8 +359,7 @@ public abstract class DynamicResourcePack implements PackResources {
 
     private static final boolean MODERN_FIX = CompatHandler.MODERNFIX && ModernFixCompat.areLazyResourcesOn();
 
-    private boolean modernFixHack(ResourceLocation r) {
-        String s = r.getPath();
+    private boolean modernFixHack(String s) {
         return s.startsWith("model") || s.startsWith("blockstate");
     }
 }

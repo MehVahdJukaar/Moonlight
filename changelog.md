@@ -1,1 +1,1 @@
-fixed a rare issue with reload listeners conditions causing very rare crashes with some mods
+made dynamic pack list resources call as fast as it can be , using a search trie
