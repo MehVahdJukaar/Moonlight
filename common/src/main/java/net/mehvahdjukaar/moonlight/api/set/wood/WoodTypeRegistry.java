@@ -132,37 +132,37 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     @Nullable
     public WoodType getFromVanilla(net.minecraft.world.level.block.state.properties.WoodType woodType) {
+        if (fromVanilla.isEmpty()) {
+            for (WoodType w : getValues()) {
+                var vanilla = w.toVanilla();
+                if (vanilla != null) fromVanilla.put(vanilla, w);
+            }
+        }
         return fromVanilla.get(woodType);
     }
 
-    private static final List<net.minecraft.world.level.block.state.properties.WoodType> VANILLA_ORDER = List.of(
-            net.minecraft.world.level.block.state.properties.WoodType.OAK,
-            net.minecraft.world.level.block.state.properties.WoodType.SPRUCE,
-            net.minecraft.world.level.block.state.properties.WoodType.BIRCH,
-            net.minecraft.world.level.block.state.properties.WoodType.JUNGLE,
-            net.minecraft.world.level.block.state.properties.WoodType.ACACIA,
-            net.minecraft.world.level.block.state.properties.WoodType.DARK_OAK,
-            net.minecraft.world.level.block.state.properties.WoodType.MANGROVE,
-            net.minecraft.world.level.block.state.properties.WoodType.CHERRY,
-            net.minecraft.world.level.block.state.properties.WoodType.BAMBOO,
-            net.minecraft.world.level.block.state.properties.WoodType.CRIMSON,
-            net.minecraft.world.level.block.state.properties.WoodType.WARPED
-    );
-
     @Override
     protected void finalizeAndFreeze() {
-        //map vanilla
-        for (var w : builder) {
-            var vanilla = w.toVanilla();
-            if (vanilla != null) fromVanilla.put(vanilla, w);
-        }
-
+        // order according vanilla
+        List<String> vanillaOrder = List.of(
+                "minecraft:oak",
+                "minecraft:spruce",
+                "minecraft:birch",
+                "minecraft:jungle",
+                "minecraft:acacia",
+                "minecraft:dark_oak",
+                "minecraft:mangrove",
+                "minecraft:cherry",
+                "minecraft:bamboo",
+                "minecraft:crimson",
+                "minecraft:warped"
+        );
         List<WoodType> temp = new ArrayList<>(builder);
         builder.clear();
         outer:
-        for (var v : VANILLA_ORDER) {
+        for (var v : vanillaOrder) {
             for (var t : temp) {
-                if (t.toVanilla() == v) {
+                if (t.getId().toString().equals(v)) {
                     builder.add(t);
                     temp.remove(t);
                     continue outer;
