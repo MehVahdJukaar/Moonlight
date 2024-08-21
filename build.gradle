@@ -57,12 +57,14 @@ subprojects {
     var changelogFile = rootProject.file("changelog.md")
     var changelogText = changelogFile.exists() ? changelogFile.text : ""
 
+    var versions = listGameVersions(minecraft_min_version, minecraft_version)
+
     if (env.MODRINTH_TOKEN) {
         modrinth {
             projectId = rootProject.mod_id
             uploadFile = tasks.remapJar
             additionalFiles.add(tasks.remapSourcesJar)
-            gameVersions = listGameVersions(minecraft_min_version, minecraft_version)
+            gameVersions = versions
             if (modLoader == "forge") {
                 loaders = ["neoforge"]
             } else loaders = [modLoader]
@@ -87,7 +89,7 @@ subprojects {
                 id = project_id
                 changelog = changelogText
                 releaseType = release_type
-                for (var ver : listGameVersions(minecraft_min_version, minecraft_version)){
+                for (var ver : versions){
                     addGameVersion ver
                 }
 
