@@ -44,6 +44,9 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
@@ -214,6 +217,10 @@ public class Utils {
         p.emissiveRendering((blockState, blockGetter, blockPos) -> false);
         //TODO: this isnt safe anymore... in 1.21
         return p;
+    }
+
+    public static BlockHitResult rayTrace(LivingEntity entity, boolean hitsFluids, float partialTicks){
+        return (BlockHitResult) entity.pick(ForgeHelper.getReachDistance(entity), partialTicks, hitsFluids);
     }
 
     public static void awardAdvancement(ServerPlayer sp, ResourceLocation name) {

@@ -33,6 +33,7 @@
     "MultiPackResourceManagerMixin",
     "PistonBlockEntityMixin",
     "ShearItemMixin",
+    "ThrownPotionMixin",
     "VillagerMixin",
     "accessor.BrainAccessor",
     "accessor.DispenserBlockAccessor",
