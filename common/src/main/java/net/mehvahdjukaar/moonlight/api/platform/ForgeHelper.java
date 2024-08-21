@@ -121,12 +121,6 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @Deprecated(forRemoval = true)
-    public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
-        return PlatHelper.isFireSource(blockState, level, pos, up);
-    }
-
-
     @ExpectPlatform
     public static boolean canDropFromExplosion(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         throw new AssertionError();

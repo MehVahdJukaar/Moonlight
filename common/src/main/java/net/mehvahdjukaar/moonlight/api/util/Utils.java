@@ -6,6 +6,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.advancements.AdvancementHolder;
@@ -27,6 +28,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
@@ -217,10 +220,6 @@ public class Utils {
         p.emissiveRendering((blockState, blockGetter, blockPos) -> false);
         //TODO: this isnt safe anymore... in 1.21
         return p;
-    }
-
-    public static BlockHitResult rayTrace(LivingEntity entity, boolean hitsFluids, float partialTicks){
-        return (BlockHitResult) entity.pick(ForgeHelper.getReachDistance(entity), partialTicks, hitsFluids);
     }
 
     public static void awardAdvancement(ServerPlayer sp, ResourceLocation name) {
