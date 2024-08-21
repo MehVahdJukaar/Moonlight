@@ -35,6 +35,7 @@ public class WoodType extends BlockType {
     public final Block planks;
     public final Block log;
 
+    // like this so it can be called early. not too early tho as children might not be initialized
     private final Supplier<net.minecraft.world.level.block.state.properties.WoodType> vanillaType = Suppliers.memoize(this::detectVanillaWood);
 
     @Nullable
