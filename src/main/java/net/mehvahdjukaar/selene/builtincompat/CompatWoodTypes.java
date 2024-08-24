@@ -60,6 +60,38 @@ public class CompatWoodTypes {
         phantasm.addChild("stripped_log", "stripped_ebony_packed_stems");
         BlockSetManager.addBlockTypeFinder(WoodType.class, phantasm);
 
+            // Enlightened End
+        var ceruleanStalk = WoodType.Finder.simple(
+                "enlightened_end", "cerulean", "cerulean_planks", "cerulean_log");
+        ceruleanStalk.addChild("stripped_log", "stripped_cerulean_stalk_block");
+        BlockSetManager.addBlockTypeFinder(WoodType.class, ceruleanStalk);
+
+        var indigoStem = WoodType.Finder.simple(
+                "enlightened_end", "indigo", "indigo_planks", "indigo_stem");
+        indigoStem.addChild("stripped_log", "stripped_indigo_stem");
+        BlockSetManager.addBlockTypeFinder(WoodType.class, indigoStem);
+
+            // Oh The Biomes You'll Go
+        var sythianStem = WoodType.Finder.simple(
+                "byg", "sythian", "sythian_planks", "sythian_stem");
+        sythianStem.addChild("stripped_log", "stripped_sythian_stem");
+        BlockSetManager.addBlockTypeFinder(WoodType.class, sythianStem);
+
+        var bulbisStem = WoodType.Finder.simple(
+                "byg", "bulbis", "bulbis_planks", "bulbis_stem");
+        bulbisStem.addChild("stripped_log", "stripped_bulbis_stem");
+        BlockSetManager.addBlockTypeFinder(WoodType.class, bulbisStem);
+
+            // Enhanced Mushroom
+        var brownMushroom = WoodType.Finder.simple(
+                "enhanced_mushrooms", "brown_mushroom", "brown_mushroom_planks", "brown_mushroom_stem");
+        brownMushroom.addChild("stripped_log", "stripped_brown_mushroom_stem");
+        BlockSetManager.addBlockTypeFinder(WoodType.class, brownMushroom);
+
+        var redMushroom = WoodType.Finder.simple(
+                "enhanced_mushrooms", "red_mushroom", "red_mushroom_planks", "red_mushroom_stem");
+        redMushroom.addChild("stripped_log", "stripped_red_mushroom_stem");
+        BlockSetManager.addBlockTypeFinder(WoodType.class, redMushroom);
 
     }
 }
