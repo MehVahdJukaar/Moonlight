@@ -98,6 +98,15 @@ public abstract class ChannelHandler {
 
     public void sendToAllClientPlayersInDefaultRange(Level level, BlockPos pos, Message message){
         sendToAllClientPlayersInRange(level, pos, 64, message);
+    }
+
+    // same distance as serverlevel send particles
+    public void sendToAllClientPlayersInParticleRange(Level level, BlockPos pos, Message message){
+        sendToAllClientPlayersInRange(level, pos, 32, message);
+    }
+
+    public void sendToAllClientPlayersInDistantParticleRange(Level level, BlockPos pos, Message message){
+        sendToAllClientPlayersInRange(level, pos, 512, message);
     };
 
     public abstract void sentToAllClientPlayersTrackingEntity(Entity target, Message message);
