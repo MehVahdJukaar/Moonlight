@@ -48,10 +48,9 @@ dependencies {
    //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
 
    // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
-    modImplementation ("curse.maven:map-atlases-forge-519759:4990003")
+    //modImplementation ("curse.maven:map-atlases-forge-519759:4990003")
     //modImplementation ("curse.maven:supplementaries-412082:4995508")
     modImplementation ("curse.maven:configured-457570:5101367")
-    modImplementation ("curse.maven:piglin-proliferation-657831:5585039")
 
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.6"))
     implementation(include("io.github.llamalad7:mixinextras-forge:0.3.6"))
