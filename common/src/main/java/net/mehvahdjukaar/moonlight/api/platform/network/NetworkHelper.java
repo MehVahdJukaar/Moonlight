@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 
@@ -41,8 +42,17 @@ public class NetworkHelper {
         throw new AssertionError();
     }
 
-    public static void sendToAllClientPlayersInDefaultRange(ServerLevel level, BlockPos pos, Message message) {
+    public static void sendToAllClientPlayersInDefaultRange(ServerLevel level, BlockPos pos, CustomPacketPayload message) {
         sendToAllClientPlayersInRange(level, pos, 64, message);
+    }
+
+    // same distance as serverlevel send particles
+    public static void sendToAllClientPlayersInParticleRange(Level level, BlockPos pos, CustomPacketPayload message){
+        sendToAllClientPlayersInRange(level, pos, 32, message);
+    }
+
+    public static void sendToAllClientPlayersInDistantParticleRange(Level level, BlockPos pos, CustomPacketPayload message){
+        sendToAllClientPlayersInRange(level, pos, 512, message);
     }
 
     @ExpectPlatform

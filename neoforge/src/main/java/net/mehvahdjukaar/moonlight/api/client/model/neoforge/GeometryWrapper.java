@@ -20,6 +20,6 @@ public class GeometryWrapper implements IUnbakedGeometry<GeometryWrapper> {
     @Override
     public BakedModel bake(IGeometryBakingContext iGeometryBakingContext, ModelBaker bakery,
                            Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides itemOverrides) {
-        return owner.bakeModel(bakery, spriteGetter, modelState);
+        return owner.bake(bakery, spriteGetter, modelState);
     }
 }
