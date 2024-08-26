@@ -25,9 +25,13 @@ public class SoftFluidImpl {
             var f = fluid.get();
             var prop = FluidRenderHandlerRegistry.INSTANCE.get(f);
             if (prop != null) {
-                var textures = prop.getFluidSprites(null, null, f.defaultFluidState());
-                int tint = prop.getFluidColor(null, null, f.defaultFluidState());
-                return Triplet.of(textures[0].contents().name(), textures[1].contents().name(), tint);
+                try {
+                    var textures = prop.getFluidSprites(null, null, f.defaultFluidState());
+                    int tint = prop.getFluidColor(null, null, f.defaultFluidState());
+                    return Triplet.of(textures[0].contents().name(), textures[1].contents().name(), tint);
+                } catch (Exception e) {
+                    throw new IllegalStateException("Fluid " + useTexturesFrom + " had invalid rendering data", e);
+                }
             }
         }
         return null;

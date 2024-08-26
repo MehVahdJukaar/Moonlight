@@ -6,7 +6,7 @@ architectury {
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/moonlight.accesswidener")
+    accessWidenerPath = file("src/main/resources/${mod_id}.accesswidener")
 }
 
 sourceSets.create("example"){
