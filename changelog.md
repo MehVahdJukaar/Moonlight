@@ -1,1 +1,2 @@
-fixed an issue with wood type detection initializing vanilla types too early
+added more logging to improve exception handling
+improved washable interface
