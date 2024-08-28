@@ -47,11 +47,11 @@ public class NetworkHelper {
     }
 
     // same distance as serverlevel send particles
-    public static void sendToAllClientPlayersInParticleRange(Level level, BlockPos pos, CustomPacketPayload message){
+    public static void sendToAllClientPlayersInParticleRange(ServerLevel level, BlockPos pos, CustomPacketPayload message){
         sendToAllClientPlayersInRange(level, pos, 32, message);
     }
 
-    public static void sendToAllClientPlayersInDistantParticleRange(Level level, BlockPos pos, CustomPacketPayload message){
+    public static void sendToAllClientPlayersInDistantParticleRange(ServerLevel level, BlockPos pos, CustomPacketPayload message){
         sendToAllClientPlayersInRange(level, pos, 512, message);
     }
 

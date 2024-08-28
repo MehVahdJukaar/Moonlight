@@ -4,7 +4,8 @@ import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
-import net.mehvahdjukaar.moonlight.api.misc.PathTrie;
+import net.mehvahdjukaar.moonlight.api.misc.PathSearchTrie;
+import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
@@ -13,7 +14,6 @@ import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
@@ -75,7 +75,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final Supplier<PackMetadataSection> metadata;
     protected final Set<String> namespaces = new HashSet<>();
     protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
-    protected final PathTrie<ResourceLocation> searchTrie = new PathTrie<>();
+    protected final ResourceLocationSearchTrie searchTrie = new ResourceLocationSearchTrie();
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final String mainNamespace;
 
@@ -267,7 +267,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected void addBytes(ResourceLocation id, byte[] bytes) {
         this.namespaces.add(id.getNamespace());
         this.resources.put(id, bytes);
-        this.searchTrie.insert(id, id);
+        this.searchTrie.insert(id);
         if (addToStatic) markNotClearable(id);
         //debug
         if (generateDebugResources) {
@@ -343,7 +343,7 @@ public abstract class DynamicResourcePack implements PackResources {
             }
             // rebuild search trie with just static
             for (var s : staticResources) {
-                this.searchTrie.insert(s, s);
+                this.searchTrie.insert(s);
             }
         }
     }
