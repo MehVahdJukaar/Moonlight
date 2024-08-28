@@ -106,13 +106,13 @@ public class NetworkHelperImpl {
         return new AssertionError("Cant send message to clients from client side!");
     }
 
-    public static void sentToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
+    public static void sendToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
         if (target.level() instanceof ServerLevel serverLevel) {
             serverLevel.getChunkSource().broadcast(target, ServerPlayNetworking.createS2CPacket(message));
         } else throw makeAssertionError();
     }
 
-    public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
+    public void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         if (target.level() instanceof ServerLevel serverLevel) {
             var p = ServerPlayNetworking.createS2CPacket(message);
             serverLevel.getChunkSource().broadcast(target, p);

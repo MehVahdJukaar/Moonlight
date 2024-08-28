@@ -56,12 +56,22 @@ public class NetworkHelper {
     }
 
     @ExpectPlatform
-    public static void sentToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
+    public static void sendToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
+    public static void sentToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
+        sendToAllClientPlayersTrackingEntity(target, message);
+    }
+
+    @Deprecated(forRemoval = true)
     public static void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
+        sendToAllClientPlayersTrackingEntityAndSelf(target, message);
+    }
+
+    @ExpectPlatform
+    public static void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         throw new AssertionError();
     }
 

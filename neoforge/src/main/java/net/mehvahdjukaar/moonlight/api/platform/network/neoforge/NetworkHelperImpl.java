@@ -100,11 +100,11 @@ public class NetworkHelperImpl {
                 pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, radius, message);
     }
 
-    public static void sentToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
+    public static void sendToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
         PacketDistributor.sendToPlayersTrackingEntity(target, message);
     }
 
-    public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
+    public void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(target, message);
     }
 
