@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class SearchTrie<K, O> {
+public class SearchTrie<K, O> {
     protected final TrieNode<K, O> root;
 
     public SearchTrie() {
@@ -44,7 +44,7 @@ public abstract class SearchTrie<K, O> {
     protected TrieNode<K, O> getNode(List<K> path) {
         TrieNode<K, O> current = root;
         for (K key : path) {
-            current = current.children.get(key);
+            current = current.children.getOrDefault(key, current.children.get(null));
             if (current == null) {
                 return null; // Path doesn't exist
             }
