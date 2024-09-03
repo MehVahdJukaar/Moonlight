@@ -55,6 +55,7 @@ public class ForgeHelper {
         return ops; //TODO: 1.20.4
     }
 
+    @Contract
     @ExpectPlatform
     public static boolean onProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
         throw new AssertionError();
@@ -128,10 +129,11 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
-        throw new AssertionError();
+        return PlatHelper.isFireSource(blockState, level, pos, up);
     }
+
 
     @ExpectPlatform
     public static boolean canDropFromExplosion(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
@@ -213,6 +215,12 @@ public class ForgeHelper {
 
     @ExpectPlatform
     public static Map<Block, Item> getBlockItemMap() {
+        throw new AssertionError();
+    }
+
+    @Contract
+    @ExpectPlatform
+    public static boolean isInFluidThatCanExtinguish(Entity entity) {
         throw new AssertionError();
     }
 }

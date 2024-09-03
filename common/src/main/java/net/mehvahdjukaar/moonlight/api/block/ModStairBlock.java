@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
+import com.google.common.base.Preconditions;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -14,7 +15,8 @@ public class ModStairBlock extends StairBlock {
     private static final Field FORGE_BLOCK_SUPPLIER = PlatHelper.findField(StairBlock.class, "stateSupplier");
 
     public ModStairBlock(Supplier<Block> baseBlock, Properties settings) {
-        super(FORGE_BLOCK_SUPPLIER == null ? baseBlock.get().defaultBlockState() : Blocks.AIR.defaultBlockState(), settings);
+        super(FORGE_BLOCK_SUPPLIER == null ? Preconditions.checkNotNull(baseBlock.get(), "Stairs block was given a null base block!")
+                .defaultBlockState() : Blocks.AIR.defaultBlockState(), settings);
         if (FORGE_BLOCK_SUPPLIER != null) {
             FORGE_BLOCK_SUPPLIER.setAccessible(true);
             try {

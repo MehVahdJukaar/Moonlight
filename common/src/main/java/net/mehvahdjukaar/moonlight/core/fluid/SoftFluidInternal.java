@@ -26,18 +26,16 @@ public class SoftFluidInternal {
 
     //needs to be called on both sides
     private static void populateSlaveMaps() {
-        var itemMap = ITEM_MAP;
-        itemMap.clear();
-        var fluidsMap = FLUID_MAP;
-        fluidsMap.clear();
+        FLUID_MAP.clear();
+        ITEM_MAP.clear();
         for (var h : getHolders()) {
             var s = h.value();
             if (s.isEnabled()) {
-                s.getEquivalentFluids().forEach(f -> fluidsMap.put(f, h));
+                s.getEquivalentFluids().forEach(f -> FLUID_MAP.put(f, h));
                 s.getContainerList().getPossibleFilled().forEach(i -> {
                     //don't associate water to potion bottle
                     if (i != Items.POTION || s != BuiltInSoftFluids.WATER.get()) {
-                        itemMap.put(i, h);
+                        ITEM_MAP.put(i, h);
                     }
                 });
             }

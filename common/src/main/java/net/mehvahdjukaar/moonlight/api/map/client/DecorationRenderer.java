@@ -7,6 +7,7 @@ import com.mojang.math.Axis;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -99,9 +100,10 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
         //vertexBuilder = sprite.wrap(vertexBuilder);
 
         if (alpha != 0) {
-            RenderUtil.renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, alpha, sprite);
 
             if (outline) {
+                int tint = PlatHelper.getPlatform().isForge() ? 255 : 0;
+
                 RenderSystem.setShaderColor(1, 1, 1, 1);
                 VertexConsumer vb2 = buffer.getBuffer(RenderUtil.getTextColorRenderType(MapDecorationClientManager.LOCATION_MAP_MARKERS));
                 for (int j = -1; j <= 1; ++j) {
@@ -109,12 +111,13 @@ public class DecorationRenderer<T extends CustomMapDecoration> {
                         if (j != 0 || k != 0) {
                             matrixStack.pushPose();
                             matrixStack.translate(j * 0.125, k * 0.125, 0.001);
-                            RenderUtil.renderSprite(matrixStack, vb2, LightTexture.FULL_BRIGHT, index, 255, 255, 255, alpha, sprite);
+                            RenderUtil.renderSprite(matrixStack, vb2, LightTexture.FULL_BRIGHT, index, tint, tint, tint, alpha, sprite);
                             matrixStack.popPose();
                         }
                     }
                 }
             }
+            RenderUtil.renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, alpha, sprite);
         }
     }
 

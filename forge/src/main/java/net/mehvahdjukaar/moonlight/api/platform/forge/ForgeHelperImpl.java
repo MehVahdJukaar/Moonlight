@@ -22,11 +22,13 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
@@ -68,13 +70,13 @@ public class ForgeHelperImpl {
         if (success) {
             AtomicReference<FinishedRecipe> newRecipe = new AtomicReference<>();
             builder.addRecipe(originalRecipe);
-            builder.build(r->newRecipe.set(new Wrapper(r, originalRecipe)), originalRecipe.getId());
+            builder.build(r -> newRecipe.set(new Wrapper(r, originalRecipe)), originalRecipe.getId());
             return newRecipe.get();
         }
         return originalRecipe;
     }
 
-    private record Wrapper(FinishedRecipe cond, FinishedRecipe original)implements FinishedRecipe{
+    private record Wrapper(FinishedRecipe cond, FinishedRecipe original) implements FinishedRecipe {
 
         @Override
         public void serializeRecipeData(JsonObject json) {
@@ -118,7 +120,6 @@ public class ForgeHelperImpl {
     }
 
 
-
     public static boolean canEquipItem(LivingEntity entity, ItemStack stack, EquipmentSlot slot) {
         return stack.canEquip(slot, entity);
     }
@@ -159,10 +160,6 @@ public class ForgeHelperImpl {
         return stack.equals(other, sameNbt);
     }
 
-    public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
-        return blockState.isFireSource(level, pos, up);
-    }
-
     public static boolean canDropFromExplosion(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         return blockstate.canDropFromExplosion(level, blockpos, explosion);
     }
@@ -182,7 +179,7 @@ public class ForgeHelperImpl {
     public static boolean isMultipartEntity(Entity e) {
         return e.isMultipartEntity();
     }
-    
+
     public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, AbstractMinecart o) {
         return railBlock.getRailDirection(blockstate, level, blockpos, o);
     }
@@ -197,26 +194,26 @@ public class ForgeHelperImpl {
 
 
     public static boolean onCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
-        return ForgeHooks.onCropsGrowPre(level , pos, state,b);
+        return ForgeHooks.onCropsGrowPre(level, pos, state, b);
     }
 
     public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
         ForgeHooks.onCropsGrowPost(level, pos, state);
     }
 
-    public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to){
+    public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
         MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(entity, slot, from, to));
     }
 
     @Nullable
     public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
-        var ev =  ForgeHooks.onRightClickBlock(player, hand, below, rayTraceResult);
-        if(ev.isCanceled())return ev.getCancellationResult();
+        var ev = ForgeHooks.onRightClickBlock(player, hand, below, rayTraceResult);
+        if (ev.isCanceled()) return ev.getCancellationResult();
         return null;
     }
 
     public static boolean canItemStack(ItemStack selected, ItemStack item) {
-        return ItemHandlerHelper.canItemStacksStack(selected,item);
+        return ItemHandlerHelper.canItemStacksStack(selected, item);
     }
 
     public static int getLightEmission(BlockState state, Level level, BlockPos pos) {
@@ -225,6 +222,10 @@ public class ForgeHelperImpl {
 
     public static Map<Block, Item> getBlockItemMap() {
         return GameData.getBlockItemMap();
+    }
+
+    public static boolean isInFluidThatCanExtinguish(Entity entity) {
+        return entity.isInFluidType((a, b) -> a.canExtinguish(entity));
     }
 }
 

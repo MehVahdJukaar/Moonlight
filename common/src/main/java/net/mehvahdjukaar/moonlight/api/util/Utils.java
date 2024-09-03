@@ -50,6 +50,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -228,12 +229,16 @@ public class Utils {
         return p;
     }
 
+    public static BlockHitResult rayTrace(LivingEntity entity, boolean hitsFluids, float partialTicks){
+        return (BlockHitResult) entity.pick(ForgeHelper.getReachDistance(entity), partialTicks, hitsFluids);
+    }
+
     @Deprecated(forRemoval = true)
     public static HitResult rayTrace(LivingEntity entity, Level world, ClipContext.Block blockMode, ClipContext.Fluid fluidMode) {
         return rayTrace(entity, world, blockMode, fluidMode, ForgeHelper.getReachDistance(entity));
     }
 
-    // use entity.clip
+    // use entity.pick
     @Deprecated(forRemoval = true)
     public static HitResult rayTrace(Entity entity, Level world, ClipContext.Block blockMode, ClipContext.Fluid fluidMode, double range) {
         Vec3 startPos = entity.getEyePosition();

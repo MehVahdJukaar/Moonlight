@@ -250,6 +250,11 @@ public class Palette implements Set<PaletteColor> {
         if (this.size() == 0 || targetSize <= 0) {
             throw new UnsupportedOperationException("Palette size can't be 0");
         }
+        if (this.size() == 1) {
+            PaletteColor first = this.get(0);
+            this.add(first.getDarkened());
+            this.add(first.getLightened());
+        }
         if (this.size() == 2 && targetLumStep == null) {
             var lightest = this.getLightest();
             var darkest = this.getDarkest();
@@ -272,7 +277,7 @@ public class Palette implements Set<PaletteColor> {
         int currentSize;
         while ((currentSize = this.size()) < targetSize) {
             //safety check if palette is full
-            //increase inner if it shouldn't increase outer of if it can't increase outer
+            //increase inner if it shouldn't increase outer or if it can't increase outer
             if ((!canIncreaseDown && !canIncreaseUp) ||
                     (!this.shouldChangeRange(targetSize, targetLumStep))) { //&& this.hasLuminanceGap()
                 increaseInner();
@@ -300,12 +305,9 @@ public class Palette implements Set<PaletteColor> {
     private boolean shouldChangeRange(int targetSize, @Nullable Float targetStep) {
         if (targetStep == null) return false;
         float targetRange = targetSize * targetStep;
-        float currentRange = this.getAverageLuminanceStep() * this.size();
-        float percentageCutoff = 0.18f; //if these are 18% diff
-        float inc = 1 + percentageCutoff;
-        float dec = 1 / inc;
-        float ratio = targetRange / currentRange;
-        return ratio > inc || ratio < dec;
+        float currentRange = this.getLuminanceSpan();
+        float delta = 0.1f; //if these are at most 0.1 apart
+        return Mth.abs(currentRange - targetRange) > delta;
     }
 
     /**
@@ -431,25 +433,23 @@ public class Palette implements Set<PaletteColor> {
         }
     }
 
-    //write a function that altersthis palette by increasing / decreasing its contrast using an input float. COntrast is directly related tothe "luminance" field you can find here. each color has luminance
-    //this is similar to changeSizeMatchingLuminanceSpan, however i do not want to add new colors changing palettesize. I want to instead modify the eixsting one colors
-    // so youcannot clal increase inner or decrease methods. those add new colors
-
-    //TODO:
-    /*
-    public void setLuminanceStep(float newLuminanceStep){
-        float averageLuminance = getCenterLuminance();
+    /**
+     * Alters luminance step by NOT changing its size but instead creating a new palette where each color is a certain luminance step apart from eachother
+     * All colors will be evenly spaced by this, centered on the old luminance
+     * @param newLuminanceStep you can see this as contrast between 2 colors.
+     */
+    public void matchLuminanceStep(float newLuminanceStep) {
+        float centerLuminance = getCenterLuminance();
         int size = this.size();
+        float lowerLuminance = centerLuminance - newLuminanceStep * size / 2;
         var copy = this.copy();
-        for(int i = 0; i < size; i++){
+        for (int i = 0; i < size; i++) {
             PaletteColor color = copy.get(i);
-            float lum = color.luminance();
-            float diff = lum - averageLuminance;
-            float newLum = lum + diff * luminanceIncrease;
+            float newLum = lowerLuminance + i * newLuminanceStep;
             this.remove(color);
-            this.add()
+            this.add(new PaletteColor(color.hcl().withLuminance(newLum)));
         }
-    }*/
+    }
 
     /**
      * @return true if there is a significant gap between two neighboring colors

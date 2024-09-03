@@ -14,6 +14,8 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -63,10 +65,12 @@ public class LeavesType extends BlockType {
 
     @Override
     public void initializeChildrenItems() {
+        this.addChild("sapling", this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
     }
 
     public static class Finder implements SetFinder<LeavesType> {
 
+        private final Map<String, ResourceLocation> childNames = new HashMap<>();
         private final Supplier<Block> leavesFinder;
         private final Supplier<WoodType> woodFinder;
         private final ResourceLocation id;
@@ -88,6 +92,14 @@ public class LeavesType extends BlockType {
                     () -> WoodTypeRegistry.INSTANCE.get(new ResourceLocation(woodTypeName)));
         }
 
+        public void addChild(String childType, String childName) {
+            addChild(childType, new ResourceLocation(id.getNamespace(), childName));
+        }
+
+        public void addChild(String childType, ResourceLocation childName) {
+            this.childNames.put(childType, childName);
+        }
+
         @Override
         public Optional<LeavesType> get() {
             if (PlatHelper.isModLoaded(id.getNamespace())) {
@@ -96,9 +108,13 @@ public class LeavesType extends BlockType {
                     var d = BuiltInRegistries.BLOCK.get(BuiltInRegistries.BLOCK.getDefaultKey());
                     if (leaves != d && leaves != null) {
                         if (woodFinder == null) {
-                            return Optional.of(new LeavesType(id, leaves));
+                            var l = new LeavesType(id, leaves);
+                            childNames.forEach((key, value) -> l.addChild(key, BuiltInRegistries.BLOCK.get(value)));
+                            return Optional.of(l);
                         } else {
-                            return Optional.of(new LeavesType(id, leaves, woodFinder));
+                            var l = new LeavesType(id, leaves, woodFinder);
+                            childNames.forEach((key, value) -> l.addChild(key, BuiltInRegistries.BLOCK.get(value)));
+                            return Optional.of(l);
                         }
                     }
                 } catch (Exception ignored) {

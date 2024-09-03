@@ -88,13 +88,16 @@ public interface ILightable {
                     return true;
                 }
             }
-        } else if (projectile instanceof ThrownPotion potion && PotionUtils.getPotion(potion.getItem()) == Potions.WATER) {
+        }
+        // Now handled by mixin since it needs bigger radius
+        /*
+        else if (projectile instanceof ThrownPotion potion && PotionUtils.getPotion(potion.getItem()) == Potions.WATER) {
             Entity entity = projectile.getOwner();
             boolean flag = entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity);
             if (flag && extinguish(projectile, state, pos, level)) {
                 return true;
             }
-        }
+        }*/
         return false;
     }
 
@@ -147,21 +150,20 @@ public interface ILightable {
         }
     }
 
-    enum FireSourceType {
-        FLINT_AND_STEEL,
-        FIRE_CHANGE,
-        FLAMING_ARROW;
+    //TODO: rename in 1.21
+    @FunctionalInterface
+    interface FireSourceType {
+        FireSourceType FLINT_AND_STEEL = (level, pos) ->
+                level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
 
-        public void play(LevelAccessor world, BlockPos pos) {
-            switch (this) {
-                case FIRE_CHANGE ->
-                        world.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0F, (world.getRandom().nextFloat() - world.getRandom().nextFloat()) * 0.2F + 1.0F);
-                case FLAMING_ARROW ->
-                        world.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.5F, 1.4F);
-                case FLINT_AND_STEEL ->
-                        world.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, world.getRandom().nextFloat() * 0.4F + 0.8F);
-            }
-        }
+        FireSourceType FIRE_CHANGE = (level, pos) ->
+                level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0F, (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.2F + 1.0F);
+
+        FireSourceType FLAMING_ARROW = (level, pos) ->
+                level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.5F, 1.4F);
+
+        void play(LevelAccessor level, BlockPos pos);
+
     }
 
 }

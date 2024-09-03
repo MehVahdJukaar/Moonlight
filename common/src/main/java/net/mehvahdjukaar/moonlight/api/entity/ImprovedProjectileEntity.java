@@ -1,15 +1,14 @@
 package net.mehvahdjukaar.moonlight.api.entity;
 
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
+import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
@@ -19,24 +18,37 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.phys.*;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Improved version of the projectile entity. Combines the functionality of AbstractArrow and ThrowableItemProjectile
+ * Main features are:
+ * - Improved collision handling, onHit and onBlockHit are called after the pos has been set and not before
+ * - Correctly handles weird cases like portal and end portal hit, which arrows and snowballs both do only one of
+ * - Collision can now use swept AABB collision instead of ray collision, greatly improving accuracy for blocks
+ * - Handy overrides such as spawnTrailParticles and hasReachedEndOfLife
+ * - Streamlined deceleration and gravity logic
+ */
 public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
-    private static final EntityDataAccessor<Byte> ID_FLAGS = SynchedEntityData.defineId(ImprovedProjectileEntity.class, EntityDataSerializers.BYTE);
 
-    protected boolean touchedGround = false;
-    protected int groundTime = 0;
+    protected Vec3 movementOld;
 
-    protected int maxAge = 200;
-    protected int maxGroundTime = 20;
-    protected float waterDeceleration = 0.8f;
+    // Renamed inGround. This is used to check if the projectile has its center inside a bock
+    protected boolean isStuck = false;
+    protected int stuckTime = 0;
+
+    protected int maxAge = 300;
+    protected int maxStuckTime = 20;
 
     protected ImprovedProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, Level world) {
         super(type, world);
+        this.movementOld = this.getDeltaMovement();
+        this.setMaxUpStep(0);
     }
 
     protected ImprovedProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, double x, double y, double z, Level world) {
@@ -50,184 +62,188 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ID_FLAGS, (byte) 0);
+    protected float getEyeHeight(Pose pose, EntityDimensions dimensions) {
+        return dimensions.height * 0.5f;
     }
 
-    private void setFlag(int id, boolean value) {
-        byte b0 = this.entityData.get(ID_FLAGS);
-        if (value) {
-            this.entityData.set(ID_FLAGS, (byte) (b0 | id));
-        } else {
-            this.entityData.set(ID_FLAGS, (byte) (b0 & ~id));
-        }
-
-    }
-
-    public void setNoPhysics(boolean noPhysics) {
-        this.noPhysics = noPhysics;
-        this.setFlag(2, noPhysics);
-    }
-
-    public boolean isNoPhysics() {
-        if (!this.level().isClientSide) {
-            return this.noPhysics;
-        } else {
-            return (this.entityData.get(ID_FLAGS) & 2) != 0;
-        }
-    }
-
+    //mix of projectile + arrow code to do what both do+  fix some issues
     @SuppressWarnings("ConstantConditions")
     @Override
     public void tick() {
-        //base tick stuff
-        this.baseTick();
-
+        // Projectile tick stuff
         if (!this.hasBeenShot) {
             this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner());
             this.hasBeenShot = true;
         }
+        if (!this.leftOwner) {
+            this.leftOwner = this.checkLeftOwner();
+        }
+
+        this.baseTick();
+
+        //TODO: check
+        if (this.hasReachedEndOfLife() && !isRemoved()) {
+            this.reachedEndOfLife();
+        }
+
+        // end of projectile tick stuff
+
+        // AbstractArrow + ThrowableProjectile stuff
 
         //fixed vanilla arrow code. You're welcome
-        Vec3 movement = this.getDeltaMovement();
-
-        double velX = movement.x;
-        double velY = movement.y;
-        double velZ = movement.z;
-
-        /*
-        //set initial rot
-        if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
-            float horizontalVel = MathHelper.sqrt(getHorizontalDistanceSqr(movement));
-            this.yRot = (float) (MathHelper.atan2(velX, velZ) * (double) (180F / (float) Math.PI));
-            this.xRot = (float) (MathHelper.atan2(velY, horizontalVel) * (double) (180F / (float) Math.PI));
-            this.yRotO = this.yRot;
-            this.xRotO = this.xRot;
-        }*/
-
-        boolean noPhysics = this.isNoPhysics();
-
-        BlockPos blockpos = this.blockPosition();
         Level level = this.level();
-        BlockState blockstate = level.getBlockState(blockpos);
-        //sets on ground
-        if (!blockstate.isAir() && !noPhysics) {
-            VoxelShape voxelshape = blockstate.getCollisionShape(level, blockpos, CollisionContext.of(this));
-            if (!voxelshape.isEmpty()) {
-                Vec3 vector3d1 = this.position();
+        Vec3 movement = this.getDeltaMovement();
+        this.movementOld = movement;
 
-                for (AABB aabb : voxelshape.toAabbs()) {
-                    if (aabb.move(blockpos).contains(vector3d1)) {
-                        this.touchedGround = true;
-                        break;
-                    }
-                }
-            }
+        if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7) {
+            movement = movement.multiply(this.stuckSpeedMultiplier);
+            this.stuckSpeedMultiplier = Vec3.ZERO;
+            this.setDeltaMovement(Vec3.ZERO);
         }
 
-        if (this.isInWaterOrRain()) {
-            this.clearFire();
+        if (!noPhysics && this.isStuck) {
+            this.stuckTime++;
         }
 
+        this.move(MoverType.SELF, movement);
 
-        if (this.touchedGround && !noPhysics) {
-            this.groundTime++;
-        } else {
-            this.groundTime = 0;
+        // rest stuff
+        this.tryCheckInsideBlocks();
+        this.updateFireState();
 
-            this.updateRotation();
+        // after we finished moving we can apply forces and  particles
 
-            Vec3 pos = this.position();
-            boolean client = level.isClientSide;
+        // update movement and particles
+        float deceleration = this.isInWater() ? this.getWaterInertia() : this.getInertia();
 
-            Vec3 newPos = pos.add(movement);
+        this.setDeltaMovement(this.getDeltaMovement().scale(deceleration));
+        if (!this.isNoGravity() && !noPhysics) {
+            this.setDeltaMovement(this.getDeltaMovement().subtract(0, this.getGravity(), 0));
+        }
 
-            HitResult blockHitResult = level.clip(new ClipContext(pos, newPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
-            if (blockHitResult.getType() != HitResult.Type.MISS) {
-                //get correct land pos
-                if (!noPhysics) {
-                    newPos = blockHitResult.getLocation();
-                }
-                //no physics clips through blocks
-            }
-
-
-            double posX = newPos.x;
-            double posY = newPos.y;
-            double posZ = newPos.z;
-
-
-            if (!this.isNoGravity() && !noPhysics) {
-                this.setDeltaMovement(velX, velY - this.getGravity(), velZ);
-            }
-
-            float deceleration = this.getDeceleration();
-
-            if (this.isInWater()) {
-                if (client) {
-                    for (int j = 0; j < 4; ++j) {
-                        double pY = posY + this.getBbHeight() / 2d;
-                        level.addParticle(ParticleTypes.BUBBLE, posX - velX * 0.25D, pY - velY * 0.25D, posZ - velZ * 0.25D, velX, velY, velZ);
-                    }
-                }
-                deceleration = this.waterDeceleration;
-            }
-
-            this.setDeltaMovement(this.getDeltaMovement().scale(deceleration));
-
-            //first sets correct position, then call hit
-            this.setPos(posX, posY, posZ);
-            this.checkInsideBlocks();
-
-            if (client) {
+        if (!isStuck) {
+            if (level.isClientSide) {
                 this.spawnTrailParticles();
             }
 
-            //calls on hit
-            if (!this.isRemoved()) {
-                //try hit entity
-                EntityHitResult hitEntityResult = this.findHitEntity(pos, newPos);
-                if (hitEntityResult != null) {
-                    blockHitResult = hitEntityResult;
-                }
+            this.updateRotation();
+        }
+    }
 
-                HitResult.Type type = blockHitResult.getType();
-                boolean portalHit = false;
-                if (type == HitResult.Type.ENTITY) {
-                    Entity hitEntity = ((EntityHitResult) blockHitResult).getEntity();
-                    if (hitEntity == this.getOwner()) {
-                        if (!canHarmOwner()) {
-                            blockHitResult = null;
-                        }
-                    } else if (hitEntity instanceof Player p1 && this.getOwner() instanceof Player p2 && !p2.canHarmPlayer(p1)) {
-                        blockHitResult = null;
-                    }
-                } else if (type == HitResult.Type.BLOCK) {
-                    //portals. done here and not in onBlockHit to prevent any further calls
-                    BlockPos hitPos = ((BlockHitResult) blockHitResult).getBlockPos();
-                    BlockState hitState = level.getBlockState(hitPos);
+    private void updateFireState() {
+        //copied bit from move method. Extracted for clarity
+        this.wasOnFire = this.isOnFire();
 
-                    if (hitState.is(Blocks.NETHER_PORTAL)) {
-                        this.handleInsidePortal(hitPos);
-                        portalHit = true;
-                    } else if (hitState.is(Blocks.END_GATEWAY)) {
-                        if (level.getBlockEntity(hitPos) instanceof TheEndGatewayBlockEntity tile && TheEndGatewayBlockEntity.canEntityTeleport(this)) {
-                            TheEndGatewayBlockEntity.teleportEntity(level, hitPos, hitState, this, tile);
-                        }
-                        portalHit = true;
-                    }
-                }
+        if (this.level().getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch((arg) ->
+                arg.is(BlockTags.FIRE) || arg.is(Blocks.LAVA))) {
+            if (this.getRemainingFireTicks() <= 0) {
+                this.setRemainingFireTicks(-this.getFireImmuneTicks());
+            }
 
-                if (!portalHit && blockHitResult != null && type != HitResult.Type.MISS && !noPhysics &&
-                        !ForgeHelper.onProjectileImpact(this, blockHitResult)) {
-                    this.onHit(blockHitResult);
-                    this.hasImpulse = true; //idk what this does
-                }
+            if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble() ||
+                    ForgeHelper.isInFluidThatCanExtinguish(this))) {
+                this.playEntityOnFireExtinguishedSound();
             }
         }
-        if (this.hasReachedEndOfLife() && !isRemoved()) {
-            this.reachedEndOfLife();
+
+        if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble() || ForgeHelper.isInFluidThatCanExtinguish(this))) {
+            this.setRemainingFireTicks(-this.getFireImmuneTicks());
+        }
+    }
+
+    /**
+     * Tries moving this entity by movement amount.
+     * Does all the checks it needs and calls onHit if it hits something.
+     * This was made from entity.move  + much stuff from both arrow and projectile code.
+     * Does not check for fall damage or other living entity specific stuff
+     * If blocks are hit movement is not modified. You need to react in onHitBlock if you wish to do so
+     * Movement isn't modified at all here.
+     * On fallOn isn't called as we call onProjectile hit. Projectiles dont fall.
+     *
+     * @param movement amount to travel by
+     */
+    @Override
+    public void move(MoverType moverType, Vec3 movement) {
+        // use normal movement logic if not self.. idk why compat i guess incase we were to use ray collider
+        if (moverType != MoverType.SELF) {
+            super.move(moverType, movement);
+            return;
+        }
+
+        movement = this.maybeBackOffFromEdge(movement, moverType);
+
+        Level level = this.level();
+        Vec3 pos = this.position();
+
+        // Applies collisions calculating hit face and new pos
+        ColliderType colliderType = this.getColliderType();
+        HitResult hitResult = switch (colliderType) {
+            case RAY -> level.clip(new ClipContext(pos, pos.add(movement),
+                    ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+            case AABB -> MthUtils.collideWithSweptAABB(this, movement, 2);
+            case ENTITY_COLLIDE -> {
+                Vec3 vec3 = this.collide(movement);
+                Vec3 sub = vec3.subtract(movement);
+                yield vec3 == movement ? BlockHitResult.miss(pos.add(vec3), Direction.UP,
+                        BlockPos.containing(pos.add(vec3))) : new BlockHitResult(pos.add(vec3),
+                        Direction.getNearest(sub.x, sub.y, sub.z), BlockPos.containing(pos.add(vec3)), false);
+            }
+        };
+
+        Vec3 newPos = hitResult.getLocation();
+        Vec3 newMovement = newPos.subtract(pos);
+        this.setPos(newPos.x, newPos.y, newPos.z);
+
+        //this is mainly used for players
+        boolean bl = !Mth.equal(newMovement.x, movement.x);
+        boolean bl2 = !Mth.equal(newMovement.z, movement.z);
+        this.horizontalCollision = bl || bl2;
+        this.verticalCollision = newMovement.y != movement.y;
+        this.verticalCollisionBelow = this.verticalCollision && newMovement.y < 0.0;
+        if (this.horizontalCollision) {
+            this.minorHorizontalCollision = this.isHorizontalCollisionMinor(newMovement);
+        } else {
+            this.minorHorizontalCollision = false;
+        }
+
+
+        //try hit entity
+        EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(level, this, pos, newPos,
+                this.getBoundingBox().expandTowards(newPos.subtract(pos)).inflate(1.0D), this::canHitEntity);
+
+        if (entityHitResult != null) {
+            hitResult = entityHitResult;
+        }
+
+        boolean portalHit = false;
+        if (hitResult instanceof EntityHitResult ei) {
+            Entity hitEntity = ei.getEntity();
+            if (hitEntity == this.getOwner()) {
+                if (!canHarmOwner()) {
+                    hitResult = null;
+                }
+            } else if (hitEntity instanceof Player p1 && this.getOwner() instanceof Player p2 && !p2.canHarmPlayer(p1)) {
+                hitResult = null;
+            }
+        } else if (hitResult instanceof BlockHitResult bi) {
+            //portals. done here and not in onBlockHit to prevent any further calls
+            BlockPos hitPos = bi.getBlockPos();
+            BlockState hitState = level.getBlockState(hitPos);
+
+            if (hitState.is(Blocks.NETHER_PORTAL)) {
+                this.handleInsidePortal(hitPos);
+                portalHit = true;
+            } else if (hitState.is(Blocks.END_GATEWAY)) {
+                if (level.getBlockEntity(hitPos) instanceof TheEndGatewayBlockEntity tile && TheEndGatewayBlockEntity.canEntityTeleport(this)) {
+                    TheEndGatewayBlockEntity.teleportEntity(level, hitPos, hitState, this, tile);
+                }
+                portalHit = true;
+            }
+        }
+
+        if (!portalHit && hitResult != null && hitResult.getType() != HitResult.Type.MISS &&
+                !ForgeHelper.onProjectileImpact(this, hitResult)) {
+            this.onHit(hitResult);
         }
     }
 
@@ -238,15 +254,21 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         return false;
     }
 
-    protected float getDeceleration() {
+    protected float getInertia() {
+        // normally 0.99 for everything
         return 0.99F;
+    }
+
+    protected float getWaterInertia() {
+        // normally 0.6 for arrows and 0.99 for tridents and 0.8 for other projectiles
+        return 0.6F;
     }
 
     /**
      * do stuff before removing, then call remove. Called when age reaches max age
      */
     public boolean hasReachedEndOfLife() {
-        return this.tickCount > this.maxAge || this.groundTime > maxGroundTime;
+        return this.tickCount > this.maxAge || this.stuckTime > maxStuckTime;
     }
 
     /**
@@ -256,29 +278,95 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         this.remove(RemovalReason.DISCARDED);
     }
 
-    @Nullable
-    protected EntityHitResult findHitEntity(Vec3 oPos, Vec3 pos) {
-        return ProjectileUtil.getEntityHitResult(this.level(), this, oPos, pos, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity);
-    }
-
     @Deprecated(forRemoval = true)
     public void spawnTrailParticles(Vec3 oldPos, Vec3 newPos) {
     }
 
     public void spawnTrailParticles() {
         spawnTrailParticles(new Vec3(xo, yo, zo), this.position());
+
+        if (this.isInWater()) {
+            // Projectile particle code
+            var movement = this.getDeltaMovement();
+            double velX = movement.x;
+            double velY = movement.y;
+            double velZ = movement.z;
+            for (int j = 0; j < 4; ++j) {
+                double pY = this.getEyeY();
+                level().addParticle(ParticleTypes.BUBBLE,
+                        getX() - velX * 0.25D, pY - velY * 0.25D, getZ() - velZ * 0.25D,
+                        velX, velY, velZ);
+            }
+        }
     }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        tag.putBoolean("touchedGround", this.touchedGround);
+        tag.putBoolean("stuck", this.isStuck);
+        tag.putInt("stuckTime", this.stuckTime);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        this.touchedGround = tag.getBoolean("touchedGround");
+        this.isStuck = tag.getBoolean("stuck");
+        this.stuckTime = tag.getInt("stuckTime");
     }
 
+    @Override
+    public void shootFromRotation(Entity shooter, float x, float y, float z, float velocity, float inaccuracy) {
+        super.shootFromRotation(shooter, x, y, z, velocity, inaccuracy);
+    }
+
+    @Override
+    public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
+        super.shoot(x, y, z, velocity, inaccuracy);
+    }
+
+    // Has no effect. Give this to shoot method manually
+    public float getDefaultShootVelocity() {
+        return 1.5F;
+    }
+
+
+    @Deprecated(forRemoval = true)
+    public boolean touchedGround;
+    @Deprecated(forRemoval = true)
+    public int groundTime = 0;
+
+    @Deprecated(forRemoval = true)
+    public void setNoPhysics(boolean noGravity) {
+        super.setNoGravity(noGravity);
+    }
+
+    @Deprecated(forRemoval = true)
+    public boolean isNoPhysics() {
+        return super.isNoGravity();
+    }
+
+    @Deprecated(forRemoval = true)
+    protected float getDeceleration() {
+        return 0.99F;
+    }
+
+    @Deprecated(forRemoval = true)
+    @Nullable
+    protected EntityHitResult findHitEntity(Vec3 oPos, Vec3 pos) {
+        return ProjectileUtil.getEntityHitResult(this.level(), this, oPos, pos, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0D), this::canHitEntity);
+    }
+
+    /**
+     * AABB: Swept AABB collision, gives very accurate block collisions and stops the entity on the first detected collision
+     * RAY: Ray collision, fast but only accurate in the center of the projectile. Ok to use for small projectiles. What arrows use
+     */
+    protected ColliderType getColliderType() {
+        return ColliderType.AABB;
+    }
+
+    protected enum ColliderType {
+        RAY,
+        AABB,
+        ENTITY_COLLIDE
+    }
 }

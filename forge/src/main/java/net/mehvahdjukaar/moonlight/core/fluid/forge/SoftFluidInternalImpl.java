@@ -52,7 +52,7 @@ public class SoftFluidInternalImpl {
                 Holder.Reference<SoftFluid> holder = reg.getHolder(reg.getId(sf)).orElseThrow();
                 fluidMap.put(f, holder);
                 Item bucket = f.getBucket();
-                if (bucket != Items.AIR && bucket != null) itemMap.put(bucket, holder);
+                if (bucket != Items.AIR) itemMap.put(bucket, holder);
             } catch (Exception ignored) {
             }
         }

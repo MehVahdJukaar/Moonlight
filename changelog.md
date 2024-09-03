@@ -1,2 +1,2 @@
-blacklisted smoldering wood from IW from wood detection
-improved mod projectile entity class
+added more logging to improve exception handling
+improved washable interface

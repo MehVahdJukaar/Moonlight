@@ -21,13 +21,15 @@ public abstract class ItemInHandRendererMixin {
     @Inject(method = "renderArmWithItem", at = @At(value = "INVOKE",
             ordinal = 1,
             target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"),
-            require = 0)
+            require = 1)
     public void moonlight$animateItem(AbstractClientPlayer player, float partialTicks, float pitch,
                                       InteractionHand hand, float swingProgress, ItemStack stack,
                                       float handHeight, PoseStack poseStack, MultiBufferSource buffer,
-                                      int combinedLight, CallbackInfo ci, @Local HumanoidArm arm) {
+                                      int combinedLight, CallbackInfo ci) {
         IFirstPersonAnimationProvider provider = IFirstPersonAnimationProvider.get(stack.getItem());
         if (provider != null) {
+            boolean mainHanded = hand == InteractionHand.MAIN_HAND;
+            HumanoidArm arm = mainHanded ? player.getMainArm() : player.getMainArm().getOpposite();
             provider.animateItemFirstPerson(player, stack, hand, arm, poseStack, partialTicks, pitch, swingProgress, handHeight);
         }
     }

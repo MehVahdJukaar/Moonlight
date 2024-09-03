@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
+import net.mehvahdjukaar.moonlight.api.misc.PathTrie;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
@@ -73,6 +74,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final ResourceLocation resourcePackName;
     protected final Set<String> namespaces = new HashSet<>();
     protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
+    protected final PathTrie<ResourceLocation> searchTrie = new PathTrie<>();
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final String mainNamespace;
 
@@ -93,7 +95,7 @@ public abstract class DynamicResourcePack implements PackResources {
         this.packType = type;
         this.resourcePackName = name;
         this.mainNamespace = name.getNamespace();
-        this.namespaces.add(name.getNamespace());
+        this.namespaces.add(mainNamespace);
         this.title = Component.translatable(LangBuilder.getReadableName(name.toString()));
 
         this.position = position;
@@ -209,12 +211,11 @@ public abstract class DynamicResourcePack implements PackResources {
     @Override
     public void listResources(PackType packType, String namespace, String id, ResourceOutput output) {
         //why are we only using server resources here?
-        if (packType == this.packType && this.namespaces.contains(namespace)) {
+        if (packType == this.packType) {
             //idk why but somebody had an issue with concurrency here during world load
 
-            this.resources.entrySet().stream()
-                    .filter(r -> (r.getKey().getNamespace().equals(namespace) && r.getKey().getPath().startsWith(id)))
-                    .forEach(r -> output.accept(r.getKey(), () -> new ByteArrayInputStream(r.getValue())));
+            this.searchTrie.search(namespace + "/" + id)
+                    .forEach(r -> output.accept(r, () -> new ByteArrayInputStream(resources.get(r))));
         }
     }
 
@@ -242,14 +243,15 @@ public abstract class DynamicResourcePack implements PackResources {
         return new FileNotFoundException(String.format("'%s' in ResourcePack '%s'", path, this.resourcePackName));
     }
 
-    protected void addBytes(ResourceLocation path, byte[] bytes) {
-        this.namespaces.add(path.getNamespace());
-        this.resources.put(path, bytes);
-        if (addToStatic) markNotClearable(path);
+    protected void addBytes(ResourceLocation id, byte[] bytes) {
+        this.namespaces.add(id.getNamespace());
+        this.resources.put(id, bytes);
+        this.searchTrie.insert(id, id);
+        if (addToStatic) markNotClearable(id);
         //debug
         if (generateDebugResources) {
             try {
-                Path p = Paths.get("debug", "generated_resource_pack").resolve(path.getNamespace() + "/" + path.getPath());
+                Path p = Paths.get("debug", "generated_resource_pack").resolve(id.getNamespace() + "/" + id.getPath());
                 Files.createDirectories(p.getParent());
                 Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException ignored) {
@@ -260,6 +262,7 @@ public abstract class DynamicResourcePack implements PackResources {
     public void removeResource(ResourceLocation res) {
         this.resources.remove(res);
         this.staticResources.remove(res);
+        this.searchTrie.remove(res);
     }
 
     public void addResource(StaticResource resource) {
@@ -291,10 +294,35 @@ public abstract class DynamicResourcePack implements PackResources {
     @ApiStatus.Internal
     protected void clearNonStatic() {
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
+        boolean hasLessStatic = staticResources.size() < (resources.size() - staticResources.size());
         for (var r : this.resources.keySet()) {
-            if (mf && modernFixHack(r)) continue;
+            if (mf && modernFixHack(r.getPath())) {
+                continue;
+            }
             if (!this.staticResources.contains(r)) {
                 this.resources.remove(r);
+                //removing is slow
+                if (!hasLessStatic) this.searchTrie.remove(r);
+            }
+        }
+        // clear trie entirely and re populate as we always expect to have way less staitc resources than others
+        if (hasLessStatic) {
+
+            if (!mf) this.searchTrie.clear();
+            else {
+                List<String> toRemove = new ArrayList<>();
+                for (String namespace : this.searchTrie.listFolders("")) {
+                    for (String f : this.searchTrie.listFolders(namespace)) {
+                        if (!modernFixHack(f)) {
+                            toRemove.add(namespace + "/" + f);
+                        }
+                    }
+                }
+                toRemove.forEach(this.searchTrie::remove);
+            }
+            // rebuild search trie with just static
+            for (var s : staticResources) {
+                this.searchTrie.insert(s, s);
             }
         }
     }
@@ -303,16 +331,14 @@ public abstract class DynamicResourcePack implements PackResources {
     @ApiStatus.Internal
     protected void clearAllContent() {
         if (this.clearOnReload) {
-            for (var r : this.resources.keySet()) {
-                this.resources.remove(r);
-            }
+            this.resources.clear();
+            this.searchTrie.clear();
         }
     }
 
     private static final boolean MODERN_FIX = CompatHandler.MODERNFIX && ModernFixCompat.areLazyResourcesOn();
 
-    private boolean modernFixHack(ResourceLocation r) {
-        String s = r.getPath();
+    private boolean modernFixHack(String s) {
         return s.startsWith("model") || s.startsWith("blockstate");
     }
 }

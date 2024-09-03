@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -111,7 +112,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
             //remove
             if (handItem.isEmpty()) {
                 ItemStack it = this.removeItemNoUpdate(slot);
-                if(!it.isEmpty()) {
+                if (!it.isEmpty()) {
                     onItemRemoved(player, it, slot);
                     if (!this.level.isClientSide()) {
                         player.setItemInHand(handIn, it);
@@ -208,6 +209,9 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         return 1;
     }
 
+    //use the one below
+    @Deprecated(forRemoval = true)
+    @ApiStatus.Internal
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory player) {
         return ChestMenu.threeRows(id, player, this);
@@ -249,8 +253,6 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     public int[] getSlotsForFace(Direction side) {
         return IntStream.range(0, this.getContainerSize()).toArray();
     }
-
-
 
 
 }
