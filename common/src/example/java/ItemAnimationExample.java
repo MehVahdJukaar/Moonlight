@@ -30,7 +30,7 @@ public class ItemAnimationExample extends Item implements IFirstPersonAnimationP
     @Override
     public void animateItemFirstPerson(Player entity, ItemStack stack, InteractionHand hand, HumanoidArm arm, PoseStack matrixStack, float partialTicks, float pitch, float attackAnim, float handHeight) {
         if (entity.isUsingItem() && entity.getUseItemRemainingTicks() > 0 && entity.getUsedItemHand() == hand) {
-            float timeLeft = stack.getUseDuration() - (entity.getUseItemRemainingTicks() - partialTicks + 1.0F);
+            float timeLeft = stack.getUseDuration(entity) - (entity.getUseItemRemainingTicks() - partialTicks + 1.0F);
             matrixStack.translate(0, 0, timeLeft * 0.04F);
         }
     }
@@ -61,7 +61,7 @@ public class ItemAnimationExample extends Item implements IFirstPersonAnimationP
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
         return 72000;
     }
 

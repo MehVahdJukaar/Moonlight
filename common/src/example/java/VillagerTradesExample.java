@@ -1,6 +1,6 @@
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -29,14 +29,14 @@ public class VillagerTradesExample {
                                   int maxTrades, int xp, float priceMult, int level) implements ModItemListing {
 
         // Codec used to serialize your custom trade type. Note that again for most application you will do fine just using default builtin type ("simple" type)
-        public static final Codec<CustomTradeType> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+        public static final MapCodec<CustomTradeType> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
                 ItemStack.CODEC.fieldOf("price").forGetter(CustomTradeType::emeralds),
-                StrOpt.of(ItemStack.CODEC, "price_secondary", ItemStack.EMPTY).forGetter(CustomTradeType::priceSecondary),
+                ItemStack.CODEC.optionalFieldOf( "price_secondary", ItemStack.EMPTY).forGetter(CustomTradeType::priceSecondary),
                 Codec.INT.fieldOf("amount").forGetter(CustomTradeType::rockets),
-                StrOpt.of(ExtraCodecs.POSITIVE_INT, "max_trades", 16).forGetter(CustomTradeType::maxTrades),
-                StrOpt.of(ExtraCodecs.POSITIVE_INT, "xp").forGetter(s -> Optional.of(s.xp)),
-                StrOpt.of(ExtraCodecs.POSITIVE_FLOAT, "price_multiplier", 0.05f).forGetter(CustomTradeType::priceMult),
-                StrOpt.of(Codec.intRange(1, 5), "level", 1).forGetter(CustomTradeType::level)
+                ExtraCodecs.POSITIVE_INT.optionalFieldOf( "max_trades", 16).forGetter(CustomTradeType::maxTrades),
+                ExtraCodecs.POSITIVE_INT.optionalFieldOf( "xp").forGetter(s -> Optional.of(s.xp)),
+                ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf( "price_multiplier", 0.05f).forGetter(CustomTradeType::priceMult),
+                Codec.intRange(1, 5).optionalFieldOf( "level", 1).forGetter(CustomTradeType::level)
         ).apply(instance, CustomTradeType::create));
 
         public static CustomTradeType create(ItemStack price, ItemStack price2, int rockets,
@@ -56,7 +56,7 @@ public class VillagerTradesExample {
         }
 
         @Override
-        public Codec<? extends ModItemListing> getCodec() {
+        public MapCodec<? extends ModItemListing> getCodec() {
             return CODEC;
         }
 

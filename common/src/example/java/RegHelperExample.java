@@ -3,14 +3,8 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.HoneycombItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -21,7 +15,10 @@ import java.util.function.Supplier;
 public class RegHelperExample {
 
     // Call this on mod init. Use to add callbacks for special events
-    public static void init(){
+    public static void init() {
+        //IEventBus bus;
+        //RegHelper.startRegisteringFor(bus);
+
         // These callbacks pretty much just wrap forge and fabric events. Just showcasing a few
         RegHelper.addItemsToTabsRegistration(RegHelperExample::registerItemsToTabs);
         RegHelper.addLootTableInjects(RegHelperExample::registerLootInjects);
@@ -29,12 +26,12 @@ public class RegHelperExample {
 
     protected static final Supplier<FlowerBlock> LILAC_FLOWER = RegHelper.registerBlockWithItem(
             Moonlight.res("lilac"), () -> new FlowerBlock(
-                    MobEffects.HARM, 1,  BlockBehaviour.Properties.of())
+                    MobEffects.HARM, 1, BlockBehaviour.Properties.of())
     );
 
     // Generic entry registration. Just like Registry.register calls
     protected static final Supplier<GameEvent> CUSTOM_EVENT = RegHelper.register(
-            Moonlight.res("custom_event"), ()->new GameEvent("custom_event", 2),
+            Moonlight.res("custom_event"), () -> new GameEvent(2),
             Registries.GAME_EVENT
     );
 
@@ -48,7 +45,7 @@ public class RegHelperExample {
 
     // Adds diamond loot to stone block
     private static void registerLootInjects(RegHelper.LootInjectEvent event) {
-        if(event.getTable().equals(ResourceLocation.parse("stone"))){
+        if (event.getTable().equals(ResourceLocation.parse("stone"))) {
             event.addTableReference(ResourceLocation.parse("diamond"));
         }
     }

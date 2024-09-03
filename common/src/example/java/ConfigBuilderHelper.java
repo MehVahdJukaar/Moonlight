@@ -36,7 +36,7 @@ public class ConfigBuilderHelper {
 
     static {
         // Creates a common config builder. Works pretty much like forge one with a few added features
-        ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.COMMON);
+        ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.COMMON_SYNCED);
         // push a new category
         builder.push("misc");
         BOOL_CONFIG = builder.comment("This is a boolean config").define("bool_config", true);
@@ -48,8 +48,6 @@ public class ConfigBuilderHelper {
                 .defineObject("custom_object", () -> new MyObj(2, 4), CODEC);
         builder.pop();
 
-        // With this line, the config file will be synced to all connecting clients when connecting to a server
-        builder.setSynced();
 
         // Builds and register out config
         CONFIG_SPEC = builder.build();

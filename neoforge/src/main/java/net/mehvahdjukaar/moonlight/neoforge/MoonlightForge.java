@@ -176,10 +176,9 @@ public class MoonlightForge {
     private static WeakReference<IEventBus> currentBus = null;
 
     public static IEventBus getCurrentBus() {
-        var b = currentBus.get();
-        if (b == null)
+        if (currentBus == null || currentBus.get() == null)
             throw new IllegalStateException("Bus is null. You must call RegHelper.startRegistering(IEventBus) before registering events");
-        return b;
+        return currentBus.get();
     }
 
     /**

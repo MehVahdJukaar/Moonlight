@@ -32,8 +32,8 @@ public class CustomModelLoaderExample implements CustomModelLoader {
     public CustomGeometry deserialize(JsonObject json, JsonDeserializationContext context) throws JsonParseException {
         JsonElement innerModel1 = json.get("inner_model");
         boolean prop = json.get("is_translated").getAsBoolean();
-        return (modelBaker, spriteGetter, transform, location) -> {
-            var innerModel = CustomModelLoader.parseModel(innerModel1, modelBaker, spriteGetter, transform, location);
+        return (modelBaker, spriteGetter, transform) -> {
+            var innerModel = CustomModelLoader.parseModel(innerModel1, modelBaker, spriteGetter, transform);
             return new CustomBakedModelExample(innerModel, prop, transform);
         };
     }

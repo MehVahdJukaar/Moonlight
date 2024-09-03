@@ -8,6 +8,10 @@ public class PlatHelperExample {
 
     // Call on mod init (Forge: mod constructor, Fabric: Main entry point)
     public static void init() {
+        // when on forge you must call this immediately
+        //IEventBus bus;
+        //RegHelper.startRegisteringFor(bus);
+
         // Adding a Common Setup step, called after registration. Equivalent of Forge one
         PlatHelper.addCommonSetup(PlatHelperExample::setup);
         PlatHelper.addCommonSetupAsync(()->{/* Some expensive task which can be run off thread*/});
@@ -21,9 +25,6 @@ public class PlatHelperExample {
 
     // Setup will run after all registrations are done
     private static void setup() {
-        // Adding some animal foods
-        RegHelper.registerParrotFood(Items.APPLE);
-
         // Showcasing some other PlatHelper functions
         if (PlatHelper.isModLoaded("jei") && !PlatHelper.isDev()) {
             // Note that this call is fabric only. For Forge, you should override getBurnTime in your item

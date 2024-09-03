@@ -1,6 +1,6 @@
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -32,11 +32,11 @@ public class DispenserHelperExample {
 
         @Override
         protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
-            BlockPos frontPos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
-            if (source.getLevel().getBlockState(frontPos).isAir()) {
-                EnderDragon entity = new EnderDragon(EntityType.ENDER_DRAGON, source.getLevel());
-                entity.moveTo(source.getPos(), 0, 0);
-                source.getLevel().addFreshEntity(entity);
+            BlockPos frontPos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
+            if (source.level().getBlockState(frontPos).isAir()) {
+                EnderDragon entity = new EnderDragon(EntityType.ENDER_DRAGON, source.level());
+                entity.moveTo(source.pos(), 0, 0);
+                source.level().addFreshEntity(entity);
                 stack.shrink(1);
                 return InteractionResultHolder.success(stack);
             }
