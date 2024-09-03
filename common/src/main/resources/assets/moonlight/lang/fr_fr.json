@@ -1,5 +1,14 @@
 {
-  "fluid.selene.generic_fluid": "Fluide sans nom",
+  "fluid.moonlight.generic_fluid": "Fluide sans nom",
   "item.minecraft.potion_lingering": "Potion persistante",
-  "item.minecraft.potion_splash": "Potion Jetable",
+
+  "item.minecraft.potion_splash": "Potion jetable",
+  "gui.moonlight.open_mod_page": "Ouvrir la page CurseForge de %s",
+  "message.moonlight.anti_repost": "Vous semblez avoir téléchargé %1$s à partir d'un site malveillant :( Obtenez la vraie version %2$s.",
+  "message.moonlight.anti_repost_link": "ici",
+
+  "wood_type.twilightforest.dark": "Bois sombre",
+  "leaves_type.twilightforest.dark": "Bois sombre",
+  "leaves_type.ulterlands.souldrained": "Pétrifié"
+
 }
