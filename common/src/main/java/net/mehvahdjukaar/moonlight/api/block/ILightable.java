@@ -13,6 +13,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownPotion;
@@ -78,15 +79,11 @@ public interface ILightable {
         return false;
     }
 
-
-    //true on state change
-    default boolean interactWithProjectile(Level level, BlockState state, Projectile projectile, BlockPos pos) {
+    default boolean interactWithEntity(Level level, BlockState state, Entity projectile, BlockPos pos) {
         if (projectile.isOnFire()) {
-            Entity entity = projectile.getOwner();
-            if (entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity)) {
-                if (lightUp(projectile, state, pos, level, FireSourceType.FLAMING_ARROW)) {
-                    return true;
-                }
+            Entity owner = projectile instanceof TraceableEntity te ? te.getOwner() : null;
+            if (owner == null || owner instanceof Player || PlatHelper.isMobGriefingOn(level, owner)) {
+                return lightUp(projectile, state, pos, level, FireSourceType.FLAMING_ARROW);
             }
         }
         // Now handled by mixin since it needs bigger radius
@@ -98,6 +95,19 @@ public interface ILightable {
                 return true;
             }
         }*/
+        return false;
+    }
+
+    //true on state change
+    @Deprecated(forRemoval = true)
+    default boolean interactWithProjectile(Level level, BlockState state, Projectile projectile, BlockPos pos) {
+        if (projectile instanceof ThrownPotion potion && PotionUtils.getPotion(potion.getItem()) == Potions.WATER) {
+            Entity entity = projectile.getOwner();
+            boolean flag = entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity);
+            if (flag && extinguish(projectile, state, pos, level)) {
+                return true;
+            }
+        }
         return false;
     }
 
