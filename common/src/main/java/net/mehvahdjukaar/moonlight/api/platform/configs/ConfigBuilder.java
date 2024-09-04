@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.block.ILightable;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -34,7 +35,8 @@ public abstract class ConfigBuilder {
     }
 
     public static ConfigBuilder create(String modId, ConfigType type) {
-        return create(ResourceLocation.fromNamespaceAndPath(modId, type.toString().toLowerCase(Locale.ROOT)), type);
+        ILightable
+        return create(ResourceLocation.fromNamespaceAndPath(modId, type.getDefaultName()), type);
     }
 
     private final ResourceLocation name;

@@ -64,7 +64,7 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
     }
 
     public static <A> Opt<A> optional(String id, ResourceKey<Registry<A>> registry) {
-        return optional(new ResourceLocation(id), registry);
+        return optional(ResourceLocation.tryParse(id), registry);
     }
 
     private void invalidateInstance() {

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.neoforge;
 
 import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
+import net.mehvahdjukaar.moonlight.api.misc.FakeLevel;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
@@ -13,14 +14,11 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
-import net.mehvahdjukaar.moonlight.core.misc.FakeLevel;
 import net.mehvahdjukaar.moonlight.core.misc.neoforge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.neoforge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
-import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.locale.Language;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;

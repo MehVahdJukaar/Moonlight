@@ -9,6 +9,8 @@ import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
+import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
@@ -30,6 +32,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
@@ -389,7 +392,7 @@ public class RegHelper {
     @FunctionalInterface
     public interface SpawnPlacementEvent {
         <T extends Mob> void register(EntityType<T> entityType, SpawnPlacementType decoratorType,
-                                         Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate);
+                                      Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate);
     }
 
     @ExpectPlatform
@@ -531,7 +534,7 @@ public class RegHelper {
      * Very hack solution for forge. Call this as soon as your mod is created in its constructor, offering your mod bus
      */
     @ExpectPlatform
-    public static void startRegisteringFor(Object bus){
+    public static void startRegisteringFor(Object bus) {
         throw new AssertionError();
     }
 
@@ -543,6 +546,19 @@ public class RegHelper {
         DispenserHelper.addListener(eventListener, priority);
     }
 
+    /**
+     * Call on mod setup. Register a new serializer for your trade
+     */
+    public static void registerDynamicItemListingSerializer(ResourceLocation id, MapCodec<? extends ModItemListing> trade) {
+        ItemListingManager.registerSerializer(id, trade);
+    }
+
+    /**
+     * Registers a simple special trade
+     */
+    public static void registerDynamicItemListingSerializer(ResourceLocation id, VillagerTrades.ItemListing instance, int level) {
+        ItemListingManager.registerSimple(id, instance, level);
+    }
 
 }
 

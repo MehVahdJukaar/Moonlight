@@ -168,7 +168,6 @@ public class ClientHelper {
     }
 
     public interface SpecialModelEvent {
-        @Deprecated(forRemoval = true)
         void register(ModelResourceLocation modelLocation);
 
         void register(ResourceLocation id);
