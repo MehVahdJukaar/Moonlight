@@ -133,10 +133,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                 ItemStack it = handItem.copy();
                 it.setCount(1);
                 this.setItem(slot, it);
-
-                if (!player.isCreative()) {
-                    handItem.shrink(1);
-                }
+                handItem.consume(1, player);
                 onItemAdded(player, it, slot);
                 if (!this.level.isClientSide()) {
                     this.level.playSound(null, this.worldPosition, this.getAddItemSound(), SoundSource.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.10F + 0.95F);

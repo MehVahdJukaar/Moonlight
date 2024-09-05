@@ -167,9 +167,11 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    @FunctionalInterface
     public interface SpecialModelEvent {
+        @Deprecated(forRemoval = true)
         void register(ModelResourceLocation modelLocation);
+
+        void register(ResourceLocation id);
     }
 
     @ExpectPlatform

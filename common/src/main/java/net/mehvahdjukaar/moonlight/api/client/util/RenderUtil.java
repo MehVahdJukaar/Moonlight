@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
@@ -197,6 +198,10 @@ public class RenderUtil {
         MoonlightClient.setMipMap(mipMap);
     }
 
+
+    public static ModelResourceLocation getStandaloneModelLocation(ResourceLocation location) {
+        return new ModelResourceLocation(location, PlatHelper.getPlatform().isFabric() ? "fabric_resource" : "standalone");
+    }
 
 }
 

@@ -160,7 +160,17 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<ModelEvent.RegisterAdditional> eventConsumer = event -> {
-            eventListener.accept(event::register);
+            eventListener.accept(new ClientHelper.SpecialModelEvent() {
+                @Override
+                public void register(ModelResourceLocation modelLocation) {
+                    event.register(modelLocation);
+                }
+
+                @Override
+                public void register(ResourceLocation id) {
+                    event.register(ModelResourceLocation.standalone(id));
+                }
+            });
         };
         getCurrentBus().addListener(eventConsumer);
     }

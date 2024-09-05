@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model.neoforge;
 
+import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
@@ -7,6 +8,7 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
 
 public record ExtraModelDataImpl(ModelData data) implements ExtraModelData {
@@ -31,6 +33,11 @@ public record ExtraModelDataImpl(ModelData data) implements ExtraModelData {
         ModelProperty<T> prop = (ModelProperty<T>) KEYS_TO_PROP.get(key);
         if (prop == null) return null;
         return data.get(prop);
+    }
+
+    @Override
+    public Map<ModelDataKey<?>, Object> values() {
+        return ImmutableMap.copyOf(KEYS_TO_PROP);
     }
 
     public static ExtraModelData.Builder builder() {

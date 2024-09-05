@@ -171,8 +171,16 @@ public class ClientHelperImpl {
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
         Moonlight.assertInitPhase();
             ModelLoadingPlugin.register(pluginContext -> {
-                eventListener.accept(r->{
-                    pluginContext.addModels(r.id());
+                eventListener.accept(new ClientHelper.SpecialModelEvent() {
+                    @Override
+                    public void register(ModelResourceLocation modelLocation) {
+                        pluginContext.addModels(modelLocation.id());
+                    }
+
+                    @Override
+                    public void register(ResourceLocation id) {
+                        pluginContext.addModels(id);
+                    }
                 });
             });
     }

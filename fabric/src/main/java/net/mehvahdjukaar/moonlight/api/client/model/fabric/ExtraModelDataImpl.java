@@ -1,12 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
+import com.google.common.collect.ImmutableMap;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.ModelDataKey;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ExtraModelDataImpl implements ExtraModelData {
 
@@ -18,6 +16,11 @@ public class ExtraModelDataImpl implements ExtraModelData {
 
     public <T> T get(ModelDataKey<T> prop) {
         return (T) this.backingMap.get(prop);
+    }
+
+    @Override
+    public Map<ModelDataKey<?>, Object> values() {
+        return ImmutableMap.copyOf(backingMap);
     }
 
     public static ExtraModelData.Builder builder() {

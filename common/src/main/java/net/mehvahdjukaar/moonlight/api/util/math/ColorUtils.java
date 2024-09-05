@@ -13,14 +13,14 @@ public class ColorUtils {
 
     //utility codec that serializes either a string or an integer
     public static final Codec<Integer> CODEC = Codec.either(Codec.intRange(0, 0xffffffff),
-            Codec.STRING.flatXmap(ColorUtils::isValidStringOrError, s->isValidStringOrError(s)
+            Codec.STRING.flatXmap(ColorUtils::isValidStringOrError, s -> isValidStringOrError(s)
                     .map(ColorUtils::formatString))).xmap(
             either -> either.map(integer -> integer, s -> Integer.parseUnsignedInt(s, 16)),
             integer -> Either.right("#" + String.format("%08X", integer))
     );
 
-    private static String formatString(String s){
-        return "#"+ s.toUpperCase(Locale.ROOT);
+    private static String formatString(String s) {
+        return "#" + s.toUpperCase(Locale.ROOT);
     }
 
     public static DataResult<String> isValidStringOrError(String s) {
@@ -88,5 +88,9 @@ public class ColorUtils {
 
     public static int pack(float[] rgb) {
         return FastColor.ARGB32.color(255, (int) (rgb[0] * 255), (int) (rgb[1] * 255), (int) (rgb[2] * 255));
+    }
+
+    public static float[] unpack(int color) {
+        return new float[]{FastColor.ABGR32.red(color) / 255f, FastColor.ABGR32.green(color) / 255f, FastColor.ABGR32.blue(color) / 255f};
     }
 }

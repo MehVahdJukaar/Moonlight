@@ -18,6 +18,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -184,6 +186,12 @@ public class SoftFluidStack implements DataComponentHolder {
 
     public void shrink(int amount) {
         setCount(this.count - amount);
+    }
+
+    public void consume(int amount, @Nullable LivingEntity entity){
+        if (entity == null || !entity.hasInfiniteMaterials()) {
+            this.shrink(amount);
+        }
     }
 
     public SoftFluidStack copy() {
