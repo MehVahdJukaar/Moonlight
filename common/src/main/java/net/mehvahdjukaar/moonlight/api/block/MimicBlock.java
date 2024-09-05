@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.core.BlockPos;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import java.util.List;
 
 public abstract class MimicBlock extends Block {
+
     protected MimicBlock(Properties properties) {
         super(properties);
     }
