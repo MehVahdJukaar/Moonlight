@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
 import net.minecraft.advancements.CriteriaTriggers;
-import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -14,10 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -104,15 +100,14 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         this.setItem(0, stack);
     }
 
-    public InteractionResult interact(Player player, InteractionHand handIn) {
-        return this.interact(player, handIn, 0);
+    public ItemInteractionResult interactWithPlayerItem(Player player, InteractionHand handIn, ItemStack stack) {
+        return this.interactWithPlayerItem(player, handIn, stack,0);
     }
 
-    public InteractionResult interact(Player player, InteractionHand handIn, int slot) {
+    public ItemInteractionResult interactWithPlayerItem(Player player, InteractionHand handIn, ItemStack handItem, int slot) {
         if (!this.isAccessibleBy(player)) {
             player.displayClientMessage(Component.translatable("container.isLocked", ""), true);
         } else if (handIn == InteractionHand.MAIN_HAND) {
-            ItemStack handItem = player.getItemInHand(handIn);
             //remove
             if (handItem.isEmpty()) {
                 ItemStack it = this.removeItemNoUpdate(slot);
@@ -125,11 +120,11 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                         //also update visuals on client. will get overwritten by packet tho
                         this.updateClientVisualsOnLoad();
                     }
-                    return InteractionResult.sidedSuccess(this.level.isClientSide);
+                    return ItemInteractionResult.sidedSuccess(this.level.isClientSide);
                 }
             }
             //place
-            else if (!handItem.isEmpty() && this.canPlaceItem(slot, handItem)) {
+            else if (this.canPlaceItem(slot, handItem)) {
                 ItemStack it = handItem.copy();
                 it.setCount(1);
                 this.setItem(slot, it);
@@ -142,10 +137,10 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                     //also update visuals on client. will get overwritten by packet tho
                     this.updateClientVisualsOnLoad();
                 }
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
+                return ItemInteractionResult.sidedSuccess(this.level.isClientSide);
             }
         }
-        return InteractionResult.PASS;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     public void onItemRemoved(Player player, ItemStack stack, int slot) {

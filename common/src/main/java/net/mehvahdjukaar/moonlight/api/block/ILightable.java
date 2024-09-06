@@ -11,7 +11,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +36,7 @@ public interface ILightable {
 
     void setLitUp(BlockState state, LevelAccessor world, BlockPos pos, boolean lit);
 
-    default boolean lightUp(@Nullable Entity player, BlockState state, BlockPos pos, LevelAccessor world, FireSourceType fireSourceType) {
+    default boolean lightUp(@Nullable Entity player, BlockState state, BlockPos pos, LevelAccessor world, FireSoundType fireSourceType) {
         if (!isLitUp(state, world, pos)) {
             if (!world.isClientSide()) {
                 this.setLitUp(state, world, pos, true);
@@ -68,7 +68,7 @@ public interface ILightable {
         if (projectile.isOnFire()) {
             Entity entity = projectile.getOwner();
             if (entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity)) {
-                return lightUp(projectile, state, pos, level, FireSourceType.FLAMING_ARROW);
+                return lightUp(projectile, state, pos, level, FireSoundType.FLAMING_ARROW);
             }
         }
         // Now handled by mixin since it needs bigger radius
@@ -83,38 +83,38 @@ public interface ILightable {
     }
 
     //call on use
-    default InteractionResult interactWithPlayer(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
+    default ItemInteractionResult interactWithPlayerItem(BlockState state, Level level, BlockPos pos, Player player,
+                                                         InteractionHand hand, ItemStack stack) {
         if (Utils.mayPerformBlockAction(player, pos, stack)) {
             if (!this.isLitUp(state, level, pos)) {
                 Item item = stack.getItem();
                 if (item instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS)) {
-                    if (lightUp(player, state, pos, level, FireSourceType.FLINT_AND_STEEL)) {
+                    if (lightUp(player, state, pos, level, FireSoundType.FLINT_AND_STEEL)) {
                         stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
-                        return InteractionResult.sidedSuccess(level.isClientSide);
+                        return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }
                 } else if (item instanceof FireChargeItem) {
-                    if (lightUp(player, state, pos, level, FireSourceType.FIRE_CHANGE)) {
+                    if (lightUp(player, state, pos, level, FireSoundType.FIRE_CHANGE)) {
                         stack.consume(1, player);
-                        return InteractionResult.sidedSuccess(level.isClientSide);
+                        return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }
                 }
             } else if (this.canBeExtinguishedBy(stack)) {
                 if (extinguish(player, state, pos, level)) {
                     if (!(stack.getItem() instanceof BrushItem)) {
-                        return InteractionResult.sidedSuccess(level.isClientSide);
+                        return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }
                 }
             }
         }
-        return InteractionResult.PASS;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     default boolean canBeExtinguishedBy(ItemStack item) {
         return item.getItem() instanceof ShovelItem || item.getItem() instanceof BrushItem;
     }
 
-    default void playLightUpSound(LevelAccessor world, BlockPos pos, FireSourceType type) {
+    default void playLightUpSound(LevelAccessor world, BlockPos pos, FireSoundType type) {
         type.play(world, pos);
     }
 
@@ -130,16 +130,15 @@ public interface ILightable {
         }
     }
 
-    //TODO: rename in 1.21
     @FunctionalInterface
-    interface FireSourceType {
-        FireSourceType FLINT_AND_STEEL = (level, pos) ->
+    interface FireSoundType {
+        FireSoundType FLINT_AND_STEEL = (level, pos) ->
                 level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
 
-        FireSourceType FIRE_CHANGE = (level, pos) ->
+        FireSoundType FIRE_CHANGE = (level, pos) ->
                 level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0F, (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.2F + 1.0F);
 
-        FireSourceType FLAMING_ARROW = (level, pos) ->
+        FireSoundType FLAMING_ARROW = (level, pos) ->
                 level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.5F, 1.4F);
 
         void play(LevelAccessor level, BlockPos pos);
