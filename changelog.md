@@ -1,2 +1,1 @@
-added more logging to improve exception handling
-improved washable interface
+fixed an issue with dynamic resource pack

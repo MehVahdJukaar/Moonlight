@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
@@ -11,6 +13,7 @@ import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -215,7 +218,14 @@ public abstract class DynamicResourcePack implements PackResources {
             //idk why but somebody had an issue with concurrency here during world load
 
             this.searchTrie.search(namespace + "/" + id)
-                    .forEach(r -> output.accept(r, () -> new ByteArrayInputStream(resources.get(r))));
+                    .forEach(r -> output.accept(r, () -> {
+
+                        byte[] buf = resources.get(r);
+                        if (buf == null) {
+                            throw new IllegalStateException("Somehow search tree returned a resource not in resources " + r);
+                        }
+                        return new ByteArrayInputStream(buf);
+                    }));
         }
     }
 
@@ -245,7 +255,7 @@ public abstract class DynamicResourcePack implements PackResources {
 
     protected void addBytes(ResourceLocation id, byte[] bytes) {
         this.namespaces.add(id.getNamespace());
-        this.resources.put(id, bytes);
+        this.resources.put(id, Preconditions.checkNotNull(bytes));
         this.searchTrie.insert(id, id);
         if (addToStatic) markNotClearable(id);
         //debug
@@ -293,8 +303,9 @@ public abstract class DynamicResourcePack implements PackResources {
     // Called after texture have been stitched. Only keeps needed stuff
     @ApiStatus.Internal
     protected void clearNonStatic() {
+        Stopwatch watch = Stopwatch.createStarted();
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
-        boolean hasLessStatic = staticResources.size() < (resources.size() - staticResources.size());
+        boolean hasLessStatic = false;// staticResources.size() < (resources.size() - staticResources.size());
         for (var r : this.resources.keySet()) {
             if (mf && modernFixHack(r.getPath())) {
                 continue;
@@ -305,6 +316,7 @@ public abstract class DynamicResourcePack implements PackResources {
                 if (!hasLessStatic) this.searchTrie.remove(r);
             }
         }
+
         // clear trie entirely and re populate as we always expect to have way less staitc resources than others
         if (hasLessStatic) {
 
@@ -325,6 +337,8 @@ public abstract class DynamicResourcePack implements PackResources {
                 this.searchTrie.insert(s, s);
             }
         }
+        Moonlight.LOGGER.info("Cleared non-static resources for pack {} in: {} ms", this.resourcePackName,
+                watch.elapsed().toMillis());
     }
 
     // Called after each reload
