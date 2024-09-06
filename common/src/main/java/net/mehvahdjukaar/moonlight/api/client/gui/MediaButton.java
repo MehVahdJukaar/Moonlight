@@ -22,6 +22,7 @@ public class MediaButton {
     public static final ResourceLocation KO_FI = Moonlight.res("media/ko_fi");
     public static final ResourceLocation CURSEFORGE = Moonlight.res("media/curseforge");
     public static final ResourceLocation GITHUB = Moonlight.res("media/github");
+    public static final ResourceLocation AKLIZ = Moonlight.res("media/akliz");
 
     public static final ResourceLocation YES = Moonlight.res("yes");
     public static final ResourceLocation NO = Moonlight.res("no");
@@ -91,5 +92,11 @@ public class MediaButton {
     public static Button github(Screen parent, int x, int y, String url) {
         return create(parent, x, y, GITHUB, url, "Mod Wiki");
     }
+
+    public static Button akliz(Screen parent, int x, int y, String url, String tooltip) {
+        return create(parent, x, y, AKLIZ, url, tooltip);
+    }
+
+
 
 }

@@ -70,16 +70,16 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     @ExpectPlatform
-    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, DataComponentPatch tag) {
+    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, @NotNull DataComponentPatch tag) {
         throw new AssertionError();
     }
 
     public static SoftFluidStack of(Holder<SoftFluid> fluid, int count) {
-        return of(fluid, count, null);
+        return of(fluid, count, DataComponentPatch.EMPTY);
     }
 
     public static SoftFluidStack of(Holder<SoftFluid> fluid) {
-        return of(fluid, 1, null);
+        return of(fluid, 1);
     }
 
     public static SoftFluidStack bucket(Holder<SoftFluid> fluid) {
@@ -115,7 +115,7 @@ public class SoftFluidStack implements DataComponentHolder {
 
     public static SoftFluidStack empty() {
         if (cachedEmptyInstance == null) {
-            cachedEmptyInstance = of(SoftFluidRegistry.getEmpty(), 0, null);
+            cachedEmptyInstance = of(SoftFluidRegistry.getEmpty(), 0);
         }
         return cachedEmptyInstance;
     }
