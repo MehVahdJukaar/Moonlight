@@ -176,6 +176,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuadBuilder fromVanilla(BakedQuad quad) {
         inner.fromVanilla(quad, RendererAccess.INSTANCE.getRenderer().materialFinder().find(), quad.getDirection());
+        vertexIndex = 4;
         return this;
     }
 

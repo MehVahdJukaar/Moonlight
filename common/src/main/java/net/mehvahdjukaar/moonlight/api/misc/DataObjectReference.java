@@ -9,7 +9,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.function.Supplier;
 
 //can be statically stored and persists across world loads
@@ -52,8 +51,8 @@ public class DataObjectReference<T> implements Supplier<T> {
                 cache = reg.getHolderOrThrow(key);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get object from registry: " + key +
-                        ".\nCalled from " + Thread.currentThread() + ".\n"+
-                        "Registry content was: " + reg.entrySet().stream().map(Map.Entry::getValue).toList(), e);
+                        ".\nCalled from " + Thread.currentThread() + ".\n" +
+                        "Registry content was: " + reg.entrySet().stream().map(b -> b.getKey().location()).toList(), e);
             }
         }
         return cache;

@@ -61,14 +61,6 @@ public class SoftFluidStack implements DataComponentHolder {
         this.setCount(count);
     }
 
-    protected SoftFluidStack(Holder<SoftFluid> fluid, int count) {
-        this(fluid, count, DataComponentPatch.EMPTY);
-    }
-
-    protected SoftFluidStack(Holder<SoftFluid> fluid) {
-        this(fluid, 1);
-    }
-
     @ExpectPlatform
     public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, @NotNull DataComponentPatch tag) {
         throw new AssertionError();

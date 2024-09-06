@@ -20,8 +20,8 @@ public class SoftFluidColorsImpl {
         //yay hardcoding
         //at least this works for any fluid
         PotionContents potionContents = stack.get(DataComponents.POTION_CONTENTS);
-        if (potionContents != null && potionContents.customColor().isPresent()) {
-            specialColor = potionContents.customColor().get();
+        if (potionContents != null) {
+            specialColor = potionContents.getColor();
         } else {
             Fluid f = stack.getVanillaFluid().value();
             if (f != Fluids.EMPTY) {

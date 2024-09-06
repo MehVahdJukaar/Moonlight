@@ -13,11 +13,7 @@ public class SoftFluidStackImpl extends SoftFluidStack {
     }
 
     public static SoftFluidStack of(Holder<SoftFluid> fluid, int count,  DataComponentPatch components) {
-        var f = new SoftFluidStackImpl(fluid, count, components);
-        if (f.isEmpty()) {
-            return SoftFluidStack.empty();
-        }
-        return f;
+        return new SoftFluidStackImpl(fluid, count, components);
     }
 
     public boolean isFluidEqual(FluidStack fluidStack) {
