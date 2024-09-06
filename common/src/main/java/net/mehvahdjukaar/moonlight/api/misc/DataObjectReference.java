@@ -17,6 +17,7 @@ import java.util.function.Supplier;
  * A soft reference to an object in a Data pack registry
  * Like registry object but can be invalidated and works for data pack registries
  */
+//TODO: rename to lazyRegistryObject lazyHolder or dataRegistryObject
 public class DataObjectReference<T> implements Supplier<T> {
 
     private static final WeakHashSet<DataObjectReference<?>> REFERENCES = new WeakHashSet<>();

@@ -11,13 +11,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.mrcrayfish.configured.api.IConfigEntry;
 import com.mrcrayfish.configured.api.IConfigValue;
+import com.mrcrayfish.configured.api.IModConfig;
 import com.mrcrayfish.configured.api.ValueEntry;
 import com.mrcrayfish.configured.client.screen.ConfigScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.impl.neoforge.NeoForgeConfig;
 import com.mrcrayfish.configured.impl.neoforge.NeoForgeValue;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.neoforge.ForgeConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -29,7 +29,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
@@ -50,6 +49,8 @@ import java.util.*;
 //this is just a more customized version of Configured default config screen with some extra icons and such
 public abstract class CustomConfigScreen extends ConfigScreen {
 
+    @Nullable
+    private static final Field FORGE_CONFIG = findFieldOrNull(NeoForgeConfig.class, "config");
     @Nullable
     private static final Field BUTTON_ON_PRESS = findFieldOrNull(Button.class, "onPress");
     @Nullable
@@ -87,18 +88,25 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         return field;
     }
 
-    protected CustomConfigScreen(CustomConfigSelectScreen parent, ModConfig config) {
+    protected CustomConfigScreen(CustomConfigSelectScreen parent, IModConfig config) {
         this(parent.getModId(), parent.getMainIcon(), parent.getTitle(), parent, config);
     }
 
-
-    //needed for custom title
     protected CustomConfigScreen(String modId, ItemStack mainIcon, Component title,
-                                 Screen parent, ModConfig config) {
-        super(parent, title, new NeoForgeConfig(config));
+                                 Screen parent, IModConfig config) {
+        super(parent, title, config);
         this.modId = modId;
         this.mainIcon = mainIcon;
-        this.mlConfig = ForgeConfigHolder.getFromForgeConfig(config);
+        this.mlConfig = ForgeConfigHolder.getFromForgeConfig(getForgeConfig(config));
+    }
+
+    private ModConfig getForgeConfig(IModConfig config) {
+        try {
+            FORGE_CONFIG.setAccessible(true);
+            return (ModConfig) FORGE_CONFIG.get(config);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -234,7 +242,12 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         return null;
     }
 
-    public abstract CustomConfigScreen createSubScreen(Component title);
+    @FunctionalInterface
+    public interface Factory {
+        CustomConfigScreen create(String modId, ItemStack mainIcon, Component title, Screen parent, IModConfig config);
+    }
+
+    public abstract Factory getSubScreenFactory();
 
     public String getEnabledKeyword() {
         return "enabled";
@@ -255,7 +268,12 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             this.button = Button.builder(Component.literal(label).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.WHITE),
                             (onPress) -> {
                                 Component newTitle = CustomConfigScreen.this.title.plainCopy().append(" > " + label);
-                                var sc = createSubScreen(newTitle);
+                                var sc = getSubScreenFactory()
+                                        .create(CustomConfigScreen.this.modId,
+                                                CustomConfigScreen.this.mainIcon,
+                                                newTitle,
+                                                CustomConfigScreen.this,
+                                                config);
                                 //hax
                                 try {
                                     FOLDER_ENTRY.set(sc, folderEntry);

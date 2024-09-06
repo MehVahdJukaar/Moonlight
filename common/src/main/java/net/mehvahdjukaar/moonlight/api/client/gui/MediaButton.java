@@ -93,10 +93,13 @@ public class MediaButton {
         return create(parent, x, y, GITHUB, url, "Mod Wiki");
     }
 
+    @Deprecated(forRemoval = true)
     public static Button akliz(Screen parent, int x, int y, String url, String tooltip) {
-        return create(parent, x, y, AKLIZ, url, tooltip);
+        return create(parent, x, y, AKLIZ, url, "Need a server? Get one with Akliz");
     }
 
-
+    public static Button akliz(Screen parent, int x, int y, String url) {
+        return create(parent, x, y, AKLIZ, url, "Need a server? Get one with Akliz");
+    }
 
 }

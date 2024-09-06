@@ -1,1 +1,1 @@
-fixed an issue with wood type detection initializing vanilla types too early
+fixed an issue when savin an empty fluid causing a crash

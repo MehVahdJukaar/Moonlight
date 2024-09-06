@@ -39,7 +39,7 @@ public class SoftFluidStack implements DataComponentHolder {
 
     public static final Codec<SoftFluidStack> CODEC = RecordCodecBuilder.create(i -> i.group(
             SoftFluid.HOLDER_CODEC.fieldOf("id").forGetter(SoftFluidStack::getHolder),
-            ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(SoftFluidStack::getCount),
+            ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("count", 1).forGetter(SoftFluidStack::getCount),
             DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
                     .forGetter(stack -> stack.components.asPatch())
     ).apply(i, SoftFluidStack::of));

@@ -104,7 +104,7 @@ public class NetworkHelperImpl {
         PacketDistributor.sendToPlayersTrackingEntity(target, message);
     }
 
-    public void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
+    public static void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(target, message);
     }
 

@@ -84,7 +84,7 @@ public class NetworkHelperImpl {
         ServerPlayNetworking.send(serverPlayer, message);
     }
 
-    public void sendToAllClientPlayers(CustomPacketPayload message) {
+    public static void sendToAllClientPlayers(CustomPacketPayload message) {
         for (var p : PlatHelper.getCurrentServer().getPlayerList().getPlayers()) {
             sendToClientPlayer(p, message);
         }
@@ -112,7 +112,7 @@ public class NetworkHelperImpl {
         } else throw makeAssertionError();
     }
 
-    public void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
+    public static void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         if (target.level() instanceof ServerLevel serverLevel) {
             var p = ServerPlayNetworking.createS2CPacket(message);
             serverLevel.getChunkSource().broadcast(target, p);
