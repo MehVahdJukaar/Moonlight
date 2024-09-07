@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
+import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -111,6 +112,7 @@ public class Moonlight {
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
         DynamicResourcePack.clearAfterReload(PackType.SERVER_DATA);
         DataObjectReference.onDataReload();
+        DynamicHolder.onDataReload();
     }
 
     @EventCalled
