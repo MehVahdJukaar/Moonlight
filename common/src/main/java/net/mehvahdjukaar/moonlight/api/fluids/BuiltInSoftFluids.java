@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
 import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
+import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 
 public class BuiltInSoftFluids {
@@ -23,7 +24,7 @@ public class BuiltInSoftFluids {
     public static final DataObjectReference<SoftFluid> POWDERED_SNOW = create("powder_snow");
 
 
-    private static DataObjectReference<SoftFluid> create(String name) {
-        return new DataObjectReference<>(Moonlight.res(name), SoftFluidRegistry.KEY);
+    private static DynamicHolder<SoftFluid> create(String name) {
+        return new DynamicHolder<>(Moonlight.res(name), SoftFluidRegistry.KEY);
     }
 }
