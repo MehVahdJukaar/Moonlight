@@ -43,15 +43,15 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
         REFERENCES.add(this);
     }
 
-    public DynamicHolder<T> of(String id, ResourceKey<Registry<T>> registry) {
+    public static <A> DynamicHolder<A> of(String id, ResourceKey<Registry<A>> registry) {
         return of(new ResourceLocation(id), registry);
     }
 
-    public DynamicHolder<T> of(ResourceLocation location, ResourceKey<Registry<T>> registry) {
-        return new DynamicHolder<>(registry, ResourceKey.create(registryKey, location));
+    public static <A> DynamicHolder<A> of(ResourceLocation location, ResourceKey<Registry<A>> registry) {
+        return new DynamicHolder<>(registry, ResourceKey.create(registry, location));
     }
 
-    public DynamicHolder<T> of(ResourceKey<T> key) {
+    public static <A> DynamicHolder<A> of(ResourceKey<A> key) {
         return new DynamicHolder<>(ResourceKey.createRegistryKey(key.registry()), key);
     }
 
@@ -59,13 +59,15 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
         instance.remove();
     }
 
-    protected Holder<T> instance() {
+    @NotNull
+    protected Holder<T> getInstance() {
         Holder<T> value = instance.get();
         if (value == null) {
             var r = Utils.hackyGetRegistryAccess();
             Registry<T> reg = r.registryOrThrow(registryKey);
             try {
-                instance.set(reg.getHolderOrThrow(key));
+                value = reg.getHolderOrThrow(key);
+                instance.set(value);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get object from registry: " + key +
                         ".\nCalled from " + Thread.currentThread() + ".\n" +
@@ -87,19 +89,20 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
         return key;
     }
 
+    @Deprecated(forRemoval = true)
     @NotNull
     public T get() {
-        return instance().value();
+        return getInstance().value();
     }
 
     @Override
     public T value() {
-        return instance().value();
+        return getInstance().value();
     }
 
     @Override
     public boolean isBound() {
-        return instance().isBound();
+        return getInstance().isBound();
     }
 
     @Override
@@ -117,14 +120,18 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
         return predicate.test(key);
     }
 
+    public boolean is(Holder<T> other){
+        return other == this || other.unwrapKey().get() == key;
+    }
+
     @Override
     public boolean is(TagKey<T> tagKey) {
-        return instance().is(tagKey);
+        return getInstance().is(tagKey);
     }
 
     @Override
     public Stream<TagKey<T>> tags() {
-        return instance().tags();
+        return getInstance().tags();
     }
 
     @Override
@@ -139,11 +146,11 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
 
     @Override
     public Kind kind() {
-        return instance().kind();
+        return getInstance().kind();
     }
 
     @Override
     public boolean canSerializeIn(HolderOwner<T> owner) {
-        return instance().canSerializeIn(owner);
+        return getInstance().canSerializeIn(owner);
     }
 }

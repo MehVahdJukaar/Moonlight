@@ -24,7 +24,7 @@ public class BuiltInSoftFluids {
     public static final DataObjectReference<SoftFluid> POWDERED_SNOW = create("powder_snow");
 
 
-    private static DynamicHolder<SoftFluid> create(String name) {
-        return new DynamicHolder<>(Moonlight.res(name), SoftFluidRegistry.KEY);
+    private static DataObjectReference<SoftFluid> create(String name) {
+        return new DataObjectReference<>(Moonlight.res(name), SoftFluidRegistry.KEY);
     }
 }

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  * A soft reference to an object in a Data pack registry
  * Like registry object but can be invalidated and works for data pack registries
  */
-@Deprecated(forRemoval = true)
+@Deprecated()
 public class DataObjectReference<T> extends DynamicHolder<T> {
 
     public DataObjectReference(String id, ResourceKey<Registry<T>> registry) {
@@ -28,7 +28,7 @@ public class DataObjectReference<T> extends DynamicHolder<T> {
     }
 
     public Holder<T> getHolder() {
-        return instance();
+        return getInstance();
     }
 
     @Deprecated(forRemoval = true)

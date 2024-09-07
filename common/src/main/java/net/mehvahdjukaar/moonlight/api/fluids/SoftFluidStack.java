@@ -395,7 +395,7 @@ public class SoftFluidStack {
                 }
 
                 //converts water bottles into potions
-                if (emptyContainer.is(Items.GLASS_BOTTLE) && this.is(BuiltInSoftFluids.WATER.get())) {
+                if (emptyContainer.is(Items.GLASS_BOTTLE) && this.is(BuiltInSoftFluids.WATER)) {
                     filledStack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
                 }
 

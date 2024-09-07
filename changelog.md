@@ -1,1 +1,2 @@
-fixed an issue with dynamic resource pack
+added DynamicHolder, allows storing static fields to datapack registries entries, cleared automaticaly and re populated on datapack reload. Implements Holder and supplier interface.
+DynamicHolders also are backed by a threadlocal cache so to work properly with datapack regisrie entry, unlike previus "DataObjectReference" which had issues.
