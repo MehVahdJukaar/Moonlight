@@ -35,7 +35,7 @@ public class SoftFluidInternal {
                 s.getEquivalentFluids().forEach(f -> FLUID_MAP.put(f.value(), h));
                 s.getContainerList().getPossibleFilled().forEach(i -> {
                     //don't associate water to potion bottle
-                    if (i != Items.POTION || s != BuiltInSoftFluids.WATER.get()) {
+                    if (i != Items.POTION || !BuiltInSoftFluids.WATER.is(h)) {
                         ITEM_MAP.put(i, h);
                     }
                 });

@@ -292,7 +292,7 @@ public class SoftFluidStack implements DataComponentHolder {
                 ItemStack filledStack = new ItemStack(category.getFirstFilled().get());
 
                 //converts water bottles into potions
-                if (emptyContainer.is(Items.GLASS_BOTTLE) && this.is(BuiltInSoftFluids.WATER.get())) {
+                if (emptyContainer.is(Items.GLASS_BOTTLE) && this.is(BuiltInSoftFluids.WATER)) {
                     filledStack = PotionContents.createItemStack(Items.POTION, Potions.WATER);
                 }
 
