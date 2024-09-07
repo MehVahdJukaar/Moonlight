@@ -114,7 +114,6 @@ public class Moonlight {
     public static void afterDataReload(RegistryAccess registryAccess) {
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
         DynamicResourcePack.clearAfterReload(PackType.SERVER_DATA);
-        DataObjectReference.onDataReload();
         DynamicHolder.onDataReload();
     }
 

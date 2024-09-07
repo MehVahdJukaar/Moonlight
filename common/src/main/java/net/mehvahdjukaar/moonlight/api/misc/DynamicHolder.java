@@ -36,27 +36,29 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
     // needs to be thread local because of data pack stuff. datapack registries will have 2 objects with the same key
     private final ThreadLocal<Holder<T>> instance = new ThreadLocal<>();
 
-    public DynamicHolder(String id, ResourceKey<Registry<T>> registry) {
-        this(ResourceLocation.parse(id), registry);
-    }
-
-    public DynamicHolder(ResourceLocation location, ResourceKey<Registry<T>> registry) {
-        this.registryKey = registry;
-        this.key = ResourceKey.create(registryKey, location);
-        REFERENCES.add(this);
-    }
-
-    public DynamicHolder(ResourceKey<T> key) {
+    protected DynamicHolder(ResourceKey<Registry<T>> registryKey, ResourceKey<T> key) {
+        this.registryKey = registryKey;
         this.key = key;
-        this.registryKey = ResourceKey.createRegistryKey(key.registry());
         REFERENCES.add(this);
+    }
+
+    public DynamicHolder<T> of(String id, ResourceKey<Registry<T>> registry) {
+        return of(ResourceLocation.tryParse(id), registry);
+    }
+
+    public DynamicHolder<T> of(ResourceLocation location, ResourceKey<Registry<T>> registry) {
+        return new DynamicHolder<>(registry, ResourceKey.create(registryKey, location));
+    }
+
+    public DynamicHolder<T> of(ResourceKey<T> key) {
+        return new DynamicHolder<>(ResourceKey.createRegistryKey(key.registry()), key);
     }
 
     private void invalidateInstance() {
         instance.remove();
     }
 
-    private Holder<T> instance() {
+    protected Holder<T> instance() {
         Holder<T> value = instance.get();
         if (value == null) {
             var r = Utils.hackyGetRegistryAccess();

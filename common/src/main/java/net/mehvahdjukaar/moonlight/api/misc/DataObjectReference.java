@@ -1,15 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Supplier;
 
 //can be statically stored and persists across world loads
 
@@ -17,65 +12,28 @@ import java.util.function.Supplier;
  * A soft reference to an object in a Data pack registry
  * Like registry object but can be invalidated and works for data pack registries
  */
-//TODO: rename to lazyRegistryObject lazyHolder or dataRegistryObject
-    @Deprecated(forRemoval = true) //use LazyHolder instead
-public class DataObjectReference<T> implements Supplier<T> {
-
-    private static final WeakHashSet<DataObjectReference<?>> REFERENCES = new WeakHashSet<>();
-
-    private final ResourceKey<Registry<T>> registryKey;
-    private final ResourceKey<T> key;
-
-    // needs to be thread local because of data pack stuff
-    @Nullable
-    private Holder<T> instance;
+@Deprecated(forRemoval = true)
+public class DataObjectReference<T> extends DynamicHolder<T> {
 
     public DataObjectReference(String id, ResourceKey<Registry<T>> registry) {
-        this(ResourceLocation.parse(id), registry);
+        this(ResourceLocation.tryParse(id), registry);
     }
 
     public DataObjectReference(ResourceLocation location, ResourceKey<Registry<T>> registry) {
-        this.registryKey = registry;
-        this.key = ResourceKey.create(registryKey, location);
-        REFERENCES.add(this);
+        super(registry, ResourceKey.create(registry, location));
     }
 
     public DataObjectReference(ResourceKey<T> key) {
-        this.key = key;
-        this.registryKey = ResourceKey.createRegistryKey(key.registry());
-        REFERENCES.add(this);
+        super(ResourceKey.createRegistryKey(key.registry()), key);
     }
 
     public Holder<T> getHolder() {
-        if (instance == null) {
-            var r = Utils.hackyGetRegistryAccess();
-            Registry<T> reg = r.registryOrThrow(registryKey);
-            try {
-                instance = reg.getHolderOrThrow(key);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to get object from registry: " + key +
-                        ".\nCalled from " + Thread.currentThread() + ".\n" +
-                        "Registry content was: " + reg.entrySet().stream().map(b -> b.getKey().location()).toList(), e);
-            }
-        }
-        return instance;
+        return instance();
     }
 
-    @NotNull
-    public T get() {
-        return getHolder().value();
-    }
-
-    public void clearCache() {
-        instance = null;
-    }
-
-    public ResourceLocation getID() {
-        return key.location();
-    }
-
-    @ApiStatus.Internal
-    public static void onDataReload() {
-        REFERENCES.forEach(DataObjectReference::clearCache);
+    @Deprecated(forRemoval = true)
+    @Nullable
+    public T getUnchecked() {
+        return get();
     }
 }

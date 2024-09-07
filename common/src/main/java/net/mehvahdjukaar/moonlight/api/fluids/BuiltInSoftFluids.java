@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 
 public class BuiltInSoftFluids {
 
+    //TODO: replace and in amenments
     public static final DataObjectReference<SoftFluid> EMPTY = create("empty");
     public static final DataObjectReference<SoftFluid> WATER = create("water");
     public static final DataObjectReference<SoftFluid> LAVA = create("lava");
