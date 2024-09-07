@@ -18,6 +18,7 @@ import java.util.function.Supplier;
  * Like registry object but can be invalidated and works for data pack registries
  */
 //TODO: rename to lazyRegistryObject lazyHolder or dataRegistryObject
+    @Deprecated(forRemoval = true) //use LazyHolder instead
 public class DataObjectReference<T> implements Supplier<T> {
 
     private static final WeakHashSet<DataObjectReference<?>> REFERENCES = new WeakHashSet<>();
@@ -25,8 +26,9 @@ public class DataObjectReference<T> implements Supplier<T> {
     private final ResourceKey<Registry<T>> registryKey;
     private final ResourceKey<T> key;
 
+    // needs to be thread local because of data pack stuff
     @Nullable
-    private Holder<T> cache;
+    private Holder<T> instance;
 
     public DataObjectReference(String id, ResourceKey<Registry<T>> registry) {
         this(ResourceLocation.parse(id), registry);
@@ -45,18 +47,18 @@ public class DataObjectReference<T> implements Supplier<T> {
     }
 
     public Holder<T> getHolder() {
-        if (cache == null) {
+        if (instance == null) {
             var r = Utils.hackyGetRegistryAccess();
             Registry<T> reg = r.registryOrThrow(registryKey);
             try {
-                cache = reg.getHolderOrThrow(key);
+                instance = reg.getHolderOrThrow(key);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get object from registry: " + key +
                         ".\nCalled from " + Thread.currentThread() + ".\n" +
                         "Registry content was: " + reg.entrySet().stream().map(b -> b.getKey().location()).toList(), e);
             }
         }
-        return cache;
+        return instance;
     }
 
     @NotNull
@@ -65,7 +67,7 @@ public class DataObjectReference<T> implements Supplier<T> {
     }
 
     public void clearCache() {
-        cache = null;
+        instance = null;
     }
 
     public ResourceLocation getID() {
