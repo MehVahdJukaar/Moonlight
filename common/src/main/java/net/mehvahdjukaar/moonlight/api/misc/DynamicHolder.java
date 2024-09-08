@@ -22,6 +22,7 @@ import java.util.stream.Stream;
  * A soft reference to an object in a Data pack registry
  * Like registry object but can be invalidated and works for data pack registries
  */
+//TODO: add optionals
 public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
 
     @ApiStatus.Internal
