@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.misc.QuadConsumer;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -519,6 +520,11 @@ public class RegHelper {
     @ExpectPlatform
     public static void addLootTableInjects(Consumer<LootInjectEvent> eventListener) {
         throw new AssertionError();
+    }
+
+
+    public static void addDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener) {
+        DispenserHelper.addListener(eventListener);
     }
 
 

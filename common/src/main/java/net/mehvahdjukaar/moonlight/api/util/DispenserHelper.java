@@ -1,12 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
 
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
-import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
+import net.minecraft.core.*;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
@@ -22,14 +20,82 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import org.jetbrains.annotations.ApiStatus;
 
+import java.util.*;
+import java.util.function.Consumer;
+
+// point of this class is to
+// dynamically register dispenser behaviors such that they can depend on tags
 public class DispenserHelper {
 
+    private static final Map<Item, List<DispenseItemBehavior>> MODDED_BEHAVIORS = new HashMap<>();
+    private static final List<Consumer<Event>> EVENT_LISTENERS = new ArrayList<>();
+
+    public static void addListener(Consumer<Event> listener) {
+        EVENT_LISTENERS.add(listener);
+    }
+
+    @ApiStatus.Internal
+    public static void reload(RegistryAccess registryAccess) {
+        //clear all behaviors
+        Set<Item> failed = new HashSet<>();
+        Map<Item, DispenseItemBehavior> originals = new HashMap<>();
+        for (var e : MODDED_BEHAVIORS.entrySet()) {
+            Item item = e.getKey();
+            var expected = e.getValue();
+            var current = DispenserBlock.DISPENSER_REGISTRY.get(item);
+            if (current instanceof AdditionalDispenserBehavior behavior) {
+                List<AdditionalDispenserBehavior> visited = new ArrayList<>();
+                var original = unwrapBehavior(behavior, visited);
+                if (original != null && expected.equals(visited)) {
+                    originals.put(item, original);
+                } else {
+                    Moonlight.LOGGER.warn("Failed to unwrap original behavior for item: {}, {}, {}", item, current, expected);
+                    failed.add(item);
+                }
+            } else if (expected.size() == 1 && expected.get(0) == current) {
+                originals.put(item, null);
+            } else {
+                failed.add(item);
+                Moonlight.LOGGER.error("Failed to restore original behavior for item: {}, {}", item, current);
+            }
+        }
+        //restore vanilla state
+        for (var e : originals.entrySet()) {
+            DispenserBlock.registerBehavior(e.getKey(), e.getValue());
+        }
+
+        //re-register all behaviors
+        MODDED_BEHAVIORS.clear();
+        for (var listener : EVENT_LISTENERS) {
+            listener.accept((i, b) -> {
+                if (!failed.contains(i)) {
+                    MODDED_BEHAVIORS.computeIfAbsent(i, k -> new ArrayList<>()).add(b);
+                    DispenserBlock.registerBehavior(i, b);
+                }
+            });
+        }
+    }
+
+
+    // this only works if our behaviors are the outermost of the wrappers. This should usually be the case as most mods will run their registering code in setup and not on world load
+    private static DispenseItemBehavior unwrapBehavior(AdditionalDispenserBehavior behavior, List<AdditionalDispenserBehavior> visited) {
+        visited.add(behavior);
+        var inner = behavior.fallback;
+        if (inner instanceof AdditionalDispenserBehavior ab) {
+            return unwrapBehavior(ab, visited);
+        }
+        return null;
+    }
+
+    @Deprecated(forRemoval = true)
     public static void registerCustomBehavior(AdditionalDispenserBehavior behavior) {
         DispenserBlock.registerBehavior(behavior.item, behavior);
     }
 
     //block placement behavior
+    @Deprecated(forRemoval = true)
     public static void registerPlaceBlockBehavior(ItemLike block) {
         DispenserBlock.registerBehavior(block, PLACE_BLOCK_BEHAVIOR);
     }
@@ -168,5 +234,13 @@ public class DispenserHelper {
     public static final DefaultDispenseItemBehavior PLACE_BLOCK_BEHAVIOR = new PlaceBlockDispenseBehavior();
     private static final DefaultDispenseItemBehavior SHOOT_BEHAVIOR = new DefaultDispenseItemBehavior();
 
+
+    public interface Event {
+        void register(Item i, DispenseItemBehavior behavior);
+
+        default void registerPlaceBlock(Item i) {
+            register(i, PLACE_BLOCK_BEHAVIOR);
+        }
+    }
 
 }

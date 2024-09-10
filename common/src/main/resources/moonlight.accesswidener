@@ -12,6 +12,8 @@ mutable field net/minecraft/client/renderer/RenderStateShard setupState Ljava/la
 
 accessible method net/minecraft/world/entity/ai/village/poi/PoiTypes registerBlockStates (Lnet/minecraft/core/Holder;Ljava/util/Set;)V
 
+accessible field net/minecraft/world/level/block/DispenserBlock DISPENSER_REGISTRY Ljava/util/Map;
+
 accessible field net/minecraft/world/entity/projectile/Projectile leftOwner Z
 accessible method net/minecraft/world/entity/projectile/Projectile checkLeftOwner ()Z
 accessible method net/minecraft/world/entity/Entity collide (Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
