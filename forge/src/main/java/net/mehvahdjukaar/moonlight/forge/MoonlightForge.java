@@ -109,7 +109,7 @@ public class MoonlightForge {
                         new ClientBoundSendLoginPacket());
             } catch (Exception ignored) {
             }
-        } else Moonlight.checkDatapackRegistry();
+        } else Moonlight.checkDataPackRegistry();
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -131,7 +131,7 @@ public class MoonlightForge {
 
     @SubscribeEvent
     public static void onLevelLoaded(LevelEvent.Load event) {
-        if (!event.getLevel().isClientSide()) Moonlight.checkDatapackRegistry();
+        if (!event.getLevel().isClientSide()) Moonlight.checkDataPackRegistry();
     }
 
 }

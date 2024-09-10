@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 public class DispenserHelper {
 
     private static final Map<Item, List<DispenseItemBehavior>> MODDED_BEHAVIORS = new HashMap<>();
+    private static final Map<Item, List<DispenseItemBehavior>> STATIC_MODDED_BEHAVIORS = new HashMap<>();
     private static final List<Consumer<Event>> EVENT_LISTENERS = new ArrayList<>();
 
     public static void addListener(Consumer<Event> listener) {
@@ -43,12 +44,13 @@ public class DispenserHelper {
         Map<Item, DispenseItemBehavior> originals = new HashMap<>();
         for (var e : MODDED_BEHAVIORS.entrySet()) {
             Item item = e.getKey();
-            var expected = e.getValue();
+            var expected = new ArrayList<>(e.getValue());
+            expected.addAll(STATIC_MODDED_BEHAVIORS.getOrDefault(item, List.of()));
             var current = DispenserBlock.DISPENSER_REGISTRY.get(item);
             if (current instanceof AdditionalDispenserBehavior behavior) {
                 List<AdditionalDispenserBehavior> visited = new ArrayList<>();
                 var original = unwrapBehavior(behavior, visited);
-                if (original != null && expected.equals(visited)) {
+                if (expected.equals(visited)) {
                     originals.put(item, original);
                 } else {
                     Moonlight.LOGGER.warn("Failed to unwrap original behavior for item: {}, {}, {}", item, current, expected);
@@ -68,14 +70,22 @@ public class DispenserHelper {
 
         //re-register all behaviors
         MODDED_BEHAVIORS.clear();
-        for (var listener : EVENT_LISTENERS) {
-            listener.accept((i, b) -> {
+
+        Event event = new Event() {
+            @Override
+            public void register(Item i, DispenseItemBehavior behavior) {
                 if (!failed.contains(i)) {
-                    MODDED_BEHAVIORS.computeIfAbsent(i, k -> new ArrayList<>()).add(b);
-                    DispenserBlock.registerBehavior(i, b);
+                    MODDED_BEHAVIORS.computeIfAbsent(i, k -> new ArrayList<>()).add(behavior);
+                    DispenserBlock.registerBehavior(i, behavior);
                 }
-            });
-        }
+            }
+
+            @Override
+            public RegistryAccess getRegistryAccess() {
+                return registryAccess;
+            }
+        };
+        EVENT_LISTENERS.forEach(listener -> listener.accept(event));
     }
 
 
@@ -86,7 +96,7 @@ public class DispenserHelper {
         if (inner instanceof AdditionalDispenserBehavior ab) {
             return unwrapBehavior(ab, visited);
         }
-        return null;
+        return inner;
     }
 
     @Deprecated(forRemoval = true)
@@ -238,9 +248,15 @@ public class DispenserHelper {
     public interface Event {
         void register(Item i, DispenseItemBehavior behavior);
 
-        default void registerPlaceBlock(Item i) {
-            register(i, PLACE_BLOCK_BEHAVIOR);
+        default void register(AdditionalDispenserBehavior behavior) {
+            register(behavior.item, behavior);
         }
+
+        default void registerPlaceBlock(ItemLike i) {
+            register(i.asItem(), PLACE_BLOCK_BEHAVIOR);
+        }
+
+        RegistryAccess getRegistryAccess();
     }
 
 }

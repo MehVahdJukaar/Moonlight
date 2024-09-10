@@ -8,7 +8,6 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
-import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
 import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
@@ -39,7 +38,6 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
-import org.spongepowered.asm.mixin.MixinEnvironment;
 
 @ApiStatus.Internal
 public class Moonlight {
@@ -142,7 +140,7 @@ public class Moonlight {
         return d;
     }
 
-    public static void checkDatapackRegistry() {
+    public static void checkDataPackRegistry() {
         try {
             SoftFluidRegistry.getEmpty();
             MapDataRegistry.getDefaultType();
