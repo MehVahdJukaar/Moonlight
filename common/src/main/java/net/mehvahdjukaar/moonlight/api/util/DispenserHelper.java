@@ -1,6 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
+import net.mehvahdjukaar.moonlight.api.block.ISoftFluidTankProvider;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
@@ -30,11 +34,16 @@ import java.util.function.Consumer;
 public class DispenserHelper {
 
     private static final Map<Item, List<DispenseItemBehavior>> MODDED_BEHAVIORS = new HashMap<>();
+    //TODO: remove once mods have updated
     private static final Map<Item, List<DispenseItemBehavior>> STATIC_MODDED_BEHAVIORS = new HashMap<>();
-    private static final List<Consumer<Event>> EVENT_LISTENERS = new ArrayList<>();
+    private static final Map<Priority,List<Consumer<Event>>> EVENT_LISTENERS = Map.of(
+            Priority.LOW, new ArrayList<>(),
+            Priority.NORMAL, new ArrayList<>(),
+            Priority.HIGH, new ArrayList<>()
+    );
 
-    public static void addListener(Consumer<Event> listener) {
-        EVENT_LISTENERS.add(listener);
+    public static void addListener(Consumer<Event> listener, Priority priority) {
+        EVENT_LISTENERS.get(priority).add(listener);
     }
 
     @ApiStatus.Internal
@@ -44,11 +53,12 @@ public class DispenserHelper {
         Map<Item, DispenseItemBehavior> originals = new HashMap<>();
         for (var e : MODDED_BEHAVIORS.entrySet()) {
             Item item = e.getKey();
-            var expected = new ArrayList<>(e.getValue());
-            expected.addAll(STATIC_MODDED_BEHAVIORS.getOrDefault(item, List.of()));
+            // dont alter these as we cant override them since they are static otherwise we would lose them
+            if(STATIC_MODDED_BEHAVIORS.containsKey(item)) continue;
+            var expected = new ReferenceOpenHashSet<>(e.getValue());
             var current = DispenserBlock.DISPENSER_REGISTRY.get(item);
             if (current instanceof AdditionalDispenserBehavior behavior) {
-                List<AdditionalDispenserBehavior> visited = new ArrayList<>();
+                Set<AdditionalDispenserBehavior> visited = new ReferenceOpenHashSet<>();
                 var original = unwrapBehavior(behavior, visited);
                 if (expected.equals(visited)) {
                     originals.put(item, original);
@@ -56,7 +66,7 @@ public class DispenserHelper {
                     Moonlight.LOGGER.warn("Failed to unwrap original behavior for item: {}, {}, {}", item, current, expected);
                     failed.add(item);
                 }
-            } else if (expected.size() == 1 && expected.get(0) == current) {
+            } else if (expected.size() == 1 && expected.stream().findAny().get() == current) {
                 originals.put(item, null);
             } else {
                 failed.add(item);
@@ -77,6 +87,8 @@ public class DispenserHelper {
         //re-register all behaviors
         MODDED_BEHAVIORS.clear();
 
+        failed.addAll(STATIC_MODDED_BEHAVIORS.keySet());
+
         Event event = new Event() {
             @Override
             public void register(Item i, DispenseItemBehavior behavior) {
@@ -91,12 +103,14 @@ public class DispenserHelper {
                 return registryAccess;
             }
         };
-        EVENT_LISTENERS.forEach(listener -> listener.accept(event));
+        EVENT_LISTENERS.get(Priority.LOW).forEach(l -> l.accept(event));
+        EVENT_LISTENERS.get(Priority.NORMAL).forEach(l -> l.accept(event));
+        EVENT_LISTENERS.get(Priority.HIGH).forEach(l -> l.accept(event));
     }
 
 
     // this only works if our behaviors are the outermost of the wrappers. This should usually be the case as most mods will run their registering code in setup and not on world load
-    private static DispenseItemBehavior unwrapBehavior(AdditionalDispenserBehavior behavior, List<AdditionalDispenserBehavior> visited) {
+    private static DispenseItemBehavior unwrapBehavior(AdditionalDispenserBehavior behavior, Set<AdditionalDispenserBehavior> visited) {
         visited.add(behavior);
         var inner = behavior.fallback;
         if (inner instanceof AdditionalDispenserBehavior ab) {
@@ -108,12 +122,14 @@ public class DispenserHelper {
     @Deprecated(forRemoval = true)
     public static void registerCustomBehavior(AdditionalDispenserBehavior behavior) {
         DispenserBlock.registerBehavior(behavior.item, behavior);
+        STATIC_MODDED_BEHAVIORS.computeIfAbsent(behavior.item, k -> new ArrayList<>()).add(behavior);
     }
 
     //block placement behavior
     @Deprecated(forRemoval = true)
     public static void registerPlaceBlockBehavior(ItemLike block) {
         DispenserBlock.registerBehavior(block, PLACE_BLOCK_BEHAVIOR);
+        STATIC_MODDED_BEHAVIORS.computeIfAbsent(block.asItem(), k -> new ArrayList<>()).add(PLACE_BLOCK_BEHAVIOR);
     }
 
     /**
@@ -246,12 +262,41 @@ public class DispenserHelper {
         }
     }
 
+    public static class FillFluidHolderBehavior extends DispenserHelper.AdditionalDispenserBehavior {
+
+        public FillFluidHolderBehavior(Item item) {
+            super(item);
+        }
+
+        @Override
+        protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
+            BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
+            BlockEntity te = source.getLevel().getBlockEntity(blockpos);
+            if (te instanceof ISoftFluidTankProvider tile) {
+                ItemStack returnStack;
+                if (tile.canInteractWithSoftFluidTank()) {
+
+                    SoftFluidTank tank = tile.getSoftFluidTank();
+                    if (!tank.isFull()) {
+                        returnStack = tank.interactWithItem(stack, source.getLevel(), blockpos, false);
+                        if (returnStack != null) {
+                            te.setChanged();
+                            return InteractionResultHolder.success(returnStack);
+                        }
+                    }
+                }
+                return InteractionResultHolder.fail(stack);
+            }
+            return InteractionResultHolder.pass(stack);
+        }
+    }
 
     public static final DefaultDispenseItemBehavior PLACE_BLOCK_BEHAVIOR = new PlaceBlockDispenseBehavior();
     private static final DefaultDispenseItemBehavior SHOOT_BEHAVIOR = new DefaultDispenseItemBehavior();
 
 
     public interface Event {
+
         void register(Item i, DispenseItemBehavior behavior);
 
         default void register(AdditionalDispenserBehavior behavior) {
@@ -262,7 +307,16 @@ public class DispenserHelper {
             register(i.asItem(), PLACE_BLOCK_BEHAVIOR);
         }
 
+
         RegistryAccess getRegistryAccess();
+    }
+
+
+    // when wrapping order is important. Use this to set priority
+    public enum Priority {
+        LOW,
+        NORMAL,
+        HIGH
     }
 
 }

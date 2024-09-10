@@ -524,7 +524,11 @@ public class RegHelper {
 
 
     public static void addDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener) {
-        DispenserHelper.addListener(eventListener);
+        DispenserHelper.addListener(eventListener, DispenserHelper.Priority.NORMAL);
+    }
+
+    public static void addDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener, DispenserHelper.Priority priority) {
+        DispenserHelper.addListener(eventListener, priority);
     }
 
 

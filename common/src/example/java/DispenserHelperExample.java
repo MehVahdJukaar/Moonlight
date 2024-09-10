@@ -1,3 +1,4 @@
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
@@ -9,18 +10,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.DispenserBlock;
 
+// This is used so we can have tag dependant dispenser behaviors
 public class DispenserHelperExample {
 
+    // Call this during mod initialization
+    public static void init(){
+        RegHelper.addDispenserBehaviorRegistration(DispenserHelperExample::registerDynamic);
+    }
 
-    // Call this during mod setup after items have been registered
-    public static void setup() {
+    // This will run on datapack reload so you can access tags!
+    public static void registerDynamic(DispenserHelper.Event event) {
         // Dispenser helper is useful as it wraps all existing behaviors,
         // guaranteeing compatibility with other mods that do the same
 
         // Place block behavior for emerald
-        DispenserHelper.registerPlaceBlockBehavior(Items.EMERALD_BLOCK);
+        event.registerPlaceBlock(Items.EMERALD_BLOCK);
 
-        DispenserHelper.registerCustomBehavior(new SpawnDragonBehavior(Items.DRAGON_EGG));
+        event.register(new SpawnDragonBehavior(Items.DRAGON_EGG));
     }
 
     // Extend the main wrapper class for your custom behaviors
