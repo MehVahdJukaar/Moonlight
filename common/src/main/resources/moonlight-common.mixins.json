@@ -44,3 +44,5 @@
     "injectionPoints": [
       "net.mehvahdjukaar.moonlight.api.misc.InvokeUnrestricted"
     ]
+  }
+}
