@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -532,6 +533,14 @@ public class RegHelper {
     @ExpectPlatform
     public static void startRegisteringFor(Object bus){
         throw new AssertionError();
+    }
+
+    public static void addDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener) {
+        DispenserHelper.addListener(eventListener, DispenserHelper.Priority.NORMAL);
+    }
+
+    public static void addDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener, DispenserHelper.Priority priority) {
+        DispenserHelper.addListener(eventListener, priority);
     }
 
 }
