@@ -6,6 +6,7 @@
   "client": [
     "BlockModelAccessor",
     "BlockModelDeserializerMixin",
+    "ClientLanguagesMixin",
     "ClientPacketListenerMixin",
     "ItemRendererAccessor",
     "ItemRendererMixin",
