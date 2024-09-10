@@ -1,1 +1,1 @@
-fixed an issue when savin an empty fluid causing a crash
+some new API improvements, ported changes from 1.20.1

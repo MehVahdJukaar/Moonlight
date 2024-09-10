@@ -23,7 +23,7 @@ public class SoftFluidRegistry {
     }
 
     public static SoftFluid empty() {
-        return BuiltInSoftFluids.EMPTY.get();
+        return BuiltInSoftFluids.EMPTY.value();
     }
 
     public static Registry<SoftFluid> hackyGetRegistry() {

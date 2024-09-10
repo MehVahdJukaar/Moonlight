@@ -131,11 +131,6 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
     }
 
     @Override
-    public boolean is(Holder<T> holder) {
-        return instance().is(holder);
-    }
-
-    @Override
     public Stream<TagKey<T>> tags() {
         return getInstance().tags();
     }
