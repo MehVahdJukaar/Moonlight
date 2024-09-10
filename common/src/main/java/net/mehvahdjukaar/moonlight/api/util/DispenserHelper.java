@@ -65,7 +65,13 @@ public class DispenserHelper {
         }
         //restore vanilla state
         for (var e : originals.entrySet()) {
-            DispenserBlock.registerBehavior(e.getKey(), e.getValue());
+            Item item = e.getKey();
+            DispenseItemBehavior behavior = e.getValue();
+            if (behavior != null) {
+                DispenserBlock.registerBehavior(item, behavior);
+            } else {
+                DispenserBlock.DISPENSER_REGISTRY.remove(item);
+            }
         }
 
         //re-register all behaviors
