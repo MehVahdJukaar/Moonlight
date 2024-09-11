@@ -9,7 +9,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer;
@@ -45,6 +44,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,43 +52,44 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
-public class FakeClientLevel extends Level {
+public class FakeLevel extends Level {
 
-    private static final Map<String, FakeClientLevel> INSTANCES = new Object2ObjectArrayMap<>();
+    private static final Map<String, FakeLevel> INSTANCES = new Object2ObjectArrayMap<>();
 
     private final Scoreboard scoreboard = new Scoreboard();
     private final RecipeManager recipeManager = new RecipeManager();
     private final ChunkSource chunkManager = new DummyChunkManager();
     private final DummyLevelEntityGetter<Entity> entityGetter = new DummyLevelEntityGetter<>();
 
-    protected FakeClientLevel() {
+    protected FakeLevel(boolean client, String id) {
         super(new DummyData(),
-                ResourceKey.create(Registries.DIMENSION, new ResourceLocation("dummy_" + INSTANCES.size())),
+                ResourceKey.create(Registries.DIMENSION, new ResourceLocation(id)),
                 Utils.hackyGetRegistryAccess(),
                 Utils.hackyGetRegistryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
                 () -> InactiveProfiler.INSTANCE,
-                false, //client side
+                client, //client side
                 false, //debug
                 0, 0);
     }
 
-    @Deprecated(forRemoval = true)
-    public static FakeClientLevel getInstance() {
-        return getCachedInstance();
+    public static FakeLevel getDefault(boolean client) {
+        return get("dummy_world", client, FakeLevel::new);
     }
 
-    public static FakeClientLevel getCachedInstance() {
-        return getCachedInstance("dummy_world", FakeClientLevel::new);
+    public static <T extends FakeLevel> T get(String id, boolean client, BiFunction<Boolean, String, T> constructor) {
+        if(client) {
+            id = "client_" + id;
+        }
+        String finalId = id;
+        return (T) INSTANCES.computeIfAbsent(id, k -> constructor.apply(client, finalId));
     }
 
-    public static <T extends FakeClientLevel> T getCachedInstance(String id, Supplier<T> constructor) {
-        return (T) INSTANCES.computeIfAbsent(id, k -> constructor.get());
-    }
-
+    @ApiStatus.Internal
     public static void clearInstance() {
         INSTANCES.clear();
     }
@@ -225,7 +226,7 @@ public class FakeClientLevel extends Level {
 
         @Override
         public ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
-            return new EmptyLevelChunk(FakeClientLevel.this, new ChunkPos(x, z), Utils.hackyGetRegistryAccess().registryOrThrow(Registries.BIOME)
+            return new EmptyLevelChunk(FakeLevel.this, new ChunkPos(x, z), Utils.hackyGetRegistryAccess().registryOrThrow(Registries.BIOME)
                     .getHolderOrThrow(Biomes.FOREST));
         }
 
@@ -250,7 +251,7 @@ public class FakeClientLevel extends Level {
 
         @Override
         public BlockGetter getLevel() {
-            return FakeClientLevel.this;
+            return FakeLevel.this;
         }
 
     }

@@ -5,12 +5,13 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,10 +30,10 @@ public class FakeLocalPlayer extends AbstractClientPlayer {
      * Mods should either hold weak references to the return value, or listen for a
      * WorldEvent.Unload and kill all references to prevent worlds staying in memory.
      */
-    static FakeLocalPlayer get(Level level, GameProfile username) {
-        if (!HAS_CACHE) return new FakeLocalPlayer((ClientLevel) level, username);
-        return FAKE_PLAYERS.computeIfAbsent((ClientLevel) level, l -> new HashMap<>())
-                .computeIfAbsent(username, u -> new FakeLocalPlayer((ClientLevel) level, username));
+    static FakeLocalPlayer get(ClientLevel level, GameProfile username) {
+        if (!HAS_CACHE) return new FakeLocalPlayer(level, username);
+        return FAKE_PLAYERS.computeIfAbsent(level, l -> new HashMap<>())
+                .computeIfAbsent(username, u -> new FakeLocalPlayer(level, username));
     }
 
     static void unloadLevel(LevelAccessor level) {
@@ -48,6 +49,11 @@ public class FakeLocalPlayer extends AbstractClientPlayer {
 
     @Override
     public void playSound(SoundEvent pSound, float pVolume, float pPitch) {
+    }
+
+    @Override
+    public @Nullable MinecraftServer getServer() {
+        return PlatHelper.getCurrentServer();
     }
 
     @Override

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.util;
 import com.mojang.authlib.GameProfile;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
+import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -22,15 +23,15 @@ public class FakePlayerManager {
 
     public static Player get(GameProfile id, Level level) {
         Player fakePlayer;
-        try {
+        if (!level.isClientSide) {
             if (level instanceof ServerLevel sl) {
                 fakePlayer = PlatHelper.getFakeServerPlayer(id, sl);
             } else {
-                //class loading hacks
-                fakePlayer = FPClientAccess.get(level, id);
+                fakePlayer = FakeGenericPlayer.get(level, id);
             }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Level must be either ServerLevel or ClientLevel", e);
+        } else {
+            //class loading hacks
+            fakePlayer = FPClientAccess.get(level, id);
         }
         return fakePlayer;
     }
