@@ -9,17 +9,16 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -31,8 +30,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityTypeTest;
@@ -40,7 +39,6 @@ import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
@@ -58,34 +56,36 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class DummyWorld extends Level {
+public class FakeClientLevel extends Level {
 
-    private static final Map<String, DummyWorld> INSTANCES = new Object2ObjectArrayMap<>();
+    private static final Map<String, FakeClientLevel> INSTANCES = new Object2ObjectArrayMap<>();
 
     private final Scoreboard scoreboard = new Scoreboard();
-    private final RecipeManager recipeManager ;
+    private final RecipeManager recipeManager = new RecipeManager();
     private final ChunkSource chunkManager = new DummyChunkManager();
     private final DummyLevelEntityGetter<Entity> entityGetter = new DummyLevelEntityGetter<>();
-    private final TickRateManager tickRateManager = new TickRateManager();
 
-    protected DummyWorld() {
-        this(true, false);
-    }
-
-    protected DummyWorld(boolean clientSide, boolean debug) {
+    protected FakeClientLevel() {
         super(new DummyData(),
-                ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse("dummy_" + INSTANCES.size())),
+                ResourceKey.create(Registries.DIMENSION, new ResourceLocation("dummy_" + INSTANCES.size())),
                 Utils.hackyGetRegistryAccess(),
                 Utils.hackyGetRegistryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
-                () -> InactiveProfiler.INSTANCE, clientSide, debug, 0, 0);
-       recipeManager = new RecipeManager(Utils.hackyGetRegistryAccess());
+                () -> InactiveProfiler.INSTANCE,
+                false, //client side
+                false, //debug
+                0, 0);
     }
 
-    public static DummyWorld getCachedInstance() {
-        return getCachedInstance("dummy_world", DummyWorld::new);
+    @Deprecated(forRemoval = true)
+    public static FakeClientLevel getInstance() {
+        return getCachedInstance();
     }
 
-    public static <T extends DummyWorld> T getCachedInstance(String id, Supplier<T> constructor) {
+    public static FakeClientLevel getCachedInstance() {
+        return getCachedInstance("dummy_world", FakeClientLevel::new);
+    }
+
+    public static <T extends FakeClientLevel> T getCachedInstance(String id, Supplier<T> constructor) {
         return (T) INSTANCES.computeIfAbsent(id, k -> constructor.get());
     }
 
@@ -138,24 +138,17 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public TickRateManager tickRateManager() {
-        return tickRateManager;
-    }
-
-    @Nullable
-    @Override
-    public MapItemSavedData getMapData(MapId mapId) {
+    public MapItemSavedData getMapData(String id) {
         return null;
     }
 
     @Override
-    public void setMapData(MapId mapId, MapItemSavedData mapData) {
-
+    public void setMapData(String pMapId, MapItemSavedData pData) {
     }
 
     @Override
-    public MapId getFreeMapId() {
-        return new MapId(0);
+    public int getFreeMapId() {
+        return -1;
     }
 
     @Override
@@ -188,8 +181,12 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public void gameEvent(Holder<GameEvent> gameEvent, Vec3 pos, GameEvent.Context context) {
+    public void gameEvent(GameEvent p_220404_, Vec3 p_220405_, GameEvent.Context p_220406_) {
 
+    }
+
+    @Override
+    public void gameEvent(@Nullable Entity pEntity, GameEvent pEvent, BlockPos pPos) {
     }
 
     @Override
@@ -208,11 +205,6 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public PotionBrewing potionBrewing() {
-        return null;
-    }
-
-    @Override
     public FeatureFlagSet enabledFeatures() {
         return FeatureFlags.DEFAULT_FLAGS;
     }
@@ -225,7 +217,7 @@ public class DummyWorld extends Level {
     @NotNull
     private static Holder.Reference<Biome> getPlains() {
         return Utils.hackyGetRegistryAccess().registry(Registries.BIOME)
-                .get().getHolder(ResourceKey.create(Registries.BIOME, ResourceLocation.parse("minecraft:plains")))
+                .get().getHolder(ResourceKey.create(Registries.BIOME, new ResourceLocation("minecraft:plains")))
                 .get();
     }
 
@@ -233,7 +225,7 @@ public class DummyWorld extends Level {
 
         @Override
         public ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
-            return new EmptyLevelChunk(DummyWorld.this, new ChunkPos(x, z), Utils.hackyGetRegistryAccess().registryOrThrow(Registries.BIOME)
+            return new EmptyLevelChunk(FakeClientLevel.this, new ChunkPos(x, z), Utils.hackyGetRegistryAccess().registryOrThrow(Registries.BIOME)
                     .getHolderOrThrow(Biomes.FOREST));
         }
 
@@ -258,7 +250,7 @@ public class DummyWorld extends Level {
 
         @Override
         public BlockGetter getLevel() {
-            return DummyWorld.this;
+            return FakeClientLevel.this;
         }
 
     }
@@ -291,10 +283,35 @@ public class DummyWorld extends Level {
 
         GameRules gameRules = new GameRules();
 
+        @Override
+        public void setXSpawn(int xSpawn) {
+        }
 
         @Override
-        public BlockPos getSpawnPos() {
-            return null;
+        public void setYSpawn(int ySpawn) {
+        }
+
+        @Override
+        public void setZSpawn(int zSpawn) {
+        }
+
+        @Override
+        public void setSpawnAngle(float spawnAngle) {
+        }
+
+        @Override
+        public int getXSpawn() {
+            return 0;
+        }
+
+        @Override
+        public int getYSpawn() {
+            return 0;
+        }
+
+        @Override
+        public int getZSpawn() {
+            return 0;
         }
 
         @Override
@@ -344,11 +361,6 @@ public class DummyWorld extends Level {
         @Override
         public boolean isDifficultyLocked() {
             return false;
-        }
-
-        @Override
-        public void setSpawn(BlockPos spawnPoint, float spawnAngle) {
-
         }
     }
 
