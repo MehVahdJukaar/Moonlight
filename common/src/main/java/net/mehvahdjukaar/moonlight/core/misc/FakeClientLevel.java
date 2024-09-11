@@ -9,6 +9,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer;
@@ -55,37 +56,36 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class DummyWorld extends Level {
+public class FakeClientLevel extends Level {
 
-    private static final Map<String, DummyWorld> INSTANCES = new Object2ObjectArrayMap<>();
+    private static final Map<String, FakeClientLevel> INSTANCES = new Object2ObjectArrayMap<>();
 
     private final Scoreboard scoreboard = new Scoreboard();
     private final RecipeManager recipeManager = new RecipeManager();
     private final ChunkSource chunkManager = new DummyChunkManager();
     private final DummyLevelEntityGetter<Entity> entityGetter = new DummyLevelEntityGetter<>();
 
-    protected DummyWorld() {
-        this(true, false);
-    }
-
-    protected DummyWorld(boolean clientSide, boolean debug) {
+    protected FakeClientLevel() {
         super(new DummyData(),
                 ResourceKey.create(Registries.DIMENSION, new ResourceLocation("dummy_" + INSTANCES.size())),
                 Utils.hackyGetRegistryAccess(),
                 Utils.hackyGetRegistryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
-                () -> InactiveProfiler.INSTANCE, clientSide, debug, 0, 0);
+                () -> InactiveProfiler.INSTANCE,
+                false, //client side
+                false, //debug
+                0, 0);
     }
 
     @Deprecated(forRemoval = true)
-    public static DummyWorld getInstance() {
+    public static FakeClientLevel getInstance() {
         return getCachedInstance();
     }
 
-    public static DummyWorld getCachedInstance() {
-        return getCachedInstance("dummy_world", DummyWorld::new);
+    public static FakeClientLevel getCachedInstance() {
+        return getCachedInstance("dummy_world", FakeClientLevel::new);
     }
 
-    public static <T extends DummyWorld> T getCachedInstance(String id, Supplier<T> constructor) {
+    public static <T extends FakeClientLevel> T getCachedInstance(String id, Supplier<T> constructor) {
         return (T) INSTANCES.computeIfAbsent(id, k -> constructor.get());
     }
 
@@ -225,7 +225,7 @@ public class DummyWorld extends Level {
 
         @Override
         public ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
-            return new EmptyLevelChunk(DummyWorld.this, new ChunkPos(x, z), Utils.hackyGetRegistryAccess().registryOrThrow(Registries.BIOME)
+            return new EmptyLevelChunk(FakeClientLevel.this, new ChunkPos(x, z), Utils.hackyGetRegistryAccess().registryOrThrow(Registries.BIOME)
                     .getHolderOrThrow(Biomes.FOREST));
         }
 
@@ -250,7 +250,7 @@ public class DummyWorld extends Level {
 
         @Override
         public BlockGetter getLevel() {
-            return DummyWorld.this;
+            return FakeClientLevel.this;
         }
 
     }

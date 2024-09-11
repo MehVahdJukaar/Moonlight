@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
-import net.mehvahdjukaar.moonlight.core.misc.DummyWorld;
+import net.mehvahdjukaar.moonlight.core.misc.FakeServerLevel;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
@@ -90,7 +90,7 @@ public class MoonlightForge {
 
     @SubscribeEvent
     public static void beforeServerStart(ServerStoppedEvent event) {
-        DummyWorld.clearInstance();
+        FakeServerLevel.clearInstance();
     }
 
     @SubscribeEvent
