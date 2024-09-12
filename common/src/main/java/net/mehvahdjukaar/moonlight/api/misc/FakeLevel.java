@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.misc;
+package net.mehvahdjukaar.moonlight.api.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -55,7 +55,6 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class FakeLevel extends Level {
 
