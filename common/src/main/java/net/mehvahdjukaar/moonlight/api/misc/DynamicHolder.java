@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -21,7 +22,6 @@ import java.util.stream.Stream;
  * A soft reference to an object in a Data pack registry
  * Like registry object but can be invalidated and works for data pack registries
  */
-//TODO: add optionals
 public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
 
     @ApiStatus.Internal
@@ -35,7 +35,7 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
     private final ResourceKey<T> key;
 
     // needs to be thread local because of data pack stuff. datapack registries will have 2 objects with the same key
-    private final ThreadLocal<Holder<T>> instance = new ThreadLocal<>();
+    protected final ThreadLocal<Holder<T>> instance = new ThreadLocal<>();
 
     protected DynamicHolder(ResourceKey<Registry<T>> registryKey, ResourceKey<T> key) {
         this.registryKey = registryKey;
@@ -53,6 +53,18 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
 
     public static <A> DynamicHolder<A> of(ResourceKey<A> key) {
         return new DynamicHolder<>(ResourceKey.createRegistryKey(key.registry()), key);
+    }
+
+    public static <A> Opt<A> optional(ResourceLocation location, ResourceKey<Registry<A>> registry) {
+        return new Opt<>(registry, ResourceKey.create(registry, location));
+    }
+
+    public static <A> Opt<A> optional(ResourceKey<A> key) {
+        return new Opt<>(ResourceKey.createRegistryKey(key.registry()), key);
+    }
+
+    public static <A> Opt<A> optional(String id, ResourceKey<Registry<A>> registry) {
+        return optional(new ResourceLocation(id), registry);
     }
 
     private void invalidateInstance() {
@@ -93,7 +105,7 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
     @Deprecated(forRemoval = true)
     @NotNull
     public T get() {
-        return getInstance().value();
+        return value();
     }
 
     @Override
@@ -103,7 +115,7 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
 
     @Override
     public boolean isBound() {
-        return getInstance().isBound();
+        return true;
     }
 
     @Override
@@ -121,7 +133,7 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
         return predicate.test(key);
     }
 
-    public boolean is(Holder<T> other){
+    public boolean is(Holder<T> other) {
         return other == this || other.unwrapKey().get() == key;
     }
 
@@ -147,11 +159,60 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
 
     @Override
     public Kind kind() {
-        return getInstance().kind();
+        return Holder.Kind.REFERENCE;
     }
 
     @Override
     public boolean canSerializeIn(HolderOwner<T> owner) {
         return getInstance().canSerializeIn(owner);
+    }
+
+    public static class Opt<T> extends DynamicHolder<T> {
+        private boolean resolved = false;
+
+        protected Opt(ResourceKey<Registry<T>> registryKey, ResourceKey<T> key) {
+            super(registryKey, key);
+        }
+
+        @Nullable
+        @Override
+        protected Holder<T> getInstance() {
+            if (!resolved) {
+                resolved = true;
+                try {
+                    return super.getInstance();
+                } catch (Exception ignored) {
+                }
+            }
+            return instance.get();
+        }
+
+        @Override
+        public Stream<TagKey<T>> tags() {
+            var i = getInstance();
+            if (i != null) return i.tags();
+            return Stream.empty();
+        }
+
+        @Override
+        public boolean is(TagKey<T> tagKey) {
+            var i = getInstance();
+            if (i != null) return i.is(tagKey);
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public T get() {
+            return super.get();
+        }
+
+        @Nullable
+        @Override
+        public T value() {
+            var i = getInstance();
+            if (i != null) return i.value();
+            return null;
+        }
     }
 }
