@@ -6,10 +6,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.level.ClipContext;
@@ -36,9 +40,11 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
+    private static final EntityDataAccessor<Byte> ID_FLAGS = SynchedEntityData.defineId(ImprovedProjectileEntity.class, EntityDataSerializers.BYTE);
+
     protected Vec3 movementOld;
 
-    // Renamed inGround. This is used to check if the projectile has its center inside a bock
+    // Renamed inGround. This is used to check if the projectile is not moving
     protected boolean isStuck = false;
     protected int stuckTime = 0;
 
@@ -62,6 +68,16 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     }
 
     @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(ID_FLAGS, (byte) 0);
+    }
+
+    public boolean hasLeftOwner() {
+        return this.leftOwner;
+    }
+
+    @Override
     protected float getEyeHeight(Pose pose, EntityDimensions dimensions) {
         return dimensions.height * 0.5f;
     }
@@ -70,6 +86,9 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void tick() {
+        //entity has this param. we sync them for consistency
+        this.noPhysics = this.isNoPhysics();
+
         // Projectile tick stuff
         if (!this.hasBeenShot) {
             this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner());
@@ -101,8 +120,10 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
             this.setDeltaMovement(Vec3.ZERO);
         }
 
-        if (!noPhysics && this.isStuck) {
+        if (!this.noPhysics && this.isStuck) {
             this.stuckTime++;
+        }else {
+            this.stuckTime = 0;
         }
 
         this.move(MoverType.SELF, movement);
@@ -128,6 +149,10 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
             this.updateRotation();
         }
+
+        // check if stuck
+        this.isStuck = !this.noPhysics && this.position().subtract(this.xo, this.yo, this.zo).lengthSqr() < (0.0001 * 0.0001);
+
     }
 
     private void updateFireState() {
@@ -165,7 +190,8 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     @Override
     public void move(MoverType moverType, Vec3 movement) {
         // use normal movement logic if not self.. idk why compat i guess incase we were to use ray collider
-        if (moverType != MoverType.SELF) {
+        // also ued for no physics as that will just set the pos without doing any collision
+        if (moverType != MoverType.SELF || this.noPhysics) {
             super.move(moverType, movement);
             return;
         }
@@ -177,6 +203,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
         // Applies collisions calculating hit face and new pos
         ColliderType colliderType = this.getColliderType();
+
         HitResult hitResult = switch (colliderType) {
             case RAY -> level.clip(new ClipContext(pos, pos.add(movement),
                     ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
@@ -189,6 +216,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                         Direction.getNearest(sub.x, sub.y, sub.z), BlockPos.containing(pos.add(vec3)), false);
             }
         };
+        //TODO: add no physics here
 
         Vec3 newPos = hitResult.getLocation();
         Vec3 newMovement = newPos.subtract(pos);
@@ -205,7 +233,6 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         } else {
             this.minorHorizontalCollision = false;
         }
-
 
         //try hit entity
         EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(level, this, pos, newPos,
@@ -305,6 +332,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("stuck", this.isStuck);
         tag.putInt("stuckTime", this.stuckTime);
+        tag.putBoolean("noPhysics", this.isNoPhysics());
     }
 
     @Override
@@ -312,6 +340,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         super.readAdditionalSaveData(tag);
         this.isStuck = tag.getBoolean("stuck");
         this.stuckTime = tag.getInt("stuckTime");
+        this.setNoPhysics(tag.getBoolean("noPhysics"));
     }
 
     @Override
@@ -329,6 +358,28 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         return 1.5F;
     }
 
+    protected void setFlag(int id, boolean value) {
+        byte b0 = this.entityData.get(ID_FLAGS);
+        if (value) {
+            this.entityData.set(ID_FLAGS, (byte) (b0 | id));
+        } else {
+            this.entityData.set(ID_FLAGS, (byte) (b0 & ~id));
+        }
+    }
+
+    protected boolean getFlag(int id) {
+        return (this.entityData.get(ID_FLAGS) & id) != 0;
+    }
+
+    // 2 cause its same as arrows for consistency
+    public void setNoPhysics(boolean noPhysics) {
+        this.noPhysics = noPhysics;
+        this.setFlag(2, noPhysics);
+    }
+
+    public boolean isNoPhysics() {
+        return this.getFlag(2);
+    }
 
     @Deprecated(forRemoval = true)
     public boolean touchedGround;
@@ -336,18 +387,8 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     public int groundTime = 0;
 
     @Deprecated(forRemoval = true)
-    public void setNoPhysics(boolean noGravity) {
-        super.setNoGravity(noGravity);
-    }
-
-    @Deprecated(forRemoval = true)
-    public boolean isNoPhysics() {
-        return super.isNoGravity();
-    }
-
-    @Deprecated(forRemoval = true)
     protected float getDeceleration() {
-        return 0.99F;
+        return getInertia();
     }
 
     @Deprecated(forRemoval = true)
