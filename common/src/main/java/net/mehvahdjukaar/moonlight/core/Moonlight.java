@@ -74,7 +74,7 @@ public class Moonlight {
         VillagerAIInternal.init();
         MapDataInternal.init();
         SoftFluidInternal.init();
-        RegHelper.addDispenserBehaviorRegistration(Moonlight::registerBuiltinFluidBehavior);
+        RegHelper.addDynamicDispenserBehaviorRegistration(Moonlight::registerBuiltinFluidBehavior);
 
         PlatHelper.addCommonSetup(Moonlight::commonSetup);
 

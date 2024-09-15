@@ -523,14 +523,13 @@ public class RegHelper {
     }
 
 
-    public static void addDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener) {
+    public static void addDynamicDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener) {
         DispenserHelper.addListener(eventListener, DispenserHelper.Priority.NORMAL);
     }
 
-    public static void addDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener, DispenserHelper.Priority priority) {
+    public static void addDynamicDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener, DispenserHelper.Priority priority) {
         DispenserHelper.addListener(eventListener, priority);
     }
-
 
     // Animal food stuff
 
