@@ -104,7 +104,6 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
         this.baseTick();
 
-        //TODO: check
         if (this.hasReachedEndOfLife() && !isRemoved()) {
             this.reachedEndOfLife();
         }
@@ -220,7 +219,6 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                         Direction.getNearest(sub.x, sub.y, sub.z), BlockPos.containing(pos.add(vec3)), false);
             }
         };
-        //TODO: add no physics here
 
         Vec3 newPos = hitResult.getLocation();
         Vec3 newMovement = newPos.subtract(pos);

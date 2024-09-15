@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -48,11 +48,11 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
@@ -64,28 +64,30 @@ public class FakeLevel extends Level {
     private final RecipeManager recipeManager = new RecipeManager();
     private final ChunkSource chunkManager = new DummyChunkManager();
     private final DummyLevelEntityGetter<Entity> entityGetter = new DummyLevelEntityGetter<>();
+    private final WeakReference<RegistryAccess> registryAccess;
 
-    protected FakeLevel(boolean client, String id) {
+    protected FakeLevel(boolean client, String id, RegistryAccess registryAccess) {
         super(new DummyData(),
                 ResourceKey.create(Registries.DIMENSION, new ResourceLocation(id)),
-                Utils.hackyGetRegistryAccess(),
-                Utils.hackyGetRegistryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
+                registryAccess,
+                registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
                 () -> InactiveProfiler.INSTANCE,
                 client, //client side
                 false, //debug
                 0, 0);
+        this.registryAccess = new WeakReference<>(registryAccess);
     }
 
-    public static FakeLevel getDefault(boolean client) {
-        return get("dummy_world", client, FakeLevel::new);
+    public static FakeLevel getDefault(boolean client, RegistryAccess registryAccess) {
+        return get("dummy_world", client,registryAccess,  FakeLevel::new);
     }
 
-    public static <T extends FakeLevel> T get(String id, boolean client, BiFunction<Boolean, String, T> constructor) {
-        if(client) {
+    public static <T extends FakeLevel> T get(String id, boolean client,RegistryAccess registryAccess, TriFunction<Boolean, String, RegistryAccess, T> constructor) {
+        if (client) {
             id = "client_" + id;
         }
         String finalId = id;
-        return (T) INSTANCES.computeIfAbsent(id, k -> constructor.apply(client, finalId));
+        return (T) INSTANCES.computeIfAbsent(id, k -> constructor.apply(client, finalId, registryAccess));
     }
 
     @ApiStatus.Internal
@@ -201,7 +203,7 @@ public class FakeLevel extends Level {
 
     @Override
     public RegistryAccess registryAccess() {
-        return Utils.hackyGetRegistryAccess();
+        return registryAccess.get();
     }
 
     @Override
@@ -211,12 +213,12 @@ public class FakeLevel extends Level {
 
     @Override
     public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
-        return getPlains();
+        return getPlains(registryAccess.get());
     }
 
     @NotNull
-    private static Holder.Reference<Biome> getPlains() {
-        return Utils.hackyGetRegistryAccess().registry(Registries.BIOME)
+    private static Holder.Reference<Biome> getPlains(RegistryAccess registryAccess) {
+        return registryAccess.registry(Registries.BIOME)
                 .get().getHolder(ResourceKey.create(Registries.BIOME, new ResourceLocation("minecraft:plains")))
                 .get();
     }
@@ -225,7 +227,7 @@ public class FakeLevel extends Level {
 
         @Override
         public ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
-            return new EmptyLevelChunk(FakeLevel.this, new ChunkPos(x, z), Utils.hackyGetRegistryAccess().registryOrThrow(Registries.BIOME)
+            return new EmptyLevelChunk(FakeLevel.this, new ChunkPos(x, z), registryAccess.get().registryOrThrow(Registries.BIOME)
                     .getHolderOrThrow(Biomes.FOREST));
         }
 

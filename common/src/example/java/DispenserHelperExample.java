@@ -15,7 +15,7 @@ public class DispenserHelperExample {
 
     // Call this during mod initialization
     public static void init(){
-        RegHelper.addDispenserBehaviorRegistration(DispenserHelperExample::registerDynamic);
+        RegHelper.addDynamicDispenserBehaviorRegistration(DispenserHelperExample::registerDynamic);
     }
 
     // This will run on datapack reload so you can access tags!

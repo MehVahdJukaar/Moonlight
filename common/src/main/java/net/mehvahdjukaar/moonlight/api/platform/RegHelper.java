@@ -535,12 +535,19 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    public static void addDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener) {
+    public static void addDynamicDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener) {
         DispenserHelper.addListener(eventListener, DispenserHelper.Priority.NORMAL);
     }
 
-    public static void addDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener, DispenserHelper.Priority priority) {
+    public static void addDynamicDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener, DispenserHelper.Priority priority) {
         DispenserHelper.addListener(eventListener, priority);
+    }
+
+
+    // Only relevant on forge
+    @ExpectPlatform
+    public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient) {
+        throw new AssertionError();
     }
 
 }
