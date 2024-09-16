@@ -36,6 +36,7 @@ import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import vazkii.quark.base.client.config.ConfigObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -113,13 +114,13 @@ public class ConfigHelper {
     /**
      * Define a config value for a complex object.
      *
-     * @param <T>           The type of the thing in the config we are making a listener for
-     * @param builder       Builder to build configs with
-     * @param name          The name of the field in your config that will hold objects of this type
-     * @param codec         A Codec for de/serializing your object type.
+     * @param <T>             The type of the thing in the config we are making a listener for
+     * @param builder         Builder to build configs with
+     * @param name            The name of the field in your config that will hold objects of this type
+     * @param codec           A Codec for de/serializing your object type.
      * @param defaultSupplier The default instance of your config field. The given codec must be able to serialize this;
-     *                      if it cannot, an exception will be intentionally thrown the first time the config attempts to load.
-     *                      If the codec fails to deserialize the config field at a later time, an error message will be logged and this default instance will be used instead.
+     *                        if it cannot, an exception will be intentionally thrown the first time the config attempts to load.
+     *                        If the codec fails to deserialize the config field at a later time, an error message will be logged and this default instance will be used instead.
      * @return A reload-sensitive wrapper around your config object value. Use ConfigObject#get to get the most up-to-date object.
      */
     public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
@@ -129,7 +130,7 @@ public class ConfigHelper {
             return encodeResult.getOrThrow(s -> new IllegalArgumentException(String.format("Unable to encode default value %s: %s", defaultValue, s)));
         });
 
-        ModConfigSpec.ConfigValue<Object> value = builder.define(name, lazyDefaultValue, o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass()));
+        ModConfigSpec.ConfigValue<Object> value = builder.define(name, lazyDefaultValue, Objects::nonNull);
         return new ConfigObject<>(value, codec, defaultSupplier);
     }
 
