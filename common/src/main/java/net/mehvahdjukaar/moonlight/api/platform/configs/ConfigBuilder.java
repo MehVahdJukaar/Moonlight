@@ -35,7 +35,6 @@ public abstract class ConfigBuilder {
     }
 
     public static ConfigBuilder create(String modId, ConfigType type) {
-        ILightable
         return create(ResourceLocation.fromNamespaceAndPath(modId, type.getDefaultName()), type);
     }
 

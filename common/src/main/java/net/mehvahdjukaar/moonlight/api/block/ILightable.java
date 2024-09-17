@@ -17,7 +17,9 @@ import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -78,19 +80,6 @@ public interface ILightable {
             boolean flag = entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity);
             return flag && extinguish(projectile, state, pos, level);
         }*/
-        return false;
-    }
-
-    //true on state change
-    @Deprecated(forRemoval = true)
-    default boolean interactWithProjectile(Level level, BlockState state, Projectile projectile, BlockPos pos) {
-        if (projectile instanceof ThrownPotion potion && PotionUtils.getPotion(potion.getItem()) == Potions.WATER) {
-            Entity entity = projectile.getOwner();
-            boolean flag = entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level, entity);
-            if (flag && extinguish(projectile, state, pos, level)) {
-                return true;
-            }
-        }
         return false;
     }
 
