@@ -544,12 +544,6 @@ public class RegHelper {
     }
 
 
-    // Only relevant on forge
-    @ExpectPlatform
-    public static void registerFireworkRecipe(FireworkRocketItem.Shape shape, Item ingredient) {
-        throw new AssertionError();
-    }
-
 }
 
 

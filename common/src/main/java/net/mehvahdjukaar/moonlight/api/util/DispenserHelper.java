@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
 import net.minecraft.core.*;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
@@ -155,7 +156,7 @@ public class DispenserHelper {
                 if (type != InteractionResult.PASS) {
                     boolean success = type.consumesAction();
                     this.playSound(source, success);
-                    this.playAnimation(source, source.getBlockState().getValue(DispenserBlock.FACING));
+                    this.playAnimation(source, source.state().getValue(DispenserBlock.FACING));
                     if (success) {
                         ItemStack resultStack = result.getObject();
                         if (resultStack.getItem() == stack.getItem()) return resultStack;
@@ -180,11 +181,11 @@ public class DispenserHelper {
         protected abstract InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack);
 
         protected void playSound(BlockSource source, boolean success) {
-            source.getLevel().levelEvent(success ? 1000 : 1001, source.getPos(), 0);
+            source.level().levelEvent(success ? 1000 : 1001, source.pos(), 0);
         }
 
         protected void playAnimation(BlockSource source, Direction direction) {
-            source.getLevel().levelEvent(2000, source.getPos(), direction.get3DDataValue());
+            source.level().levelEvent(2000, source.pos(), direction.get3DDataValue());
         }
 
         //returns full bottle to dispenser. same function that's in IDispenserItemBehavior
@@ -193,7 +194,7 @@ public class DispenserHelper {
             if (empty.isEmpty()) {
                 return filled.copy();
             } else {
-                if (!mergeDispenserItem(source.getEntity(), filled)) {
+                if (!mergeDispenserItem(source.blockEntity(), filled)) {
                     SHOOT_BEHAVIOR.dispense(source, filled.copy());
                 }
                 return empty;
@@ -224,8 +225,8 @@ public class DispenserHelper {
         @Override
         protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
             //this.setSuccessful(false);
-            ServerLevel world = source.getLevel();
-            BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
+            ServerLevel world = source.level();
+            BlockPos blockpos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
             BlockEntity te = world.getBlockEntity(blockpos);
             if (te instanceof WorldlyContainer tile) {
                 if (tile.canPlaceItem(0, stack)) {
@@ -251,11 +252,11 @@ public class DispenserHelper {
             this.setSuccess(false);
             Item item = stack.getItem();
             if (item instanceof BlockItem bi) {
-                Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
-                BlockPos blockpos = source.getPos().relative(direction);
+                Direction direction = source.state().getValue(DispenserBlock.FACING);
+                BlockPos blockpos = source.pos().relative(direction);
                 // Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
                 Direction direction1 = direction;
-                InteractionResult result = bi.place(new DirectionalPlaceContext(source.getLevel(), blockpos, direction, stack, direction1));
+                InteractionResult result = bi.place(new DirectionalPlaceContext(source.level(), blockpos, direction, stack, direction1));
                 this.setSuccess(result.consumesAction());
             }
             return stack;
@@ -270,15 +271,15 @@ public class DispenserHelper {
 
         @Override
         protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
-            BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
-            BlockEntity te = source.getLevel().getBlockEntity(blockpos);
+            BlockPos blockpos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
+            BlockEntity te = source.level().getBlockEntity(blockpos);
             if (te instanceof ISoftFluidTankProvider tile) {
                 ItemStack returnStack;
                 if (tile.canInteractWithSoftFluidTank()) {
 
                     SoftFluidTank tank = tile.getSoftFluidTank();
                     if (!tank.isFull()) {
-                        returnStack = tank.interactWithItem(stack, source.getLevel(), blockpos, false);
+                        returnStack = tank.interactWithItem(stack, source.level(), blockpos, false);
                         if (returnStack != null) {
                             te.setChanged();
                             return InteractionResultHolder.success(returnStack);

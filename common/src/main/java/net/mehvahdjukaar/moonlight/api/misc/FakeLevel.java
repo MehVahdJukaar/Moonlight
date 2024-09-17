@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -14,10 +13,12 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -29,7 +30,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.entity.EntityAccess;
@@ -38,12 +38,14 @@ import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -61,14 +63,18 @@ public class FakeLevel extends Level {
     private static final Map<String, FakeLevel> INSTANCES = new Object2ObjectArrayMap<>();
 
     private final Scoreboard scoreboard = new Scoreboard();
-    private final RecipeManager recipeManager = new RecipeManager();
+    private final RecipeManager recipeManager;
+    private final MapId mapId = new MapId(0);
+    private final TickRateManager tickRateManager = new TickRateManager();
     private final ChunkSource chunkManager = new DummyChunkManager();
     private final DummyLevelEntityGetter<Entity> entityGetter = new DummyLevelEntityGetter<>();
     private final WeakReference<RegistryAccess> registryAccess;
+    private final LevelTickAccess<Block> blockTicks = new EmptyLevelTickAccess<>();
+    private final LevelTickAccess<Fluid> fluidTicks = new EmptyLevelTickAccess<>();
 
     protected FakeLevel(boolean client, String id, RegistryAccess registryAccess) {
         super(new DummyData(),
-                ResourceKey.create(Registries.DIMENSION, new ResourceLocation(id)),
+                ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(id)),
                 registryAccess,
                 registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
                 () -> InactiveProfiler.INSTANCE,
@@ -76,6 +82,7 @@ public class FakeLevel extends Level {
                 false, //debug
                 0, 0);
         this.registryAccess = new WeakReference<>(registryAccess);
+        this.recipeManager = new RecipeManager(registryAccess);
     }
 
     public static FakeLevel getDefault(boolean client, RegistryAccess registryAccess) {
@@ -140,17 +147,23 @@ public class FakeLevel extends Level {
     }
 
     @Override
-    public MapItemSavedData getMapData(String id) {
+    public TickRateManager tickRateManager() {
+        return tickRateManager;
+    }
+
+    @Override
+    public @Nullable MapItemSavedData getMapData(MapId mapId) {
         return null;
     }
 
     @Override
-    public void setMapData(String pMapId, MapItemSavedData pData) {
+    public void setMapData(MapId mapId, MapItemSavedData mapData) {
+
     }
 
     @Override
-    public int getFreeMapId() {
-        return -1;
+    public MapId getFreeMapId() {
+        return mapId;
     }
 
     @Override
@@ -169,26 +182,21 @@ public class FakeLevel extends Level {
 
     @Override
     public LevelTickAccess<Block> getBlockTicks() {
-        throw new IllegalStateException("not implemented");
+        return blockTicks;
     }
 
     @Override
     public LevelTickAccess<Fluid> getFluidTicks() {
-        throw new IllegalStateException("not implemented");
+        return fluidTicks;
     }
 
     @Override
     public void levelEvent(Player player, int eventId, BlockPos pos, int data) {
-        throw new IllegalStateException("not implemented");
     }
 
     @Override
-    public void gameEvent(GameEvent p_220404_, Vec3 p_220405_, GameEvent.Context p_220406_) {
+    public void gameEvent(Holder<GameEvent> gameEvent, Vec3 pos, GameEvent.Context context) {
 
-    }
-
-    @Override
-    public void gameEvent(@Nullable Entity pEntity, GameEvent pEvent, BlockPos pPos) {
     }
 
     @Override
@@ -207,6 +215,11 @@ public class FakeLevel extends Level {
     }
 
     @Override
+    public PotionBrewing potionBrewing() {
+        return null;
+    }
+
+    @Override
     public FeatureFlagSet enabledFeatures() {
         return FeatureFlags.DEFAULT_FLAGS;
     }
@@ -219,14 +232,14 @@ public class FakeLevel extends Level {
     @NotNull
     private static Holder.Reference<Biome> getPlains(RegistryAccess registryAccess) {
         return registryAccess.registry(Registries.BIOME)
-                .get().getHolder(ResourceKey.create(Registries.BIOME, new ResourceLocation("minecraft:plains")))
+                .get().getHolder(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("plains")))
                 .get();
     }
 
     private class DummyChunkManager extends ChunkSource {
 
         @Override
-        public ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
+        public @Nullable ChunkAccess getChunk(int x, int z, net.minecraft.world.level.chunk.status.ChunkStatus chunkStatus, boolean requireChunk) {
             return new EmptyLevelChunk(FakeLevel.this, new ChunkPos(x, z), registryAccess.get().registryOrThrow(Registries.BIOME)
                     .getHolderOrThrow(Biomes.FOREST));
         }
@@ -286,34 +299,8 @@ public class FakeLevel extends Level {
         GameRules gameRules = new GameRules();
 
         @Override
-        public void setXSpawn(int xSpawn) {
-        }
-
-        @Override
-        public void setYSpawn(int ySpawn) {
-        }
-
-        @Override
-        public void setZSpawn(int zSpawn) {
-        }
-
-        @Override
-        public void setSpawnAngle(float spawnAngle) {
-        }
-
-        @Override
-        public int getXSpawn() {
-            return 0;
-        }
-
-        @Override
-        public int getYSpawn() {
-            return 0;
-        }
-
-        @Override
-        public int getZSpawn() {
-            return 0;
+        public BlockPos getSpawnPos() {
+            return BlockPos.ZERO;
         }
 
         @Override
@@ -363,6 +350,34 @@ public class FakeLevel extends Level {
         @Override
         public boolean isDifficultyLocked() {
             return false;
+        }
+
+        @Override
+        public void setSpawn(BlockPos spawnPoint, float spawnAngle) {
+
+        }
+    }
+
+    private static class EmptyLevelTickAccess<T> implements LevelTickAccess<T>{
+
+        @Override
+        public boolean willTickThisTick(BlockPos pos, T type) {
+            return false;
+        }
+
+        @Override
+        public void schedule(ScheduledTick<T> tick) {
+
+        }
+
+        @Override
+        public boolean hasScheduledTick(BlockPos pos, T type) {
+            return false;
+        }
+
+        @Override
+        public int count() {
+            return 0;
         }
     }
 

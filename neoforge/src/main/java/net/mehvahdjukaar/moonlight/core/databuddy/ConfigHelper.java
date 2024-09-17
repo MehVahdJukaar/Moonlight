@@ -130,7 +130,8 @@ public class ConfigHelper {
             return encodeResult.getOrThrow(s -> new IllegalArgumentException(String.format("Unable to encode default value %s: %s", defaultValue, s)));
         });
 
-        ModConfigSpec.ConfigValue<Object> value = builder.define(name, lazyDefaultValue, Objects::nonNull);
+        ModConfigSpec.ConfigValue<Object> value = builder.define(name, lazyDefaultValue,
+                Objects::nonNull);
         return new ConfigObject<>(value, codec, defaultSupplier);
     }
 
