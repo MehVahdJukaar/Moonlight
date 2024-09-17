@@ -124,7 +124,8 @@ public class ConfigHelper {
             return encodeResult.getOrThrow(false, s -> LOGGER.error("Unable to encode default value: {}", s));
         });
 
-        ConfigValue<Object> value = builder.define(name, lazyDefaultValue, o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass()));
+        ConfigValue<Object> value = builder.define(name, lazyDefaultValue,
+                Objects::nonNull);
         return new ConfigObject<>(value, codec, defaultSupplier);
     }
 
