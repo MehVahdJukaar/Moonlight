@@ -18,6 +18,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -45,7 +46,7 @@ public class ForgeHelperImpl {
         return false;
     }
 
-    public static Recipe addRecipeConditions(Recipe originalRecipe, List<Object> conditions) {
+    public static <T extends RecipeInput> Recipe<T> copyRecipeConditions(Recipe<T> originalRecipe, Recipe<?> otherRecipe) {
         return originalRecipe;
     }
 

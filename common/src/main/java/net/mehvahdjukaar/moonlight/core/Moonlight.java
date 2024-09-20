@@ -143,7 +143,7 @@ public class Moonlight {
 
     public static void checkDatapackRegistry() {
         try {
-            SoftFluidRegistry.getEmpty();
+            SoftFluidRegistry.getEmpty().value();
             MapDataRegistry.getDefaultType();
         } catch (Exception e) {
             throw new RuntimeException("""

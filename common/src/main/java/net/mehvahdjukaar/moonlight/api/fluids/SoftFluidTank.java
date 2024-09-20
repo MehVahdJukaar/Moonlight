@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.sounds.SoundEvent;
@@ -45,6 +46,18 @@ public class SoftFluidTank {
     @ExpectPlatform
     public static SoftFluidTank create(int capacity) {
         throw new AssertionError();
+    }
+
+    public static SoftFluidTank create(SoftFluidStack stack, int capacity) {
+        SoftFluidTank tank = create(capacity);
+        tank.setFluid(stack);
+        return tank;
+    }
+
+    public SoftFluidTank makeCopy() {
+        SoftFluidTank tank = create(this.capacity);
+        this.copyContent(tank);
+        return tank;
     }
 
     /**
@@ -372,30 +385,33 @@ public class SoftFluidTank {
      *
      * @param compound nbt
      */
-    public void load(CompoundTag compound) {
-        //backward compat
-        if (compound.contains("FluidHolder")) {
-            compound.put("fluid", compound.get("FluidHolder"));
-            compound.remove("FluidHolder");
-        }
+    public void load(CompoundTag compound, HolderLookup.Provider registries) {
         if (compound.contains("fluid")) {
-            this.setFluid(SoftFluidStack.load(
-                    Utils.hackyGetRegistryAccess(),
+            this.setFluid(SoftFluidStack.load(registries,
                     compound.getCompound("fluid")));
         }
+    }
+
+    @Deprecated(forRemoval = true)
+    public void load(CompoundTag compound) {
+        this.load(compound, Utils.hackyGetRegistryAccess());
+    }
+
+    @Deprecated(forRemoval = true)
+    public CompoundTag save(CompoundTag compound) {
+        this.save(compound, Utils.hackyGetRegistryAccess());
+        return compound;
     }
 
     /**
      * call from tile entity. saves to nbt
      *
      * @param compound nbt
-     * @return nbt
      */
-    public CompoundTag save(CompoundTag compound) {
+    public void save(CompoundTag compound, HolderLookup.Provider registries) {
         this.setFluid(this.fluidStack);
-        Tag tag = this.fluidStack.save(Utils.hackyGetRegistryAccess());
+        Tag tag = this.fluidStack.save(registries);
         compound.put("fluid", tag);
-        return compound;
     }
 
     /**

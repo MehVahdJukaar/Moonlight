@@ -157,4 +157,13 @@ public class VertexUtil {
         builder.setNormal(nx, ny, nz);
     }
 
+    // got knows why these dont match the ones in LightTexture
+
+    public static int lightU(int light) {
+        return light & '\uffff';
+    }
+
+    public static int lightV(int light) {
+        return light >> 16 & '\uffff';
+    }
 }

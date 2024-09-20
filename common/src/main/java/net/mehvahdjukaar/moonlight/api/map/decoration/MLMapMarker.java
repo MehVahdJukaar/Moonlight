@@ -33,7 +33,7 @@ public abstract class MLMapMarker<D extends MLMapDecoration> {
     protected final boolean shouldRefresh;
     protected final boolean shouldSave;
 
-    public static final Codec<MLMapMarker<?>> CODEC =
+    public static final Codec<MLMapMarker<?>> REFERENCE_CODEC =
             MLMapDecorationType.CODEC.dispatch("type", MLMapMarker::getType,
                     mapWorldMarker -> mapWorldMarker.value().getMarkerCodec());
 

@@ -19,7 +19,7 @@ public class SoftFluidRegistry {
     public static final ResourceKey<Registry<SoftFluid>> KEY = ResourceKey.createRegistryKey(Moonlight.res("soft_fluid"));
 
     public static Holder<SoftFluid> getEmpty() {
-        return BuiltInSoftFluids.EMPTY.getHolder();
+        return BuiltInSoftFluids.EMPTY;
     }
 
     public static SoftFluid empty() {

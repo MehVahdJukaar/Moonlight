@@ -11,7 +11,7 @@ public class MapDataInternalImpl {
 
     @SubscribeEvent
     public static void registerDataPackRegistry(DataPackRegistryEvent.NewRegistry event) {
-        event.dataPackRegistry(MapDataInternal.KEY, MLMapDecorationType.DIRECT_CODEC, MLMapDecorationType.DIRECT_NETWORK_CODEC);
+        event.dataPackRegistry(MapDataInternal.KEY, MLMapDecorationType.DIRECT_CODEC, MLMapDecorationType.DIRECT_CODEC);
     }
 
     public static void init() {

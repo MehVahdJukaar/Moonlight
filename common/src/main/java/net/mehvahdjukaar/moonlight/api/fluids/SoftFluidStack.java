@@ -15,11 +15,13 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.*;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -43,6 +45,13 @@ public class SoftFluidStack implements DataComponentHolder {
             DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
                     .forGetter(stack -> stack.components.asPatch())
     ).apply(i, SoftFluidStack::of));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, SoftFluidStack> STREAM_CODEC = StreamCodec.composite(
+            SoftFluid.STREAM_CODEC, SoftFluidStack::getFluid,
+            ByteBufCodecs.VAR_INT, SoftFluidStack::getCount,
+            DataComponentPatch.STREAM_CODEC, s -> s.components.asPatch(),
+            SoftFluidStack::of
+    );
 
     // this is not a singleton. Many empty instances might exist (due to world reload). We keep this just as a minor optimization
     private static SoftFluidStack cachedEmptyInstance = null;
@@ -180,7 +189,7 @@ public class SoftFluidStack implements DataComponentHolder {
         setCount(this.count - amount);
     }
 
-    public void consume(int amount, @Nullable LivingEntity entity){
+    public void consume(int amount, @Nullable LivingEntity entity) {
         if (entity == null || !entity.hasInfiniteMaterials()) {
             this.shrink(amount);
         }
@@ -234,8 +243,6 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
 
-
-
     // item conversion
 
     @Nullable
@@ -256,7 +263,7 @@ public class SoftFluidStack implements DataComponentHolder {
                 //convert potions to water bottles
                 PotionContents potion = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
                 if (potion.is(Potions.WATER)) {
-                    fluid = BuiltInSoftFluids.WATER.getHolder();
+                    fluid = BuiltInSoftFluids.WATER;
                 }
                 //add tags to splash and lingering potions
                 else if (potion.hasEffects()) {

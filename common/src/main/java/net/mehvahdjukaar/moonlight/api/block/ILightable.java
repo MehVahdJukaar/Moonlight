@@ -16,10 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -37,9 +34,19 @@ public interface ILightable {
 
     boolean isLitUp(BlockState state, BlockGetter level, BlockPos pos);
 
-    void setLitUp(BlockState state, LevelAccessor world, BlockPos pos, boolean lit);
+    default void setLitUp(BlockState state, LevelAccessor world, BlockPos pos, boolean lit) {
+        setLitUp(state, world, pos, null, lit);
+    }
 
+    void setLitUp(BlockState state, LevelAccessor world, BlockPos pos, @Nullable Entity entity,  boolean lit);
+
+
+    @Deprecated(forRemoval = true)
     default boolean lightUp(@Nullable Entity player, BlockState state, BlockPos pos, LevelAccessor world, FireSoundType fireSourceType) {
+        return tryLightUp(player, state, pos, world, fireSourceType);
+    }
+
+    default boolean tryLightUp(@Nullable Entity player, BlockState state, BlockPos pos, LevelAccessor world, FireSoundType fireSourceType) {
         if (!isLitUp(state, world, pos)) {
             if (!world.isClientSide()) {
                 this.setLitUp(state, world, pos, true);
@@ -51,7 +58,12 @@ public interface ILightable {
         return false;
     }
 
+    @Deprecated(forRemoval = true)
     default boolean extinguish(@Nullable Entity player, BlockState state, BlockPos pos, LevelAccessor world) {
+        return tryExtinguish(player, state, pos, world);
+    }
+
+    default boolean tryExtinguish(@Nullable Entity player, BlockState state, BlockPos pos, LevelAccessor world) {
         if (this.isLitUp(state, world, pos)) {
             if (!world.isClientSide()) {
                 playExtinguishSound(world, pos);
@@ -65,11 +77,16 @@ public interface ILightable {
         return false;
     }
 
+    @Deprecated(forRemoval = true)
     default boolean interactWithEntity(Level level, BlockState state, Entity projectile, BlockPos pos) {
+        return lightableInteractWithEntity(level, state, projectile, pos);
+    }
+
+    default boolean lightableInteractWithEntity(Level level, BlockState state, Entity projectile, BlockPos pos) {
         if (projectile.isOnFire()) {
             Entity owner = projectile instanceof TraceableEntity te ? te.getOwner() : null;
             if (owner == null || owner instanceof Player || PlatHelper.isMobGriefingOn(level, owner)) {
-                return lightUp(projectile, state, pos, level, FireSoundType.FLAMING_ARROW);
+                return tryLightUp(projectile, state, pos, level, FireSoundType.FLAMING_ARROW);
             }
         }
         // Now handled by mixin since it needs bigger radius
@@ -83,25 +100,31 @@ public interface ILightable {
         return false;
     }
 
-    //call on use
+    @Deprecated(forRemoval = true)
     default ItemInteractionResult interactWithPlayerItem(BlockState state, Level level, BlockPos pos, Player player,
+                                                         InteractionHand hand, ItemStack stack) {
+        return lightableInteractWithPlayerItem(state, level, pos, player, hand, stack);
+    }
+
+    //call on use
+    default ItemInteractionResult lightableInteractWithPlayerItem(BlockState state, Level level, BlockPos pos, Player player,
                                                          InteractionHand hand, ItemStack stack) {
         if (Utils.mayPerformBlockAction(player, pos, stack)) {
             if (!this.isLitUp(state, level, pos)) {
                 Item item = stack.getItem();
                 if (item instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS)) {
-                    if (lightUp(player, state, pos, level, FireSoundType.FLINT_AND_STEEL)) {
+                    if (tryLightUp(player, state, pos, level, FireSoundType.FLINT_AND_STEEL)) {
                         stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
                         return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }
                 } else if (item instanceof FireChargeItem) {
-                    if (lightUp(player, state, pos, level, FireSoundType.FIRE_CHANGE)) {
+                    if (tryLightUp(player, state, pos, level, FireSoundType.FIRE_CHANGE)) {
                         stack.consume(1, player);
                         return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }
                 }
             } else if (this.canBeExtinguishedBy(stack)) {
-                if (extinguish(player, state, pos, level)) {
+                if (tryExtinguish(player, state, pos, level)) {
                     if (!(stack.getItem() instanceof BrushItem)) {
                         return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }

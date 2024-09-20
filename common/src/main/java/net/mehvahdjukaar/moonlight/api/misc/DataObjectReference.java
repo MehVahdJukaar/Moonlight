@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
+import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;

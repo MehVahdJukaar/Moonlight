@@ -138,7 +138,7 @@ public class MapHelper {
         Holder<MLMapDecorationType<?, ?>> type = MapDataRegistry.getHolder(id);
         if (type != null) {
             //hack only works with these
-            if(type.value().getMarkerCodec() == SimpleMapMarker.CODEC) {
+            if(type.value().getMarkerCodec() == SimpleMapMarker.REFERENCE_CODEC) {
                 var marker = new SimpleMapMarker(type, pos, rotation, Optional.ofNullable(name));
                 ((ExpandedMapData) data).ml$addCustomMarker(marker);
                 return true;

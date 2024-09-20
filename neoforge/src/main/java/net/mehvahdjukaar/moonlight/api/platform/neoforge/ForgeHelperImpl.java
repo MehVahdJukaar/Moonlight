@@ -20,6 +20,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -53,7 +55,7 @@ public class ForgeHelperImpl {
         return EventHooks.onProjectileImpact(projectile, blockHitResult);
     }
 
-    public static RecipeOutput addRecipeConditions(RecipeOutput originalRecipe, List<Object> conditions) {
+    public static <T extends RecipeInput> Recipe<T> copyRecipeConditions(Recipe<T> originalRecipe, Recipe<?> otherRecipe) {
         boolean success = false;
         /*
         var builder = ConditionalRecipe.builder();

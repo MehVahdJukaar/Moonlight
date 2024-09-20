@@ -12,16 +12,19 @@ import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
+import net.minecraft.Util;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -289,6 +292,13 @@ public class RegHelper {
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
         return register(name, type, Registries.ENTITY_TYPE);
+    }
+
+    public static RegSupplier<JukeboxSong> registerJukeboxSong(ResourceLocation name, Supplier<Holder<SoundEvent>> soundEvent,
+                                                               float lengthInSeconds, int comparatorOutput) {
+        return register(name, () -> new JukeboxSong(soundEvent.get(),
+                Component.translatable(Util.makeDescriptionId("jukebox_song", name)),
+                lengthInSeconds, comparatorOutput), Registries.JUKEBOX_SONG);
     }
 
     public static void registerCompostable(ItemLike itemLike, float chance) {

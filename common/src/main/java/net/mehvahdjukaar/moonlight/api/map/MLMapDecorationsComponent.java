@@ -8,7 +8,7 @@ import java.util.Map;
 
 public record MLMapDecorationsComponent(Map<String, MLMapMarker<?>> decorations) {
 
-    public static final Codec<MLMapDecorationsComponent> CODEC = Codec.unboundedMap(Codec.STRING, MLMapMarker.CODEC)
+    public static final Codec<MLMapDecorationsComponent> CODEC = Codec.unboundedMap(Codec.STRING, MLMapMarker.REFERENCE_CODEC)
             .xmap(MLMapDecorationsComponent::new, MLMapDecorationsComponent::decorations);
 
     public MLMapDecorationsComponent withDecoration(String type, MLMapMarker<?> entry) {

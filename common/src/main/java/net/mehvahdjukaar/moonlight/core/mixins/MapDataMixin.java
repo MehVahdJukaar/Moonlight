@@ -255,7 +255,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             RegistryOps<Tag> registryOps = registries.createSerializationContext(NbtOps.INSTANCE);
 
             for (int j = 0; j < listNBT.size(); ++j) {
-                MLMapMarker.CODEC.parse(registryOps, listNBT.getCompound(j))
+                MLMapMarker.REFERENCE_CODEC.parse(registryOps, listNBT.getCompound(j))
                         .resultOrPartial(string -> Moonlight.LOGGER.warn("Failed to parse moonlight map marker: '{}'", string))
                         .ifPresent(marker -> {
                             mapData.ml$getCustomMarkers().put(marker.getMarkerUniqueId(), marker);
@@ -277,7 +277,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
         for (MLMapMarker<?> marker : this.moonlight$customMapMarkers.values()) {
             if (marker.shouldSave()) {
-                listNBT.add(MLMapMarker.CODEC.encodeStart(registryOps, marker).getOrThrow());
+                listNBT.add(MLMapMarker.REFERENCE_CODEC.encodeStart(registryOps, marker).getOrThrow());
             }
         }
         com.put("customMarkers", listNBT);

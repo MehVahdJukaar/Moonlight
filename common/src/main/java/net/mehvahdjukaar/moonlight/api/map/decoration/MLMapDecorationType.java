@@ -1,10 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.map.decoration;
 
+import com.google.common.base.Suppliers;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -19,25 +21,13 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 //these are what is in json. Each json = a new instance of these Types
 public sealed abstract class MLMapDecorationType<D extends MLMapDecoration, M extends MLMapMarker<D>> permits MLJsonMapDecorationType, MLSpecialMapDecorationType {
 
     //pain
     public static final Codec<MLMapDecorationType<?, ?>> DIRECT_CODEC =
-            Codec.lazyInitialized(() -> Codec.either(MLSpecialMapDecorationType.CODEC, MLJsonMapDecorationType.CODEC).xmap(
-                    either -> either.map(s -> s, c -> c),
-                    type -> {
-                        if (type == null) {
-                            Moonlight.LOGGER.error("map decoration type cant be null. how did this happen?");
-                        }
-                        if (type instanceof MLSpecialMapDecorationType<?, ?> c) {
-                            return Either.left(c);
-                        }
-                        return Either.right((MLJsonMapDecorationType) type);
-                    }));
-
-    public static final Codec<MLMapDecorationType<?, ?>> DIRECT_NETWORK_CODEC =
             Codec.lazyInitialized(() -> Codec.either(MLSpecialMapDecorationType.CODEC, MLJsonMapDecorationType.CODEC).xmap(
                     either -> either.map(s -> s, c -> c),
                     type -> {
@@ -59,7 +49,12 @@ public sealed abstract class MLMapDecorationType<D extends MLMapDecoration, M ex
     private final StreamCodec<RegistryFriendlyByteBuf, D> decorationCodec;
     private final MapCodec<M> markerCodec;
 
-    protected MLMapDecorationType( MapCodec<M> markerCodec, StreamCodec<RegistryFriendlyByteBuf, D> decorationCodec) {
+    // hack
+    private final Supplier<Holder<MLMapDecorationType<?, ?>>> builtinHolder = Suppliers.memoize(
+            () -> MapDataInternal.hackyGetRegistry().wrapAsHolder(this)
+    );
+
+    protected MLMapDecorationType(MapCodec<M> markerCodec, StreamCodec<RegistryFriendlyByteBuf, D> decorationCodec) {
         this.decorationCodec = decorationCodec;
         this.markerCodec = markerCodec;
     }
@@ -96,4 +91,7 @@ public sealed abstract class MLMapDecorationType<D extends MLMapDecoration, M ex
         return markerCodec;
     }
 
+    protected Holder<MLMapDecorationType<?, ?>> wrapAsHolder() {
+        return builtinHolder.get();
+    }
 }

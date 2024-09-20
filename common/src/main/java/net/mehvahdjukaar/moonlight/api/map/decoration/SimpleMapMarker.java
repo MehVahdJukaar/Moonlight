@@ -14,6 +14,8 @@ import java.util.Optional;
  */
 public class SimpleMapMarker extends MLMapMarker<MLMapDecoration> {
 
+    public static final MapCodec<SimpleMapMarker> DIRECT_CODEC = RecordCodecBuilder.mapCodec(i->
+            baseCodecGroup(i).apply(i, SimpleMapMarker::new));
 
     public SimpleMapMarker(Holder<MLMapDecorationType<?,?>> type, BlockPos pos, Float rotation, Optional<Component> name) {
         super(type, pos, rotation, name, Optional.empty(), Optional.empty(), false);
@@ -29,8 +31,7 @@ public class SimpleMapMarker extends MLMapMarker<MLMapDecoration> {
         return new MLMapDecoration(this.getType(), mapX, mapY, rot, getDisplayName());
     }
 
-    static final MapCodec<SimpleMapMarker> DIRECT_CODEC = RecordCodecBuilder.mapCodec(i->
-        baseCodecGroup(i).apply(i, SimpleMapMarker::new));
+
 
 
 }

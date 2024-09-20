@@ -9,8 +9,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -18,6 +16,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 //can be statically stored and persists across world loads
+
 /**
  * A soft reference to an object in a Data pack registry
  * Like registry object but can be invalidated and works for data pack registries
@@ -55,23 +54,10 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
         return new DynamicHolder<>(ResourceKey.createRegistryKey(key.registry()), key);
     }
 
-    public static <A> Opt<A> optional(ResourceLocation location, ResourceKey<Registry<A>> registry) {
-        return new Opt<>(registry, ResourceKey.create(registry, location));
-    }
-
-    public static <A> Opt<A> optional(ResourceKey<A> key) {
-        return new Opt<>(ResourceKey.createRegistryKey(key.registry()), key);
-    }
-
-    public static <A> Opt<A> optional(String id, ResourceKey<Registry<A>> registry) {
-        return optional(ResourceLocation.tryParse(id), registry);
-    }
-
-    private void invalidateInstance() {
+    protected void invalidateInstance() {
         instance.remove();
     }
 
-    @NotNull
     protected Holder<T> getInstance() {
         Holder<T> value = instance.get();
         if (value == null) {
@@ -102,8 +88,6 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
         return key;
     }
 
-    @Deprecated(forRemoval = true)
-    @NotNull
     public T get() {
         return value();
     }
@@ -167,52 +151,4 @@ public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
         return getInstance().canSerializeIn(owner);
     }
 
-    public static class Opt<T> extends DynamicHolder<T> {
-        private boolean resolved = false;
-
-        protected Opt(ResourceKey<Registry<T>> registryKey, ResourceKey<T> key) {
-            super(registryKey, key);
-        }
-
-        @Nullable
-        @Override
-        protected Holder<T> getInstance() {
-            if (!resolved) {
-                resolved = true;
-                try {
-                    return super.getInstance();
-                } catch (Exception ignored) {
-                }
-            }
-            return instance.get();
-        }
-
-        @Override
-        public Stream<TagKey<T>> tags() {
-            var i = getInstance();
-            if (i != null) return i.tags();
-            return Stream.empty();
-        }
-
-        @Override
-        public boolean is(TagKey<T> tagKey) {
-            var i = getInstance();
-            if (i != null) return i.is(tagKey);
-            return false;
-        }
-
-        @Nullable
-        @Override
-        public T get() {
-            return super.get();
-        }
-
-        @Nullable
-        @Override
-        public T value() {
-            var i = getInstance();
-            if (i != null) return i.value();
-            return null;
-        }
-    }
 }

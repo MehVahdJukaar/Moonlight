@@ -2,9 +2,9 @@ package net.mehvahdjukaar.moonlight.api.map.decoration;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.client.util.VertexUtil;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
-import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
@@ -12,7 +12,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Nameable;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import org.jetbrains.annotations.Nullable;
@@ -32,15 +34,6 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
                     MLJsonMapDecorationType::getAssociatedStructure), Codec.STRING.xmap(PlatHelper::isModLoaded, b -> "minecraft")
                     .optionalFieldOf("from_mod", true)
                     .forGetter(t -> t.enabled)
-    ).apply(instance, MLJsonMapDecorationType::new));
-
-    //we cant reference other data pack registries in network codec...
-    static final Codec<MLJsonMapDecorationType> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(MLJsonMapDecorationType::getTarget),
-            ComponentSerialization.FLAT_CODEC.optionalFieldOf("name").forGetter(MLJsonMapDecorationType::getDisplayName),
-            Codec.FLOAT.optionalFieldOf("rotation", 0f).forGetter(MLJsonMapDecorationType::getRotation),
-            ColorUtils.CODEC.optionalFieldOf("map_color", 0).forGetter(MLJsonMapDecorationType::getDefaultMapColor),
-            Codec.BOOL.fieldOf("enabled").forGetter(t -> t.enabled)
     ).apply(instance, MLJsonMapDecorationType::new));
 
     //using this and not block predicate since it requires a worldLevelGen...
@@ -104,8 +97,16 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
     public SimpleMapMarker createMarkerFromWorld(BlockGetter reader, BlockPos pos) {
         if (this.target.isPresent() && enabled) {
             if (target.get().test(reader.getBlockState(pos), RandomSource.create())) {
+                Optional<Component> name = this.getDisplayName();
+                if (!name.isPresent()) {
+                    BlockEntity be = reader.getBlockEntity(pos);
+                    if (be instanceof Nameable n) {
+                        // auto names named stuff
+                        name = Optional.ofNullable(n.getCustomName());
+                    }
+                }
                 return new SimpleMapMarker(
-                        MapDataInternal.hackyGetRegistry().wrapAsHolder(this),
+                        this.wrapAsHolder(),
                         pos, defaultRotation, name);
             }
         }

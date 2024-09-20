@@ -29,7 +29,7 @@ public abstract class ThrownPotionMixin extends ThrowableItemProjectile {
             Entity entity = this.getOwner();
             boolean canAct = entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level(), entity);
             if (canAct) {
-                l.extinguish(this, state, pos, level());
+                l.tryExtinguish(this, state, pos, level());
             }
         }
     }

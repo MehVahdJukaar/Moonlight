@@ -47,7 +47,7 @@ public class MapDataRegistry {
     //we have instances of markers per map. these have a type which determines their type
     //each type is assigned to one and one only json file. essntally the type is what is parsed from json.
     //each type can intern have its own type.., the custom factory
-    public static void registerCustomType(ResourceLocation factoryId, Supplier<MLSpecialMapDecorationType<?,?>> decorationTypeFactory) {
+    public static void registerSpecialMapDecorationTypeFactory(ResourceLocation factoryId, Supplier<MLSpecialMapDecorationType<?,?>> decorationTypeFactory) {
          MapDataInternal.registerCustomType(factoryId, decorationTypeFactory);
     }
 
@@ -73,9 +73,6 @@ public class MapDataRegistry {
         MapDataInternal.addDynamicServerMarkersEvent(event);
     }
 
-    public static MLSpecialMapDecorationType<?, ?> getCustomType(ResourceLocation resourceLocation) {
-        return MapDataInternal.createCustomType(resourceLocation);
-    }
 
     public static MLMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
         return MapDataInternal.getAssociatedType(structure);
