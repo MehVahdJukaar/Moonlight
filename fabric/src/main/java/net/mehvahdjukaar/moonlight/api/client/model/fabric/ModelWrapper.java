@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
+import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 //needed cause fabric
-public final class ModelWrapper implements BakedModel {
+public final class ModelWrapper implements BakedModel, FabricBakedModel {
 
     private final CustomBakedModel father;
 

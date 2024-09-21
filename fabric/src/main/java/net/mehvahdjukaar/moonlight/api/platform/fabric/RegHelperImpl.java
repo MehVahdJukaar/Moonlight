@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
+import net.fabricmc.fabric.api.loot.v3.FabricLootTableBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
@@ -265,7 +266,7 @@ public class RegHelperImpl {
                         public void addTableReference(ResourceLocation targetId) {
                             LootPool pool = LootPool.lootPool().add(NestedLootTable.lootTableReference(
                                     ResourceKey.create(Registries.LOOT_TABLE, targetId))).build();
-                            tableBuilder.pool(pool);
+                            ((FabricLootTableBuilder)tableBuilder).pool(pool);
                         }
                     });
                 }

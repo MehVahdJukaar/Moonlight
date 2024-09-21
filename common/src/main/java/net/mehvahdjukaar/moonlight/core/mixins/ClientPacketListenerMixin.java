@@ -21,7 +21,7 @@ public abstract class ClientPacketListenerMixin {
     private void handleExtraData(MapRenderer instance, MapId mapId, MapItemSavedData mapData, Operation<Void> operation,
                                  @Local(argsOnly = true) ClientboundMapItemDataPacket packet) {
         IMapDataPacketExtension ext = (IMapDataPacketExtension) (Object) packet;
-        var customServerData = ext.moonlight$getCustomMapDataBuf();
+        var customServerData = ext.moonlight$getDirtyCustomData();
         boolean updateTexture = packet.colorPatch().isPresent();
         if (customServerData.isPresent()) {
             updateTexture = true;

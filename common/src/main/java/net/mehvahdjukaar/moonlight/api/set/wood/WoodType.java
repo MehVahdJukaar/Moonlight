@@ -188,14 +188,14 @@ public class WoodType extends BlockType {
     protected <V> V findRelatedEntry(String before, String after, Registry<V> reg) {
         if (!after.isEmpty()) after = "_" + after;
         ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + before + after),
-                new ResourceLocation(id.getNamespace(), before + "_" + id.getPath() + after),
+                id.withPath(id.getPath() + "_" + before + after),
+                id.withPath(before + "_" + id.getPath() + after),
                 //weird conventions here
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_planks_" + before + after),
+                id.withPath(id.getPath() + "_planks_" + before + after),
                 // TFC & AFC: Include children of wood_type: stairs, slab...
-                new ResourceLocation(id.getNamespace(), "wood/planks/" + id.getPath() + "_" + before),
+                id.withPath("wood/planks/" + id.getPath() + "_" + before),
                 // TFC & AFC: Include twig (sticks), leaves, planks
-                new ResourceLocation(id.getNamespace(), "wood/" + before + after + "/" + id.getPath())
+                id.withPath("wood/" + before + after + "/" + id.getPath())
         };
         V found = null;
         for (var r : targets) {

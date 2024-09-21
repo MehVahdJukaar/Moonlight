@@ -5,12 +5,11 @@ import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface IMapDataPacketExtension {
 
-    Optional<List<Map.Entry<CustomMapData.Type<?, ?>, CustomMapData.DirtyCounter>>> moonlight$getCustomMapDataBuf();
+    Optional<List<CustomMapData.DirtyDataPatch<?,?>>> moonlight$getDirtyCustomData();
 
     Optional<List<MLMapDecoration>> moonlight$getCustomDecorations();
 

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
@@ -10,7 +11,6 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -48,7 +48,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
     private List<MLMapDecoration> moonlight$customDecorations = null;
     @Nullable
     @Unique
-    private FriendlyByteBuf moonlight$customData = null;
+    private List<CustomMapData.DirtyDataPatch<?,?>> moonlight$customDataPatches = null;
     @Unique
     private int moonlight$mapCenterX = 0;
     @Unique
@@ -80,15 +80,15 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
         return StreamCodec.composite(original, Function.identity(),
                 MLMapDecoration.CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs::optional),
                 p -> ((IMapDataPacketExtension) (Object) p).moonlight$getCustomDecorations(),
-                p -> ((IMapDataPacketExtension) (Object) p).moonlight$getCustomMapDataBuf(),
+                CustomMapData.DirtyDataPatch.STREAM_CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs::optional),
+                p -> ((IMapDataPacketExtension) (Object) p).moonlight$getDirtyCustomData(),
                 ResourceLocation.STREAM_CODEC, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getDimension(),
                 ByteBufCodecs.INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterX(),
                 ByteBufCodecs.INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterZ(),
-                ByteBufCodecs.P
-                (old, deco, res, x, z, extra) -> {
+                (old, deco,dataPatch, res, x, z) -> {
                     IMapDataPacketExtension ext = (IMapDataPacketExtension) (Object) old;
                     ext.moonlight$setCustomDecorations(deco);
-                    ext.moonlight$setDirtyCustomData(tag);
+                    ext.moonlight$setDirtyCustomData(dataPatch);
                     ext.moonlight$setDimension(res);
                     ext.moonlight$setMapCenter(x, z);
                     return old;
@@ -98,8 +98,8 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
 
 
     @Override
-    public Optional<FriendlyByteBuf> moonlight$getCustomMapDataBuf() {
-        return Optional.ofNullable(moonlight$customData);
+    public Optional<List<CustomMapData.DirtyDataPatch<?,?>>> moonlight$getDirtyCustomData() {
+        return Optional.ofNullable(moonlight$customDataPatches);
     }
 
     @Override
@@ -113,8 +113,8 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
     }
 
     @Override
-    public void moonlight$setCustomMapDataBuf(Optional<FriendlyByteBuf> tag) {
-        moonlight$customData = tag.orElse(null);
+    public void moonlight$setDirtyCustomData(Optional<List<CustomMapData.DirtyDataPatch<?, ?>>> tag) {
+        moonlight$customDataPatches = tag.map(List::copyOf).orElse(null);
     }
 
     @Override
@@ -146,7 +146,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
     @Inject(method = "applyToMap", at = @At("HEAD"))
     private void handleExtraData(MapItemSavedData mapData, CallbackInfo ci) {
         var serverDeco = this.moonlight$customDecorations;
-        var serverData = this.moonlight$customData;
+        var serverDataPatches = this.moonlight$customDataPatches;
 
         mapData.centerX = this.moonlight$mapCenterX;
         mapData.centerZ = this.moonlight$mapCenterZ;
@@ -172,11 +172,12 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
                 }
 
             }
-            if (serverData != null) {
-                var customData = ed.ml$getCustomData();
-                for (var v : customData.values()) {
-                    v.loadFromUpdatePacket(serverData);
+            if (serverDataPatches != null) {
+                for(var p : serverDataPatches){
+                    var customData = ed.ml$getCustomData();
+                    p.apply(customData);
                 }
+
             }
 
             //adds dynamic todo use deco instead

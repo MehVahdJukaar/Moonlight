@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -52,9 +54,9 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
 
     C createDirtyCounter();
 
-    void load(CompoundTag tag);
+    void load(CompoundTag tag, HolderLookup.Provider lookup);
 
-    void save(CompoundTag tag);
+    void save(CompoundTag tag, HolderLookup.Provider lookup);
 
     P createUpdatePatch(C dirtyCounter);
 
@@ -89,6 +91,7 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
         void clearDirty();
     }
 
+    // what's send via packet. Wraps the patch with its type to be able to decode it later
     record DirtyDataPatch<P, D extends CustomMapData<?, P>>(CustomMapData.Type<P, D> type, P patch) {
         public static final StreamCodec<RegistryFriendlyByteBuf, DirtyDataPatch<?, ?>> STREAM_CODEC = new StreamCodec<>() {
 
@@ -113,6 +116,11 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
                 return new DirtyDataPatch<>(type, decode);
             }
         };
+
+        public void apply(Map<Type<?, ?>, CustomMapData<?, ?>> customData) {
+            CustomMapData<?, P> data = (CustomMapData<?, P>) customData.get(this.type);
+            data.applyUpdatePatch(this.patch);
+        }
     }
 
 }

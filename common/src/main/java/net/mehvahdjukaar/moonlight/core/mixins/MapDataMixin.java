@@ -221,8 +221,9 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                 CustomMapData<?,?> customData = entry.getValue();
                 if (customData.persistOnCopyOrLock()) {
                     CompoundTag t = new CompoundTag();
-                    customData.save(t);
-                    ed.ml$getCustomData().get(entry.getKey()).load(t);
+                    var reg = Utils.hackyGetRegistryAccess();
+                    customData.save(t, reg);
+                    ed.ml$getCustomData().get(entry.getKey()).load(t, reg);
                 }
             }
         }
@@ -263,7 +264,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                         });
             }
 
-            mapData.ml$getCustomData().values().forEach(customMapData -> customMapData.load(compound));
+            mapData.ml$getCustomData().values().forEach(customMapData -> customMapData.load(compound, registries));
         }
     }
 
@@ -282,7 +283,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         }
         com.put("customMarkers", listNBT);
 
-        this.moonlight$customData.forEach((s, o) -> o.save(tag));
+        this.moonlight$customData.forEach((s, o) -> o.save(tag, registries));
 
     }
 
