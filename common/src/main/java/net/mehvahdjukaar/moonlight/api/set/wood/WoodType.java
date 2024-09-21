@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.AxeItem;
@@ -182,6 +183,29 @@ public class WoodType extends BlockType {
         this.addChild("chest_boat", this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
         this.addChild("sapling", this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
         this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK)); // TFC & AFC only
+    }
+
+    @Nullable
+    protected <V> V findRelatedEntry(String before, String after, Registry<V> reg) {
+        if (!after.isEmpty()) after = "_" + after;
+        ResourceLocation[] targets = {
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + before + after),
+                new ResourceLocation(id.getNamespace(), before + "_" + id.getPath() + after),
+                //weird conventions here
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_planks_" + before + after),
+                // TFC & AFC: Include children of wood_type: stairs, slab...
+                new ResourceLocation(id.getNamespace(), "wood/planks/" + id.getPath() + "_" + before),
+                // TFC & AFC: Include twig (sticks), leaves, planks
+                new ResourceLocation(id.getNamespace(), "wood/" + before + after + "/" + id.getPath())
+        };
+        V found = null;
+        for (var r : targets) {
+            if (reg.containsKey(r)) {
+                found = reg.get(r);
+                break;
+            }
+        }
+        return found;
     }
 
     public static class Finder implements SetFinder<WoodType> {
