@@ -89,21 +89,16 @@ public abstract class BlockType {
     }
 
     @Nullable
-    protected <V> V findRelatedEntry(String appendedName, Registry<V> reg) {
-        return findRelatedEntry(appendedName, "", reg);
+    protected <V> V findRelatedEntry(String after, Registry<V> reg) {
+        return findRelatedEntry(after, "", reg);
     }
 
     @Nullable
-    protected <V> V findRelatedEntry(String append, String postPend, Registry<V> reg) {
-        String post = postPend.isEmpty() ? "" : "_" + postPend;
+    protected <V> V findRelatedEntry(String before, String after, Registry<V> reg) {
+        if (!after.isEmpty()) after = "_" + after;
         ResourceLocation[] targets = {
-                // TFC & AFC: Include children of wood_type: stairs, slab...
-                id.withPath("wood/planks/" + id.getPath() + "_" + append),
-                // TFC & AFC: Include twig (sticks), leaves, planks
-                id.withPath("wood/" + append + post + "/" + id.getPath()),
-                id.withPath(id.getPath() + "_" + append + post),
-                id.withPath(append + "_" + id.getPath() + post),
-                id.withPath(id.getPath() + "_planks_" + append + post),
+                id.withPath(id.getPath() + "_" + before + after),
+                id.withPath( before + "_" + id.getPath() + after),
         };
         V found = null;
         for (var r : targets) {
