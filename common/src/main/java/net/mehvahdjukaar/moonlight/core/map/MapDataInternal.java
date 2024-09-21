@@ -1,14 +1,11 @@
 package net.mehvahdjukaar.moonlight.core.map;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
-import net.mehvahdjukaar.moonlight.api.misc.CodecMapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -31,12 +28,12 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public class MapDataInternal {
 
-    public static final MapRegistry<CustomMapData.Type<?>> CUSTOM_MAP_DATA_TYPES = new MapRegistry<>("custom_map_data_types");
+    public static final MapRegistry<CustomMapData.Type<?, ?>> CUSTOM_MAP_DATA_TYPES = new MapRegistry<>("custom_map_data_types");
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
      **/
-    public static <T extends CustomMapData<?>> CustomMapData.Type<T> registerCustomMapSavedData(CustomMapData.Type<T> type) {
+    public static <P, T extends CustomMapData<?, P>> CustomMapData.Type<P, T> registerCustomMapSavedData(CustomMapData.Type<P, T> type) {
         if (CUSTOM_MAP_DATA_TYPES.containsKey(type.id())) {
             throw new IllegalArgumentException("Duplicate custom map data registration " + type.id());
         } else {

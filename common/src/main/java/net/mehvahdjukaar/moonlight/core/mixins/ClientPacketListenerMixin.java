@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -22,7 +21,7 @@ public abstract class ClientPacketListenerMixin {
     private void handleExtraData(MapRenderer instance, MapId mapId, MapItemSavedData mapData, Operation<Void> operation,
                                  @Local(argsOnly = true) ClientboundMapItemDataPacket packet) {
         IMapDataPacketExtension ext = (IMapDataPacketExtension) (Object) packet;
-        var customServerData = ext.moonlight$getCustomMapDataTag();
+        var customServerData = ext.moonlight$getCustomMapDataBuf();
         boolean updateTexture = packet.colorPatch().isPresent();
         if (customServerData.isPresent()) {
             updateTexture = true;

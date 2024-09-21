@@ -21,7 +21,7 @@ public interface ExpandedMapData {
     Map<String, MLMapMarker<?>> ml$getCustomMarkers();
 
     @ApiStatus.Internal
-    Map<ResourceLocation, CustomMapData<?>> ml$getCustomData();
+    Map<CustomMapData.Type<?,?>, CustomMapData<?,?>> ml$getCustomData();
 
     boolean ml$toggleCustomDecoration(LevelAccessor world, BlockPos pos);
 
@@ -37,5 +37,5 @@ public interface ExpandedMapData {
 
     void ml$setCustomDecorationsDirty();
 
-    <H extends CustomMapData.DirtyCounter> void ml$setCustomDataDirty(CustomMapData.Type<?> type, Consumer<H> dirtySetter);
+    <H extends CustomMapData.DirtyCounter> void ml$setCustomDataDirty(CustomMapData.Type<?,?> type, Consumer<H> dirtySetter);
 }

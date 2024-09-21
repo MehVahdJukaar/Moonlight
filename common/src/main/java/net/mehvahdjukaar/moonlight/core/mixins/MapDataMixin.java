@@ -75,7 +75,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     //custom data that can be stored in maps
     @Unique
-    public final Map<ResourceLocation, CustomMapData<?>> moonlight$customData = new LinkedHashMap<>();
+    public final Map<CustomMapData.Type<?,?>, CustomMapData<?,?>> moonlight$customData = new LinkedHashMap<>();
 
     @Override
     public void ml$setCustomDecorationsDirty() {
@@ -85,7 +85,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Override
     public <H extends CustomMapData.DirtyCounter> void ml$setCustomDataDirty(
-            CustomMapData.Type<?> type, Consumer<H> dirtySetter) {
+            CustomMapData.Type<?,?> type, Consumer<H> dirtySetter) {
         this.setDirty();
         carriedBy.forEach(h -> ((IHoldingPlayerExtension) h)
                 .moonlight$setCustomDataDirty(type, dirtySetter));
@@ -93,7 +93,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Override
-    public Map<ResourceLocation, CustomMapData<?>> ml$getCustomData() {
+    public Map<CustomMapData.Type<?,?>, CustomMapData<?,?>> ml$getCustomData() {
         return moonlight$customData;
     }
 
@@ -218,7 +218,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     private void moonlight$copyCustomData(MapItemSavedData data) {
         if (data instanceof ExpandedMapData ed) {
             for (var entry : this.moonlight$customData.entrySet()) {
-                CustomMapData<?> customData = entry.getValue();
+                CustomMapData<?,?> customData = entry.getValue();
                 if (customData.persistOnCopyOrLock()) {
                     CompoundTag t = new CompoundTag();
                     customData.save(t);
@@ -313,7 +313,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     public void initCustomData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3,
                                ResourceKey<Level> resourceKey, CallbackInfo ci) {
         for (var d : MapDataInternal.CUSTOM_MAP_DATA_TYPES.getValues()) {
-            moonlight$customData.put(d.id(), d.factory().get());
+            moonlight$customData.put(d, d.factory().get());
         }
     }
 

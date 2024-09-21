@@ -2,13 +2,12 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
-import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.world.entity.player.Player;
@@ -44,7 +43,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     private final ReentrantLock moonlight$concurrentLock = new ReentrantLock();
 
     @Unique
-    private final Map<CustomMapData.Type<?>, CustomMapData.DirtyCounter> moonlight$customDataDirty = new IdentityHashMap<>();
+    private final Map<CustomMapData.Type<?, ?>, CustomMapData.DirtyCounter> moonlight$customDataDirty = new IdentityHashMap<>();
     @Unique
     private boolean moonlight$customMarkersDirty = true;
 
@@ -61,6 +60,9 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     @Final
     public Player player;
 
+    @Shadow
+    private boolean dirtyData;
+
     @Inject(method = "nextUpdatePacket", at = @At("HEAD"), cancellable = true)
     public void checkLocked(MapId mapId, CallbackInfoReturnable<@Nullable Packet<?>> cir) {
         //we won't wait here. if its locked too bad we cant block the main thread
@@ -76,7 +78,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
         boolean updateDeco = false;
 
         // same logic as vanilla just for custom stuff
-        List<Map.Entry<CustomMapData.Type<?>, CustomMapData.DirtyCounter>> dirtyData = new ArrayList<>();
+        List<Map.Entry<CustomMapData.Type<?,?>, CustomMapData.DirtyCounter>> dirtyData = new ArrayList<>();
         for (var e : moonlight$customDataDirty.entrySet()) {
             CustomMapData.DirtyCounter value = e.getValue();
             if (value.isDirty()) {
@@ -100,7 +102,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
         }
         // only send if we have stuff to update or every 4 sec
         // this ensures removal happens (even if late), while keeping additions / modifications instant
-        if(!extra.isEmpty() || (moonlight$volatileDecorationRefreshTicks++ % (20 * 4)) == 0) updateDeco = true;
+        if (!extra.isEmpty() || (moonlight$volatileDecorationRefreshTicks++ % (20 * 4)) == 0) updateDeco = true;
         //}
 
         if (updateData || updateDeco) {
@@ -112,12 +114,14 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             IMapDataPacketExtension ep = ((IMapDataPacketExtension) packet);
 
             if (updateData) {
-                CompoundTag customDataTag = new CompoundTag();
+                List<CustomMapData.DirtyDataPatch<?, ?>> dirtyPatch = new ArrayList<>();
                 for (var e : dirtyData) {
-                    saveDataToUpdateTag(ed, customDataTag, e);
+                    dirtyPatch.add(ml$createDirtyDataPatch(ed, e.getKey(), e.getValue()));
                     e.getValue().clearDirty();
                 }
-                ep.moonlight$setCustomMapDataTag(Optional.of(customDataTag));
+                if (!dirtyData.isEmpty()) {
+                    ep.moonlight$setDirtyCustomData(Optional.of(dirtyPatch));
+                }
             }
             if (updateDeco) {
                 List<MLMapDecoration> decorations = new ArrayList<>(ed.ml$getCustomDecorations().values());
@@ -130,23 +134,23 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     }
 
     @Unique
-    private static <C extends CustomMapData.DirtyCounter, D extends CustomMapData<C>> void saveDataToUpdateTag(
-            ExpandedMapData ed, CompoundTag customDataTag,
-            Map.Entry<CustomMapData.Type<?>, CustomMapData.DirtyCounter> e) {
-        D d = (D) ed.ml$getCustomData().get(e.getKey().id());
-        //TODO: !!!!put this in a separate compound. cant cause of backwards compat
-        C value = (C) e.getValue();
-        d.saveToUpdateTag(customDataTag, value);
+    private static <P, C extends CustomMapData.DirtyCounter, D extends CustomMapData<C, P>>
+    CustomMapData.DirtyDataPatch<?, ?> ml$createDirtyDataPatch(ExpandedMapData ed, CustomMapData.Type<?, ?> type,
+                                                               CustomMapData.DirtyCounter dirtyCounter) {
+        D d = (D) ed.ml$getCustomData().get(type);
+        P patch = d.createUpdatePatch((C) dirtyCounter);
+        CustomMapData.Type<P, CustomMapData<?, P>> t = (CustomMapData.Type<P, CustomMapData<?, P>>) type;
+        return new CustomMapData.DirtyDataPatch<>(t, patch);
     }
 
     @Override
     public <H extends CustomMapData.DirtyCounter> void moonlight$setCustomDataDirty(
-            CustomMapData.Type<?> type, Consumer<H> dirtySetter) {
+            CustomMapData.Type<?,?> type, Consumer<H> dirtySetter) {
         try {
             moonlight$concurrentLock.lock();
             var t = this.moonlight$customDataDirty.get(type);
             dirtySetter.accept((H) t);
-        }finally {
+        } finally {
             moonlight$concurrentLock.unlock();
         }
     }

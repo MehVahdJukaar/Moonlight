@@ -1,13 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
+import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
-import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -28,12 +30,14 @@ public class MapDataRegistry {
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
      **/
-    public static <T extends CustomMapData<?>> CustomMapData.Type<T> registerCustomMapSavedData(CustomMapData.Type<T> type) {
+    public static <P, T extends CustomMapData<?, P>> CustomMapData.Type<P, T> registerCustomMapSavedData(CustomMapData.Type<P, T> type) {
         return MapDataInternal.registerCustomMapSavedData(type);
     }
 
-    public static <T extends CustomMapData<?>> CustomMapData.Type<T> registerCustomMapSavedData(ResourceLocation id, Supplier<T> factory) {
-        return registerCustomMapSavedData(new CustomMapData.Type<>(id, factory));
+    public static <P, T extends CustomMapData<?, P>> CustomMapData.Type<P, T> registerCustomMapSavedData(
+            ResourceLocation id, Supplier<T> factory,
+            StreamCodec<RegistryFriendlyByteBuf, P> patchCodec) {
+        return registerCustomMapSavedData(new CustomMapData.Type<>(id, factory, patchCodec));
     }
 
     public static MLMapDecorationType<?, ?> getDefaultType() {
@@ -47,8 +51,8 @@ public class MapDataRegistry {
     //we have instances of markers per map. these have a type which determines their type
     //each type is assigned to one and one only json file. essntally the type is what is parsed from json.
     //each type can intern have its own type.., the custom factory
-    public static void registerSpecialMapDecorationTypeFactory(ResourceLocation factoryId, Supplier<MLSpecialMapDecorationType<?,?>> decorationTypeFactory) {
-         MapDataInternal.registerCustomType(factoryId, decorationTypeFactory);
+    public static void registerSpecialMapDecorationTypeFactory(ResourceLocation factoryId, Supplier<MLSpecialMapDecorationType<?, ?>> decorationTypeFactory) {
+        MapDataInternal.registerCustomType(factoryId, decorationTypeFactory);
     }
 
     /**

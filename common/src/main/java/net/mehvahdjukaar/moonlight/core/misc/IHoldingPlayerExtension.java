@@ -9,5 +9,5 @@ public interface IHoldingPlayerExtension {
     void moonlight$setCustomMarkersDirty();
 
     <H extends CustomMapData.DirtyCounter> void moonlight$setCustomDataDirty(
-            CustomMapData.Type<?> type, Consumer<H> dirtySetter);
+            CustomMapData.Type<?,?> type, Consumer<H> dirtySetter);
 }
