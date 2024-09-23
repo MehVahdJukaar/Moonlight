@@ -294,13 +294,6 @@ public class RegHelper {
         return register(name, type, Registries.ENTITY_TYPE);
     }
 
-    public static RegSupplier<JukeboxSong> registerJukeboxSong(ResourceLocation name, Supplier<Holder<SoundEvent>> soundEvent,
-                                                               float lengthInSeconds, int comparatorOutput) {
-        return register(name, () -> new JukeboxSong(soundEvent.get(),
-                Component.translatable(Util.makeDescriptionId("jukebox_song", name)),
-                lengthInSeconds, comparatorOutput), Registries.JUKEBOX_SONG);
-    }
-
     public static void registerCompostable(ItemLike itemLike, float chance) {
         ComposterBlock.COMPOSTABLES.put(itemLike.asItem(), chance);
     }

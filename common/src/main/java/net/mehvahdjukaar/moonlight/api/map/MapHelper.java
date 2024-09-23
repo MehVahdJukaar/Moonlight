@@ -3,13 +3,18 @@ package net.mehvahdjukaar.moonlight.api.map;
 import net.mehvahdjukaar.moonlight.api.integration.MapAtlasCompat;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.decoration.SimpleMapMarker;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.component.MapItemColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
@@ -18,8 +23,6 @@ import java.util.Optional;
 
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.MAP_ATLASES;
 
-//TODO: change
-@Deprecated(forRemoval = true)
 public class MapHelper {
 
     @Nullable
@@ -39,18 +42,15 @@ public class MapHelper {
      * @param type     vanilla decorationType
      * @param mapColor map item tint color
      */
-    public static void addVanillaDecorations(ItemStack stack, BlockPos pos, net.minecraft.world.level.saveddata.maps.MapDecorationType type, int mapColor) {
-        //MapItemSavedData.addTargetDecoration(stack, pos, "+", type);
+    public static void addVanillaTargetDecoration(ItemStack stack, BlockPos pos, Holder<net.minecraft.world.level.saveddata.maps.MapDecorationType> type, int mapColor) {
+        MapItemSavedData.addTargetDecoration(stack, pos, "+", type);
         if (mapColor != 0) {
-           // CompoundTag com = stack.getOrCreateTagElement("display");
-           // com.putInt("MapColor", mapColor);
+            stack.set(DataComponents.MAP_COLOR, new MapItemColor(mapColor));
         }
     }
 
-    //TODO: rename
-
     /**
-     * Adds a static decoration tp a map itemstack NBT.<br>
+     * Adds a static decoration to a map itemstack NBT.<br>
      * Such decoration will not have any world marker associated and wont be toggleable
      *
      * @param stack    map item stack
@@ -59,7 +59,8 @@ public class MapHelper {
      * @param mapColor map item tint color
      */
     public static void addDecorationToMap(ItemStack stack, BlockPos pos, MLMapDecorationType<?, ?> type, int mapColor) {
-/*
+
+        stack.get(DataComponents.MAP_DECORATIONS)
         ListTag tags;
         if (stack.hasTag() && stack.getTag().contains("CustomDecorations", 9)) {
             tags = stack.getTag().getList("CustomDecorations", 10);
@@ -75,7 +76,7 @@ public class MapHelper {
         if (mapColor != 0) {
             CompoundTag com = stack.getOrCreateTagElement("display");
             com.putInt("MapColor", mapColor);
-        }*/
+        }
     }
 
     /**

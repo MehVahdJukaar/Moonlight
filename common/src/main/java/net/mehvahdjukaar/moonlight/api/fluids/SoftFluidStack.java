@@ -16,6 +16,7 @@ import net.minecraft.core.component.*;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.FluidTags;
@@ -119,6 +120,14 @@ public class SoftFluidStack implements DataComponentHolder {
             cachedEmptyInstance = of(SoftFluidRegistry.getEmpty(), 0);
         }
         return cachedEmptyInstance;
+    }
+
+    public Component getDisplayName() {
+        if (BuiltInSoftFluids.POTION.is(this.fluidHolder)) {
+            PotionBottleType bottle = PotionBottleType.getOrDefault(this);
+            return bottle.getTranslatedName();
+        }
+        return this.fluid().getTranslatedName();
     }
 
 

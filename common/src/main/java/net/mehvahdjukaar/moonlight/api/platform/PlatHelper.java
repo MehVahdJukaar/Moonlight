@@ -6,6 +6,7 @@ import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -51,6 +52,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -67,6 +69,15 @@ public class PlatHelper {
 
     @ExpectPlatform
     public static void addCommonSetupAsync(Runnable commonSetup) {
+        throw new AssertionError();
+    }
+
+    /**
+     * A setup step that runs similar to resource reloads. RegistryAccess and tags are available here as this runs on world load
+     * Boolean given is if this is run on the client logical side
+     */
+    @ExpectPlatform
+    public static void addReloadableCommonSetup(BiConsumer<RegistryAccess, Boolean> setup) {
         throw new AssertionError();
     }
 

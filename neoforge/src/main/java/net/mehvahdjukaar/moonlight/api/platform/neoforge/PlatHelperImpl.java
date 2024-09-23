@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -60,6 +61,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.Nullable;
@@ -69,6 +71,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -183,7 +186,6 @@ public class PlatHelperImpl {
     }
 
 
-
     public static boolean isModLoadingValid() {
         return !ModLoader.hasErrors();
     }
@@ -223,6 +225,14 @@ public class PlatHelperImpl {
         MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
+    public static void addReloadableCommonSetup(BiConsumer<RegistryAccess, Boolean> listener) {
+        Moonlight.assertInitPhase();
+        Consumer<TagsUpdatedEvent> eventConsumer = event -> {
+            listener.accept(event.getRegistryAccess(),
+                    event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.CLIENT_PACKET_RECEIVED);
+        };
+        NeoForge.EVENT_BUS.addListener(eventConsumer);
+    }
 
     //maybe move these
 
@@ -250,7 +260,7 @@ public class PlatHelperImpl {
     }
 
     public static String getModVersion(String modId) {
-        return ModList.get().getModContainerById(modId).map(v->v.getModInfo().getVersion().toString()).orElse(null);
+        return ModList.get().getModContainerById(modId).map(v -> v.getModInfo().getVersion().toString()).orElse(null);
     }
 
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
@@ -258,7 +268,7 @@ public class PlatHelperImpl {
     }
 
     public static <A> void setComponent(DataComponentHolder to, DataComponentType<A> type, A componentValue) {
-        if(to instanceof MutableDataComponentHolder mc){
+        if (to instanceof MutableDataComponentHolder mc) {
             mc.set(type, componentValue);
         }
     }

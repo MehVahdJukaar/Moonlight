@@ -18,7 +18,7 @@ public interface RegSupplier<T> extends Supplier<T> {
 
     ResourceLocation getId();
 
-    ResourceKey<T> getKey();
+    ResourceKey<? super T> getKey();
 
     Holder<T> getHolder();
 

@@ -51,7 +51,7 @@ public class RegistryQueue<T> {
 
 
     static class EntryWrapper<T extends R, R> implements RegSupplier<T> {
-        private final ResourceLocation id;
+        private final ResourceKey<R> id;
         private ResourceKey<? extends Registry<R>> registryKey;
         private Supplier<T> regSupplier;
         private T entry;
@@ -60,7 +60,7 @@ public class RegistryQueue<T> {
 
         public EntryWrapper(ResourceLocation id, Supplier<T> factory, ResourceKey<? extends Registry<R>> registry) {
             this.regSupplier = factory;
-            this.id = id;
+            this.id = ResourceKey.create(registry, id);
             this.registryKey = registry;
         }
 
@@ -72,12 +72,12 @@ public class RegistryQueue<T> {
 
         @Override
         public ResourceLocation getId() {
-            return id;
+            return id.location();
         }
 
         @Override
-        public ResourceKey<T> getKey() {
-            return holder.unwrapKey().get();
+        public ResourceKey<R> getKey() {
+            return id;
         }
 
         @Override
@@ -86,8 +86,9 @@ public class RegistryQueue<T> {
         }
 
         void initialize() {
-            this.holder = ((WritableRegistry) BuiltInRegistries.REGISTRY.get(registryKey.location()))
-                    .register(ResourceKey.create(registryKey, id), regSupplier.get(), RegistrationInfo.BUILT_IN);
+            WritableRegistry writableRegistry = (WritableRegistry) BuiltInRegistries.REGISTRY.get(registryKey.location());
+            if(writableRegistry == null) throw new IllegalStateException("Registry not found: " + registryKey.location());
+            this.holder = writableRegistry.register(id, regSupplier.get(), RegistrationInfo.BUILT_IN);
             this.entry = this.holder.value();
             regSupplier = null;
             registryKey = null;

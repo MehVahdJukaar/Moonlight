@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
+import io.netty.buffer.ByteBuf;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
@@ -36,7 +37,7 @@ public class MapDataRegistry {
 
     public static <P, T extends CustomMapData<?, P>> CustomMapData.Type<P, T> registerCustomMapSavedData(
             ResourceLocation id, Supplier<T> factory,
-            StreamCodec<RegistryFriendlyByteBuf, P> patchCodec) {
+            StreamCodec<? super RegistryFriendlyByteBuf, P> patchCodec) {
         return registerCustomMapSavedData(new CustomMapData.Type<>(id, factory, patchCodec));
     }
 

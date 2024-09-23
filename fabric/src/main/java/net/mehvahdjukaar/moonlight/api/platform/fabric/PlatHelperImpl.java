@@ -5,6 +5,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -13,24 +14,21 @@ import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
-import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundSpawnCustomEntityMessage;
-import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenCustomMenuMessage;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -43,7 +41,6 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.*;
@@ -68,6 +65,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -278,6 +276,10 @@ public class PlatHelperImpl {
     }
 
     public static <A> void setComponent(DataComponentHolder to, DataComponentType<A> type, A componentValue) {
+    }
+
+    public static void addReloadableCommonSetup(BiConsumer<RegistryAccess, Boolean> setup) {
+        CommonLifecycleEvents.TAGS_LOADED.register(setup::accept);
     }
 
 

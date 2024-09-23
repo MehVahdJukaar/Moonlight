@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
 import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -24,7 +25,7 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
 
 
     record Type<P, T extends CustomMapData<?, P>>(ResourceLocation id, Supplier<T> factory,
-                                                  StreamCodec<RegistryFriendlyByteBuf, P> patchCodec) {
+                                                  StreamCodec<? super RegistryFriendlyByteBuf, P> patchCodec) {
 
         public static final Codec<Type<?, ?>> CODEC = MapDataInternal.CUSTOM_MAP_DATA_TYPES;
         public static final StreamCodec<FriendlyByteBuf, Type<?, ?>> STREAM_CODEC = MapDataInternal.CUSTOM_MAP_DATA_TYPES.getStreamCodec();
@@ -67,23 +68,6 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
         ((ExpandedMapData) data).ml$setCustomDataDirty(type, dirtySetter);
     }
 
-    class SimpleDirtyCounter implements DirtyCounter {
-        private boolean dirty = true;
-
-        public void markDirty() {
-            this.dirty = true;
-        }
-
-        public boolean isDirty() {
-            return dirty;
-        }
-
-        @Override
-        public void clearDirty() {
-            dirty = false;
-        }
-    }
-
     interface DirtyCounter {
 
         boolean isDirty();
@@ -120,6 +104,50 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
         public void apply(Map<Type<?, ?>, CustomMapData<?, ?>> customData) {
             CustomMapData<?, P> data = (CustomMapData<?, P>) customData.get(this.type);
             data.applyUpdatePatch(this.patch);
+        }
+    }
+
+    // simple implementation for simple data
+
+    class SimpleDirtyCounter implements DirtyCounter {
+        private boolean dirty = true;
+
+        public void markDirty() {
+            this.dirty = true;
+        }
+
+        public boolean isDirty() {
+            return dirty;
+        }
+
+        @Override
+        public void clearDirty() {
+            dirty = false;
+        }
+    }
+
+    abstract class Simple<O> implements CustomMapData<SimpleDirtyCounter, O>{
+
+        protected O value;
+
+        @Override
+        public Type<O, ?> getType() {
+            return null;
+        }
+
+        @Override
+        public SimpleDirtyCounter createDirtyCounter() {
+            return new SimpleDirtyCounter();
+        }
+
+        @Override
+        public O createUpdatePatch(SimpleDirtyCounter dirtyCounter) {
+            return value;
+        }
+
+        @Override
+        public void applyUpdatePatch(O patch) {
+            this.value = patch;
         }
     }
 
