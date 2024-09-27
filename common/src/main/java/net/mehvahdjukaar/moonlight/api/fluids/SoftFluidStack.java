@@ -40,9 +40,6 @@ public class SoftFluidStack {
             CompoundTag.CODEC.optionalFieldOf("tag", null).forGetter(SoftFluidStack::getTag)
     ).apply(i, SoftFluidStack::of));
 
-    // this is not a singleton. Many empty instances might exist. We keep this just as a minor optimization
-    private static SoftFluidStack cachedEmptyInstance = null;
-
     // dont access directly
     private final Holder<SoftFluid> fluidHolder;
     private final SoftFluid fluid; //reference to avoid calling value all the times. these 2 should always match
@@ -104,15 +101,7 @@ public class SoftFluidStack {
     }
 
     public static SoftFluidStack empty() {
-        if (cachedEmptyInstance == null) {
-            cachedEmptyInstance = of(SoftFluidRegistry.getEmpty(), 0, null);
-        }
-        return cachedEmptyInstance;
-    }
-
-    @ApiStatus.Internal
-    public static void invalidateEmptyInstance() {
-        cachedEmptyInstance = null;
+        return of(SoftFluidRegistry.getEmpty(), 0, null);
     }
 
     public CompoundTag save(CompoundTag compoundTag) {
@@ -186,7 +175,7 @@ public class SoftFluidStack {
     }
 
     public void setCount(int count) {
-        if (this == cachedEmptyInstance) {
+        if (this.fluid.isEmptyFluid()) {
             if (PlatHelper.isDev()) throw new AssertionError();
             return;
         }
@@ -212,7 +201,7 @@ public class SoftFluidStack {
     }
 
     public void setTag(@Nullable CompoundTag tag) {
-        if (this == cachedEmptyInstance) {
+        if (this.fluid.isEmptyFluid()) {
             if (PlatHelper.isDev()) throw new AssertionError();
             return;
         }

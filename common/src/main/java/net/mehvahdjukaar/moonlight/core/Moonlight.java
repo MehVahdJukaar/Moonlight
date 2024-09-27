@@ -93,7 +93,7 @@ public class Moonlight {
     private static void commonSetup() {
         BlocksColorInternal.setup();
 
-        if(PlatHelper.isDev()){
+        if (PlatHelper.isDev()) {
             //MixinEnvironment.getCurrentEnvironment().audit();
         }
     }
@@ -117,17 +117,16 @@ public class Moonlight {
     }
 
     @EventCalled
-    public static void afterDataReload(RegistryAccess registryAccess) {
+    public static void afterDataReload(RegistryAccess registryAccess, boolean client) {
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
         DynamicResourcePack.clearAfterReload(PackType.SERVER_DATA);
-        DynamicHolder.onDataReload();
+        DynamicHolder.clearCache();
         DispenserHelper.reload(registryAccess);
     }
 
     @EventCalled
     public static void beforeServerStart() {
         SoftFluidInternal.doPostInitServer();
-        SoftFluidStack.invalidateEmptyInstance();
     }
 
     public static void assertInitPhase() {

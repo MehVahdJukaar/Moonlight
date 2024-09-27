@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.fabric;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -40,15 +41,13 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
             currentServer = s;
             Moonlight.beforeServerStart();
         });
+        CommonLifecycleEvents.TAGS_LOADED.register(Moonlight::afterDataReload);
         ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
             currentServer = null;
             FakeLevel.clearInstance();
         });
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(SoftFluidInternal::onDataSyncToPlayer);
         ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
-        ServerWorldEvents.LOAD.register((s, l) -> {
-            if (!l.getLevel().isClientSide) Moonlight.checkDataPackRegistry();
-        });
 
         ResourceConditionsBridge.init();
     }

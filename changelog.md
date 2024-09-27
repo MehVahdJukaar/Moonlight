@@ -1,2 +1,1 @@
-- bumped major version due to recent bit API hanges
-- fixed an issue with codec configs not having their default values set properly sometimes
+- fixed some minor inconsistencies related to fluids and server reload

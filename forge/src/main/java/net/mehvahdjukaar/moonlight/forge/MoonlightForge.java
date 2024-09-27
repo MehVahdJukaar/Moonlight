@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.forge;
 
+import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -67,7 +68,7 @@ public class MoonlightForge {
     //hacky but eh
     @SubscribeEvent
     public static void onTagUpdated(TagsUpdatedEvent event) {
-        Moonlight.afterDataReload(event.getRegistryAccess());
+        Moonlight.afterDataReload(event.getRegistryAccess(), event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.CLIENT_PACKET_RECEIVED);
     }
 
     @Nullable
@@ -110,7 +111,7 @@ public class MoonlightForge {
                         new ClientBoundSendLoginPacket());
             } catch (Exception ignored) {
             }
-        } else Moonlight.checkDataPackRegistry();
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -132,8 +133,8 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
-    public static void onLevelLoaded(LevelEvent.Load event) {
-        if (!event.getLevel().isClientSide()) Moonlight.checkDataPackRegistry();
+    public static void onLevelLoaded(LevelEvent.Unload event) {
+        DynamicHolder.clearCache();
     }
 
 }
