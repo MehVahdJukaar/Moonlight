@@ -30,10 +30,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity implements WorldlyContainer, IOwnerProtected {
+public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity implements WorldlyContainer {
 
-    @Nullable
-    private UUID owner = null;
     private NonNullList<ItemStack> stacks;
 
     protected ItemDisplayTile(BlockEntityType type, BlockPos pos, BlockState state) {
@@ -44,17 +42,6 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         super(type, pos, state);
         this.stacks = NonNullList.withSize(slots, ItemStack.EMPTY);
 
-    }
-
-    @Override
-    public void setOwner(@Nullable UUID owner) {
-        this.owner = owner;
-    }
-
-    @Override
-    @Nullable
-    public UUID getOwner() {
-        return owner;
     }
 
     //should only be server side. called when inventory has changed
@@ -105,9 +92,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     public ItemInteractionResult interactWithPlayerItem(Player player, InteractionHand handIn, ItemStack handItem, int slot) {
-        if (!this.isAccessibleBy(player)) {
-            player.displayClientMessage(Component.translatable("container.isLocked", ""), true);
-        } else if (handIn == InteractionHand.MAIN_HAND) {
+         if (handIn == InteractionHand.MAIN_HAND) {
             //remove
             if (handItem.isEmpty()) {
                 ItemStack it = this.removeItemNoUpdate(slot);
@@ -173,7 +158,6 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                 //this doesn't work on first load cause world is null on server. You need to save stuff on nbt
             else this.updateTileOnInventoryChanged();
         }
-        this.loadOwner(tag);
     }
 
     @Override
@@ -182,7 +166,6 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         if (!this.trySaveLootTable(compound)) {
             ContainerHelper.saveAllItems(compound, this.stacks, registries);
         }
-        this.saveOwner(compound);
     }
 
     @Override

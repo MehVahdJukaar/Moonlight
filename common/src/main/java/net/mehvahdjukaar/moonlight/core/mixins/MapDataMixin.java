@@ -235,16 +235,10 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         //for exploration maps. Decoration assigned to an item instead of a map directly
         MLMapDecorationsComponent customDecoComponent = stack.get(MoonlightRegistry.CUSTOM_MAP_DECORATIONS.get());
         if (customDecoComponent != null) {
-
-            if (!this.moonlight$customMapMarkers.keySet().containsAll(customDecoComponent.decorations().keySet())) {
-                customDecoComponent.decorations().forEach((string, entry) -> {
-                    if (!this.decorations.containsKey(string)) {
-                        this.ml$addCustomMarker(entry);
-                    }
-                });
-            }
+            customDecoComponent.addIfAbsent(this.moonlight$customMapMarkers.keySet(), this);
         }
     }
+
 
     @Inject(method = "load", at = @At("RETURN"))
     private static void load(CompoundTag compound, HolderLookup.Provider

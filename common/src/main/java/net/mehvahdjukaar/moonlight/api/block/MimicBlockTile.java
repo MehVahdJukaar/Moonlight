@@ -38,14 +38,17 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
 
     @Override
     public boolean setHeldBlock(BlockState state, int index) {
-        this.mimic = state;
-        return true;
+        if (index == 0) {
+            this.mimic = state;
+            return true;
+        }
+        return false;
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        this.mimic = Utils.readBlockState(tag.getCompound("Mimic"), level);
+        setHeldBlock(Utils.readBlockState(tag.getCompound("Mimic"), level), 0);
     }
 
     @Override
