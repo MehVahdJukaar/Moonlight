@@ -140,7 +140,7 @@ public class Moonlight {
         }
     }
 
-    public static void checkDatapackRegistry() {
+    private static void checkDatapackRegistry() {
         try {
             SoftFluidRegistry.getEmpty().value();
             MapDataRegistry.getDefaultType();

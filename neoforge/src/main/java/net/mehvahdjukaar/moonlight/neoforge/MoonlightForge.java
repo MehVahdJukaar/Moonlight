@@ -142,7 +142,7 @@ public class MoonlightForge {
                 NetworkHelper.sendToClientPlayer(player, new ClientBoundSendLoginPacket());
             } catch (Exception ignored) {
             }
-        } else Moonlight.checkDatapackRegistry();
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -160,11 +160,6 @@ public class MoonlightForge {
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
         Moonlight.onPlayerCloned(event.getOriginal(), event.getEntity(), event.isWasDeath());
-    }
-
-    @SubscribeEvent
-    public static void onLevelLoaded(LevelEvent.Load event) {
-        if (!event.getLevel().isClientSide()) Moonlight.checkDatapackRegistry();
     }
 
     private static WeakReference<IEventBus> currentBus = null;

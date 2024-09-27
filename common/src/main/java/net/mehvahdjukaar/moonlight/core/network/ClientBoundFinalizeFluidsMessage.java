@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
+import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
@@ -26,6 +27,8 @@ public class ClientBoundFinalizeFluidsMessage implements Message {
     @Override
     public void handle(Context context) {
         SoftFluidInternal.postInitClient();
+        //just incase
+        DynamicHolder.clearCache();
     }
 
     @Override
