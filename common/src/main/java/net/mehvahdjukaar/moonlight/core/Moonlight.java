@@ -10,7 +10,6 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.integration.CompatWoodTypes;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
-import net.mehvahdjukaar.moonlight.api.misc.DataObjectReference;
 import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
@@ -37,7 +36,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.GameRules;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,8 +46,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 @ApiStatus.Internal
 public class Moonlight {
@@ -83,6 +79,7 @@ public class Moonlight {
         RegHelper.addDynamicDispenserBehaviorRegistration(Moonlight::registerBuiltinFluidBehavior);
 
         PlatHelper.addCommonSetup(Moonlight::commonSetup);
+        PlatHelper.addReloadableCommonSetup(Moonlight::afterDataReload);
 
         PlatHelper.addServerReloadListener(new ItemListingManager(), Moonlight.res("villager_trade"));
 
@@ -95,6 +92,8 @@ public class Moonlight {
             MoonlightClient.initClient();
         }
     }
+
+
 
     private static void commonSetup() {
         BlocksColorInternal.setup();
@@ -123,10 +122,10 @@ public class Moonlight {
     }
 
     @EventCalled
-    public static void afterDataReload(RegistryAccess registryAccess) {
+    private static void afterDataReload(RegistryAccess registryAccess, Boolean client) {
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
         DynamicResourcePack.clearAfterReload(PackType.SERVER_DATA);
-        DynamicHolder.onDataReload();
+        DynamicHolder.clearCache();
     }
 
     @EventCalled

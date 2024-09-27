@@ -103,12 +103,6 @@ public class MoonlightForge {
     }
 
 
-    //hacky but eh
-    @SubscribeEvent
-    public static void onTagUpdated(TagsUpdatedEvent event) {
-        Moonlight.afterDataReload(event.getRegistryAccess());
-    }
-
     @Nullable
     private static WeakReference<ICondition.IContext> context = null;
 

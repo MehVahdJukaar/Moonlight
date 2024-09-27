@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class DynamicHolder<T> implements Supplier<T>, Holder<T> {
 
     @ApiStatus.Internal
-    public static void onDataReload() {
+    public static void clearCache() {
         REFERENCES.forEach(DynamicHolder::invalidateInstance);
     }
 
