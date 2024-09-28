@@ -55,7 +55,8 @@ public class SoftFluidStack {
         this.fluidHolder = fluid;
         this.fluid = this.fluidHolder.value();
         this.tag = tag;
-        this.setCount(count);
+        this.count = count;
+        this.updateEmpty();
 
         //even more hardcoded shit
         if (fluid.is(BuiltInSoftFluids.POTION.getID())) {
