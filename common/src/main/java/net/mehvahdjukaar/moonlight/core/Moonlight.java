@@ -131,7 +131,6 @@ public class Moonlight {
     @EventCalled
     public static void beforeServerStart() {
         SoftFluidInternal.doPostInitServer();
-        SoftFluidStack.invalidateEmptyInstance();
     }
 
     public static void assertInitPhase() {

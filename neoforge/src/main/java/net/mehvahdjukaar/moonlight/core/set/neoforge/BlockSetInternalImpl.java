@@ -64,26 +64,16 @@ public class BlockSetInternalImpl {
     public static <T extends BlockType, E> void addEvent(Registry<E> reg,
                                                          BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction,
                                                          Class<T> blockType) {
-
-        Consumer<RegisterEvent> eventConsumer;
-
         List<Runnable> registrationQueues = getOrAddQueue();
 
         //if block makes a function that just adds the bus and runnable to the queue whenever reg block is fired
-        eventConsumer = e -> {
-            if (e.getRegistryKey().equals(BuiltInRegistries.BLOCK.key())) {
-                //actual runnable which will registers the blocks
-                Runnable lateRegistration = () -> {
-                    registrationFunction.accept((r, o) -> Registry.register(BuiltInRegistries.BLOCK, r, (Block) o),
-                            BlockSetAPI.getBlockSet(blockType).getValues());
-                };
-                //when this reg block event fires we only add a runnable to the queue
-                registrationQueues.add(lateRegistration);
-            }
+        //actual runnable which will registers the blocks
+        Runnable lateRegistration = () -> {
+            registrationFunction.accept((r, o) -> Registry.register(BuiltInRegistries.BLOCK, r, (Block) o),
+                    BlockSetAPI.getBlockSet(blockType).getValues());
         };
-        //registering block event to the bus
-        IEventBus bus = MoonlightForge.getCurrentBus();
-        bus.addListener(EventPriority.HIGHEST, eventConsumer);
+        //when this reg block event fires we only add a runnable to the queue
+        registrationQueues.add(lateRegistration);
     }
 
     @NotNull
@@ -92,16 +82,26 @@ public class BlockSetInternalImpl {
         IEventBus bus = MoonlightForge.getCurrentBus();
         //get the queue corresponding to this certain mod
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
-        return LATE_REGISTRATION_QUEUE.computeIfAbsent(modId, s -> {
+
+        List<Runnable> list;
+        if (!LATE_REGISTRATION_QUEUE.containsKey(modId)) {
+            list = new ArrayList<>();
             //if absent we register its registration callback
-            bus.addListener(EventPriority.HIGHEST, BlockSetInternalImpl::registerLateBlockAndItems);
-            return new ArrayList<>();
-        });
+            Consumer<RegisterEvent> eventConsumer = r -> {
+                BlockSetInternalImpl.registerLateBlockAndItems(r, list);
+            };
+            bus.addListener(EventPriority.HIGHEST, eventConsumer);
+            LATE_REGISTRATION_QUEUE.put(modId, list);
+        } else {
+            list = LATE_REGISTRATION_QUEUE.get(modId);
+        }
+        return list;
     }
 
 
     //shittiest code ever lol
-    protected static void registerLateBlockAndItems(RegisterEvent event) {
+    protected static void registerLateBlockAndItems(RegisterEvent event,
+                                                    List<Runnable> toRun) {
         //fires right after blocks
         if (event.getRegistryKey().equals(BuiltInRegistries.ATTRIBUTE.key())) {
             if (!hasFilledBlockSets) {
@@ -120,17 +120,13 @@ public class BlockSetInternalImpl {
                 BlockSetInternal.initializeBlockSets();
                 hasFilledBlockSets = true;
             }
-
             //get the queue corresponding to this certain mod
-            String modId = ModLoadingContext.get().getActiveContainer().getModId();
-            var registrationQueues = LATE_REGISTRATION_QUEUE.get(modId);
 
-            if (registrationQueues != null) {
-                //register blocks
-                registrationQueues.forEach(Runnable::run);
-            }
+            //register blocks
+            toRun.forEach(Runnable::run);
+
+            toRun.clear();
             //clears stuff that's been executed. not really needed but just to be safe its here
-            LATE_REGISTRATION_QUEUE.remove(modId);
         }
     }
 

@@ -31,7 +31,6 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,9 +53,6 @@ public class SoftFluidStack implements DataComponentHolder {
             SoftFluidStack::of
     );
 
-    // this is not a singleton. Many empty instances might exist (due to world reload). We keep this just as a minor optimization
-    private static SoftFluidStack cachedEmptyInstance = null;
-
     // dont access directly
     private final Holder<SoftFluid> fluidHolder;
     private final SoftFluid fluid; //reference to avoid calling value all the times. these 2 should always match
@@ -68,7 +64,8 @@ public class SoftFluidStack implements DataComponentHolder {
         this.fluidHolder = fluid;
         this.fluid = this.fluidHolder.value();
         this.components = PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, components);
-        this.setCount(count);
+        this.count = count;
+        this.updateEmpty();
     }
 
     @ExpectPlatform
@@ -116,10 +113,7 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     public static SoftFluidStack empty() {
-        if (cachedEmptyInstance == null) {
-            cachedEmptyInstance = of(SoftFluidRegistry.getEmpty(), 0);
-        }
-        return cachedEmptyInstance;
+        return of(SoftFluidRegistry.getEmpty(), 0);
     }
 
     public Component getDisplayName() {
@@ -130,11 +124,6 @@ public class SoftFluidStack implements DataComponentHolder {
         return this.fluid().getTranslatedName();
     }
 
-
-    @ApiStatus.Internal
-    public static void invalidateEmptyInstance() {
-        cachedEmptyInstance = null;
-    }
 
     public Tag save(HolderLookup.Provider lookupProvider) {
         return CODEC.encodeStart(lookupProvider.createSerializationContext(NbtOps.INSTANCE), this).getOrThrow();
@@ -182,7 +171,7 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     public void setCount(int count) {
-        if (this == cachedEmptyInstance) {
+        if (this.fluid.isEmptyFluid()) {
             if (PlatHelper.isDev()) throw new AssertionError();
             return;
         }
