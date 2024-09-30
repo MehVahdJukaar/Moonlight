@@ -168,7 +168,7 @@ public class SoftFluidStack {
     }
 
     protected void updateEmpty() {
-        isEmptyCache = fluid.isEmptyFluid() || count <= 0;
+        isEmptyCache = count <= 0 ||fluid.isEmptyFluid() ;
     }
 
     public int getCount() {
@@ -181,7 +181,7 @@ public class SoftFluidStack {
             return;
         }
         this.count = count;
-        updateEmpty();
+        this.updateEmpty();
     }
 
     public void grow(int amount) {
