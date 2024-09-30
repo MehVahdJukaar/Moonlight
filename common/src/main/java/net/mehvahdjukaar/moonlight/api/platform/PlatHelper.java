@@ -38,7 +38,9 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -271,6 +273,16 @@ public class PlatHelper {
 
     @ExpectPlatform
     public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void onCaughtFire(Level level, BlockPos pos, int chance, int age) {
         throw new AssertionError();
     }
 

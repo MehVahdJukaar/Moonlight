@@ -18,8 +18,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
-import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenCustomMenuMessage;
+import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -46,7 +46,9 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -124,6 +126,13 @@ public class PlatHelperImpl {
 
     public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnChance();
+    }
+
+    public static boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        return getFlammability(state, level, pos, direction) > 0;
+    }
+
+    public static void onCaughtFire(Level level, BlockPos pos, int chance, int age) {
     }
 
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
@@ -258,7 +267,7 @@ public class PlatHelperImpl {
     }
 
     public static Player getFakeServerPlayer(GameProfile id, ServerLevel level) {
-       return FakePlayer.get(level, id);
+        return FakePlayer.get(level, id);
     }
 
     public static boolean isInitializing() {
@@ -266,7 +275,7 @@ public class PlatHelperImpl {
     }
 
     public static String getModVersion(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId).map(v->v.getMetadata().getVersion().getFriendlyString())
+        return FabricLoader.getInstance().getModContainer(modId).map(v -> v.getMetadata().getVersion().getFriendlyString())
                 .orElse(null);
     }
 

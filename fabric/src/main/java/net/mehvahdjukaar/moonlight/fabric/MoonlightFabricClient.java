@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;

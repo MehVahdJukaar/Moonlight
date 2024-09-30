@@ -25,10 +25,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -134,6 +131,15 @@ public class PlatHelperImpl {
 
     public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         return state.getFlammability(level, pos, direction);
+    }
+
+
+    public static boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+      return   state.isFlammable(level, pos, direction);
+    }
+
+    public static void onCaughtFire(BlockState state, Level level, BlockPos pos, Direction direction, @Nullable LivingEntity igniter) {
+        state.onCaughtFire(level, pos, direction, igniter);
     }
 
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
