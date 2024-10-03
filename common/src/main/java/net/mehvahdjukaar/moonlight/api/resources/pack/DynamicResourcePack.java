@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -314,6 +315,8 @@ public abstract class DynamicResourcePack implements PackResources {
     // Called after texture have been stitched. Only keeps needed stuff
     @ApiStatus.Internal
     protected void clearNonStatic() {
+        if (!this.needsClearingNonStatic) return;
+        Stopwatch watch = Stopwatch.createStarted();
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
         boolean hasLessStatic = staticResources.size() < (resources.size() - staticResources.size());
         for (var r : this.resources.keySet()) {
@@ -346,6 +349,8 @@ public abstract class DynamicResourcePack implements PackResources {
                 this.searchTrie.insert(s);
             }
         }
+        Moonlight.LOGGER.info("Cleared non-static resources for pack {} in: {} ms", this.resourcePackName,
+                watch.elapsed().toMillis());
     }
 
     // Called after each reload
@@ -355,7 +360,10 @@ public abstract class DynamicResourcePack implements PackResources {
             this.resources.clear();
             this.searchTrie.clear();
         }
+        this.needsClearingNonStatic = true;
     }
+
+    private boolean needsClearingNonStatic = false;
 
     private static final boolean MODERN_FIX = CompatHandler.MODERNFIX && ModernFixCompat.areLazyResourcesOn();
 
