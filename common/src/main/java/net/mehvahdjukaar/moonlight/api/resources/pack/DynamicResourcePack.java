@@ -303,6 +303,7 @@ public abstract class DynamicResourcePack implements PackResources {
     // Called after texture have been stitched. Only keeps needed stuff
     @ApiStatus.Internal
     protected void clearNonStatic() {
+        if (!this.needsClearingNonStatic) return;
         Stopwatch watch = Stopwatch.createStarted();
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
         boolean hasLessStatic = false;// staticResources.size() < (resources.size() - staticResources.size());
@@ -348,7 +349,10 @@ public abstract class DynamicResourcePack implements PackResources {
             this.resources.clear();
             this.searchTrie.clear();
         }
+        this.needsClearingNonStatic = true;
     }
+
+    private boolean needsClearingNonStatic = false;
 
     private static final boolean MODERN_FIX = CompatHandler.MODERNFIX && ModernFixCompat.areLazyResourcesOn();
 
