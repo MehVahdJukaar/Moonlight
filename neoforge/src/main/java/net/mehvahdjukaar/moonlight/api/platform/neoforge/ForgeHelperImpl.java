@@ -51,7 +51,7 @@ import java.util.function.Consumer;
 
 public class ForgeHelperImpl {
 
-    public static boolean onProjectileImpact(Projectile projectile, HitResult blockHitResult) {
+    public static boolean fireOnProjectileImpact(Projectile projectile, HitResult blockHitResult) {
         return EventHooks.onProjectileImpact(projectile, blockHitResult);
     }
 
@@ -102,15 +102,15 @@ public class ForgeHelperImpl {
         return CommonHooks.canEntityDestroy(level, blockPos, animal);
     }
 
-    public static boolean onExplosionStart(Level level, Explosion explosion) {
+    public static boolean fireOnExplosionStart(Level level, Explosion explosion) {
         return EventHooks.onExplosionStart(level, explosion);
     }
 
-    public static void onExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
+    public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
         EventHooks.onExplosionDetonate(level, explosion, entities, diameter);
     }
 
-    public static void onLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {
+    public static void fireOnLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {
         EventHooks.onLivingConvert(newHorse, newHorse);
     }
 
@@ -122,7 +122,7 @@ public class ForgeHelperImpl {
         return state.getExplosionResistance(level, pos, explosion);
     }
 
-    public static void onBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
+    public static void fireOnBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         blockstate.onBlockExploded(level, blockpos, explosion);
     }
 
@@ -163,20 +163,20 @@ public class ForgeHelperImpl {
     }
 
 
-    public static boolean onCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
+    public static boolean fireOnCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
         return CommonHooks.canCropGrow(level, pos, state, b);
     }
 
-    public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
+    public static void fireOnCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
         CommonHooks.fireCropGrowPost(level, pos, state);
     }
 
-    public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
+    public static void fireOnEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
         NeoForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(entity, slot, from, to));
     }
 
     @Nullable
-    public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
+    public static InteractionResult fireOnRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
         var ev = CommonHooks.onRightClickBlock(player, hand, below, rayTraceResult);
         if (ev.isCanceled()) return ev.getCancellationResult();
         return null;

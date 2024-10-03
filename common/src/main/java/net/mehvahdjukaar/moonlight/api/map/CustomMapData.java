@@ -33,7 +33,7 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
         @SuppressWarnings("unchecked")
         @NotNull
         public T get(MapItemSavedData mapData) {
-            return (T) ((ExpandedMapData) mapData).ml$getCustomData().get(this.id);
+            return (T) ((ExpandedMapData) mapData).ml$getCustomData().get(this);
         }
 
     }

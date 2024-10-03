@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
-import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,7 +18,6 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -42,7 +40,7 @@ import java.util.function.Consumer;
 
 public class ForgeHelperImpl {
 
-    public static boolean onProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
+    public static boolean fireOnProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
         return false;
     }
 
@@ -71,14 +69,14 @@ public class ForgeHelperImpl {
         }
     }
 
-    public static boolean onExplosionStart(Level level, Explosion explosion) {
+    public static boolean fireOnExplosionStart(Level level, Explosion explosion) {
         return false; //true if event cancelled
     }
 
-    public static void onExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
+    public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
     }
 
-    public static void onLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {
+    public static void fireOnLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {
     }
 
     public static boolean canLivingConvert(LivingEntity entity, EntityType<? extends LivingEntity> outcome, Consumer<Integer> timer) {
@@ -89,7 +87,7 @@ public class ForgeHelperImpl {
         return state.getBlock().getExplosionResistance();
     }
 
-    public static void onBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
+    public static void fireOnBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         level.setBlock(blockpos, Blocks.AIR.defaultBlockState(), 3);
         blockstate.getBlock().wasExploded(level, blockpos, explosion);
     }
@@ -140,15 +138,15 @@ public class ForgeHelperImpl {
     public static void reviveEntity(Entity entity) {
     }
 
-    public static boolean onCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
+    public static boolean fireOnCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
         return b;
     }
 
-    public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
+    public static void fireOnCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
     }
 
     @org.jetbrains.annotations.Nullable
-    public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
+    public static InteractionResult fireOnRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
         return null;
     }
 
@@ -156,7 +154,7 @@ public class ForgeHelperImpl {
         return entity.getEquipmentSlotForItem(stack) == slot;
     }
 
-    public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
+    public static void fireOnEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
     }
 
     public static int getLightEmission(BlockState state, Level level, BlockPos pos) {

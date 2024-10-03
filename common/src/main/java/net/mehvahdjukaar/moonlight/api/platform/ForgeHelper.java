@@ -57,9 +57,15 @@ public class ForgeHelper {
         return ops; //TODO: 1.20.4
     }
 
+
+    @Deprecated(forRemoval = true)
+    public static boolean onProjectileImpact(Projectile projectile, HitResult blockHitResult) {
+        return fireOnProjectileImpact(projectile, blockHitResult);
+    }
+
     @Contract
     @ExpectPlatform
-    public static boolean onProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
+    public static boolean fireOnProjectileImpact(Projectile projectile, HitResult blockHitResult) {
         throw new AssertionError();
     }
 
@@ -91,13 +97,23 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static boolean onExplosionStart(Level level, Explosion explosion) {
-        throw new AssertionError();
+        return fireOnExplosionStart(level, explosion);
     }
 
     @ExpectPlatform
-    public static void onLivingConvert(LivingEntity frFom, LivingEntity to) {
+    public static boolean fireOnExplosionStart(Level level, Explosion explosion) {
+        throw new AssertionError();
+    }
+
+    @Deprecated(forRemoval = true)
+    public static void onLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {
+        fireOnLivingConvert(skellyHorseMixin, newHorse);
+    }
+
+    @ExpectPlatform
+    public static void fireOnLivingConvert(LivingEntity frFom, LivingEntity to) {
         throw new AssertionError();
     }
 
@@ -106,8 +122,13 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static void onExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
+        fireOnExplosionDetonate(level, explosion, entities, diameter);
+    }
+
+    @ExpectPlatform
+    public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
         throw new AssertionError();
     }
 
@@ -116,8 +137,13 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static void onBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
+        fireOnBlockExploded(blockstate, level, blockpos, explosion);
+    }
+
+    @ExpectPlatform
+    public static void fireOnBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         throw new AssertionError();
     }
 
@@ -169,23 +195,44 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static boolean onCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
+        return fireOnCropsGrowPre(level, pos, state, b);
+    }
+
+    @ExpectPlatform
+    public static boolean fireOnCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
         throw new AssertionError();
 
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
+        fireOnCropsGrowPost(level, pos, state);
     }
 
     @ExpectPlatform
+    public static void fireOnCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
+        throw new AssertionError();
+    }
+
     public static void onEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
+        fireOnEquipmentChange(entity, slot, from, to);
     }
 
     @ExpectPlatform
-    @org.jetbrains.annotations.Nullable
+    public static void fireOnEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
+        throw new AssertionError();
+    }
+
+    @Deprecated(forRemoval = true)
     public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
+        return fireOnRightClickBlock(player, hand, below, rayTraceResult);
+    }
+
+    @ExpectPlatform
+    @Nullable
+    public static InteractionResult fireOnRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
         throw new AssertionError();
     }
 
