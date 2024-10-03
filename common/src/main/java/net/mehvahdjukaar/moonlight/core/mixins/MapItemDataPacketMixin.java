@@ -208,31 +208,4 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         }
     }
 
-
-    private static CompoundTag readCompressedNbt(FriendlyByteBuf buf) {
-        int i = buf.readerIndex();
-        byte b = buf.readByte();
-        if (b == 0) {
-            throw new EncoderException();
-        } else {
-            buf.readerIndex(i);
-            try {
-                return NbtIo.readCompressed(new ByteBufInputStream(buf));
-            } catch (IOException var5) {
-                throw new EncoderException(var5);
-            }
-        }
-    }
-
-    private static void writeCompressedNbt(FriendlyByteBuf buf, CompoundTag nbt) {
-        if (nbt == null) {
-            buf.writeByte(0);
-        } else {
-            try {
-                NbtIo.writeCompressed(nbt, (new ByteBufOutputStream(buf)));
-            } catch (IOException var3) {
-                throw new EncoderException(var3);
-            }
-        }
-    }
 }
