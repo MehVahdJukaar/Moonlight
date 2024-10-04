@@ -122,10 +122,11 @@ public class Moonlight {
     }
 
     @EventCalled
-    private static void afterDataReload(RegistryAccess registryAccess, Boolean client) {
+    private static void afterDataReload(RegistryAccess registryAccess, boolean client) {
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
         DynamicResourcePack.clearAfterReload(PackType.SERVER_DATA);
         DynamicHolder.clearCache();
+        DispenserHelper.reload(registryAccess, client);
     }
 
     @EventCalled

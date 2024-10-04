@@ -48,10 +48,6 @@ public class DispenserHelper {
         EVENT_LISTENERS.get(priority).add(listener);
     }
 
-    static{
-        PlatHelper.addReloadableCommonSetup(DispenserHelper::reload);
-    }
-
     @ApiStatus.Internal
     public static void reload(RegistryAccess registryAccess, boolean isClient) {
         //clear all behaviors
