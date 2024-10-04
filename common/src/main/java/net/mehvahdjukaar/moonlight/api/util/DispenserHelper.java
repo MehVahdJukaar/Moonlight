@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.block.ISoftFluidTankProvider;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
@@ -47,8 +48,12 @@ public class DispenserHelper {
         EVENT_LISTENERS.get(priority).add(listener);
     }
 
+    static{
+        PlatHelper.addReloadableCommonSetup(DispenserHelper::reload);
+    }
+
     @ApiStatus.Internal
-    public static void reload(RegistryAccess registryAccess) {
+    public static void reload(RegistryAccess registryAccess, boolean isClient) {
         //clear all behaviors
         Set<Item> failed = new HashSet<>();
         Map<Item, DispenseItemBehavior> originals = new HashMap<>();
