@@ -8,6 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.function.Supplier;
 
 //ISTER provider
+//TODO: deprecate and use events
 public interface ICustomItemRendererProvider extends ItemLike {
 
     @Environment(EnvType.CLIENT)

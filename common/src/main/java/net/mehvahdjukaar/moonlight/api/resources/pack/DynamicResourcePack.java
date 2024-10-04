@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.PlatformOnly;
