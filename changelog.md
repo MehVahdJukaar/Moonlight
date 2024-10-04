@@ -1,4 +1,2 @@
-many internal api changes and fixes
-fixed dynamic block set stuff not registering stuff consistetly (for some raeson)
-fixed many issues related to the empty fluid
-fixed some fluid colors not working
+- fixed many things related to the 1.21 port
+- added a couple new helpers and util classes

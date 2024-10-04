@@ -12,7 +12,6 @@ import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
-import net.minecraft.Util;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -24,7 +23,6 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -288,6 +286,51 @@ public class RegHelper {
                                                                                    MobCategory category, float width, float height,
                                                                                    int clientTrackingRange, int updateInterval) {
         throw new AssertionError();
+    }
+
+    public static RegSupplier<ArmorMaterial> registerArmorMaterial(ResourceLocation name, int totalDefense, Supplier<Ingredient> ingredient,
+                                                                   int enchValue, Supplier<Holder<SoundEvent>> sound,
+                                                                   float toughness, float knockbackResistance) {
+        return register(name, () -> new ArmorMaterial(calculateStandardDefence(totalDefense), enchValue, sound.get(), ingredient,
+                List.of(new ArmorMaterial.Layer(name)), toughness, knockbackResistance), Registries.ARMOR_MATERIAL);
+    }
+
+    private static EnumMap<ArmorItem.Type, Integer> calculateStandardDefence(int totalDefense) {
+        EnumMap<ArmorItem.Type, Integer> defenseMap = new EnumMap<>(ArmorItem.Type.class);
+
+        // Proportions for each armor piece using a Map
+        Map<ArmorItem.Type, Double> proportions = new LinkedHashMap<>();
+        proportions.put(ArmorItem.Type.CHESTPLATE, 0.41);
+        proportions.put(ArmorItem.Type.LEGGINGS, 0.32);
+        proportions.put(ArmorItem.Type.HELMET, 1.14);
+        proportions.put(ArmorItem.Type.BOOTS, 0.13);
+
+        // Calculate initial (rounded down) values for each piece
+        for (Map.Entry<ArmorItem.Type, Double> entry : proportions.entrySet()) {
+            ArmorItem.Type type = entry.getKey();
+            int defenseValue = (int) (entry.getValue() * totalDefense);
+            defenseMap.put(type, defenseValue);
+        }
+
+        // Calculate the remainder to distribute
+        int remainder = totalDefense - defenseMap.values().stream().mapToInt(Integer::intValue).sum();
+
+        // Distribute the remainder to pieces with room to grow
+        while (remainder > 0) {
+            for (Map.Entry<ArmorItem.Type, Double> entry : proportions.entrySet()) {
+                ArmorItem.Type type = entry.getKey();
+                int maxDefense = (int) Math.ceil(entry.getValue() * totalDefense);
+                int currentDefense = defenseMap.get(type);
+                if (currentDefense < maxDefense) {
+                    defenseMap.put(type, currentDefense + 1);
+                    remainder--;
+                    if (remainder <= 0) break; // Exit if no remainder left
+                }
+            }
+        }
+        defenseMap.put(ArmorItem.Type.BODY,
+                defenseMap.get(ArmorItem.Type.CHESTPLATE) + defenseMap.get(ArmorItem.Type.BOOTS));
+        return defenseMap;
     }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
