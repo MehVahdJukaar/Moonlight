@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
@@ -8,9 +9,13 @@ public class ResourceLocationSearchTrie extends PathSearchTrie<ResourceLocation>
 
     // Insert a ResourceLocation (namespace + path) into the trie
     public void insert(ResourceLocation objectToAdd) {
+        super.insert( getPath(objectToAdd), objectToAdd);
+    }
+
+    private static @NotNull String getPath(ResourceLocation objectToAdd) {
         String path = objectToAdd.getNamespace() + "/" + objectToAdd.getPath();
         path = getFolderPath(path);
-        super.insert(path, objectToAdd);
+        return path;
     }
 
     private static String getFolderPath(String path) {
@@ -24,15 +29,8 @@ public class ResourceLocationSearchTrie extends PathSearchTrie<ResourceLocation>
         return path.substring(0, lastIndex);
     }
 
-    // Search using a ResourceLocation (namespace + path)
-    public Collection<ResourceLocation> search(ResourceLocation folder) {
-        String path = folder.getNamespace() + "/" + folder.getPath();
-        return super.search(path);
-    }
-
     // Remove entries based on ResourceLocation
-    public boolean remove(ResourceLocation folder) {
-        String path = folder.getNamespace() + "/" + folder.getPath();
-        return super.remove(path);
+    public boolean remove(ResourceLocation object) {
+        return super.remove(getPath(object));
     }
 }

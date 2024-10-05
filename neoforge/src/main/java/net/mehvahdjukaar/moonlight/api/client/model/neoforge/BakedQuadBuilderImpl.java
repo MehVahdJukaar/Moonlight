@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.client.model.neoforge;
 
-import com.google.common.base.Preconditions;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -12,74 +11,59 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
-    public static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
-        return new BakedQuadBuilderImpl(sprite, transformation);
+    public static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation, Consumer<BakedQuad> quadConsumer) {
+        return new BakedQuadBuilderImpl(sprite, transformation, quadConsumer);
     }
 
     private final QuadBakingVertexConsumer inner;
     private final TextureAtlasSprite sprite;
-
+    private final Consumer<BakedQuad> quadConsumer;
     private final Matrix4f globalTransform;
     private final Matrix3f normalTransf;
 
     private int emissivity = 0;
     private boolean autoDirection = false;
-    private BakedQuad output;
-    private Consumer<BakedQuad> quadConsumer = s -> output = s;
 
-    private boolean building = false;
+    private int vertexIndex = -1;
 
 
-    private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
+    private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transformation, Consumer<BakedQuad> quadConsumer) {
         this.inner = new QuadBakingVertexConsumer();
         this.globalTransform = transformation;// == null ? null : new Matrix4f(new Matrix3f(transformation)); //gets rid of translation
         this.sprite = sprite;
-        inner.setShade(true);
-        inner.setHasAmbientOcclusion(true);
-        inner.setSprite(sprite);
+        this.quadConsumer = quadConsumer;
+        this.inner.setShade(true);
+        this.inner.setHasAmbientOcclusion(true);
+        this.inner.setSprite(sprite);
         this.normalTransf = transformation == null ? null :
                 new Matrix3f(transformation).invert().transpose();
     }
 
     @Override
-    public BakedQuad getQuad() {
-        end();
-        Preconditions.checkNotNull(output, "vertex data has not been fully filled");
-        return output;
-    }
-
-    public void end() {
-        if (building) {
-            tryBaking();
-        }
+    public void close() {
+        tryBaking();
     }
 
     private void tryBaking() {
-        if (building) {
+        if (vertexIndex == 3) {
+            vertexIndex = -1;
+
             BakedQuad quad = inner.bakeQuad();
             if (emissivity != 0) {
                 QuadTransformers.settingEmissivity(emissivity).processInPlace(quad);
             }
             quadConsumer.accept(quad);
-            building = false;
         }
-    }
-
-    @Override
-    public BakedQuadBuilderImpl setAutoBuild(Consumer<BakedQuad> quadConsumer) {
-        this.quadConsumer = quadConsumer;
-        return this;
     }
 
     @Override
     public BakedQuadBuilderImpl addVertex(float x, float y, float z) {
         tryBaking();
-        building = true;
+        vertexIndex++;
         if (globalTransform != null) {
             inner.addVertex(new Matrix4f(globalTransform), x, y, z);
         } else {
@@ -162,13 +146,6 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     @Override
     public BakedQuadBuilder setAutoDirection() {
         this.autoDirection = true;
-        return this;
-    }
-
-    @Override
-    public BakedQuadBuilder fromVanilla(BakedQuad q) {
-        int[] v = Arrays.copyOf(q.getVertices(), q.getVertices().length);
-        output = new BakedQuad(v, q.getTintIndex(), q.getDirection(), q.getSprite(), q.isShade(), q.hasAmbientOcclusion());
         return this;
     }
 }

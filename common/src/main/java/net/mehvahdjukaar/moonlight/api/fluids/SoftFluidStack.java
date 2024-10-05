@@ -57,13 +57,14 @@ public class SoftFluidStack implements DataComponentHolder {
     private final Holder<SoftFluid> fluidHolder;
     private final SoftFluid fluid; //reference to avoid calling value all the times. these 2 should always match
     private int count;
+    @NotNull
     private final PatchedDataComponentMap components;
     private boolean isEmptyCache;
 
     protected SoftFluidStack(Holder<SoftFluid> fluid, int count, DataComponentPatch components) {
         this.fluidHolder = fluid;
         this.fluid = this.fluidHolder.value();
-        this.components = PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, components);
+        this.components = PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, Objects.requireNonNull(components));
         this.count = count;
         this.updateEmpty();
     }
@@ -98,7 +99,7 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     @NotNull
-    public static SoftFluidStack fromFluid(Fluid fluid, int amount, DataComponentPatch component) {
+    public static SoftFluidStack fromFluid(Fluid fluid, int amount, @NotNull DataComponentPatch component) {
         Holder<SoftFluid> f = SoftFluidInternal.FLUID_MAP.get(fluid);
         if (f == null) return empty();
         return of(f, amount, component);
@@ -399,7 +400,7 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     @Override
-    public PatchedDataComponentMap getComponents() {
+    public @NotNull PatchedDataComponentMap getComponents() {
         return this.components;
     }
 

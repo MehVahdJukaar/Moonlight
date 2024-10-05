@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.misc;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public class SearchTrie<K, O> {
     protected final TrieNode<K, O> root;
@@ -15,8 +16,7 @@ public class SearchTrie<K, O> {
         TrieNode<K, O> current = root;
 
         // Traverse the trie to insert the path
-        for (int i = 0; i <= paths.size() - 1; i++) {
-            K folder = paths.get(i);
+        for (K folder : paths) {
             current.children.putIfAbsent(folder, new TrieNode<>());
             current = current.children.get(folder);
         }
@@ -82,14 +82,18 @@ public class SearchTrie<K, O> {
     }
 
     public void printTrie() {
-        printNode(root, "", "root", true);
+        printTrie(Logger.getGlobal());
     }
 
-    private void printNode(TrieNode<K, O> node, String prefix, String nodeName, boolean isTail) {
+    public void printTrie(Logger logger) {
+        printNode(logger, root, "", "root", true);
+    }
+
+    private void printNode(Logger logger, TrieNode<K, O> node, String prefix, String nodeName, boolean isTail) {
         if (!node.objects.isEmpty()) {
-            System.out.println(prefix + (isTail ? "\\--- " : "|--- ") + nodeName + " " + node.objects);
+            logger.info( prefix + (isTail ? "\\--- " : "|--- ") + nodeName + " " + node.objects);
         } else {
-            System.out.println(prefix + (isTail ? "\\--- " : "|--- ") + nodeName + " " + "(empty)");
+            logger.info(prefix + (isTail ? "\\--- " : "|--- ") + nodeName + " " + "(empty)");
         }
         List<K> childrenKeys = new ArrayList<>(node.children.keySet());
         for (int i = 0; i < childrenKeys.size(); i++) {
@@ -101,7 +105,7 @@ public class SearchTrie<K, O> {
             String newPrefix = prefix + (isTail ? "    " : "|   ");
 
             // Print the child node
-            printNode(childNode, newPrefix, key.toString(), isLastChild);
+            printNode(logger, childNode, newPrefix, key.toString(), isLastChild);
         }
     }
 

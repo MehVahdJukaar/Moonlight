@@ -20,14 +20,7 @@ import java.util.function.Supplier;
 public abstract class DynClientResourcesGenerator extends DynResourceGenerator<DynamicTexturePack> {
     protected DynClientResourcesGenerator(DynamicTexturePack pack) {
         super(MoonlightClient.maybeMergePack(pack), pack.mainNamespace);
-    }
 
-    /**
-     * Remember to call this during mod init
-     */
-    @Override
-    public void register() {
-        super.register();
         //unused now...
         ClientHelper.addClientReloadListener(() -> this,
                 ResourceLocation.fromNamespaceAndPath(this.modId, "dyn_resources_generator_" + index++));

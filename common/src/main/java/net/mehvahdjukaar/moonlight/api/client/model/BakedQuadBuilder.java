@@ -16,27 +16,24 @@ import java.util.function.Consumer;
  * Cross loader utility to create baked quad
  * On forge just wraps its own baked quad builder. Can also be fed to render calls as it implements vertex consumer
  */
-public interface BakedQuadBuilder extends VertexConsumer {
+public interface BakedQuadBuilder extends VertexConsumer, AutoCloseable {
 
-    static BakedQuadBuilder create(TextureAtlasSprite sprite) {
-        return create(sprite, (Matrix4f) null);
+    static BakedQuadBuilder create(TextureAtlasSprite sprite, Consumer<BakedQuad> quadConsumer) {
+        return create(sprite, (Matrix4f) null, quadConsumer);
     }
 
-    static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Transformation transformation) {
+    static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Transformation transformation, Consumer<BakedQuad> quadConsumer) {
         return create(sprite, transformation == null ? null : new Matrix4f().translate(0.5f, 0.5f, 0.5f)
-                .mul(transformation.getMatrix())
-                .translate(-0.5f, -0.5f, -0.5f));
+                        .mul(transformation.getMatrix())
+                        .translate(-0.5f, -0.5f, -0.5f),
+                quadConsumer);
     }
 
     //
     @ExpectPlatform
-    static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
+    static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation, Consumer<BakedQuad> quadConsumer) {
         throw new AssertionError();
     }
-
-
-    @Deprecated
-    BakedQuadBuilder fromVanilla(BakedQuad quad);
 
     BakedQuadBuilder setAutoDirection();
 
@@ -49,14 +46,6 @@ public interface BakedQuadBuilder extends VertexConsumer {
     BakedQuadBuilder lightEmission(int light);
 
     BakedQuadBuilder setTint(int tintIndex);
-
-    BakedQuad getQuad();
-
-    // if using auto build call this after you are done
-    void end();
-
-    BakedQuadBuilder setAutoBuild(Consumer<BakedQuad> quadConsumer);
-
 
     @Override
     default BakedQuadBuilder addVertex(Matrix4f matrix, float x, float y, float z) {

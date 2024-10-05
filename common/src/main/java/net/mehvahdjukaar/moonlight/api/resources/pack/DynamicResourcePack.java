@@ -320,36 +320,30 @@ public abstract class DynamicResourcePack implements PackResources {
         this.needsClearingNonStatic = false;
         Stopwatch watch = Stopwatch.createStarted();
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
-        boolean hasLessStatic = staticResources.size() < (resources.size() - staticResources.size());
         for (var r : this.resources.keySet()) {
             if (mf && modernFixHack(r.getPath())) {
                 continue;
             }
             if (!this.staticResources.contains(r)) {
                 this.resources.remove(r);
-                //removing is slow
-                if (!hasLessStatic) this.searchTrie.remove(r);
             }
         }
         // clear trie entirely and re populate as we always expect to have way less staitc resources than others
-        if (hasLessStatic) {
-
-            if (!mf) this.searchTrie.clear();
-            else {
-                List<String> toRemove = new ArrayList<>();
-                for (String namespace : this.searchTrie.listFolders("")) {
-                    for (String f : this.searchTrie.listFolders(namespace)) {
-                        if (!modernFixHack(f)) {
-                            toRemove.add(namespace + "/" + f);
-                        }
+        if (!mf) this.searchTrie.clear();
+        else {
+            List<String> toRemove = new ArrayList<>();
+            for (String namespace : this.searchTrie.listFolders("")) {
+                for (String f : this.searchTrie.listFolders(namespace)) {
+                    if (!modernFixHack(f)) {
+                        toRemove.add(namespace + "/" + f);
                     }
                 }
-                toRemove.forEach(this.searchTrie::remove);
             }
-            // rebuild search trie with just static
-            for (var s : staticResources) {
-                this.searchTrie.insert(s);
-            }
+            toRemove.forEach(this.searchTrie::remove);
+        }
+        // rebuild search trie with just static
+        for (var s : staticResources) {
+            this.searchTrie.insert(s);
         }
         Moonlight.LOGGER.info("Cleared non-static resources for pack {} in: {} ms", this.resourcePackName,
                 watch.elapsed().toMillis());
@@ -361,8 +355,8 @@ public abstract class DynamicResourcePack implements PackResources {
         if (this.clearOnReload) {
             this.resources.clear();
             this.searchTrie.clear();
+            this.needsClearingNonStatic = true;
         }
-        this.needsClearingNonStatic = true;
     }
 
     private boolean needsClearingNonStatic = false;

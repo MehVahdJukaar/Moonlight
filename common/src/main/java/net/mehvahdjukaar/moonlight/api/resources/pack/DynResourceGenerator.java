@@ -33,17 +33,17 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     protected DynResourceGenerator(T pack, String modId) {
         this.dynamicPack = pack;
         this.modId = modId;
-    }
 
-    /**
-     * Called on Mod Init
-     */
-    public void register() {
-        dynamicPack.registerPack();
+        this.dynamicPack.registerPack();
 
         MoonlightEventsHelper.addListener(this::onEarlyReload, EarlyPackReloadEvent.class);
     }
 
+    /**
+     * Called on Mod Init. just loads this class
+     */
+    public final void register() {
+    }
 
     public abstract Logger getLogger();
 

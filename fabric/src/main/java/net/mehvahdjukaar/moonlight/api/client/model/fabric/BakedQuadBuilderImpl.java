@@ -20,34 +20,27 @@ import java.util.function.Consumer;
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
 
-    public static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation) {
-        return new BakedQuadBuilderImpl(sprite, transformation);
+    public static BakedQuadBuilder create(TextureAtlasSprite sprite, @Nullable Matrix4f transformation, Consumer<BakedQuad> quadConsumer) {
+        return new BakedQuadBuilderImpl(sprite, transformation, quadConsumer);
     }
 
     private final QuadEmitter inner;
     private final TextureAtlasSprite sprite;
     private final Matrix4f globalTransform;
     private final Matrix3f normalTransf;
-    private BakedQuad output;
-    private Consumer<BakedQuad> quadConsumer = s -> output = s;
-    private int vertexIndex = 0;
-    private boolean building = true;
+    private final Consumer<BakedQuad> quadConsumer;
+    private int vertexIndex = -1;
     private boolean autoDirection = false;
 
-    private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transform) {
+    private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transform, Consumer<BakedQuad> quadConsumer) {
         MeshBuilder meshBuilder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
         this.inner = meshBuilder.getEmitter();
         this.globalTransform = transform; //new Matrix4f(new Matrix3f(transform));
         this.sprite = sprite;
-        inner.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
+        this.quadConsumer = quadConsumer;
+        this.inner.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
         this.normalTransf = transform == null ? null :
                 new Matrix3f(transform).invert().transpose(); //forge uses this in quad transform. idk how it works
-    }
-
-    @Override
-    public BakedQuadBuilder setAutoBuild(Consumer<BakedQuad> quadConsumer) {
-        this.quadConsumer = quadConsumer;
-        return this;
     }
 
     @Override
@@ -83,9 +76,8 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     @Override
     public BakedQuadBuilderImpl addVertex(float x, float y, float z) {
-        vertexIndex++;
         tryBaking();
-        building = true;
+        vertexIndex++;
         if (globalTransform != null) {
             Vector4f v = globalTransform.transform(new Vector4f(x, y, z, 1.0F));
             inner.pos(vertexIndex, v.x(), v.y(), v.z());
@@ -147,36 +139,21 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     }
 
     @Override
-    public void end() {
-        if (building) {
-            tryBaking();
-        }
+    public void close() {
+        tryBaking();
     }
-
-    @Override
-    public BakedQuad getQuad() {
-        end();
-        Preconditions.checkNotNull(output, "vertex data has not been fully filled");
-        return output;
-    }
-
 
     private void tryBaking() {
-        if (building) {
-            if (vertexIndex == 4) {
-                vertexIndex = -1;
-                Preconditions.checkNotNull(sprite, "sprite cannot be null");
-                quadConsumer.accept(inner.toBakedQuad(sprite));
-            }
-            building = false;
+        if (vertexIndex == 3) {
+            vertexIndex = -1;
+            Preconditions.checkNotNull(sprite, "sprite cannot be null");
+            quadConsumer.accept(inner.toBakedQuad(sprite));
         }
     }
 
-
-    @Override
     public BakedQuadBuilder fromVanilla(BakedQuad quad) {
         inner.fromVanilla(quad, RendererAccess.INSTANCE.getRenderer().materialFinder().find(), quad.getDirection());
-        vertexIndex = 4;
+        vertexIndex = 3;
         return this;
     }
 

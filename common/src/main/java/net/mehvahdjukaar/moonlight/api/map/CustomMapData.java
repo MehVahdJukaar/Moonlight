@@ -127,6 +127,14 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
     }
 
     abstract class Simple<O> implements CustomMapData<SimpleDirtyCounter, O>{
+        
+        public Simple(O defaultValue) {
+            this.value = defaultValue;
+        }
+
+        @Deprecated(forRemoval = true)
+        public Simple() {
+        }
 
         protected O value;
 

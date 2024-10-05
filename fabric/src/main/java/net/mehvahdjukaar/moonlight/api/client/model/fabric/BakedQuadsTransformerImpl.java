@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadBuilder;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadsTransformer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -12,6 +11,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
 import java.util.function.UnaryOperator;
@@ -95,10 +95,14 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
         inner.accept(newQuad);
         lastSpriteHack = null;
         if (emissivity != null) {
-            BakedQuadBuilder builder = BakedQuadBuilderImpl.create(sprite, null);
-            builder.fromVanilla(newQuad);
-            builder.lightEmission(emissivity);
-            newQuad = builder.getQuad();
+            AtomicReference<BakedQuad> emissiveQuad = new AtomicReference<>();
+            try (BakedQuadBuilderImpl builder = (BakedQuadBuilderImpl) BakedQuadBuilderImpl
+                    .create(sprite, null, emissiveQuad::set)) {
+                builder.fromVanilla(newQuad);
+                builder.lightEmission(emissivity);
+            } catch (Exception ignored) {
+            }
+            newQuad = emissiveQuad.get();
         }
         return newQuad;
     }
