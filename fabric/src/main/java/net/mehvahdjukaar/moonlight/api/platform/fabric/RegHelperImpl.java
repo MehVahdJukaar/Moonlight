@@ -61,7 +61,7 @@ public class RegHelperImpl {
 
     public static final List<ResourceKey<? extends Registry<?>>> REG_PRIORITY = List.of(
             Registries.SOUND_EVENT, Registries.FLUID, Registries.BLOCK, Registries.PARTICLE_TYPE,
-            Registries.ENTITY_TYPE, Registries.ITEM,
+            Registries.ENTITY_TYPE, Registries.ARMOR_MATERIAL, Registries.ITEM,
             Registries.BLOCK_ENTITY_TYPE, Registries.PLACEMENT_MODIFIER_TYPE, Registries.STRUCTURE_TYPE,
             Registries.STRUCTURE_PIECE, Registries.FEATURE, Registries.CONFIGURED_FEATURE,
             Registries.PLACED_FEATURE
@@ -130,7 +130,7 @@ public class RegHelperImpl {
         var m = REGISTRIES.computeIfAbsent(reg, h -> new LinkedHashMap<>());
         RegistryQueue<T> registry = (RegistryQueue<T>) m.computeIfAbsent(modId,
                 c -> {
-                     Moonlight.addDependent(modId);
+                    Moonlight.addDependent(modId);
 
                     return new RegistryQueue<>(reg);
                 });
@@ -266,7 +266,7 @@ public class RegHelperImpl {
                         public void addTableReference(ResourceLocation targetId) {
                             LootPool pool = LootPool.lootPool().add(NestedLootTable.lootTableReference(
                                     ResourceKey.create(Registries.LOOT_TABLE, targetId))).build();
-                            ((FabricLootTableBuilder)tableBuilder).pool(pool);
+                            ((FabricLootTableBuilder) tableBuilder).pool(pool);
                         }
                     });
                 }

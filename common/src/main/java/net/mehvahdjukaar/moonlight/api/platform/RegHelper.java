@@ -302,7 +302,7 @@ public class RegHelper {
         Map<ArmorItem.Type, Double> proportions = new LinkedHashMap<>();
         proportions.put(ArmorItem.Type.CHESTPLATE, 0.41);
         proportions.put(ArmorItem.Type.LEGGINGS, 0.32);
-        proportions.put(ArmorItem.Type.HELMET, 1.14);
+        proportions.put(ArmorItem.Type.HELMET, 0.14);
         proportions.put(ArmorItem.Type.BOOTS, 0.13);
 
         // Calculate initial (rounded down) values for each piece

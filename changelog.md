@@ -1,2 +1,1 @@
-- fixed many things related to the 1.21 port
-- added a couple new helpers and util classes
+fixed armor materials registering after items on fabric

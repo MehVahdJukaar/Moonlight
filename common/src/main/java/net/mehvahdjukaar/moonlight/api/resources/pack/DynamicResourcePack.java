@@ -317,6 +317,7 @@ public abstract class DynamicResourcePack implements PackResources {
     @ApiStatus.Internal
     protected void clearNonStatic() {
         if (!this.needsClearingNonStatic) return;
+        this.needsClearingNonStatic = false;
         Stopwatch watch = Stopwatch.createStarted();
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
         boolean hasLessStatic = staticResources.size() < (resources.size() - staticResources.size());
