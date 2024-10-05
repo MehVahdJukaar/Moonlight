@@ -15,6 +15,7 @@ import java.nio.file.Path;
 
 public class DynamicTexturePack extends DynamicResourcePack {
 
+    //TODO: make static constructor and private this. merge packs here instead
     public DynamicTexturePack(ResourceLocation name, Pack.Position position, boolean fixed, boolean hidden) {
         super(name, PackType.CLIENT_RESOURCES, position, fixed, hidden);
     }

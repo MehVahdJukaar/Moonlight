@@ -32,17 +32,16 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     protected DynResourceGenerator(T pack, String modId) {
         this.dynamicPack = pack;
         this.modId = modId;
+        this.dynamicPack.registerPack();
+        MoonlightEventsHelper.addListener(this::onEarlyReload, EarlyPackReloadEvent.class);
     }
 
     /**
      * Called on Mod Init
+     * Yes this just loads the class
      */
-    public void register() {
-        dynamicPack.registerPack();
-
-        MoonlightEventsHelper.addListener(this::onEarlyReload, EarlyPackReloadEvent.class);
+    public final void register() {
     }
-
 
     public abstract Logger getLogger();
 
@@ -118,7 +117,8 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             var repository = this.getRepository();
             // only needed on second reload since there will be no pack on first
             // and only if the pack itself doesn't get cleared
-            if(repository != null && hasBeenInitialized && !dynamicPack.clearOnReload) {
+            boolean clearOnReload = true;
+            if(repository != null && hasBeenInitialized && !clearOnReload) {
                 Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
                 FilteredResManager nonSelfManager = FilteredResManager.excluding(repository, this.dynamicPack.packType,
                         dynamicPack.packId());
@@ -128,12 +128,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             }
             this.regenerateDynamicAssets(manager);
         }
-        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms" +
-                        (this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : ""),
-                this.dynamicPack.getPackType(),
-                this.dynamicPack.packId(),
-                this.modId,
-                watch.elapsed().toMillis());
+        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{}", this.dynamicPack.getPackType(), this.dynamicPack.packId(), this.modId, watch.elapsed().toMillis(), this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
     }
 
     @Nullable

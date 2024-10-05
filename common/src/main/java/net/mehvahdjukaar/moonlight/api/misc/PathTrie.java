@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -12,17 +11,12 @@ public class PathTrie<T> {
         root = new TrieNode<>();
     }
 
-    public void insert(ResourceLocation resourceLocation, T object) {
-        insert(resourceLocation.getNamespace() + "/" + resourceLocation.getPath(), object);
-    }
-
     public void insert(String path, T object) {
         String[] folders = path.split("/");
         TrieNode<T> current = root;
 
-        // Traverse the trie to insert the path
-        for (int i = 0; i < folders.length - 1; i++) {
-            String folder = folders[i];
+        // Traverse the trie to insert the path.
+        for (String folder : folders) {
             current.children.putIfAbsent(folder, new TrieNode<>());
             current = current.children.get(folder);
         }
@@ -31,19 +25,11 @@ public class PathTrie<T> {
         current.objects.add(object);
     }
 
-    public Collection<T> search(ResourceLocation id) {
-        return search(id.getNamespace() + "/" + id.getPath());
-    }
-
     public Collection<T> search(String path) {
         TrieNode<T> current = getNode(path);
         if (current == null) return Collections.emptyList();
         // Once at the target node, collect all objects from this node and its children
         return current.collectObjects();
-    }
-
-    public boolean remove(ResourceLocation resourceLocation) {
-        return remove(resourceLocation.getNamespace() + "/" + resourceLocation.getPath());
     }
 
     public boolean remove(String path) {

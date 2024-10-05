@@ -44,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public abstract class DynamicResourcePack implements PackResources {
-    private static final List<DynamicResourcePack> INSTANCES = new ArrayList<>();
+    protected static final List<DynamicResourcePack> INSTANCES = new ArrayList<>();
 
     @ApiStatus.Internal
     public static void clearAfterReload(PackType targetType) {
@@ -77,12 +77,11 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final ResourceLocation resourcePackName;
     protected final Set<String> namespaces = new HashSet<>();
     protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
-    protected final PathTrie<ResourceLocation> searchTrie = new PathTrie<>();
+    protected final ResourceLocPathTrie searchTrie = new ResourceLocPathTrie();
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final String mainNamespace;
 
 
-    protected boolean clearOnReload = true;
     protected Set<ResourceLocation> staticResources = new HashSet<>();
 
     //for debug or to generate assets
@@ -114,12 +113,10 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     public void setClearOnReload(boolean canBeCleared) {
-        this.clearOnReload = canBeCleared;
     }
 
     @Deprecated(forRemoval = true)
     public void clearOnReload(boolean canBeCleared) {
-        this.clearOnReload = canBeCleared;
     }
 
     public void markNotClearable(ResourceLocation staticResources) {
@@ -163,8 +160,7 @@ public abstract class DynamicResourcePack implements PackResources {
     /**
      * Registers this pack. Call on mod init
      */
-    public void registerPack() {
-
+    protected void registerPack() {
         if (!INSTANCES.contains(this)) {
             PlatHelper.registerResourcePack(this.packType, () ->
                     Pack.create(
@@ -256,7 +252,7 @@ public abstract class DynamicResourcePack implements PackResources {
     protected void addBytes(ResourceLocation id, byte[] bytes) {
         this.namespaces.add(id.getNamespace());
         this.resources.put(id, Preconditions.checkNotNull(bytes));
-        this.searchTrie.insert(id, id);
+        this.searchTrie.insert(id);
         if (addToStatic) markNotClearable(id);
         //debug
         if (generateDebugResources) {
@@ -304,39 +300,35 @@ public abstract class DynamicResourcePack implements PackResources {
     @ApiStatus.Internal
     protected void clearNonStatic() {
         if (!this.needsClearingNonStatic) return;
+        this.needsClearingNonStatic = false;
         Stopwatch watch = Stopwatch.createStarted();
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
-        boolean hasLessStatic = false;// staticResources.size() < (resources.size() - staticResources.size());
         for (var r : this.resources.keySet()) {
             if (mf && modernFixHack(r.getPath())) {
                 continue;
             }
             if (!this.staticResources.contains(r)) {
                 this.resources.remove(r);
-                //removing is slow
-                if (!hasLessStatic) this.searchTrie.remove(r);
             }
         }
 
         // clear trie entirely and re populate as we always expect to have way less staitc resources than others
-        if (hasLessStatic) {
 
-            if (!mf) this.searchTrie.clear();
-            else {
-                List<String> toRemove = new ArrayList<>();
-                for (String namespace : this.searchTrie.listFolders("")) {
-                    for (String f : this.searchTrie.listFolders(namespace)) {
-                        if (!modernFixHack(f)) {
-                            toRemove.add(namespace + "/" + f);
-                        }
+        if (!mf) this.searchTrie.clear();
+        else {
+            List<String> toRemove = new ArrayList<>();
+            for (String namespace : this.searchTrie.listFolders("")) {
+                for (String f : this.searchTrie.listFolders(namespace)) {
+                    if (!modernFixHack(f)) {
+                        toRemove.add(namespace + "/" + f);
                     }
                 }
-                toRemove.forEach(this.searchTrie::remove);
             }
-            // rebuild search trie with just static
-            for (var s : staticResources) {
-                this.searchTrie.insert(s, s);
-            }
+            toRemove.forEach(this.searchTrie::remove);
+        }
+        // rebuild search trie with just static
+        for (var r : staticResources) {
+            this.searchTrie.insert(r);
         }
         Moonlight.LOGGER.info("Cleared non-static resources for pack {} in: {} ms", this.resourcePackName,
                 watch.elapsed().toMillis());
@@ -345,10 +337,8 @@ public abstract class DynamicResourcePack implements PackResources {
     // Called after each reload
     @ApiStatus.Internal
     protected void clearAllContent() {
-        if (this.clearOnReload) {
-            this.resources.clear();
-            this.searchTrie.clear();
-        }
+        this.resources.clear();
+        this.searchTrie.clear();
         this.needsClearingNonStatic = true;
     }
 
@@ -358,5 +348,22 @@ public abstract class DynamicResourcePack implements PackResources {
 
     private boolean modernFixHack(String s) {
         return s.startsWith("model") || s.startsWith("blockstate");
+    }
+
+    protected static class ResourceLocPathTrie extends PathTrie<ResourceLocation> {
+
+        public boolean remove(ResourceLocation object) {
+            //remove last bit as that's the object
+            String path = object.getNamespace() + '/' + object.getPath().substring
+                    (0, object.getPath().lastIndexOf('/'));
+            return super.remove(path);
+        }
+
+        public void insert(ResourceLocation object) {
+            String path = object.getNamespace() + '/' + object.getPath().substring
+                    (0, object.getPath().lastIndexOf('/'));
+            super.insert(path, object);
+        }
+
     }
 }

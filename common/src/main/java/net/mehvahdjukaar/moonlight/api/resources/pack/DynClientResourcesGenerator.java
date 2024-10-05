@@ -21,14 +21,7 @@ import java.util.function.Supplier;
 public abstract class DynClientResourcesGenerator extends DynResourceGenerator<DynamicTexturePack> {
     protected DynClientResourcesGenerator(DynamicTexturePack pack) {
         super(MoonlightClient.maybeMergePack(pack), pack.mainNamespace);
-    }
 
-    /**
-     * Remember to call this during mod init
-     */
-    @Override
-    public void register() {
-        super.register();
         //run data could give a null minecraft here...
         if (!PlatHelper.isData()) {
             //unused now...
