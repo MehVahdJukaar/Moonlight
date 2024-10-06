@@ -42,9 +42,6 @@
     "compat.PistonReactQuarkMixin"
   ],
   "injectors": {
-    "defaultRequire": 1,
-    "injectionPoints": [
-      "net.mehvahdjukaar.moonlight.api.misc.InvokeUnrestricted"
-    ]
+    "defaultRequire": 1
   }
 }
