@@ -18,6 +18,8 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -33,7 +35,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     protected DynResourceGenerator(T pack, String modId) {
         this.dynamicPack = pack;
         this.modId = modId;
-
+        this.dynamicPack.addNamespaces(additionalNamespaces().toArray(new String[0]));
         this.dynamicPack.registerPack();
 
         MoonlightEventsHelper.addListener(this::onEarlyReload, EarlyPackReloadEvent.class);
@@ -46,6 +48,15 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     }
 
     public abstract Logger getLogger();
+
+    /**
+     * @return list of additional namespaces that should be included in the pack.
+     * Only generate assets for these namespaces
+     */
+    //TODO: make abstract
+    public Collection<String> additionalNamespaces(){
+        return List.of();
+    }
 
     public T getPack() {
         return dynamicPack;

@@ -50,7 +50,7 @@ public enum ResType {
     }
 
     public static ResourceLocation getTagPath(TagKey<?> tag) {
-     return    TAGS.getPath(tag.location().withPrefix(tag.registry().location().getPath() + "s/"));
+        return TAGS.getPath(tag.location().withPrefix(tag.registry().location().getPath() + "/"));
     }
 
 }

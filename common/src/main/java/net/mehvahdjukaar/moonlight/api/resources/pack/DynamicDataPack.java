@@ -39,8 +39,6 @@ public class DynamicDataPack extends DynamicResourcePack {
 
         ResourceLocation tagId = builder.getId();
         String tagPath = type.location().getPath();
-        if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item") || tagPath.equals("fluid"))
-            tagPath = tagPath + "s";
         ResourceLocation loc = ResType.TAGS.getPath(tagId.withPath(tagPath + "/" + tagId.getPath()));
         //merge tags
         if (this.resources.containsKey(loc)) {
