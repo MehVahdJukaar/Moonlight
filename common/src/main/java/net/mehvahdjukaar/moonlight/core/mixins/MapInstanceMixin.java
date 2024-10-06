@@ -30,24 +30,20 @@ public abstract class MapInstanceMixin {
         MoonlightClient.setMipMap(false);
     }
 
-    @Inject(
+    @WrapOperation(
             method = {"<init>"},
             require = 0,
             at = {@At(
-                    value = "moonlight:INVOKE_UNRESTRICTED",
-                    target = "Ljava/lang/Object;<init>()V",
+                    value = "NEW",
+                    target ="(IIZ)Lnet/minecraft/client/renderer/texture/DynamicTexture;",
                     remap = false
             )}
     )
-    private void forceMipMapOn(MapRenderer arg, int i, MapItemSavedData arg2, CallbackInfo ci) {
+    private DynamicTexture forceMipMapOn(int width, int height, boolean useCalloc, Operation<DynamicTexture> original) {
         MoonlightClient.setMipMap(true);
-    }
-
-    @Inject(method = "<init>",
-            require = 0,
-            at = @At("RETURN"))
-    public void forceMipMapOff(MapRenderer r, int pId, MapItemSavedData pData, CallbackInfo ci) {
+        var t = original.call(width, height, useCalloc);
         MoonlightClient.setMipMap(false);
+        return t;
     }
 
     @WrapOperation(method = "<init>",

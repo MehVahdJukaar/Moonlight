@@ -149,6 +149,7 @@ public abstract class DynamicResourcePack implements PackResources {
      * Dynamic textures are loaded after getNamespaces is called, so unfortunately we need to know those in advance
      * Call this if you are adding stuff for another mod namespace
      **/
+    @ApiStatus.Internal
     public void addNamespaces(String... namespaces) {
         this.namespaces.addAll(Arrays.asList(namespaces));
     }

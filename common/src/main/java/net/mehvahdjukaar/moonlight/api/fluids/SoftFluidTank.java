@@ -386,9 +386,14 @@ public class SoftFluidTank {
      * @param compound nbt
      */
     public void load(CompoundTag compound, HolderLookup.Provider registries) {
-        if (compound.contains("fluid")) {
-            this.setFluid(SoftFluidStack.load(registries,
-                    compound.getCompound("fluid")));
+        CompoundTag fluidTag = compound.getCompound("fluid");
+        //TODO: remove this in 1.22
+        CompoundTag backCompat = compound.getCompound("FluidHolder");
+        if (!backCompat.isEmpty()) {
+            fluidTag = backCompat;
+        }
+        if (!fluidTag.isEmpty()) {
+            this.setFluid(SoftFluidStack.load(registries, fluidTag));
         }
     }
 
