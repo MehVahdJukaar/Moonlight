@@ -51,13 +51,18 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
             name = path.substring("leaves_".length());
         }
         String namespace = baseRes.getNamespace();
-        if (name != null && !namespace.equals("securitycraft") && !path.contains("hanging")) {
+        if (name != null && !isBlacklisted(namespace, path)) {
             if (baseBlock instanceof LeavesBlock) {
                 ResourceLocation id = new ResourceLocation(namespace, name);
                 return Optional.of(new LeavesType(id, baseBlock));
             }
         }
         return Optional.empty();
+    }
+
+    private static boolean isBlacklisted(String namespace, String path) {
+        return namespace.equals("securitycraft") || namespace.equals("dynamic_trees") ||
+                namespace.equals("dynamictrees") || path.contains("hanging");
     }
 
     @Override
