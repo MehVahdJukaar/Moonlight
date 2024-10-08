@@ -48,7 +48,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
     private List<MLMapDecoration> moonlight$customDecorations = null;
     @Nullable
     @Unique
-    private List<CustomMapData.DirtyDataPatch<?,?>> moonlight$customDataPatches = null;
+    private List<CustomMapData.DirtyDataPatch<?, ?>> moonlight$customDataPatches = null;
     @Unique
     private int moonlight$mapCenterX = 0;
     @Unique
@@ -85,7 +85,10 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
                 ResourceLocation.STREAM_CODEC, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getDimension(),
                 ByteBufCodecs.INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterX(),
                 ByteBufCodecs.INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterZ(),
-                (old, deco,dataPatch, res, x, z) -> {
+                (old, deco, dataPatch, res, x, z) -> {
+                    if (old == null) {
+                        return null;
+                    }
                     IMapDataPacketExtension ext = (IMapDataPacketExtension) (Object) old;
                     ext.moonlight$setCustomDecorations(deco);
                     ext.moonlight$setDirtyCustomData(dataPatch);
@@ -98,7 +101,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
 
 
     @Override
-    public Optional<List<CustomMapData.DirtyDataPatch<?,?>>> moonlight$getDirtyCustomData() {
+    public Optional<List<CustomMapData.DirtyDataPatch<?, ?>>> moonlight$getDirtyCustomData() {
         return Optional.ofNullable(moonlight$customDataPatches);
     }
 
@@ -173,7 +176,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
 
             }
             if (serverDataPatches != null) {
-                for(var p : serverDataPatches){
+                for (var p : serverDataPatches) {
                     var customData = ed.ml$getCustomData();
                     p.apply(customData);
                 }
