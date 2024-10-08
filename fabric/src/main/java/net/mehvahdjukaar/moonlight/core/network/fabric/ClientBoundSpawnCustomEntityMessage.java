@@ -37,7 +37,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
     private final int velX;
     private final int velY;
     private final int velZ;
-    private final FriendlyByteBuf buf;
+    private final RegistryFriendlyByteBuf buf;
 
     public ClientBoundSpawnCustomEntityMessage(Entity e) {
         this.entity = e;
@@ -76,7 +76,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         this.velX = buf.readShort();
         this.velY = buf.readShort();
         this.velZ = buf.readShort();
-        this.buf = new FriendlyByteBuf(buf.copy());
+        this.buf = new RegistryFriendlyByteBuf(buf.copy(), buf.registryAccess());
         buf.clear();
     }
 
