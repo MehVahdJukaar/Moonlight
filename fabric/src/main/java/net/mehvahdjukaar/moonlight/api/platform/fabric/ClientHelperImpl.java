@@ -50,7 +50,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -168,9 +170,9 @@ public class ClientHelperImpl {
 
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
         Moonlight.assertInitPhase();
-            ModelLoadingPlugin.register(pluginContext -> {
-                eventListener.accept(pluginContext::addModels);
-            });
+        ModelLoadingPlugin.register(pluginContext -> {
+            eventListener.accept(pluginContext::addModels);
+        });
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
@@ -239,7 +241,7 @@ public class ClientHelperImpl {
 
     public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
         Moonlight.assertInitPhase();
-        if(!PlatHelper.isDev()) {
+        if (!PlatHelper.isDev()) {
             FabricLoader.getInstance().getModContainer(folderName.getNamespace()).ifPresent(c -> {
                 ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, displayName,
                         defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL);
@@ -249,6 +251,13 @@ public class ClientHelperImpl {
 
     public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
         return null;
+    }
+
+    public static final List<Consumer<ClientHelper.ShaderEvent>> SHADER_REGISTRATIONS = new ArrayList<>();
+
+    public static void addShaderRegistration(Consumer<ClientHelper.ShaderEvent> eventListener) {
+        Moonlight.assertInitPhase();
+        SHADER_REGISTRATIONS.add(eventListener);
     }
 
 }
