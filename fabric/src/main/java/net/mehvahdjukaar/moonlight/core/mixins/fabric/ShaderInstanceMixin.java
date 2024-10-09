@@ -16,8 +16,8 @@ public class ShaderInstanceMixin {
     private ResourceLocation moonlight$namespacedShader(String location,
                                                         Operation<ResourceLocation> original,
                                                         @Local(argsOnly = true) String name) {
-        if (name.contains("MOONLIGHT_MARKER")) {
-            var res = new ResourceLocation(name.replace("MOONLIGHT_MARKER", ":"));
+        if (name.contains("moonlight_marker")) {
+            var res = new ResourceLocation(name.replace("moonlight_marker", ":"));
             String namespace = res.getNamespace();
             String path = res.getPath();
             return new ResourceLocation(namespace, "shaders/core/" + path + ".json");
