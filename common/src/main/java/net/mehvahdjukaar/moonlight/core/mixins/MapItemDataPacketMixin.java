@@ -56,6 +56,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
     @Unique
     private ResourceLocation moonlight$dimension = Level.OVERWORLD.location();
 
+    /*
     //new constructor expansion
     @Inject(method = "<init>(Lnet/minecraft/world/level/saveddata/maps/MapId;BZLjava/util/Optional;Ljava/util/Optional;)V",
             at = @At("RETURN"))
@@ -98,7 +99,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
                 }
         );
     }
-
+*/
 
     @Override
     public Optional<List<CustomMapData.DirtyDataPatch<?, ?>>> moonlight$getDirtyCustomData() {
@@ -145,7 +146,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
         this.moonlight$mapCenterX = x;
         this.moonlight$mapCenterZ = z;
     }
-
+/*
     @Inject(method = "applyToMap", at = @At("HEAD"))
     private void handleExtraData(MapItemSavedData mapData, CallbackInfo ci) {
         var serverDeco = this.moonlight$customDecorations;
@@ -194,6 +195,6 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
             }
         }
     }
-
+*/
 
 }

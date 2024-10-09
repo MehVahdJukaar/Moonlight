@@ -7,12 +7,14 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.*;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -127,7 +129,13 @@ public class SoftFluidStack implements DataComponentHolder {
 
 
     public Tag save(HolderLookup.Provider lookupProvider) {
-        return CODEC.encodeStart(lookupProvider.createSerializationContext(NbtOps.INSTANCE), this).getOrThrow();
+        var a = CODEC.encodeStart(lookupProvider.createSerializationContext(NbtOps.INSTANCE), this);
+        if (a.isSuccess()) return a.getOrThrow();
+        else {
+            Moonlight.LOGGER.error("Failed to encode fluid stack. HOW??, {}", a.error().get());
+            if (PlatHelper.isDev()) a.getOrThrow();
+            return new CompoundTag();
+        }
     }
 
     public static SoftFluidStack load(HolderLookup.Provider lookupProvider, Tag tag) {

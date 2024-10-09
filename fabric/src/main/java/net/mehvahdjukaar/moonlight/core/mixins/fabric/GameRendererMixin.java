@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public abstract class GameRendererMixin {
 
     @Inject(method = "reloadShaders", at = @At(value = "INVOKE",
-            ordinal = 56,
+            ordinal = 52,
             shift = At.Shift.AFTER,
             target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
     public void moonlight$registerShaders(ResourceProvider resourceProvider, CallbackInfo ci,
@@ -31,7 +31,7 @@ public abstract class GameRendererMixin {
         ClientHelper.ShaderEvent event = (id, vertexFormat, setter) -> {
             try {
                 ShaderInstance shader = new ShaderInstance(resourceProvider, id.toString()
-                        .replace(":", "MOONLIGHT_MARKER"), vertexFormat);
+                        .replace(":", "moonlight_marker"), vertexFormat);
                 list.add(Pair.of(shader, setter));
             } catch (Exception e) {
                 Moonlight.LOGGER.error("Failed to load shader: {}", id, e);

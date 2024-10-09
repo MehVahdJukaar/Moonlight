@@ -112,10 +112,6 @@ dependencies {
     modCompileOnly("curse.maven:quark-243121:4463411")
     modCompileOnly("curse.maven:the-twilight-forest-227639:4755494")
 
-    // Add Connector to the launch classpath
-
-    //modImplementation("maven.modrinth:flashback:0.11.0")
-
     //modRuntimeOnly("curse.maven:productivetrees-867074:5290721")
     // modRuntimeOnly("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
     //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")

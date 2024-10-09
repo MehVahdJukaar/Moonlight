@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -308,10 +309,6 @@ public class ClientHelperImpl {
         );
     }
 
-    public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
-        return modelManager.getModelBakery().getModel(modelLocation);
-    }
-
     public static void addShaderRegistration(Consumer<ClientHelper.ShaderEvent> eventListener) {
         Moonlight.assertInitPhase();
 
@@ -326,7 +323,7 @@ public class ClientHelperImpl {
                 }
             });
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
 

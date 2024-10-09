@@ -67,8 +67,6 @@ public class MoonlightClient {
                 MLRenderTypes.PARTICLE_TRANSLUCENT_SHADER::set);
         event.register(Moonlight.res("text_alpha_color"), DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
                 MLRenderTypes.TEXT_COLOR_SHADER::set);
-
-
     }
 
     @EventCalled

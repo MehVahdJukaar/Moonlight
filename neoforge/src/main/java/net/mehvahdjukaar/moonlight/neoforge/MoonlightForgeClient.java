@@ -30,7 +30,6 @@ import net.neoforged.neoforge.common.conditions.ConditionalOps;
 public class MoonlightForgeClient {
 
     public static void init(IEventBus modEventBus) {
-        modEventBus.addListener(MoonlightForgeClient::registerShader);
         modEventBus.addListener(MoonlightForgeClient::afterLoad);
         modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
 
