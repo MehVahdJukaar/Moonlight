@@ -194,4 +194,6 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
             }
         }
     }
+
+
 }

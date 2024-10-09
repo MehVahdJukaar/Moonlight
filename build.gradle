@@ -161,6 +161,11 @@ allprojects {
             url = "https://maven.blamejared.com/"
         }
 
+        maven {
+            name = "Sinytra"
+            url = "https://maven.su5ed.dev/releases"
+        }
+
     }
 
     tasks.withType(JavaCompile) {

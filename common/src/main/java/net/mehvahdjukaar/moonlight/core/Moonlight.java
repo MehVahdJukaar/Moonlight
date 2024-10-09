@@ -97,10 +97,6 @@ public class Moonlight {
 
     private static void commonSetup() {
         BlocksColorInternal.setup();
-
-        if(PlatHelper.isDev()){
-            MixinEnvironment.getCurrentEnvironment().audit();
-        }
     }
 
     @EventCalled
