@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonElement;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,6 +20,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -68,6 +70,7 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
+
     @ExpectPlatform
     public static void registerRenderType(Block block, RenderType... types) {
         throw new AssertionError();
@@ -107,6 +110,16 @@ public class ClientHelper {
     public interface ItemDecoratorEvent {
         void register(ItemLike itemLike, IItemDecoratorRenderer renderer);
     }
+
+    public interface ShaderEvent {
+        void register(ResourceLocation id, VertexFormat vertexFormat, Consumer<ShaderInstance> setter);
+    }
+
+    @ExpectPlatform
+    public static void addShaderRegistration(Consumer<ShaderEvent> eventListener) {
+        throw new AssertionError();
+    }
+
 
     @ExpectPlatform
     public static void addItemDecoratorsRegistration(Consumer<ItemDecoratorEvent> eventListener) {

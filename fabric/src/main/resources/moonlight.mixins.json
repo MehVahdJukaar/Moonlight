@@ -8,6 +8,7 @@
     "BlockModelDeserializerMixin",
     "ClientLanguagesMixin",
     "ClientPacketListenerMixin",
+    "GameRendererMixin",
     "ItemRendererAccessor",
     "ItemRendererMixin",
     "LocalPlayerMixin",
@@ -18,6 +19,7 @@
     "SelfItemStackRenderer",
     "SelfModFlowingFluidMixin",
     "SelfModFluidRendererPropertiesMixin",
+    "ShaderInstanceMixin",
     "TextureAtlasMixin",
     "TextureAtlasSpriteMixin"
   ],

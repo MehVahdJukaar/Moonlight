@@ -52,7 +52,9 @@ import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -170,8 +172,8 @@ public class ClientHelperImpl {
 
     public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
         Moonlight.assertInitPhase();
-            ModelLoadingPlugin.register(pluginContext -> {
-                eventListener.accept(new ClientHelper.SpecialModelEvent() {
+        ModelLoadingPlugin.register(pluginContext -> {
+            eventListener.accept(new ClientHelper.SpecialModelEvent() {
                     @Override
                     public void register(ModelResourceLocation modelLocation) {
                         pluginContext.addModels(modelLocation.id());
@@ -182,7 +184,7 @@ public class ClientHelperImpl {
                         pluginContext.addModels(id);
                     }
                 });
-            });
+        });
     }
 
     public static void addTooltipComponentRegistration(Consumer<ClientHelper.TooltipComponentEvent> eventListener) {
@@ -251,12 +253,19 @@ public class ClientHelperImpl {
 
     public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
         Moonlight.assertInitPhase();
-        if(!PlatHelper.isDev()) {
+        if (!PlatHelper.isDev()) {
             FabricLoader.getInstance().getModContainer(folderName.getNamespace()).ifPresent(c -> {
                 ResourceManagerHelper.registerBuiltinResourcePack(folderName, c, displayName,
                         defaultEnabled ? ResourcePackActivationType.DEFAULT_ENABLED : ResourcePackActivationType.NORMAL);
             });
         }
+    }
+
+    public static final List<Consumer<ClientHelper.ShaderEvent>> SHADER_REGISTRATIONS = new ArrayList<>();
+
+    public static void addShaderRegistration(Consumer<ClientHelper.ShaderEvent> eventListener) {
+        Moonlight.assertInitPhase();
+        SHADER_REGISTRATIONS.add(eventListener);
     }
 
 }

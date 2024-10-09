@@ -10,6 +10,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -54,9 +55,9 @@ public class ClientHelperImpl {
 
     public static void registerRenderType(Block block, RenderType... types) {
         //from 0.64 we should register render types in out model json
-        if(types.length == 1) {
+        if (types.length == 1) {
             ItemBlockRenderTypes.setRenderLayer(block, types[0]);
-        }else {
+        } else {
             var l = List.of(types);
             ItemBlockRenderTypes.setRenderLayer(block, l::contains);
         }
@@ -307,6 +308,26 @@ public class ClientHelperImpl {
         );
     }
 
+    public static UnbakedModel getUnbakedModel(ModelManager modelManager, ResourceLocation modelLocation) {
+        return modelManager.getModelBakery().getModel(modelLocation);
+    }
+
+    public static void addShaderRegistration(Consumer<ClientHelper.ShaderEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<RegisterShadersEvent> eventConsumer = event -> {
+            eventListener.accept((id, vertexFormat, setter) -> {
+                try {
+                    ShaderInstance shader = new ShaderInstance(event.getResourceProvider(), id, vertexFormat);
+                    event.registerShader(shader, setter);
+                } catch (Exception e) {
+                    Moonlight.LOGGER.error("Failed to parse shader: {}", id, e);
+                    if (PlatHelper.isDev()) throw new RuntimeException(e);
+                }
+            });
+        };
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+    }
 
 
 }
