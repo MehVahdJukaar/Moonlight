@@ -61,7 +61,8 @@ public class RegHelperImpl {
 
     public static final List<ResourceKey<? extends Registry<?>>> REG_PRIORITY = List.of(
             Registries.SOUND_EVENT, Registries.FLUID, Registries.BLOCK, Registries.PARTICLE_TYPE,
-            Registries.ENTITY_TYPE, Registries.ARMOR_MATERIAL, Registries.ITEM,
+            Registries.ENTITY_TYPE, Registries.ARMOR_MATERIAL,
+            Registries.MOB_EFFECT, Registries.ITEM,
             Registries.BLOCK_ENTITY_TYPE, Registries.PLACEMENT_MODIFIER_TYPE, Registries.STRUCTURE_TYPE,
             Registries.STRUCTURE_PIECE, Registries.FEATURE, Registries.CONFIGURED_FEATURE,
             Registries.PLACED_FEATURE

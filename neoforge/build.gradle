@@ -1,6 +1,5 @@
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
-    id 'org.sinytra.adapter.userdev' version '1.2-SNAPSHOT'
 
 }
 
@@ -114,16 +113,8 @@ dependencies {
     modCompileOnly("curse.maven:the-twilight-forest-227639:4755494")
 
     // Add Connector to the launch classpath
-    additionalRuntimeClasspath "org.sinytra:Connector:2.0.0-beta.3+1.21.1"
-    // Add FFAPI dependency
-    modRuntimeOnly "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.104.0+2.0.14+1.21.1"
-    // Install desired Fabric mods. Make sure they remain unmapped at runtime
-    modRuntimeOnly "maven.modrinth:flashback:0.11.0"
 
     //modImplementation("maven.modrinth:flashback:0.11.0")
-
-
-    modImplementation ("curse.maven:piglin-proliferation-657831:5524520")
 
     //modRuntimeOnly("curse.maven:productivetrees-867074:5290721")
     // modRuntimeOnly("com.tterrag.registrate:Registrate:MC1.19-1.1.5")

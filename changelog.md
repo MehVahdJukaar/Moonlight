@@ -1,1 +1,2 @@
-hotfix for crash from previous version due to removed mixin injection type
+fixed a crash due to map packet
+fixed a crash in dev when running a server
