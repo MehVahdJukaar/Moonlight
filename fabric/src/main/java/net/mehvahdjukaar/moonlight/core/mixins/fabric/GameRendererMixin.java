@@ -32,7 +32,8 @@ public abstract class GameRendererMixin {
             @Override
             public void register(ResourceLocation id, VertexFormat vertexFormat, Consumer<ShaderInstance> setter) {
                 try {
-                    ShaderInstance shader = new ShaderInstance(resourceProvider, id.toString(), vertexFormat);
+                    ShaderInstance shader = new ShaderInstance(resourceProvider, id.toString()
+                            .replace(":", "MOONLIGHT_MARKER"), vertexFormat);
                     list.add(Pair.of(shader, setter));
                 } catch (Exception e) {
                     Moonlight.LOGGER.error("Failed to load shader: {}", id, e);
