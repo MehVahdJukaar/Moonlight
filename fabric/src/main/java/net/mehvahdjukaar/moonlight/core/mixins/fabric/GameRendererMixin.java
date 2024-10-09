@@ -28,17 +28,14 @@ public abstract class GameRendererMixin {
             target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
     public void moonlight$registerShaders(ResourceProvider resourceProvider, CallbackInfo ci,
                                           @Local(ordinal = 1) List<Pair<ShaderInstance, Consumer<ShaderInstance>>> list) {
-        ClientHelper.ShaderEvent event = new ClientHelper.ShaderEvent() {
-            @Override
-            public void register(ResourceLocation id, VertexFormat vertexFormat, Consumer<ShaderInstance> setter) {
-                try {
-                    ShaderInstance shader = new ShaderInstance(resourceProvider, id.toString()
-                            .replace(":", "MOONLIGHT_MARKER"), vertexFormat);
-                    list.add(Pair.of(shader, setter));
-                } catch (Exception e) {
-                    Moonlight.LOGGER.error("Failed to load shader: {}", id, e);
-                    if (PlatHelper.isDev()) throw new RuntimeException(e);
-                }
+        ClientHelper.ShaderEvent event = (id, vertexFormat, setter) -> {
+            try {
+                ShaderInstance shader = new ShaderInstance(resourceProvider, id.toString()
+                        .replace(":", "MOONLIGHT_MARKER"), vertexFormat);
+                list.add(Pair.of(shader, setter));
+            } catch (Exception e) {
+                Moonlight.LOGGER.error("Failed to load shader: {}", id, e);
+                if (PlatHelper.isDev()) throw new RuntimeException(e);
             }
         };
         ClientHelperImpl.SHADER_REGISTRATIONS.forEach(l -> l.accept(event));

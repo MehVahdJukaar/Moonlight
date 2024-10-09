@@ -1,1 +1,1 @@
-blacklisted some mods from leaves and wood types detection
+added callback to register custom shaders on fabric

@@ -1,18 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TerrainParticle;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -24,12 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.ApiStatus;
-import org.lwjgl.opengl.GL13;
 
 import java.util.function.Supplier;
-
-import static com.mojang.blaze3d.vertex.DefaultVertexFormat.PARTICLE;
 
 public class ParticleUtil {
 
@@ -217,32 +205,6 @@ public class ParticleUtil {
         });
     }
 
-    @ApiStatus.Internal
-    public static Supplier<ShaderInstance> particleShader = GameRenderer::getParticleShader;
-
-    public static final ParticleRenderType ADDITIVE_TRANSLUCENCY_RENDER_TYPE = new ParticleRenderType() {
-        @Override
-        public void begin(BufferBuilder builder, TextureManager textureManager) {
-            Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
-            RenderSystem.activeTexture(GL13.GL_TEXTURE2);
-            RenderSystem.activeTexture(GL13.GL_TEXTURE0);
-            //because of custom render type fuckery...
-
-            RenderSystem.setShader(particleShader);
-            RenderSystem.depthMask(false);
-            RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
-            RenderSystem.enableBlend();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
-            builder.begin(VertexFormat.Mode.QUADS, PARTICLE);
-        }
-
-        @Override
-        public void end(Tesselator tesselator) {
-            tesselator.end();
-        }
-
-        public String toString() {
-            return "PARTICLE_SHEET_ADDITIVE_TRANSLUCENT";
-        }
-    };
+    @Deprecated(forRemoval = true)
+    public static final ParticleRenderType ADDITIVE_TRANSLUCENCY_RENDER_TYPE = MLRenderTypes.PARTICLE_ADDITIVE_TRANSLUCENCY_RENDER_TYPE;
 }

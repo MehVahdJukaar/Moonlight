@@ -31,48 +31,9 @@ public class MoonlightForgeClient {
 
     public static void init() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(MoonlightForgeClient::registerShader);
         modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
     }
 
-
-    private static ShaderInstance translucentParticle;
-    private static ShaderInstance textColorShader;
-
-    public static ShaderInstance getTranslucentParticle() {
-        return translucentParticle;
-    }
-
-    public static ShaderInstance getTextColorShader() {
-        return textColorShader;
-    }
-
-    public static void registerShader(RegisterShadersEvent event) {
-        try {
-            ShaderInstance translucentParticleShader = new ShaderInstance(event.getResourceProvider(),
-                    Moonlight.res("particle_translucent"), DefaultVertexFormat.POSITION_TEX);
-
-            event.registerShader(translucentParticleShader, s -> translucentParticle = s);
-
-            ParticleUtil.particleShader = MoonlightForgeClient::getTranslucentParticle;
-        } catch (Exception e) {
-            Moonlight.LOGGER.error("Failed to parse shader: " + e);
-        }
-        try {
-            ShaderInstance shader = new ShaderInstance(event.getResourceProvider(),
-                    Moonlight.res("text_alpha_color"), DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
-            event.registerShader(shader, s -> textColorShader = s);
-
-            MLRenderTypes.textColorShader = MoonlightForgeClient::getTextColorShader;
-        } catch (Exception e) {
-            Moonlight.LOGGER.error("Failed to parse shader: " + e);
-        }
-    }
-
-
-    @SubscribeEvent
-    public static void registerShaders(RegisterShadersEvent event) {
-    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onInputUpdate(MovementInputUpdateEvent event) {
