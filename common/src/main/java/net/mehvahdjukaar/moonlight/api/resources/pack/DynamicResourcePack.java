@@ -209,6 +209,16 @@ public abstract class DynamicResourcePack implements PackResources {
 
     @Override
     public void listResources(PackType packType, String namespace, String id, ResourceOutput output) {
+
+        if (PlatHelper.isDev()) {
+            //validate
+            for (var r : this.searchTrie.search("")) {
+                if (!resources.containsKey(r)) {
+                    Moonlight.LOGGER.error("Resource {} not ", r);
+                    throw new IllegalStateException("Resource " + r + " not found in resources");
+                }
+            }
+        }
         //why are we only using server resources here?
         if (packType == this.packType) {
             //idk why but somebody had an issue with concurrency here during world load
@@ -332,6 +342,8 @@ public abstract class DynamicResourcePack implements PackResources {
         }
         Moonlight.LOGGER.info("Cleared non-static resources for pack {} in: {} ms", this.resourcePackName,
                 watch.elapsed().toMillis());
+
+
     }
 
     // Called after each reload

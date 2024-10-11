@@ -43,6 +43,7 @@ public class PathTrie<T> {
 
     @Nullable
     private TrieNode<T> getNode(String path) {
+        if(path.isEmpty())return root;
         String[] folders = path.split("/");
         TrieNode<T> current = root;
         for (String folder : folders) {
@@ -70,7 +71,7 @@ public class PathTrie<T> {
 
     private static class TrieNode<T> {
         Map<String, TrieNode<T>> children = new HashMap<>();
-        List<T> objects = new ArrayList<>();
+        Set<T> objects = new HashSet<>();
 
         public TrieNode() {
         }
