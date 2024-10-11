@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +27,6 @@ public class MLFabricModelLoaderRegistry {
            // Moonlight.LOGGER.error("Unknown model loader: {}", loader);
             return null;
         }
-        return new UnbakedModelWrapper(original, d.deserialize(jsonobject,context));
+        return new BlockModelWithCustomGeo(original, d.deserialize(jsonobject,context));
     }
 }

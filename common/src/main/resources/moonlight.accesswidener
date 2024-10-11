@@ -160,5 +160,6 @@ transitive-accessible method net/minecraft/world/level/levelgen/feature/foliagep
 transitive-accessible method net/minecraft/world/level/levelgen/feature/rootplacers/RootPlacerType <init> (Lcom/mojang/serialization/Codec;)V
 transitive-accessible method net/minecraft/world/level/levelgen/feature/trunkplacers/TrunkPlacerType <init> (Lcom/mojang/serialization/Codec;)V
 
-
+#fabric custom model loader
+accessible field net/minecraft/client/renderer/block/model/BlockModel parent Lnet/minecraft/client/renderer/block/model/BlockModel;
 

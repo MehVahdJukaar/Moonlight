@@ -15,29 +15,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class UnbakedModelWrapper extends BlockModel {
+public class BlockModelWithCustomGeo extends BlockModel {
 
     private final CustomGeometry geometry;
 
-    public UnbakedModelWrapper(CustomGeometry geometry) {
+    public BlockModelWithCustomGeo(CustomGeometry geometry) {
         super(null, List.of(), Map.of(), true, null,
                 ItemTransforms.NO_TRANSFORMS, List.of());
         this.geometry = geometry;
     }
 
-    public UnbakedModelWrapper(BlockModel original, CustomGeometry geometry) {
+    public BlockModelWithCustomGeo(BlockModel original, CustomGeometry geometry) {
         super(((BlockModelAccessor) original).getParentLocation(), List.of(),
                 ((BlockModelAccessor) original).getTextureMap(), original.hasAmbientOcclusion(),
                 original.getGuiLight(), original.getTransforms(), original.getOverrides());
         this.geometry = geometry;
     }
 
-
-    @Override
-    public BakedModel bake(ModelBaker modelBakery, Function<Material, TextureAtlasSprite> spriteGetter,
-                           ModelState transform, ResourceLocation location) {
-        return geometry.bakeModel(modelBakery, spriteGetter, transform, location);
+    public CustomGeometry getCustomGeometry() {
+        return this.geometry;
     }
-
 
 }
