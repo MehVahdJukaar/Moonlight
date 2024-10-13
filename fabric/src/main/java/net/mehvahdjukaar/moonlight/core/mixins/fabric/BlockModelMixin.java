@@ -22,13 +22,13 @@ public class BlockModelMixin {
 
     // makes models with a custom parent loader also use its geometry baking
     @Inject(at = @At("HEAD"), cancellable = true,
-            method = "bake(Lnet/minecraft/client/resources/model/ModelBaker;Lnet/minecraft/client/renderer/block/model/BlockModel;Ljava/util/function/Function;Lnet/minecraft/client/resources/model/ModelState;Lnet/minecraft/resources/ResourceLocation;Z)Lnet/minecraft/client/resources/model/BakedModel;")
+            method = "bake(Lnet/minecraft/client/resources/model/ModelBaker;Lnet/minecraft/client/renderer/block/model/BlockModel;Ljava/util/function/Function;Lnet/minecraft/client/resources/model/ModelState;Z)Lnet/minecraft/client/resources/model/BakedModel;")
     void moonlight$bakeCustomGeo(ModelBaker baker, BlockModel model, Function<Material, TextureAtlasSprite> spriteGetter,
-                                 ModelState state, ResourceLocation location, boolean guiLight3d,
+                                 ModelState state, boolean guiLight3d,
                                  CallbackInfoReturnable<BakedModel> cir) {
         CustomGeometry geo = getParentGeoRecursive(model);
         if (geo != null) {
-            cir.setReturnValue(geo.bakeModel(baker, spriteGetter, state, location));
+            cir.setReturnValue(geo.bake(baker, spriteGetter, state));
         }
     }
 

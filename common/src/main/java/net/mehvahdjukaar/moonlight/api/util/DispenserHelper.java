@@ -2,14 +2,15 @@ package net.mehvahdjukaar.moonlight.api.util;
 
 
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.block.ISoftFluidTankProvider;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
@@ -38,7 +39,7 @@ public class DispenserHelper {
     private static final Map<Item, List<DispenseItemBehavior>> MODDED_BEHAVIORS = new HashMap<>();
     //TODO: remove once mods have updated
     private static final Map<Item, List<DispenseItemBehavior>> STATIC_MODDED_BEHAVIORS = new HashMap<>();
-    private static final Map<Priority,List<Consumer<Event>>> EVENT_LISTENERS = Map.of(
+    private static final Map<Priority, List<Consumer<Event>>> EVENT_LISTENERS = Map.of(
             Priority.LOW, new ArrayList<>(),
             Priority.NORMAL, new ArrayList<>(),
             Priority.HIGH, new ArrayList<>()
@@ -56,12 +57,17 @@ public class DispenserHelper {
         for (var e : MODDED_BEHAVIORS.entrySet()) {
             Item item = e.getKey();
             // dont alter these as we cant override them since they are static otherwise we would lose them
-            if(STATIC_MODDED_BEHAVIORS.containsKey(item)) continue;
+            if (STATIC_MODDED_BEHAVIORS.containsKey(item)) continue;
             var expected = new ReferenceOpenHashSet<>(e.getValue());
             var current = DispenserBlock.DISPENSER_REGISTRY.get(item);
             if (current instanceof AdditionalDispenserBehavior behavior) {
                 Set<AdditionalDispenserBehavior> visited = new ReferenceOpenHashSet<>();
                 var original = unwrapBehavior(behavior, visited);
+                if (expected.contains(original)) {
+                    expected.remove(original);
+                    //if original was also a custom behavior we unregister it
+                    original = null;
+                }
                 if (expected.equals(visited)) {
                     originals.put(item, original);
                 } else {
@@ -246,6 +252,30 @@ public class DispenserHelper {
     }
 
 
+    public static class PlaceBlockBehavior extends DispenserHelper.AdditionalDispenserBehavior {
+
+        public PlaceBlockBehavior(Item item) {
+            super(item);
+        }
+
+        @Override
+        protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
+            Item item = stack.getItem();
+            if (item instanceof BlockItem bi) {
+                Direction direction = source.state().getValue(DispenserBlock.FACING);
+                BlockPos blockpos = source.pos().relative(direction);
+                // Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
+                InteractionResult result = bi.place(new DirectionalPlaceContext(source.level(), blockpos, direction, stack, direction));
+                var res = new InteractionResultHolder<>(result, stack);
+                if (result.consumesAction()) {
+                    return res;
+                }
+            }
+            return InteractionResultHolder.pass(stack);
+        }
+    }
+
+    @Deprecated(forRemoval = true)
     public static class PlaceBlockDispenseBehavior extends OptionalDispenseItemBehavior {
 
         @Override
@@ -293,6 +323,7 @@ public class DispenserHelper {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public static final DefaultDispenseItemBehavior PLACE_BLOCK_BEHAVIOR = new PlaceBlockDispenseBehavior();
     private static final DefaultDispenseItemBehavior SHOOT_BEHAVIOR = new DefaultDispenseItemBehavior();
 
@@ -306,7 +337,7 @@ public class DispenserHelper {
         }
 
         default void registerPlaceBlock(ItemLike i) {
-            register(i.asItem(), PLACE_BLOCK_BEHAVIOR);
+            register(i.asItem(), new PlaceBlockBehavior(i.asItem()));
         }
 
 

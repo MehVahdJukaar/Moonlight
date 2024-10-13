@@ -30,7 +30,7 @@ public class MoonlightClient {
 
     public static void initClient() {
         ClientHelper.addShaderRegistration(MoonlightClient::registerShaders);
-        ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluids"));
+        ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluid"));
         ClientConfigs.init();
         var gen = new Gen();
         gen.register();

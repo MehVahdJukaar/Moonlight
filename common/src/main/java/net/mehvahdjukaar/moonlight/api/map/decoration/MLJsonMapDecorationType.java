@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.map.decoration;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.client.util.VertexUtil;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.core.BlockPos;
@@ -26,7 +25,8 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
 
 
     static final Codec<MLJsonMapDecorationType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RuleTest.CODEC.optionalFieldOf("target_block").forGetter(MLJsonMapDecorationType::getTarget),
+            //purposefully lenient
+            RuleTest.CODEC.lenientOptionalFieldOf("target_block").forGetter(MLJsonMapDecorationType::getTarget),
             ComponentSerialization.FLAT_CODEC.optionalFieldOf("name").forGetter(MLJsonMapDecorationType::getDisplayName),
             Codec.FLOAT.optionalFieldOf("rotation", 0f).forGetter(MLJsonMapDecorationType::getRotation),
             ColorUtils.CODEC.optionalFieldOf("map_color", 0).forGetter(MLJsonMapDecorationType::getDefaultMapColor),

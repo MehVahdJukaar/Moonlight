@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 public class FoodProvider {
 
     public static final Codec<FoodProvider> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(f -> f.foodItem),
+            Utils.optionalRegistryCodec(BuiltInRegistries.ITEM, Items.AIR).fieldOf("item").forGetter(f -> f.foodItem),
             SoftFluid.Capacity.INT_CODEC.optionalFieldOf("divider", 1).forGetter(f -> f.divider)
     ).apply(instance, FoodProvider::create));
 

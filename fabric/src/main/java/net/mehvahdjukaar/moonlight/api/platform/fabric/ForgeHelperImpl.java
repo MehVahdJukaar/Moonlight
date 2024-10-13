@@ -9,7 +9,10 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
@@ -132,7 +135,9 @@ public class ForgeHelperImpl {
     }
 
     public static Optional<ItemStack> getCraftingRemainingItem(ItemStack itemstack) {
-        return Optional.ofNullable(itemstack.getItem().getCraftingRemainingItem()).map(Item::getDefaultInstance);
+        var r = itemstack.getItem().getRecipeRemainder(itemstack);
+        if (r.isEmpty()) return Optional.empty();
+        return Optional.of(r);
     }
 
     public static void reviveEntity(Entity entity) {
