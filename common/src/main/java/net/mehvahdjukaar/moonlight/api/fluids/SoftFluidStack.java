@@ -65,6 +65,11 @@ public class SoftFluidStack implements DataComponentHolder {
 
     protected SoftFluidStack(Holder<SoftFluid> fluid, int count, DataComponentPatch components) {
         this.fluidHolder = fluid;
+        //validate
+        if (!fluid.canSerializeIn(SoftFluidRegistry.hackyGetRegistry().holderOwner())) {
+            Moonlight.LOGGER.error("Fluid {} cannot be serialized in the current registry", fluid);
+            if (PlatHelper.isDev()) throw new AssertionError();
+        }
         this.fluid = this.fluidHolder.value();
         this.components = PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, Objects.requireNonNull(components));
         this.count = count;
@@ -102,7 +107,7 @@ public class SoftFluidStack implements DataComponentHolder {
 
     @NotNull
     public static SoftFluidStack fromFluid(Fluid fluid, int amount, @NotNull DataComponentPatch component) {
-        Holder<SoftFluid> f = SoftFluidInternal.FLUID_MAP.get(fluid);
+        Holder<SoftFluid> f = SoftFluidInternal.FLUID_MAP.get().get(fluid);
         if (f == null) return empty();
         return of(f, amount, component);
     }
@@ -255,7 +260,7 @@ public class SoftFluidStack implements DataComponentHolder {
     @Nullable
     public static Pair<SoftFluidStack, FluidContainerList.Category> fromItem(ItemStack itemStack) {
         Item filledContainer = itemStack.getItem();
-        Holder<SoftFluid> fluid = SoftFluidInternal.ITEM_MAP.get(filledContainer);
+        Holder<SoftFluid> fluid = SoftFluidInternal.ITEM_MAP.get().get(filledContainer);
 
         if (fluid != null && !fluid.value().isEmptyFluid()) {
             var category = fluid.value().getContainerList()

@@ -22,21 +22,25 @@ import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry.getHolder
 @ApiStatus.Internal
 public class SoftFluidInternal {
 
-    public static final Map<Fluid, Holder<SoftFluid>> FLUID_MAP = new IdentityHashMap<>();
-    public static final Map<Item, Holder<SoftFluid>> ITEM_MAP = new IdentityHashMap<>();
+    //TODO: improve, this isnt very robust. Same with DynamicHolder stuff
+    //needs thread local as each level has its own holderand registry
+    public static final ThreadLocal<Map<Fluid, Holder<SoftFluid>>> FLUID_MAP = ThreadLocal.withInitial(IdentityHashMap::new);
+    public static final ThreadLocal<Map<Item, Holder<SoftFluid>>> ITEM_MAP = ThreadLocal.withInitial(IdentityHashMap::new);
 
     //needs to be called on both sides
     private static void populateSlaveMaps() {
-        FLUID_MAP.clear();
-        ITEM_MAP.clear();
+        var fludiMap = SoftFluidInternal.FLUID_MAP.get();
+        var itemMap = SoftFluidInternal.ITEM_MAP.get();
+        fludiMap.clear();
+        itemMap.clear();
         for (var h : getHolders()) {
             var s = h.value();
             if (s.isEnabled()) {
-                s.getEquivalentFluids().forEach(f -> FLUID_MAP.put(f.value(), h));
+                s.getEquivalentFluids().forEach(f -> fludiMap.put(f.value(), h));
                 s.getContainerList().getPossibleFilled().forEach(i -> {
                     //don't associate water to potion bottle
                     if (i != Items.POTION || !BuiltInSoftFluids.WATER.is(h)) {
-                        ITEM_MAP.put(i, h);
+                        itemMap.put(i, h);
                     }
                 });
             }
@@ -69,7 +73,7 @@ public class SoftFluidInternal {
         populateSlaveMaps();
         //registers existing fluids. also update the salve maps
         //we need to call this on bont server and client as this happens too late and these wont be sent
-        registerExistingVanillaFluids(FLUID_MAP, ITEM_MAP);
+        registerExistingVanillaFluids(FLUID_MAP.get(), ITEM_MAP.get());
     }
 
     @ExpectPlatform
