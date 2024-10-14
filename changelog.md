@@ -1,1 +1,1 @@
-added callback to register custom shaders on fabric
+fixed an issue where the wrong registry access was used for the mod own data objects

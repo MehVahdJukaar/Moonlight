@@ -193,19 +193,20 @@ public class Utils {
     }
 
     @Deprecated(forRemoval = true)
-    public static <T> boolean isTagged(T entry, Registry<T> registry, TagKey<T> tag) {
+    public static <T> boolean ishTagged(T entry, Registry<T> registry, TagKey<T> tag) {
         return registry.wrapAsHolder(entry).is(tag);
     }
 
     //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
         var s = PlatHelper.getCurrentServer();
-        if (s != null) return s.registryAccess();
+        if (s != null && s.isSameThread()) return s.registryAccess();
         if (PlatHelper.getPhysicalSide().isClient()) {
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
             throw new UnsupportedOperationException("Failed to get registry access: level was null");
         }
+        if (s != null) return s.registryAccess();
         throw new UnsupportedOperationException("Failed to get registry access. This is a bug");
     }
 
@@ -229,7 +230,7 @@ public class Utils {
         return p;
     }
 
-    public static BlockHitResult rayTrace(LivingEntity entity, boolean hitsFluids, float partialTicks){
+    public static BlockHitResult rayTrace(LivingEntity entity, boolean hitsFluids, float partialTicks) {
         return (BlockHitResult) entity.pick(ForgeHelper.getReachDistance(entity), partialTicks, hitsFluids);
     }
 

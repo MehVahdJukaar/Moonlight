@@ -21,21 +21,23 @@ import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry.getHolder
 @ApiStatus.Internal
 public class SoftFluidInternal {
 
-    public static final Map<Fluid, Holder<SoftFluid>> FLUID_MAP = new IdentityHashMap<>();
-    public static final Map<Item, Holder<SoftFluid>> ITEM_MAP = new IdentityHashMap<>();
+    public static final ThreadLocal<Map<Fluid, Holder<SoftFluid>>> FLUID_MAP = ThreadLocal.withInitial(IdentityHashMap::new);
+    public static final ThreadLocal<Map<Item, Holder<SoftFluid>>> ITEM_MAP = ThreadLocal.withInitial(IdentityHashMap::new);
 
     //needs to be called on both sides
     private static void populateSlaveMaps() {
-        FLUID_MAP.clear();
-        ITEM_MAP.clear();
+        var fluidMap = SoftFluidInternal.FLUID_MAP.get();
+        var itemMap = SoftFluidInternal.ITEM_MAP.get();
+        fluidMap.clear();
+        itemMap.clear();
         for (var h : getHolders()) {
             var s = h.value();
             if (s.isEnabled()) {
-                s.getEquivalentFluids().forEach(f -> FLUID_MAP.put(f, h));
+                s.getEquivalentFluids().forEach(f -> fluidMap.put(f, h));
                 s.getContainerList().getPossibleFilled().forEach(i -> {
                     //don't associate water to potion bottle
                     if (i != Items.POTION || !BuiltInSoftFluids.WATER.is(h)) {
-                        ITEM_MAP.put(i, h);
+                        itemMap.put(i, h);
                     }
                 });
             }
@@ -58,7 +60,7 @@ public class SoftFluidInternal {
 
     public static void onDataSyncToPlayer(ServerPlayer player, boolean isJoined) {
         //just sends on login
-        if(isJoined) {
+        if (isJoined) {
             ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundFinalizeFluidsMessage());
         }
     }
@@ -68,7 +70,7 @@ public class SoftFluidInternal {
         populateSlaveMaps();
         //registers existing fluids. also update the salve maps
         //we need to call this on bont server and client as this happens too late and these wont be sent
-        registerExistingVanillaFluids(FLUID_MAP, ITEM_MAP);
+        registerExistingVanillaFluids(FLUID_MAP.get(), ITEM_MAP.get());
     }
 
     @ExpectPlatform
