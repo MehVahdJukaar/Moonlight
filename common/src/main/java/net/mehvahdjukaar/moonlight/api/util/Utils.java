@@ -189,11 +189,20 @@ public class Utils {
     //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
         var s = PlatHelper.getCurrentServer();
-        if (s != null) return s.registryAccess();
+        if (s != null && s.isSameThread()) {
+            //if on server thread
+            return s.registryAccess();
+        }
+
         if (PlatHelper.getPhysicalSide().isClient()) {
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
-            throw new UnsupportedOperationException("Failed to get registry access: level was null");
+            else throw new UnsupportedOperationException("Failed to get registry access: level was null");
+        }
+        if (s != null) {
+            //if another thread. shouldnot happen
+            if(PlatHelper.isDev()) throw new UnsupportedOperationException("Cant get registry access from this thread");
+            return s.registryAccess();
         }
         throw new UnsupportedOperationException("Failed to get registry access. This is a bug");
     }
