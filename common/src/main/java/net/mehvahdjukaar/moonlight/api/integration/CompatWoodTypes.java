@@ -4,35 +4,47 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 //place for all known weird hardcoded wood types from mods that aren't getting detected
 public class CompatWoodTypes {
 
     public static void init() {
 
-            // Domum Oranmentum
+        // Domum Oranmentum
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(ResourceLocation.parse("domum_ornamentum:cactus"),
                 ResourceLocation.parse("domum_ornamentum:green_cactus_extra"), ResourceLocation.parse("cactus")));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(ResourceLocation.parse("domum_ornamentum:cactus_extra"),
                 ResourceLocation.parse("domum_ornamentum:cactus_extra"), ResourceLocation.parse("cactus")));
 
-            // Ars Nouveau
+        // spectrum
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, spectrumWood("ebony"));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, spectrumWood("slate"));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, spectrumWood("chestnut"));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, spectrumWood("ivory"));
+
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("spectrum",
+                "ebony_noxwood", "ebony_noxwood_planks", "ebony_noxcap_stem"));
+
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("spectrum",
+                "chestnut_noxwood", "chestnut_noxwood_planks", "chestnut_noxcap_stem"));
+        // Ars Nouveau
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "ars_nouveau", "archwood", "archwood_planks", "blue_archwood_log"));
 
-            // Blue Skies
+        // Blue Skies
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "blue_skies", "crystallized", "crystallized_planks", "crystallized_log"));
 
-            // Darker Depths
+        // Darker Depths
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "darkerdepths", "petrified", "petrified_planks", "petrified_log"));
 
-            // Pokecube Legends
+        // Pokecube Legends
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "pokecube_legends", "concrete", "concrete_planks", "concrete_log"));
 
-            // Terraqueous
+        // Terraqueous
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "terraqueous", "storm_cloud", "storm_cloud", "storm_cloud_column"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
@@ -40,11 +52,11 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "terraqueous", "dense_cloud", "dense_cloud", "dense_cloud_column"));
 
-            // Rats
+        // Rats
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "rats", "pirat", "pirat_planks", "pirat_log"));
 
-            // Oh The Biomes You'll Go
+        // Oh The Biomes You'll Go
         var embur = WoodType.Finder.simple(
                 "byg", "embur", "embur_planks", "embur_pedu");
         embur.addChild("stripped_log", "stripped_embur_pedu");
@@ -53,16 +65,16 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, embur);
 
         // mcreator mod with typos...
-            // Nethers Exoticism
+        // Nethers Exoticism
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "nethers_exoticism", "jabuticaba", "jaboticaba_planks", "jabuticaba_log"));
 
-            // My Nether's Delight
+        // My Nether's Delight
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "mynethersdelight", "powdery", "powdery_planks", "block_of_powdery_cannon"
         ));
 
-            // Nourished End
+        // Nourished End
         var verdant = WoodType.Finder.simple(
                 "nourished_end", "verdant", "verdant_planks", "verdant_stalk");
         verdant.addChild("wood", "verdant_hyphae");
@@ -76,7 +88,7 @@ public class CompatWoodTypes {
         cerulean.addChild("stripped_log", "cerulean_stem_stripped");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, cerulean);
 
-            // Gardens Of The Dead
+        // Gardens Of The Dead
         var soulblight = WoodType.Finder.simple("gardens_of_the_dead",
                 "soulblight", "soulblight_planks", "soulblight_stem");
         cerulean.addChild("stripped_wood", "stripped_soulblight_hyphae");
@@ -87,22 +99,22 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("gardens_of_the_dead",
                 "whistlecane", "whistlecane_block", "whistlecane"));
 
-            // Desolation
+        // Desolation
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("desolation",
                 "charred", "charredlog", "charred_planks"));
 
-            // Damn Of Time Builder
+        // Damn Of Time Builder
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("dawnoftimebuilder",
                 "waxed_oak", "waxed_oak_log_stripped", "waxed_oak_planks"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("dawnoftimebuilder",
                 "charred_spruce", "charred_spruce_log_stripped", "charred_spruce_planks"));
 
 
-            // Habitat
+        // Habitat
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
                 "habitat", "fairy_ring_mushroom", "fairy_ring_mushroom_planks", "enhanced_fairy_ring_mushroom_stem"));
 
-            // Ecologics
+        // Ecologics
         var floweringAzalea = WoodType.Finder.simple(
                 "ecologics", "flowering_azalea", "flowering_azalea_planks", "flowering_azalea_log");
         floweringAzalea.addChild("stripped_log", "stripped_azalea_log");
@@ -114,7 +126,7 @@ public class CompatWoodTypes {
         azalea.addChild("leaves", ResourceLocation.parse("minecraft:azalea_leaves"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, azalea);
 
-            // Quark
+        // Quark
         var quarkAzalea = WoodType.Finder.simple(
                 "quark", "azalea", "azalea_planks", "azalea_log");
         quarkAzalea.addChild("leaves", ResourceLocation.parse("minecraft:azalea_leaves"));
@@ -123,12 +135,12 @@ public class CompatWoodTypes {
 
 
 // LEAVES
-            // Ecologics
+        // Ecologics
         var coconut = LeavesType.Finder.simple("ecologics", "coconut", "coconut_leaves", "ecologics:coconut");
         coconut.addChild("sapling", ResourceLocation.parse("ecologics:coconut_seedling"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, coconut);
 
-            // ARS NOUVEAU
+        // ARS NOUVEAU
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ars_nouveau", "blue_archwood", "blue_archwood_leaves", "ars_nouveau:archwood"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
@@ -138,7 +150,7 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ars_nouveau", "red_archwood", "red_archwood_leaves", "ars_nouveau:archwood"));
 
-            // BIOMES O' PLENTY
+        // BIOMES O' PLENTY
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "biomesoplenty", "origin", "origin_leaves", "oak"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
@@ -154,13 +166,13 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "biomesoplenty", "snowblossom", "snowblossom_leaves", "cherry"));
 
-            // BLUE SKIES
+        // BLUE SKIES
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "blue_skies", "crystallized", "crystallized_leaves", "blue_skies:crystallized"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "blue_skies", "crescent_fruit", "crescent_fruit_leaves", "blue_skies:dusk"));
 
-            // COLORFUL AZALEAS
+        // COLORFUL AZALEAS
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "colorfulazaleas", "blue_azalea", "blue_azalea_leaves", "colorfulazaleas:azule_azalea"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
@@ -210,7 +222,7 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "colorfulazaleas", "yellow_flowering_azalea", "yellow_flowering_azalea_leaves", "colorfulazaleas:fiss_azalea"));
 
-            // POKECUBE LEGENDS
+        // POKECUBE LEGENDS
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "pokecube_legends", "dyna_pastel_pink", "dyna_leaves_pastel_pink", "pokecube_legends:aged"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
@@ -218,13 +230,13 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "pokecube_legends", "dyna_red", "dyna_leaves_red", "pokecube_legends:aged"));
 
-            // REGIONS UNEXPLORED
+        // REGIONS UNEXPLORED
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "regions_unexplored", "bamboo", "bamboo_leaves", "jungle"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "regions_unexplored", "golden_larch", "golden_larch_leaves", "regions_unexplored:larch"));
 
-            // TERRAQUEOUS
+        // TERRAQUEOUS
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "terraqueous", "apple", "apple_leaves", "terraqueous:apple"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
@@ -248,17 +260,17 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "terraqueous", "plum", "plum_leaves", "terraqueous:plum"));
 
-            // THE TWILIGHT FOREST
+        // THE TWILIGHT FOREST
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "twilightforest", "beanstalk", "beanstalk_leaves", "twilightforest:twilight_oak"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "twilightforest", "thorn", "thorn_leaves", "twilightforest:twilight_oak"));
 
-            // ULTERLANDS
+        // ULTERLANDS
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ulterlands", "souldrained", "souldrained_leaves", "oak"));
 
-            // CHIPPED
+        // CHIPPED
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "chipped", "apple_acacia", "apple_acacia_leaves", "acacia"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
@@ -386,5 +398,14 @@ public class CompatWoodTypes {
                 "chipped", "red_spruce", "red_spruce_leaves", "spruce"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "chipped", "white_flower_spruce", "white_flower_spruce_leaves", "spruce"));
+    }
+
+    private static WoodType.@NotNull Finder spectrumWood(String name) {
+        var w = WoodType.Finder.simple("spectrum",
+                name + "_noxwood", name + "_noxwood_planks", "_noxcap_stem");
+        w.addChild("stripped_log", "stripped_" + name + "_noxcap_stem");
+        w.addChild("wood", name + "_noxcap_hyphae");
+        w.addChild("stripped_wood", "stripped_" + name + "_noxcap_hyphae");
+        return w;
     }
 }

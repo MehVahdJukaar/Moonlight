@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
@@ -186,22 +187,22 @@ public class Utils {
         throw new UnsupportedOperationException("Unsupported class type " + object.getClass() + ". Expected a registry entry for a call to Utils.getID()");
     }
 
+    @Deprecated(forRemoval = true)
+    public static <T> boolean isTagged(T entry, Registry<T> registry, TagKey<T> tag) {
+        return registry.wrapAsHolder(entry).is(tag);
+    }
+
     //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
         var s = PlatHelper.getCurrentServer();
-        if (s != null && s.isSameThread()) {
-            //if on server thread
-            return s.registryAccess();
-        }
-
         if (PlatHelper.getPhysicalSide().isClient()) {
+            if ((s != null && s.isSameThread()) || !MoonlightClient.isClientThread()) return s.registryAccess();
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
             else throw new UnsupportedOperationException("Failed to get registry access: level was null");
         }
         if (s != null) {
             //if another thread. shouldnot happen
-            if(PlatHelper.isDev()) throw new UnsupportedOperationException("Cant get registry access from this thread");
             return s.registryAccess();
         }
         throw new UnsupportedOperationException("Failed to get registry access. This is a bug");
