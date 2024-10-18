@@ -11,6 +11,7 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerato
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -49,6 +50,10 @@ public class MoonlightClient {
         for (var n : nameSpaces) mergedDynamicPack.addNamespaces(n);
         mergedDynamicPack.mods++;
         return mergedDynamicPack;
+    }
+
+    public static boolean isClientThread() {
+        return Minecraft.getInstance().isSameThread();
     }
 
     private static class MergedDynamicTexturePack extends DynamicTexturePack {

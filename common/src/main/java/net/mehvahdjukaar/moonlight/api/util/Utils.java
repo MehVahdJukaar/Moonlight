@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.client.Minecraft;
@@ -193,15 +194,15 @@ public class Utils {
     }
 
     @Deprecated(forRemoval = true)
-    public static <T> boolean ishTagged(T entry, Registry<T> registry, TagKey<T> tag) {
+    public static <T> boolean isTagged(T entry, Registry<T> registry, TagKey<T> tag) {
         return registry.wrapAsHolder(entry).is(tag);
     }
 
     //very hacky
     public static RegistryAccess hackyGetRegistryAccess() {
         var s = PlatHelper.getCurrentServer();
-        if (s != null && s.isSameThread()) return s.registryAccess();
         if (PlatHelper.getPhysicalSide().isClient()) {
+            if ((s != null && s.isSameThread()) || !MoonlightClient.isClientThread()) return s.registryAccess();
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
             throw new UnsupportedOperationException("Failed to get registry access: level was null");
