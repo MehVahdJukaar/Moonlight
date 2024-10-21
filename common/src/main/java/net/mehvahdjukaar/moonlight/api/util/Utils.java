@@ -197,7 +197,7 @@ public class Utils {
     public static RegistryAccess hackyGetRegistryAccess() {
         var s = PlatHelper.getCurrentServer();
         if (PlatHelper.getPhysicalSide().isClient()) {
-            if ((s != null && s.isSameThread()) || !MoonlightClient.isClientThread()) return s.registryAccess();
+            if (s != null && (s.isSameThread() || !MoonlightClient.isClientThread())) return s.registryAccess();
             var level = Minecraft.getInstance().level;
             if (level != null) return level.registryAccess();
             else throw new UnsupportedOperationException("Failed to get registry access: level was null");
