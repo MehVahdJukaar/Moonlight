@@ -1,1 +1,1 @@
-fixed another issue with mods that added more threads and did stuff with blocks on them
+fixed yet another weird issue allowing for better compat with mods that add multithreading for stuff

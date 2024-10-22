@@ -72,9 +72,9 @@ public class MoonlightClient {
     @EventCalled
     public static void registerShaders(ClientHelper.ShaderEvent event) {
         event.register(Moonlight.res("particle_translucent"), DefaultVertexFormat.POSITION_TEX,
-                MLRenderTypes.PARTICLE_TRANSLUCENT_SHADER::set);
+                MLRenderTypes.PARTICLE_TRANSLUCENT_SHADER::assign);
         event.register(Moonlight.res("text_alpha_color"), DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
-                MLRenderTypes.TEXT_COLOR_SHADER::set);
+                MLRenderTypes.TEXT_COLOR_SHADER::assign);
 
 
     }

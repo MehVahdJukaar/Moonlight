@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.mehvahdjukaar.moonlight.api.client.CoreShaderContainer;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -27,14 +28,14 @@ import static com.mojang.blaze3d.vertex.DefaultVertexFormat.PARTICLE;
 
 public class MLRenderTypes extends RenderType {
 
-    public static AtomicReference<ShaderInstance> TEXT_COLOR_SHADER = new AtomicReference<>();
-    public static AtomicReference<ShaderInstance> PARTICLE_TRANSLUCENT_SHADER = new AtomicReference<>();
+    public static CoreShaderContainer TEXT_COLOR_SHADER = new CoreShaderContainer(GameRenderer::getPositionTexColorShader);
+    public static CoreShaderContainer PARTICLE_TRANSLUCENT_SHADER = new CoreShaderContainer(GameRenderer::getParticleShader);
 
 
     public static final Function<ResourceLocation, RenderType> COLOR_TEXT = Util.memoize((p) ->
     {
         CompositeState compositeState = CompositeState.builder()
-                .setShaderState(new ShaderStateShard(TEXT_COLOR_SHADER::get))
+                .setShaderState(new ShaderStateShard(TEXT_COLOR_SHADER))
                 .setTextureState(new TextureStateShard(p,
                         false, true))
                 .setTransparencyState(TRANSLUCENT_TRANSPARENCY)

@@ -28,6 +28,8 @@ dependencies {
     modCompileOnly("curse.maven:quark-243121:5344451")
 
 
+    modCompileOnly("curse.maven:irisshaders-455508:5789255")
+
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.3.6"))
 
         annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
