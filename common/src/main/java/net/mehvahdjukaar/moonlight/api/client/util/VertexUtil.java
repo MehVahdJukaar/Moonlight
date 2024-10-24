@@ -5,8 +5,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -282,6 +285,18 @@ public class VertexUtil {
         builder.uv2(lu, lv);
         builder.normal(nx, ny, nz);
         builder.endVertex();
+    }
+
+    private static final Direction[] DIRS = new Direction[]{
+            Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, null
+    };
+
+    public static List<BakedQuad> getAllModelQuads(BakedModel model, BlockState state, RandomSource rand) {
+        List<BakedQuad> allQuads = new ArrayList<>();
+        for (var d : DIRS) {
+            allQuads.addAll(model.getQuads(state, d, rand));
+        }
+        return allQuads;
     }
 
 }
