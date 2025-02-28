@@ -134,21 +134,24 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
         return this.addModifier((s, id, w) -> {
             String r = s;
-            try {
-                ItemLike woodObject = childProvider.apply(w);
-                ResourceLocation newTexture = null;
-                if (woodObject instanceof Block b) {
-                    newTexture = RPUtils.findFirstBlockTextureLocation(manager, b, texturePredicate);
-                } else if (woodObject instanceof Item i) {
-                    newTexture = RPUtils.findFirstItemTextureLocation(manager, i);
-                }
-                if (newTexture != null) {
-                    //try mc namespace
-                    r = s.replace("\"block/", "\"minecraft:block/");
+            // Exclude models/item files with only "parent" - shouldn't be modifying them
+            if (!s.matches("\\{\\s*\"parent\":\\s*\".*\"\\s*\\}")) {
+                try {
+                    ItemLike woodObject = childProvider.apply(w);
+                    ResourceLocation newTexture = null;
+                    if (woodObject instanceof Block b) {
+                        newTexture = RPUtils.findFirstBlockTextureLocation(manager, b, texturePredicate);
+                    } else if (woodObject instanceof Item i) {
+                        newTexture = RPUtils.findFirstItemTextureLocation(manager, i);
+                    }
+                    if (newTexture != null) {
+                        //try mc namespace
+                        r = s.replace("\"block/", "\"minecraft:block/");
 
-                    r = r.replace("\"" + target + "\"", "\"" + newTexture + "\"");
+                        r = r.replace("\"" + target + "\"", "\"" + newTexture + "\"");
+                    }
+                } catch (FileNotFoundException ignored) {
                 }
-            } catch (FileNotFoundException ignored) {
             }
             return r;
         });
