@@ -54,6 +54,10 @@ public class HolderReference<T> {
         return new HolderReference<>(ResourceKey.createRegistryKey(key.registry()), key);
     }
 
+    public static <A> HolderReference.Opt<A> optional(ResourceKey<A> key) {
+        return new HolderReference.Opt<>(ResourceKey.createRegistryKey(key.registry()), key);
+    }
+
     public T getUnsafe() {
         return get(Utils.hackyGetRegistryAccess());
     }
