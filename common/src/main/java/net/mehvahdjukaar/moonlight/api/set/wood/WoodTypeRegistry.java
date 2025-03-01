@@ -29,7 +29,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     @Nullable
     public static WoodType getValue(String woodTypeId) {
-        return INSTANCE.get(new ResourceLocation(woodTypeId));
+        return INSTANCE.get(ResourceLocation.parse(woodTypeId));
     }
 
     @Deprecated(forRemoval = true)
