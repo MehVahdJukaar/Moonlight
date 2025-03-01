@@ -1,1 +1,3 @@
-- made it so fake players fromm both loaders dont try to adjust their spawn position. technically this could be considered a vanilla (or forge/fabric) bug as when spawn radius is large the setting of spawn position can take a tremendous amount of time, obviously not even needed for fake players
+- **LANG**: Updated zh_cn - @ChuijkYahus
+- **WoodTypeRegistry** & **LeavesTypeRegistry**: Added methods for **EveryCompat**
+- **BlockTypeResTransformer**: Improved RegEx to fix a bug in **EveryCompat**
