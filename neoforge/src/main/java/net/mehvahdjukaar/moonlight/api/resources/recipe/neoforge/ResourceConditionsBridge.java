@@ -36,7 +36,7 @@ public class ResourceConditionsBridge {
         JsonElement conditionElement = obj.get(conditionKey);
         if (conditionElement != null) {
             if (obj.has("neoforge:conditions")) {
-                return false;
+                return true;
             }
             var newObj = replaceKeyInJsonRecursive(conditionElement,
                     "condition", "type",
