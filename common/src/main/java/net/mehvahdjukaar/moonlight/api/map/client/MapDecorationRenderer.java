@@ -94,7 +94,9 @@ public class MapDecorationRenderer<T extends MLMapDecoration> {
         //vertexBuilder = sprite.wrap(vertexBuilder);
 
         if (alpha != 0) {
-            RenderUtil.renderSprite(matrixStack, vertexBuilder, light, index, b, g, r, alpha, sprite);
+            matrixStack.pushPose();
+            matrixStack.translate(0,0,index * -0.001F);
+            RenderUtil.renderSprite(matrixStack, vertexBuilder, light, b, g, r, alpha, sprite);
 
             if (outline) {
                 //we cant tint white fabric so might as well make it black
@@ -106,12 +108,14 @@ public class MapDecorationRenderer<T extends MLMapDecoration> {
                         if (j != 0 || k != 0) {
                             matrixStack.pushPose();
                             matrixStack.translate(j * 0.125, k * 0.125, 0.001);
-                            RenderUtil.renderSprite(matrixStack, vb2, LightTexture.FULL_BRIGHT, index, tint, tint, tint, alpha, sprite);
+
+                            RenderUtil.renderSprite(matrixStack, vb2, LightTexture.FULL_BRIGHT, tint, tint, tint, alpha, sprite);
                             matrixStack.popPose();
                         }
                     }
                 }
             }
+            matrixStack.popPose();
         }
     }
 

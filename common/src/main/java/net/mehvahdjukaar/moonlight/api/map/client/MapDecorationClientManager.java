@@ -3,16 +3,14 @@ package net.mehvahdjukaar.moonlight.api.map.client;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.MapRenderer;
+import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.TextureAtlasHolder;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
@@ -39,21 +37,25 @@ public class MapDecorationClientManager {
 
     private static final Map<MLMapDecorationType<?, ?>, MapDecorationRenderer<?>> RENDERERS = Maps.newHashMap();
 
-
-    private static <T extends MLMapDecoration> MapDecorationRenderer<T> createRenderer(MLMapDecorationType<T, ?> type) {
-        var id = Utils.getID(type);
-        ResourceLocation texture = id.withPath( "map_marker/" + id.getPath());
-        var custom = CUSTOM_RENDERERS_FACTORIES.get(type.getCustomFactoryID());
-        if (custom != null) return (MapDecorationRenderer<T>) custom.apply(texture);
-        else return new MapDecorationRenderer<>(texture);
+    private static MapDecorationRenderer<?> createRenderer(Holder<MLMapDecorationType<?, ?>> type) {
+        ResourceLocation id = type.unwrapKey().get().location();
+        var custom = CUSTOM_RENDERERS_FACTORIES.get(type.value().getCustomFactoryID());
+        if (custom != null) return custom.apply(id);
+        else return new MapDecorationRenderer<>(id);
     }
+
 
     public static <E extends MLMapDecoration> MapDecorationRenderer<E> getRenderer(E decoration) {
-        return (MapDecorationRenderer<E>) getRenderer(decoration.getType().value());
+        return getRenderer(decoration.getType());
     }
 
+    @Deprecated(forRemoval = true)
     public static <E extends MLMapDecoration, T extends MLMapDecorationType<E, ?>> MapDecorationRenderer<E> getRenderer(T type) {
-        return (MapDecorationRenderer<E>) RENDERERS.computeIfAbsent(type, t -> createRenderer(type));
+        return getRenderer(MapDataInternal.hackyGetRegistry().wrapAsHolder(type));
+    }
+
+    public static <E extends MLMapDecoration> MapDecorationRenderer<E> getRenderer(Holder<MLMapDecorationType<?, ?>> type) {
+        return (MapDecorationRenderer<E>) RENDERERS.computeIfAbsent(type.value(), t -> createRenderer(type));
     }
 
     public static <T extends MLMapDecoration> boolean render(T decoration, PoseStack matrixStack,

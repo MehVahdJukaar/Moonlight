@@ -142,19 +142,19 @@ public class RenderUtil {
         graphics.blit(sprite.atlasLocation(), x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
     }
 
-    public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light, int index,
+    public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light,
                                     int b, int g, int r, TextureAtlasSprite sprite) {
-        renderSprite(stack, vertexBuilder, light, index, b, g, r, 255, sprite);
+        renderSprite(stack, vertexBuilder, light, b, g, r, 255, sprite);
     }
 
-    public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light, int index,
+    public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light,
                                     int b, int g, int r, int a, TextureAtlasSprite sprite) {
         Matrix4f matrix4f1 = stack.last().pose();
         float u0 = sprite.getU(0);
-        float u1 = sprite.getU(16);
+        float u1 = sprite.getU(1);
         float h = (u0 + u1) / 2.0f;
         float v0 = sprite.getV(0);
-        float v1 = sprite.getV(16);
+        float v1 = sprite.getV(1);
         float k = (v0 + v1) / 2.0f;
         float shrink = sprite.uvShrinkRatio();
         float u0s = Mth.lerp(shrink, u0, h);
@@ -162,10 +162,10 @@ public class RenderUtil {
         float v0s = Mth.lerp(shrink, v0, k);
         float v1s = Mth.lerp(shrink, v1, k);
 
-        vertexBuilder.addVertex(matrix4f1, -1.0F, 1.0F, index * -0.001F).setColor(r, g, b, a).setUv(u0s, v1s).setLight(light);
-        vertexBuilder.addVertex(matrix4f1, 1.0F, 1.0F, index * -0.001F).setColor(r, g, b, a).setUv(u1s, v1s).setLight(light);
-        vertexBuilder.addVertex(matrix4f1, 1.0F, -1.0F, index * -0.001F).setColor(r, g, b, a).setUv(u1s, v0s).setLight(light);
-        vertexBuilder.addVertex(matrix4f1, -1.0F, -1.0F, index * -0.001F).setColor(r, g, b, a).setUv(u0s, v0s).setLight(light);
+        vertexBuilder.addVertex(matrix4f1, -1.0F, 1.0F, 0).setColor(r, g, b, a).setUv(u0s, v1s).setLight(light);
+        vertexBuilder.addVertex(matrix4f1, 1.0F, 1.0F, 0).setColor(r, g, b, a).setUv(u1s, v1s).setLight(light);
+        vertexBuilder.addVertex(matrix4f1, 1.0F, -1.0F, 0).setColor(r, g, b, a).setUv(u1s, v0s).setLight(light);
+        vertexBuilder.addVertex(matrix4f1, -1.0F, -1.0F, 0).setColor(r, g, b, a).setUv(u0s, v0s).setLight(light);
     }
 
 

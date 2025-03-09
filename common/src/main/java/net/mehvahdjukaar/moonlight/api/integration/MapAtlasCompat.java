@@ -10,12 +10,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
-import pepjebs.mapatlases.MapAtlasesMod;
 import pepjebs.mapatlases.client.MapAtlasesClient;
-import pepjebs.mapatlases.item.MapAtlasItem;
-import pepjebs.mapatlases.map_collection.MapKey;
 
-@Deprecated(forRemoval = true) //use the internal one of make your own
+@Deprecated(forRemoval = true) //Make your own one!
 public class MapAtlasCompat {
 
     public static boolean isAtlas(Item item) {
@@ -29,7 +26,7 @@ public class MapAtlasCompat {
 
     @Nullable
     public static Integer getMapIdFromAtlas(ItemStack atlas, Level level, Object data) {
-        return net.mehvahdjukaar.moonlight.core.integration.MapAtlasCompat.getMapIdFromAtlas(atlas, level, data);
+        return null;
     }
 
     @Environment(EnvType.CLIENT)

@@ -1,1 +1,3 @@
-fixed a recipe bug
+- fixed an issue with map packet
+- updated map atlases compat
+- fixed custom map markers not rendering correctly

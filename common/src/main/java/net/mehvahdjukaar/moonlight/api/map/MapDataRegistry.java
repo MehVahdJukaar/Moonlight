@@ -4,9 +4,11 @@ import io.netty.buffer.ByteBuf;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
+import net.mehvahdjukaar.moonlight.api.misc.HolderReference;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -28,6 +30,9 @@ public class MapDataRegistry {
 
     public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.KEY;
 
+    public static final HolderReference<MLMapDecorationType<?,?>> GENERIC_STRUCTURE_MARKER = HolderReference.of(MapDataInternal.GENERIC_STRUCTURE_ID,
+            REGISTRY_KEY);
+
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
      **/
@@ -39,10 +44,6 @@ public class MapDataRegistry {
             ResourceLocation id, Supplier<T> factory,
             StreamCodec<? super RegistryFriendlyByteBuf, P> patchCodec) {
         return registerCustomMapSavedData(new CustomMapData.Type<>(id, factory, patchCodec));
-    }
-
-    public static MLMapDecorationType<?, ?> getDefaultType() {
-        return MapDataInternal.getGenericStructure();
     }
 
     /**
@@ -101,5 +102,11 @@ public class MapDataRegistry {
     @Nullable
     public static Holder<MLMapDecorationType<?, ?>> getHolder(ResourceLocation id) {
         return MapDataInternal.getHolder(id);
+    }
+
+
+    @Deprecated(forRemoval = true)
+    public static MLMapDecorationType<?, ?> getDefaultType() {
+        return MapDataInternal.getGenericStructure();
     }
 }

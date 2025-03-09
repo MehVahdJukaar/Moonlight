@@ -48,6 +48,7 @@ public class MapDataInternal {
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
     private static final MapRegistry<Supplier<MLSpecialMapDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new MapRegistry<>("code_map_decoration_types_factories");
 
+    @Deprecated(forRemoval = true)
     public static MLMapDecorationType<?, ?> getGenericStructure() {
         return getOrDefault(GENERIC_STRUCTURE_ID);
     }
