@@ -1,3 +1,4 @@
-- **LANG**: Updated zh_cn - @ChuijkYahus
-- **WoodTypeRegistry** & **LeavesTypeRegistry**: Added methods for **EveryCompat**
-- **BlockTypeResTransformer**: Improved RegEx to fix a bug in **EveryCompat**
+- **LANG**: 
+  - Added es_mx - @Santiago Hernandez
+  - Added it_it - @Micky
+- **CompatWoodType**: Corrected the children of **Eternal-Tales**' comets
