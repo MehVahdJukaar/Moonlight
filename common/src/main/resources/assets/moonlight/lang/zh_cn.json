@@ -11,7 +11,12 @@
   "tag.block.minecraft.mineable.shear": "剪刀可破坏",
 
 
-  
+
+  "moonlight.configuration.general": "通用",
+  "moonlight.configuration.clear_dynamic_resources": "清除动态资源包",
+
+
+
   "wood_type.minecraft.oak": "橡木",
   "wood_type.minecraft.spruce": "云杉木",
   "wood_type.minecraft.birch": "白桦木",
@@ -150,7 +155,7 @@
   "leaves_type.ars_nouveau.red_archwood": "烈焰至高",
   "leaves_type.ars_nouveau.green_archwood": "繁茂至高",
   "leaves_type.ars_nouveau.purple_archwood": "恼人至高",
-  
+
   "wood_type.arts_and_crafts.cork": "软木",
   "leaves_type.arts_and_crafts.cork": "软木",
 
