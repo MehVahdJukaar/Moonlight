@@ -267,7 +267,7 @@ public class ClientHelperImpl {
                             folderName.toString(),
                             true,
                             file.findResource("resourcepacks/" + folderName.getPath()))) {
-                        var metadata = Objects.requireNonNull(pack.getMetadataSection(PackMetadataSection.TYPE));
+                        var metadata = Objects.requireNonNull(pack.getMetadataSection(PackMetadataSection.TYPE), "Missing pack.mcmeta for pack " + folderName);
                         return Pack.create(
                                 folderName.toString(),
                                 displayName,

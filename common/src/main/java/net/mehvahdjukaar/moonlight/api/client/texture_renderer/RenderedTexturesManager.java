@@ -159,6 +159,13 @@ public class RenderedTexturesManager {
      * If you render an item at 0,0 it will be centered
      */
     public static void drawAsInGUI(FrameBufferBackedDynamicTexture tex, Consumer<PoseStack> drawFunction) {
+        float fogStart = RenderSystem.getShaderFogStart();
+        float fogEnd = RenderSystem.getShaderFogEnd();
+        RenderSystem.setShaderFogStart(Integer.MAX_VALUE);
+        RenderSystem.setShaderFogEnd(Integer.MAX_VALUE);
+
+        RenderSystem.clear(256, Minecraft.ON_OSX);
+
         Minecraft mc = Minecraft.getInstance();
         RenderTarget frameBuffer = tex.getFrameBuffer();
         frameBuffer.clear(Minecraft.ON_OSX);
@@ -196,6 +203,10 @@ public class RenderedTexturesManager {
         //RenderSystem.clear(256, Minecraft.ON_OSX);
         //returns render calls to main render target
         mc.getMainRenderTarget().bindWrite(true);
+
+        RenderSystem.setShaderFogStart(fogStart);
+        RenderSystem.setShaderFogEnd(fogEnd);
+
     }
 
 

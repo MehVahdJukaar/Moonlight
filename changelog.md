@@ -1,1 +1,2 @@
-- made it so fake players fromm both loaders dont try to adjust their spawn position. technically this could be considered a vanilla (or forge/fabric) bug as when spawn radius is large the setting of spawn position can take a tremendous amount of time, obviously not even needed for fake players
+- improved flat texture gen
+- better logging in some places
