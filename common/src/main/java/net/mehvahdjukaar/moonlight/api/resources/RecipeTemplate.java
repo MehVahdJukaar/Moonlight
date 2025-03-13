@@ -4,9 +4,11 @@ import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import org.jetbrains.annotations.NotNull;
@@ -91,7 +93,7 @@ public class RecipeTemplate {
         List<Ingredient> newList = convertIngredients(or.getIngredients(), from, to);
         ItemStack originalResult = or.getResultItem(RegistryAccess.EMPTY);
         ItemStack newResult = convertItemStack(originalResult, from, to);
-        if (newResult == null) throw new UnsupportedOperationException("Failed to convert recipe result");
+        if (newResult == null) throw new UnsupportedOperationException("Failed to convert shaped recipe result");
         NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
 
         ShapedRecipePattern pattern = new ShapedRecipePattern(or.getWidth(), or.getHeight(), ingredients,
@@ -143,7 +145,7 @@ public class RecipeTemplate {
 
     @Nullable
     public static <T extends BlockType> ItemStack convertItemStack(ItemStack original, T from, T to) {
-        var changed = BlockType.changeItemType(original.getItem(), from, to);
+        Item changed = BlockType.changeItemType(original.getItem(), from, to);
         if (changed == null) return null;
         return original.transmuteCopy(changed);
     }

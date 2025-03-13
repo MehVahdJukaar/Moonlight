@@ -116,9 +116,13 @@ public class RenderUtil {
         throw new ArrayStoreException();
     }
 
+    @Deprecated(forRemoval = true)
     public static GuiGraphics getGuiDummy(PoseStack poseStack) {
         var mc = Minecraft.getInstance();
-        return new GuiGraphics(mc, poseStack, mc.renderBuffers().bufferSource());
+        var p = new GuiGraphics(mc, mc.renderBuffers().bufferSource());
+        p.pose().setIdentity();
+        p.pose().mulPose(poseStack.last().pose());
+        return p;
     }
 
     /**

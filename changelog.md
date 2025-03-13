@@ -1,3 +1,1 @@
-- fixed an issue with map packet
-- updated map atlases compat
-- fixed custom map markers not rendering correctly
+- improved flat texture renderer to clear more gl states and work better with mods

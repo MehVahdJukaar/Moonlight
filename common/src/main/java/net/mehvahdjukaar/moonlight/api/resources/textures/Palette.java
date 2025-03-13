@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HCLColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.LABColor;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
@@ -688,7 +689,7 @@ public class Palette implements Set<PaletteColor> {
         if (tolerance != 0) palette.updateTolerance(tolerance);
 
         if (palette.isEmpty()) {
-            throw new RuntimeException("Palette from image " + textureImage + " ended ub being empty");
+            Moonlight.LOGGER.error("Palette from image {} ended up being empty", textureImage);
         }
         return palette;
     }

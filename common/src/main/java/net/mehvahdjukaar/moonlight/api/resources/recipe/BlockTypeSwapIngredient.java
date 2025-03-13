@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +81,7 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
             if (type != this.fromType) {
                 break;
             } else {
-                var newItem = BlockType.changeItemType(it.getItem(), this.fromType, this.toType);
+                Item newItem = BlockType.changeItemType(it.getItem(), this.fromType, this.toType);
                 if (newItem != null) {
                     newItems.add(it.transmuteCopy(newItem));
                     success = true;

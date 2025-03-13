@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins.neoforge;
 
+import com.google.common.base.Preconditions;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.neoforge.ExtraModelDataImpl;
@@ -42,7 +43,7 @@ public interface SelfCustomBakedModel extends IDynamicBakedModel, CustomBakedMod
     @NotNull
     default ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
         ExtraModelData d = modelData == ModelData.EMPTY ? ExtraModelDataImpl.EMPTY : new ExtraModelDataImpl(modelData);
-        ExtraModelDataImpl wrapped = (ExtraModelDataImpl) getModelData(d, pos, state, level);
-        return wrapped.data();
+        ExtraModelDataImpl wrapped = (ExtraModelDataImpl) getModelData(Preconditions.checkNotNull(d, "tile entity model data was null.How?"), pos, state, level);
+        return Preconditions.checkNotNull(wrapped, "getModelData returned null. How?").data();
     }
 }

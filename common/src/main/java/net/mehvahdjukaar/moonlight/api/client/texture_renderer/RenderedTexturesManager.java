@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -117,26 +118,26 @@ public class RenderedTexturesManager {
     //Utility methods
 
     public static void drawItem(FrameBufferBackedDynamicTexture tex, ItemStack stack) {
-        drawAsInGUI(tex, s -> {
+        drawAsInGUI(tex, g -> {
             //render stuff
-            RenderUtil.getGuiDummy(s).renderFakeItem(stack, 0, 0);
+            g.renderFakeItem(stack, 0, 0);
         });
     }
 
     public static void drawTexture(FrameBufferBackedDynamicTexture tex, ResourceLocation texture) {
         RenderedTexturesManager.drawAsInGUI(tex, s -> {
             RenderSystem.setShaderTexture(0, texture);
-            var matrix = s.last().pose();
+            PoseStack.Pose pose = s.pose().last();
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
             RenderSystem.disableBlend();
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1);
             BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            bufferBuilder.addVertex(matrix, 0.0f, 16, 0).setUv(0, 0);
-            bufferBuilder.addVertex(matrix, 16, 16, 0).setUv(1, 0);
-            bufferBuilder.addVertex(matrix, 16, 0.0f, 0).setUv(1, 1);
-            bufferBuilder.addVertex(matrix, 0.0f, 0.0f, 0).setUv(0, 1);
+            bufferBuilder.addVertex(pose, 0.0f, 16, 0).setUv(0, 0);
+            bufferBuilder.addVertex(pose, 16, 16, 0).setUv(1, 0);
+            bufferBuilder.addVertex(pose, 16, 0.0f, 0).setUv(1, 1);
+            bufferBuilder.addVertex(pose, 0.0f, 0.0f, 0).setUv(0, 1);
             BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
         });
     }
@@ -145,7 +146,8 @@ public class RenderedTexturesManager {
      * Coordinates here are from 0 to 1
      */
     public static void drawNormalized(FrameBufferBackedDynamicTexture tex, Consumer<PoseStack> drawFunction) {
-        drawAsInGUI(tex, s -> {
+        drawAsInGUI(tex, g -> {
+            var s = g.pose();
             float scale = 1f / 16f;
             s.translate(8, 8, 0);
             s.scale(scale, scale, 1);
@@ -157,7 +159,16 @@ public class RenderedTexturesManager {
      * Utility method that sets up an environment akin to gui rendering with a box from 0 t0 16.
      * If you render an item at 0,0 it will be centered
      */
-    public static void drawAsInGUI(FrameBufferBackedDynamicTexture tex, Consumer<PoseStack> drawFunction) {
+    public static void drawAsInGUI(FrameBufferBackedDynamicTexture tex, Consumer<GuiGraphics> drawFunction) {
+        //fog bs that idk why its needed with flywheel. MC gui code doesnt need that
+        float fogStart = RenderSystem.getShaderFogStart();
+        float fogEnd = RenderSystem.getShaderFogEnd();
+        RenderSystem.setShaderFogStart(Integer.MAX_VALUE);
+        RenderSystem.setShaderFogEnd(Integer.MAX_VALUE);
+
+        RenderSystem.clear(256, Minecraft.ON_OSX);
+
+
         Minecraft mc = Minecraft.getInstance();
         RenderTarget frameBuffer = tex.getFrameBuffer();
         frameBuffer.clear(Minecraft.ON_OSX);
@@ -183,7 +194,9 @@ public class RenderedTexturesManager {
         //end gui setup code
 
         //item renderer needs a new pose stack as it applies its last to render system itself. for the rest tbh idk
-        drawFunction.accept(new PoseStack());
+        GuiGraphics guiGraphics = new GuiGraphics(mc, mc.renderBuffers().bufferSource());
+        drawFunction.accept(guiGraphics);
+        guiGraphics.flush();
 
         //reset stuff
         posestack.popMatrix();
@@ -195,6 +208,10 @@ public class RenderedTexturesManager {
         //RenderSystem.clear(256, Minecraft.ON_OSX);
         //returns render calls to main render target
         mc.getMainRenderTarget().bindWrite(true);
+
+        //and apparently not resetting causes clouds to be messed up
+        RenderSystem.setShaderFogStart(fogStart);
+        RenderSystem.setShaderFogEnd(fogEnd);
     }
 
 

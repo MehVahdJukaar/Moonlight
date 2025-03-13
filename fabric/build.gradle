@@ -45,6 +45,7 @@ dependencies {
     modCompileOnly "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
     //modRuntimeOnly("curse.maven:gardens-of-the-dead-683174:4784268")
     //modRuntimeOnly("curse.maven:architectury-api-419699:5137936")
+    modImplementation("pebjebs.mapatlases:map_atlases-fabric:1.21-6.1.2")
 
     modCompileOnly("maven.modrinth:flashback:0.11.0") // Get latest version from releases
 
