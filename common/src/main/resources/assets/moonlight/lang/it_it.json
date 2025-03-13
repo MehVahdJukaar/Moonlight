@@ -1,0 +1,12 @@
+{
+  "fluid.moonlight.generic_fluid": "Fluido senza nome",
+  "item.minecraft.potion_lingering": "Pozione persistente",
+  "item.minecraft.potion_splash": "Pozione da lancio",
+  "gui.moonlight.open_mod_page": "Apri pagina CurseForge di %s",
+  "message.moonlight.anti_repost": "Sembra che tu abbia scaricato %1$s da un sito dannoso :( Scarica la versione reale %2$s.",
+  "message.moonlight.anti_repost_link": "qui",
+
+  "wood_type.twilightforest.dark": "Legnoscuro",
+  "leaves_type.twilightforest.dark": "Legnoscuro",
+  "leaves_type.ulterlands.souldrained": "Pietrificato"
+}

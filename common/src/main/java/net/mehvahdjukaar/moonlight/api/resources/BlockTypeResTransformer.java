@@ -181,21 +181,24 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
         return this.addModifier((s, id, w) -> {
             String r = s;
-            try {
-                ItemLike woodObject = childProvider.apply(w);
-                ResourceLocation newTexture = null;
-                if (woodObject instanceof Block b) {
-                    newTexture = RPUtils.findFirstBlockTextureLocation(manager, b, texturePredicate);
-                } else if (woodObject instanceof Item i) {
-                    newTexture = RPUtils.findFirstItemTextureLocation(manager, i);
-                }
-                if (newTexture != null) {
-                    //try mc namespace
-                    r = s.replace("\"block/", "\"minecraft:block/");
+            // Exclude models/item files with only "parent" - shouldn't be modifying them
+            if (!s.matches("\\{\\s*\"parent\":\\s*\".*\"\\s*\\}")) {
+                try {
+                    ItemLike woodObject = childProvider.apply(w);
+                    ResourceLocation newTexture = null;
+                    if (woodObject instanceof Block b) {
+                        newTexture = RPUtils.findFirstBlockTextureLocation(manager, b, texturePredicate);
+                    } else if (woodObject instanceof Item i) {
+                        newTexture = RPUtils.findFirstItemTextureLocation(manager, i);
+                    }
+                    if (newTexture != null) {
+                        //try mc namespace
+                        r = s.replace("\"block/", "\"minecraft:block/");
 
-                    r = r.replace("\"" + target + "\"", "\"" + newTexture + "\"");
+                        r = r.replace("\"" + target + "\"", "\"" + newTexture + "\"");
+                    }
+                } catch (FileNotFoundException ignored) {
                 }
-            } catch (FileNotFoundException ignored) {
             }
             return r;
         });
@@ -259,7 +262,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
     public static String replaceFullGenericType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName,
                                                 @Nullable String oldNamespace, String folderName) {
 
-        Pattern blockPathSubPathPattern = Pattern.compile("([^,]*(?=\\/))");
+        Pattern blockPathSubPathPattern = Pattern.compile("([^,]*(?=/))");
         Matcher blockPathSubPathMather = blockPathSubPathPattern.matcher(blockId.getPath());
         String blockFolderPrefix = blockPathSubPathMather.find() ? blockPathSubPathMather.group(1) : ""; //"mcf/create"
         String blockTypeName = blockType.getTypeName(); // path of block id "scoria"
@@ -267,11 +270,13 @@ public class BlockTypeResTransformer<T extends BlockType> {
         String newNamespace = oldNamespace == null ? "" : blockId.getNamespace() + ":";
         oldNamespace = oldNamespace == null ? "" : oldNamespace + ":";
         // grabs first folder it finds as folder name if given is empty
-        String folderRegEx = "(" + folderName + ")\\/";
+        String folderRegEx = "(" + folderName + ")/";
+
+        String excludeKeyword = "(?<![a-z]stone)"; // exclude "flagstone", or other keywords with "stone"
 
         //pattern to find sub folders. Does not include "/"
         //matches stuff between (oldNamespace + folderName) and oldTypeName not including leading or trailing slashes
-        Pattern subFolderPattern = Pattern.compile(oldNamespace + folderRegEx + "([\\w,\\/,\\-]*)" + oldTypeName); // \w is similar to [a-z,A-Z,_]
+        Pattern subFolderPattern = Pattern.compile(oldNamespace + folderRegEx + "([\\w,/,\\-]*)" + oldTypeName +  excludeKeyword); // \w is similar to [a-z,A-Z,_]
         Matcher subFolderMatcher = subFolderPattern.matcher(text);
 
         return subFolderMatcher.replaceAll(m -> {

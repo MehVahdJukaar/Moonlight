@@ -23,8 +23,13 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     }
 
     @Nullable
-    public static WoodType getValue(ResourceLocation name) {
-        return INSTANCE.get(name);
+    public static WoodType getValue(ResourceLocation woodTypeId) {
+        return INSTANCE.get(woodTypeId);
+    }
+
+    @Nullable
+    public static WoodType getValue(String woodTypeId) {
+        return INSTANCE.get(new ResourceLocation(woodTypeId));
     }
 
     public static WoodType fromNBT(String name) {

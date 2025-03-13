@@ -22,8 +22,13 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     @Nullable
-    public static LeavesType getValue(ResourceLocation name) {
-        return INSTANCE.get(name);
+    public static LeavesType getValue(ResourceLocation leavesTypeId) {
+        return INSTANCE.get(leavesTypeId);
+    }
+
+    @Nullable
+    public static LeavesType getValue(String leavesTypeId) {
+        return INSTANCE.get(new ResourceLocation(leavesTypeId));
     }
 
     public static LeavesType fromNBT(String name) {

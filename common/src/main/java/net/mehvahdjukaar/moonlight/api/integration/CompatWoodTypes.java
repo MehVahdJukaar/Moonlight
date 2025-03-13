@@ -12,7 +12,7 @@ public class CompatWoodTypes {
 
     public static void init() {
         // Eternal Tales
-        var comets = WoodType.Finder.simple("eternal_tales", "comets", "comets_log", "comets_log");
+        var comets = WoodType.Finder.simple("eternal_tales", "comets", "comets_planks", "comets_log");
         comets.addChild("stripped_log", "striped_comets_log");
         BlockSetAPI.addBlockTypeFinder(WoodType.class, comets);
 
