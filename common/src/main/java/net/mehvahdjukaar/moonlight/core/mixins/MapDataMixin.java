@@ -196,21 +196,22 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
             expandedMapData.getCustomMarkers().putAll(this.getCustomMarkers());
             expandedMapData.getCustomDecorations().putAll(this.getCustomDecorations());
         }
-        moonlight$copyCustomData(data);
+        moonlight$copyCustomData(data, false);
     }
 
     @Inject(method = "scaled", at = @At("RETURN"))
     public void scaled(CallbackInfoReturnable<MapItemSavedData> cir) {
         MapItemSavedData data = cir.getReturnValue();
-        moonlight$copyCustomData(data);
+        moonlight$copyCustomData(data, true);
     }
 
     @Unique
-    private void moonlight$copyCustomData(MapItemSavedData data) {
+    private void moonlight$copyCustomData(MapItemSavedData data, boolean isScaled) {
         if (data instanceof ExpandedMapData ed) {
-            for(var d : this.moonlight$customData.entrySet()) {
-                var v = d.getValue();
-                if(v.persistOnCopyOrLock()) {
+            for (var entry : this.moonlight$customData.entrySet()) {
+                CustomMapData<?,?> customData = entry.getValue();
+                boolean persists = isScaled ? customData.persistOnRescale() : customData.persistOnCopyOrLock();
+                if (persists) {
                     CompoundTag t = new CompoundTag();
                     v.save(t);
                     ed.getCustomData().get(d.getKey()).load(t);

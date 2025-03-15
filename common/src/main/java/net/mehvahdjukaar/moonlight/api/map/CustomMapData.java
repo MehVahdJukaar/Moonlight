@@ -32,6 +32,10 @@ public interface CustomMapData<H extends CustomMapData.DirtyCounter> {
         return true;
     }
 
+    default boolean persistOnRescale(){
+        return true;
+    }
+
     default boolean onItemUpdate(MapItemSavedData data, Entity entity) {
         return false;
     }

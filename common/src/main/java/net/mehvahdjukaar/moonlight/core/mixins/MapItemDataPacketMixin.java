@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,7 +63,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
             at = @At("RETURN"))
     private void addExtraCenterAndDimension(int mapId, byte b, boolean bl, Collection collection, MapItemSavedData.MapPatch mapPatch, CallbackInfo ci) {
         var level = PlatHelper.getCurrentServer().getLevel(Level.OVERWORLD);
-        moonlight$dimension = null;
         if (level != null) {
             MapItemSavedData data = Moonlight.getMapDataFromKnownKeys(level, mapId);
             if (data != null) {
@@ -128,6 +128,7 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         }
     }
 
+    @NotNull
     @Override
     public void moonlight$sendCustomDecorations(Collection<CustomMapDecoration> decorations) {
 
