@@ -1,12 +1,15 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ChunkTaskPriorityQueueSorter;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.thread.ProcessorHandle;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.ApiStatus;
@@ -46,15 +49,4 @@ public class CompatHandler {
         return 0;
     }
 
-    public static MapItemSavedData getMapDataFromKnownKeys(ServerLevel level, MapId mapId) {
-        var d = level.getMapData(mapId);
-        /* //TODO: fix this
-        if (d == null) {
-            d = level.getMapData("magicmap_" + mapId);
-            if (d == null) {
-                d = level.getMapData("mazemap_" + mapId);
-            }
-        }*/
-        return d;
-    }
 }

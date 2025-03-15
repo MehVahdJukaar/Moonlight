@@ -6,7 +6,6 @@ import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
@@ -21,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,10 +61,10 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
             at = @At("RETURN"))
     private void moonlight$addExtraCenterAndDimension(MapId mapId, byte b, boolean bl, Optional optional, Optional optional2, CallbackInfo ci) {
         var server = PlatHelper.getCurrentServer();
-        moonlight$dimension = null;
         // on server side we add extra data like this
-        if (server != null && server.getLevel(Level.OVERWORLD) instanceof ServerLevel sl) {
-            MapItemSavedData data = CompatHandler.getMapDataFromKnownKeys(sl, mapId);
+        if (server != null && server.overworld() instanceof ServerLevel sl) {
+            MapItemSavedData data = sl.getMapData(mapId);
+            //we are assuming here that this packet i FOR the vanilla map. we'll need to add additional constructor logic to se these for another mod map in a mixin... I dont see a way around this, we are missing information
             if (data != null) {
                 this.moonlight$mapCenterX = data.centerX;
                 this.moonlight$mapCenterZ = data.centerZ;
@@ -119,6 +119,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
         moonlight$customDataPatches = tag.map(List::copyOf).orElse(null);
     }
 
+    @NotNull
     @Override
     public ResourceLocation moonlight$getDimension() {
         return moonlight$dimension;

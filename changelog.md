@@ -1,1 +1,1 @@
-- improved flat texture renderer to clear more gl states and work better with mods
+made some of the custom map packet code more resilient
