@@ -13,6 +13,11 @@ import org.jetbrains.annotations.NotNull;
 public class CompatWoodTypes {
 
     public static void init() {
+
+        // Deeper And Darker
+        BlockSetAPI.addBlockTypeFinder(WoodType.class,
+                altSimpleStemFinder("deeperdarker", "blooming", "bloom"));
+
         // Eternal Tales
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
                 advancedWoodFinder("eternal_tales", "comets", "comets_planks", "log", "wood", "striped_comets_log", ""));
