@@ -1,4 +1,4 @@
-- **ADDED** undetected WoodType: Deeper-&-Darker's Bloom
+- Forgot to remove logging stuff via CompatWoodType
 
 ### If you have EveryCompat or Immserive Weathering installed
 <span style="color: red;">WARNING: make sure you backup your world before you load into the world</span>
