@@ -4,7 +4,6 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -714,14 +713,6 @@ public class CompatWoodTypes {
             wf.addChild("stripped_wood", new ResourceLocation(suffixStrippedWood));
         else
             wf.addChild("stripped_wood", stripped_wood);
-
-        Moonlight.LOGGER.warn("\nTYPE --- {}:{} ---:", modId, nameWood);
-        Moonlight.LOGGER.warn("log - {} ", log);
-        Moonlight.LOGGER.warn("stripped_log - {} ", stripped_log);
-        Moonlight.LOGGER.warn("planks - {} ", planksId);
-        Moonlight.LOGGER.warn("wood - {} ", wood);
-        Moonlight.LOGGER.warn("stripped_wood - {} ", stripped_wood);
-        Moonlight.LOGGER.warn("--- END ---\n");
 
         return wf;
     }
