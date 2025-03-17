@@ -13,6 +13,22 @@ public class CompatWoodTypes {
 
     public static void init() {
 
+        // Upgrade Aquatic
+        BlockSetAPI.addBlockTypeFinder(WoodType.class,
+                advancedWoodFinder("upgrade_aquatic", "driftwood", "driftwood_planks",
+                        "log", "",
+                        "log", ""));
+        // Atmospheric
+        BlockSetAPI.addBlockTypeFinder(WoodType.class,
+                advancedWoodFinder("atmospheric", "grimwood", "grimwood_planks",
+                        "log", "",
+                        "log", ""));
+
+        BlockSetAPI.addBlockTypeFinder(WoodType.class,
+                advancedWoodFinder("atmospheric", "rosewood", "rosewood_planks",
+                        "log", "",
+                        "log", ""));
+
         // Deeper And Darker
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
                 altSimpleStemFinder("deeperdarker", "blooming", "bloom"));
