@@ -13,6 +13,12 @@ public class CompatWoodTypes {
 
     public static void init() {
 
+        // The Outer End
+        BlockSetAPI.addBlockTypeFinder(WoodType.class,
+                advancedWoodFinder("outer_end", "azure", "azure_planks",
+                        "stem", "pith",
+                        "stripped_stem", "stripped_pith"));
+
         // Upgrade Aquatic
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
                 advancedWoodFinder("upgrade_aquatic", "driftwood", "driftwood_planks",
@@ -670,6 +676,7 @@ public class CompatWoodTypes {
     }
 
     /**
+     * MediumWoodFinder include log, wood
      * @param nameWood Name of WoodType without "_log"
      * @param suffixLog Example: "stem","block" or "TYPE_stem" or "stem_TYPE"
      * @param suffixWood Example: "wood", "hyphae" or "TYPE_wood" or "wood_TYPE"
