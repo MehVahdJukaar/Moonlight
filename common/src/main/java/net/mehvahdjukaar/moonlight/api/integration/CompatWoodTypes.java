@@ -13,6 +13,17 @@ public class CompatWoodTypes {
 
     public static void init() {
 
+        // Botania
+        BlockSetAPI.addBlockTypeFinder(WoodType.class,
+                advancedWoodFinder("botania", "livingwood", "livingwood_planks",
+                        "log", "",
+                        "log", ""));
+
+        BlockSetAPI.addBlockTypeFinder(WoodType.class,
+                advancedWoodFinder("botania", "dreamwood", "dreamwood_planks",
+                        "log", "",
+                        "log", ""));
+
         // Caverns-And-Chasms
         var ccAzalea = simpleWoodFinder("caverns_and_chasms", "azalea");
         ccAzalea.addChild("leaves", new ResourceLocation("minecraft:azalea_leaves"));
