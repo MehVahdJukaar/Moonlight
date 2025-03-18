@@ -13,6 +13,11 @@ public class CompatWoodTypes {
 
     public static void init() {
 
+        // Caverns-And-Chasms
+        var ccAzalea = simpleWoodFinder("caverns_and_chasms", "azalea");
+        ccAzalea.addChild("leaves", new ResourceLocation("minecraft:azalea_leaves"));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, ccAzalea);
+
         // The Outer End
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
                 advancedWoodFinder("outer_end", "azure", "azure_planks",
@@ -692,6 +697,7 @@ public class CompatWoodTypes {
 
     /**
      * AdvancedWoodFinder include planks, log, wood, stripped_log, stripped_wood based on their unique Ids
+     * @param useNamePlanks useNamePlanks instead of WoodType's name for children
      * @param modId The ID of mod where WoodType is from
      * @param nameWood Name of WoodType without the suffix, "_log"
      * @param planksId Example: "TYPE_planks" or "modId:TYPE_planks"
