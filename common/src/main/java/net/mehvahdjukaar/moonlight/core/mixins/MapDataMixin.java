@@ -14,6 +14,7 @@ import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -221,7 +222,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                 boolean persists = isScaled ? customData.persistOnRescale() : customData.persistOnCopyOrLock();
                 if (persists) {
                     CompoundTag t = new CompoundTag();
-                    var reg = Utils.hackyGetRegistryAccess();
+                    RegistryAccess reg = Utils.hackyGetRegistryAccess();
                     customData.save(t, reg);
                     ed.ml$getCustomData().get(entry.getKey()).load(t, reg);
                 }

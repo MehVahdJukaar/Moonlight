@@ -31,13 +31,13 @@ public class ObjectConfigValue<T> extends ConfigValue<T> {
                 JsonElement j = element.get(this.name);
                 var e = codec.decode(JsonOps.INSTANCE, j);
                 var json = e.resultOrPartial(s -> {
-                    Moonlight.LOGGER.warn("Failed to parse config {}: {}" + name, s);
+                    Moonlight.LOGGER.warn("Failed to parse config {}: {}", name, s);
                 });
                 if (json.isPresent()) {
                     this.value = json.get().getFirst();
                     return;
                 }
-                Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting " + name);
+                Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting ", name);
                 //if not valid it defaults
                 this.value = defaultValue;
             } catch (Exception ignored) {

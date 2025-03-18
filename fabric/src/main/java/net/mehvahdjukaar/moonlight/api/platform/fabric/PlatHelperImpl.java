@@ -104,7 +104,7 @@ public class PlatHelperImpl {
     }
 
     public static PlatHelper.Side getPhysicalSide() {
-        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
+            return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
     }
 
     @Nullable
