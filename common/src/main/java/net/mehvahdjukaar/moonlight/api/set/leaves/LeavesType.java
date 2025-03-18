@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -35,7 +34,18 @@ public class LeavesType extends BlockType {
     private final Supplier<WoodType> woodType;
 
     protected LeavesType(ResourceLocation id, Block leaves) {
-        this(id, leaves, Suppliers.memoize(() -> Objects.requireNonNullElse(WoodTypeRegistry.getValue(id), WoodTypeRegistry.OAK_TYPE)));
+        this(id, leaves, Suppliers.memoize(() -> detectEquivalentWoodType(id)));
+    }
+
+    private static WoodType detectEquivalentWoodType(ResourceLocation id) {
+        WoodType o = WoodTypeRegistry.INSTANCE.get(id);
+        if (o != null) return o;
+        for (WoodType w : WoodTypeRegistry.INSTANCE.getValues()) {
+            if (w.id.getPath().equals(id.getPath())) {
+                return w;
+            }
+        }
+        return WoodTypeRegistry.OAK_TYPE;
     }
 
     protected LeavesType(ResourceLocation id, Block leaves, Supplier<WoodType> woodType) {
