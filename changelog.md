@@ -1,3 +1,6 @@
+## v2.13.78
+- **Undetected Children**: Updated code of **Jaden's Nether Expansion**'s claret, so the children will be detected
+
 ## v2.13.77
 - **HOTFIX**: Fixing the crash related to LeavesType with wood mods, **Blues Skies** - my fault, @xelbayria
 
