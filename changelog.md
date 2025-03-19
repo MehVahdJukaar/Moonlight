@@ -1,3 +1,6 @@
+## v2.13.79
+- **BLACKLISTED_MODS** (LeavesType): Corrected the RegEx to blacklist the Dynamic Trees' addons
+
 ## v2.13.78
 - **Undetected Children**: Updated code of **Jaden's Nether Expansion**'s claret, so the children will be detected
 
