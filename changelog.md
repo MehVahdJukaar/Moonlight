@@ -1,3 +1,7 @@
+## v2.13.77
+- **HOTFIX**: Fixing the crash related to LeavesType with wood mods, **Blues Skies** - my fault, @xelbayria
+
+## v2.13.76
 - **Added** (Undetected WoodType): -NOTE: some of their children are undetected, so they are now included.  
   - **Atmospheric**'s _grimwood_ & _rosewood_
   - **Upgrade Aquatic**'s _driftwood_
