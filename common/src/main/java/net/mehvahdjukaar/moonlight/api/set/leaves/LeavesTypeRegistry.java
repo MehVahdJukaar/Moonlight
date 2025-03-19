@@ -66,9 +66,10 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         return Optional.empty();
     }
 
+    //- BLACKLISTED_MODS
     private static boolean isBlacklisted(String namespace, String path) {
         return namespace.equals("securitycraft") || namespace.equals("dynamic_trees") ||
-                namespace.matches("dynamictrees|dt") || path.contains("hanging");
+                namespace.matches("dynamictrees|dt\\w+") || path.contains("hanging");
     }
 
     @Override
