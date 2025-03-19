@@ -253,7 +253,7 @@ public class CompatWoodTypes {
                 simpleStemFinder("gardens_of_the_dead", "soulblight"));
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                mediumWoodFinder("gardens_of_the_dead","whistlecane","block", ""));
+                mediumWoodFinder("gardens_of_the_dead","whistlecane","block", "wood"));
 
         // Desolation
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("desolation",
