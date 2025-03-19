@@ -85,7 +85,7 @@ public class ChannelHandlerImpl extends ChannelHandler {
         }
 
         @Override
-        public void disconnect(Component message){
+        public void disconnect(Component message) {
             context.getNetworkManager().disconnect(message);
         }
     }
@@ -112,21 +112,21 @@ public class ChannelHandlerImpl extends ChannelHandler {
             var distributor = PacketDistributor.NEAR.with(() ->
                     new PacketDistributor.TargetPoint(pos.getX(), pos.getY(), pos.getZ(), radius, level.dimension()));
             channel.send(distributor, message);
-        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
+        } else if (PlatHelper.isDev()) throw new AssertionError("Cant send message to clients from client side");
     }
 
     @Override
     public void sentToAllClientPlayersTrackingEntity(Entity target, Message message) {
-        if(!target.level().isClientSide) {
+        if (!target.level().isClientSide) {
             channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> target), message);
-        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
+        } else if (PlatHelper.isDev()) throw new AssertionError("Cant send message to clients from client side");
     }
 
     @Override
     public void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
-        if(!target.level().isClientSide) {
+        if (!target.level().isClientSide) {
             channel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> target), message);
-        }else if(PlatHelper.isDev())throw new AssertionError("Cant send message to clients from client side");
+        } else if (PlatHelper.isDev()) throw new AssertionError("Cant send message to clients from client side");
     }
 
 
