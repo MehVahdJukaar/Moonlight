@@ -146,7 +146,6 @@ public class BlocksColorInternal {
      */
     @Nullable
     public static Block changeColor(Block old, @Nullable DyeColor newColor) {
-        if (old.builtInRegistryHolder().is(MoonlightTags.NON_RECOLORABLE_BLOCKS_TAG)) return null;
         String key = getKey(old);
         if (key != null) {
             var set = getBlockSet(key);
@@ -165,7 +164,6 @@ public class BlocksColorInternal {
      */
     @Nullable
     public static Item changeColor(Item old, @Nullable DyeColor newColor) {
-        if (old.builtInRegistryHolder().is(MoonlightTags.NON_RECOLORABLE_ITEMS_TAG)) return null;
         String key = getKey(old);
         if (key != null) {
             var set = getItemSet(key);
