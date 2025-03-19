@@ -58,7 +58,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         return OAK_TYPE;
     }
 
-    public static Set<String> IGNORED_MODS = new HashSet<>(Set.of("chipped",
+    public static Set<String> BLACKLISTED_MODS = new HashSet<>(Set.of("chipped",
             "compressedblocks", "securitycraft", "absentbydesign", "immersive_weathering", "dynamictrees", "dt"));
 
     //returns if this block is the base plank block
@@ -90,7 +90,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             name = path.substring("plank_".length());
         }
         String namespace = baseRes.getNamespace();
-        if (name != null && !IGNORED_MODS.contains(namespace)) {
+        if (name != null && !BLACKLISTED_MODS.contains(namespace)) {
 
             BlockState state = baseBlock.defaultBlockState();
             //Can't check if the block is a full one, so I do this. Adding some checks here
