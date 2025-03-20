@@ -16,6 +16,7 @@ import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.impl.forge.ForgeConfig;
 import com.mrcrayfish.configured.impl.forge.ForgeValue;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
@@ -55,8 +56,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     @Nullable
     private static final Field FOLDER_ENTRY = findFieldOrNull(ConfigScreen.class, "folderEntry");
     @Nullable
-    private static final Method SAVE_CONFIG = findMethodOrNull(ConfigScreen.class, "saveConfig");
-    @Nullable
     private static final Field CONFIG_VALUE_HOLDER = findFieldOrNull(ConfigItem.class, "holder");
     @Nullable
     private static final Field BOOLEAN_ITEM_BUTTON = findFieldOrNull(BooleanItem.class, "button");
@@ -82,6 +81,9 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         try {
             field = ObfuscationReflectionHelper.findField(c, fieldName);
         } catch (Exception ignored) {
+            if (PlatHelper.isDev()) {
+                throw new RuntimeException("Failed to find field: " + fieldName + " in class: " + c.getName());
+            }
         }
         return field;
     }
@@ -153,9 +155,13 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         this.entries = new ArrayList<>(temp);
 
         //overrides save button
-        if (this.saveButton != null && SAVE_CONFIG != null && BUTTON_ON_PRESS != null) {
+        if (this.saveButton != null &&  BUTTON_ON_PRESS != null) {
             try {
-                Button.OnPress press = this::saveButtonAction;
+                Button.OnPress oldOnPress = (Button.OnPress) BUTTON_ON_PRESS.get(this.saveButton);
+                Button.OnPress press = (onPress) -> {
+                    oldOnPress.onPress(onPress);
+                    onSave();
+                };
                 BUTTON_ON_PRESS.set(this.saveButton, press);
             } catch (Exception ignored) {
             }
@@ -181,21 +187,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             newList.add(c);
         }
         return newList;
-    }
-
-    //sync configs to server when saving
-    private void saveButtonAction(Button button) {
-        if (this.config != null) {
-            try {
-                SAVE_CONFIG.invoke(this);
-            } catch (Exception ignored) {
-            }
-
-            if (this.isChanged(this.folderEntry)) {
-                this.onSave();
-            }
-        }
-        this.minecraft.setScreen(this.parent);
     }
 
     public abstract void onSave();
