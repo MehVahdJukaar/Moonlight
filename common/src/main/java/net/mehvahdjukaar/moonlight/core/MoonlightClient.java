@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
@@ -51,6 +52,11 @@ public class MoonlightClient {
 
     public static boolean isClientThread() {
         return Minecraft.getInstance().isSameThread();
+    }
+
+    public static void setupClient() {
+       var e = ExtraModelData.EMPTY;
+       //classloader on main thread to prevent possible race condition BS
     }
 
     private static class MergedDynamicTexturePack extends DynamicTexturePack {

@@ -62,7 +62,6 @@ public class MoonlightForge {
 
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init(bus);
-            MoonlightClient.initClient();
 
             if (PlatHelper.isModLoaded("configured")) {
                 ModConfigSelectScreen.registerConfigScreen(MOD_ID, ModConfigSelectScreen::new);
