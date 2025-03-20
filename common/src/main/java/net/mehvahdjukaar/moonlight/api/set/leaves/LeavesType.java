@@ -97,14 +97,9 @@ public class LeavesType extends BlockType {
         }
 
         public static Finder simple(String modId, String leavesTypeName, String leavesName, String woodTypeName) {
-            if (leavesName.contains(":"))
-                return new Finder(new ResourceLocation(modId, leavesTypeName),
-                        () -> BuiltInRegistries.BLOCK.get(new ResourceLocation(leavesName)),
-                        () -> WoodTypeRegistry.INSTANCE.get(new ResourceLocation(woodTypeName)));
-
             return new Finder(new ResourceLocation(modId, leavesTypeName),
                     () -> BuiltInRegistries.BLOCK.get(new ResourceLocation(modId, leavesName)),
-                    () -> WoodTypeRegistry.INSTANCE.get(new ResourceLocation(modId, woodTypeName)));
+                    () -> WoodTypeRegistry.INSTANCE.get(new ResourceLocation(woodTypeName)));
         }
 
         public void addChild(String childType, String childName) {

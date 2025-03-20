@@ -7,6 +7,8 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 //place for all known weird hardcoded wood types from mods that aren't getting detected
 @SuppressWarnings("SameParameterValue")
 public class CompatWoodTypes {
@@ -157,9 +159,9 @@ public class CompatWoodTypes {
 
         // Jaden's Nether Expansion
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("netherexp", "cerebrage_claret", "claret_planks",
-                        "stem", "hyphae",
-                        "netherexp:stripped_claret_stem", "netherexp:stripped_claret_hyphae")
+                advancedWoodFinder("netherexp", "claret", "claret_planks",
+                        "netherexp:cerebrage_claret_stem", "netherexp:cerebrage_claret_hyphae",
+                        "stem", "hyphae")
         );
 
         // Piglin Ruins
@@ -253,7 +255,7 @@ public class CompatWoodTypes {
                 simpleStemFinder("gardens_of_the_dead", "soulblight"));
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                mediumWoodFinder("gardens_of_the_dead","whistlecane","block", ""));
+                mediumWoodFinder("gardens_of_the_dead","whistlecane","block", "wood"));
 
         // Desolation
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("desolation",
@@ -681,10 +683,11 @@ public class CompatWoodTypes {
     /**
      * @param modId The ID of the mod that WoodType is from
      * @param nameWood Name of WoodType without "_log"
+     * @param childBlocks Example: "oak_fence", "oak_leaves", "oak_gate_fence"
      * The rest of WoodType's children will be detected
      */
-    private static WoodType.@NotNull Finder simpleWoodFinder(String modId, String nameWood) {
-        return advancedWoodFinder(modId, nameWood, nameWood+ "_planks", "stem", "hyphae", "", "");
+    private static WoodType.@NotNull Finder simpleWoodFinder(String modId, String nameWood, String... childBlocks) {
+        return advancedWoodFinder(modId, nameWood, nameWood+ "_planks", "stem", "hyphae", "", "", childBlocks);
     }
 
     private static WoodType.@NotNull Finder simpleStemFinder(String modId, String nameStem) {
@@ -702,8 +705,8 @@ public class CompatWoodTypes {
     }
 
     private static WoodType.@NotNull Finder advancedWoodFinder(String modId, String nameWood, String planksId,
-                                                               String suffixLog, String suffixWood, String suffixStrippedLog, String suffixStrippedWood) {
-        return advancedWoodFinder(false, modId, nameWood, planksId, suffixLog, suffixWood, suffixStrippedLog, suffixStrippedWood);
+                                                               String suffixLog, String suffixWood, String suffixStrippedLog, String suffixStrippedWood, String... childBlocks) {
+        return advancedWoodFinder(false, modId, nameWood, planksId, suffixLog, suffixWood, suffixStrippedLog, suffixStrippedWood, childBlocks);
     }
 
     /**
@@ -712,13 +715,16 @@ public class CompatWoodTypes {
      * @param modId The ID of mod where WoodType is from
      * @param nameWood Name of WoodType without the suffix, "_log"
      * @param planksId Example: "TYPE_planks" or "modId:TYPE_planks"
-     * @param suffixLog Example: "stem","block" or "TYPE_stem" or "stem_TYPE"
-     * @param suffixWood Example: "wood", "hyphae" or "TYPE_wood" or "wood_TYPE"
-     * @param suffixStrippedLog Example: "stem","block" or "TYPE_stripped_log"
-     * @param suffixStrippedWood Example: "wood", "hyphae" or "TYPE_stripped_wood"
+     * @param suffixLog Example: "stem","block" or "modId:TYPE_WORD_log"
+     * @param suffixWood Example: "wood", "hyphae" or "modId:TYPE_WORD_wood"
+     * @param suffixStrippedLog Example: "stem","block" or "stripped_log" or "modId:stripped_TYPE_WORD_log
+     * @param suffixStrippedWood Example: "wood", "hyphae" or "stripped_wood" or "modId:stripped_TYPE_WORD_wood
+     * @param childBlocks Example: "oak_fence", "oak_leaves", "oak_fence_gate" - NOTE: "fence_oak" won't work
      */
     private static WoodType.@NotNull Finder advancedWoodFinder(boolean useNamePlanks, String modId, String nameWood, String planksId,
-                                                               String suffixLog, String suffixWood, String suffixStrippedLog, String suffixStrippedWood) {
+                                                               String suffixLog, String suffixWood,
+                                                               String suffixStrippedLog, String suffixStrippedWood,
+                                                               String... childBlocks) {
         // Creating Ids of log & stripped_log
         String logPrefixed = (suffixStrippedLog.matches("(\\w+)?(striped|stripped)_\\w+")) ? "" : "stripped_";
         String logSuffixed = (suffixLog.isBlank()) ? "" : "_" + suffixLog;
@@ -739,11 +745,17 @@ public class CompatWoodTypes {
         WoodType.Finder wf;
         if (planksId.contains(":")) // some addons like ars_elemental are using ars_nouveau's planks
             wf = WoodType.Finder.simple(new ResourceLocation(modId, nameWood), new ResourceLocation(planksId), new ResourceLocation(modId, log));
+        else if (suffixLog.contains(":"))
+            wf = WoodType.Finder.simple(new ResourceLocation(modId, nameWood), new ResourceLocation(modId, planksId), new ResourceLocation(suffixLog));
         else
             wf = WoodType.Finder.simple(modId, nameWood, planksId, log);
 
         // WoodType.Finder has a null check for below, so don't worry about it
-        wf.addChild("wood", wood);
+        if (suffixWood.contains(":"))
+            wf.addChild("wood", new ResourceLocation(suffixWood));
+        else
+            wf.addChild("wood", wood);
+
         if (suffixStrippedLog.contains(":"))
             wf.addChild("stripped_log", new ResourceLocation(suffixStrippedLog));
         else
@@ -753,6 +765,16 @@ public class CompatWoodTypes {
             wf.addChild("stripped_wood", new ResourceLocation(suffixStrippedWood));
         else
             wf.addChild("stripped_wood", stripped_wood);
+
+        if (!Arrays.stream(childBlocks).toList().isEmpty()) {
+            for (String block : childBlocks) {
+                String key = (block.contains("fence_gate")) ? "fence_gate" : block.substring(block.lastIndexOf("_") + 1);
+                if (block.contains(":"))
+                    wf.addChild(key, new ResourceLocation(block));
+                else
+                    wf.addChild(key, block);
+            }
+        }
 
         return wf;
     }
@@ -780,9 +802,9 @@ public class CompatWoodTypes {
     }
     /**
      * Similar to AltSimpleWoodFinder (above) but included suffix for log and wood
-     * @param nameWood Name of WoodType without "_log"
+     * @param nameWood Name of WoodType without "_stem"
      * @param namePlanks Name of Planks without "_planks"
-     * @param suffixLog Example: "stem","block" or "TYPE_log"
+     * @param suffixLog Example: "stem","block" or "TYPE_stem"
      * @param suffixWood Example: "wood", "hyphae" or "TYPE_wood"
     **/
     private static WoodType.@NotNull Finder altMediumWoodFinder(String modId, String nameWood, String namePlanks, String suffixLog, String suffixWood) {
