@@ -110,6 +110,9 @@ public class Moonlight {
         if (PlatHelper.isDev()) {
             //MixinEnvironment.getCurrentEnvironment().audit();
         }
+        if(PlatHelper.getPhysicalSide().isClient()){
+            MoonlightClient.setupClient();
+        }
     }
 
     @EventCalled

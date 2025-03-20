@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface ExtraModelData {
 
-    ExtraModelData EMPTY = ClassLoadingBs.INSTANCE;
+    ExtraModelData EMPTY = ClassLoadingBs.getInstance();
 
     @ExpectPlatform
     static Builder builder() {
@@ -29,7 +29,13 @@ public interface ExtraModelData {
 
     //prevents circular dependency when this class is loaded at the same time on 2 threads
     class ClassLoadingBs {
-        static final ExtraModelData INSTANCE = ExtraModelData.builder().build();
+        private static class Holder {
+            static final ExtraModelData INSTANCE = ExtraModelData.builder().build();
+        }
+
+        static ExtraModelData getInstance() {
+            return Holder.INSTANCE;
+        }
     }
 }
 
