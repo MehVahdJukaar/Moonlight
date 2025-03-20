@@ -13,7 +13,6 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -23,7 +22,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3f;
 
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 @ApiStatus.Internal
 public class MoonlightClient {
@@ -58,8 +56,8 @@ public class MoonlightClient {
     }
 
     public static void setupClient() {
-       var e = ExtraModelData.EMPTY;
-       //classloader on main thread to prevent possible race condition BS
+        var e = ExtraModelData.EMPTY;
+        //classloader on main thread to prevent possible race condition BS
     }
 
     private static class MergedDynamicTexturePack extends DynamicTexturePack {
