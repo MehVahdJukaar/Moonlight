@@ -1,1 +1,1 @@
-made some of the custom map packet code more resilient
+fixed a possible rare race condition

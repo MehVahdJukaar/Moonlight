@@ -97,7 +97,7 @@ public class Moonlight {
 
     private static void commonSetup() {
         BlocksColorInternal.setup();
-        if(PlatHelper.getPhysicalSide().isClient()){
+        if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.setupClient();
         }
     }
