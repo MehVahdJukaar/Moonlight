@@ -224,14 +224,15 @@ public abstract class DynamicResourcePack implements PackResources {
             //idk why but somebody had an issue with concurrency here during world load
 
             this.searchTrie.search(namespace + "/" + id)
-                    .forEach(r -> output.accept(r, () -> {
-
+                    .forEach(r -> {
                         byte[] buf = resources.get(r);
-                        if (buf == null) {
-                            throw new IllegalStateException("Somehow search tree returned a resource not in resources " + r);
-                        }
-                        return new ByteArrayInputStream(buf);
-                    }));
+                        output.accept(r, () -> {
+                            if (buf == null) {
+                                throw new IllegalStateException("Somehow search tree returned a resource not in resources " + r);
+                            }
+                            return new ByteArrayInputStream(buf);
+                        });
+                    });
         }
     }
 
@@ -324,7 +325,6 @@ public abstract class DynamicResourcePack implements PackResources {
                 this.resources.remove(r);
             }
         }
-
 
 
         if (mf) {
