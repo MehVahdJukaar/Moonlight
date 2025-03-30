@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
+import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundParticleAroundBlockPacket;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -16,14 +17,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
-//TODO: use more
 public interface IGlowable {
 
     boolean isGlowing();
 
     void setGlowing(boolean b);
 
-    //TODO: move to static utility classmaybe?
     //callable on both sides
     default ItemInteractionResult tryGlowingWithItem(Level level, BlockPos pos, Player player, ItemStack stack) {
         if (stack.is(Items.GLOW_INK_SAC)) {

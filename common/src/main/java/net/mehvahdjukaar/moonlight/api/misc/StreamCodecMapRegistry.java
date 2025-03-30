@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
 import com.mojang.serialization.MapCodec;
+import net.mehvahdjukaar.moonlight.api.set.BlocksColorAPI;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;

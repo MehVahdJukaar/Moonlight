@@ -46,7 +46,7 @@ public abstract class ItemMixin implements IExtendedItem {
     }
 
     @Override
-    public void moonlight$addAdditionalBehavior(AdditionalItemPlacement placementOverride) {
+    public void moonlight$setAdditionalBehavior(AdditionalItemPlacement placementOverride) {
         this.moonlight$additionalBehavior = placementOverride;
     }
 

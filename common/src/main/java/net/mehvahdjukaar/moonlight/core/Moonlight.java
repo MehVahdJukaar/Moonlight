@@ -129,7 +129,6 @@ public class Moonlight {
 
         HolderReference.clearCache();
         DispenserHelper.reload(registryAccess, client);
-        AdditionalItemPlacementsAPI.onReload(registryAccess, client);
     }
 
     @EventCalled
@@ -140,6 +139,12 @@ public class Moonlight {
     public static void assertInitPhase() {
         if (!PlatHelper.isInitializing() && PlatHelper.getPlatform().isForge()) {
             throw new AssertionError("Method has to be called during main mod initialization phase. Client and Server initializer are not valid, you must call in the main one");
+        }
+    }
+
+    public static void assertAfterInitPhase(){
+        if (PlatHelper.isInitializing()) {
+            throw new AssertionError("Method has to be called after main mod initialization phase. Client and Server initializer are not valid, you must call in the main one");
         }
     }
 

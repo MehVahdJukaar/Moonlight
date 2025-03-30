@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.item.additional_placements;
 
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
 import net.minecraft.core.RegistryAccess;
@@ -10,22 +11,57 @@ import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class AdditionalItemPlacementsAPI {
 
-    //no need for sided instance yet
-    private static final List<Consumer<Event>> LISTENERS = Collections.synchronizedList(new ArrayList<>());
-    private static final Map<Item, AdditionalItemPlacement> PLACEMENTS = new HashMap<>();
-    private static final Set<Block> ADDED_BLOCKS = new HashSet<>();
-
     /**
      * Adds a behavior to an existing block. can be called at any time but ideally before registration. Less ideally during mod setup
      */
+    @Deprecated(forRemoval = true)
     public static void addRegistration(Consumer<Event> eventConsumer) {
         Moonlight.assertInitPhase();
-        LISTENERS.add(eventConsumer);
+        PlatHelper.addCommonSetup(() -> eventConsumer.accept(AdditionalItemPlacementsAPI::registerPlacement));
+    }
+
+    //since these need to be called on client too we MUST allow it to be called at any time so we don't need to reply on our own packet and can run on another mod will
+    /***
+     * Call in mod setup. Adds a placement to an item
+     */
+    public static void registerPlacement(Item target, AdditionalItemPlacement placement) {
+        IExtendedItem ei = (IExtendedItem) target;
+        AdditionalItemPlacement old = ei.moonlight$getAdditionalBehavior();
+        if (old != null) {
+            unregisterPlacement(target);
+            Moonlight.LOGGER.warn("Overriding existing additional placement behavior for item {}, placement {}", target, old);
+        }
+        ei.moonlight$setAdditionalBehavior(placement);
+        Block placedBlock = placement.getPlacedBlock();
+        if (target == Items.AIR || placedBlock == Blocks.AIR) {
+            throw new AssertionError("Invalid item or block for additional placement: block = " + placedBlock + ", item = " + target);
+        }
+
+        Item.BY_BLOCK.put(placedBlock, target);
+        placedBlock.item = null;
+    }
+
+    //shorthand
+    public static void registerSimplePlacement(Item target, Block toPlace) {
+        registerPlacement(target, new AdditionalItemPlacement(toPlace));
+    }
+
+    public static void unregisterPlacement(Item target) {
+        IExtendedItem ei = (IExtendedItem) target;
+        AdditionalItemPlacement old = ei.moonlight$getAdditionalBehavior();
+        if (old != null) {
+            ei.moonlight$setAdditionalBehavior(null);
+            Block placedBlock = old.getPlacedBlock();
+            if (placedBlock.item == target) {
+                Item.BY_BLOCK.remove(placedBlock);
+                placedBlock.item = null;
+            }
+        }
     }
 
     @Nullable
@@ -37,40 +73,7 @@ public class AdditionalItemPlacementsAPI {
         return getBehavior(item) != null;
     }
 
-    @ApiStatus.Internal
-    public static void onReload(RegistryAccess registryAccess, Boolean aBoolean) {
-        Map<Block, Item> map = Item.BY_BLOCK;
-
-        for (var b : ADDED_BLOCKS) {
-            map.remove(b);
-            //reset inverse
-            b.item = null;
-        }
-        ADDED_BLOCKS.clear();
-
-        for (var l : LISTENERS) {
-            l.accept(PLACEMENTS::put);
-        }
-        for (var p : PLACEMENTS.entrySet()) {
-            AdditionalItemPlacement placement = p.getValue();
-            Item i = p.getKey();
-            Block b = placement.getPlacedBlock();
-
-            if (i != null && b != null) {
-                if (i != Items.AIR && b != Blocks.AIR) {
-                    ((IExtendedItem) i).moonlight$addAdditionalBehavior(placement);
-                    if (!map.containsKey(b)) {
-                        map.put(b, i);
-                        b.item = null;
-                        ADDED_BLOCKS.add(b);
-                    }
-                } else {
-                    throw new AssertionError("Attempted to register an Additional behavior for block " + b + " using with item " + i);
-                }
-            }
-        }
-    }
-
+    @Deprecated(forRemoval = true)
     public interface Event {
 
         void register(Item target, AdditionalItemPlacement instance);

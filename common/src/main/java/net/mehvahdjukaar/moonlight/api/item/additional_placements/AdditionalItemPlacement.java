@@ -45,4 +45,11 @@ public class AdditionalItemPlacement{
     public Block getPlacedBlock() {
         return placeable;
     }
+
+    @Override
+    public String toString() {
+        return "AdditionalItemPlacement{" +
+                "placeable=" + placeable +
+                '}';
+    }
 }
