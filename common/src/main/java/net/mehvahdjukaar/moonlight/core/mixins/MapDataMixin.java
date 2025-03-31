@@ -209,12 +209,12 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     private void moonlight$copyCustomData(MapItemSavedData data, boolean isScaled) {
         if (data instanceof ExpandedMapData ed) {
             for (var entry : this.moonlight$customData.entrySet()) {
-                CustomMapData<?,?> customData = entry.getValue();
+                var customData = entry.getValue();
                 boolean persists = isScaled ? customData.persistOnRescale() : customData.persistOnCopyOrLock();
                 if (persists) {
                     CompoundTag t = new CompoundTag();
-                    v.save(t);
-                    ed.getCustomData().get(d.getKey()).load(t);
+                    customData.save(t);
+                    ed.getCustomData().get(entry.getKey()).load(t);
                 }
             }
         }
