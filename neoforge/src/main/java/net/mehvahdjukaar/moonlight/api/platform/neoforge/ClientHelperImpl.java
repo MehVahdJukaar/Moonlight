@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.neoforge;
 
 import com.google.gson.JsonElement;
-import net.mehvahdjukaar.moonlight.api.client.ItemStackRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -27,6 +26,7 @@ import net.minecraft.server.packs.*;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
@@ -333,12 +333,20 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<RegisterClientExtensionsEvent> eventConsumer = event -> {
-            eventListener.accept((item, renderer) -> event.registerItem(new IClientItemExtensions() {
-                @Override
-                public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                    return renderer;
-                }
-            }, item.asItem()));
+            eventListener.accept((item, renderer) -> {
+                event.registerItem(new IClientItemExtensions() {
+                    @Override
+                    public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                        return renderer;
+                    }
+
+                    @Override
+                    public void renderHelmetOverlay(ItemStack stack, Player player, int width, int height, float partialTick) {
+                        renderer.renderHelmetOverlay(stack, player, width, height, partialTick);
+                    }
+
+                }, item.asItem());
+            });
         };
         getCurrentBus().addListener(eventConsumer);
     }
