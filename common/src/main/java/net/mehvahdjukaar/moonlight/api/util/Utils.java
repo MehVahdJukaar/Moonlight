@@ -32,6 +32,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
@@ -43,6 +44,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -59,6 +61,34 @@ import java.util.function.Supplier;
 
 
 public class Utils {
+
+    public static void spawnItemWithTileData(Player player, RandomizableContainerBlockEntity tile) {
+        Level level = player.level();
+        if (!level.isClientSide && player.isCreative() && !tile.isEmpty()) {
+            BlockPos pos = tile.getBlockPos();
+            ItemStack itemstack = saveTileToItem(tile);
+
+            ItemEntity itementity = new ItemEntity(level, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, itemstack);
+            itementity.setDefaultPickUpDelay();
+            level.addFreshEntity(itementity);
+        } else {
+            tile.unpackLootTable(player);
+        }
+    }
+
+    public static ItemStack saveTileToItem(BlockEntity tile) {
+        Block block = tile.getBlockState().getBlock();
+        ItemStack stack = new ItemStack(block.asItem());
+        tile.saveToItem(stack, tile.getLevel().registryAccess());
+        return stack;
+    }
+
+    public static void loadTileFromItem(BlockEntity tile, ItemStack stack) {
+        var comp = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (comp != null) {
+            tile.loadWithComponents(comp.copyTag(), tile.getLevel().registryAccess());
+        }
+    }
 
     public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem, boolean bothSides) {
         if (!player.level().isClientSide || bothSides)
