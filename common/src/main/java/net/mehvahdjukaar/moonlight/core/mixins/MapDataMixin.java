@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -216,6 +217,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     customData.save(t);
                     ed.getCustomData().get(entry.getKey()).load(t);
                 }
+                BehaviorUtils.lockGazeAndWalkToEachOther();
             }
         }
     }
