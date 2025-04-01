@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.api.client.ItemStackRenderer;
 import net.mehvahdjukaar.moonlight.api.client.model.fabric.MLFabricModelLoaderRegistry;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
@@ -252,7 +251,6 @@ public class ClientHelperImpl {
     }
 
     public static final List<Consumer<ClientHelper.ShaderEvent>> SHADER_REGISTRATIONS = Collections.synchronizedList(new ArrayList<>());
-    ;
 
     public static void addShaderRegistration(Consumer<ClientHelper.ShaderEvent> eventListener) {
         Moonlight.assertInitPhase();
@@ -261,8 +259,12 @@ public class ClientHelperImpl {
 
     public static void addItemRenderersRegistration(Consumer<ClientHelper.ItemRendererEvent> eventListener) {
         MoonlightFabricClient.PRE_CLIENT_SETUP_WORK.add(() -> {
-            eventListener.accept((item, renderer) -> BuiltinItemRendererRegistry.INSTANCE.register(item,
-                    (BuiltinItemRendererRegistry.DynamicItemRenderer) renderer));
+            eventListener.accept((item, renderer) -> {
+                var rend = renderer.getItemRenderer();
+                if(rend instanceof BuiltinItemRendererRegistry.DynamicItemRenderer br){
+                    BuiltinItemRendererRegistry.INSTANCE.register(item, br);
+                }
+            });
         });
     }
 

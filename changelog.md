@@ -1,2 +1,3 @@
-changed how additional placements api works. it no longer has an even and can be called statically
-added some other utilities for stream codecs
+minor fix and more utilities classes for codecs.
+
+added some interfaces for blocks and common extension to register item head overlays

@@ -1,15 +1,11 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.fabric.ClientHelperImpl;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,8 +30,7 @@ public abstract class GameRendererMixin {
                         .replace(":", "moonlight_marker"), vertexFormat);
                 list.add(Pair.of(shader, setter));
             } catch (Exception e) {
-                Moonlight.LOGGER.error("Failed to load shader: {}", id, e);
-                if (PlatHelper.isDev()) throw new RuntimeException(e);
+                throw new RuntimeException("Failed to load shader: " + id, e);
             }
         };
         ClientHelperImpl.SHADER_REGISTRATIONS.forEach(l -> l.accept(event));

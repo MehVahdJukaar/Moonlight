@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.moonlight.api.client.ItemRenderExtension;
 import net.mehvahdjukaar.moonlight.api.client.ItemStackRenderer;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
@@ -122,7 +123,17 @@ public class ClientHelper {
 
     @FunctionalInterface
     public interface ItemRendererEvent {
-        void register(ItemLike item, ItemStackRenderer renderer);
+        @Deprecated(forRemoval = true)
+        default void register(ItemLike item, ItemStackRenderer renderer) {
+            register(item, new ItemRenderExtension() {
+                @Override
+                public @Nullable ItemStackRenderer getItemRenderer() {
+                    return renderer;
+                }
+            });
+        }
+
+        void register(ItemLike item, ItemRenderExtension extension);
     }
 
     @ExpectPlatform

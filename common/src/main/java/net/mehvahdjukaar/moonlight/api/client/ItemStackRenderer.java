@@ -17,5 +17,4 @@ public abstract class ItemStackRenderer extends BlockEntityWithoutLevelRenderer 
     @Override
     public abstract void renderByItem(ItemStack stack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay);
 
-    public void renderHelmetOverlay(ItemStack stack, Player player, int width, int height, float partialTick){}
 }

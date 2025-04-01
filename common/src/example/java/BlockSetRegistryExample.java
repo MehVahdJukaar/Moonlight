@@ -7,9 +7,11 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
@@ -24,7 +26,6 @@ public class BlockSetRegistryExample {
         BlockSetAPI.registerBlockSetDefinition(new FlowerTypeRegistry());
         // Using a block set to register dynamic blocks
         BlockSetAPI.addDynamicBlockRegistration(BlockSetRegistryExample::registerFlowerTypeBlocks, FlowerType.class);
-
         init2();
     }
 

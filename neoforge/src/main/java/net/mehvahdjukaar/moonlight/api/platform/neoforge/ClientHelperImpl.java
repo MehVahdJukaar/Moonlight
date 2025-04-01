@@ -321,8 +321,7 @@ public class ClientHelperImpl {
                     ShaderInstance shader = new ShaderInstance(event.getResourceProvider(), id, vertexFormat);
                     event.registerShader(shader, setter);
                 } catch (Exception e) {
-                    Moonlight.LOGGER.error("Failed to parse shader: {}", id, e);
-                    if (PlatHelper.isDev()) throw new RuntimeException(e);
+                    throw new RuntimeException("Failed to parse shader: " + id, e);
                 }
             });
         };
@@ -334,10 +333,12 @@ public class ClientHelperImpl {
 
         Consumer<RegisterClientExtensionsEvent> eventConsumer = event -> {
             eventListener.accept((item, renderer) -> {
+                var rend = renderer.getItemRenderer();
                 event.registerItem(new IClientItemExtensions() {
                     @Override
                     public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                        return renderer;
+                        if (rend != null) return rend;
+                        return IClientItemExtensions.super.getCustomRenderer();
                     }
 
                     @Override
