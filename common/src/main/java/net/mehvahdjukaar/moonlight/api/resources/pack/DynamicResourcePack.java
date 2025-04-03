@@ -219,18 +219,20 @@ public abstract class DynamicResourcePack implements PackResources {
                 }
             }
         }
-        //why are we only using server resources here?
-        if (packType == this.packType) {
-            //idk why but somebody had an issue with concurrency here during world load
+        synchronized (this) {
+            //why are we only using server resources here?
+            if (packType == this.packType) {
+                //idk why but somebody had an issue with concurrency here during world load
 
-            this.searchTrie.search(namespace + "/" + id)
-                    .forEach(r -> {
-                        byte[] buf = resources.get(r);
-                        if (buf == null) {
-                            throw new IllegalStateException("Somehow search trie returned a resource not in resources " + r);
-                        }
-                        output.accept(r, () -> new ByteArrayInputStream(buf));
-                    });
+                this.searchTrie.search(namespace + "/" + id)
+                        .forEach(r -> {
+                            byte[] buf = resources.get(r);
+                            if (buf == null) {
+                                throw new IllegalStateException("Somehow search trie returned a resource not in resources " + r);
+                            }
+                            output.accept(r, () -> new ByteArrayInputStream(buf));
+                        });
+            }
         }
     }
 
@@ -275,9 +277,11 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     public void removeResource(ResourceLocation res) {
-        this.searchTrie.remove(res);
-        this.resources.remove(res);
-        this.staticResources.remove(res);
+        synchronized (this) {
+            this.searchTrie.remove(res);
+            this.resources.remove(res);
+            this.staticResources.remove(res);
+        }
     }
 
     public void addResource(StaticResource resource) {
@@ -345,9 +349,11 @@ public abstract class DynamicResourcePack implements PackResources {
     // Called after each reload
     @ApiStatus.Internal
     protected void clearAllContent() {
-        this.searchTrie.clear();
-        this.resources.clear();
-        this.needsClearingNonStatic = true;
+        synchronized (this) {
+            this.searchTrie.clear();
+            this.resources.clear();
+            this.needsClearingNonStatic = true;
+        }
     }
 
     private boolean needsClearingNonStatic = false;
