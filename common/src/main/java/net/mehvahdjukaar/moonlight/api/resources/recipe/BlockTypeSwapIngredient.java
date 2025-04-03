@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.recipe;
 
+import com.google.common.base.Preconditions;
 import com.mojang.serialization.*;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
@@ -23,12 +24,12 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
 
 
     @ExpectPlatform
-    public static <T extends BlockType> Ingredient create(Ingredient original, T from, T to) {
+    public static <T extends BlockType> Ingredient create(Ingredient original, @NotNull T from, @NotNull T to) {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static <T extends BlockType> BlockTypeSwapIngredient<T> create(Ingredient original, T from, T to, BlockTypeRegistry<T> reg) {
+    public static <T extends BlockType> BlockTypeSwapIngredient<T> create(Ingredient original, @NotNull T from, @NotNull T to, BlockTypeRegistry<T> reg) {
         throw new AssertionError();
     }
 
@@ -41,6 +42,8 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
 
     protected BlockTypeSwapIngredient(Ingredient inner, T fromType, T toType, BlockTypeRegistry<T> reg) {
         super();
+        Preconditions.checkNotNull(toType, "Found null block type for BlockTypeSwapIngredient");
+        Preconditions.checkNotNull(fromType, "Found null block type for BlockTypeSwapIngredient");
         this.inner = inner;
         this.fromType = fromType;
         this.toType = toType;
@@ -73,7 +76,7 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
         return false;
     }
 
-    public final List<ItemStack> convertItems(List<ItemStack> toConvert){
+    public final List<ItemStack> convertItems(List<ItemStack> toConvert) {
         List<ItemStack> newItems = new ArrayList<>();
         boolean success = false;
         for (ItemStack it : toConvert) {
@@ -139,8 +142,10 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
                 var ingCodec = nonEmpty ? Ingredient.CODEC_NONEMPTY : Ingredient.CODEC;
                 Ingredient inner = ingCodec.parse(ops, input.get(ops.createString("ingredient"))).result().orElseThrow();
                 BlockTypeRegistry<?> reg = BlockTypeRegistry.getRegistryCodec().parse(ops, input.get(ops.createString("block_type"))).result().orElseThrow();
-                BlockType from = reg.getCodec().parse(ops, input.get(ops.createString("from"))).result().orElseThrow();
-                BlockType to = reg.getCodec().parse(ops, input.get(ops.createString("to"))).result().orElseThrow();
+                T fromType = ops.createString("from");
+                BlockType from = reg.getCodec().parse(ops, input.get(fromType)).result().orElseThrow();
+                T toType = ops.createString("to");
+                BlockType to = reg.getCodec().parse(ops, input.get(toType)).result().orElseThrow();
                 return DataResult.success(create(inner, from, to, (BlockTypeRegistry<? super BlockType>) reg));
             }
 

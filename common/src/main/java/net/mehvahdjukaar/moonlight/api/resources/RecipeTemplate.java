@@ -1,10 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.resources;
 
+import com.google.common.base.Preconditions;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
@@ -52,15 +52,18 @@ public class RecipeTemplate {
         return makeSimilarRecipe(original, originalMat, destinationMat, ResourceLocation.parse(baseID));
     }
 
-    public static <T extends BlockType, R extends Recipe<?>> RecipeHolder<?> makeSimilarRecipe(R original, T originalMat,
-                                                                                               T destinationMat,
-                                                                                               ResourceLocation baseID) {
+    public static <T extends BlockType, R extends Recipe<?>> RecipeHolder<?> makeSimilarRecipe(
+            R original, @NotNull T originalMat, @NotNull T destinationMat,
+            ResourceLocation baseID) {
         var clazz = original.getClass();
         var remapper = REMAPPERS.get(clazz);
         if (remapper == null) {
             throw new UnsupportedOperationException("Recipe class " + clazz + " not supported. You must register it using RecipeTemplate.register()");
         }
         ResourceLocation newId = baseID.withPath(p -> p + "/" + destinationMat.getAppendableId());
+
+        Preconditions.checkNotNull(original, "Found null from block type for remapping for recipe " + originalMat + " with id " + newId);
+        Preconditions.checkNotNull(originalMat, "Found null from block type for remapping for recipe " + originalMat + " with id " + newId);
 
         var remapped = remapper.apply(original, originalMat, destinationMat);
 
@@ -75,7 +78,10 @@ public class RecipeTemplate {
     }
 
 
-    private static <R extends Recipe<?>> R createSimple(R or, RecipeFactory<R> factory, BlockType from, BlockType to) {
+    private static <R extends Recipe<?>> R createSimple(R or, RecipeFactory<R> factory,
+                                                        @NotNull BlockType from, @NotNull BlockType to) {
+        Preconditions.checkNotNull(from, "Found null from block type for recipe remapping on recipe " + or);
+        Preconditions.checkNotNull(to, "Found null to block type for recipe remapping on recipe " + or);
         List<Ingredient> newList = convertIngredients(or.getIngredients(), from, to);
         ItemStack originalResult = or.getResultItem(RegistryAccess.EMPTY);
         ItemStack newResult = convertItemStack(originalResult, from, to);
@@ -89,7 +95,9 @@ public class RecipeTemplate {
         return factory.create(or.getGroup(), cat, newResult, ingredients);
     }
 
-    private static ShapedRecipe createShaped(ShapedRecipe or, BlockType from, BlockType to) {
+    private static ShapedRecipe createShaped(ShapedRecipe or, @NotNull BlockType from, @NotNull BlockType to) {
+        Preconditions.checkNotNull(from, "Found null from block type for recipe remapping on recipe " + or);
+        Preconditions.checkNotNull(to, "Found null to block type for recipe remapping on recipe " + or);
         List<Ingredient> newList = convertIngredients(or.getIngredients(), from, to);
         ItemStack originalResult = or.getResultItem(RegistryAccess.EMPTY);
         ItemStack newResult = convertItemStack(originalResult, from, to);
@@ -164,7 +172,7 @@ public class RecipeTemplate {
     }
 
     public static <R extends Recipe<?>> @NotNull List<Ingredient> convertIngredients(NonNullList<Ingredient> or,
-                                                                                     BlockType from, BlockType to) {
+                                                                                     @NotNull BlockType from, @NotNull BlockType to) {
         List<Ingredient> newList = new ArrayList<>();
         Map<Ingredient, Ingredient> convertedMap = new HashMap<>();
         for (Ingredient ingredient : or) {

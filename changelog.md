@@ -1,3 +1,3 @@
-minor fix and more utilities classes for codecs.
+fixed a rare concurrency issue with dynamic pack
 
-added some interfaces for blocks and common extension to register item head overlays
+improved error handling ofblock type swap ingredient
