@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.Font;
@@ -342,8 +343,8 @@ public class ClientHelperImpl {
                     }
 
                     @Override
-                    public void renderHelmetOverlay(ItemStack stack, Player player, int width, int height, float partialTick) {
-                        renderer.renderHelmetOverlay(stack, player, width, height, partialTick);
+                    public void renderHelmetOverlay(ItemStack stack, Player player, GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+                        renderer.renderHelmetOverlay(stack, player, guiGraphics, deltaTracker);
                     }
 
                 }, item.asItem());
