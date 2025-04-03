@@ -7,6 +7,7 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface IRecipeTemplate<R extends FinishedRecipe> {
 
     //null if it fails to convert at least 1 ingredient
     @Nullable
-    default <T extends BlockType> R createSimilar(T originalMat, T destinationMat, Item unlockItem) {
+    default <T extends BlockType> R createSimilar(@NotNull T originalMat, @NotNull T destinationMat, Item unlockItem) {
         return createSimilar(originalMat, destinationMat, unlockItem, null);
     }
 
@@ -26,7 +27,7 @@ public interface IRecipeTemplate<R extends FinishedRecipe> {
 
     List<Object> getConditions();
 
-    static <T extends BlockType> Ingredient convertIngredients(T originalMat, T destinationMat, Ingredient ing) {
+    static <T extends BlockType> Ingredient convertIngredients(@NotNull T originalMat, @NotNull T destinationMat, @NotNull Ingredient ing) {
         return BlockTypeSwapIngredient.create(ing, originalMat, destinationMat);
     }
 

@@ -13,6 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,7 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
 
     @Override
     public <T extends BlockType> ShapelessRecipeBuilder.Result createSimilar(
-            T originalMat, T destinationMat, Item unlockItem, String id) {
+            @NotNull T originalMat,@NotNull T destinationMat, Item unlockItem, String id) {
         ItemLike newRes = BlockType.changeItemType(this.result, originalMat, destinationMat);
         if (newRes == null) {
             throw new UnsupportedOperationException(String.format("Could not convert output item %s from type %s to %s",
@@ -71,7 +72,7 @@ public class ShapelessRecipeTemplate implements IRecipeTemplate<ShapelessRecipeB
 
         boolean atLeastOneChanged = false;
         for (var originalIng : this.ingredients) {
-            var newIng = IRecipeTemplate.convertIngredients(originalMat, destinationMat, originalIng);
+            Ingredient newIng = IRecipeTemplate.convertIngredients(originalMat, destinationMat, originalIng);
             if (newIng != null) {
                 atLeastOneChanged = true;
             }

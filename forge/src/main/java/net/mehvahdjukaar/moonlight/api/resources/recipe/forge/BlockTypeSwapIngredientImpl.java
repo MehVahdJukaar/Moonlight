@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.recipe.forge;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
@@ -10,9 +11,11 @@ import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraftforge.common.crafting.AbstractIngredient;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +32,8 @@ public class BlockTypeSwapIngredientImpl<T extends BlockType> extends AbstractIn
 
     public BlockTypeSwapIngredientImpl(Ingredient inner, T fromType, T toType, BlockTypeRegistry<T> registry) {
         super();
+        Preconditions.checkNotNull(fromType, "From block type cannot be null");
+        Preconditions.checkNotNull(toType, "To block type cannot be null");
         this.inner = inner;
         this.fromType = fromType;
         this.toType = toType;
@@ -97,8 +102,12 @@ public class BlockTypeSwapIngredientImpl<T extends BlockType> extends AbstractIn
                 @Override
                 public BlockTypeSwapIngredientImpl<?> parse(FriendlyByteBuf arg) {
                     var reg = BlockSetInternal.getRegistry(arg.readUtf());
-                    var from = reg.getFromNBT(arg.readUtf());
-                    var to = reg.getFromNBT(arg.readUtf());
+                    String fromWood = arg.readUtf();
+                    var from = reg.getFromNBT(fromWood);
+                    Preconditions.checkNotNull(from, "Found null block type with name: " + fromWood );
+                    String toWood = arg.readUtf();
+                    var to = reg.getFromNBT(toWood);
+                    Preconditions.checkNotNull(to, "Found null block type with name: " + toWood );
 
                     var ing = Ingredient.fromNetwork(arg);
                     return new BlockTypeSwapIngredientImpl<>(ing, from, to, (BlockTypeRegistry) reg);
@@ -107,8 +116,12 @@ public class BlockTypeSwapIngredientImpl<T extends BlockType> extends AbstractIn
                 @Override
                 public BlockTypeSwapIngredientImpl<?> parse(JsonObject jsonObject) {
                     var reg = BlockSetInternal.getRegistry(jsonObject.get("block_type").getAsString());
-                    var from = reg.getFromNBT(jsonObject.get("from").getAsString());
-                    var to = reg.getFromNBT(jsonObject.get("to").getAsString());
+                    String fromWood = jsonObject.get("from").getAsString();
+                    var from = reg.getFromNBT(fromWood);
+                    Preconditions.checkNotNull(from, "Found null block type with name: " + fromWood );
+                    String toWood = jsonObject.get("to").getAsString();
+                    var to = reg.getFromNBT(toWood);
+                    Preconditions.checkNotNull(to, "Found null block type with name: " + toWood );
                     var ing = Ingredient.fromJson(jsonObject.get("ingredient"));
                     return new BlockTypeSwapIngredientImpl<>(ing, from, to, (BlockTypeRegistry) reg);
                 }
@@ -133,7 +146,7 @@ public class BlockTypeSwapIngredientImpl<T extends BlockType> extends AbstractIn
         return obj;
     }
 
-    public static <T extends BlockType> Ingredient create(Ingredient original, T from, T to) {
+    public static <T extends BlockType> Ingredient create(Ingredient original, @NotNull T from,@NotNull T to) {
         return new BlockTypeSwapIngredientImpl<>(original, from, to, from.getRegistry());
     }
 

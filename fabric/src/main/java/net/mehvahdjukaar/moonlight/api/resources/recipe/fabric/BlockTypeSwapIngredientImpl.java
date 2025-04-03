@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.recipe.fabric;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
@@ -30,6 +31,8 @@ public class BlockTypeSwapIngredientImpl<T extends BlockType> implements CustomI
 
     public BlockTypeSwapIngredientImpl(Ingredient inner, T fromType, T toType, BlockTypeRegistry<T> reg) {
         super();
+        Preconditions.checkNotNull(fromType, "From block type cannot be null");
+        Preconditions.checkNotNull(toType, "To block type cannot be null");
         this.inner = inner;
         this.fromType = fromType;
         this.toType = toType;
@@ -138,6 +141,7 @@ public class BlockTypeSwapIngredientImpl<T extends BlockType> implements CustomI
             };
 
     public static <T extends BlockType> Ingredient create(Ingredient original, T from, T to) {
+
         return new BlockTypeSwapIngredientImpl<>(original, from, to, from.getRegistry())
                 .toVanilla();
     }
