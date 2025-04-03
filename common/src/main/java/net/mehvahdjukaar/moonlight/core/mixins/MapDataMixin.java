@@ -217,7 +217,6 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
                     customData.save(t);
                     ed.getCustomData().get(entry.getKey()).load(t);
                 }
-                BehaviorUtils.lockGazeAndWalkToEachOther();
             }
         }
     }
