@@ -1,1 +1,2 @@
-- improved the custom map data stuff to allow non persisting on rescale
+- fixed a very rare concurrency issue with the dynamic pack
+- improved error handling for the block swap type ingredient
