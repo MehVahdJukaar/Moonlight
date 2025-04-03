@@ -169,7 +169,11 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
         @Override
         public T decode(FriendlyByteBuf buffer) {
             int i = VarInt.read(buffer);
-            return byId(i);
+            var obj = byId(i);
+            if (obj == null) {
+                throw new IllegalStateException("Unknown id " + i + " for registry " + name);
+            }
+            return obj;
         }
 
         @Override

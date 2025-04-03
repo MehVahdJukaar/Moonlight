@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.set;
 
 import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
@@ -8,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -22,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public abstract class BlockTypeRegistry<T extends BlockType> {
+
 
     public static Codec<BlockTypeRegistry<?>> getRegistryCodec() {
         return BlockSetInternal.getRegistriesCodec();
@@ -38,11 +41,13 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     private final MapRegistry<T> valuesReg; //TODO: extend this instead
     private final Class<T> typeClass;
     private final Object2ObjectOpenHashMap<Object, T> childrenToType = new Object2ObjectOpenHashMap<>();
+    private final StreamCodec<ByteBuf, T> streamCodecSlow;
 
     protected BlockTypeRegistry(Class<T> typeClass, String name) {
         this.typeClass = typeClass;
         this.name = name;
         this.valuesReg = new MapRegistry<>(name);
+        this.streamCodecSlow = ByteBufCodecs.fromCodec(this.getCodec());
     }
 
     public Class<T> getType() {
@@ -75,6 +80,11 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     public StreamCodec<FriendlyByteBuf, T> getStreamCodec() {
         return valuesReg.getStreamCodec();
+    }
+
+
+    public StreamCodec<ByteBuf, T> getStreamCodecExplicit() {
+        return streamCodecSlow;
     }
 
     public abstract T getDefaultType();
@@ -170,7 +180,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         if (t != null) return t;
         if (itemLike == Items.AIR || itemLike == Blocks.AIR) return null;
         if (itemLike instanceof BlockItem bi) {
-            var ofBlock=  childrenToType.get(bi.getBlock());
+            var ofBlock = childrenToType.get(bi.getBlock());
             if (ofBlock != null) return ofBlock;
         }
         if (itemLike instanceof Block b) {

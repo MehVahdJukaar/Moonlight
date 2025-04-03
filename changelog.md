@@ -1,3 +1,1 @@
-fixed a rare concurrency issue with dynamic pack
-
-improved error handling ofblock type swap ingredient
+improved error handling ofblock type swap ingredient even more to debug network issues

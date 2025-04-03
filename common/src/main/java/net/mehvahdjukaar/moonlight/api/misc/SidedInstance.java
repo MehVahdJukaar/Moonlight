@@ -55,7 +55,11 @@ public class SidedInstance<T> {
     }
 
     private ChatType getDummyKey(HolderLookup.Provider ra) {
-        return ra.lookupOrThrow(Registries.CHAT_TYPE)
-                .getOrThrow(ChatType.CHAT).value();
+        try {
+            return ra.lookupOrThrow(Registries.CHAT_TYPE)
+                    .getOrThrow(ChatType.CHAT).value();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to find CHAT_TYPE registry! This is a VANILLA datapack registry! How is this possible??");
+        }
     }
 }

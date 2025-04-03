@@ -42,8 +42,8 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
 
     protected BlockTypeSwapIngredient(Ingredient inner, T fromType, T toType, BlockTypeRegistry<T> reg) {
         super();
-        Preconditions.checkNotNull(toType, "Found null block type for BlockTypeSwapIngredient");
-        Preconditions.checkNotNull(fromType, "Found null block type for BlockTypeSwapIngredient");
+        Preconditions.checkNotNull(toType, "Found null to block type for BlockTypeSwapIngredient");
+        Preconditions.checkNotNull(fromType, "Found null from block type for BlockTypeSwapIngredient");
         this.inner = inner;
         this.fromType = fromType;
         this.toType = toType;
@@ -115,8 +115,10 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
                 public BlockTypeSwapIngredient<?> decode(RegistryFriendlyByteBuf object) {
                     Ingredient inner = Ingredient.CONTENTS_STREAM_CODEC.decode(object);
                     BlockTypeRegistry<?> reg = BlockTypeRegistry.getRegistryStreamCodec().decode(object);
-                    BlockType from = reg.getStreamCodec().decode(object);
-                    BlockType to = reg.getStreamCodec().decode(object);
+                    //this is slower but sends the full id so we have better error logging
+                    var slowCodec = reg.getStreamCodecExplicit();
+                    BlockType from = slowCodec.decode(object);
+                    BlockType to = slowCodec.decode(object);
                     return create(inner, from, to, (BlockTypeRegistry<? super BlockType>) reg);
                 }
 
@@ -124,7 +126,7 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
                 public void encode(RegistryFriendlyByteBuf buf, BlockTypeSwapIngredient<?> ing) {
                     Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ing.inner);
                     BlockTypeRegistry.getRegistryStreamCodec().encode(buf, ing.registry);
-                    StreamCodec streamCodec = ing.registry.getStreamCodec();
+                    StreamCodec streamCodec = ing.registry.getStreamCodecExplicit();
                     streamCodec.encode(buf, ing.fromType);
                     streamCodec.encode(buf, ing.toType);
                 }
