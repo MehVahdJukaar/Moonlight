@@ -226,12 +226,10 @@ public abstract class DynamicResourcePack implements PackResources {
             this.searchTrie.search(namespace + "/" + id)
                     .forEach(r -> {
                         byte[] buf = resources.get(r);
-                        output.accept(r, () -> {
-                            if (buf == null) {
-                                throw new IllegalStateException("Somehow search tree returned a resource not in resources " + r);
-                            }
-                            return new ByteArrayInputStream(buf);
-                        });
+                        if (buf == null) {
+                            throw new IllegalStateException("Somehow search trie returned a resource not in resources " + r);
+                        }
+                        output.accept(r, () -> new ByteArrayInputStream(buf));
                     });
         }
     }
