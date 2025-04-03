@@ -37,7 +37,7 @@ dependencies {
 
     modCompileOnly("curse.maven:yacl-667299:5424169")
     //modCompileOnly("curse.maven:super-better-grass-911433:4744836")
-    modCompileOnly("curse.maven:map-atlases-436298:5018173")
+    modCompileOnly("curse.maven:map-atlases-436298:6345966")
     //modImplementation ("curse.maven:supplementaries-412082:4987505")
     // modRuntimeOnly("net.mehvahdjukaar:supplementaries-fabric:1.20-2.7.17")
     modCompileOnly "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
@@ -45,7 +45,7 @@ dependencies {
     modCompileOnly "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
     //modRuntimeOnly("curse.maven:gardens-of-the-dead-683174:4784268")
     //modRuntimeOnly("curse.maven:architectury-api-419699:5137936")
-    modImplementation("pebjebs.mapatlases:map_atlases-fabric:1.21-6.1.2")
+//    modImplementation("pebjebs.mapatlases:map_atlases-fabric:1.21-6.1.2")
 
     modCompileOnly("maven.modrinth:flashback:0.11.0") // Get latest version from releases
 
