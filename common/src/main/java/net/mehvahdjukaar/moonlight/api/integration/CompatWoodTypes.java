@@ -349,7 +349,7 @@ public class CompatWoodTypes {
         
         // Ars Elemental
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "ars_nouveau", "yellow_archwood", "yellow_archwood_leaves", "ars_nouveau:archwood"));
+                "ars_elemental", "yellow_archwood", "yellow_archwood_leaves", "ars_nouveau:archwood"));
 
         // BIOMES O' PLENTY
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
