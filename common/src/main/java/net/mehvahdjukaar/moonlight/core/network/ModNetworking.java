@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 public class ModNetworking {
 
     public static void init() {
-        NetworkHelper.addNetworkRegistration(ModNetworking::registerMessages, 7);
+        NetworkHelper.addNetworkRegistration(ModNetworking::registerMessages, 8);
     }
 
     private static void registerMessages(NetworkHelper.RegisterMessagesEvent event) {

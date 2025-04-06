@@ -1,1 +1,1 @@
-improved error handling ofblock type swap ingredient even more to debug network issues
+further improvements of error handling of block type swap ingredient type (mainly relevant for everycompat that uses it)
