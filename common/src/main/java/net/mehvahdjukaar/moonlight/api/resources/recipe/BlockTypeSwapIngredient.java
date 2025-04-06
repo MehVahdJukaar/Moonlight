@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe;
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.*;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import io.netty.handler.codec.DecoderException;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -117,9 +118,13 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
                     BlockTypeRegistry<?> reg = BlockTypeRegistry.getRegistryStreamCodec().decode(object);
                     //this is slower but sends the full id so we have better error logging
                     var slowCodec = reg.getStreamCodecExplicit();
-                    BlockType from = slowCodec.decode(object);
-                    BlockType to = slowCodec.decode(object);
-                    return create(inner, from, to, (BlockTypeRegistry<? super BlockType>) reg);
+                    try {
+                        BlockType from = slowCodec.decode(object);
+                        BlockType to = slowCodec.decode(object);
+                        return create(inner, from, to, (BlockTypeRegistry<? super BlockType>) reg);
+                    } catch (DecoderException e) {
+                        throw new RuntimeException("Failed to decode block type swap ingredient", e);
+                    }
                 }
 
                 @Override

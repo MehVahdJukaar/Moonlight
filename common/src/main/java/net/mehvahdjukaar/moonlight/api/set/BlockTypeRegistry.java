@@ -30,7 +30,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         return BlockSetInternal.getRegistriesCodec();
     }
 
-    public static StreamCodec<FriendlyByteBuf, BlockTypeRegistry<?>> getRegistryStreamCodec() {
+    public static StreamCodec<ByteBuf, BlockTypeRegistry<?>> getRegistryStreamCodec() {
         return BlockSetInternal.getRegistriesStreamCodec();
     }
 

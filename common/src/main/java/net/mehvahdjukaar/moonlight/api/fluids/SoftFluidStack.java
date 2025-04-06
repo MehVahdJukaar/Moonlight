@@ -70,9 +70,9 @@ public class SoftFluidStack implements DataComponentHolder {
     protected SoftFluidStack(Holder<SoftFluid> fluid, int count, DataComponentPatch components) {
         this.fluidHolder = fluid;
         //validate
-        //cant have this becasue stuff likes to create these from netty thread
+        //cant have this because stuff likes to create these from netty thread
         this.fluid = this.fluidHolder.value();
-        this.components = PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, Objects.requireNonNull(components));
+        this.components = PatchedDataComponentMap.fromPatch(DataComponentMap.EMPTY, Objects.requireNonNull(components, "component map cant be null"));
         this.count = count;
         this.updateEmpty();
 

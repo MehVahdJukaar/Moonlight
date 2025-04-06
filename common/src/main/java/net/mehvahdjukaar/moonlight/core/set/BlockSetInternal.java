@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.*;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import io.netty.buffer.ByteBuf;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
@@ -13,6 +14,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
@@ -31,6 +33,7 @@ public class BlockSetInternal {
 
     private static final Map<Class<? extends BlockType>, BlockTypeRegistry<?>> REGISTRIES_BY_CLASS = new LinkedHashMap<>();
     private static final MapRegistry<BlockTypeRegistry<?>> REGISTRIES_BY_NAME = new MapRegistry<>("block_set_registry");
+    private static final StreamCodec<ByteBuf, BlockTypeRegistry<?>> EXPLICIT_STREAM_CODEC = ByteBufCodecs.fromCodec(REGISTRIES_BY_NAME);
     private static final List<BlockTypeRegistry<?>> ORDERED_REGISTRIES = new ArrayList<>();
 
     public static void initializeBlockSets() {
@@ -141,44 +144,8 @@ public class BlockSetInternal {
         return REGISTRIES_BY_NAME;
     }
 
-    public static StreamCodec<FriendlyByteBuf, BlockTypeRegistry<?>> getRegistriesStreamCodec() {
-        return REGISTRIES_BY_NAME.getStreamCodec();
-    }
-
-
-    //very dumb
-    // experimental. Returns first block type in a map codec
-    public static MapCodec<BlockType> createGenericCodec() {
-        return new MapCodec<BlockType>() {
-            @Override
-            public <T> Stream<T> keys(DynamicOps<T> ops) {
-                return REGISTRIES_BY_NAME.keySet().stream().map(ResourceLocation::toString).map(ops::createString);
-            }
-
-            @Override
-            public <T> DataResult<BlockType> decode(DynamicOps<T> ops, MapLike<T> input) {
-                for (var e : input.entries().toList()) {
-                    T keyStr = e.getFirst();
-                    T valueStr = e.getSecond();
-                    var registry = REGISTRIES_BY_NAME.decode(ops, keyStr).getOrThrow().getFirst();
-                    var value = registry.getCodec().decode(ops, valueStr).getOrThrow();
-                    return DataResult.success(value.getFirst());
-                }
-                return DataResult.error(() -> "No block type found");
-            }
-
-            @Override
-            public <T> RecordBuilder<T> encode(BlockType input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
-                BlockTypeRegistry<?> registry = input.getRegistry();
-                ResourceLocation key = REGISTRIES_BY_NAME.getKey(registry);
-                if (key != null) {
-                    Codec<BlockType> codec = (Codec<BlockType>) registry.getCodec();
-                    return prefix.add(ops.createString(key.toString()),
-                            codec.encodeStart(ops, input));
-                }
-                return prefix;
-            }
-        };
+    public static StreamCodec<ByteBuf, BlockTypeRegistry<?>> getRegistriesStreamCodec() {
+        return EXPLICIT_STREAM_CODEC;//slow but safer REGISTRIES_BY_NAME.getStreamCodec();
     }
 
 }
