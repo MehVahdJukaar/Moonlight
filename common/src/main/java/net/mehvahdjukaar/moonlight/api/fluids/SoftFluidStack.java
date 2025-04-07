@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 // do NOT have these in a static field as they contain registry holders
 public class SoftFluidStack {
@@ -38,8 +39,8 @@ public class SoftFluidStack {
     public static final Codec<SoftFluidStack> CODEC = RecordCodecBuilder.create(i -> i.group(
             SoftFluid.HOLDER_CODEC.fieldOf("id").forGetter(SoftFluidStack::getHolder),
             Codec.INT.optionalFieldOf("count", 1).forGetter(SoftFluidStack::getCount),
-            CompoundTag.CODEC.optionalFieldOf("tag", null).forGetter(SoftFluidStack::getTag)
-    ).apply(i, SoftFluidStack::of));
+            CompoundTag.CODEC.optionalFieldOf("tag").forGetter(fluidStack -> Optional.ofNullable(fluidStack.getTag()))
+    ).apply(i, SoftFluidStack::fromCodec));
 
     // dont access directly
     private final Holder<SoftFluid> fluidHolder;
@@ -70,6 +71,10 @@ public class SoftFluidStack {
     @Deprecated(forRemoval = true)
     public SoftFluidStack(Holder<SoftFluid> fluid, int count) {
         this(fluid, count, null);
+    }
+
+    private static SoftFluidStack fromCodec(Holder<SoftFluid> fluid, Integer count, Optional<CompoundTag> optionalTag) {
+        return of(fluid, count, optionalTag.orElse(null));
     }
 
     @Deprecated(forRemoval = true)
