@@ -31,6 +31,7 @@ public class QuadUtilsExample {
 
     public static void addCube(List<BakedQuad> quads, TextureAtlasSprite sprite) {
         // Works just like Forge one
+        /*
         BakedQuadBuilder builder = BakedQuadBuilder.create(sprite);
         builder.setAutoDirection();
         // needed so all finished quads will be added to the list
@@ -40,6 +41,7 @@ public class QuadUtilsExample {
         pose.translate(0, 0, 1);
         // Adding a simple cube using helper function. You can also add vertices manually
         VertexUtil.addCube(builder, pose, 0, 0, 0.2f, 0.2f, 0, 0);
+    */
     }
 
 }
