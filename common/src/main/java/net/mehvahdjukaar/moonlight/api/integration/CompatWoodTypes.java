@@ -14,6 +14,13 @@ import java.util.Arrays;
 public class CompatWoodTypes {
 
     public static void init() {
+        // TEMPLATE:
+//        advancedWoodFinder("", "nameWood", "planksId", "suffixLog", "suffixWood", "suffixStrippedLog", "suffixStrippedWood")
+
+        // Burnt
+        BlockSetAPI.addBlockTypeFinder(WoodType.class,
+                mediumWoodFinder("burnt", "smoldering_bamboo",
+                        "block", ""));
 
         // Botania
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
