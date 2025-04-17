@@ -11,8 +11,6 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -21,14 +19,10 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFileCodec;
-import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -343,7 +337,7 @@ public class SoftFluid {
                     .optionalFieldOf("preserved_components_from_item", HolderSet.empty())
                     .forGetter(SoftFluid::getPreservedComponents),
             FluidContainerList.CODEC.optionalFieldOf("containers", new FluidContainerList()).forGetter(SoftFluid::getContainerList),
-            Utils.lenientHomogeneousList(Registries.FLUID).optionalFieldOf("equivalent_fluids",HolderSet.empty())
+            Utils.lenientHomogeneousList(Registries.FLUID).optionalFieldOf("equivalent_fluids", HolderSet.empty())
                     .forGetter(s -> s.equivalentFluids),
             ResourceLocation.CODEC.optionalFieldOf("use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
     ).apply(instance, SoftFluid::new));

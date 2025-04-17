@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.network;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
+import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 
 
 public class ModNetworking {

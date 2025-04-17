@@ -40,6 +40,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         LISTING_TYPES.register(ResourceLocation.parse("simple"), SimpleItemListing.CODEC);
         LISTING_TYPES.register(ResourceLocation.parse("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
         LISTING_TYPES.register(ResourceLocation.parse("no_op"), NoOpListing.CODEC);
+        LISTING_TYPES.register(ResourceLocation.parse("villager_type_variant"), BiomeVariantItemListing.CODEC);
     }
 
     private final Map<EntityType<?>, Int2ObjectArrayMap<List<ModItemListing>>> specialCustomTrades = new HashMap<>();
