@@ -288,7 +288,8 @@ public class VertexUtil {
     }
 
     private static final Direction[] DIRS = new Direction[]{
-            Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, null
+            Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST,
+            Direction.UP, Direction.DOWN, null
     };
 
     public static List<BakedQuad> getAllModelQuads(BakedModel model, BlockState state, RandomSource rand) {
