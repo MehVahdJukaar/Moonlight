@@ -44,8 +44,26 @@ public abstract class BlockType {
         return id.getNamespace();
     }
 
+    /**
+     * @return namespace/TypeName
+     */
     public String getAppendableId() {
         return this.getNamespace() + "/" + this.getTypeName();
+    }
+
+    /**
+     * @return namespace/TypeName_suffix
+     */
+    public String getAppendableIdWith(String suffix) {
+        return getAppendableIdWith("", suffix);
+    }
+
+    /**
+     * @return namespace/prefix_TypeName_suffix
+     */
+    public String getAppendableIdWith(String prefix, String suffix) {
+        String prefixed = (prefix.isEmpty()) ? "" : prefix + "_";
+        return  this.getNamespace() +"/"+ prefixed + this.getTypeName() +"_"+ suffix;
     }
 
     @Override
