@@ -21,7 +21,7 @@ public record BiomeVariantItemListing(Map<VillagerType, ModItemListing> listingM
                     Codec.unboundedMap(
                             BuiltInRegistries.VILLAGER_TYPE.byNameCodec(),
                             ModItemListing.CODEC
-                    ).fieldOf("trades_per_biome").forGetter(BiomeVariantItemListing::listingMap),
+                    ).fieldOf("trades_per_type").forGetter(BiomeVariantItemListing::listingMap),
                     ModItemListing.CODEC.fieldOf("default").forGetter(BiomeVariantItemListing::defaultListing)
             ).apply(instance, BiomeVariantItemListing::new))
             .validate(
