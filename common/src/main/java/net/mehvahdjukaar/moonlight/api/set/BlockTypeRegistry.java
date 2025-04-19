@@ -6,6 +6,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.CompatHandler;
+import net.mehvahdjukaar.moonlight.core.integration.PolymerCompat;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -155,6 +157,8 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
             for (Block b : BuiltInRegistries.BLOCK) {
+                //skip stuff that wont be on the client
+                if (CompatHandler.POLYMER && PolymerCompat.isPolymerObj(b)) continue;
                 this.detectTypeFromBlock(b, Utils.getID(b)).ifPresent(t -> {
                     if (!notInclude.contains(t.getId())) this.registerBlockType(t);
                 });

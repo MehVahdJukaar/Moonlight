@@ -27,6 +27,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.trading.MerchantOffer;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -36,7 +37,8 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
     private static final SidedInstance<ItemListingManager> INSTANCE = SidedInstance.of(ItemListingManager::new);
     protected static final CodecMapRegistry<ModItemListing> LISTING_TYPES = MapRegistry.ofCodec();
 
-    static {
+    @ApiStatus.Internal
+    public static void init() {
         LISTING_TYPES.register(ResourceLocation.parse("simple"), SimpleItemListing.CODEC);
         LISTING_TYPES.register(ResourceLocation.parse("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
         LISTING_TYPES.register(ResourceLocation.parse("no_op"), NoOpListing.CODEC);
