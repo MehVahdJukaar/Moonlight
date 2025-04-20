@@ -1,1 +1,1 @@
-added polymer compat
+fixed map decoration hash code

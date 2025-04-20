@@ -75,7 +75,7 @@ public class MLMapDecoration {
         if (this == obj) {
             return true;
         } else if (obj instanceof MLMapDecoration mapDecoration) {
-            if (this.type != mapDecoration.type) {
+            if (!this.type.getRegisteredName().equals(mapDecoration.type.getRegisteredName())) {
                 return false;
             } else if (this.rot != mapDecoration.rot) {
                 return false;
@@ -93,7 +93,7 @@ public class MLMapDecoration {
 
     @Override
     public int hashCode() {
-        int i = Utils.getID(this.type).hashCode();
+        int i = this.type.getRegisteredName().hashCode();
         i = 31 * i + this.x;
         i = 31 * i + this.y;
         i = 31 * i + this.rot;

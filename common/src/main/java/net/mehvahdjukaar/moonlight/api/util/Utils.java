@@ -138,6 +138,9 @@ public class Utils {
         return xp;
     }
 
+    public static ResourceLocation getId(Holder<?> object) {
+        return object.unwrapKey().get().location();
+    }
 
     public static ResourceLocation getID(Block object) {
         return BuiltInRegistries.BLOCK.getKey(object);
@@ -175,10 +178,12 @@ public class Utils {
         return BuiltInRegistries.RECIPE_SERIALIZER.getKey(object);
     }
 
+    @Deprecated(forRemoval = true)
     public static ResourceLocation getID(SoftFluid object) {
         return SoftFluidRegistry.hackyGetRegistry().getKey(object);
     }
 
+    @Deprecated(forRemoval = true)
     public static ResourceLocation getID(MLMapDecorationType<?, ?> object) {
         return MapDataInternal.hackyGetRegistry().getKey(object);
     }
@@ -217,6 +222,7 @@ public class Utils {
             case CreativeModeTab t -> getID(t);
             case DamageType t -> getID(t);
             case StatType<?> t -> getID(t);
+            case Holder<?> h -> getId(h);
             default -> throw new UnsupportedOperationException("Unsupported class type " +
                     object.getClass() + ". Expected a registry entry for a call to Utils.getID()");
         };
