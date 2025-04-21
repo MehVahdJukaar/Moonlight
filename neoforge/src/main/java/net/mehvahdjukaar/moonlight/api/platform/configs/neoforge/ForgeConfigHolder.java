@@ -125,7 +125,6 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
     public boolean hasConfigScreen() {
         return ModList.get().getModContainerById(this.getModId())
                 .map(container -> container.getCustomExtension(IConfigScreenFactory.class)
