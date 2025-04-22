@@ -36,6 +36,7 @@ import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.schedule.Activity;
@@ -137,6 +138,17 @@ public class RegHelper {
             }
             return new PoiType(builder.build(), searchDistance, maxTickets);
         });
+    }
+
+    //call in setup when you have blocks
+    public static void addBlocksToPOI(ResourceKey<PoiType> poi, Block... blocks) {
+        var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+        ImmutableSet.Builder<BlockState> builder = ImmutableSet.builder();
+        builder.addAll(beehivePOI.value().matchingStates());
+        for (var block : blocks) {
+            builder.addAll(block.getStateDefinition().getPossibleStates());
+        }
+        PoiTypes.registerBlockStates(beehivePOI, builder.build());
     }
 
     @ExpectPlatform

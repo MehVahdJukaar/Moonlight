@@ -22,6 +22,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.level.block.StairBlock;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.*;
@@ -136,6 +137,7 @@ public final class FabricConfigSpec extends ConfigSpec {
 
     @Override
     public boolean hasConfigScreen() {
+        StairBlock
         return CLOTH_CONFIG || YACL;
     }
 
