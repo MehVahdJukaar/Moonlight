@@ -1,2 +1,1 @@
-- fixed a very rare concurrency issue with the dynamic pack
-- improved error handling for the block swap type ingredient
+- **CompatWoodType**: **Burnt** - Added burnt:burnt_bamboo_block instead of burnt:burnt_bamboo_stalk
