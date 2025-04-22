@@ -33,6 +33,7 @@
     "MapItemMixin",
     "MultiPackResourceManagerMixin",
     "PistonBlockEntityMixin",
+    "PoiMixin",
     "ServerLevelMixin",
     "ServerPlayerMixin",
     "ShearItemMixin",
