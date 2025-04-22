@@ -13,7 +13,7 @@ mutable field net/minecraft/client/renderer/RenderStateShard setupState Ljava/la
 
 accessible class net/minecraft/server/level/ServerLevel$EntityCallbacks
 
-accessible method net/minecraft/world/entity/ai/village/poi/PoiTypes registerBlockStates (Lnet/minecraft/core/Holder;Ljava/util/Set;)V
+transitive-accessible method net/minecraft/world/entity/ai/village/poi/PoiTypes registerBlockStates (Lnet/minecraft/core/Holder;Ljava/util/Set;)V
 
 accessible field net/minecraft/world/level/block/Block item Lnet/minecraft/world/item/Item;
 

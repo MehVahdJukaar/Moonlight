@@ -21,6 +21,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
@@ -34,6 +35,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.schedule.Activity;
@@ -156,6 +158,17 @@ public class RegHelper {
             }
             return new PoiType(builder.build(), searchDistance, maxTickets);
         });
+    }
+
+    //call in setup when you have blocks
+    public static void addBlocksToPOI(ResourceKey<PoiType> poi, Block... blocks) {
+        var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+        ImmutableSet.Builder<BlockState> builder = ImmutableSet.builder();
+        builder.addAll(beehivePOI.value().matchingStates());
+        for (var block : blocks) {
+            builder.addAll(block.getStateDefinition().getPossibleStates());
+        }
+        PoiTypes.registerBlockStates(beehivePOI, builder.build());
     }
 
     @ExpectPlatform
