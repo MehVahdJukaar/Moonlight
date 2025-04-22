@@ -120,7 +120,6 @@ public final class FabricConfigHolder extends ModConfigHolder {
 
     @Override
     public boolean hasConfigScreen() {
-        StairBlock
         return CLOTH_CONFIG || YACL;
     }
 
