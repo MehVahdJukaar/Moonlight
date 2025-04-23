@@ -177,9 +177,9 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             if (LABEL != null) {
                 int changedEntries = getChangedConfigs(folderEntry);
                 try {
+                    String s = (changedEntries == 0) ? "": " (§3" + changedEntries + "§r)";
                     LABEL.set(this.saveButton,
-                            Component.literal(Component.translatable("configured.gui.save").getString() +
-                                    Component.literal("(" + changedEntries + ")").withStyle(ChatFormatting.GOLD).getString()));
+                            Component.literal(Component.translatable("configured.gui.save").getString() + s));
                 }catch (Exception e){
                     if (PlatHelper.isDev()) {
                         throw new RuntimeException("Failed to set save button label");
