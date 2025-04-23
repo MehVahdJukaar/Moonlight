@@ -6,23 +6,25 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.io.ByteArrayInputStream;
 
-public class ClientBoundSyncConfigsMessage implements Message {
+//bidirectional
+public class SyncConfigsMessage implements Message {
 
-    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundSyncConfigsMessage> TYPE = Message.makeType(
-            Moonlight.res("s2c_sync_configs"), ClientBoundSyncConfigsMessage::new);
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, SyncConfigsMessage> TYPE = Message.makeType(
+            Moonlight.res("bidi_sync_configs"), SyncConfigsMessage::new);
 
     public final ResourceLocation configId;
     public final byte[] configData;
 
-    public ClientBoundSyncConfigsMessage(RegistryFriendlyByteBuf buf) {
+    public SyncConfigsMessage(RegistryFriendlyByteBuf buf) {
         this.configId = buf.readResourceLocation();
         this.configData = buf.readByteArray();
     }
 
-    public ClientBoundSyncConfigsMessage(final byte[] configFileData, final ResourceLocation configId) {
+    public SyncConfigsMessage(final byte[] configFileData, final ResourceLocation configId) {
         this.configId = configId;
         this.configData = configFileData;
     }
@@ -35,12 +37,19 @@ public class ClientBoundSyncConfigsMessage implements Message {
 
     @Override
     public void handle(Context context) {
+        if (context.getDirection() == NetworkDir.SERVER_BOUND) {
+            if (context.getPlayer() instanceof ServerPlayer sp && !sp.hasPermissions(3)) {
+                Moonlight.LOGGER.warn("Player {} tried to sync their configs without permission", sp.getName().getString());
+                return;
+            }
+        }
         var config = ModConfigHolder.getConfigSpec(this.configId);
         if (config != null) {
-            try(var stream =  new ByteArrayInputStream(this.configData)) {
+            try (var stream = new ByteArrayInputStream(this.configData)) {
                 config.loadFromBytes(stream);
                 Moonlight.LOGGER.info("Synced {} configs", config.getFileName());
-            }catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
         } else {
             Moonlight.LOGGER.error("Failed to find config file with id {}", this.configId);
         }

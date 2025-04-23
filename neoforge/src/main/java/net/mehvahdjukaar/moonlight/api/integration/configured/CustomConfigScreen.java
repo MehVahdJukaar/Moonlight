@@ -15,6 +15,7 @@ import com.mrcrayfish.configured.client.screen.ConfigScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.impl.neoforge.NeoForgeConfig;
 import com.mrcrayfish.configured.impl.neoforge.NeoForgeValue;
+import com.mrcrayfish.configured.util.ConfigHelper;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.neoforge.ForgeConfigHolder;
@@ -35,6 +36,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
@@ -58,6 +60,8 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     private static final Field CONFIG_VALUE_HOLDER = findFieldOrNull(ConfigItem.class, "holder");
     @Nullable
     private static final Field BOOLEAN_ITEM_BUTTON = findFieldOrNull(BooleanItem.class, "button");
+    @Nullable
+    private static final Field LABEL = findFieldOrNull(IconButton.class, "label");
 
     protected final String modId;
     protected final Map<String, ItemStack> icons = new HashMap<>();
@@ -153,16 +157,46 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         this.entries = new ArrayList<>(temp);
 
         //overrides save button
-        if (this.saveButton != null &&  BUTTON_ON_PRESS != null) {
+
+        if (this.saveButton != null && BUTTON_ON_PRESS != null) {
             try {
                 Button.OnPress oldOnPress = (Button.OnPress) BUTTON_ON_PRESS.get(this.saveButton);
                 Button.OnPress press = (onPress) -> {
                     oldOnPress.onPress(onPress);
+                    trySyncToServer();
                     onSave();
                 };
                 BUTTON_ON_PRESS.set(this.saveButton, press);
             } catch (Exception ignored) {
+                if (PlatHelper.isDev()) {
+                    throw new RuntimeException("Failed to set save button");
+                }
             }
+            if (LABEL != null) {
+                int changedEntries = getChangedConfigs(folderEntry);
+                try {
+                    LABEL.set(this.saveButton,
+                            Component.literal(Component.translatable("configured.gui.save").getString() +
+                                    Component.literal("(" + changedEntries + ")").withStyle(ChatFormatting.GOLD).getString()));
+                }catch (Exception e){
+                    if (PlatHelper.isDev()) {
+                        throw new RuntimeException("Failed to set save button label");
+                    }
+                }
+            }
+        }
+    }
+
+    public int getChangedConfigs(IConfigEntry entry) {
+        if (!entry.isLeaf()) {
+            int count = 0;
+            for (IConfigEntry child : entry.getChildren()) {
+                count += getChangedConfigs(child);
+            }
+            return count;
+        } else {
+            IConfigValue<?> value = entry.getValue();
+            return (value != null && value.isChanged()) ? 1 : 0;
         }
     }
 
@@ -185,6 +219,17 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             newList.add(c);
         }
         return newList;
+    }
+
+    private void trySyncToServer() {
+        if (!ConfigHelper.isSingleplayer() && !ConfigHelper.isPlayingLan()) {
+            if (ConfigHelper.isPlayingGame()) {
+                Player player = ConfigHelper.getClientPlayer();
+                if (player != null && ConfigHelper.isOperator(player)) {
+                    this.mlConfig.sendChangedConfigToServer();
+                }
+            }
+        }
     }
 
     public abstract void onSave();

@@ -6,7 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
+import net.mehvahdjukaar.moonlight.core.network.SyncConfigsMessage;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -122,7 +122,17 @@ public abstract class ModConfigHolder {
         if (this.isSynced()) {
             try {
                 final byte[] configData = Files.readAllBytes(this.getFullPath());
-                NetworkHelper.sendToClientPlayer(player, new ClientBoundSyncConfigsMessage(configData, this.getId()));
+                NetworkHelper.sendToClientPlayer(player, new SyncConfigsMessage(configData, this.getId()));
+            } catch (IOException e) {
+                Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
+            }
+        } else throw new UnsupportedOperationException("Tried to sync a config of type " + this.getConfigType());
+    }
+    public void sendChangedConfigToServer(){
+        if (this.isSynced()) {
+            try {
+                final byte[] configData = Files.readAllBytes(this.getFullPath());
+                NetworkHelper.sendToServer(new SyncConfigsMessage(configData, this.getId()));
             } catch (IOException e) {
                 Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
             }

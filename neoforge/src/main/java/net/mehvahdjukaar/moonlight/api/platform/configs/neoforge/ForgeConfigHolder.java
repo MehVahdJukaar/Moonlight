@@ -1,9 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.neoforge;
 
+import com.electronwill.nightconfig.core.concurrent.ConcurrentCommentedConfig;
+import com.electronwill.nightconfig.core.io.ParsingMode;
+import com.electronwill.nightconfig.toml.TomlFormat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +28,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -163,7 +167,8 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     public void loadFromBytes(InputStream stream) {
         try { //this should work the same as below and internaly calls refresh
             byte[] b = stream.readAllBytes();
-            ConfigTracker.acceptSyncedConfig(this.modConfig, b);
+            acceptConfig(this.modConfig, b);
+            //ConfigTracker.acceptSyncedConfig(this.modConfig, b);
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to sync config file {}:", this.getFileName(), e);
         }
@@ -171,6 +176,14 @@ public final class ForgeConfigHolder extends ModConfigHolder {
         //using this isntead so we dont fire the config changes event otherwise this will loop
         //this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
         //this.onRefresh();
+    }
+
+    public static void acceptConfig(ModConfig modConfig, byte[] bytes) {
+        if (modConfig.getLoadedConfig().config() instanceof ConcurrentCommentedConfig cc) {
+            cc.bulkCommentedUpdate(view -> {
+                TomlFormat.instance().createParser().parse(new ByteArrayInputStream(bytes), view, ParsingMode.REPLACE);
+            });
+        }
     }
 
 
