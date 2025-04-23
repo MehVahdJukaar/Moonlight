@@ -4,6 +4,8 @@ package net.mehvahdjukaar.moonlight.api.integration.configured;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mrcrayfish.configured.api.ConfigType;
 import com.mrcrayfish.configured.api.IModConfig;
+import com.mrcrayfish.configured.api.IConfigEntry;
+import com.mrcrayfish.configured.api.IConfigValue;
 import com.mrcrayfish.configured.client.screen.ModConfigSelectionScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.impl.forge.ForgeConfig;
@@ -42,6 +44,8 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     private final ItemStack mainIcon;
     private final String modId;
     private final String modURL;
+
+
 
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName, ResourceLocation background,
                                     Screen parent,

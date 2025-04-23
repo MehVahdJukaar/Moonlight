@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncConfigsMessage;
+import net.mehvahdjukaar.moonlight.core.network.SyncConfigsMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -114,7 +114,17 @@ public abstract class ConfigSpec {
         if (this.getConfigType() == ConfigType.COMMON && this.isSynced()) {
             try {
                 final byte[] configData = Files.readAllBytes(this.getFullPath());
-                ModMessages.CHANNEL.sendToClientPlayer(player, new ClientBoundSyncConfigsMessage(configData, this.getFileName(), this.getModId()));
+                ModMessages.CHANNEL.sendToClientPlayer(player, new SyncConfigsMessage(configData, this.getId()));
+            } catch (IOException e) {
+                Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
+            }
+        } else throw new UnsupportedOperationException("Tried to sync a config of type " + this.getConfigType());
+    }
+    public void sendChangedConfigToServer(){
+        if (this.isSynced()) {
+            try {
+                final byte[] configData = Files.readAllBytes(this.getFullPath());
+                NetworkHelper.sendToServer(new SyncConfigsMessage(configData, this.getFileName(), this.getModId()));
             } catch (IOException e) {
                 Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
             }
