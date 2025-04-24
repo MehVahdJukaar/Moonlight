@@ -61,6 +61,11 @@ public class TextureImage implements AutoCloseable {
         }
     }
 
+    @Deprecated(forRemoval = true)
+    public void forEachFrame(FramePixelConsumer e) {
+        forEachFramePixel(e);
+    }
+
     public void toGrayscale() {
         SpriteUtils.grayscaleImage(this.image);
     }
