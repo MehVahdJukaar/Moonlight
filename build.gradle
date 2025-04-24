@@ -69,7 +69,7 @@ subprojects {
                 loaders = ["neoforge"]
             } else loaders = [modLoader]
             changelog = changelogText
-            versionNumber = modLoader +"_"+ mod_version
+            versionNumber = mod_version +"-"+ modLoader
             versionType = release_type
             if (modLoader == "fabric") {
                 dependencies {
