@@ -106,7 +106,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     public void registerBlockType(T newType) {
         if (frozen) {
-            throw new UnsupportedOperationException("Tried to register a wood types after registry events");
+            throw new UnsupportedOperationException("Tried to register a block types after registry events");
         }
         //ignore duplicates
         if (!valuesReg.containsKey(newType.id)) {
