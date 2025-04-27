@@ -49,7 +49,7 @@ subprojects {
                 loaders = [modLoader]
             }
             changelog = changelogText
-            versionNumber = modLoader +"_"+ mod_version
+            versionNumber = mod_version+"-"+modLoader
             versionType = "release"
 
             if (modLoader == "fabric") {
