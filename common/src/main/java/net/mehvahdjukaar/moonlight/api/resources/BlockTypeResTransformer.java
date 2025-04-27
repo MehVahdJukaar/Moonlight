@@ -145,9 +145,9 @@ public class BlockTypeResTransformer<T extends BlockType> {
                         newTexture = RPUtils.findFirstItemTextureLocation(manager, i);
                     }
                     if (newTexture != null) {
+                        r = r.replace("\"" + target + "\"", "\"" + newTexture + "\"");
                         //try mc namespace
                         r = s.replace("\"block/", "\"minecraft:block/");
-
                         r = r.replace("\"" + target + "\"", "\"" + newTexture + "\"");
                     }
                 } catch (FileNotFoundException ignored) {
