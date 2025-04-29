@@ -15,7 +15,9 @@ public class CompatWoodTypes {
 
     public static void init() {
         // TEMPLATE:
-//        advancedWoodFinder("", "nameWood", "planksId", "suffixLog", "suffixWood", "suffixStrippedLog", "suffixStrippedWood")
+//        simpleWoodFinder("modId", "nameWood")
+//        mediumWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood")
+//        advancedWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood", "suffixStrippedLog", "suffixStrippedWood")
 
         // Mofu's Better End
         var weepingstar = advancedWoodFinder("mofus_better_end_", "weepingstar", "weepingstar_planks",
