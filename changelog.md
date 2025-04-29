@@ -1,1 +1,1 @@
-- **CompatWoodType**: **Burnt** - Added burnt:burnt_bamboo_block instead of burnt:burnt_bamboo_stalk
+- Backported addBlocksToPOI() from 1.21 to fix the issue with EveryCompat's Friends-And-Foes, related to [#339](https://github.com/MehVahdJukaar/Moonlight/issues/339)
