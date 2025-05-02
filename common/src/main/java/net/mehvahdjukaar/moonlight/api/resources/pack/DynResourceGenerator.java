@@ -213,6 +213,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                     .map(gen -> CompletableFuture.runAsync(() -> gen.onEarlyReload(earlyPackReloadEvent), EXECUTOR_SERVICE))
                     .toList();
 
+
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
             Moonlight.LOGGER.info("Generated runtime resources for {} packs in a total of: {} ms",
