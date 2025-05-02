@@ -276,6 +276,7 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public void removeResource(ResourceLocation res) {
         synchronized (this) {
             this.searchTrie.remove(res);
@@ -284,10 +285,12 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public void addResource(StaticResource resource) {
         this.addBytes(resource.location, resource.data);
     }
 
+    @Deprecated(forRemoval = true)
     private void addJson(ResourceLocation path, JsonElement json) {
         try {
             this.addBytes(path, RPUtils.serializeJson(json).getBytes());
@@ -296,10 +299,12 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public void addJson(ResourceLocation location, JsonElement json, ResType resType) {
         this.addJson(resType.getPath(location), json);
     }
 
+    @Deprecated(forRemoval = true)
     public void addBytes(ResourceLocation location, byte[] bytes, ResType resType) {
         this.addBytes(resType.getPath(location), bytes);
     }

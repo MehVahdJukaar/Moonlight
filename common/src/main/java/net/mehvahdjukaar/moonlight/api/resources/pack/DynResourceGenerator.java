@@ -17,17 +17,15 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class DynResourceGenerator<T extends DynamicResourcePack> implements PreparableReloadListener {
+
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
 
     public final T dynamicPack;
@@ -61,7 +59,44 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
      */
     public abstract boolean dependsOnLoadedPacks();
 
-    public abstract void regenerateDynamicAssets(ResourceManager manager);
+    @Deprecated(forRemoval = true) //just deprecated as it shouldnt be overritten aymore and will become final private
+    public void regenerateDynamicAssets(ResourceManager manager) {
+
+        List<Future<ResourceSink>> futures = new ArrayList<>();
+
+        var tasks = new ArrayList<ResourceGenTask>();
+        regenerateDynamicAssets(tasks::add);
+
+        // Submit all tasks
+        tasks.forEach(task -> {
+            futures.add(EXECUTOR_SERVICE.submit(() -> {
+                var localSink = new ResourceSink(this.modId, this.dynamicPack.packId());
+                task.accept(manager, localSink);
+                return localSink;
+            }));
+        });
+
+        // join
+        for (Future<ResourceSink> future : futures) {
+            try {
+                ResourceSink sink = future.get(); // <- this is the join point
+                sink.resources.forEach(this.dynamicPack::addBytes);
+                sink.notClearable.forEach(this.dynamicPack::markNotClearable);
+            }catch (Exception e) {
+                Moonlight.LOGGER.error("Task failed", e);
+            }
+        }
+
+    }
+
+    public interface ResourceGenTask extends BiConsumer<ResourceManager, ResourceSink> {
+        @Override
+        void accept(ResourceManager manager, ResourceSink sink);
+    }
+
+    public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
+        //implement this for multi thead
+    }
 
     @Override
     public final CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
@@ -83,7 +118,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     protected void onNormalReload(ResourceManager manager) {
     }
 
-    protected void onEarlyReload(EarlyPackReloadEvent event) {
+    protected final void onEarlyReload(EarlyPackReloadEvent event) {
         if (event.type() == dynamicPack.packType) {
             try {
                 this.reloadResources(event.manager());
@@ -141,10 +176,12 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     @Nullable
     protected abstract PackRepository getRepository();
 
+    @Deprecated(forRemoval = true)
     public boolean alreadyHasAssetAtLocation(ResourceManager manager, ResourceLocation res, ResType type) {
         return alreadyHasAssetAtLocation(manager, type.getPath(res));
     }
 
+    @Deprecated(forRemoval = true)
     public boolean alreadyHasAssetAtLocation(ResourceManager manager, ResourceLocation res) {
         var resource = manager.getResource(res);
         return resource.filter(value -> !value.sourcePackId().equals(this.dynamicPack.packId())).isPresent();
@@ -161,14 +198,17 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
      * @param keyword     keyword to replace
      * @param replaceWith word to replace the keyword with
      */
+    @Deprecated(forRemoval = true)
     public void addSimilarJsonResource(ResourceManager manager, StaticResource resource, String keyword, String replaceWith) throws NoSuchElementException {
         addSimilarJsonResource(manager, resource, s -> s.replace(keyword, replaceWith));
     }
 
+    @Deprecated(forRemoval = true)
     public void addSimilarJsonResource(ResourceManager manager, StaticResource resource, Function<String, String> textTransform) throws NoSuchElementException {
         addSimilarJsonResource(manager, resource, textTransform, textTransform);
     }
 
+    @Deprecated(forRemoval = true)
     public void addSimilarJsonResource(ResourceManager manager, StaticResource resource, Function<String, String> textTransform, Function<String, String> pathTransform) throws NoSuchElementException {
         ResourceLocation fullPath = resource.location;
 
@@ -194,6 +234,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         }
     }
 
+    @Deprecated(forRemoval = true)
     public void addResourceIfNotPresent(ResourceManager manager, StaticResource resource) {
         if (!alreadyHasAssetAtLocation(manager, resource.location)) {
             this.dynamicPack.addResource(resource);
@@ -202,7 +243,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
 
     private static final Set<DynResourceGenerator<?>> GENERATORS = new HashSet<>();
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool(); // 4 threads
 
     static {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
