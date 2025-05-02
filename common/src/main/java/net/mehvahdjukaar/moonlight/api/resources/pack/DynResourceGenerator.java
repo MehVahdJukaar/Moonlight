@@ -20,12 +20,18 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
+import java.util.HashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 public abstract class DynResourceGenerator<T extends DynamicResourcePack> implements PreparableReloadListener {
+
 
     public final T dynamicPack;
     protected final String modId;
@@ -39,7 +45,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         this.dynamicPack.addNamespaces(modId);
         this.dynamicPack.registerPack();
 
-        MoonlightEventsHelper.addListener(this::onEarlyReload, EarlyPackReloadEvent.class);
+        GENERATORS.add(this);
     }
 
     /**
@@ -141,7 +147,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             }
             this.regenerateDynamicAssets(manager);
         }
-        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{}",
+        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{} (multithreaded)",
                 this.dynamicPack.getPackType(), this.dynamicPack.packId(),
                 LangBuilder.getReadableName(this.modId), watch.elapsed().toMillis(), this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
     }
@@ -206,6 +212,28 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         if (!alreadyHasAssetAtLocation(manager, resource.location)) {
             this.dynamicPack.addResource(resource);
         }
+    }
+
+
+    private static final Set<DynResourceGenerator<?>> GENERATORS = new HashSet<>();
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool(); // 4 threads
+
+    static {
+        MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
+            var stopwatch = Stopwatch.createStarted();
+
+            List<CompletableFuture<Void>> futures = GENERATORS.stream()
+                    .filter(gen -> gen.dynamicPack.packType == earlyPackReloadEvent.type())
+                    .map(gen -> CompletableFuture.runAsync(() -> gen.onEarlyReload(earlyPackReloadEvent), EXECUTOR_SERVICE))
+                    .toList();
+
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            Moonlight.LOGGER.info("Generated runtime resources for {} packs in a total of: {} ms",
+                    GENERATORS.size(), stopwatch.elapsed().toMillis());
+
+        }, EarlyPackReloadEvent.class);
+
     }
 
 }
