@@ -39,14 +39,17 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
         return Minecraft.getInstance().getResourcePackRepository();
     }
 
+    @Deprecated(forRemoval = true)
     public boolean alreadyHasTextureAtLocation(ResourceManager manager, ResourceLocation res) {
         return alreadyHasAssetAtLocation(manager, res, ResType.TEXTURES);
     }
 
+    @Deprecated(forRemoval = true)
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier) {
         addTextureIfNotPresent(manager, relativePath, textureSupplier, true);
     }
 
+    @Deprecated(forRemoval = true)
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier, boolean isOnAtlas) {
 
         ResourceLocation res = relativePath.contains(":") ? ResourceLocation.parse(relativePath) :

@@ -32,6 +32,7 @@ public class DynamicTexturePack extends DynamicResourcePack {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public void addAndCloseTexture(ResourceLocation path, TextureImage image) {
         addAndCloseTexture(path, image, true);
     }
@@ -41,6 +42,7 @@ public class DynamicTexturePack extends DynamicResourcePack {
      * Last boolean is for textures that aren't stitched so won't be cleared automatically after stitching
      * Use it for textures such as entity textures of GUI
      */
+    @Deprecated(forRemoval = true)
     public void addAndCloseTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
         try (image) {
             this.addBytes(path, image.getImage().asByteArray(), ResType.TEXTURES);
@@ -53,22 +55,27 @@ public class DynamicTexturePack extends DynamicResourcePack {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public void addBlockModel(ResourceLocation modelLocation, JsonElement model) {
         this.addJson(modelLocation, model, ResType.BLOCK_MODELS);
     }
 
+    @Deprecated(forRemoval = true)
     public void addItemModel(ResourceLocation modelLocation, JsonElement model) {
         this.addJson(modelLocation, model, ResType.ITEM_MODELS);
     }
 
+    @Deprecated(forRemoval = true)
     public void addBlockState(ResourceLocation modelLocation, JsonElement model) {
         this.addJson(modelLocation, model, ResType.BLOCKSTATES);
     }
 
+    @Deprecated(forRemoval = true)
     public void addLang(ResourceLocation langName, JsonElement language) {
         this.addJson(langName, language, ResType.LANG);
     }
 
+    @Deprecated(forRemoval = true)
     public void addLang(ResourceLocation langName, LangBuilder builder) {
         this.addJson(langName, builder.build(), ResType.LANG);
     }

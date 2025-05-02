@@ -35,6 +35,7 @@ public class DynamicDataPack extends DynamicResourcePack {
     }
 
 
+    @Deprecated(forRemoval = true)
     public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
 
         ResourceLocation tagId = builder.getId();
@@ -58,15 +59,18 @@ public class DynamicDataPack extends DynamicResourcePack {
      *
      * @param block block to be dropped
      */
+    @Deprecated(forRemoval = true)
     public void addSimpleBlockLootTable(Block block) {
         this.addLootTable(block, createSingleItemTable(block)
                 .setParamSet(LootContextParamSets.BLOCK));
     }
 
+    @Deprecated(forRemoval = true)
     public void addLootTable(Block block, LootTable.Builder table) {
         this.addLootTable(block.getLootTable().location(), table.build());
     }
 
+    @Deprecated(forRemoval = true)
     public void addLootTable(ResourceLocation id, LootTable table) {
         this.addJson(id, LootDataType.TABLE.codec.encodeStart(JsonOps.INSTANCE, table).getOrThrow(), ResType.LOOT_TABLES);
     }
@@ -79,6 +83,7 @@ public class DynamicDataPack extends DynamicResourcePack {
                                 .add(LootItem.lootTableItem(itemLike)).unwrap());
     }
 
+    @Deprecated(forRemoval = true)
     public void addRecipe(RecipeHolder<?> holder) {
         addRecipe(holder.value(), holder.id());
     }
@@ -94,6 +99,7 @@ public class DynamicDataPack extends DynamicResourcePack {
         //}
     }
 
+    @Deprecated(forRemoval = true)
     @UnstableApi
     public void addRecipeNoAdvancement(Recipe<?> recipe, ResourceLocation id) {
         this.addJson(id, RPUtils.writeRecipe(recipe), ResType.RECIPES);
