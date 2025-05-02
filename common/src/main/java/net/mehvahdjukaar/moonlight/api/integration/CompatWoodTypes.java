@@ -15,7 +15,21 @@ public class CompatWoodTypes {
 
     public static void init() {
         // TEMPLATE:
-//        advancedWoodFinder("", "nameWood", "planksId", "suffixLog", "suffixWood", "suffixStrippedLog", "suffixStrippedWood")
+//        simpleWoodFinder("modId", "nameWood")
+//        mediumWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood")
+//        advancedWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood", "suffixStrippedLog", "suffixStrippedWood")
+
+        // Mofu's Better End
+        var weepingstar = advancedWoodFinder("mofus_better_end_", "weepingstar", "weepingstar_planks",
+                "log", "",
+                "stripped_log", "");
+        weepingstar.addChild("leaves", new ResourceLocation("mofus_better_end_:weepingstar_leaf"));
+        BlockSetAPI.addBlockTypeFinder(WoodType.class, weepingstar);
+
+        BlockSetAPI.addBlockTypeFinder(WoodType.class,
+                advancedWoodFinder("mofus_better_end_", "frost_root", "frost_root_plank",
+                        "log", "",
+                        "", ""));
 
         // Burnt
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
