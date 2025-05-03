@@ -45,25 +45,50 @@ public abstract class BlockType {
     }
 
     /**
-     * @return namespace/TypeName
+     * @return namespace/TYPENAME
      */
     public String getAppendableId() {
         return this.getNamespace() + "/" + this.getTypeName();
     }
 
     /**
-     * @return namespace/TypeName_suffix
+     * @return namespace/TYPENAME_suffix
      */
     public String getAppendableIdWith(String suffix) {
         return getAppendableIdWith("", suffix);
     }
 
     /**
-     * @return namespace/prefix_TypeName_suffix
+     * @return namespace/prefix_TYPENAME_suffix
      */
     public String getAppendableIdWith(String prefix, String suffix) {
         String prefixed = (prefix.isEmpty()) ? "" : prefix + "_";
         return  this.getNamespace() +"/"+ prefixed + this.getTypeName() +"_"+ suffix;
+    }
+
+    /**
+     * @return shortenedID/namespace/TYPENAME_suffix
+     */
+    public String createPathWith(String shortenedId, String suffix) {
+        return createPathWith(shortenedId, "", suffix);
+    }
+
+    /**
+     * @return shortenedID/namespace/prefix_TYPENAME_suffix
+     */
+    public String createPathWith(String shortenedId, String prefix, String suffix) {
+        String prefixed = (prefix.isEmpty()) ? "" : prefix + "_";
+        return shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() +"_"+ suffix;
+    }
+
+    /**
+     * @return namesapce:folder/shortenedID/namespace/prefix_TYPENAME_suffix
+     */
+    public String createFullIdWith(String modId, String folder, String shortenedId, String prefix, String suffix) {
+        String prefixed = (prefix.isEmpty()) ? "" : prefix + "_";
+        String foldered = (folder.isEmpty()) ? "" : folder + "/";
+
+        return modId+":"+ foldered + shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() +"_"+ suffix;
     }
 
     @Override
@@ -75,9 +100,10 @@ public abstract class BlockType {
 
     /**
      * Use this to get the new id of a block variant
-     *
+     * NOTE: minecraft will be ignored as namespace
+     * TYPENAME == getTypeName()
      * @param baseName base variant name
-     * @return something like mod_id/[baseName]_oak. ignores minecraft namespace
+     * @return baseName_TYPENAME OR namespace/baseName_TYPENAME
      */
     public String getVariantId(String baseName) {
         String namespace = this.isVanilla() ? "" : this.getNamespace() + "/";
@@ -85,10 +111,18 @@ public abstract class BlockType {
         else return namespace + baseName + "_" + this.getTypeName();
     }
 
+    /**
+     * NOTE: minecraft will be ignored as namespace
+     * @return prefix_baseName_TYPENAME OR namespace/prefix_baseName_TYPENAME
+     */
     public String getVariantId(String baseName, boolean prefix) {
         return getVariantId(prefix ? baseName + "_%s" : "%s_" + baseName);
     }
 
+    /**
+     * NOTE: minecraft will be ignored as namespace
+     * @return prefix_TYPENAME_postfix OR namespace/prefix_TYPENAME_postfix
+     */
     public String getVariantId(String postfix, String prefix) {
         return getVariantId(prefix + "_%s_" + postfix);
     }
