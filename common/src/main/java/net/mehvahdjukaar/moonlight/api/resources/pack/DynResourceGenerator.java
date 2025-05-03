@@ -82,16 +82,11 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 ResourceSink sink = future.get(); // <- this is the join point
                 sink.resources.forEach(this.dynamicPack::addBytes);
                 sink.notClearable.forEach(this.dynamicPack::markNotClearable);
-            }catch (Exception e) {
-                Moonlight.LOGGER.error("Task failed", e);
+            } catch (Exception e) {
+                throw new RuntimeException("Task failed", e);
             }
         }
 
-    }
-
-    public interface ResourceGenTask extends BiConsumer<ResourceManager, ResourceSink> {
-        @Override
-        void accept(ResourceManager manager, ResourceSink sink);
     }
 
     public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
