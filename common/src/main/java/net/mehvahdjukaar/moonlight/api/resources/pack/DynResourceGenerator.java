@@ -15,6 +15,7 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
@@ -80,9 +81,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         var tasks = new ArrayList<ResourceGenTask>();
         regenerateDynamicAssets(tasks::add);
 
+        Stopwatch watch = Stopwatch.createStarted();
         // Submit all tasks
         tasks.forEach(task -> {
-            futures.add(EXECUTOR_SERVICE.submit(() -> {
+            futures.add(getExecutors().submit(() -> {
                 var localSink = new ResourceSink(this.modId, this.dynamicPack.packId());
                 task.accept(manager, localSink);
                 return localSink;
@@ -99,7 +101,12 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 throw new RuntimeException("Task failed", e);
             }
         }
+        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{} (multithreaded)", this.dynamicPack.getPackType(), this.dynamicPack.packId(), this.modId, watch.elapsed().toMillis(), this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
 
+    }
+
+    protected @NotNull ExecutorService getExecutors() {
+        return EXECUTOR_SERVICE;
     }
 
     public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
@@ -137,8 +144,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     }
 
     protected final void reloadResources(ResourceManager manager) {
-        Stopwatch watch = Stopwatch.createStarted();
-
         boolean resourcePackSupport = this.dependsOnLoadedPacks();
         //first clear all pack content if it should be cleared
 
@@ -177,9 +182,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             }
             this.regenerateDynamicAssets(manager);
         }
-        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{} (multithreaded)",
-                this.dynamicPack.getPackType(), this.dynamicPack.packId(),
-                LangBuilder.getReadableName(this.modId), watch.elapsed().toMillis(), this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
     }
 
     @Nullable
