@@ -15,6 +15,8 @@ public class ExtraMapDataExample {
     public static void init() {
     }
 
+    //sorry i havent updated this yet. Check out my impl in supplementaries for example for an updated version
+    /*
     // Register your custom data type
     private static final CustomMapData.Type<Integer, MyCustomData> DEPTH_DATA_KEY = MapDataRegistry.registerCustomMapSavedData(
             Moonlight.res("my_data"), MyCustomData::new, ByteBufCodecs.INT);
@@ -59,5 +61,5 @@ public class ExtraMapDataExample {
         public void set(int data) {
             this.value = data;
         }
-    }
+    }*/
 }
