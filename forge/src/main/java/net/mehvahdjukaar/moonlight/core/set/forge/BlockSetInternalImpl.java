@@ -107,13 +107,6 @@ public class BlockSetInternalImpl {
 
     //shittiest code ever lol
     protected static void registerLateBlockAndItems(RegisterEvent event) {
-        //fires right after blocks
-        if (event.getRegistryKey().equals(ForgeRegistries.ATTRIBUTES.getRegistryKey())) {
-            if (!hasFilledBlockSets) {
-                BlockSetInternal.initializeBlockSets();
-                hasFilledBlockSets = true;
-            }
-        }
 
         // just first once called by whichever mod called the event first
         // fires right after items so we also have all modded items filled in (for EC)
@@ -121,7 +114,7 @@ public class BlockSetInternalImpl {
             hasRegisteredDynamic = true;
             //when the first registration function is called we find all block types
 
-            // prob not needed
+            //fires right after blocks
             if (!hasFilledBlockSets) {
                 BlockSetInternal.initializeBlockSets();
                 hasFilledBlockSets = true;
