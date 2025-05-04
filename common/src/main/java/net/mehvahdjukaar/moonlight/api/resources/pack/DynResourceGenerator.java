@@ -62,34 +62,37 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
     @Deprecated(forRemoval = true) //just deprecated as it shouldnt be overritten aymore and will become final private
     public void regenerateDynamicAssets(ResourceManager manager) {
-
-        List<Future<ResourceSink>> futures = new ArrayList<>();
-
         var tasks = new ArrayList<ResourceGenTask>();
         regenerateDynamicAssets(tasks::add);
 
         Stopwatch watch = Stopwatch.createStarted();
-        // Submit all tasks
-        tasks.forEach(task -> {
-            futures.add(getExecutors().submit(() -> {
-                var localSink = new ResourceSink(this.modId, this.dynamicPack.packId());
-                task.accept(manager, localSink);
-                return localSink;
-            }));
-        });
 
-        // join
-        for (Future<ResourceSink> future : futures) {
-            try {
-                ResourceSink sink = future.get(); // <- this is the join point
+        List<CompletableFuture<ResourceSink>> futures = tasks.stream()
+                .map(task -> CompletableFuture.supplyAsync(() -> {
+                    var localSink = new ResourceSink(this.modId, this.dynamicPack.packId());
+                    task.accept(manager, localSink);
+                    return localSink;
+                }, getExecutors()))
+                .toList();
+
+        // Proper join using CompletableFuture
+        CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
+        try {
+            allDone.join(); // joins all futures
+            for (CompletableFuture<ResourceSink> future : futures) {
+                ResourceSink sink = future.join();
                 sink.resources.forEach(this.dynamicPack::addBytes);
                 sink.notClearable.forEach(this.dynamicPack::markNotClearable);
-            } catch (Exception e) {
-                throw new RuntimeException("Task failed", e);
             }
+        } catch (Exception e) {
+            throw new RuntimeException("Task failed", e);
         }
-        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{} (multithreaded)", this.dynamicPack.getPackType(), this.dynamicPack.packId(), this.modId, watch.elapsed().toMillis(), this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
 
+        getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{} (multithreaded)",
+                this.dynamicPack.getPackType(), this.dynamicPack.packId(), this.modId,
+                watch.elapsed().toMillis(),
+                this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
     }
 
     protected @NotNull ExecutorService getExecutors() {
