@@ -117,9 +117,9 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     }
 
     @Override
-    public final CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
-                                                ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
-                                                Executor workerExecutor, Executor mainExecutor) {
+    public final @NotNull CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
+                                                         ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
+                                                         Executor workerExecutor, Executor mainExecutor) {
         //not used anymore. Loading early instead
         if (Moonlight.HAS_BEEN_INIT && PlatHelper.isModLoadingValid()) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
             onNormalReload(manager);
