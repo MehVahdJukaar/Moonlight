@@ -87,9 +87,12 @@ public abstract class BlockType {
 
     /**
      * @return namesapce:folder/shortenedID/namespace/prefix_TYPENAME_suffix
+     * OPTIONAL: folder, prefix can be empty
      */
     public String createFullIdWith(String modId, String folder, String shortenedId, String prefix, String suffix) {
-        String prefixed = (prefix.isEmpty()) ? "" : prefix + "_";
+        String prefixed = "";
+        if (prefix.contains("/")) prefixed = prefix;
+        else if (!prefix.isEmpty()) prefixed = prefix + "_";
         String foldered = (folder.isEmpty()) ? "" : folder + "/";
 
         return modId+":"+ foldered + shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() +"_"+ suffix;
