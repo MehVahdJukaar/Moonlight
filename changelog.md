@@ -1,1 +1,3 @@
-- Backported addBlocksToPOI() from 1.21 to fix the issue with EveryCompat's Friends-And-Foes, related to [#339](https://github.com/MehVahdJukaar/Moonlight/issues/339)
+- Major changes in DynResourceGenerator - Added multi-thread stuff
+- **CompatWoodType**: Cleanup & Updated
+  - <span style="color: RED;">WARNING: backup your world and make sure there are no missing generated blocks</span>
