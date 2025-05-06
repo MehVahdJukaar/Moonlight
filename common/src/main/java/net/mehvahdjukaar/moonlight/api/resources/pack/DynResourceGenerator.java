@@ -80,6 +80,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
         try {
             allDone.join(); // joins all futures
+            getLogger().info("Tasks finished in: {} ms", watch.elapsed().toMillis());
             for (CompletableFuture<ResourceSink> future : futures) {
                 ResourceSink sink = future.join();
                 sink.resources.forEach(this.dynamicPack::addBytes);
