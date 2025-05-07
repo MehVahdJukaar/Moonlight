@@ -13,6 +13,7 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootDataType;
@@ -22,7 +23,6 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -35,7 +35,7 @@ public class ResourceSink {
     private final String packId;
     final Map<ResourceLocation, byte[]> resources = new HashMap<>();
     final Set<ResourceLocation> notClearable = new HashSet<>();
-    final Map<ResourceKey<?>, SimpleTagBuilder> tags = new HashMap<>();
+    final Map<TagKey<?>, SimpleTagBuilder> tags = new HashMap<>();
 
     public ResourceSink(String modId, String packId) {
         this.modId = modId;
@@ -46,7 +46,6 @@ public class ResourceSink {
     protected void addBytes(ResourceLocation id, byte[] bytes) {
         this.resources.put(id, Preconditions.checkNotNull(bytes));
     }
-
 
 
     public void addResource(StaticResource resource) {
@@ -117,7 +116,7 @@ public class ResourceSink {
 
 
     public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
-        this.tags.put(type, builder);
+        this.tags.put(TagKey.create((ResourceKey) type, builder.getId()), builder);
     }
 
     /**
@@ -157,8 +156,6 @@ public class ResourceSink {
     public void addRecipeNoAdvancement(FinishedRecipe recipe) {
         this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
     }
-
-
 
 
     public void addResourceIfNotPresent(ResourceManager manager, StaticResource resource) {

@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -84,7 +85,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         try {
-            Map<Pair<ResourceLocation, ResourceKey<?>>, SimpleTagBuilder> tags = new HashMap<>();
+            Map<TagKey<?>, SimpleTagBuilder> tags = new HashMap<>();
             allDone.join(); // joins all futures
             getLogger().info("Tasks finished in: {} ms", watch.elapsed().toMillis());
             for (CompletableFuture<ResourceSink> future : futures) {
@@ -92,10 +93,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 sink.resources.forEach(this.dynamicPack::addBytes);
                 sink.notClearable.forEach(this.dynamicPack::markNotClearable);
                 for (var e : sink.tags.entrySet()) {
-                    var builder = e.getValue();
-                    ResourceKey<?> resKey = e.getKey();
-                    Pair<ResourceLocation, ResourceKey<?>> pair = Pair.of(builder.getId(), resKey);
-                    tags.merge(pair, builder, (oldTag, newTag) -> {
+                    tags.merge(e.getKey(),  e.getValue(), (oldTag, newTag) -> {
                         oldTag.merge(newTag);
                         return oldTag;
                     });
@@ -104,7 +102,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
             //adds tags
             for (var e : tags.entrySet()) {
-                this.dynamicPack.addTag(e.getValue(), (e.getKey().getSecond()));
+                this.dynamicPack.addTag(e.getValue(), e.getKey().registry());
             }
 
         } catch (Exception e) {
