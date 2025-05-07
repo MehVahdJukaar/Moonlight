@@ -39,8 +39,9 @@ public class SimpleTagBuilder extends TagBuilder {
     }
 
 
-    public void merge(SimpleTagBuilder other) {
+    public SimpleTagBuilder merge(SimpleTagBuilder other) {
         this.addAll(other.build());
+        return this;
     }
 
     public SimpleTagBuilder addAll(Collection<TagEntry> entries) {
@@ -50,9 +51,10 @@ public class SimpleTagBuilder extends TagBuilder {
 
     @Override
     public TagBuilder add(TagEntry entry) {
-        if(validateEntry(entry)) {
+        if (validateEntry(entry)) {
             return super.add(entry);
-        }return this;
+        }
+        return this;
     }
 
     public SimpleTagBuilder add(ResourceLocation entry) {
@@ -66,10 +68,9 @@ public class SimpleTagBuilder extends TagBuilder {
     }
 
     //assure entry is unique
-    private boolean validateEntry(TagEntry entry){
-        if(uniqueKeys.contains(entry.toString()))return false;
-        else uniqueKeys.add(entry.toString());
-        return true;
+    private boolean validateEntry(TagEntry entry) {
+        String string = entry.toString();
+        return uniqueKeys.add(string);
     }
 
     //Forge stuff. we arent using it

@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
-import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -10,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -85,7 +83,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         try {
-            Map<TagKey<?>, SimpleTagBuilder> tags = new HashMap<>();
+            Map<TagKey<?>, SimpleTagBuilder> allTags = new HashMap<>();
             allDone.join(); // joins all futures
             getLogger().info("Tasks finished in: {} ms", watch.elapsed().toMillis());
             for (CompletableFuture<ResourceSink> future : futures) {
@@ -93,15 +91,12 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 sink.resources.forEach(this.dynamicPack::addBytes);
                 sink.notClearable.forEach(this.dynamicPack::markNotClearable);
                 for (var e : sink.tags.entrySet()) {
-                    tags.merge(e.getKey(),  e.getValue(), (oldTag, newTag) -> {
-                        oldTag.merge(newTag);
-                        return oldTag;
-                    });
+                    allTags.merge(e.getKey(),  e.getValue(), SimpleTagBuilder::merge);
                 }
             }
 
             //adds tags
-            for (var e : tags.entrySet()) {
+            for (var e : allTags.entrySet()) {
                 this.dynamicPack.addTag(e.getValue(), e.getKey().registry());
             }
 
