@@ -35,6 +35,7 @@ public class ResourceSink {
     private final String packId;
     final Map<ResourceLocation, byte[]> resources = new HashMap<>();
     final Set<ResourceLocation> notClearable = new HashSet<>();
+    final Map<ResourceKey<?>, SimpleTagBuilder> tags = new HashMap<>();
 
     public ResourceSink(String modId, String packId) {
         this.modId = modId;
@@ -116,24 +117,7 @@ public class ResourceSink {
 
 
     public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
-
-        ResourceLocation tagId = builder.getId();
-        String tagPath = type.location().getPath();
-        if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item") || tagPath.equals("fluid"))
-            tagPath = tagPath + "s";
-        ResourceLocation loc = ResType.TAGS.getPath(new ResourceLocation(tagId.getNamespace(),
-                tagPath + "/" + tagId.getPath()));
-        //merge tags
-        if (this.resources.containsKey(loc)) {
-            var r = resources.get(loc);
-            try (var stream = new ByteArrayInputStream(r)) {
-                var oldTag = RPUtils.deserializeJson(stream);
-                builder.addFromJson(oldTag);
-            } catch (Exception ignored) {
-            }
-        }
-        JsonElement json = builder.serializeToJson();
-        this.addJson(loc, json, ResType.GENERIC);
+        this.tags.put(type, builder);
     }
 
     /**

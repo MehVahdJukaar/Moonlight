@@ -38,6 +38,16 @@ public class SimpleTagBuilder extends TagBuilder {
         return new SimpleTagBuilder(key.location());
     }
 
+
+    public void merge(SimpleTagBuilder other) {
+        this.addAll(other.build());
+    }
+
+    public SimpleTagBuilder addAll(Collection<TagEntry> entries) {
+        entries.forEach(this::add);
+        return this;
+    }
+
     @Override
     public TagBuilder add(TagEntry entry) {
         if(validateEntry(entry)) {
