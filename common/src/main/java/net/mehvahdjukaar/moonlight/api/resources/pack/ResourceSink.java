@@ -116,7 +116,8 @@ public class ResourceSink {
 
 
     public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
-        this.tags.put(TagKey.create((ResourceKey) type, builder.getId()), builder);
+        this.tags.merge(TagKey.create((ResourceKey) type, builder.getId()), builder,
+                SimpleTagBuilder::merge);
     }
 
     /**
