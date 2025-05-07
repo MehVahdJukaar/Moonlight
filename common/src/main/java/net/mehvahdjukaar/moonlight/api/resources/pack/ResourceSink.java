@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
+import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
@@ -9,10 +11,10 @@ import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootDataType;
@@ -22,7 +24,6 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -35,6 +36,7 @@ public class ResourceSink {
     private final String packId;
     final Map<ResourceLocation, byte[]> resources = new HashMap<>();
     final Set<ResourceLocation> notClearable = new HashSet<>();
+    final Map<ResourceKey<?>, SimpleTagBuilder> tags = new HashMap<>();
 
     public ResourceSink(String modId, String packId) {
         this.modId = modId;
@@ -45,7 +47,6 @@ public class ResourceSink {
     protected void addBytes(ResourceLocation id, byte[] bytes) {
         this.resources.put(id, Preconditions.checkNotNull(bytes));
     }
-
 
 
     public void addResource(StaticResource resource) {
@@ -116,24 +117,7 @@ public class ResourceSink {
 
 
     public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
-
-        ResourceLocation tagId = builder.getId();
-        String tagPath = type.location().getPath();
-        if (tagPath.equals("block") || tagPath.equals("entity_type") || tagPath.equals("item") || tagPath.equals("fluid"))
-            tagPath = tagPath + "s";
-        ResourceLocation loc = ResType.TAGS.getPath(new ResourceLocation(tagId.getNamespace(),
-                tagPath + "/" + tagId.getPath()));
-        //merge tags
-        if (this.resources.containsKey(loc)) {
-            var r = resources.get(loc);
-            try (var stream = new ByteArrayInputStream(r)) {
-                var oldTag = RPUtils.deserializeJson(stream);
-                builder.addFromJson(oldTag);
-            } catch (Exception ignored) {
-            }
-        }
-        JsonElement json = builder.serializeToJson();
-        this.addJson(loc, json, ResType.GENERIC);
+        this.tags.put(type, builder);
     }
 
     /**
@@ -147,11 +131,11 @@ public class ResourceSink {
     }
 
     public void addLootTable(Block block, LootTable.Builder table) {
-        this.addLootTable(block.getLootTable(), table.build());
+        this.addLootTable(block.getLootTable().location(), table.build());
     }
 
     public void addLootTable(ResourceLocation id, LootTable table) {
-        this.addJson(id, LootDataType.TABLE.parser().toJsonTree(table), ResType.LOOT_TABLES);
+        this.addJson(id, LootDataType.TABLE.codec.encodeStart(JsonOps.INSTANCE, table).getOrThrow(), ResType.LOOT_TABLES);
     }
 
     protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {
@@ -162,19 +146,21 @@ public class ResourceSink {
                                 .add(LootItem.lootTableItem(itemLike)).unwrap());
     }
 
-    public void addRecipe(FinishedRecipe recipe) {
-        this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
-        ResourceLocation advancementId = recipe.getAdvancementId();
-        if (advancementId != null) {
-            this.addJson(recipe.getAdvancementId(), recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
-        }
+    @UnstableApi
+    public void addRecipe(Recipe<?> recipe, ResourceLocation id) {
+        this.addRecipeNoAdvancement(recipe, id);
+
+        //Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+        // ResourceLocation advancementId = recipe.getAdvancementId();
+        //if (advancementId != null) {
+        //  this.addJson(recipe.getAdvancementId(), recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
+        //}
     }
 
-    public void addRecipeNoAdvancement(FinishedRecipe recipe) {
-        this.addJson(recipe.getId(), recipe.serializeRecipe(), ResType.RECIPES);
+    @UnstableApi
+    public void addRecipeNoAdvancement(Recipe<?> recipe, ResourceLocation id) {
+        this.addJson(id, RPUtils.writeRecipe(recipe), ResType.RECIPES);
     }
-
-
 
 
     public void addResourceIfNotPresent(ResourceManager manager, StaticResource resource) {
@@ -193,8 +179,8 @@ public class ResourceSink {
 
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier, boolean isOnAtlas) {
 
-        ResourceLocation res = relativePath.contains(":") ? new ResourceLocation(relativePath) :
-                new ResourceLocation(this.modId, relativePath);
+        ResourceLocation res = relativePath.contains(":") ? ResourceLocation.parse(relativePath) :
+                ResourceLocation.fromNamespaceAndPath(this.modId, relativePath);
         if (!alreadyHasTextureAtLocation(manager, res)) {
             TextureImage textureImage = null;
             try {
@@ -251,7 +237,7 @@ public class ResourceSink {
             } else builder.append(partial[i]);
         }
         //adds modified under my namespace
-        ResourceLocation newRes = new ResourceLocation(this.modId, builder.toString());
+        ResourceLocation newRes = ResourceLocation.fromNamespaceAndPath(this.modId, builder.toString());
         if (!alreadyHasAssetAtLocation(manager, newRes)) {
 
             String fullText = new String(resource.data, StandardCharsets.UTF_8);

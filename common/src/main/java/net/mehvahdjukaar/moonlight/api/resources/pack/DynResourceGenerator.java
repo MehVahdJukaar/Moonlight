@@ -1,14 +1,17 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
+import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -19,8 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -62,7 +63,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
      * Only generate assets for these namespaces
      */
     //TODO: make abstract
-    public Collection<String> additionalNamespaces(){
+    public Collection<String> additionalNamespaces() {
         return List.of();
     }
 
@@ -94,12 +95,28 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         try {
+            Multimap<ResourceKey<?>, SimpleTagBuilder> tags = HashMultimap.create();
             allDone.join(); // joins all futures
             for (CompletableFuture<ResourceSink> future : futures) {
                 ResourceSink sink = future.join();
                 sink.resources.forEach(this.dynamicPack::addBytes);
                 sink.notClearable.forEach(this.dynamicPack::markNotClearable);
+                for (var e : sink.tags.entrySet()) {
+                    tags.put(e.getKey(), e.getValue());
+                }
             }
+            //adds tags
+            for (var key : tags.keySet()) {
+                var it = tags.get(key).iterator();
+                if (it.hasNext()) {
+                    SimpleTagBuilder tag = it.next();
+                    while (it.hasNext()) {
+                        tag.merge(it.next());
+                    }
+                    this.dynamicPack.addTag(tag, key);
+                }
+            }
+
         } catch (Exception e) {
             throw new RuntimeException("Task failed", e);
         }

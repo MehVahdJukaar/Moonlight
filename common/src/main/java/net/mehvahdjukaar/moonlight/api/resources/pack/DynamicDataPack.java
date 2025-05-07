@@ -42,6 +42,7 @@ public class DynamicDataPack extends DynamicResourcePack {
         String tagPath = type.location().getPath();
         ResourceLocation loc = ResType.TAGS.getPath(tagId.withPath(tagPath + "/" + tagId.getPath()));
         //merge tags
+        //not needed anymore actually
         if (this.resources.containsKey(loc)) {
             var r = resources.get(loc);
             try (var stream = new ByteArrayInputStream(r)) {

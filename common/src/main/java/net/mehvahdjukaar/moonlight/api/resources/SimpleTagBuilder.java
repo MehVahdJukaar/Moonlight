@@ -2,11 +2,9 @@ package net.mehvahdjukaar.moonlight.api.resources;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagEntry;
@@ -39,11 +37,21 @@ public class SimpleTagBuilder extends TagBuilder {
         return new SimpleTagBuilder(key.location());
     }
 
+    public void merge(SimpleTagBuilder otherBuilder) {
+        this.addAll(otherBuilder.build());
+    }
+
+    public SimpleTagBuilder addAll(Collection<TagEntry> entries) {
+        entries.forEach(this::add);
+        return this;
+    }
+
     @Override
     public TagBuilder add(TagEntry entry) {
-        if(validateEntry(entry)) {
+        if (validateEntry(entry)) {
             return super.add(entry);
-        }return this;
+        }
+        return this;
     }
 
     public SimpleTagBuilder add(ResourceLocation entry) {
@@ -57,8 +65,8 @@ public class SimpleTagBuilder extends TagBuilder {
     }
 
     //assure entry is unique
-    private boolean validateEntry(TagEntry entry){
-        if(uniqueKeys.contains(entry.toString()))return false;
+    private boolean validateEntry(TagEntry entry) {
+        if (uniqueKeys.contains(entry.toString())) return false;
         else uniqueKeys.add(entry.toString());
         return true;
     }

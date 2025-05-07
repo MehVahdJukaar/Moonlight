@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
+import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
@@ -14,6 +15,7 @@ import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.integration.ModernFixCompat;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
@@ -386,5 +388,8 @@ public abstract class DynamicResourcePack implements PackResources {
 
     private boolean modernFixHack(String s) {
         return s.startsWith("model") || s.startsWith("blockstate");
+    }
+
+    public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
     }
 }
