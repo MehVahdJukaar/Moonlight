@@ -96,6 +96,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                     tags.put(e.getKey(), e.getValue());
                 }
             }
+
             //adds tags
             for (var key : tags.keySet()) {
                 var it = tags.get(key).iterator();
