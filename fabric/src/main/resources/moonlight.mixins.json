@@ -14,6 +14,7 @@
     "LocalPlayerMixin",
     "MenuScreensAccessor",
     "ModelManagerAccessor",
+    "ParticleEngineAccessor",
     "SelfCustomBakedModel",
     "SelfIExtraModelDataProvider",
     "SelfItemStackRenderer",
