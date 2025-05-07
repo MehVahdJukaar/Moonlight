@@ -23,8 +23,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.BiConsumer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -124,9 +126,9 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     }
 
     @Override
-    public final CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
-                                                ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
-                                                Executor workerExecutor, Executor mainExecutor) {
+    public final @NotNull CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
+                                                         ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
+                                                         Executor workerExecutor, Executor mainExecutor) {
         //not used anymore. Loading early instead
         if (Moonlight.HAS_BEEN_INIT && PlatHelper.isModLoadingValid()) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
             onNormalReload(manager);
