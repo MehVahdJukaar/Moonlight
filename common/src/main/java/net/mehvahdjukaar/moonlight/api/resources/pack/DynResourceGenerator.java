@@ -1,8 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -85,7 +84,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         try {
-            Multimap<ResourceKey<?>, SimpleTagBuilder> tags = HashMultimap.create();
+            Map<Pair<ResourceLocation, ResourceKey<?>>, SimpleTagBuilder> tags = new HashMap<>();
             allDone.join(); // joins all futures
             getLogger().info("Tasks finished in: {} ms", watch.elapsed().toMillis());
             for (CompletableFuture<ResourceSink> future : futures) {
@@ -93,21 +92,21 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 sink.resources.forEach(this.dynamicPack::addBytes);
                 sink.notClearable.forEach(this.dynamicPack::markNotClearable);
                 for (var e : sink.tags.entrySet()) {
-                    tags.put(e.getKey(), e.getValue());
+                    var builder = e.getValue();
+                    ResourceKey<?> resKey = e.getKey();
+                    Pair<ResourceLocation, ResourceKey<?>> pair = Pair.of(builder.getId(), resKey);
+                    tags.merge(pair, builder, (oldTag, newTag) -> {
+                        oldTag.merge(newTag);
+                        return oldTag;
+                    });
                 }
             }
 
             //adds tags
-            for (var key : tags.keySet()) {
-                var it = tags.get(key).iterator();
-                if (it.hasNext()) {
-                    SimpleTagBuilder tag = it.next();
-                    while (it.hasNext()) {
-                        tag.merge(it.next());
-                    }
-                    this.dynamicPack.addTag(tag, key);
-                }
+            for (var e : tags.entrySet()) {
+                this.dynamicPack.addTag(e.getValue(), (e.getKey().getSecond()));
             }
+
         } catch (Exception e) {
             throw new RuntimeException("Task failed", e);
         }

@@ -32,6 +32,7 @@ public class DynamicDataPack extends DynamicResourcePack {
 
 
     @Deprecated(forRemoval = true)
+    @Override
     public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
 
         ResourceLocation tagId = builder.getId();
