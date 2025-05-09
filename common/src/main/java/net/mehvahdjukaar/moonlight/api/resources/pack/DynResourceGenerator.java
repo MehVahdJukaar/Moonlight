@@ -83,10 +83,9 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         try {
-            Map<TagKey<?>, SimpleTagBuilder> allTags = new HashMap<>();
             allDone.join(); // joins all futures
             getLogger().info("Tasks finished in: {} ms", watch.elapsed().toMillis());
-            addAllResources(futures.stream().map(CompletableFuture::join).toList(), allTags);
+            addAllResourceSinks(futures.stream().map(CompletableFuture::join).toList());
 
         } catch (Exception e) {
             throw new RuntimeException("Task failed", e);
@@ -98,7 +97,8 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
     }
 
-    protected void addAllResources(List<ResourceSink> sinks, Map<TagKey<?>, SimpleTagBuilder> allTags) {
+    protected void addAllResourceSinks(List<ResourceSink> sinks) {
+        Map<TagKey<?>, SimpleTagBuilder> allTags = new HashMap<>();
         for (ResourceSink sink : sinks) {
             sink.resources.forEach(this.dynamicPack::addBytes);
             sink.notClearable.forEach(this.dynamicPack::markNotClearable);
