@@ -73,7 +73,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
         List<CompletableFuture<ResourceSink>> futures = tasks.stream()
                 .map(task -> CompletableFuture.supplyAsync(() -> {
-                    var localSink = new ResourceSink(this.modId, this.dynamicPack.packId());
+                    var localSink = createLocalSink();
                     task.accept(manager, localSink);
                     return localSink;
                 }, getExecutors()))
@@ -108,6 +108,11 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 this.dynamicPack.getPackType(), this.dynamicPack.packId(), this.modId,
                 watch.elapsed().toMillis(),
                 this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
+    }
+
+    //override if you really need to
+    protected @NotNull ResourceSink createLocalSink() {
+        return new ResourceSink(this.modId, this.dynamicPack.packId());
     }
 
     protected @NotNull ExecutorService getExecutors() {
