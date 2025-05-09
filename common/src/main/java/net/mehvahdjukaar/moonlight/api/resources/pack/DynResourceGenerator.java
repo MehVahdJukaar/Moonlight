@@ -86,19 +86,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             Map<TagKey<?>, SimpleTagBuilder> allTags = new HashMap<>();
             allDone.join(); // joins all futures
             getLogger().info("Tasks finished in: {} ms", watch.elapsed().toMillis());
-            for (CompletableFuture<ResourceSink> future : futures) {
-                ResourceSink sink = future.join();
-                sink.resources.forEach(this.dynamicPack::addBytes);
-                sink.notClearable.forEach(this.dynamicPack::markNotClearable);
-                for (var e : sink.tags.entrySet()) {
-                    allTags.merge(e.getKey(),  e.getValue(), SimpleTagBuilder::merge);
-                }
-            }
-
-            //adds tags
-            for (var e : allTags.entrySet()) {
-                this.dynamicPack.addTag(e.getValue(), e.getKey().registry());
-            }
+            addAllResources(futures.stream().map(CompletableFuture::join).toList(), allTags);
 
         } catch (Exception e) {
             throw new RuntimeException("Task failed", e);
@@ -108,6 +96,21 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 this.dynamicPack.getPackType(), this.dynamicPack.packId(), this.modId,
                 watch.elapsed().toMillis(),
                 this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
+    }
+
+    protected void addAllResources(List<ResourceSink> sinks, Map<TagKey<?>, SimpleTagBuilder> allTags) {
+        for (ResourceSink sink : sinks) {
+            sink.resources.forEach(this.dynamicPack::addBytes);
+            sink.notClearable.forEach(this.dynamicPack::markNotClearable);
+            for (var e : sink.tags.entrySet()) {
+                allTags.merge(e.getKey(),  e.getValue(), SimpleTagBuilder::merge);
+            }
+        }
+
+        //adds tags
+        for (var e : allTags.entrySet()) {
+            this.dynamicPack.addTag(e.getValue(), e.getKey().registry());
+        }
     }
 
     //override if you really need to
