@@ -64,7 +64,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
      */
     public abstract boolean dependsOnLoadedPacks();
 
-    @Deprecated(forRemoval = true) //just deprecated as it shouldnt be overritten aymore and will become final private
+    /**
+     * just deprecated as it shouldnt be overritten aymore and will become final private
+     */
+    @Deprecated(forRemoval = true)
     public void regenerateDynamicAssets(ResourceManager manager) {
         var tasks = new ArrayList<ResourceGenTask>();
         regenerateDynamicAssets(tasks::add);
