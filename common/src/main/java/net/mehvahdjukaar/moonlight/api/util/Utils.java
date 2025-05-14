@@ -34,7 +34,10 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.GameType;
@@ -339,7 +342,7 @@ public class Utils {
      * In a Block class this should be called instead to allow adventure mode to work properly
      * <p>
      * Call when placing or modifying a block. Checks edge cases like spectator
-     * Needed also in BLOCK use methods. or other places. not item i believe
+     * Needed also in BLOCK use methods. or other places. not item I believe
      */
     public static boolean mayPerformBlockAction(Player player, BlockPos pos, ItemStack stack) {
         GameType gameMode;
@@ -348,6 +351,7 @@ public class Utils {
         } else {
             gameMode = Minecraft.getInstance().gameMode.getPlayerMode();
         }
+        //we don't have context so we check both can break and can place. this below already check canBreak
         //this only checks the adventure mode canDestroyTag tag
         boolean result = !player.blockActionRestricted(player.level(), pos, gameMode);
         if (!result) {
@@ -355,9 +359,7 @@ public class Utils {
             //also vanilla tends to allow a bunch of unpreventable adventure interactions
 
             if (gameMode == GameType.ADVENTURE && !stack.isEmpty()) {
-                AdventureModePredicate adventureModePredicate = stack.get(DataComponents.CAN_PLACE_ON);
-                if (adventureModePredicate != null && adventureModePredicate.test(
-                        new BlockInWorld(player.level(), pos, false))) {
+                if (stack.canPlaceOnBlockInAdventureMode(new BlockInWorld(player.level(), pos, false))) {
                     return true;
                 }
             }
