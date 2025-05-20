@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.client.IScreenProvider;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -59,14 +60,14 @@ public interface IOnePlayerInteractable {
         return player.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) > (8*8);
     }
 
-    default boolean tryOpeningEditGui(ServerPlayer player, BlockPos pos, ItemStack stack) {
+    default boolean tryOpeningEditGui(ServerPlayer player, BlockPos pos, ItemStack stack, Direction hitFace) {
         //this is likely not needed
         if (Utils.mayPerformBlockAction(player, pos, stack) && !this.isOtherPlayerEditing(player)) {
             // open gui (edit sign with empty hand)
             this.setPlayerWhoMayEdit(player.getUUID());
 
             if (this instanceof IScreenProvider sp) {
-                sp.sendOpenGuiPacket(player.level(), pos, player);
+                sp.sendOpenGuiPacket(player, hitFace);
                 return false;
             }
             if (this instanceof MenuProvider mp) {

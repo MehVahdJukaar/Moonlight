@@ -1,15 +1,15 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
 import net.mehvahdjukaar.moonlight.api.client.IScreenProvider;
+import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 
 public class ClientBoundOpenScreenPacket implements Message {
@@ -17,22 +17,22 @@ public class ClientBoundOpenScreenPacket implements Message {
     public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundOpenScreenPacket> TYPE = Message.makeType(
             Moonlight.res("s2c_open_screen"), ClientBoundOpenScreenPacket::new);
 
-    public final BlockPos pos;
+    public final TileOrEntityTarget target;
     private final Direction dir;
 
     public ClientBoundOpenScreenPacket(RegistryFriendlyByteBuf buffer) {
-        this.pos = buffer.readBlockPos();
+        this.target = TileOrEntityTarget.read(buffer);
         this.dir = Direction.from3DDataValue(buffer.readVarInt());
     }
 
-    public ClientBoundOpenScreenPacket(BlockPos pos, Direction hitFace) {
-        this.pos = pos;
-        this.dir = hitFace;
+    public ClientBoundOpenScreenPacket(TileOrEntityTarget target,@Nullable Direction hitFace) {
+        this.target = target;
+        this.dir = hitFace == null ? Direction.UP : hitFace;
     }
 
     @Override
     public void write(RegistryFriendlyByteBuf buffer) {
-        buffer.writeBlockPos(this.pos);
+        this.target.write(buffer);
         buffer.writeVarInt(this.dir.get3DDataValue());
     }
 
@@ -41,9 +41,8 @@ public class ClientBoundOpenScreenPacket implements Message {
         Player player = context.getPlayer();
         Level level = player.level();
 
-        BlockPos pos = this.pos;
-        if (level.getBlockEntity(pos) instanceof IScreenProvider tile) {
-            tile.openScreen(level, pos, player, this.dir);
+        if (this.target.getTarget(level) instanceof IScreenProvider tile) {
+            tile.openScreen(level, player, this.dir);
         }
     }
 

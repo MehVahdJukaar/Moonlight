@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.model.loading.v1.FabricBakedModelManager;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
@@ -211,7 +212,7 @@ public class ClientHelperImpl {
     }
 
     public static BakedModel getModel(ModelManager modelManager, ModelResourceLocation modelLocation) {
-        return ((ModelManagerAccessor) modelManager).getBakedRegistry().getOrDefault(modelLocation, modelManager.getMissingModel());
+        return modelManager.getModel(modelLocation.id());
     }
 
 
