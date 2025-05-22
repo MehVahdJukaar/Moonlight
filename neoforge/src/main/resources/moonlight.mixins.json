@@ -10,6 +10,7 @@
     "SelfCustomModelLoaderMixin",
     "SelfExtraModelDataProvider",
     "SelfModFluidRendererPropertiesMixin"
+
   ],
   "mixins": [
     "ConditionHackMixin",

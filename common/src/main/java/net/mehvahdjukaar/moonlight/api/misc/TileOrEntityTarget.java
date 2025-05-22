@@ -3,19 +3,39 @@ package net.mehvahdjukaar.moonlight.api.misc;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
 
 public class TileOrEntityTarget {
 
     private final Either<BlockPos, Integer> posOrEntityId;
 
-    public TileOrEntityTarget(BlockPos pos) {
-        this.posOrEntityId = Either.left(pos);
+    private TileOrEntityTarget(Either<BlockPos, Integer> either){
+        this.posOrEntityId = either;
     }
 
-    public TileOrEntityTarget(int entityId) {
-        this.posOrEntityId = Either.right(entityId);
+
+    //bad code
+    public static TileOrEntityTarget orThrow(Object object) {
+        if (object instanceof BlockEntity be) {
+            return TileOrEntityTarget.of(be);
+        } else if (object instanceof Entity entity) {
+            return TileOrEntityTarget.of(entity);
+        } else {
+            throw new IllegalArgumentException("Object must be a BlockEntity or Entity");
+        }
+    }
+
+    public static TileOrEntityTarget of(BlockEntity be) {
+        return new TileOrEntityTarget(Either.left(be.getBlockPos()));
+    }
+
+    public static TileOrEntityTarget of(Entity entity) {
+        return new TileOrEntityTarget(Either.right(entity.getId()));
     }
 
     public void write(FriendlyByteBuf buf) {
@@ -29,9 +49,9 @@ public class TileOrEntityTarget {
 
     public static TileOrEntityTarget read(FriendlyByteBuf buf) {
         if (buf.readBoolean()) {
-            return new TileOrEntityTarget(buf.readBlockPos());
+            return new TileOrEntityTarget(Either.left(buf.readBlockPos()));
         } else {
-            return new TileOrEntityTarget(buf.readVarInt());
+            return new TileOrEntityTarget(Either.right(buf.readVarInt()));
         }
     }
 
@@ -45,6 +65,18 @@ public class TileOrEntityTarget {
         } else {
             return level.getEntity(this.posOrEntityId.right().get());
         }
+    }
+
+    @Nullable
+    public <T> T map(Level level, Function<BlockEntity, T> a, Function<Entity, T> b) {
+        if (this.posOrEntityId.left().isPresent()) {
+            var be = level.getBlockEntity(this.posOrEntityId.left().get());
+            if (be != null) return a.apply(be);
+        } else {
+            var entity = level.getEntity(this.posOrEntityId.right().get());
+            if (entity != null) return b.apply(entity);
+        }
+        return null;
     }
 
 

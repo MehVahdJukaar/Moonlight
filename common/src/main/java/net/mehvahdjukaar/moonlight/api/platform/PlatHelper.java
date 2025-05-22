@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -11,7 +12,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -23,8 +23,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -34,14 +32,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -100,7 +95,7 @@ public class PlatHelper {
      * If loaders are during standard mod init phase
      */
     @ExpectPlatform
-    public static boolean isInitializing(){
+    public static boolean isInitializing() {
         throw new AssertionError();
     }
 
@@ -279,7 +274,7 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
-    public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction){
+    public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         throw new AssertionError();
     }
 
@@ -350,8 +345,14 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
-    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, BlockPos pos) {
-        openCustomMenu(player, menuProvider, buf -> buf.writeBlockPos(pos));
+    public static <T extends Entity & MenuProvider> void openCustomMenu(ServerPlayer player, T menuProvider) {
+        TileOrEntityTarget target = TileOrEntityTarget.of(menuProvider);
+        openCustomMenu(player, menuProvider, target::write);
+    }
+
+    public static <T extends BlockEntity & MenuProvider> void openCustomMenu(ServerPlayer player, T menuProvider) {
+        TileOrEntityTarget target = TileOrEntityTarget.of(menuProvider);
+        openCustomMenu(player, menuProvider, target::write);
     }
 
     @ExpectPlatform

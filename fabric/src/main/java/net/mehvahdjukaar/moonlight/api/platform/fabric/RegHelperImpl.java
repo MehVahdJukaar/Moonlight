@@ -4,7 +4,6 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
-import net.fabricmc.fabric.api.loot.v3.FabricLootTableBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
@@ -37,7 +36,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -273,7 +271,7 @@ public class RegHelperImpl {
                         public void addTableReference(ResourceLocation targetId) {
                             LootPool pool = LootPool.lootPool().add(NestedLootTable.lootTableReference(
                                     ResourceKey.create(Registries.LOOT_TABLE, targetId))).build();
-                            ((FabricLootTableBuilder) tableBuilder).pool(pool);
+                            tableBuilder.pool(pool);
                         }
                     });
                 }
@@ -290,7 +288,7 @@ public class RegHelperImpl {
     public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(ResourceLocation name, Supplier<EntityDataSerializer<T>> serializer) {
         var value = serializer.get();
         EntityDataSerializers.registerSerializer(value);
-        return ()->value;
+        return () -> value;
     }
 
 

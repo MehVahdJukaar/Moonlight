@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootDataType;
@@ -91,7 +92,7 @@ public class ResourceSink {
         }
     }
 
-    private void markNotClearable(ResourceLocation path) {
+    public void markNotClearable(ResourceLocation path) {
         this.notClearable.add(path);
     }
 
@@ -146,7 +147,10 @@ public class ResourceSink {
                                 .add(LootItem.lootTableItem(itemLike)).unwrap());
     }
 
-    @UnstableApi
+    public void addRecipe(RecipeHolder<?> holder) {
+        addRecipe(holder.value(), holder.id());
+    }
+
     public void addRecipe(Recipe<?> recipe, ResourceLocation id) {
         this.addRecipeNoAdvancement(recipe, id);
 
@@ -157,7 +161,6 @@ public class ResourceSink {
         //}
     }
 
-    @UnstableApi
     public void addRecipeNoAdvancement(Recipe<?> recipe, ResourceLocation id) {
         this.addJson(id, RPUtils.writeRecipe(recipe), ResType.RECIPES);
     }

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
 import net.mehvahdjukaar.moonlight.api.client.IScreenProvider;
+import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
@@ -15,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-// Interface for blocks that can be edited by one player at a time like signs and such
+// Interface for tile entities that can be edited by one player at a time like signs and such
 public interface IOnePlayerInteractable {
 
     void setPlayerWhoMayEdit(@Nullable UUID uuid);
@@ -23,25 +24,24 @@ public interface IOnePlayerInteractable {
     UUID getPlayerWhoMayEdit();
 
     //call before access
-    default boolean isEditingPlayer(Player player) {
+    default boolean isEditingPlayer(BlockPos myPos, Player player) {
         //player who may edit is a server side concept. here we just check if player is close by
         if (player.level().isClientSide) {
-            return isCloseEnoughToEdit(player);
+            return isCloseEnoughToEdit(player, myPos);
         }
-        validateEditingPlayer();
+        validateEditingPlayer(myPos, player.level());
         UUID uuid = this.getPlayerWhoMayEdit();
         return uuid != null && uuid.equals(player.getUUID());
     }
 
-    default boolean isOtherPlayerEditing(Player player) {
-        validateEditingPlayer();
+    default boolean isOtherPlayerEditing(BlockPos myPos, Player otherThan) {
+        validateEditingPlayer(myPos, otherThan.level());
         UUID uuid = this.getPlayerWhoMayEdit();
-        return uuid != null && !uuid.equals(player.getUUID());
+        return uuid != null && !uuid.equals(otherThan.getUUID());
     }
 
 
-    private void validateEditingPlayer() {
-        Level level = ((BlockEntity) this).getLevel();
+    private void validateEditingPlayer(BlockPos myPos, Level level) {
         if (level == null) {
             this.setPlayerWhoMayEdit(null);
             return;
@@ -50,19 +50,18 @@ public interface IOnePlayerInteractable {
         if (uuid == null) return;
 
         Player player = level.getPlayerByUUID(uuid);
-        if (player == null || isCloseEnoughToEdit(player)) {
+        if (player == null || !isCloseEnoughToEdit(player, myPos)) {
             this.setPlayerWhoMayEdit(null);
         }
     }
 
-    private boolean isCloseEnoughToEdit(Player player) {
-        BlockPos pos = ((BlockEntity) this).getBlockPos();
-        return player.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) > (8*8);
+    private boolean isCloseEnoughToEdit(Player player, BlockPos myPos) {
+        return player.canInteractWithBlock(myPos, 8);
     }
 
     default boolean tryOpeningEditGui(ServerPlayer player, BlockPos pos, ItemStack stack, Direction hitFace) {
         //this is likely not needed
-        if (Utils.mayPerformBlockAction(player, pos, stack) && !this.isOtherPlayerEditing(player)) {
+        if (Utils.mayPerformBlockAction(player, pos, stack) && !this.isOtherPlayerEditing(pos, player)) {
             // open gui (edit sign with empty hand)
             this.setPlayerWhoMayEdit(player.getUUID());
 
@@ -70,8 +69,9 @@ public interface IOnePlayerInteractable {
                 sp.sendOpenGuiPacket(player, hitFace);
                 return false;
             }
-            if (this instanceof MenuProvider mp) {
-                PlatHelper.openCustomMenu(player, mp, pos);
+            if (this instanceof MenuProvider mp && this instanceof BlockEntity be) {
+                TileOrEntityTarget target = TileOrEntityTarget.of(be);
+                PlatHelper.openCustomMenu(player, mp, target::write);
                 return true;
             }
         }

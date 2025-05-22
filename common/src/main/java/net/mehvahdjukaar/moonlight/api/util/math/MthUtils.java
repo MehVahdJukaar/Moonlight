@@ -38,6 +38,42 @@ public class MthUtils {
         return (float) Mth.atan2(x1 * y1 - y1 * x2, x1 * x2 + y1 * y2);
     }
 
+
+    /**
+     * Clamps the given angle between two boundary angles, handling wrap-around at 360 degrees.
+     *
+     * @param first The first boundary angle (in degrees)
+     * @param second The second boundary angle (in degrees)
+     * @param angle The angle to clamp (in degrees)
+     * @return The clamped angle
+     */
+    public static float clampDegrees(float angle, float first, float second) {
+        // Normalize all angles to the range [0, 360)
+        angle = (angle % 360 + 360) % 360;
+        first = (first % 360 + 360) % 360;
+        second = (second % 360 + 360) % 360;
+
+        // Calculate the arc length from A to B in the positive direction
+        float deltaAB = (second - first + 360) % 360;
+        // Calculate the position of the angle relative to A
+        float deltaThetaA = (angle - first + 360) % 360;
+
+        // Check if the angle is within the valid slice from A to B
+        if (deltaThetaA <= deltaAB) {
+            return angle;
+        } else {
+            // Calculate minimal distances to A and B
+            float diffA = Math.abs(angle - first);
+            float distanceToA = Math.min(diffA, 360 - diffA);
+
+            float diffB = Math.abs(angle - second);
+            float distanceToB = Math.min(diffB, 360 - diffB);
+
+            // Return the closer boundary, preferring B in case of a tie
+            return Mth.wrapDegrees((distanceToA < distanceToB) ? first : second);
+        }
+    }
+
     //vector relative to a new basis
     public static Vec3 changeBasisN(Vec3 newBasisYVector, Vec3 rot) {
         Vec3 y = newBasisYVector.normalize();

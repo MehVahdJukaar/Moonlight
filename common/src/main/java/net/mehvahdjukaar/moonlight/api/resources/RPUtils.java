@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceSink;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
@@ -251,10 +252,32 @@ public class RPUtils {
 
     }
 
+    @Deprecated(forRemoval = true)
+    public static void appendModelOverride(ResourceManager manager, DynamicTexturePack pack,
+                                           ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
+        var o = manager.getResource(ResType.ITEM_MODELS.getPath(modelRes));
+        if (o.isPresent()) {
+            try (var model = o.get().open()) {
+                var json = RPUtils.deserializeJson(model);
+                JsonArray overrides;
+                if (json.has("overrides")) {
+                    overrides = json.getAsJsonArray("overrides");
+                    ;
+                } else overrides = new JsonArray();
+
+                modelConsumer.accept(ov -> overrides.add(serializeOverride(ov)));
+
+                json.add("overrides", overrides);
+                pack.addItemModel(modelRes, json);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
     /**
      * Utility method to add models overrides in a non-destructive way. Provided overrides will be added on top of whatever model is currently provided by vanilla or mod resources. IE: crossbows
      */
-    public static void appendModelOverride(ResourceManager manager, DynamicTexturePack pack,
+    public static void appendModelOverride(ResourceManager manager, ResourceSink pack,
                                            ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
         var o = manager.getResource(ResType.ITEM_MODELS.getPath(modelRes));
         if (o.isPresent()) {

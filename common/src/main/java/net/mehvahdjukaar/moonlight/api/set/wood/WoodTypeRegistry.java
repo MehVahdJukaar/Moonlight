@@ -1,8 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.set.wood;
 
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -55,6 +58,9 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
         WoodType.CODEC = this.getCodec();
         WoodType.STREAM_CODEC = this.getStreamCodec();
+
+        WoodType.ENTITY_SERIALIZER = RegHelper.registerEntityDataSerializer(Moonlight.res("wood_type"),
+                () -> EntityDataSerializer.forValueType(this.getStreamCodec()));
     }
 
     static void touch() {

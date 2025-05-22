@@ -5,12 +5,10 @@ import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundOpenScreenPacket;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -23,10 +21,15 @@ public interface IScreenProvider {
     }
 
     default void sendOpenGuiPacket(Player player, @Nullable Direction hitFace) {
-        NetworkHelper.sendToClientPlayer((ServerPlayer) player,
-                new ClientBoundOpenScreenPacket(getScreenProviderTarget(), hitFace));
+        TileOrEntityTarget target;
+        if (this instanceof BlockEntity be) {
+            target = TileOrEntityTarget.of(be);
+        } else if (this instanceof Player entity) {
+            target = TileOrEntityTarget.of(entity);
+        } else {
+            throw new IllegalStateException("IScreenProvider must be a BlockEntity or Entity");
+        }
+        NetworkHelper.sendToServer(new ClientBoundOpenScreenPacket(target, hitFace));
     }
-
-    @NotNull TileOrEntityTarget getScreenProviderTarget();
 
 }
