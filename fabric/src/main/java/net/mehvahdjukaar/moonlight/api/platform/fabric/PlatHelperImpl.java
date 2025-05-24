@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
@@ -30,8 +31,11 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
@@ -104,7 +108,7 @@ public class PlatHelperImpl {
     }
 
     public static PlatHelper.Side getPhysicalSide() {
-            return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
+        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? PlatHelper.Side.CLIENT : PlatHelper.Side.SERVER;
     }
 
     @Nullable
@@ -135,7 +139,7 @@ public class PlatHelperImpl {
         return getFlammability(state, level, pos, direction) > 0;
     }
 
-    public static void onCaughtFire(Level level, BlockPos pos, int chance, int age) {
+    public static void onCaughtFire(BlockState state, Level level, BlockPos pos, Direction direction, @Nullable LivingEntity igniter) {
     }
 
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
@@ -209,6 +213,10 @@ public class PlatHelperImpl {
 
     public static SimpleParticleType newParticle() {
         return FabricParticleTypes.simple(true);
+    }
+
+    public static <T extends ParticleOptions> ParticleType<T> newParticle(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+        return FabricParticleTypes.complex(true, codec, streamCodec);
     }
 
     public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {

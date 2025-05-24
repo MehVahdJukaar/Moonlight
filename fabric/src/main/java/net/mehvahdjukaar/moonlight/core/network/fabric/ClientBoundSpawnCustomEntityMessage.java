@@ -4,12 +4,15 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -57,7 +60,8 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         this.velX = (int) (d1 * 8000.0);
         this.velY = (int) (d2 * 8000.0);
         this.velZ = (int) (d3 * 8000.0);
-        this.extraBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), e.level().registryAccess());
+        RegistryAccess ra = PlatHelper.getCurrentServer().registryAccess();
+        this.extraBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), ra);
         if (this.entity instanceof IExtraClientSpawnData spawnData) {
             spawnData.writeSpawnData(extraBuf);
         }

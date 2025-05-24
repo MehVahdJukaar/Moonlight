@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.set.wood;
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
@@ -14,6 +13,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -44,6 +44,26 @@ public class WoodType extends BlockType {
 
     // like this so it can be called early. not too early tho as children might not be initialized
     private final Supplier<net.minecraft.world.level.block.state.properties.WoodType> vanillaType = Suppliers.memoize(this::detectVanillaWood);
+
+    private final Supplier<Boat.Type> boatType = Suppliers.memoize(this::detectVanillaBoat);
+
+    @Nullable
+    private Boat.Type detectVanillaBoat() {
+        if (this == WoodTypeRegistry.OAK_TYPE) return Boat.Type.OAK;
+        var id = this.getId();
+        var conventions = Set.of(id.getPath(),
+                id.getNamespace() + id.getPath(),
+                id.getNamespace() + "_" + id.getPath(),
+                id.getNamespace() + "/" + id.getPath(),
+                id.toString());
+        for (var s : conventions) {
+            var o = Boat.Type.byName(s);
+            if (o != Boat.Type.OAK) {
+                return o;
+            }
+        }
+        return null;
+    }
 
     @Nullable
     private net.minecraft.world.level.block.state.properties.WoodType detectVanillaWood() {
@@ -129,11 +149,23 @@ public class WoodType extends BlockType {
         return this.vanillaType.get();
     }
 
+    @Nullable
+    public Boat.Type toVanillaBoat() {
+        return this.boatType.get();
+    }
+
     @NotNull
     public net.minecraft.world.level.block.state.properties.WoodType toVanillaOrOak() {
         var v = toVanilla();
         if (v != null) return v;
         return net.minecraft.world.level.block.state.properties.WoodType.OAK;
+    }
+
+    @NotNull
+    public Boat.Type toVanillaBoatOrOak() {
+        var v = toVanillaBoat();
+        if (v != null) return v;
+        return Boat.Type.OAK;
     }
 
     /**
@@ -198,8 +230,13 @@ public class WoodType extends BlockType {
 
     @Override
     public void initializeChildrenItems() {
-        this.addChild("boat", this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
-        this.addChild("chest_boat", this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
+        if (this.id.toString().equals("minecraft:bamboo")) {
+            this.addChild("boat", this.findRelatedEntry("raft", BuiltInRegistries.ITEM));
+            this.addChild("chest_boat", this.findRelatedEntry("chest_raft", BuiltInRegistries.ITEM));
+        } else {
+            this.addChild("boat", this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
+            this.addChild("chest_boat", this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
+        }
         this.addChild("sapling", this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
         this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK)); // TFC & AFC only
     }

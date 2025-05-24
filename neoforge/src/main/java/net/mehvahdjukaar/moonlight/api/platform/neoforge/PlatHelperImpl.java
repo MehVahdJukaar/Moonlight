@@ -3,17 +3,25 @@ package net.mehvahdjukaar.moonlight.api.platform.neoforge;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
+import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -51,6 +59,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.common.MutableDataComponentHolder;
 import net.neoforged.neoforge.common.NeoForge;
@@ -183,6 +192,21 @@ public class PlatHelperImpl {
         return new SimpleParticleType(true);
     }
 
+    public static <T extends ParticleOptions> ParticleType<T> newParticle(
+            MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+        return new ParticleType<>(true) {
+            @Override
+            public MapCodec<T> codec() {
+                return codec;
+            }
+
+            @Override
+            public StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec() {
+                return streamCodec;
+            }
+        };
+    }
+
     public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
         return BlockEntityType.Builder.of(blockEntitySupplier::create, validBlocks).build(null);
     }
@@ -290,6 +314,8 @@ public class PlatHelperImpl {
     public static boolean isFakePlayer(ServerPlayer instance) {
         return instance instanceof FakePlayer;
     }
+
+
 
 
 }

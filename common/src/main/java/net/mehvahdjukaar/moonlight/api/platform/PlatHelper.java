@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.minecraft.core.BlockPos;
@@ -11,8 +12,11 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
@@ -24,10 +28,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -289,7 +290,7 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
-    public static void onCaughtFire(Level level, BlockPos pos, int chance, int age) {
+    public static void onCaughtFire(BlockState state, Level level, BlockPos pos, Direction direction, @Nullable LivingEntity igniter) {
         throw new AssertionError();
     }
 
@@ -310,6 +311,11 @@ public class PlatHelper {
 
     @ExpectPlatform
     public static SimpleParticleType newParticle() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static <T extends ParticleOptions> ParticleType<T> newParticle(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
         throw new AssertionError();
     }
 

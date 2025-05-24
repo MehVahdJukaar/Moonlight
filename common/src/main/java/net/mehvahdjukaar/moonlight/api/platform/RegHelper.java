@@ -20,10 +20,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -293,6 +297,10 @@ public class RegHelper {
         return register(name, PlatHelper::newParticle, Registries.PARTICLE_TYPE);
     }
 
+    public static <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
+            ResourceLocation name, MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+        return register(name, () -> PlatHelper.newParticle(codec, streamCodec), Registries.PARTICLE_TYPE);
+    }
 
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
                                                                                    MobCategory category, float width, float height) {
