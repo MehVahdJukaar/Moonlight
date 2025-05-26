@@ -13,12 +13,13 @@ public class CommonConfigs {
     public static final ConfigSpec CONFIG;
 
     static {
-        ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.COMMON_SYNCED);
+        ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.COMMON);
         builder.push("general");
         CLEAR_RESOURCES = builder.comment("Clears dynamic models and textures from the mod dynamic pack once resource reload is done. This can save up some RAM. Turning off if you notice inconsistencies with pack loading")
                 .define("clear_dynamic_resources", false);
 
         builder.pop();
+        builder.setSynced();
 
         CONFIG = builder.buildAndRegister();
     }

@@ -17,8 +17,8 @@ public class ModMessages {
             .register(NetworkDir.PLAY_TO_CLIENT,
                     ClientBoundFinalizeFluidsMessage.class, ClientBoundFinalizeFluidsMessage::new)
 
-            .register(NetworkDir.PLAY_TO_CLIENT,
-                    ClientBoundSyncConfigsMessage.class, ClientBoundSyncConfigsMessage::new)
+            .register(NetworkDir.BOTH,
+                    SyncConfigsMessage.class, SyncConfigsMessage::new)
 
             .register(NetworkDir.PLAY_TO_CLIENT,
                     ClientBoundOpenScreenPacket.class, ClientBoundOpenScreenPacket::new)

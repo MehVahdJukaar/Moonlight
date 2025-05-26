@@ -1,9 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.forge;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
+import com.electronwill.nightconfig.core.ConcurrentConfigSpec;
 import com.electronwill.nightconfig.core.ConfigFormat;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.io.ParsingMode;
 import com.electronwill.nightconfig.core.io.WritingMode;
+import com.electronwill.nightconfig.toml.TomlFormat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
@@ -32,6 +35,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -213,6 +217,16 @@ public final class ConfigSpecWrapper extends ConfigSpec {
         //using this isntead so we dont fire the config changes event otherwise this will loop
         //this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
         //this.onRefresh();
+    }
+
+
+    public static void acceptConfig(ModConfig modConfig, byte[] bytes) {
+        /*
+        if (modConfig.getConfigData() instanceof ConcurrentConfigSpec cc) {
+            cc.bulkCommentedUpdate(view -> {
+                TomlFormat.instance().createParser().parse(new ByteArrayInputStream(bytes), view, ParsingMode.REPLACE);
+            });
+        }*/
     }
 
 

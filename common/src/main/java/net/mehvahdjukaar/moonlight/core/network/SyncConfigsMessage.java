@@ -9,19 +9,19 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.io.ByteArrayInputStream;
 
-public class ClientBoundSyncConfigsMessage implements Message {
+public class SyncConfigsMessage implements Message {
 
     public final String fineName;
     public final String modId;
     public final byte[] configData;
 
-    public ClientBoundSyncConfigsMessage(FriendlyByteBuf buf) {
+    public SyncConfigsMessage(FriendlyByteBuf buf) {
         this.modId = buf.readUtf();
         this.fineName = buf.readUtf();
         this.configData = buf.readByteArray();
     }
 
-    public ClientBoundSyncConfigsMessage(final byte[] configFileData, final String fileName, String modId) {
+    public SyncConfigsMessage(final byte[] configFileData, final String fileName, String modId) {
         this.modId = modId;
         this.fineName = fileName;
         this.configData = configFileData;
