@@ -207,6 +207,9 @@ public final class SpriteUtils {
         });
     }
 
+    /**
+     * Note: This have been moved to Every Compat > SpriteHelper
+     */
     @Deprecated(forRemoval = true)
     @NotNull
     public static final Predicate<String> LOOKS_LIKE_TOP_LOG_TEXTURE = s -> {
@@ -215,11 +218,17 @@ public final class SpriteUtils {
         return s.contains("_top") || s.contains("_end") || s.contains("_up");
     };
 
+    /**
+     * Note: This have been moved to Every Compat > SpriteHelper
+     */
     @Deprecated(forRemoval = true)
     @NotNull
     public static final Predicate<String> LOOKS_LIKE_SIDE_LOG_TEXTURE =
             s -> !LOOKS_LIKE_TOP_LOG_TEXTURE.test(s) && !new ResourceLocation(s).getPath().contains("_overlay");
 
+    /**
+     * Note: This have been moved to Every Compat > SpriteHelper
+     */
     @Deprecated(forRemoval = true)
     @NotNull
     public static final Predicate<String> LOOKS_LIKE_LEAF_TEXTURE = s -> {

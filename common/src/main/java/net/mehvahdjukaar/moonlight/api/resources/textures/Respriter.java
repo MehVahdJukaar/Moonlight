@@ -88,6 +88,9 @@ public class Respriter {
 
     //TODO: generalize and merge these two
 
+    /**
+     * @deprecated use {@link #recolorWithAnimation(List, McMetaFile)}
+     */
     @Deprecated(forRemoval = true)
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable AnimationMetadataSection targetAnimationData) {
         return recolorWithAnimation(targetPalettes, targetAnimationData == null ? null : McMetaFile.of(targetAnimationData));
