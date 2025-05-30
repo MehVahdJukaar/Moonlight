@@ -89,13 +89,16 @@ public abstract class BlockType {
      * OPTIONAL: modId, folder, prefix can be empty
      */
     public String createFullIdWith(String modIdOrEmpty, String folderOrEmpty, String shortenedId, String prefixOrEmpty, String suffix) {
+        String modIded = (modIdOrEmpty.isEmpty()) ? "" : modIdOrEmpty + ":";
+        String foldered = (folderOrEmpty.isEmpty()) ? "" : folderOrEmpty + "/";
+
         String prefixed = "";
         if (prefixOrEmpty.contains("/")) prefixed = prefixOrEmpty;
         else if (!prefixOrEmpty.isEmpty()) prefixed = prefixOrEmpty + "_";
-        String foldered = (folderOrEmpty.isEmpty()) ? "" : folderOrEmpty + "/";
-        String modIded = (modIdOrEmpty.isEmpty()) ? "" : modIdOrEmpty + ":";
 
-        return modIded + foldered + shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() +"_"+ suffix;
+        String suffixed = (suffix.isEmpty()) ? "" : "_" + suffix;
+
+        return modIded + foldered + shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() + suffixed;
     }
 
     @Override
