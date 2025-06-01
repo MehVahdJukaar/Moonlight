@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.*;
@@ -79,9 +80,9 @@ public class MapDataInternal {
     }
 
     @ApiStatus.Internal
-    @ExpectPlatform
     public static void init() {
-        throw new AssertionError();
+        RegHelper.registerDataPackRegistry(MapDataInternal.KEY,
+                MLMapDecorationType.DIRECT_CODEC, MLMapDecorationType.DIRECT_CODEC);
     }
 
     @Deprecated(forRemoval = true)

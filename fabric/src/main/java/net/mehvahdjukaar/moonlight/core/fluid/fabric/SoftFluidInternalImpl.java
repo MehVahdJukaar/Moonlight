@@ -19,10 +19,6 @@ import java.util.Map;
 
 public class SoftFluidInternalImpl {
 
-    public static void init() {
-        DynamicRegistries.registerSynced(SoftFluidRegistry.KEY, SoftFluid.CODEC, SoftFluid.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
-    }
-
     public static void registerExistingVanillaFluids(RegistryAccess ra, Map<Fluid, Holder<SoftFluid>> fluidMap, Map<Item, Holder<SoftFluid>> itemMap) {
         //only runs on the first object
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.get(ra);

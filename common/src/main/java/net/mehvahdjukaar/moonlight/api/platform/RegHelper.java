@@ -384,6 +384,11 @@ public class RegHelper {
     }
 
     @ExpectPlatform
+    public static  <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(
             ResourceLocation name,
             boolean searchBar,
@@ -392,7 +397,7 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = List.of(CreativeModeTabs.SPAWN_EGGS.location());
+    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = java.util.List.of(CreativeModeTabs.SPAWN_EGGS.location());
 
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
         return registerCreativeModeTab(name, false, configurator);
