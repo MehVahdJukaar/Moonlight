@@ -26,11 +26,6 @@ import static net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry.KEY;
 
 public class SoftFluidInternalImpl {
 
-    public static void init() {
-        IEventBus bus = MoonlightForge.getCurrentBus();
-        bus.register(SoftFluidInternalImpl.class);
-    }
-
     public static void registerExistingVanillaFluids(RegistryAccess ra, Map<Fluid, Holder<SoftFluid>> fluidMap, Map<Item, Holder<SoftFluid>> itemMap) {
         //only runs on the first object
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.get(ra);
@@ -57,11 +52,6 @@ public class SoftFluidInternalImpl {
             }
         }
         reg.freeze();
-    }
-
-    @SubscribeEvent
-    public static void registerDataPackRegistry(DataPackRegistryEvent.NewRegistry event) {
-        event.dataPackRegistry(KEY, SoftFluid.CODEC, SoftFluid.CODEC);
     }
 
 

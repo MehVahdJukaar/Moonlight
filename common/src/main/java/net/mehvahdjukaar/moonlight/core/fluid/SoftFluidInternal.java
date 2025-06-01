@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundFinalizeFluidsMessage;
@@ -89,8 +90,12 @@ public class SoftFluidInternal {
     }
 
 
-    @ExpectPlatform
     public static void init() {
+        RegHelper.registerDataPackRegistry(
+                SoftFluidRegistry.KEY,
+                SoftFluid.CODEC,
+                SoftFluid.CODEC
+        );
     }
 
     //wtf is going on here

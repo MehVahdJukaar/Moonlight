@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
+import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
@@ -47,6 +49,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -223,6 +226,19 @@ public class RegHelperImpl {
         var codec = OptionalRecipeCondition.createCodec(id, predicate);
         ResourceConditionType<OptionalRecipeCondition> type = ResourceConditionType.create(id, codec);
         ResourceConditions.register(type);
+    }
+
+    public static  <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
+        if (networkCodec != null) {
+            DynamicRegistries.registerSynced(registryKey,
+                    codec,
+                    networkCodec,
+                    DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY
+            );
+        } else {
+            DynamicRegistries.register(registryKey, codec);
+        }
+
     }
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
