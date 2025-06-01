@@ -90,8 +90,8 @@ public class BlockTypeResTransformer<T extends BlockType> {
         return addModifier((s, id, w) -> replaceType(s, w, id, oldTypeName, modId));
     }
 
-    public BlockTypeResTransformer<T> replaceGenericType(String oldTypeName, String entryClass) {
-        this.addModifier((s, id, w) -> replaceFullGenericType(s, w, id, oldTypeName, modId, entryClass));
+    public BlockTypeResTransformer<T> replaceGenericType(String oldTypeName, String folderName) {
+        this.addModifier((s, id, w) -> replaceFullGenericType(s, w, id, oldTypeName, modId, folderName));
         return this;
     }
 
@@ -264,7 +264,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
         Pattern blockPathSubPathPattern = Pattern.compile("([^,]*(?=/))");
         Matcher blockPathSubPathMather = blockPathSubPathPattern.matcher(blockId.getPath());
-        String blockFolderPrefix = blockPathSubPathMather.find() ? blockPathSubPathMather.group(1) : ""; //"mcf/create"
+        String blockFolderPrefix = blockPathSubPathMather.find() ? blockPathSubPathMather.group(1) : ""; // "shortenedId/namespace"
         String blockTypeName = blockType.getTypeName(); // path of block id "scoria"
 
         String newNamespace = oldNamespace == null ? "" : blockId.getNamespace() + ":";
@@ -276,7 +276,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
         //pattern to find sub folders. Does not include "/"
         //matches stuff between (oldNamespace + folderName) and oldTypeName not including leading or trailing slashes
-        Pattern subFolderPattern = Pattern.compile(oldNamespace + folderRegEx + "([\\w,/,\\-]*)" + oldTypeName +  excludeKeyword); // \w is similar to [a-z,A-Z,_]
+        Pattern subFolderPattern = Pattern.compile(oldNamespace + folderRegEx + "([\\w,/,\\-]*)" + oldTypeName + excludeKeyword); // \w is similar to [a-z,A-Z,_]
         Matcher subFolderMatcher = subFolderPattern.matcher(text);
 
         return subFolderMatcher.replaceAll(m -> {
