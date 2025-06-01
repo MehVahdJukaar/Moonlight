@@ -69,25 +69,22 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     public final ItemStack mainIcon;
 
 
-    @Nullable
     static Method findMethodOrNull(Class<?> c, String methodName) {
         Method field = null;
         try {
             field = ObfuscationReflectionHelper.findMethod(c, methodName);
         } catch (Exception ignored) {
+                throw new RuntimeException("Failed to find method: " + methodName + " in class: " + c.getName());
         }
         return field;
     }
 
-    @Nullable
     static Field findFieldOrNull(Class<?> c, String fieldName) {
         Field field = null;
         try {
             field = ObfuscationReflectionHelper.findField(c, fieldName);
         } catch (Exception ignored) {
-            if (PlatHelper.isDev()) {
                 throw new RuntimeException("Failed to find field: " + fieldName + " in class: " + c.getName());
-            }
         }
         return field;
     }
@@ -224,6 +221,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     }
 
     private void trySyncToServer() {
+        /*
         if (!ConfigHelper.isSingleplayer() && !ConfigHelper.isPlayingLan()) {
             if (ConfigHelper.isPlayingGame()) {
                 Player player = ConfigHelper.getClientPlayer();
@@ -231,7 +229,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                     this.mlConfig.sendChangedConfigToServer();
                 }
             }
-        }
+        }*/
     }
 
     public abstract void onSave();
