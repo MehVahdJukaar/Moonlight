@@ -23,7 +23,7 @@ public class CompatWoodTypes {
         var weepingstar = advancedWoodFinder("mofus_better_end_", "weepingstar", "weepingstar_planks",
                 "log", "",
                 "stripped_log", "");
-        weepingstar.addChild("leaves", new ResourceLocation("mofus_better_end_:weepingstar_leaf"));
+        weepingstar.addChild("leaves", ResourceLocation.fromNamespaceAndPath("mofus_better_end_","weepingstar_leaf"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, weepingstar);
 
         BlockSetAPI.addBlockTypeFinder(WoodType.class,
