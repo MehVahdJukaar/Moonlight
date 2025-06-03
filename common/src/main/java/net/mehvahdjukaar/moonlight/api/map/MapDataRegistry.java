@@ -28,6 +28,10 @@ import java.util.function.Supplier;
 
 public class MapDataRegistry {
 
+    public static void init(){
+
+    }
+
     public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.KEY;
 
     public static final HolderReference<MLMapDecorationType<?,?>> GENERIC_STRUCTURE_MARKER = HolderReference.of(MapDataInternal.GENERIC_STRUCTURE_ID,
