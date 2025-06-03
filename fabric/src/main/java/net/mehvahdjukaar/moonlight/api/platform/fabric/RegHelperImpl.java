@@ -311,7 +311,7 @@ public class RegHelperImpl {
 
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
         var reg = new MappedRegistry<>(key, Lifecycle.stable());
-        Registry.register((Registry<? super Registry>) BuiltInRegistries.REGISTRY, key.location(), reg);
+        Registry.register((Registry) BuiltInRegistries.REGISTRY, key.location(), reg);
         return reg;
     }
 

@@ -308,7 +308,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void initCustomData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3,
                                ResourceKey<Level> resourceKey, CallbackInfo ci) {
-        for (var d : MapDataInternal.CUSTOM_MAP_DATA_TYPES.getValues()) {
+        for (var d : MapDataInternal.CUSTOM_MAP_DATA_TYPES) {
             moonlight$customData.put(d, d.factory().get());
         }
     }
