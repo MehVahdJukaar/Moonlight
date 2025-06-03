@@ -243,9 +243,14 @@ public class RegHelperImpl {
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean synced) {
         Moonlight.assertInitPhase();
         DeferredRegister<A> defer = DeferredRegister.create(key, key.location().getNamespace());
-        return defer.makeRegistry(
-                (b) -> b.sync(synced)
-        );
+        var reg = defer.makeRegistry(
+                (b) -> b.sync(synced));
+        Consumer<NewRegistryEvent> eventConsumer = event -> {
+            event.register(reg);
+        };
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
+
+        return reg;
     }
 
     public static <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
