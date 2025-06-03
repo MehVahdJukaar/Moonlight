@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.neoforge;
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
+import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
@@ -238,6 +239,15 @@ public class RegHelperImpl {
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         register(id, () -> OptionalRecipeCondition.createCodec(id, predicate), NeoForgeRegistries.Keys.CONDITION_CODECS);
+    }
+
+    public static <A> Supplier<IForgeRegistry<A>> registerRegistry(ResourceKey<Registry<A>> key) {
+        Moonlight.assertInitPhase();
+        MapRegistry
+        DeferredRegister<A> defer = DeferredRegister.create(key, key.location().getNamespace());
+        return defer.makeRegistry(
+                () -> RegistryBuilder.of(key.location())
+        );
     }
 
     public static  <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
