@@ -156,6 +156,7 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
         return this.byId(id) != null;
     }
 
+    @Deprecated(forRemoval = true)
     public StreamCodec<FriendlyByteBuf, T> getStreamCodec() {
         return this.streamCodec;
     }

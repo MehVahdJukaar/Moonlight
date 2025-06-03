@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Lifecycle;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
@@ -22,6 +23,7 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.OptionalRecipeCon
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -228,7 +230,7 @@ public class RegHelperImpl {
         ResourceConditions.register(type);
     }
 
-    public static  <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
+    public static <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
         if (networkCodec != null) {
             DynamicRegistries.registerSynced(registryKey,
                     codec,
@@ -305,6 +307,12 @@ public class RegHelperImpl {
         var value = serializer.get();
         EntityDataSerializers.registerSerializer(value);
         return () -> value;
+    }
+
+    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
+        var reg = new MappedRegistry<>(key, Lifecycle.stable());
+        Registry.register((Registry<? super Registry>) BuiltInRegistries.REGISTRY, key.location(), reg);
+        return reg;
     }
 
 

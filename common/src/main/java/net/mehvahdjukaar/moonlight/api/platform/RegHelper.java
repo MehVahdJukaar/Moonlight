@@ -302,6 +302,11 @@ public class RegHelper {
         return register(name, () -> PlatHelper.newParticle(codec, streamCodec), Registries.PARTICLE_TYPE);
     }
 
+    @ExpectPlatform
+    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
+        throw new AssertionError();
+    }
+
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
                                                                                    MobCategory category, float width, float height) {
         return registerEntityType(name, factory, category, width, height, 5);
@@ -313,6 +318,7 @@ public class RegHelper {
                                                                                    float height, int clientTrackingRange) {
         return registerEntityType(name, factory, category, width, height, clientTrackingRange, 3);
     }
+
 
     @ExpectPlatform
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
@@ -392,7 +398,7 @@ public class RegHelper {
     }
 
     @ExpectPlatform
-    public static  <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
+    public static <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
         throw new AssertionError();
     }
 

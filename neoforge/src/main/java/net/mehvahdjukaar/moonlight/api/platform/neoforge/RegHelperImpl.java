@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform.neoforge;
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
-import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
@@ -241,16 +240,15 @@ public class RegHelperImpl {
         register(id, () -> OptionalRecipeCondition.createCodec(id, predicate), NeoForgeRegistries.Keys.CONDITION_CODECS);
     }
 
-    public static <A> Supplier<IForgeRegistry<A>> registerRegistry(ResourceKey<Registry<A>> key) {
+    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
         Moonlight.assertInitPhase();
-        MapRegistry
         DeferredRegister<A> defer = DeferredRegister.create(key, key.location().getNamespace());
         return defer.makeRegistry(
-                () -> RegistryBuilder.of(key.location())
+                (b) -> b.sync(true)
         );
     }
 
-    public static  <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
+    public static <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
         Moonlight.assertInitPhase();
 
         Consumer<DataPackRegistryEvent.NewRegistry> eventConsumer = event -> {
