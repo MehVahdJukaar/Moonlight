@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
+import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
+import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
@@ -310,9 +312,10 @@ public class RegHelperImpl {
     }
 
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
-        var reg = new MappedRegistry<>(key, Lifecycle.stable());
-        Registry.register((Registry) BuiltInRegistries.REGISTRY, key.location(), reg);
-        return reg;
+       return FabricRegistryBuilder.createSimple(key)
+               .attribute(RegistryAttribute.SYNCED)
+               .attribute(RegistryAttribute.MODDED)
+                        .buildAndRegister();
     }
 
 
