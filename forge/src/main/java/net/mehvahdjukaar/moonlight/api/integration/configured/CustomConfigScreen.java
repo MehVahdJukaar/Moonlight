@@ -15,13 +15,13 @@ import com.mrcrayfish.configured.client.screen.ConfigScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.impl.forge.ForgeConfig;
 import com.mrcrayfish.configured.impl.forge.ForgeValue;
-import com.mrcrayfish.configured.util.ConfigHelper;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.mixins.forge.ButtonAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -37,9 +37,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -53,8 +51,6 @@ import java.util.*;
 //this is just a more customized version of Configured default config screen with some extra icons and such
 public abstract class CustomConfigScreen extends ConfigScreen {
 
-    @Nullable
-    private static final Field BUTTON_ON_PRESS = findFieldOrNull(Button.class, "onPress");
     @Nullable
     private static final Field FOLDER_ENTRY = findFieldOrNull(ConfigScreen.class, "folderEntry");
     @Nullable
@@ -74,7 +70,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         try {
             field = ObfuscationReflectionHelper.findMethod(c, methodName);
         } catch (Exception ignored) {
-                throw new RuntimeException("Failed to find method: " + methodName + " in class: " + c.getName());
+            throw new RuntimeException("Failed to find method: " + methodName + " in class: " + c.getName());
         }
         return field;
     }
@@ -84,7 +80,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
         try {
             field = ObfuscationReflectionHelper.findField(c, fieldName);
         } catch (Exception ignored) {
-                throw new RuntimeException("Failed to find field: " + fieldName + " in class: " + c.getName());
+            throw new RuntimeException("Failed to find field: " + fieldName + " in class: " + c.getName());
         }
         return field;
     }
@@ -157,15 +153,15 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
         //overrides save button
 
-        if (this.saveButton != null && BUTTON_ON_PRESS != null) {
+        if (this.saveButton != null) {
             try {
-                Button.OnPress oldOnPress = (Button.OnPress) BUTTON_ON_PRESS.get(this.saveButton);
+                Button.OnPress oldOnPress = ((ButtonAccessor) this.saveButton).getOnPress();
                 Button.OnPress press = (onPress) -> {
                     oldOnPress.onPress(onPress);
                     trySyncToServer();
                     onSave();
                 };
-                BUTTON_ON_PRESS.set(this.saveButton, press);
+                ((ButtonAccessor) this.saveButton).setOnPress(press);
             } catch (Exception ignored) {
                 if (PlatHelper.isDev()) {
                     throw new RuntimeException("Failed to set save button");
@@ -174,10 +170,10 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             if (LABEL != null) {
                 int changedEntries = getChangedConfigs(folderEntry);
                 try {
-                    String s = (changedEntries == 0) ? "": " (§3" + changedEntries + "§r)";
+                    String s = (changedEntries == 0) ? "" : " (§3" + changedEntries + "§r)";
                     LABEL.set(this.saveButton,
                             Component.literal(Component.translatable("configured.gui.save").getString() + s));
-                }catch (Exception e){
+                } catch (Exception e) {
                     if (PlatHelper.isDev()) {
                         throw new RuntimeException("Failed to set save button label");
                     }
@@ -221,7 +217,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     }
 
     private void trySyncToServer() {
-        /*
+        /* TODO:
         if (!ConfigHelper.isSingleplayer() && !ConfigHelper.isPlayingLan()) {
             if (ConfigHelper.isPlayingGame()) {
                 Player player = ConfigHelper.getClientPlayer();
@@ -308,6 +304,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                                 try {
                                     FOLDER_ENTRY.set(sc, folderEntry);
                                 } catch (Exception ignored) {
+                                    Moonlight.LOGGER.error("Failed to set folder entry for screen: " + sc.getClass().getName(), ignored);
                                 }
                                 CustomConfigScreen.this.minecraft.setScreen(sc);
                             })

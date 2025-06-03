@@ -1,1 +1,1 @@
-- improved id mapping solving some rare connection issues
+- fixed an issue with configs on forge
