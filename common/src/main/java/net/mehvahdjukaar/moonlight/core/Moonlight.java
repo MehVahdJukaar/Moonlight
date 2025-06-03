@@ -6,7 +6,6 @@ import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.FluidContainerList;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
-import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.api.misc.*;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
@@ -79,7 +78,7 @@ public class Moonlight {
         RegHelper.addDynamicDispenserBehaviorRegistration(Moonlight::registerBuiltinFluidBehavior);
 
         PlatHelper.addCommonSetup(Moonlight::commonSetup);
-        PlatHelper.addReloadableCommonSetup(Moonlight::afterDataReload);
+        PlatHelper.addReloadableCommonSetup(Moonlight::afterDataReloadOrDataSync);
 
         PlatHelper.addServerReloadListener(ItemListingManager::new, Moonlight.res("villager_trade"));
 
@@ -122,7 +121,7 @@ public class Moonlight {
     }
 
     @EventCalled
-    private static void afterDataReload(RegistryAccess registryAccess, boolean client) {
+    private static void afterDataReloadOrDataSync(RegistryAccess registryAccess, boolean client) {
         EARLY_REGISTRY_ACCESS.set(new WeakReference<>(registryAccess));
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
         DynamicResourcePack.clearAfterReload(PackType.SERVER_DATA);

@@ -40,9 +40,7 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
                 ColorUtils.CODEC.optionalFieldOf("map_color", 0).forGetter(MLJsonMapDecorationType::getDefaultMapColor),
                 //purposefully lenient for the client codec so we silently fail and dont send info we dont need as they rely on tags and we arent given registry ops there
                 RegistryCodecs.homogeneousList(Registries.STRUCTURE).lenientOptionalFieldOf("target_structures").forGetter(
-                        MLJsonMapDecorationType::getAssociatedStructure), Codec.STRING.xmap(PlatHelper::isModLoaded, b -> "minecraft")
-                        .optionalFieldOf("from_mod", true)
-                        .forGetter(t -> t.enabled)
+                        MLJsonMapDecorationType::getAssociatedStructure)
         ).apply(instance, MLJsonMapDecorationType::new));
     }
 
@@ -53,27 +51,23 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
     private final int defaultMapColor;
     private final float defaultRotation;
 
-    private final boolean enabled;
-
 
     public MLJsonMapDecorationType(Optional<RuleTest> target) {
-        this(target, Optional.empty(), 0, 0, true);
+        this(target, Optional.empty(), 0, 0);
+    }
+
+    public MLJsonMapDecorationType(Optional<RuleTest> target, Optional<Component> name, float rotation, int mapColor) {
+        this(target, name, rotation, mapColor, Optional.empty());
     }
 
     public MLJsonMapDecorationType(Optional<RuleTest> target, Optional<Component> name, float rotation,
-                                   int mapColor, boolean enabled) {
-        this(target, name, rotation, mapColor, Optional.empty(), enabled);
-    }
-
-    public MLJsonMapDecorationType(Optional<RuleTest> target, Optional<Component> name, float rotation,
-                                   int mapColor, Optional<HolderSet<Structure>> structure, Boolean enabled) {
+                                   int mapColor, Optional<HolderSet<Structure>> structure) {
         super(SimpleMapMarker.DIRECT_CODEC, MLMapDecoration.DIRECT_CODEC);
         this.target = target;
         this.name = name;
         this.defaultRotation = rotation;
         this.structures = structure;
         this.defaultMapColor = mapColor;
-        this.enabled = enabled;
     }
 
     @Override
@@ -109,7 +103,7 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
     @Nullable
     @Override
     public SimpleMapMarker createMarkerFromWorld(BlockGetter reader, BlockPos pos) {
-        if (this.target.isPresent() && enabled) {
+        if (this.target.isPresent()) {
             if (target.get().test(reader.getBlockState(pos), RandomSource.create())) {
                 Optional<Component> name = this.getDisplayName();
                 if (!name.isPresent()) {
