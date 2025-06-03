@@ -67,7 +67,6 @@ public class Moonlight {
         //MoonlightEventsHelper.addListener( BlockSetInternal::addTranslations, AfterLanguageLoadEvent.class);
         CompatWoodTypes.init();
         MoonlightRegistry.init();
-        MapDataRegistry.init();
         ItemListingManager.init();
 
         ModNetworking.init();
