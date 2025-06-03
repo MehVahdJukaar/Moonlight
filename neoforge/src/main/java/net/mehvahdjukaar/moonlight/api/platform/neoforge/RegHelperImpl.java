@@ -240,11 +240,11 @@ public class RegHelperImpl {
         register(id, () -> OptionalRecipeCondition.createCodec(id, predicate), NeoForgeRegistries.Keys.CONDITION_CODECS);
     }
 
-    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
+    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean synced) {
         Moonlight.assertInitPhase();
         DeferredRegister<A> defer = DeferredRegister.create(key, key.location().getNamespace());
         return defer.makeRegistry(
-                (b) -> b.sync(true)
+                (b) -> b.sync(synced)
         );
     }
 

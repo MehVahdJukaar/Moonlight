@@ -303,12 +303,12 @@ public class RegHelper {
     }
 
 
-    public static <A> Registry<A> registerRegistry(ResourceLocation key) {
-        return registerRegistry(ResourceKey.createRegistryKey(key));
+    public static <A> Registry<A> registerRegistry(ResourceLocation key, boolean synced) {
+        return registerRegistry(ResourceKey.createRegistryKey(key) , synced);
     }
 
     @ExpectPlatform
-    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
+    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean synced) {
         throw new AssertionError();
     }
 

@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.Lifecycle;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
@@ -25,7 +24,6 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.OptionalRecipeCon
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
-import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -311,11 +309,13 @@ public class RegHelperImpl {
         return () -> value;
     }
 
-    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
-       return FabricRegistryBuilder.createSimple(key)
-               .attribute(RegistryAttribute.SYNCED)
-               .attribute(RegistryAttribute.MODDED)
-                        .buildAndRegister();
+    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean sync) {
+        var b = FabricRegistryBuilder.createSimple(key)
+                .attribute(RegistryAttribute.MODDED);
+        if (sync) {
+            b = b.attribute(RegistryAttribute.SYNCED);
+        }
+        return b.buildAndRegister();
     }
 
 
