@@ -294,6 +294,11 @@ public class RegHelper {
     }
 
 
+
+    public static <A> Registry<A> registerRegistry(ResourceLocation key) {
+        return registerRegistry(ResourceKey.createRegistryKey(key));
+    }
+
     @ExpectPlatform
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
         throw new AssertionError();
