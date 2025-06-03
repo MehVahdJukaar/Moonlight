@@ -1,1 +1,3 @@
-Fixed addBlocksToPoi() not working properly & Fixed [#905](https://github.com/MehVahdJukaar/WoodGood/issues/905)
+added some utilities to register datapack registries
+improved some part of custom map data
+other misc internal cleanups and improvements
