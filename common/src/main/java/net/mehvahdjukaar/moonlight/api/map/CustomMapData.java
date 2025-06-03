@@ -4,10 +4,14 @@ import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.IdMap;
+import net.minecraft.core.IdMapper;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -27,8 +31,8 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
     record Type<P, T extends CustomMapData<?, P>>(ResourceLocation id, Supplier<T> factory,
                                                   StreamCodec<? super RegistryFriendlyByteBuf, P> patchCodec) {
 
-        public static final Codec<Type<?, ?>> CODEC = MapDataInternal.CUSTOM_MAP_DATA_TYPES;
-        public static final StreamCodec<FriendlyByteBuf, Type<?, ?>> STREAM_CODEC = MapDataInternal.CUSTOM_MAP_DATA_TYPES.getStreamCodec();
+        public static final Codec<Type<?, ?>> CODEC = MapDataInternal.CUSTOM_MAP_DATA_TYPES.byNameCodec();
+        public static final StreamCodec<RegistryFriendlyByteBuf, Type<?, ?>> STREAM_CODEC = ByteBufCodecs.registry(MapDataInternal.CUSTOM_MAP_DATA_TYPES.key());
 
         @SuppressWarnings("unchecked")
         @NotNull

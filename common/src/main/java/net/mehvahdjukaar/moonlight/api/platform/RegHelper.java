@@ -302,6 +302,11 @@ public class RegHelper {
         return register(name, () -> PlatHelper.newParticle(codec, streamCodec), Registries.PARTICLE_TYPE);
     }
 
+
+    public static <A> Registry<A> registerRegistry(ResourceLocation key) {
+        return registerRegistry(ResourceKey.createRegistryKey(key));
+    }
+
     @ExpectPlatform
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
         throw new AssertionError();

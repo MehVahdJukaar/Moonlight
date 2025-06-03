@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.map;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
@@ -29,7 +28,8 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public class MapDataInternal {
 
-    public static final MapRegistry<CustomMapData.Type<?, ?>> CUSTOM_MAP_DATA_TYPES = new MapRegistry<>("custom_map_data_types");
+    public static final Registry<CustomMapData.Type<?, ?>> CUSTOM_MAP_DATA_TYPES =
+            RegHelper.registerRegistry(Moonlight.res("custom_map_data_types"));
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
@@ -38,7 +38,7 @@ public class MapDataInternal {
         if (CUSTOM_MAP_DATA_TYPES.containsKey(type.id())) {
             throw new IllegalArgumentException("Duplicate custom map data registration " + type.id());
         } else {
-            CUSTOM_MAP_DATA_TYPES.register(type.id(), type);
+            RegHelper.register(type.id(), () -> type, CUSTOM_MAP_DATA_TYPES.key());
         }
         return type;
     }
@@ -163,8 +163,10 @@ public class MapDataInternal {
 
     //dynamic markers
 
-    private static final List<TriFunction<Player, MapId, MapItemSavedData, Set<MLMapMarker<?>>>> DYNAMIC_SERVER = Collections.synchronizedList(new ArrayList<>());;
-    private static final List<BiFunction<MapId, MapItemSavedData, Set<MLMapMarker<?>>>> DYNAMIC_CLIENT = Collections.synchronizedList(new ArrayList<>());;
+    private static final List<TriFunction<Player, MapId, MapItemSavedData, Set<MLMapMarker<?>>>> DYNAMIC_SERVER = Collections.synchronizedList(new ArrayList<>());
+    ;
+    private static final List<BiFunction<MapId, MapItemSavedData, Set<MLMapMarker<?>>>> DYNAMIC_CLIENT = Collections.synchronizedList(new ArrayList<>());
+    ;
 
 
     public static void addDynamicClientMarkersEvent(BiFunction<MapId, MapItemSavedData, Set<MLMapMarker<?>>> event) {
