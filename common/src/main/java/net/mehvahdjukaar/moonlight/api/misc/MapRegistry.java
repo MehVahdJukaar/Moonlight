@@ -22,7 +22,6 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
     private final String name;
 
     private final BiMap<ResourceLocation, T> map = HashBiMap.create();
-    private int nextId;
     private final Reference2IntMap<T> tToId;
     private final List<T> idToT;
 
@@ -46,7 +45,7 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
             throw new IllegalStateException("Cannot register duplicate value " + name);
         }
         this.map.put(name, value);
-        this.addMapping(value);
+        this.recomputeIdMappings();
         return value;
     }
 
@@ -55,19 +54,16 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
         return value;
     }
 
-    protected void addMapping(T key) {
-        int value = nextId;
-        this.tToId.put(key, value);
-
-        while (this.idToT.size() <= value) {
-            this.idToT.add(null);
+    protected void recomputeIdMappings() {
+        this.tToId.clear();
+        var orderedKeys = this.map.keySet().stream().sorted().toList();
+        int id = 0;
+        for (var k : orderedKeys) {
+            T value = this.map.get(k);
+            if (value == null) continue; //skip nulls
+            this.tToId.put(value, id);
+            id++;
         }
-
-        this.idToT.set(value, key);
-        if (this.nextId <= value) {
-            this.nextId = value + 1;
-        }
-
     }
 
     @Nullable
