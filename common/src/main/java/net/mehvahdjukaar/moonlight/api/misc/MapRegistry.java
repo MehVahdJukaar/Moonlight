@@ -63,12 +63,14 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
 
     protected void recomputeIdMappings() {
         this.tToId.clear();
+        this.idToT.clear();
         var orderedKeys = this.map.keySet().stream().sorted().toList();
         int id = 0;
         for (var k : orderedKeys) {
             T value = this.map.get(k);
             if (value == null) continue; //skip nulls
             this.tToId.put(value, id);
+            this.idToT.add(value);
             id++;
         }
     }
