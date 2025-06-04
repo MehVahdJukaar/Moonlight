@@ -28,24 +28,23 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public class MapDataInternal {
 
-    public static final Registry<CustomMapData.Type<?, ?>> CUSTOM_MAP_DATA_TYPES =
-            RegHelper.registerRegistry(Moonlight.res("custom_map_data_types"));
+    public static final Registry<CustomMapData.Type<?, ?>> CUSTOM_MAP_DATA_REGISTRY = RegHelper.registerRegistry(Moonlight.res("custom_map_data_types"));;
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
      **/
     public static <P, T extends CustomMapData<?, P>> CustomMapData.Type<P, T> registerCustomMapSavedData(CustomMapData.Type<P, T> type) {
-        if (CUSTOM_MAP_DATA_TYPES.containsKey(type.id())) {
+        if (CUSTOM_MAP_DATA_REGISTRY.containsKey(type.id())) {
             throw new IllegalArgumentException("Duplicate custom map data registration " + type.id());
         } else {
-            RegHelper.register(type.id(), () -> type, CUSTOM_MAP_DATA_TYPES.key());
+            RegHelper.register(type.id(), () -> type, CUSTOM_MAP_DATA_REGISTRY.key());
         }
         return type;
     }
 
     //map markers
 
-    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> KEY = ResourceKey.createRegistryKey(Moonlight.res("map_marker"));
+    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> MAP_DECORATION_REGISTRY_KEY = ResourceKey.createRegistryKey(Moonlight.res("map_marker"));
     public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
     private static final MapRegistry<Supplier<MLSpecialMapDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new MapRegistry<>("code_map_decoration_types_factories");
 
@@ -81,17 +80,28 @@ public class MapDataInternal {
 
     @ApiStatus.Internal
     public static void init() {
-        RegHelper.registerDataPackRegistry(MapDataInternal.KEY,
+        //dumb.needed because this can be class loaded before init
+        RegHelper.registerDataPackRegistry(MapDataInternal.MAP_DECORATION_REGISTRY_KEY,
                 MLMapDecorationType.DIRECT_CODEC, MLMapDecorationType.DIRECT_CODEC);
     }
 
     @Deprecated(forRemoval = true)
     public static Registry<MLMapDecorationType<?, ?>> hackyGetRegistry() {
-        return Utils.hackyGetRegistryAccess().registryOrThrow(KEY);
+        return Utils.hackyGetRegistryAccess().registryOrThrow(MAP_DECORATION_REGISTRY_KEY);
     }
 
+
+    public static Registry<CustomMapData.Type<?,?>> getMapDataRegistry(){
+        return CUSTOM_MAP_DATA_REGISTRY;
+    }
+
+    public static Registry<MLMapDecorationType<?, ?>> getMapDecorationRegistry(RegistryAccess registryAccess) {
+        return registryAccess.registryOrThrow(MAP_DECORATION_REGISTRY_KEY);
+    }
+
+    @Deprecated(forRemoval = true)
     public static Registry<MLMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
-        return registryAccess.registryOrThrow(KEY);
+        return getMapDecorationRegistry(registryAccess);
     }
 
     @Deprecated(forRemoval = true)

@@ -1,1 +1,2 @@
-- hotfix, fixed classload issue that made the work not boot in some scenarios
+- fixed an issue with supplementaries and last update (yes another classloading issue)
+- impoved mod internals to work better with forge stuff

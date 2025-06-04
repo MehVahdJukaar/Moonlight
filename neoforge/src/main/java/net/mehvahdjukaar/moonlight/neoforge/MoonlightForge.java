@@ -4,11 +4,11 @@ import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.platform.neoforge.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.ModIngredientTypes;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.integration.neoforge.ModConfigSelectScreen;
@@ -34,7 +34,6 @@ import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
-import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
@@ -51,6 +50,7 @@ public class MoonlightForge {
 
     public MoonlightForge(IEventBus bus) {
         RegHelper.startRegisteringFor(bus);
+        RegHelperImpl.runTasksOnInit();
 
         Moonlight.commonInit();
         NeoForge.EVENT_BUS.register(MoonlightForge.class);
@@ -150,19 +150,31 @@ public class MoonlightForge {
         Moonlight.onPlayerCloned(event.getOriginal(), event.getEntity(), event.isWasDeath());
     }
 
-    private static WeakReference<IEventBus> currentBus = null;
+    //this is shit
+
+    //hack
+    private static WeakReference<IEventBus> lastCurrentBus = null; //a bus. fallback. incase things go wrong works most of the time. mega ugly
+    //turbo mega hack
+    private static final ThreadLocal<WeakReference<IEventBus>> currentModBus = new ThreadLocal<>(); //ideally the bus of the mod we are constructing
+
 
     public static IEventBus getCurrentBus() {
-        if (currentBus == null || currentBus.get() == null)
-            throw new IllegalStateException("Bus is null. You must call RegHelper.startRegistering(IEventBus) before registering events");
-        return currentBus.get();
+        var threadLocalBus = currentModBus.get();
+        if (threadLocalBus != null && threadLocalBus.get() != null) {
+            return threadLocalBus.get();
+        }
+        if (lastCurrentBus != null && lastCurrentBus.get() != null) {
+            return lastCurrentBus.get();
+        }
+        throw new IllegalStateException("Bus is null. You must call RegHelper.startRegistering(IEventBus) before registering events");
     }
 
     /**
      * Call this before registering events
      */
     public static void startRegistering(IEventBus bus) {
-        currentBus = new WeakReference<>(bus);
+        lastCurrentBus = new WeakReference<>(bus);
+        currentModBus.set(lastCurrentBus);
     }
 
 }

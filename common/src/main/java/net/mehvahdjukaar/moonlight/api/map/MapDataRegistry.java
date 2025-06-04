@@ -27,10 +27,12 @@ import java.util.function.Supplier;
 public class MapDataRegistry {
 
 
-    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.KEY;
+    @Deprecated(forRemoval = true)
+    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.MAP_DECORATION_REGISTRY_KEY ;
+    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> MAP_DECORATION_REGISTRY_KEY = MapDataInternal.MAP_DECORATION_REGISTRY_KEY ;
 
-    public static final HolderReference<MLMapDecorationType<?,?>> GENERIC_STRUCTURE_MARKER = HolderReference.of(MapDataInternal.GENERIC_STRUCTURE_ID,
-            REGISTRY_KEY);
+    public static final HolderReference<MLMapDecorationType<?, ?>> GENERIC_STRUCTURE_MARKER = HolderReference.of(MapDataInternal.GENERIC_STRUCTURE_ID,
+            MAP_DECORATION_REGISTRY_KEY);
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
@@ -83,6 +85,15 @@ public class MapDataRegistry {
         return MapDataInternal.getAssociatedType(structure);
     }
 
+    public static Registry<MLMapDecorationType<?, ?>> getMapDecorationRegistry(RegistryAccess registryAccess) {
+        return MapDataInternal.getMapDecorationRegistry(registryAccess);
+    }
+
+    public static Registry<CustomMapData.Type<?, ?>> getMapDataRegistry() {
+        return MapDataInternal.getMapDataRegistry();
+    }
+
+    @Deprecated(forRemoval = true)
     public static Registry<MLMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
         return MapDataInternal.getRegistry(registryAccess);
     }

@@ -142,6 +142,10 @@ public class Moonlight {
         }
     }
 
+    public static boolean isInitPhase(){
+        return PlatHelper.isInitializing() || !PlatHelper.getPlatform().isForge();
+    }
+
     public static void assertAfterInitPhase(){
         if (PlatHelper.isInitializing()) {
             throw new AssertionError("Method has to be called after main mod initialization phase. Client and Server initializer are not valid, you must call in the main one");
