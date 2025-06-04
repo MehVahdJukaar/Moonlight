@@ -31,8 +31,8 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
     record Type<P, T extends CustomMapData<?, P>>(ResourceLocation id, Supplier<T> factory,
                                                   StreamCodec<? super RegistryFriendlyByteBuf, P> patchCodec) {
 
-        public static final Codec<Type<?, ?>> CODEC = MapDataInternal.CUSTOM_MAP_DATA_TYPES.byNameCodec();
-        public static final StreamCodec<RegistryFriendlyByteBuf, Type<?, ?>> STREAM_CODEC = ByteBufCodecs.registry(MapDataInternal.CUSTOM_MAP_DATA_TYPES.key());
+        public static final Codec<Type<?, ?>> CODEC = MapDataInternal.getMapDataRegistry().byNameCodec();
+        public static final StreamCodec<RegistryFriendlyByteBuf, Type<?, ?>> STREAM_CODEC = ByteBufCodecs.registry(MapDataInternal.getMapDataRegistry().key());
 
         @SuppressWarnings("unchecked")
         @NotNull

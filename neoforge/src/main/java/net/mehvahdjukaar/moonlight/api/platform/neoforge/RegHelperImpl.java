@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.neoforge;
 
 import com.google.common.base.Preconditions;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
@@ -48,6 +49,7 @@ import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.registries.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,8 +107,7 @@ public class RegHelperImpl {
             Moonlight.addDependent(modId);
 
             DeferredRegister<T> r = DeferredRegister.create(regKey, modId);
-            var bus = getModEventBus(modId);
-            r.register(bus);
+            doWithBus(modId, r::register);
             return r;
         });
         //forge we don't care about mod id since it's always the active container one
@@ -119,6 +120,24 @@ public class RegHelperImpl {
             return obj;
         });
         return (RegSupplier<E>) new EntryWrapper<>(register);
+    }
+
+    private static final List<Pair<String, Consumer<IEventBus>>> RUN_LATER = new ArrayList<>();
+
+    private static void doWithBus(String modId, Consumer<IEventBus> consumer) {
+        if (Moonlight.isInitPhase()) {
+            consumer.accept(getModEventBus(modId));
+        } else {
+            RUN_LATER.add(Pair.of(modId, consumer));
+        }
+    }
+
+    //mega shit. this so we can have statically initialized stuff that gets its bus subscriptions later
+    public static void runTasksOnInit(){
+        for (var e : RUN_LATER){
+            e.getSecond().accept(getModEventBus(e.getFirst()));
+        }
+        RUN_LATER.clear();
     }
 
     private static IEventBus getModEventBus(String modId) {
@@ -242,13 +261,16 @@ public class RegHelperImpl {
 
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key) {
         Moonlight.assertInitPhase();
-        DeferredRegister<A> defer = DeferredRegister.create(key, key.location().getNamespace());
+        String modId = key.location().getNamespace();
+        DeferredRegister<A> defer = DeferredRegister.create(key, modId);
         var reg = defer.makeRegistry(
                 (b) -> b.sync(true));
-        Consumer<NewRegistryEvent> eventConsumer = event -> {
-            event.register(reg);
-        };
-        MoonlightForge.getCurrentBus().addListener(eventConsumer);
+        doWithBus(modId, bus->{
+            Consumer<NewRegistryEvent> eventConsumer = event -> {
+                event.register(reg);
+            };
+            bus.addListener(eventConsumer);
+        });
 
         return reg;
     }
