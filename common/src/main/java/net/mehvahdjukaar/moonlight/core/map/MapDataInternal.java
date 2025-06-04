@@ -28,7 +28,8 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public class MapDataInternal {
 
-    public static final Registry<CustomMapData.Type<?, ?>> CUSTOM_MAP_DATA_REGISTRY = RegHelper.registerRegistry(Moonlight.res("custom_map_data_types"));;
+    public static final Registry<CustomMapData.Type<?, ?>> CUSTOM_MAP_DATA_REGISTRY = RegHelper.registerRegistry(
+            Moonlight.res("custom_map_data_types"), true);;
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation

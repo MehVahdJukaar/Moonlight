@@ -260,7 +260,6 @@ public class RegHelperImpl {
     }
 
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean synced) {
-        Moonlight.assertInitPhase();
         String modId = key.location().getNamespace();
         DeferredRegister<A> defer = DeferredRegister.create(key, modId);
         var reg = defer.makeRegistry(
