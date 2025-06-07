@@ -264,12 +264,7 @@ public class RegHelperImpl {
         DeferredRegister<A> defer = DeferredRegister.create(key, modId);
         var reg = defer.makeRegistry(
                 (b) -> b.sync(synced));
-        doWithBus(modId, bus->{
-            Consumer<NewRegistryEvent> eventConsumer = event -> {
-                event.register(reg);
-            };
-            bus.addListener(eventConsumer);
-        });
+        doWithBus(modId, defer::register);
 
         return reg;
     }
