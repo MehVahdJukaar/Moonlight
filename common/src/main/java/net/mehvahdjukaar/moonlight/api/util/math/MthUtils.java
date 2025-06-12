@@ -461,4 +461,7 @@ public class MthUtils {
     private record CollisionResult(double entryTime, Direction direction) {
     }
 
+
+    //ease functions
+
 }

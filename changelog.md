@@ -1,1 +1,1 @@
-- fixed an issue with configs on forge
+- fixed additive translucent particle render type not working

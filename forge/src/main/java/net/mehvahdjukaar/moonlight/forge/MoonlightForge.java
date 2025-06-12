@@ -13,10 +13,16 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.entity.BedBlockEntity;
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -42,7 +48,6 @@ public class MoonlightForge {
 
     public MoonlightForge() {
         Moonlight.commonInit();
-
         MinecraftForge.EVENT_BUS.register(MoonlightForge.class);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(MoonlightForge::configsLoaded);
         ModLootModifiers.register();
