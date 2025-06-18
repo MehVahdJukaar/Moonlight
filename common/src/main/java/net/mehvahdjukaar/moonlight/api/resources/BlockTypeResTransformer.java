@@ -272,11 +272,14 @@ public class BlockTypeResTransformer<T extends BlockType> {
         // grabs first folder it finds as folder name if given is empty
         String folderRegEx = "(" + folderName + ")/";
 
-        String excludeKeyword = "(?<![a-z]stone)"; // exclude "flagstone", or other keywords with "stone"
+        // exclude "flagstone" from "stone_flagstone" - Only used by StoneZone
+        String excludeKeyword = "(?<![a-z]stone)";
+        // exclude second "redstone" from "redstone_block_redstone_..." - Only used by GemsRealm
+        String extraFolderRegex = (oldTypeName.matches("redstone")) ? "([a-z,A-Z,0-9,/,\\-]*)" : "([\\w,/,\\-]*)";
 
         //pattern to find sub folders. Does not include "/"
         //matches stuff between (oldNamespace + folderName) and oldTypeName not including leading or trailing slashes
-        Pattern subFolderPattern = Pattern.compile(oldNamespace + folderRegEx + "([\\w,/,\\-]*)" + oldTypeName + excludeKeyword); // \w is similar to [a-z,A-Z,_]
+        Pattern subFolderPattern = Pattern.compile(oldNamespace + folderRegEx + extraFolderRegex + oldTypeName + excludeKeyword);
         Matcher subFolderMatcher = subFolderPattern.matcher(text);
 
         return subFolderMatcher.replaceAll(m -> {
