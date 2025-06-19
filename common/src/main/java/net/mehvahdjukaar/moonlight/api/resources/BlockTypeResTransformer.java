@@ -273,7 +273,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
         String folderRegEx = "(" + folderName + ")/";
 
         // exclude "flagstone" from "stone_flagstone" - Only used by StoneZone
-        String excludeKeyword = "(?<![a-z]stone)";
+        String excludeKeyword = (oldTypeName.matches("redstone")) ? "" : "(?<![a-z]stone)";
         // exclude second "redstone" from "redstone_block_redstone_..." - Only used by GemsRealm
         String extraFolderRegex = (oldTypeName.matches("redstone")) ? "([a-z,A-Z,0-9,/,\\-]*)" : "([\\w,/,\\-]*)";
 
