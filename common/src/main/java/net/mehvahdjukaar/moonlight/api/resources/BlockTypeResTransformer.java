@@ -275,7 +275,9 @@ public class BlockTypeResTransformer<T extends BlockType> {
         // exclude "flagstone" from "stone_flagstone" - Only used by StoneZone
         String excludeKeyword = (oldTypeName.matches("redstone")) ? "" : "(?<![a-z]stone)";
         // exclude second "redstone" from "redstone_block_redstone_..." - Only used by GemsRealm
-        String extraFolderRegex = (oldTypeName.matches("redstone")) ? "([a-z,A-Z,0-9,/,\\-]*)" : "([\\w,/,\\-]*)";
+        String extraFolderRegex = (oldTypeName.matches("redstone") && wordCounter(text, oldTypeName) > 1)
+                ? "([a-z,A-Z,0-9,/,\\-]*)"
+                : "([\\w,/,\\-]*)";
 
         //pattern to find sub folders. Does not include "/"
         //matches stuff between (oldNamespace + folderName) and oldTypeName not including leading or trailing slashes
@@ -301,5 +303,14 @@ public class BlockTypeResTransformer<T extends BlockType> {
             }
         }
         return sb.toString();
+    }
+
+    /// Counting a keyword, "redstone" in redstone_block_redstone_???.json
+    private static int wordCounter(String text, String oldTypeName) {
+        Pattern pattern = Pattern.compile(oldTypeName);
+        Matcher matcher = pattern.matcher(text);
+        int count = 0;
+        while (matcher.find()) count++;
+        return count;
     }
 }
