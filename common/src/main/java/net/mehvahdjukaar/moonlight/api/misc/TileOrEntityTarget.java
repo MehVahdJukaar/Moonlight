@@ -4,8 +4,10 @@ import com.mojang.datafixers.util.Either;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -14,7 +16,7 @@ public class TileOrEntityTarget {
 
     private final Either<BlockPos, Integer> posOrEntityId;
 
-    private TileOrEntityTarget(Either<BlockPos, Integer> either){
+    private TileOrEntityTarget(Either<BlockPos, Integer> either) {
         this.posOrEntityId = either;
     }
 
@@ -67,6 +69,26 @@ public class TileOrEntityTarget {
         }
     }
 
+    public <T extends BlockEntity> T getBlockEntityOrThrow(Level level, BlockEntityType<T> type) {
+        if (this.posOrEntityId.left().isPresent()) {
+            var be = type.getBlockEntity(level, this.posOrEntityId.left().get());
+            if (be != null) {
+                return be;
+            }
+        }
+        throw new IllegalStateException("No BlockEntity found at " + this.posOrEntityId.left().orElse(null));
+    }
+
+    public <T extends Entity> T getEntityOrThrow(Level level, EntityType<T> type) {
+        if (this.posOrEntityId.right().isPresent()) {
+            var entity = level.getEntity(this.posOrEntityId.right().get());
+            if (entity != null && entity.getType() == type) {
+                return (T) (entity);
+            }
+        }
+        throw new IllegalStateException("No Entity found with ID " + this.posOrEntityId.right().orElse(null));
+    }
+
     @Nullable
     public <T> T map(Level level, Function<BlockEntity, T> a, Function<Entity, T> b) {
         if (this.posOrEntityId.left().isPresent()) {
@@ -88,5 +110,12 @@ public class TileOrEntityTarget {
     @Nullable
     public Integer getEntityId() {
         return this.posOrEntityId.right().orElse(null);
+    }
+
+    @Override
+    public String toString() {
+        return "TileOrEntityTarget{" +
+                "posOrEntityId=" + posOrEntityId +
+                '}';
     }
 }
