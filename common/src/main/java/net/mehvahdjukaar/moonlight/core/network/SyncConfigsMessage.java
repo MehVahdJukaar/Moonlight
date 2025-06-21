@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigSpec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.network.ChannelHandler;
@@ -36,12 +37,16 @@ public class SyncConfigsMessage implements Message {
 
     @Override
     public void handle(ChannelHandler.Context context) {
+        if (PlatHelper.getCurrentServer() != null) {
+            return;//don't sync configs on integrated server
+        }
         var config = ConfigSpec.getSpec(this.modId, ConfigType.COMMON);
         if (config != null) {
-            try(var stream =  new ByteArrayInputStream(this.configData)) {
+            try (var stream = new ByteArrayInputStream(this.configData)) {
                 config.loadFromBytes(stream);
                 Moonlight.LOGGER.info("Synced {} configs", this.fineName);
-            }catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
         } else {
             Moonlight.LOGGER.error("Failed to find config file with name {}", this.fineName);
         }
