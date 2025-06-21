@@ -19,6 +19,9 @@ public class CompatWoodTypes {
 //        mediumWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood")
 //        advancedWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood", "suffixStrippedLog", "suffixStrippedWood")
 
+        // The Undergarden
+        simpleWoodFinder("undergarden", "ancient_root");
+
         // Mofu's Better End
         advancedWoodFinder("mofus_better_end_", "weepingstar", "weepingstar_planks",
                 "log", "", "stripped_log", "",
