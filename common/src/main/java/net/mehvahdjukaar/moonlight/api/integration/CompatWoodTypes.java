@@ -568,9 +568,8 @@ public class CompatWoodTypes {
 
         String crystalLeavesWoodType = "aether:skyroot";
         // Aether Redux replaces the skyroot logs in crystal trees with their own crystal logs
-        if (PlatHelper.isModLoaded("aether_redux")){
-            crystalLeavesWoodType = "aether_redux:crystal";
-        }
+        if (PlatHelper.isModLoaded("aether_redux")) crystalLeavesWoodType = "aether_redux:crystal";
+
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "aether", "crystal", "crystal_leaves", crystalLeavesWoodType));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
