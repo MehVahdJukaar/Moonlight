@@ -123,7 +123,6 @@ public class ClientHelper {
 
     @FunctionalInterface
     public interface ItemRendererEvent {
-        @Deprecated(forRemoval = true)
         default void register(ItemLike item, ItemStackRenderer renderer) {
             register(item, new ItemRenderExtension() {
                 @Override

@@ -52,7 +52,10 @@ public class MthUtils {
         angle = (angle % 360 + 360) % 360;
         first = (first % 360 + 360) % 360;
         second = (second % 360 + 360) % 360;
-
+        if (first == second) {
+            // If the range spans the full circle, everything is within range.
+            return angle;
+        }
         // Calculate the arc length from A to B in the positive direction
         float deltaAB = (second - first + 360) % 360;
         // Calculate the position of the angle relative to A

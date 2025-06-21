@@ -1,2 +1,1 @@
-- fixed an issue with supplementaries and last update (yes another classloading issue)
-- impoved mod internals to work better with forge stuff
+- big internal api change and improvements, cleaning up many apis
