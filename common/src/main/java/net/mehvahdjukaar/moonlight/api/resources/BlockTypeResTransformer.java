@@ -274,7 +274,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
         String extraFolderRegex = "([\\w,/,\\-]*)";
 
-        String typeNameRegex = "[^a-zA-Z]oak(?![a-zA-Z])"; // Matches "oak" as a whole word, not part of another word like "darkoak". However, WILL match "dark_oak" as it's the same as "chair_oak"
+        String typeNameRegex = "(?<![a-zA-Z])oak(?![a-zA-Z])"; // Matches "oak" as a whole word, not part of another word like "darkoak". However, WILL match "dark_oak" as it's the same as "chair_oak"
 
         //pattern to find sub folders. Does not include "/"
         //matches stuff between (oldNamespace + folderName) and oldTypeName not including leading or trailing slashes
