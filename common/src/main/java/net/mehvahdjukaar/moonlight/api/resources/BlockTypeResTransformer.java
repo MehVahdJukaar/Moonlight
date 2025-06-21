@@ -265,23 +265,20 @@ public class BlockTypeResTransformer<T extends BlockType> {
         Pattern blockPathSubPathPattern = Pattern.compile("([^,]*(?=/))");
         Matcher blockPathSubPathMather = blockPathSubPathPattern.matcher(blockId.getPath());
         String blockFolderPrefix = blockPathSubPathMather.find() ? blockPathSubPathMather.group(1) : ""; // "shortenedId/namespace"
-        String blockTypeName = blockType.getTypeName(); // path of block id "scoria"
+        String blockTypeName = blockType.getTypeName(); // path of block id, ie "scoria"
 
         String newNamespace = oldNamespace == null ? "" : blockId.getNamespace() + ":";
         oldNamespace = oldNamespace == null ? "" : oldNamespace + ":";
         // grabs first folder it finds as folder name if given is empty
         String folderRegEx = "(" + folderName + ")/";
 
-        // exclude "flagstone" from "stone_flagstone" - Only used by StoneZone
-        String excludeKeyword = (oldTypeName.matches("redstone")) ? "" : "(?<![a-z]stone)";
-        // exclude second "redstone" from "redstone_block_redstone_..." - Only used by GemsRealm
-        String extraFolderRegex = (oldTypeName.matches("redstone") && wordCounter(text, oldTypeName) > 1)
-                ? "([a-z,A-Z,0-9,/,\\-]*)"
-                : "([\\w,/,\\-]*)";
+        String extraFolderRegex = "([\\w,/,\\-]*)";
+
+        String typeNameRegex = "[^a-zA-Z]oak(?![a-zA-Z])"; // Matches "oak" as a whole word, not part of another word like "darkoak". However, WILL match "dark_oak" as it's the same as "chair_oak"
 
         //pattern to find sub folders. Does not include "/"
         //matches stuff between (oldNamespace + folderName) and oldTypeName not including leading or trailing slashes
-        Pattern subFolderPattern = Pattern.compile(oldNamespace + folderRegEx + extraFolderRegex + oldTypeName + excludeKeyword);
+        Pattern subFolderPattern = Pattern.compile(oldNamespace + folderRegEx + extraFolderRegex + typeNameRegex);
         Matcher subFolderMatcher = subFolderPattern.matcher(text);
 
         return subFolderMatcher.replaceAll(m -> {
