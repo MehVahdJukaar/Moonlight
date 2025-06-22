@@ -4,100 +4,68 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 //place for all known weird hardcoded wood types from mods that aren't getting detected
 @SuppressWarnings("SameParameterValue")
 public class CompatWoodTypes {
 
     public static void init() {
-        // TEMPLATE:
-//        simpleWoodFinder("modId", "nameWood")
-//        mediumWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood")
-//        advancedWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood", "suffixStrippedLog", "suffixStrippedWood")
+
+        // The Undergarden
+        advancedWoodFinder("undergarden", "ancient_root", "ancient_root_planks", "ancient_root");
 
         // Mofu's Better End
-        var weepingstar = advancedWoodFinder("mofus_better_end_", "weepingstar", "weepingstar_planks",
-                "log", "",
-                "stripped_log", "");
-        weepingstar.addChild("leaves", ResourceLocation.fromNamespaceAndPath("mofus_better_end_","weepingstar_leaf"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, weepingstar);
+        advancedWoodFinder("mofus_better_end_", "weepingstar", "weepingstar_planks", "weepingstar_log","STRIPPED_LOG-weepingstar_stripped_log", "LEAVES-weepingstar_leaf");
 
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("mofus_better_end_", "frost_root", "frost_root_plank",
-                        "log", "",
-                        "", ""));
+        advancedWoodFinder("mofus_better_end_", "frost_root", "frost_root_plank", "frost_root_log", "STRIPPED_LOG-stripped_frost_root_log");
 
         // Burnt
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                mediumWoodFinder("burnt", "smoldering_bamboo",
-                        "block", ""));
+        mediumWoodFinder("burnt", "smoldering_bamboo", "smoldering_bamboo_block", "");
 
         // Botania
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("botania", "livingwood", "livingwood_planks",
-                        "log", "",
-                        "log", ""));
+        advancedWoodFinder("botania", "livingwood", "livingwood_planks", "livingwood_log","STRIPPED_LOG-stripped_livingwood_log");
 
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("botania", "dreamwood", "dreamwood_planks",
-                        "log", "",
-                        "log", ""));
+        advancedWoodFinder("botania", "dreamwood", "dreamwood_planks", "dreamwood_log", "STRIPPED_LOG-stripped_dreamwood_log");
 
         // Caverns-And-Chasms
-        var ccAzalea = simpleWoodFinder("caverns_and_chasms", "azalea");
-        ccAzalea.addChild("leaves", ResourceLocation.parse("minecraft:azalea_leaves"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, ccAzalea);
+        simpleWoodFinder("caverns_and_chasms", "azalea", "azalea_leaves");
 
         // The Outer End
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("outer_end", "azure", "azure_planks",
-                        "stem", "pith",
-                        "stripped_stem", "stripped_pith"));
+        advancedWoodFinder("outer_end", "azure", "azure_planks", "_azurestem", "WOOD-azure_pith", "STRIPPED_LOG-azure_stripped_stem", "STRIPPED_WOOD-azure_stripped_pith");
 
         // Upgrade Aquatic
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("upgrade_aquatic", "driftwood", "driftwood_planks",
-                        "log", "",
-                        "log", ""));
-        // Atmospheric
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("atmospheric", "grimwood", "grimwood_planks",
-                        "log", "",
-                        "log", ""));
+        advancedWoodFinder("upgrade_aquatic", "driftwood", "driftwood_planks", "driftwood_log","STRIPPED_LOG-stripped_driftwood_log");
 
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("atmospheric", "rosewood", "rosewood_planks",
-                        "log", "",
-                        "log", ""));
+        // Atmospheric
+        advancedWoodFinder("atmospheric", "grimwood", "grimwood_planks", "grimwood_log", "STRIPPED_LOG-stripped_grimwood_log");
+
+        advancedWoodFinder("atmospheric", "rosewood", "rosewood_planks", "rosewood_log", "STRIPPED_LOG-stripped_rosewood_log");
 
         // Deeper And Darker
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                altSimpleStemFinder("deeperdarker", "blooming", "bloom"));
+        simplePlanksStemFinder("deeperdarker", "blooming", "bloom_planks");
 
         // Eternal Tales
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("eternal_tales", "comets", "comets_planks", "log", "wood", "striped_comets_log", ""));
+        advancedWoodFinder("eternal_tales", "comets", "comets_planks", "comets_log", "STRIPPED_LOG-striped_comets_log", "WOOD-comets_wood", "STRIPPED_WOOD-stripped_comets_wood");
 
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("eternal_tales", "purgatorium", "purgatorium_planks", "log", "wood", "stripped_log", ""));
+        advancedWoodFinder("eternal_tales", "purgatorium", "purgatorium_planks", "purgatorium_log", "STRIPPED_LOG-purgatorium_stripped_log", "WOOD-purgatorium_wood", "STRIPPED_WOOD-stripped_purgatorium_wood");
 
         // Blocks +
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                simpleStemFinder("blocksplus", "chorus"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                simpleWoodFinder( "blocksplus", "bamboo"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                simpleStemFinder( "blocksplus", "mushroom"));
+        simpleStemFinder("blocksplus", "chorus");
+        simpleWoodFinder("blocksplus", "bamboo");
+        simpleStemFinder("blocksplus", "mushroom");
 
         // Integrated Dynamics
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("integrateddynamics", "menril", "menril_planks",
-                        "log", "wood",
-                        "log_stripped", "wood_stripped"));
+        advancedWoodFinder("integrateddynamics", "menril", "menril_planks", "menril_log",
+                "STRIPPED_LOG-menril_log_stripped", "WOOD-menril_wood", "STRIPPED_WOOD-menril_wood_stripped");
 
         // Domum Oranmentum
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(ResourceLocation.parse("domum_ornamentum:cactus"),
@@ -106,111 +74,81 @@ public class CompatWoodTypes {
                 ResourceLocation.parse("domum_ornamentum:cactus_extra"), ResourceLocation.parse("cactus")));
 
         // Better End
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "end_lotus", "end_lotus_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "jellyshroom", "jellyshroom_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
+        advancedWoodFinder("betterend", "end_lotus", "end_lotus_planks", "end_lotus_log",
+                "STRIPPED_LOG-end_lotus_stripped_log", "WOOD-end_lotus_bark",  "STRIPPED_WOOD-end_lotus_stripped_bark");
 
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "lucernia", "lucernia_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "mossy_glowshroom", "mossy_glowshroom_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "pythadendron", "pythadendron_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "dragon_tree", "dragon_tree_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "helix_tree", "helix_tree_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "lacugrove", "lacugrove_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "tenanea", "tenanea_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betterend", "umbrella_tree", "umbrella_tree_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
+        advancedWoodFinder("betterend", "jellyshroom", "jellyshroom_planks", "jellyshroom_log",
+                "STRIPPED_LOG-jellyshroom_stripped_log", "WOOD-jellyshroom_bark",  "STRIPPED_WOOD-jellyshroom_stripped_bark");
+
+        advancedWoodFinder("betterend", "lucernia", "lucernia_planks", "lucernia_log",
+                "STRIPPED_LOG-lucernia_stripped_log", "WOOD-lucernia_bark",  "STRIPPED_WOOD-lucernia_stripped_bark");
+
+        advancedWoodFinder("betterend", "mossy_glowshroom", "mossy_glowshroom_planks", "mossy_glowshroom_log",
+                "STRIPPED_LOG-mossy_glowshroom_stripped_log", "WOOD-mossy_glowshroom_bark",  "STRIPPED_WOOD-mossy_glowshroom_stripped_bark");
+
+        advancedWoodFinder("betterend", "pythadendron", "pythadendron_planks", "pythadendron_log",
+                "STRIPPED_LOG-pythadendron_stripped_log", "WOOD-pythadendron_bark",  "STRIPPED_WOOD-pythadendron_stripped_bark");
+
+        advancedWoodFinder("betterend", "dragon_tree", "dragon_tree_planks", "dragon_tree_log",
+                "STRIPPED_LOG-dragon_tree_stripped_log", "WOOD-dragon_tree_bark",  "STRIPPED_WOOD-dragon_tree_stripped_bark");
+
+        advancedWoodFinder("betterend", "helix_tree", "helix_tree_planks", "helix_tree_log",
+                "STRIPPED_LOG-helix_tree_stripped_log", "WOOD-helix_tree_bark",  "STRIPPED_WOOD-helix_tree_stripped_bark");
+
+        advancedWoodFinder("betterend", "lacugrove", "lacugrove_planks", "lacugrove_log",
+                "STRIPPED_LOG-lacugrove_stripped_log", "WOOD-lacugrove_bark",  "STRIPPED_WOOD-lacugrove_stripped_bark");
+
+        advancedWoodFinder("betterend", "tenanea", "tenanea_planks", "tenanea_log",
+                "STRIPPED_LOG-tenanea_stripped_log", "WOOD-tenanea_bark",  "STRIPPED_WOOD-tenanea_stripped_bark");
+
+        advancedWoodFinder("betterend", "umbrella_tree", "umbrella_tree_planks", "umbrella_tree_log",
+                "STRIPPED_LOG-umbrella_tree_stripped_log", "WOOD-umbrella_tree_bark",  "STRIPPED_WOOD-umbrella_tree_stripped_bark");
+
 
         // Better Nether
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betternether", "anchor_tree", "anchor_tree_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betternether", "mushroom_fir", "mushroom_fir_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betternether", "nether_sakura", "nether_sakura_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betternether", "rubeus", "rubeus_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betternether", "stalagnate", "stalagnate_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betternether", "wart", "wart_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("betternether", "willow", "willow_planks",
-                        "log", "bark",
-                        "stripped_log", "stripped_bark"));
+        advancedWoodFinder("betternether", "anchor_tree", "anchor_tree_planks", "anchor_tree_log",
+                "STRIPPED_LOG-anchor_tree_stripped_log", "WOOD-anchor_tree_bark",  "STRIPPED_WOOD-anchor_tree_stripped_bark");
+
+        advancedWoodFinder("betternether", "mushroom_fir", "mushroom_fir_planks", "mushroom_fir_log",
+                "STRIPPED_LOG-mushroom_fir_stripped_log", "WOOD-mushroom_fir_bark",  "STRIPPED_WOOD-mushroom_fir_stripped_bark");
+
+        advancedWoodFinder("betternether", "nether_sakura", "nether_sakura_planks", "nether_sakura_log",
+                "STRIPPED_LOG-nether_sakura_stripped_log", "WOOD-nether_sakura_bark",  "STRIPPED_WOOD-nether_sakura_stripped_bark");
+
+        advancedWoodFinder("betternether", "rubeus", "rubeus_planks", "rubeus_log",
+                "STRIPPED_LOG-rubeus_stripped_log", "WOOD-rubeus_bark",  "STRIPPED_WOOD-rubeus_stripped_bark");
+
+        advancedWoodFinder("betternether", "stalagnate", "stalagnate_planks", "stalagnate_log",
+                "STRIPPED_LOG-stalagnate_stripped_log", "WOOD-stalagnate_bark",  "STRIPPED_WOOD-stalagnate_stripped_bark");
+
+        advancedWoodFinder("betternether", "wart", "wart_planks", "wart_log",
+                "STRIPPED_LOG-wart_stripped_log", "WOOD-wart_bark",  "STRIPPED_WOOD-wart_stripped_bark");
+
+        advancedWoodFinder("betternether", "willow", "willow_planks", "willow_log",
+                "STRIPPED_LOG-willow_stripped_log", "WOOD-willow_bark",  "STRIPPED_WOOD-willow_stripped_bark");
+
 
         // Jaden's Nether Expansion
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("netherexp", "claret", "claret_planks",
-                        "netherexp:cerebrage_claret_stem", "netherexp:cerebrage_claret_hyphae",
-                        "stem", "hyphae")
-        );
+        advancedWoodFinder("netherexp", "claret", "claret_planks", "cerebrage_claret_stem",
+                "STRIPPED_LOG-stripped_claret_stem", "WOOD-cerebrage_claret_hyphae", "STRIPPED_WOOD-stripped_claret_hyphae");
 
         // Piglin Ruins
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                mediumWoodFinder("piglin_ruins", "ominous", "stalk_block", "")
-        );
+        mediumWoodFinder("piglin_ruins", "ominous", "ominous_stalk_block", "");
 
 
         // Unusual End
-        var chorus_cane = altMediumWoodFinder("unusualend", "chorus_cane", "chorus_nest", "block", "");
-        chorus_cane.addChild("fence", ResourceLocation.parse("unusualend:chorus_nest_mosaic_fence"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, chorus_cane);
-
+        advancedWoodFinder(true, "unusualend", "chorus_cane", "chorus_nest_planks", "chorus_cane_block",
+                "STRIPPED_LOG-stripped_chorus_cane_block", "FENCE-chorus_nest_mosaic_fence");
 
         // Spectrum (FABRIC)
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                altSimpleStemFinder("spectrum", "ivory_noxcap", "ivory_noxwood"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                altSimpleStemFinder("spectrum", "slate_noxcap", "slate_noxwood"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                altSimpleStemFinder("spectrum", "ebony_noxcap", "ebony_noxwood"));
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                altSimpleStemFinder("spectrum", "chestnut_noxcap", "chestnut_noxwood"));
+        simplePlanksStemFinder("spectrum", "ivory_noxcap", "ivory_noxwood_planks");
+        simplePlanksStemFinder("spectrum", "slate_noxcap", "slate_noxwood_planks");
+        simplePlanksStemFinder("spectrum", "ebony_noxcap", "ebony_noxwood_planks");
+        simplePlanksStemFinder("spectrum", "chestnut_noxcap", "chestnut_noxwood_planks");
 
         // Ars Nouveau - Do not add other WoodTypes blc it would create too many block variants using archwood_planks
-        // The WoodTypes below all are using the same planks. There is no solutions
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                altSimpleWoodFinder("ars_nouveau", "blue_archwood", "archwood"));
+                        // The WoodTypes below all are using the same planks. There is no solutions
+        simplePlanksWoodFinder("ars_nouveau", "blue_archwood", "archwood_planks");
 
 //        BlockSetAPI.addBlockTypeFinder(WoodType.class,
 //                generalWoodFinder(false, "ars_nouveau", "red_archwood", "archwood_planks", true));
@@ -250,8 +188,7 @@ public class CompatWoodTypes {
                 "rats", "pirat", "pirat_planks", "pirat_log"));
 
         // Oh The Biomes You'll Go
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                mediumWoodFinder("byg", "embur","pedu", "pedu_top"));
+        mediumWoodFinder("byg", "embur","embur_pedu", "embur_pedu_top");
 
         // mcreator mod with typos...
         // Nethers Exoticism
@@ -259,24 +196,17 @@ public class CompatWoodTypes {
                 "nethers_exoticism", "jabuticaba", "jaboticaba_planks", "jabuticaba_log"));
 
         // My Nether's Delight
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                mediumWoodFinder("mynethersdelight", "powdery", "block", ""));
+        mediumWoodFinder("mynethersdelight", "powdery", "powdery_block", "");
 
         // Nourished End
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                mediumWoodFinder("nourished_end", "verdant", "stalk", "hyphae"));
+        mediumWoodFinder("nourished_end", "verdant", "verdant_stalk", "verdant_hyphae");
 
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                advancedWoodFinder("nourished_end", "cerulean", "cerulean_planks",
-                        "stem_thick", "hyphae",
-                        "stem_stripped", ""));
+        advancedWoodFinder("nourished_end", "cerulean", "cerulean_planks", "cerulean_stem_thick","STRIPPED_LOG-cerulean_stem_stripped", "WOOD-cerulean_hyphae",  "STRIPPED_WOOD-stripped_cerulean_hyphae");
 
         // Gardens Of The Dead
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                simpleStemFinder("gardens_of_the_dead", "soulblight"));
+        simpleStemFinder("gardens_of_the_dead", "soulblight");
 
-        BlockSetAPI.addBlockTypeFinder(WoodType.class,
-                mediumWoodFinder("gardens_of_the_dead","whistlecane","block", "wood"));
+        mediumWoodFinder("gardens_of_the_dead","whistlecane","whistlecane_block", "whistlecane_wood");
 
         // Desolation
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("desolation",
@@ -287,7 +217,6 @@ public class CompatWoodTypes {
                 "waxed_oak", "waxed_oak_log_stripped", "waxed_oak_planks"));
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("dawnoftimebuilder",
                 "charred_spruce", "charred_spruce_log_stripped", "charred_spruce_planks"));
-
 
         // Habitat
         BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
@@ -369,8 +298,8 @@ public class CompatWoodTypes {
                 "ars_nouveau", "red_archwood", "red_archwood_leaves", "ars_nouveau:archwood"));
 
         // Ars Elemental
-        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple( //yellow_archwood
-                "ars_nouveau", "yellow_archwood_leaves", "ars_nouveau:archwood"));
+        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
+                "ars_elemental", "yellow_archwood", "yellow_archwood_leaves", "ars_nouveau:archwood"));
 
         // BIOMES O' PLENTY
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
@@ -632,9 +561,8 @@ public class CompatWoodTypes {
 
         String crystalLeavesWoodType = "aether:skyroot";
         // Aether Redux replaces the skyroot logs in crystal trees with their own crystal logs
-        if (PlatHelper.isModLoaded("aether_redux")){
-            crystalLeavesWoodType = "aether_redux:crystal";
-        }
+        if (PlatHelper.isModLoaded("aether_redux")) crystalLeavesWoodType = "aether_redux:crystal";
+
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "aether", "crystal", "crystal_leaves", crystalLeavesWoodType));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
@@ -692,147 +620,183 @@ public class CompatWoodTypes {
     }
 
     /*
-      Below just reduce the amount of works to add undetected wood
-      Its the same as the code used to add the undetected wood:
-        var undetectedWoodType = WoodType.Finder.simple("modId", "nameWood", "namePlanks", "nameLog");
-        undetectedWoodType.addChild("stripped_log", "nameStrippedLog");
-        undetectedWoodType.addChild("wood", "nameWood");
-        undetectedWoodType.addChild("stripped_wood", "nameStrippedWood");
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, undetected);
+      Below is to simplify the amount of works to add undetected WoodType
     */
 
     /**
      * @param modId The ID of the mod that WoodType is from
      * @param nameWood Name of WoodType without "_log"
-     * @param childBlocks Example: "oak_fence", "oak_leaves", "oak_gate_fence"
-     * The rest of WoodType's children will be detected
+     * @param childrenIds Example: "FENCE-oak_fence", "LEAVES-oak_leaves", "GATE_FENCE-oak_gate_fence"
+     *
+     * <p>Note: The following are also included in childrenIds:</p>
+     * <ul>
+     *     <li>stripped_log</li>
+     *     <li>wood</li>
+     *     <li>stripped_wood</li>
+     * </ul>
      */
-    private static WoodType.@NotNull Finder simpleWoodFinder(String modId, String nameWood, String... childBlocks) {
-        return advancedWoodFinder(modId, nameWood, nameWood+ "_planks", "stem", "hyphae", "", "", childBlocks);
-    }
+    private static void simpleWoodFinder(String modId, String nameWood, String... childrenIds) {
+        List<@NotNull String> standardChildren = List.of(
+                "STRIPPED_LOG-stripped_"+nameWood+"_log",
+                "WOOD-"+nameWood+"_wood",
+                "STRIPPED_WOOD-stripped_"+nameWood+"_wood");
 
-    private static WoodType.@NotNull Finder simpleStemFinder(String modId, String nameStem) {
-        return advancedWoodFinder(modId, nameStem, nameStem+ "_planks", "stem", "hyphae", "", "");
+        String[] combined = Stream.concat(standardChildren.stream(), Arrays.stream(childrenIds)).toArray(String[]::new);
+
+        advancedWoodFinder(false, modId, nameWood, nameWood+"_planks", nameWood+"_log", combined);
+    }
+    /**
+     * <p>Using Planks' name instead of Log's name to detect WoodType's children</p>
+     * @param planksId Id of the planks
+     * Same as {@link CompatWoodTypes#simpleWoodFinder(String, String, String...)}
+     */
+    private static void simplePlanksWoodFinder(String modId, String nameWood, String planksId, String...childrenIds) {
+        List<@NotNull String> standardChildren = List.of(
+                "STRIPPED_LOG-stripped_"+nameWood+"_log",
+                "WOOD-"+nameWood+"_wood",
+                "STRIPPED_WOOD-stripped_"+nameWood+"_wood");
+
+        String[] combined = Stream.concat(standardChildren.stream(), Arrays.stream(childrenIds)).toArray(String[]::new);
+
+        advancedWoodFinder(true, modId, nameWood, planksId,nameWood+"_log", combined);
     }
 
     /**
-     * MediumWoodFinder include log, wood
+     * @param modId The ID of the mod that WoodType is from
+     * @param nameStem Name of WoodType without "_stem"
+     * @param childrenIds Example: "FENCE-oak_fence", "LEAVES-oak_leaves", "GATE_FENCE-oak_gate_fence"
+     *
+     * <p>Note: The following are also included in childrenIds:</p>
+     * <ul>
+     *     <li>stripped_log</li>
+     *     <li>wood</li>
+     *     <li>stripped_wood</li>
+     * </ul>
+     */
+    private static void simpleStemFinder(String modId, String nameStem, String... childrenIds) {
+        List<@NotNull String> standardChildren = List.of(
+                "STRIPPED_LOG-stripped_"+nameStem+"_stem",
+                "WOOD-"+nameStem+"_hyphae",
+                "STRIPPED_WOOD-stripped_"+nameStem+"_hyphae");
+
+        String[] combined = Stream.concat(standardChildren.stream(), Arrays.stream(childrenIds)).toArray(String[]::new);
+
+        advancedWoodFinder(false, modId, nameStem, nameStem+ "_planks", nameStem+"stem", combined);
+    }
+    /**
+     * <p>Using Planks' name instead of Stem's name to detect WoodType's children</p>
+     * @param planksId Id of the planks
+     * Same as {@link CompatWoodTypes#simpleStemFinder(String, String, String...)}
+     */
+    private static void simplePlanksStemFinder(String modId, String nameStem, String planksId, String...childrenIds) {
+        List<@NotNull String> standardChildren = List.of(
+                "STRIPPED_LOG-stripped_"+nameStem+"_log",
+                "WOOD-"+nameStem+"_wood",
+                "STRIPPED_WOOD-stripped_"+nameStem+"_wood");
+
+        String[] combined = Stream.concat(standardChildren.stream(), Arrays.stream(childrenIds)).toArray(String[]::new);
+
+        advancedWoodFinder(true, modId, nameStem, planksId,nameStem+"_stem", combined);
+    }
+
+    /**
+     * @param modId The ID of the mod that WoodType is from
      * @param nameWood Name of WoodType without "_log"
-     * @param suffixLog Example: "stem","block" or "TYPE_stem" or "stem_TYPE"
-     * @param suffixWood Example: "wood", "hyphae" or "TYPE_wood" or "wood_TYPE"
+     * @param logId Id of the log
+     * @param childrenIds Example: "FENCE-oak_fence", "LEAVES-oak_leaves", "GATE_FENCE-oak_gate_fence"
+     *
+     * <p>Note: The following are also included in childrenIds:</p>
+     * <ul>
+     *     <li>stripped_log</li>
+     *     <li>wood</li>
+     *     <li>stripped_wood</li>
+     * </ul>
      */
-    private static WoodType.@NotNull Finder mediumWoodFinder(String modId, String nameWood, String suffixLog, String suffixWood) {
-        return advancedWoodFinder(modId, nameWood, nameWood + "_planks", suffixLog, suffixWood, "", "");
-    }
+    private static void mediumWoodFinder(String modId, String nameWood, String logId, String woodId, String... childrenIds) {
+        String wood = "WOOD-"+woodId;
+        String stripped_wood = "STRIPPED_WOOD-stripped_"+woodId;
 
-    private static WoodType.@NotNull Finder advancedWoodFinder(String modId, String nameWood, String planksId,
-                                                               String suffixLog, String suffixWood, String suffixStrippedLog, String suffixStrippedWood, String... childBlocks) {
-        return advancedWoodFinder(false, modId, nameWood, planksId, suffixLog, suffixWood, suffixStrippedLog, suffixStrippedWood, childBlocks);
-    }
+        List<@NotNull String> standardChildren = new ArrayList<>(List.of("STRIPPED_LOG-stripped_" + logId));
 
-    /**
-     * AdvancedWoodFinder include planks, log, wood, stripped_log, stripped_wood based on their unique Ids
-     * @param useNamePlanks useNamePlanks instead of WoodType's name for children
-     * @param modId The ID of mod where WoodType is from
-     * @param nameWood Name of WoodType without the suffix, "_log"
-     * @param planksId Example: "TYPE_planks" or "modId:TYPE_planks"
-     * @param suffixLog Example: "stem","block" or "modId:TYPE_WORD_log"
-     * @param suffixWood Example: "wood", "hyphae" or "modId:TYPE_WORD_wood"
-     * @param suffixStrippedLog Example: "stem","block" or "stripped_log" or "modId:stripped_TYPE_WORD_log
-     * @param suffixStrippedWood Example: "wood", "hyphae" or "stripped_wood" or "modId:stripped_TYPE_WORD_wood
-     * @param childBlocks Example: "oak_fence", "oak_leaves", "oak_fence_gate" - NOTE: "fence_oak" won't work
-     */
-    private static WoodType.@NotNull Finder advancedWoodFinder(boolean useNamePlanks, String modId, String nameWood, String planksId,
-                                                               String suffixLog, String suffixWood,
-                                                               String suffixStrippedLog, String suffixStrippedWood,
-                                                               String... childBlocks) {
-        // Creating Ids of log & stripped_log
-        String logPrefixed = (suffixStrippedLog.matches("(\\w+)?(striped|stripped)_\\w+")) ? "" : "stripped_";
-        String logSuffixed = (suffixLog.isBlank()) ? "" : "_" + suffixLog;
-
-        String log = (suffixLog.contains("_")) ? suffixLog : nameWood + logSuffixed;
-        String stripped_log = (suffixStrippedLog.isBlank()) ? logPrefixed + log : logPrefixed + nameWood +"_"+ suffixStrippedLog;
-
-        // Creating Ids of wood & stripped_wood
-        String woodPrefixed = (suffixStrippedWood.matches("(\\w+)?(striped|stripped)_\\w+")) ? "" : "stripped_";
-        String woodSuffixed = (suffixWood.isBlank()) ? "" : "_" + suffixWood;
-
-        String wood = nameWood + woodSuffixed;
-        String stripped_wood = (suffixStrippedWood.isBlank()) ? woodPrefixed + wood : woodPrefixed + nameWood +"_"+ suffixStrippedWood;
-
-        if (useNamePlanks) nameWood = planksId.replace("_planks", "");
-
-        // Adding blocks to WoodType
-        WoodType.Finder wf;
-        if (planksId.contains(":")) // some addons like ars_elemental are using ars_nouveau's planks
-            wf = WoodType.Finder.simple(ResourceLocation.fromNamespaceAndPath(modId, nameWood), ResourceLocation.parse(planksId), ResourceLocation.fromNamespaceAndPath(modId, log));
-        else if (suffixLog.contains(":"))
-            wf = WoodType.Finder.simple(ResourceLocation.fromNamespaceAndPath(modId, nameWood), ResourceLocation.fromNamespaceAndPath(modId, planksId), ResourceLocation.parse(suffixLog));
-        else
-            wf = WoodType.Finder.simple(modId, nameWood, planksId, log);
-
-        // WoodType.Finder has a null check for below, so don't worry about it
-        if (suffixWood.contains(":"))
-            wf.addChild("wood", ResourceLocation.parse(suffixWood));
-        else
-            wf.addChild("wood", wood);
-
-        if (suffixStrippedLog.contains(":"))
-            wf.addChild("stripped_log", ResourceLocation.parse(suffixStrippedLog));
-        else
-            wf.addChild("stripped_log", stripped_log);
-
-        if (suffixStrippedWood.contains(":"))
-            wf.addChild("stripped_wood", ResourceLocation.parse(suffixStrippedWood));
-        else
-            wf.addChild("stripped_wood", stripped_wood);
-
-        if (!Arrays.stream(childBlocks).toList().isEmpty()) {
-            for (String block : childBlocks) {
-                String key = (block.contains("fence_gate")) ? "fence_gate" : block.substring(block.lastIndexOf("_") + 1);
-                if (block.contains(":"))
-                    wf.addChild(key, ResourceLocation.parse(block));
-                else
-                    wf.addChild(key, block);
-            }
+        if (!woodId.isEmpty()) {
+            standardChildren.add(wood);
+            standardChildren.add(stripped_wood);
         }
 
-        return wf;
+        String[] combined = Stream.concat(standardChildren.stream(), Arrays.stream(childrenIds)).toArray(String[]::new);
+
+        advancedWoodFinder(false, modId, nameWood, nameWood+"_planks", logId, combined);
     }
 
     /**
-     * ALTERNATIVE: Use Planks' name instead of log's name for WoodType's children
-     * @param nameWood Name of WoodType without "_log"
-     * @param namePlanks Name of Planks without "_planks"
-     **/
-    private static WoodType.@NotNull Finder altSimpleWoodFinder(String modId, String nameWood, String namePlanks) {
-        String planksId = namePlanks + "_planks";
+     * @param useNamePlanks Using Planks' name instead of log's name to detect WoodType's children
+     * @param modId The ID of the mod that WoodType is from
+     * @param nameWoodType Name of WoodType without "_log" or "_stem"
+     * @param planksId Id of the planks
+     * @param logId Id of the log
+     * @param childrenIds Example: "FENCE-oak_fence", "LEAVES-oak_leaves", "GATE_FENCE-oak_gate_fence"
+     */
+    private static void advancedWoodFinder(boolean useNamePlanks, String modId, String nameWoodType, String planksId, String logId, String ... childrenIds) {
+        if (PlatHelper.isModLoaded(modId)) {
+            if (useNamePlanks) nameWoodType = planksId.replace("_planks", "");
 
-        return advancedWoodFinder(true, modId, nameWood, planksId, "log", "wood", "", "");
+            WoodType.Finder woodFinder;
+            if (planksId.contains(":")) // some addons like ars_elemental are using ars_nouveau's planks
+                woodFinder = WoodType.Finder.simple(ResourceLocation.fromNamespaceAndPath(modId, nameWoodType), ResourceLocation.parse(planksId), ResourceLocation.fromNamespaceAndPath(modId, logId));
+            else if (logId.contains(":"))
+                woodFinder = WoodType.Finder.simple(ResourceLocation.fromNamespaceAndPath(modId, nameWoodType), ResourceLocation.fromNamespaceAndPath(modId, planksId), ResourceLocation.parse(logId));
+            else // default
+                woodFinder = WoodType.Finder.simple(modId, nameWoodType, planksId, logId);
 
+            if (!Arrays.stream(childrenIds).toList().isEmpty()) {
+                for (String currentChild : childrenIds) {
+                    String childKey = getChildKeyFrom(currentChild);
+                    String blockId = currentChild.split("-")[1];
+                    ResourceLocation childId = (blockId.contains(":"))
+                            ? ResourceLocation.parse(blockId)
+                            : ResourceLocation.fromNamespaceAndPath(modId, blockId);
+
+                    if (currentChild.contains("-") && childKeySafe.contains(childKey))
+                        woodFinder.addChild(childKey, childId);
+                    else if (childKeySafe.contains(childKey))
+                        woodFinder.addChild(childKey, currentChild);
+                    else
+                        Moonlight.LOGGER.warn("CompatWoodType: Incorrect childKey - {} for {}", childKey, blockId);
+                }
+            }
+
+            BlockSetAPI.addBlockTypeFinder(WoodType.class, woodFinder);
+        }
     }
-    /**
-     * Similar to altSimpleWoodFinder (above) but this is for Stem
-     * @param nameWood Name of WoodType without "_stem"
-     * @param namePlanks Name of Planks without "_planks"
-     **/
-    private static WoodType.@NotNull Finder altSimpleStemFinder(String modId, String nameWood, String namePlanks) {
-        String planksId = namePlanks + "_planks";
 
-        return advancedWoodFinder(true, modId, nameWood, planksId, "stem", "hyphae", "", "");
+    private static void advancedWoodFinder(String modId, String nameWoodType, String planksId, String logId, String ... childrenIds) {
+        advancedWoodFinder(false, modId, nameWoodType, planksId, logId, childrenIds);
     }
-    /**
-     * Similar to AltSimpleWoodFinder (above) but included suffix for log and wood
-     * @param nameWood Name of WoodType without "_stem"
-     * @param namePlanks Name of Planks without "_planks"
-     * @param suffixLog Example: "stem","block" or "TYPE_stem"
-     * @param suffixWood Example: "wood", "hyphae" or "TYPE_wood"
-     **/
-    private static WoodType.@NotNull Finder altMediumWoodFinder(String modId, String nameWood, String namePlanks, String suffixLog, String suffixWood) {
-        String planksId = namePlanks + "_planks";
 
-        return advancedWoodFinder(true, modId, nameWood, planksId, suffixLog, suffixWood, "", "");
+    /// Get the keyword from block: oak_trapdoor, key: trapdoor
+    public static String getChildKeyFrom(String childBlock) {
+        if (childBlock.contains("-")) {
+            String key = childBlock.split("-")[0];
+            if (key.equals(key.toUpperCase())) key = key.toLowerCase();
+            return key;
+        }
 
+        String lastword = childBlock.substring(childBlock.lastIndexOf("_") + 1);
+        return switch (lastword) {
+            case "leaves", "leaf" -> "leaves";
+            case "plank" -> "planks";
+            case "fence_gate" -> "fence_gate";
+            default -> lastword;
+        };
     }
+
+    protected static final Set<String> childKeySafe = Set.of(
+            "log", "planks", "stripped_log", "wood", "stripped_wood",
+            "slab", "stairs", "fence",
+            "fence_gate", "door", "trapdoor",
+            "button", "pressure_plate", "hanging_sign",
+            "wall_hanging_sign", "sign", "wall_sign",
+            "leaves"
+    );
 
 }
