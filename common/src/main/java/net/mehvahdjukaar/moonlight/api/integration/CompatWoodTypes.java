@@ -5,7 +5,6 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,10 +19,6 @@ import java.util.stream.Stream;
 public class CompatWoodTypes {
 
     public static void init() {
-        // TEMPLATE:
-//        simpleWoodFinder("modId", "nameWood")
-//        mediumWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood")
-//        advancedWoodFinder("modId", "nameWood", "planksId", "suffixLog", "suffixWood", "suffixStrippedLog", "suffixStrippedWood")
 
         // The Undergarden
         advancedWoodFinder("undergarden", "ancient_root", "ancient_root_planks", "ancient_root");
@@ -68,7 +63,7 @@ public class CompatWoodTypes {
         simpleWoodFinder("blocksplus", "bamboo");
         simpleStemFinder("blocksplus", "mushroom");
 
-        // Integrated Dynamics //TODO: check
+        // Integrated Dynamics
         advancedWoodFinder("integrateddynamics", "menril", "menril_planks", "menril_log",
                 "STRIPPED_LOG-menril_log_stripped", "WOOD-menril_wood", "STRIPPED_WOOD-menril_wood_stripped");
 
@@ -141,7 +136,7 @@ public class CompatWoodTypes {
         mediumWoodFinder("piglin_ruins", "ominous", "ominous_stalk_block", "");
 
 
-        // Unusual End //TODO: check
+        // Unusual End
         advancedWoodFinder(true, "unusualend", "chorus_cane", "chorus_nest_planks", "chorus_cane_block",
                 "STRIPPED_LOG-stripped_chorus_cane_block", "FENCE-chorus_nest_mosaic_fence");
 
@@ -301,7 +296,7 @@ public class CompatWoodTypes {
                 "ars_nouveau", "purple_archwood", "purple_archwood_leaves", "ars_nouveau:archwood"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ars_nouveau", "red_archwood", "red_archwood_leaves", "ars_nouveau:archwood"));
-        
+
         // Ars Elemental
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "ars_elemental", "yellow_archwood", "yellow_archwood_leaves", "ars_nouveau:archwood"));

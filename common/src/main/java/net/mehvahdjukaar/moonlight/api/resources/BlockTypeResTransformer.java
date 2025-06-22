@@ -301,13 +301,4 @@ public class BlockTypeResTransformer<T extends BlockType> {
         }
         return sb.toString();
     }
-
-    /// Counting a keyword, "redstone" in redstone_block_redstone_???.json
-    private static int wordCounter(String text, String oldTypeName) {
-        Pattern pattern = Pattern.compile(oldTypeName);
-        Matcher matcher = pattern.matcher(text);
-        int count = 0;
-        while (matcher.find()) count++;
-        return count;
-    }
 }
