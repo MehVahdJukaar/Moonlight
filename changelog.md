@@ -1,2 +1,6 @@
+- Simplified the CompatWoodType's code
+  - <span style="color: RED;">WARNING: ENSURE your world is backup before updating Moonlight Lib</span>
+  - **Every Compat** - REASON: some WoodType may be not detected, check your log to ensure no blocks are missing from the world. 
+- Simplified the RegEx in BlockTypeResTransformer
 - configs will no longer be synced when on an integrated server. This should make them editable again from the client
 - improvements to utilities helper functions that alter models for resource gen
