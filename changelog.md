@@ -1,3 +1,9 @@
+- CompatWoodType: Fixed the crash with "Index 1 out of bounds" from a rare case
+
+---
+
+v2.14.9
+
 - Simplified the CompatWoodType's code
   - <span style="color: RED;">WARNING: ENSURE your world is backup before updating Moonlight Lib</span>
   - **Every Compat** - REASON: some WoodType may be not detected, check your log to ensure no blocks are missing from the world. 
