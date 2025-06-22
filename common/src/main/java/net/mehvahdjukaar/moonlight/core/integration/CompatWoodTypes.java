@@ -751,7 +751,8 @@ public class CompatWoodTypes {
             if (!Arrays.stream(childrenIds).toList().isEmpty()) {
                 for (String currentChild : childrenIds) {
                     String childKey = getChildKeyFrom(currentChild);
-                    String blockId = currentChild.split("-")[1];
+                    String blockId = (currentChild.contains("-")) ? currentChild.split("-")[1] : currentChild;
+
                     ResourceLocation childId = (blockId.contains(":"))
                             ? ResourceLocation.parse(blockId)
                             : ResourceLocation.fromNamespaceAndPath(modId, blockId);
@@ -761,7 +762,7 @@ public class CompatWoodTypes {
                     else if (childKeySafe.contains(childKey))
                         woodFinder.addChild(childKey, currentChild);
                     else
-                        Moonlight.LOGGER.warn("CompatWoodType: Incorrect childKey - {} for {}", childKey, blockId);
+                        Moonlight.LOGGER.warn("CompatWoodType: Incorrect childKey - {} for {}", childKey, childId);
                 }
             }
 
