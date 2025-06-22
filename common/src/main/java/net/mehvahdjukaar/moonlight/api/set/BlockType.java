@@ -70,25 +70,31 @@ public abstract class BlockType {
      * @return shortenedID/namespace/TYPENAME_suffix
      */
     public String createPathWith(String shortenedId, String suffix) {
-        return createPathWith(shortenedId, "", suffix);
+        return createFullIdWith("", "", shortenedId, "", suffix);
     }
 
     /**
      * @return shortenedID/namespace/prefix_TYPENAME_suffix
      */
     public String createPathWith(String shortenedId, String prefix, String suffix) {
-        String prefixed = (prefix.isEmpty()) ? "" : prefix + "_";
-        return shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() +"_"+ suffix;
+        return createFullIdWith("", "", shortenedId, prefix, suffix);
     }
 
     /**
-     * @return namesapce:folder/shortenedID/namespace/prefix_TYPENAME_suffix
+     * @return namespace:folder/shortenedID/namespace/prefix_TYPENAME_suffix
+     * OPTIONAL: modId, folder, prefix can be empty
      */
-    public String createFullIdWith(String modId, String folder, String shortenedId, String prefix, String suffix) {
-        String prefixed = (prefix.isEmpty()) ? "" : prefix + "_";
-        String foldered = (folder.isEmpty()) ? "" : folder + "/";
+    public String createFullIdWith(String modIdOrEmpty, String folderOrEmpty, String shortenedId, String prefixOrEmpty, String suffix) {
+        String modIded = (modIdOrEmpty.isEmpty()) ? "" : modIdOrEmpty + ":";
+        String foldered = (folderOrEmpty.isEmpty()) ? "" : folderOrEmpty + "/";
 
-        return modId+":"+ foldered + shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() +"_"+ suffix;
+        String prefixed = "";
+        if (prefixOrEmpty.contains("/")) prefixed = prefixOrEmpty;
+        else if (!prefixOrEmpty.isEmpty()) prefixed = prefixOrEmpty + "_";
+
+        String suffixed = (suffix.isEmpty()) ? "" : "_" + suffix;
+
+        return modIded + foldered + shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() + suffixed;
     }
 
     @Override

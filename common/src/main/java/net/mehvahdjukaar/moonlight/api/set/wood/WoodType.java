@@ -28,6 +28,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
+/**
+ * CHILD AVAILABLITY:
+ * <p>BLOCK:</p>
+ * <ul>
+ * planks, log, stripped_log, wood, stripped_wood, leaves,
+ * slab, stairs, fence, fence_gate, door, trapdoor,
+ * button, pressure_plate, hanging_sign, wall_hanging_sign, sign, wall_sign
+ * </ul>
+ * <p>ITEM:</p>
+ * <ul>
+ * boat, chest_boat, sapling
+ * </ul>
+ */
 public class WoodType extends BlockType {
 
     public static Codec<WoodType> CODEC;
@@ -116,7 +129,7 @@ public class WoodType extends BlockType {
 
         // SUPPORT: TFC & AFC
         String path = id.getPath();
-        if (this.id.getNamespace().equals("tfc") || this.id.getNamespace().equals("afc")) {
+        if (this.id.getNamespace().matches("tfc|afc")) {
             var o = BuiltInRegistries.BLOCK.getOptional(
                     id.withPath("wood/" + prefix_ + postfix + "/" + path));
             if (o.isPresent()) return o.get();
@@ -214,7 +227,6 @@ public class WoodType extends BlockType {
         this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.BLOCK));
         this.addChild("wall_sign", this.findRelatedEntry("wall_sign", BuiltInRegistries.BLOCK));
 
-
         if (this.id.getNamespace().matches("tfc|afc")) { // Including unidue blocks' path
             this.addChild("sign", this.findRelatedEntry("sign", "", BuiltInRegistries.BLOCK));
             this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign/wrought_sign", "", BuiltInRegistries.BLOCK));
@@ -238,7 +250,10 @@ public class WoodType extends BlockType {
             this.addChild("chest_boat", this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
         }
         this.addChild("sapling", this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
-        this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK)); // TFC & AFC only
+        if (this.id.getNamespace().matches("tfc|afc")) { // Including unidue blocks' path
+            this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK));
+            this.addChild("boat", this.findRelatedEntry("boat", "", BuiltInRegistries.BLOCK));
+        }
     }
 
     @Nullable
@@ -251,7 +266,7 @@ public class WoodType extends BlockType {
                 id.withPath(id.getPath() + "_planks_" + before + after),
                 // TFC & AFC: Include children of wood_type: stairs, slab...
                 id.withPath("wood/planks/" + id.getPath() + "_" + before),
-                // TFC & AFC: Include twig (sticks), leaves, planks
+                // TFC & AFC: Include twig (sticks), leaves, planks, sign
                 id.withPath("wood/" + before + after + "/" + id.getPath())
         };
         V found = null;
