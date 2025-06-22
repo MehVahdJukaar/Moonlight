@@ -25,6 +25,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
+/**
+ * CHILD AVAILABLITY:
+ * <p>BLOCK:</p>
+ * <ul>
+ * planks, log, stripped_log, wood, stripped_wood, leaves,
+ * slab, stairs, fence, fence_gate, door, trapdoor,
+ * button, pressure_plate, hanging_sign, wall_hanging_sign, sign, wall_sign
+ * </ul>
+ * <p>ITEM:</p>
+ * <ul>
+ * boat, chest_boat, sapling
+ * </ul>
+ */
 public class WoodType extends BlockType {
 
     public static final Codec<WoodType> CODEC = ResourceLocation.CODEC.flatXmap(r -> {
