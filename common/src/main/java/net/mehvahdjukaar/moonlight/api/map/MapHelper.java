@@ -19,6 +19,7 @@ import net.minecraft.world.item.component.MapDecorations;
 import net.minecraft.world.item.component.MapItemColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -84,6 +85,22 @@ public class MapHelper {
      *
      * @param id decoration type id. if invalid will default to generic structure decoration
      */
+    public static void addTargetDecorationToItem(Level level, ItemStack stack, BlockPos pos, ResourceLocation id, int mapColor) {
+        var vanillaType = BuiltInRegistries.MAP_DECORATION_TYPE.getHolder(id);
+        if (vanillaType.isPresent()) {
+            addVanillaTargetDecorationToItem(stack, pos, vanillaType.get(), mapColor);
+            return;
+        }
+        var reg = MapDataRegistry.getMapDecorationRegistry(level.registryAccess());
+        var moddedType = reg.getHolder(id).orElse(null);
+        if (moddedType != null) {
+            addCustomTargetDecorationToItem(stack, pos, moddedType, mapColor);
+        } else {
+            addVanillaTargetDecorationToItem(stack, pos, MapDecorationTypes.TARGET_X, mapColor);
+        }
+    }
+
+    @Deprecated(forRemoval = true)
     public static void addTargetDecorationToItem(ItemStack stack, BlockPos pos, ResourceLocation id, int mapColor) {
         var vanillaType = BuiltInRegistries.MAP_DECORATION_TYPE.getHolder(id);
         if (vanillaType.isPresent()) {
@@ -141,7 +158,7 @@ public class MapHelper {
      * @param pos    world position
      * @return markers found, empty list if none found
      */
-    public static List<MLMapMarker<?>> getMarkersAtPos(BlockGetter reader, BlockPos pos) {
+    public static List<MLMapMarker<?>> getMarkersAtPos(LevelAccessor reader, BlockPos pos) {
         return MapDataInternal.getMarkersFromWorld(reader, pos);
     }
 

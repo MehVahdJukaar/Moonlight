@@ -351,6 +351,11 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    @Deprecated(forRemoval = true)
+    public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, BlockPos pos) {
+        openCustomMenu(player, menuProvider, buf -> buf.writeBlockPos(pos));
+    }
+
     public static <T extends Entity & MenuProvider> void openCustomMenu(ServerPlayer player, T menuProvider) {
         TileOrEntityTarget target = TileOrEntityTarget.of(menuProvider);
         openCustomMenu(player, menuProvider, target::write);

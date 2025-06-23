@@ -14,6 +14,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -81,8 +82,13 @@ public class MapDataRegistry {
     }
 
 
+    @Deprecated(forRemoval = true)
     public static MLMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
         return MapDataInternal.getAssociatedType(structure);
+    }
+
+    public static Holder<MLMapDecorationType<?, ?>> getDecorationFoStructure(Level level, Holder<Structure> structure) {
+        return MapDataInternal.getDecorationFoStructure(level, structure);
     }
 
     public static Registry<MLMapDecorationType<?, ?>> getMapDecorationRegistry(RegistryAccess registryAccess) {

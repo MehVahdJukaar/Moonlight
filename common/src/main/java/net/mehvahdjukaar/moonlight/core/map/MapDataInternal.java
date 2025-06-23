@@ -14,7 +14,8 @@ import net.minecraft.core.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -29,7 +30,8 @@ import java.util.function.Supplier;
 public class MapDataInternal {
 
     public static final Registry<CustomMapData.Type<?, ?>> CUSTOM_MAP_DATA_REGISTRY = RegHelper.registerRegistry(
-            Moonlight.res("custom_map_data_types"), true);;
+            Moonlight.res("custom_map_data_types"), true);
+    ;
 
     /**
      * Registers a custom data type to be stored in map data. Type will provide its onw data implementation
@@ -69,6 +71,7 @@ public class MapDataInternal {
         return specialType;
     }
 
+    @Deprecated(forRemoval = true)
     public static MLMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
         for (var v : getValues()) {
             Optional<HolderSet<Structure>> associatedStructure = v.getAssociatedStructure();
@@ -77,6 +80,19 @@ public class MapDataInternal {
             }
         }
         return getGenericStructure();
+    }
+
+
+    public static Holder<MLMapDecorationType<?, ?>> getDecorationFoStructure(Level level, Holder<Structure> structure) {
+        Registry<MLMapDecorationType<?, ?>> reg = getMapDecorationRegistry(level.registryAccess());
+        var matched = reg.holders()
+                .filter(
+                        h -> h.value().getAssociatedStructure()
+                                .map(s -> s.contains(structure))
+                                .orElse(false)
+                ).findFirst();
+
+        return matched.orElseGet(() -> reg.getHolder(GENERIC_STRUCTURE_ID).orElseThrow());
     }
 
     @ApiStatus.Internal
@@ -92,7 +108,7 @@ public class MapDataInternal {
     }
 
 
-    public static Registry<CustomMapData.Type<?,?>> getMapDataRegistry(){
+    public static Registry<CustomMapData.Type<?, ?>> getMapDataRegistry() {
         return CUSTOM_MAP_DATA_REGISTRY;
     }
 
@@ -163,9 +179,9 @@ public class MapDataInternal {
      * @param pos    world position
      * @return markers found, empty list if none found
      */
-    public static List<MLMapMarker<?>> getMarkersFromWorld(BlockGetter reader, BlockPos pos) {
+    public static List<MLMapMarker<?>> getMarkersFromWorld(LevelAccessor reader, BlockPos pos) {
         List<MLMapMarker<?>> list = new ArrayList<>();
-        for (MLMapDecorationType<?, ?> type : getValues()) {
+        for (var type : getMapDecorationRegistry(reader.registryAccess())) {
             MLMapMarker<?> c = type.createMarkerFromWorld(reader, pos);
             if (c != null) list.add(c);
         }
