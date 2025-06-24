@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  *
  * @param <T>
  */
-//I hate this class so much
+@SuppressWarnings("unused")
 public class BlockTypeResTransformer<T extends BlockType> {
 
     @FunctionalInterface
@@ -185,6 +185,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
         return replaceFullGenericType(text, blockType, blockId, oldTypeName, oldNamespace, 1);
     }
 
+    // Same as before but takes folder depth instead of a specific folder name
     public static String replaceFullGenericType(String text, BlockType newBlockType, ResourceLocation newBlockId, String oldTypeName,
                                                 @Nullable String oldTypeNamespace, int folderDepth) {
         StringBuilder sb = new StringBuilder();
@@ -213,8 +214,8 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
         Pattern blockPathSubPathPattern = Pattern.compile("([^,]*(?=/))");
         Matcher blockPathSubPathMather = blockPathSubPathPattern.matcher(blockId.getPath());
-        String blockFolderPrefix = blockPathSubPathMather.find() ? blockPathSubPathMather.group(1) : ""; //"mcf/create"
-        String blockTypeName = blockType.getTypeName(); // path of block id "scoria"
+        String blockFolderPrefix = blockPathSubPathMather.find() ? blockPathSubPathMather.group(1) : ""; // "shortenedId/namespace"
+        String blockTypeName = blockType.getTypeName(); // path of block id, ie "scoria"
 
         String newNamespace = oldNamespace == null ? "" : blockId.getNamespace() + ":";
         oldNamespace = oldNamespace == null ? "" : oldNamespace + ":";
