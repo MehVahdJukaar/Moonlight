@@ -33,7 +33,6 @@ public class BlockSetInternalImpl {
     public static void initializeBlockSets() {
         BlockSetInternal.initializeBlockSets();
         //init items immediately as this happens after all registries have fired
-        BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
         hasFilledBlockSets = true;
     }
 

@@ -36,17 +36,6 @@ public class BlockSetInternalImpl {
 
     private static boolean hasFilledBlockSets = false;
 
-    static {
-        //if loaded registers post item init
-        Consumer<RegisterEvent> eventConsumer = e -> {
-            //fired right after items
-            if (e.getRegistryKey().equals(BuiltInRegistries.POTION.key())) {
-                BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
-            }
-        };
-        MoonlightForge.getCurrentBus().addListener(eventConsumer);
-    }
-
     //aaaa
     public static <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
@@ -58,7 +47,7 @@ public class BlockSetInternalImpl {
             throw new IllegalArgumentException("Fluid and Sound Events registry not supported here");
         } else {
             //ensure has filled block set
-            getOrAddQueue(Registries.BLOCK_ENTITY_TYPE);
+            getOrAddQueue(Registries.POTION);
             //other entries
             RegHelper.registerInBatch(registry, e -> registrationFunction.accept(e, BlockSetAPI.getBlockSet(blockType).getValues()));
         }
@@ -104,19 +93,9 @@ public class BlockSetInternalImpl {
     //shittiest code ever lol
     protected static void registerLateBlockAndItems(RegisterEvent event,
                                                     Map<ResourceKey<? extends Registry<?>>, List<Runnable>> toRun) {
-        //fires right after blocks
-        if (event.getRegistryKey().equals(BuiltInRegistries.ENTITY_TYPE.key())) {
-            if (!hasFilledBlockSets) {
-                BlockSetInternal.initializeBlockSets();
-                hasFilledBlockSets = true;
-            }
-        }
-
         // fires right after items so we also have all modded items filled in (for EC)
-        if (event.getRegistryKey().equals(Registries.ENTITY_TYPE)) {
+        if (event.getRegistryKey().equals(Registries.POTION)) {
             //when the first registration function is called we find all block types
-
-            BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
             // prob not needed
             if (!hasFilledBlockSets) {
                 BlockSetInternal.initializeBlockSets();
