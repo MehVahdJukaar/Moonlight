@@ -1,8 +1,14 @@
+-  Improved the RegEx in BlockTypeResTrnsformer to fix [#968](https://github.com/MehVahdJukaar/WoodGood/issues/968)
+
+---
+
+## v2.14.10
+
 - CompatWoodType: Fixed the crash with "Index 1 out of bounds" from a rare case
 
 ---
 
-v2.14.9
+## v2.14.9
 
 - Simplified the CompatWoodType's code
   - <span style="color: RED;">WARNING: ENSURE your world is backup before updating Moonlight Lib</span>
