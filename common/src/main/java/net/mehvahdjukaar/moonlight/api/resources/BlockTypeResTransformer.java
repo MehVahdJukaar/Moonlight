@@ -272,7 +272,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
         // grabs first folder it finds as folder name if given is empty
         String folderRegEx = "(" + folderName + ")/";
 
-        String extraFolderRegex = "(/?(?:\\w+/)*+\\w*?)";
+        String extraFolderRegex = "(/?(?:\\w+/)*\\w*?)";
 
         String typeNameRegex = "(?<![a-zA-Z])"+ oldTypeName+ "(?![a-zA-Z])"; // Matches "oak" as a whole word, not part of another word like "darkoak". However, WILL match "dark_oak" as it's the same as "chair_oak"
 
