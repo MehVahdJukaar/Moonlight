@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -95,7 +96,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         try {
-            Multimap<ResourceKey<?>, SimpleTagBuilder> tags = HashMultimap.create();
+            Multimap<TagKey<?>, SimpleTagBuilder> tags = HashMultimap.create();
             allDone.join(); // joins all futures
             for (CompletableFuture<ResourceSink> future : futures) {
                 ResourceSink sink = future.join();
@@ -113,7 +114,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                     while (it.hasNext()) {
                         tag.merge(it.next());
                     }
-                    this.dynamicPack.addTag(tag, key);
+                    this.dynamicPack.addTag(tag, key.registry());
                 }
             }
 

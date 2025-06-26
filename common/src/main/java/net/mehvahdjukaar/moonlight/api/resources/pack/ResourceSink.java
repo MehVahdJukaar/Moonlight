@@ -11,9 +11,12 @@ import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.ItemLike;
@@ -37,7 +40,7 @@ public class ResourceSink {
     private final String packId;
     final Map<ResourceLocation, byte[]> resources = new HashMap<>();
     final Set<ResourceLocation> notClearable = new HashSet<>();
-    final Map<ResourceKey<?>, SimpleTagBuilder> tags = new HashMap<>();
+    final Map<TagKey<?>, SimpleTagBuilder> tags = new HashMap<>();
 
     public ResourceSink(String modId, String packId) {
         this.modId = modId;
@@ -117,8 +120,8 @@ public class ResourceSink {
     }
 
 
-    public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
-        this.tags.put(type, builder);
+    public void addTag(SimpleTagBuilder builder, ResourceKey<? extends Registry<?>> reg) {
+        this.tags.put(TagKey.create((ResourceKey) reg, builder.getId()), builder);
     }
 
     /**
