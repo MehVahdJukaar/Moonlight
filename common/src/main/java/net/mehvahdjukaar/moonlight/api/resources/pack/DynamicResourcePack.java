@@ -277,17 +277,19 @@ public abstract class DynamicResourcePack implements PackResources {
     }
 
     protected void addBytes(ResourceLocation id, byte[] bytes) {
-        this.namespaces.add(id.getNamespace());
-        this.resources.put(id, bytes);
-        this.searchTrie.insert(id);
-        if (addToStatic) markNotClearable(id);
-        //debug
-        if (generateDebugResources) {
-            try {
-                Path p = Paths.get("debug", "generated_resource_pack").resolve(id.getNamespace() + "/" + id.getPath());
-                Files.createDirectories(p.getParent());
-                Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-            } catch (IOException ignored) {
+        synchronized (this) {
+            this.namespaces.add(id.getNamespace());
+            this.resources.put(id, bytes);
+            this.searchTrie.insert(id);
+            if (addToStatic) markNotClearable(id);
+            //debug
+            if (generateDebugResources) {
+                try {
+                    Path p = Paths.get("debug", "generated_resource_pack").resolve(id.getNamespace() + "/" + id.getPath());
+                    Files.createDirectories(p.getParent());
+                    Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+                } catch (IOException ignored) {
+                }
             }
         }
     }
