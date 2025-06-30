@@ -2,9 +2,9 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.model.loading.v1.FabricBakedModelManager;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
@@ -18,12 +18,12 @@ import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.fabric.ITextureAtlasSpriteExtension;
-import net.mehvahdjukaar.moonlight.core.mixins.fabric.ModelManagerAccessor;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabricClient;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -47,8 +47,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -131,12 +133,13 @@ public class ClientHelperImpl {
                 new ReloadWrapper(Suppliers.memoize(listener::get), name));
     }
 
-    private record ReloadWrapper(Supplier<PreparableReloadListener> inner,ResourceLocation getFabricId) implements IdentifiableResourceReloadListener {
+    private record ReloadWrapper(Supplier<PreparableReloadListener> inner,
+                                 ResourceLocation getFabricId) implements IdentifiableResourceReloadListener {
 
         @Override
         public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
-                                             ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
-                                             Executor backgroundExecutor, Executor gameExecutor) {
+                                              ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
+                                              Executor backgroundExecutor, Executor gameExecutor) {
             return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
         }
     }
@@ -251,18 +254,18 @@ public class ClientHelperImpl {
         }
     }
 
-    public static final List<Consumer<ClientHelper.ShaderEvent>> SHADER_REGISTRATIONS = Collections.synchronizedList(new ArrayList<>());
-
     public static void addShaderRegistration(Consumer<ClientHelper.ShaderEvent> eventListener) {
         Moonlight.assertInitPhase();
-        SHADER_REGISTRATIONS.add(eventListener);
+        CoreShaderRegistrationCallback.EVENT.register(ev -> {
+            eventListener.accept(ev::register);
+        });
     }
 
     public static void addItemRenderersRegistration(Consumer<ClientHelper.ItemRendererEvent> eventListener) {
         MoonlightFabricClient.PRE_CLIENT_SETUP_WORK.add(() -> {
             eventListener.accept((item, renderer) -> {
                 var rend = renderer.getItemRenderer();
-                if(rend instanceof BuiltinItemRendererRegistry.DynamicItemRenderer br){
+                if (rend instanceof BuiltinItemRendererRegistry.DynamicItemRenderer br) {
                     BuiltinItemRendererRegistry.INSTANCE.register(item, br);
                 }
             });

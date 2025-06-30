@@ -49,6 +49,7 @@ import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -113,7 +114,7 @@ public class ClientHelper {
     }
 
     public interface ShaderEvent {
-        void register(ResourceLocation id, VertexFormat vertexFormat, Consumer<ShaderInstance> setter);
+        void register(ResourceLocation id, VertexFormat vertexFormat, Consumer<ShaderInstance> setter) throws IOException;
     }
 
     @ExpectPlatform

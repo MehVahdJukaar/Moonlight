@@ -10,7 +10,6 @@
     "ClientLanguagesMixin",
     "ClientPacketListenerMixin",
     "EffectInstanceMixin",
-    "GameRendererMixin",
     "ItemRendererAccessor",
     "ItemRendererMixin",
     "LocalPlayerMixin",
@@ -22,7 +21,6 @@
     "SelfItemStackRenderer",
     "SelfModFlowingFluidMixin",
     "SelfModFluidRendererPropertiesMixin",
-    "ShaderInstanceMixin",
     "TextureAtlasMixin",
     "TextureAtlasSpriteMixin"
   ],
