@@ -79,7 +79,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
             }
             return Optional.empty();
         }
-        // DEFAULT
+        /// DEFAULT
         if (path.endsWith("_planks")) { //needs to contain planks in its name
             name = path.substring(0, path.length() - "_planks".length());
         } else if (path.startsWith("planks_")) {
@@ -100,7 +100,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 name = name.replace("/", "_");
                 ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
                 Block logBlock = findLog(id);
-                if (logBlock != null) {
+                if (logBlock != null && Objects.isNull(get(id))) {
                     return Optional.of(new WoodType(id, baseBlock, logBlock));
                 }
             }
