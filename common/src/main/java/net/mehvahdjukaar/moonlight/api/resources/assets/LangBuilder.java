@@ -95,8 +95,8 @@ public class LangBuilder {
             String typeName = lang.getEntry(type.getTranslationKey());
             if (typeName != null) {
                 lang.addEntry(item.getDescriptionId(), String.format(base, typeName));
-            } else Moonlight.LOGGER.error("Could not find translation line {}", type.getTranslationKey());
-        } else Moonlight.LOGGER.error("Could not find translation line {}", key);
+            } else Moonlight.LOGGER.error("Could not find translation line for typeName: {}", type.getTranslationKey());
+        } else Moonlight.LOGGER.error("Could not find translation line for base: {}", key);
     }
 
     public static void addDynamicEntry(AfterLanguageLoadEvent lang,
