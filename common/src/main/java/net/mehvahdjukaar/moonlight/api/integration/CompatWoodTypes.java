@@ -425,8 +425,6 @@ public class CompatWoodTypes {
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "chipped", "apple_acacia", "apple_acacia_leaves", "acacia"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "chipped", "apple_acacia", "apple_acacia_leaves", "acacia"));
-        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "chipped", "cherry_acacia", "cherry_acacia_leaves", "acacia"));
         BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
                 "chipped", "dead_acacia", "dead_acacia_leaves", "acacia"));
