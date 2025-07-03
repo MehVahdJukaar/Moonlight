@@ -88,17 +88,21 @@ public abstract class BlockType {
      * @return namespace:folder/shortenedID/namespace/prefix_TYPENAME_suffix
      * OPTIONAL: modId, folder, prefix can be empty
      */
-    public String createFullIdWith(String modIdOrEmpty, String folderOrEmpty, String shortenedId, String prefixOrEmpty, String suffix) {
+    public String createFullIdWith(String modIdOrEmpty, String folderOrEmpty, String shortenedIdOrEmpty, String prefixOrEmpty, String suffix) {
         String modIded = (modIdOrEmpty.isEmpty()) ? "" : modIdOrEmpty + ":";
         String foldered = (folderOrEmpty.isEmpty()) ? "" : folderOrEmpty + "/";
+        String namespaced = (modIdOrEmpty.equals(this.getNamespace())) ? "" : this.getNamespace() +"/";
+        String shortenedId = (shortenedIdOrEmpty.isEmpty()) ? "" : shortenedIdOrEmpty + "/";
 
         String prefixed = "";
         if (prefixOrEmpty.contains("/")) prefixed = prefixOrEmpty;
         else if (!prefixOrEmpty.isEmpty()) prefixed = prefixOrEmpty + "_";
 
-        String suffixed = (suffix.isEmpty()) ? "" : "_" + suffix;
+        String suffixed = "";
+        if (suffix.matches("\\.(png|json)")) suffixed = suffix;
+        else if (!suffix.isEmpty()) suffixed = "_" + suffix;
 
-        return modIded + foldered + shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() + suffixed;
+        return modIded + foldered + shortenedId + namespaced + prefixed + this.getTypeName() + suffixed;
     }
 
     @Override
@@ -145,6 +149,7 @@ public abstract class BlockType {
         return this.getNamespace().equals("minecraft");
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends BlockType> BlockTypeRegistry<T> getRegistry() {
         return (BlockTypeRegistry<T>) BlockSetInternal.getRegistry(this.getClass());
     }
@@ -160,6 +165,7 @@ public abstract class BlockType {
     }
 
     @Nullable
+    @SuppressWarnings("SameParameterValue")
     protected <V> V findRelatedEntry(String before, String after, Registry<V> reg) {
         if (!after.isEmpty()) after = "_" + after;
         ResourceLocation[] targets = {
