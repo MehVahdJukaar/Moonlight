@@ -24,39 +24,49 @@ public class CompatWoodTypes {
         advancedWoodFinder("undergarden", "ancient_root", "ancient_root_planks", "ancient_root");
 
         // Mofu's Better End
-        advancedWoodFinder("mofus_better_end_", "weepingstar", "weepingstar_planks", "weepingstar_log","STRIPPED_LOG-weepingstar_stripped_log", "LEAVES-weepingstar_leaf");
+        advancedWoodFinder("mofus_better_end_", "weepingstar", "weepingstar_planks", "weepingstar_log",
+                "STRIPPED_LOG-weepingstar_stripped_log", "LEAVES-weepingstar_leaf");
 
-        advancedWoodFinder("mofus_better_end_", "frost_root", "frost_root_plank", "frost_root_log", "STRIPPED_LOG-stripped_frost_root_log");
+        advancedWoodFinder("mofus_better_end_", "frost_root", "frost_root_plank", "frost_root_log",
+                "STRIPPED_LOG-stripped_frost_root_log");
 
         // Burnt
         mediumWoodFinder("burnt", "smoldering_bamboo", "smoldering_bamboo_block", "");
 
         // Botania
-        advancedWoodFinder("botania", "livingwood", "livingwood_planks", "livingwood_log","STRIPPED_LOG-stripped_livingwood_log");
+        advancedWoodFinder("botania", "livingwood", "livingwood_planks", "livingwood_log",
+                "STRIPPED_LOG-stripped_livingwood_log");
 
-        advancedWoodFinder("botania", "dreamwood", "dreamwood_planks", "dreamwood_log", "STRIPPED_LOG-stripped_dreamwood_log");
+        advancedWoodFinder("botania", "dreamwood", "dreamwood_planks", "dreamwood_log",
+                "STRIPPED_LOG-stripped_dreamwood_log");
 
         // Caverns-And-Chasms
         simpleWoodFinder("caverns_and_chasms", "azalea", "azalea_leaves");
 
         // The Outer End
-        advancedWoodFinder("outer_end", "azure", "azure_planks", "_azurestem", "WOOD-azure_pith", "STRIPPED_LOG-azure_stripped_stem", "STRIPPED_WOOD-azure_stripped_pith");
+        advancedWoodFinder("outer_end", "azure", "azure_planks", "_azurestem",
+                "STRIPPED_LOG-azure_stripped_stem", "WOOD-azure_pith", "STRIPPED_WOOD-azure_stripped_pith");
 
         // Upgrade Aquatic
-        advancedWoodFinder("upgrade_aquatic", "driftwood", "driftwood_planks", "driftwood_log","STRIPPED_LOG-stripped_driftwood_log");
+        advancedWoodFinder("upgrade_aquatic", "driftwood", "driftwood_planks", "driftwood_log",
+                "STRIPPED_LOG-stripped_driftwood_log", "WOOD-driftwood", "STRIPPED_WOOD-stripped_driftwood");
 
         // Atmospheric
-        advancedWoodFinder("atmospheric", "grimwood", "grimwood_planks", "grimwood_log", "STRIPPED_LOG-stripped_grimwood_log");
+        advancedWoodFinder("atmospheric", "grimwood", "grimwood_planks", "grimwood_log",
+                "STRIPPED_LOG-stripped_grimwood_log", "WOOD-grimwood", "STRIPPED_WOOD-stripped_grimwood");
 
-        advancedWoodFinder("atmospheric", "rosewood", "rosewood_planks", "rosewood_log", "STRIPPED_LOG-stripped_rosewood_log");
+        advancedWoodFinder("atmospheric", "rosewood", "rosewood_planks", "rosewood_log",
+                "STRIPPED_LOG-stripped_rosewood_log", "WOOD-rosewood", "STRIPPED_WOOD-stripped_rosewood");
 
         // Deeper And Darker
         simplePlanksStemFinder("deeperdarker", "blooming", "bloom_planks");
 
         // Eternal Tales
-        advancedWoodFinder("eternal_tales", "comets", "comets_planks", "comets_log", "STRIPPED_LOG-striped_comets_log", "WOOD-comets_wood", "STRIPPED_WOOD-stripped_comets_wood");
+        advancedWoodFinder("eternal_tales", "comets", "comets_planks", "comets_log",
+                "STRIPPED_LOG-striped_comets_log", "WOOD-comets_wood", "STRIPPED_WOOD-stripped_comets_wood");
 
-        advancedWoodFinder("eternal_tales", "purgatorium", "purgatorium_planks", "purgatorium_log", "STRIPPED_LOG-purgatorium_stripped_log", "WOOD-purgatorium_wood", "STRIPPED_WOOD-stripped_purgatorium_wood");
+        advancedWoodFinder("eternal_tales", "purgatorium", "purgatorium_planks", "purgatorium_log",
+                "STRIPPED_LOG-purgatorium_stripped_log", "WOOD-purgatorium_wood", "STRIPPED_WOOD-stripped_purgatorium_wood");
 
         // Blocks +
         simpleStemFinder("blocksplus", "chorus");
@@ -201,7 +211,8 @@ public class CompatWoodTypes {
         // Nourished End
         mediumWoodFinder("nourished_end", "verdant", "verdant_stalk", "verdant_hyphae");
 
-        advancedWoodFinder("nourished_end", "cerulean", "cerulean_planks", "cerulean_stem_thick","STRIPPED_LOG-cerulean_stem_stripped", "WOOD-cerulean_hyphae",  "STRIPPED_WOOD-stripped_cerulean_hyphae");
+        advancedWoodFinder("nourished_end", "cerulean", "cerulean_planks", "cerulean_stem_thick",
+                "STRIPPED_LOG-cerulean_stem_stripped", "WOOD-cerulean_hyphae",  "STRIPPED_WOOD-stripped_cerulean_hyphae");
 
         // Gardens Of The Dead
         simpleStemFinder("gardens_of_the_dead", "soulblight");
