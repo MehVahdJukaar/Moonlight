@@ -1,4 +1,13 @@
--  Improved the RegEx in BlockTypeResTrnsformer to fix [#968](https://github.com/MehVahdJukaar/WoodGood/issues/968)
+- Added Debug Config in **moonlight-client.toml** to help with debugging an issue for StoneZone, EveryCompat, & GemsRealm 
+- Improved the detection system for WoodType & LeavesType to ensure the same type is not added twice 
+- Updated a method in BlockType for StoneZone, EveryCompat, and GemsRealm
+- CompatWoodTypes: Removed a duplicated LeavesType.Finder
+
+---
+
+## v2.14.11
+
+- Improved the RegEx in BlockTypeResTrnsformer to fix [#968](https://github.com/MehVahdJukaar/WoodGood/issues/968)
 
 ---
 
