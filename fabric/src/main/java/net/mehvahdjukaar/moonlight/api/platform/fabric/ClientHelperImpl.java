@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
@@ -23,7 +22,6 @@ import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -257,7 +255,13 @@ public class ClientHelperImpl {
     public static void addShaderRegistration(Consumer<ClientHelper.ShaderEvent> eventListener) {
         Moonlight.assertInitPhase();
         CoreShaderRegistrationCallback.EVENT.register(ev -> {
-            eventListener.accept(ev::register);
+            eventListener.accept((id, vertexFormat, setter) -> {
+                try {
+                    ev.register(id, vertexFormat, setter);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to register shader: " + id, e);
+                }
+            });
         });
     }
 

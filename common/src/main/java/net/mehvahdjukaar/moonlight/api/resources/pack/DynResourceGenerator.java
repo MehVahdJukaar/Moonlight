@@ -11,14 +11,15 @@ import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,9 +74,15 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     }
 
     /**
-     * @return if this pack assets can depend on other loaded resource packs, aka we need to access some textures that aren't strictly the vanilla ones
+     * If this pack should be cleared on reload. Overrie if you need to have your pack never cleared, for example when making a pack hat just loads once
      */
-    public abstract boolean dependsOnLoadedPacks();
+    public boolean shouldClearOnReload() {
+        return runsOnEveryReload();
+    }
+
+    public boolean runsOnEveryReload() {
+        return true;
+    }
 
     @Deprecated(forRemoval = true) //just deprecated as it shouldnt be overritten aymore and will become final private
     public void regenerateDynamicAssets(ResourceManager manager) {
@@ -167,43 +174,26 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     }
 
     protected final void reloadResources(ResourceManager manager) {
-        boolean resourcePackSupport = this.dependsOnLoadedPacks();
         //first clear all pack content if it should be cleared
 
+        boolean wasFirstReload = false;
         if (!this.hasBeenInitialized) {
+            wasFirstReload = true;
             this.hasBeenInitialized = true;
-            //TODO: figure out why this is need. I got no clue but we get missing models if not.
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
-            if (!resourcePackSupport) {
-                var repository = this.getRepository();
-                if (repository != null) {
-                    Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
-                    //no resource pack support, just include these
-                    FilteredResManager vanillaManager = FilteredResManager.including(repository, this.dynamicPack.packType,
-                            "vanilla", "mod_resources");
-                    Moonlight.CAN_EARLY_RELOAD_HACK.set(true);
-                    this.regenerateDynamicAssets(vanillaManager);
-                    vanillaManager.close();
-                } else {
-                    this.regenerateDynamicAssets(manager);
-                }
-            }
         }
 
         //generate textures
-        if (resourcePackSupport) {
+        if (runsOnEveryReload() || wasFirstReload) {
             var repository = this.getRepository();
-            // only needed on second reload since there will be no pack on first
-            // and only if the pack itself doesn't get cleared
-            if (repository != null && hasBeenInitialized && !dynamicPack.clearOnReload) {
+            if (repository != null) {
                 Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
                 FilteredResManager nonSelfManager = FilteredResManager.excluding(repository, this.dynamicPack.packType,
                         dynamicPack.packId());
                 Moonlight.CAN_EARLY_RELOAD_HACK.set(true);
                 this.regenerateDynamicAssets(nonSelfManager);
                 nonSelfManager.close();
-            }
-            this.regenerateDynamicAssets(manager);
+            } else this.regenerateDynamicAssets(manager);
         }
     }
 
@@ -295,6 +285,33 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
         }, EarlyPackReloadEvent.class);
 
+    }
+
+    @ApiStatus.Internal
+    public static void clearAfterReload(PackType targetType) {
+        //this will be called multiple times. shunt be an issue I hope
+        Set<DynamicResourcePack> packs = new HashSet<>();
+        for (var g : GENERATORS) {
+            if (g.dynamicPack.packType == targetType && g.shouldClearOnReload()) {
+                packs.add(g.dynamicPack);
+            }
+        }
+        for (var p : packs) {
+            p.clearNonStatic();
+        }
+    }
+
+    @ApiStatus.Internal
+    public static void clearBeforeReload(PackType targetType) {
+        Set<DynamicResourcePack> packs = new HashSet<>();
+        for (var g : GENERATORS) {
+            if (g.dynamicPack.packType == targetType && g.shouldClearOnReload()) {
+                packs.add(g.dynamicPack);
+            }
+        }
+        for (var p : packs) {
+            p.clearAllContent();
+        }
     }
 
 }

@@ -44,27 +44,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public abstract class DynamicResourcePack implements PackResources {
-    private static final List<DynamicResourcePack> INSTANCES = Collections.synchronizedList(new ArrayList<>());
-
-    @ApiStatus.Internal
-    public static void clearAfterReload(PackType targetType) {
-        //this will be called multiple times. shunt be an issue I hope
-        for (var p : DynamicResourcePack.INSTANCES) {
-            if (p.packType == targetType) {
-                p.clearNonStatic();
-            }
-        }
-    }
-
-    @ApiStatus.Internal
-    public static void clearBeforeReload(PackType targetType) {
-        for (var p : DynamicResourcePack.INSTANCES) {
-            if (p.packType == targetType) {
-                p.clearAllContent();
-            }
-        }
-    }
-
 
     protected static final Logger LOGGER = LogManager.getLogger();
 
@@ -81,14 +60,13 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final String mainNamespace;
 
-
-    protected boolean clearOnReload = true;
     protected Set<ResourceLocation> staticResources = new HashSet<>();
 
     //for debug or to generate assets
     protected boolean generateDebugResources;
-
+    private boolean needsClearingNonStatic = false;
     boolean addToStatic = false;
+    private boolean wasRegistered = false;
 
     protected DynamicResourcePack(ResourceLocation name, PackType type) {
         this(name, type, Pack.Position.TOP, false, false);
@@ -124,8 +102,8 @@ public abstract class DynamicResourcePack implements PackResources {
         return Component.translatable(LangBuilder.getReadableName(mainNamespace + "_dynamic_resources"));
     }
 
+    @Deprecated(forRemoval = true)
     public void setClearOnReload(boolean canBeCleared) {
-        this.clearOnReload = canBeCleared;
     }
 
     /**
@@ -171,31 +149,32 @@ public abstract class DynamicResourcePack implements PackResources {
      * Registers this pack. Call on mod init
      */
     public void registerPack() {
-
-        if (!INSTANCES.contains(this)) {
-            PlatHelper.registerResourcePack(this.packType, () ->
-                    Pack.readMetaAndCreate(
-                            this.locationInfo,
-                            new Pack.ResourcesSupplier() {
-                                @Override
-                                public PackResources openPrimary(PackLocationInfo location) {
-                                    return DynamicResourcePack.this;
-                                }
-
-                                @Override
-                                public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
-                                    return DynamicResourcePack.this;
-                                }
-                            },// pack supplier
-                            this.packType,
-                            new PackSelectionConfig(
-                                    true,    // required -- this MAY need to be true for the pack to be enabled by default
-                                    Pack.Position.TOP,
-                                    false // fixed position
-                            )
-                    ));
-            INSTANCES.add(this);
+        if (wasRegistered) {
+            return;
+        } else {
+            wasRegistered = true;
         }
+        PlatHelper.registerResourcePack(this.packType, () ->
+                Pack.readMetaAndCreate(
+                        this.locationInfo,
+                        new Pack.ResourcesSupplier() {
+                            @Override
+                            public PackResources openPrimary(PackLocationInfo location) {
+                                return DynamicResourcePack.this;
+                            }
+
+                            @Override
+                            public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
+                                return DynamicResourcePack.this;
+                            }
+                        },// pack supplier
+                        this.packType,
+                        new PackSelectionConfig(
+                                true,    // required -- this MAY need to be true for the pack to be enabled by default
+                                Pack.Position.TOP,
+                                false // fixed position
+                        )
+                ));
     }
 
     //@Override
@@ -337,37 +316,38 @@ public abstract class DynamicResourcePack implements PackResources {
     @ApiStatus.Internal
     protected void clearNonStatic() {
         if (!CommonConfigs.CLEAR_RESOURCES.get()) return;
-        if (!this.needsClearingNonStatic) return;
-        synchronized (this) {
-            this.needsClearingNonStatic = false;
-            boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
-            // clear trie entirely and re populate as we always expect to have way less staitc resources than others
-            if (!mf) this.searchTrie.clear();
+        if (this.needsClearingNonStatic) {
+            synchronized (this) {
+                this.needsClearingNonStatic = false;
+                boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
+                // clear trie entirely and re populate as we always expect to have way less staitc resources than others
+                if (!mf) this.searchTrie.clear();
 
-            for (var r : this.resources.keySet()) {
-                if (mf && modernFixHack(r.getPath())) {
-                    continue;
-                }
-                if (!this.staticResources.contains(r)) {
-                    this.resources.remove(r);
-                }
-            }
-
-
-            if (mf) {
-                List<String> toRemove = new ArrayList<>();
-                for (String namespace : this.searchTrie.listFolders("")) {
-                    for (String f : this.searchTrie.listFolders(namespace)) {
-                        if (!modernFixHack(f)) {
-                            toRemove.add(namespace + "/" + f);
-                        }
+                for (var r : this.resources.keySet()) {
+                    if (mf && modernFixHack(r.getPath())) {
+                        continue;
+                    }
+                    if (!this.staticResources.contains(r)) {
+                        this.resources.remove(r);
                     }
                 }
-                toRemove.forEach(this.searchTrie::remove);
-            }
-            // rebuild search trie with just static
-            for (var s : staticResources) {
-                this.searchTrie.insert(s);
+
+
+                if (mf) {
+                    List<String> toRemove = new ArrayList<>();
+                    for (String namespace : this.searchTrie.listFolders("")) {
+                        for (String f : this.searchTrie.listFolders(namespace)) {
+                            if (!modernFixHack(f)) {
+                                toRemove.add(namespace + "/" + f);
+                            }
+                        }
+                    }
+                    toRemove.forEach(this.searchTrie::remove);
+                }
+                // rebuild search trie with just static
+                for (var s : staticResources) {
+                    this.searchTrie.insert(s);
+                }
             }
         }
     }
@@ -375,16 +355,13 @@ public abstract class DynamicResourcePack implements PackResources {
     // Called after each reload
     @ApiStatus.Internal
     protected void clearAllContent() {
-        if (this.clearOnReload) {
-            synchronized (this) {
-                this.searchTrie.clear();
-                this.resources.clear();
-                this.needsClearingNonStatic = true;
-            }
+        synchronized (this) {
+            this.searchTrie.clear();
+            this.resources.clear();
+            this.needsClearingNonStatic = true; //clear non static after dynamic textures have been stitched
         }
     }
 
-    private boolean needsClearingNonStatic = false;
 
     private static final boolean MODERN_FIX = CompatHandler.MODERNFIX && ModernFixCompat.areLazyResourcesOn();
 

@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.*;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
@@ -124,7 +125,7 @@ public class Moonlight {
     private static void afterDataReloadOrDataSync(RegistryAccess registryAccess, boolean client) {
         EARLY_REGISTRY_ACCESS.set(new WeakReference<>(registryAccess));
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
-        DynamicResourcePack.clearAfterReload(PackType.SERVER_DATA);
+        DynResourceGenerator.clearAfterReload(PackType.SERVER_DATA);
         DynamicHolder.clearCache();
 
         HolderReference.clearCache();

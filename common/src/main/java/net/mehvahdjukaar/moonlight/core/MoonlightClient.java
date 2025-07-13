@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
@@ -8,21 +7,21 @@ import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3f;
 
+import java.io.IOException;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 @ApiStatus.Internal
 public class MoonlightClient {
@@ -55,8 +54,8 @@ public class MoonlightClient {
     }
 
     public static void setupClient() {
-       var e = ExtraModelData.EMPTY;
-       //classloader on main thread to prevent possible race condition BS
+        var e = ExtraModelData.EMPTY;
+        //classloader on main thread to prevent possible race condition BS
     }
 
     private static class MergedDynamicTexturePack extends DynamicTexturePack {
@@ -82,7 +81,7 @@ public class MoonlightClient {
 
     @EventCalled
     public static void afterTextureReload() {
-        DynamicResourcePack.clearAfterReload(PackType.CLIENT_RESOURCES);
+        DynResourceGenerator.clearAfterReload(PackType.CLIENT_RESOURCES);
     }
 
     public static void setMipMap(boolean b) {
@@ -109,45 +108,40 @@ public class MoonlightClient {
         }
 
         @Override
-        public boolean dependsOnLoadedPacks() {
-            return true;
-        }
-
-
-        @Override
-        public void regenerateDynamicAssets(ResourceManager manager) {
+        public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
             fixShade = ClientConfigs.FIX_SHADE.get();
             if (fixShade != ClientConfigs.ShadeFix.FALSE) {
+                executor.accept((manager, sink) -> {
+                    sink.addBytes(ResourceLocation.parse("shaders/include/light.glsl"),
+                            ("""
+                                    #version 150
+                                    
+                                    #define MINECRAFT_LIGHT_POWER   (0.6)
+                                    #define MINECRAFT_LIGHT_POWER_FIXED   (0.5)
+                                    #define MINECRAFT_AMBIENT_LIGHT (0.4)
+                                    #define MINECRAFT_AMBIENT_LIGHT_FIXED (0.5)
+                                    
+                                    vec4 minecraft_mix_light(vec3 lightDir0, vec3 lightDir1, vec3 normal, vec4 color) {
+                                        lightDir0 = normalize(lightDir0);
+                                        lightDir1 = normalize(lightDir1);
+                                        float light0 = max(0.0, dot(lightDir0, normal));
+                                        float light1 = max(0.0, dot(lightDir1, normal));
+                                    
+                                        float dotP = dot(lightDir0, lightDir1);
+                                        bool isFixed = dotP > 0.20 && dotP < 0.205;
+                                        float lightPow = isFixed ? MINECRAFT_LIGHT_POWER_FIXED : MINECRAFT_LIGHT_POWER;
+                                        float ambientLight = isFixed ? MINECRAFT_AMBIENT_LIGHT_FIXED : MINECRAFT_AMBIENT_LIGHT;
+                                    
+                                        float lightAccum = min(1.0, (light0 + light1) * lightPow + ambientLight);
+                                        return vec4(color.rgb * lightAccum, color.a);
+                                    }
+                                    
+                                    vec4 minecraft_sample_lightmap(sampler2D lightMap, ivec2 uv) {
+                                        return texture(lightMap, clamp(uv / 256.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0)));
+                                    }""").getBytes()
 
-                dynamicPack.addBytes(ResourceLocation.parse("shaders/include/light.glsl"),
-                        ("""
-                                #version 150
-                                
-                                #define MINECRAFT_LIGHT_POWER   (0.6)
-                                #define MINECRAFT_LIGHT_POWER_FIXED   (0.5)
-                                #define MINECRAFT_AMBIENT_LIGHT (0.4)
-                                #define MINECRAFT_AMBIENT_LIGHT_FIXED (0.5)
-                                
-                                vec4 minecraft_mix_light(vec3 lightDir0, vec3 lightDir1, vec3 normal, vec4 color) {
-                                    lightDir0 = normalize(lightDir0);
-                                    lightDir1 = normalize(lightDir1);
-                                    float light0 = max(0.0, dot(lightDir0, normal));
-                                    float light1 = max(0.0, dot(lightDir1, normal));
-                                
-                                    float dotP = dot(lightDir0, lightDir1);
-                                    bool isFixed = dotP > 0.20 && dotP < 0.205;
-                                    float lightPow = isFixed ? MINECRAFT_LIGHT_POWER_FIXED : MINECRAFT_LIGHT_POWER;
-                                    float ambientLight = isFixed ? MINECRAFT_AMBIENT_LIGHT_FIXED : MINECRAFT_AMBIENT_LIGHT;
-                                
-                                    float lightAccum = min(1.0, (light0 + light1) * lightPow + ambientLight);
-                                    return vec4(color.rgb * lightAccum, color.a);
-                                }
-                                
-                                vec4 minecraft_sample_lightmap(sampler2D lightMap, ivec2 uv) {
-                                    return texture(lightMap, clamp(uv / 256.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0)));
-                                }""").getBytes()
-
-                        , ResType.GENERIC);
+                            , ResType.GENERIC);
+                });
             }
         }
     }

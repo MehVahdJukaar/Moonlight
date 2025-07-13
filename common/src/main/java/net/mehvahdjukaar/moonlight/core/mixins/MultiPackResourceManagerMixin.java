@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
@@ -40,7 +41,8 @@ public abstract class MultiPackResourceManagerMixin implements CloseableResource
             if (!PlatHelper.isInitializing()) {
                 //reload dynamic packs before reloading data packs
                 //first clear all packs. ugly I know
-                DynamicResourcePack.clearBeforeReload(type);
+                //this will be called multiple times. shunt be an issue I hope
+                DynResourceGenerator.clearBeforeReload(type);
                 MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(packs, this, type), EarlyPackReloadEvent.class);
             }
         }

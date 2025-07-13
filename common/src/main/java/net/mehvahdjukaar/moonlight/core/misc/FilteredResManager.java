@@ -24,8 +24,8 @@ public class FilteredResManager extends MultiPackResourceManager {
     }
 
     public static FilteredResManager excluding(PackRepository original, PackType packType, String... packs) {
-        Set<String> whitelist = Set.of(packs);
-        var list = original.getAvailablePacks().stream().filter(p -> !whitelist.contains(p.getId()))
+        Set<String> blacklist = Set.of(packs);
+        var list = original.getAvailablePacks().stream().filter(p -> !blacklist.contains(p.getId()))
                 .map(Pack::open).toList();
         return new FilteredResManager(packType, list);
     }

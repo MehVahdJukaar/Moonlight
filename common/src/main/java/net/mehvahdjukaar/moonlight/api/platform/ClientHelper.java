@@ -114,7 +114,7 @@ public class ClientHelper {
     }
 
     public interface ShaderEvent {
-        void register(ResourceLocation id, VertexFormat vertexFormat, Consumer<ShaderInstance> setter) throws IOException;
+        void register(ResourceLocation id, VertexFormat vertexFormat, Consumer<ShaderInstance> setter);
     }
 
     @ExpectPlatform
