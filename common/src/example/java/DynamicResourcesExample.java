@@ -60,9 +60,5 @@ public class DynamicResourcesExample {
             return Moonlight.LOGGER;
         }
 
-        @Override
-        public boolean dependsOnLoadedPacks() {
-            return true;
-        }
     }
 }

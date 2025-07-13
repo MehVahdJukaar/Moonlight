@@ -14,6 +14,7 @@ import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
@@ -129,7 +130,7 @@ public class Moonlight {
         EARLY_REGISTRY_ACCESS.set(new WeakReference<>(registryAccess));
 
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
-        DynamicResourcePack.clearAfterReload(PackType.SERVER_DATA);
+        DynResourceGenerator.clearAfterReload(PackType.SERVER_DATA);
         DynamicHolder.clearCache();
         DispenserHelper.reload(registryAccess);
     }

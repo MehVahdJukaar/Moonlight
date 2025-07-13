@@ -46,27 +46,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public abstract class DynamicResourcePack implements PackResources {
-    protected static final List<DynamicResourcePack> INSTANCES = Collections.synchronizedList(new ArrayList<>());
-
-    @ApiStatus.Internal
-    public static void clearAfterReload(PackType targetType) {
-        //this will be called multiple times. shunt be an issue I hope
-        for (var p : DynamicResourcePack.INSTANCES) {
-            if (p.packType == targetType) {
-                p.clearNonStatic();
-            }
-        }
-    }
-
-    @ApiStatus.Internal
-    public static void clearBeforeReload(PackType targetType) {
-        for (var p : DynamicResourcePack.INSTANCES) {
-            if (p.packType == targetType) {
-                p.clearAllContent();
-            }
-        }
-    }
-
 
     protected static final Logger LOGGER = LogManager.getLogger();
 
@@ -83,13 +62,13 @@ public abstract class DynamicResourcePack implements PackResources {
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final String mainNamespace;
 
-
     protected Set<ResourceLocation> staticResources = new HashSet<>();
 
     //for debug or to generate assets
     protected boolean generateDebugResources;
-
+    private boolean needsClearingNonStatic = false;
     boolean addToStatic = false;
+    private boolean wasRegistered = false;
 
     protected DynamicResourcePack(ResourceLocation name, PackType type) {
         this(name, type, Pack.Position.TOP, false, false);
@@ -114,6 +93,7 @@ public abstract class DynamicResourcePack implements PackResources {
         return Component.translatable(LangBuilder.getReadableName(mainNamespace + "_dynamic_resources"));
     }
 
+    @Deprecated(forRemoval = true)
     public void setClearOnReload(boolean canBeCleared) {
     }
 
@@ -162,21 +142,23 @@ public abstract class DynamicResourcePack implements PackResources {
     /**
      * Registers this pack. Call on mod init
      */
-    protected void registerPack() {
-        if (!INSTANCES.contains(this)) {
-            PlatHelper.registerResourcePack(this.packType, () ->
-                    Pack.create(
+    protected void registerPack() {if (wasRegistered) {
+            return;
+        } else {
+            wasRegistered = true;
+        }
+        PlatHelper.registerResourcePack(this.packType, () ->
+                Pack.create(
                             this.packId(),    // id
-                            this.getTitle(), // title
+                        this.getTitle(), // title
                             true,    // required -- this MAY need to be true for the pack to be enabled by default
                             (s) -> this, // pack supplier
                             new Pack.Info(metadata.get().getDescription(), metadata.get().getPackFormat(), FeatureFlagSet.of()), // description
                             this.packType,
                             Pack.Position.TOP,
                             this.fixed, // fixed position? no
-                            PackSource.BUILT_IN));
-            INSTANCES.add(this);
-        }
+                        PackSource.BUILT_IN));
+
     }
 
     //@Override
@@ -332,8 +314,8 @@ public abstract class DynamicResourcePack implements PackResources {
     @ApiStatus.Internal
     protected void clearNonStatic() {
         if (!CommonConfigs.CLEAR_RESOURCES.get()) return;
-        if (!this.needsClearingNonStatic) return;
-        this.needsClearingNonStatic = false;
+        if (this.needsClearingNonStatic) {
+            this.needsClearingNonStatic = false;
         boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
         // clear trie entirely and re populate as we always expect to have way less staitc resources than others
         if (!mf) this.searchTrie.clear();
@@ -348,20 +330,22 @@ public abstract class DynamicResourcePack implements PackResources {
         }
 
 
-        if (mf) {
-            List<String> toRemove = new ArrayList<>();
-            for (String namespace : this.searchTrie.listFolders("")) {
-                for (String f : this.searchTrie.listFolders(namespace)) {
-                    if (!modernFixHack(f)) {
-                        toRemove.add(namespace + "/" + f);
+                if (mf) {
+                    List<String> toRemove = new ArrayList<>();
+                    for (String namespace : this.searchTrie.listFolders("")) {
+                        for (String f : this.searchTrie.listFolders(namespace)) {
+                            if (!modernFixHack(f)) {
+                                toRemove.add(namespace + "/" + f);
+                            }
+                        }
                     }
+                    toRemove.forEach(this.searchTrie::remove);
+                }
+                // rebuild search trie with just static
+                for (var s : staticResources) {
+                    this.searchTrie.insert(s);
                 }
             }
-            toRemove.forEach(this.searchTrie::remove);
-        }
-        // rebuild search trie with just static
-        for (var r : staticResources) {
-            this.searchTrie.insert(r);
         }
     }
 
@@ -371,11 +355,10 @@ public abstract class DynamicResourcePack implements PackResources {
         synchronized (this) {
             this.searchTrie.clear();
             this.resources.clear();
-            this.needsClearingNonStatic = true;
+            this.needsClearingNonStatic = true; //clear non static after dynamic textures have been stitched
         }
     }
 
-    private boolean needsClearingNonStatic = false;
 
     private static final boolean MODERN_FIX = CompatHandler.MODERNFIX && ModernFixCompat.areLazyResourcesOn();
 
