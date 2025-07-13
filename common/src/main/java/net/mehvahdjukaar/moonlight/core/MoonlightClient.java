@@ -111,6 +111,8 @@ public class MoonlightClient {
         public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
             fixShade = ClientConfigs.FIX_SHADE.get();
             if (fixShade != ClientConfigs.ShadeFix.FALSE) {
+                applyFixedShade();
+
                 executor.accept((manager, sink) -> {
                     sink.addBytes(ResourceLocation.parse("shaders/include/light.glsl"),
                             ("""

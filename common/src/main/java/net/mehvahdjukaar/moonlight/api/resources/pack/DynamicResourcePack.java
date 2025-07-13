@@ -106,6 +106,10 @@ public abstract class DynamicResourcePack implements PackResources {
     public void setClearOnReload(boolean canBeCleared) {
     }
 
+    @Deprecated(forRemoval = true)
+    public void setClearOnReload(boolean canBeCleared) {
+    }
+
     /**
      * Marks this texture as non-clearable.
      * By default, all textures will be cleared after texture atlases have been created

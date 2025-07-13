@@ -131,7 +131,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
 
     // Adds a mapping from leaves type to wood type.
-    // Used for non conventional wood types or leaves types that dont have a log
+    // Used for non-conventional wood types or leaves types that don't have a log
     public void addLeavesToWoodMapping(ResourceLocation leavesTypeId, ResourceLocation woodTypeId) {
         specialLeavesToWood.put(leavesTypeId, woodTypeId);
     }

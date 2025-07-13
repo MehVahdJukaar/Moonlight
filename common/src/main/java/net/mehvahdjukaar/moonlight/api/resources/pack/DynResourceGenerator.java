@@ -78,6 +78,13 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     public boolean shouldClearOnReload() {
         return runsOnEveryReload();
     }
+    public boolean shouldClearOnReload() {
+        return runsOnEveryReload();
+    }
+
+    public boolean runsOnEveryReload() {
+        return true;
+    }
 
     public boolean runsOnEveryReload() {
         return true;
@@ -272,6 +279,33 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             Moonlight.LOGGER.info("Generated runtime resources for {} packs in a total of: {} ms",
                     GENERATORS.size(), stopwatch.elapsed().toMillis());
         }, EarlyPackReloadEvent.class);
+    }
+
+    @ApiStatus.Internal
+    public static void clearAfterReload(PackType targetType) {
+        //this will be called multiple times. shunt be an issue I hope
+        Set<DynamicResourcePack> packs = new HashSet<>();
+        for (var g : GENERATORS) {
+            if (g.dynamicPack.packType == targetType && g.shouldClearOnReload()) {
+                packs.add(g.dynamicPack);
+            }
+        }
+        for (var p : packs) {
+            p.clearNonStatic();
+        }
+    }
+
+    @ApiStatus.Internal
+    public static void clearBeforeReload(PackType targetType) {
+        Set<DynamicResourcePack> packs = new HashSet<>();
+        for (var g : GENERATORS) {
+            if (g.dynamicPack.packType == targetType && g.shouldClearOnReload()) {
+                packs.add(g.dynamicPack);
+            }
+        }
+        for (var p : packs) {
+            p.clearAllContent();
+        }
     }
 
     @ApiStatus.Internal
