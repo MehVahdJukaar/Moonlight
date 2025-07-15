@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.trades;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
@@ -16,7 +16,6 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -45,14 +44,15 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         LISTING_TYPES.register(ResourceLocation.parse("villager_type_variant"), BiomeVariantItemListing.CODEC);
     }
 
-    private final Map<EntityType<?>, Int2ObjectArrayMap<List<ModItemListing>>> specialCustomTrades = new HashMap<>();
-    private final Map<VillagerProfession, Int2ObjectArrayMap<List<ModItemListing>>> customTrades = new HashMap<>();
+    private final Map<EntityType<?>, Set<ModItemListing>> specialTradesAdded = new HashMap<>();
+    private final Map<VillagerProfession, Set<ModItemListing>> tradesAdded = new HashMap<>();
 
-    private final Map<EntityType<?>, Int2ObjectArrayMap<ModItemListing[]>> oldSpecialTrades = new HashMap<>();
-    private final Map<VillagerProfession, Int2ObjectArrayMap<ModItemListing[]>> oldTrades = new HashMap<>();
+    //removed trades
+    private final Map<EntityType<?>, Int2ObjectArrayMap<Set<VillagerTrades.ItemListing>>> specialTradesRemoved = new HashMap<>();
+    private final Map<VillagerProfession, Int2ObjectArrayMap<Set<VillagerTrades.ItemListing>>> tradesRemoved = new HashMap<>();
+
 
     private final HolderLookup.Provider registryAccess;
-    private int count = 0;
 
     public ItemListingManager(HolderLookup.Provider provider) {
         super(new Gson(), "moonlight/villager_trade");
@@ -64,90 +64,235 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> jsons, ResourceManager resourceManager, ProfilerFiller profiler) {
 
-        mergeProfessionAndSpecial(false);
+        //restore
+        restoreVanillaState();
 
-        count = 0;
-        customTrades.clear();
-        specialCustomTrades.clear();
+
+        List<Pair<ModItemListing, VillagerProfession>> toAdd = new ArrayList<>();
+        List<Pair<ModItemListing, EntityType<?>>> toAddSpecial = new ArrayList<>();
+        List<Pair<RemoveNonDataListingListing, VillagerProfession>> toRemove = new ArrayList<>();
+        List<Pair<RemoveNonDataListingListing, EntityType<?>>> toRemoveSpecial = new ArrayList<>();
 
         DynamicOps<JsonElement> ops = ForgeHelper.conditionalOps(JsonOps.INSTANCE, registryAccess, this);
         for (var e : jsons.entrySet()) {
-            var json = e.getValue();
-            var id = e.getKey();
-            if (id.getPath().contains("/")) {
-                parseAndAddTrade(json, id, ops);
+            JsonElement json = e.getValue();
+            ResourceLocation id = e.getKey();
+            if (!id.getPath().contains("/")) continue;
+            ResourceLocation targetId = id.withPath(p -> p.substring(0, p.lastIndexOf('/')));
+            var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(targetId);
+            if (profession.isPresent()) {
+                ModItemListing trade = parseOrThrow(json, id, ops).orElse(null);
+                if (trade != null || (trade instanceof NoOpListing)) {
+                    continue;
+                } else if (trade instanceof RemoveNonDataListingListing rl) {
+                    toRemove.add(Pair.of(rl, profession.get()));
+                } else {
+                    toAdd.add(Pair.of(trade, profession.get()));
+                }
+                continue;
             }
-        }
-
-        mergeProfessionAndSpecial(true);
-        if (count != 0) {
-            Moonlight.LOGGER.info("Applied {} data villager trades", count);
-        }
-    }
-
-    private void parseAndAddTrade(JsonElement json, ResourceLocation id, DynamicOps<JsonElement> ops) {
-        var targetId = id.withPath(p -> p.substring(0, p.lastIndexOf('/')));
-        var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(targetId);
-        if (profession.isPresent()) {
-            var trade = parseOrThrow(json, id, ops);
-            if (trade.isEmpty() || (trade.get() instanceof NoOpListing)) {
-                // no op
-            } else if (trade.get() instanceof RemoveNonDataListingListing) {
-                //TODO: add remove trades
+            var entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(targetId);
+            if (entityType.isPresent()) {
+                ModItemListing trade = parseOrThrow(json, id, ops).orElse(null);
+                if (trade != null || (trade instanceof NoOpListing)) {
+                    continue;
+                } else if (trade instanceof RemoveNonDataListingListing rl) {
+                    toRemoveSpecial.add(Pair.of(rl, entityType.get()));
+                } else {
+                    toAddSpecial.add(Pair.of(trade, entityType.get()));
+                }
             } else {
-                customTrades.computeIfAbsent(profession.get(), t ->
-                                new Int2ObjectArrayMap<>()).computeIfAbsent(trade.get().getLevel(), a -> new ArrayList<>())
-                        .add(trade.get());
+                Moonlight.LOGGER.warn("Unknown villager type: {}", targetId);
             }
-            return;
         }
-        var entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(targetId);
-        if (entityType.isPresent()) {
-            var trade = parseOrThrow(json, id, ops);
-            if (trade.isPresent() && !(trade.get() instanceof NoOpListing)) {
-                specialCustomTrades.computeIfAbsent(entityType.get(), t ->
-                                new Int2ObjectArrayMap<>()).computeIfAbsent(trade.get().getLevel(), a -> new ArrayList<>())
-                        .add(trade.get());
+
+
+        // Apply removals for profession-based trades
+        for (var pair : toRemove) {
+            VillagerProfession profession = pair.getSecond();
+            RemoveNonDataListingListing listing = pair.getFirst();
+            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.get(profession);
+            var removed = removeMatchingTrades(listing, tradeMap);
+            if (!removed.isEmpty()) {
+                tradesRemoved.computeIfAbsent(profession, k -> new Int2ObjectArrayMap<>())
+                        .putAll(removed);
+            }
+        }
+
+        // Apply removals for entity-based trades
+        for (var pair : toRemoveSpecial) {
+            EntityType<?> entity = pair.getSecond();
+            if (entity == EntityType.WANDERING_TRADER) {
+                RemoveNonDataListingListing listing = pair.getFirst();
+                Int2ObjectMap<VillagerTrades.ItemListing[]> wanderingTraderTrades = VillagerTrades.WANDERING_TRADER_TRADES;
+                var removed = removeMatchingTrades(listing, wanderingTraderTrades);
+                if (!removed.isEmpty()) {
+                    specialTradesRemoved.computeIfAbsent(entity, k -> new Int2ObjectArrayMap<>())
+                            .putAll(removed);
+                }
+            }
+        }
+
+
+        // Apply profession-based additions
+        for (var pair : toAdd) {
+            ModItemListing listing = pair.getFirst();
+            VillagerProfession profession = pair.getSecond();
+            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.get(profession);
+            if (tradeMap != null) {
+                addTrade(tradeMap, listing, true);
+                tradesAdded.computeIfAbsent(profession, k -> new HashSet<>()).add(listing);
+            }
+        }
+
+        // Apply entity-based additions
+        for (var pair : toAddSpecial) {
+            ModItemListing listing = pair.getFirst();
+            EntityType<?> entity = pair.getSecond();
+            if (entity == EntityType.WANDERING_TRADER) {
+                Int2ObjectMap<VillagerTrades.ItemListing[]> wanderingTraderTrades = VillagerTrades.WANDERING_TRADER_TRADES;
+                addTrade(wanderingTraderTrades, listing, true);
+                specialTradesAdded.computeIfAbsent(entity, k -> new HashSet<>()).add(listing);
+            }
+        }
+
+        int added = specialTradesAdded.values().stream()
+                .mapToInt(Set::size)
+                .sum() + tradesAdded.values().stream()
+                .mapToInt(Set::size)
+                .sum();
+        int removed = tradesRemoved.values().stream().mapToInt(map -> map.values().stream().mapToInt(Set::size).sum()).sum()
+                + specialTradesRemoved.values().stream().mapToInt(map -> map.values().stream().mapToInt(Set::size).sum()).sum();
+
+        if (added > 0) {
+            Moonlight.LOGGER.info("Applied {} data villager trades", added);
+        }
+        if (removed > 0) {
+            Moonlight.LOGGER.info("Removed {} data villager trades", removed);
+        }
+    }
+
+    private static void addTrade(Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap, ModItemListing listing, boolean add) {
+        var existing = tradeMap.get(listing.getLevel());
+        tradeMap.put(listing.getLevel(), mergeArrays(existing, add, listing));
+    }
+
+    private static VillagerTrades.ItemListing[] mergeArrays(VillagerTrades.ItemListing[] existing, boolean add,
+                                                            VillagerTrades.ItemListing ...toAdd) {
+        var list = new ArrayList<>(List.of(existing));
+        if (add) list.addAll(List.of(toAdd));
+        else list.removeAll(List.of(toAdd));
+        return list.toArray(VillagerTrades.ItemListing[]::new);
+    }
+    private Int2ObjectArrayMap<Set<VillagerTrades.ItemListing>> removeMatchingTrades(
+            RemoveNonDataListingListing removal,
+            Int2ObjectMap<VillagerTrades.ItemListing[]> originalTrades
+    ) {
+        Int2ObjectArrayMap<Set<VillagerTrades.ItemListing>> removedTrades = new Int2ObjectArrayMap<>();
+
+        // Temporary map to hold updated trade arrays after removals
+        Map<Integer, VillagerTrades.ItemListing[]> updatedTrades = new HashMap<>();
+
+        for (var entry : originalTrades.int2ObjectEntrySet()) {
+            int level = entry.getIntKey();
+            VillagerTrades.ItemListing[] trades = entry.getValue();
+
+            List<VillagerTrades.ItemListing> remaining = new ArrayList<>();
+            Set<VillagerTrades.ItemListing> removedAtLevel = new HashSet<>();
+
+            for (VillagerTrades.ItemListing trade : trades) {
+                if (removal.matches(level, trade)) {
+                    removedAtLevel.add(trade);
+                } else {
+                    remaining.add(trade);
+                }
             }
 
-        } else {
-            Moonlight.LOGGER.warn("Unknown villager type: {}", targetId);
+            if (!removedAtLevel.isEmpty()) {
+                removedTrades.put(level, removedAtLevel);
+                updatedTrades.put(level, remaining.toArray(VillagerTrades.ItemListing[]::new));
+            }
         }
+
+        // Apply updates after iteration
+        originalTrades.putAll(updatedTrades);
+
+        return removedTrades;
     }
 
-    private void mergeAll(Int2ObjectMap<VillagerTrades.ItemListing[]> originalValues,
-                          Int2ObjectArrayMap<List<ModItemListing>> newValues, boolean add) {
-        for (var e : newValues.int2ObjectEntrySet()) {
-            int level = e.getIntKey();
+    private void restoreVanillaState() {
+        // Undo added profession-based trades
+        for (var entry : tradesAdded.entrySet()) {
+            VillagerProfession profession = entry.getKey();
+            Set<ModItemListing> listings = entry.getValue();
+            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.get(profession);
+            if (tradeMap == null) continue;
 
-            VillagerTrades.ItemListing[] elements = originalValues.get(level);
-            var original = new ArrayList<>(elements == null ? List.of() : List.of(elements));
-            List<ModItemListing> value = e.getValue();
-            if (add) {
-                original.addAll(value);
-                count += value.size();
-            } else original.removeAll(value);
-            originalValues.put(level, original.toArray(VillagerTrades.ItemListing[]::new));
+            for (ModItemListing listing : listings) {
+                int level = listing.getLevel();
+                VillagerTrades.ItemListing[] array = tradeMap.get(level);
+                if (array == null) continue;
+                addTrade(tradeMap, listing, false);
+            }
         }
+
+        // Undo added special/entity-based trades
+        for (var entry : specialTradesAdded.entrySet()) {
+            EntityType<?> entity = entry.getKey();
+            Set<ModItemListing> listings = entry.getValue();
+
+            if (entity == EntityType.WANDERING_TRADER) {
+                Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.WANDERING_TRADER_TRADES;
+
+                for (ModItemListing listing : listings) {
+                    int level = listing.getLevel();
+                    VillagerTrades.ItemListing[] array = tradeMap.get(level);
+                    if (array == null) continue;
+                    addTrade(tradeMap, listing, false);
+                }
+            }
+        }
+
+        // Restore removed profession-based trades
+        for (var entry : tradesRemoved.entrySet()) {
+            VillagerProfession profession = entry.getKey();
+            Int2ObjectMap<Set<VillagerTrades.ItemListing>> removedPerLevel = entry.getValue();
+            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.get(profession);
+            if (tradeMap == null) continue;
+
+            for (var levelEntry : removedPerLevel.int2ObjectEntrySet()) {
+                int level = levelEntry.getIntKey();
+                Set<VillagerTrades.ItemListing> removedTrades = levelEntry.getValue();
+                VillagerTrades.ItemListing[] currentArray = tradeMap.get(level);
+                tradeMap.put(level, mergeArrays(currentArray, true, removedTrades.toArray(VillagerTrades.ItemListing[]::new)));
+            }
+        }
+
+        // Restore removed special/entity-based trades
+        for (var entry : specialTradesRemoved.entrySet()) {
+            EntityType<?> entity = entry.getKey();
+            if (entity == EntityType.WANDERING_TRADER) {
+                Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.WANDERING_TRADER_TRADES;
+                Int2ObjectMap<Set<VillagerTrades.ItemListing>> removedPerLevel = entry.getValue();
+
+                for (var levelEntry : removedPerLevel.int2ObjectEntrySet()) {
+                    int level = levelEntry.getIntKey();
+                    Set<VillagerTrades.ItemListing> removedTrades = levelEntry.getValue();
+                    VillagerTrades.ItemListing[] currentArray = tradeMap.get(level);
+                    tradeMap.put(level, mergeArrays(currentArray, true, removedTrades.toArray(VillagerTrades.ItemListing[]::new)));
+                }
+            }
+        }
+
+        tradesAdded.clear();
+        specialTradesAdded.clear();
+        tradesRemoved.clear();
+        specialTradesRemoved.clear();
     }
 
-    private void mergeProfessionAndSpecial(boolean add) {
-        for (var p : customTrades.entrySet()) {
-            VillagerProfession profession = p.getKey();
-            Int2ObjectMap<VillagerTrades.ItemListing[]> map = VillagerTrades.TRADES.computeIfAbsent(profession, k ->
-                    new Int2ObjectArrayMap<>());
-            Int2ObjectArrayMap<List<ModItemListing>> value = p.getValue();
-            mergeAll(map, value, add);
-        }
-        Int2ObjectArrayMap<List<ModItemListing>> wanderingStuff = specialCustomTrades.get(EntityType.WANDERING_TRADER);
-        if (wanderingStuff != null) {
-            mergeAll(VillagerTrades.WANDERING_TRADER_TRADES, wanderingStuff, add);
-        }
-    }
 
     private static Optional<ModItemListing> parseOrThrow(JsonElement j, ResourceLocation id, DynamicOps<JsonElement> ops) {
-        return ForgeHelper.conditionalCodec(ModItemListing.CODEC).parse(ops, j)
-                .getOrThrow();
+        return ForgeHelper.conditionalCodec(ModItemListing.CODEC).parse(ops, j).getOrThrow();
     }
 
     public static List<? extends VillagerTrades.ItemListing> getVillagerListings(VillagerProfession profession, int level) {
@@ -162,9 +307,15 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
             if (array == null) return List.of();
             return Arrays.stream(array).toList();
         } else {
-            var special = INSTANCE.get(provider).specialCustomTrades.get(entityType);
+            var special = INSTANCE.get(provider).specialTradesAdded.get(entityType);
             if (special == null) return List.of();
-            return special.getOrDefault(level, List.of());
+            List<VillagerTrades.ItemListing> listings = new ArrayList<>();
+            for (ModItemListing listing : special) {
+                if (listing.getLevel() == level) {
+                    listings.add(listing);
+                }
+            }
+            return listings;
         }
     }
 

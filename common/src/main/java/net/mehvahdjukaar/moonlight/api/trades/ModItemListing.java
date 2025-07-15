@@ -19,9 +19,4 @@ public interface ModItemListing extends VillagerTrades.ItemListing {
         return Math.max(1, 5 * (villagerLevel - 1)) * (buying ? 2 : 1);
     }
 
-    //return false if this trade should be ignored
-    default boolean isValid() {
-        return true;
-    }
-
 }

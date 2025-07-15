@@ -286,7 +286,7 @@ public class RegHelperImpl {
             RegHelper.ItemToTabEvent itemToTabEvent = new ItemToTabEventImpl(event);
             eventListener.accept(itemToTabEvent);
         };
-        MoonlightForge.getCurrentBus().addListener(EventPriority.LOW, eventConsumer);
+        MoonlightForge.getCurrentBus().addListener(EventPriority.LOWEST, eventConsumer);
     }
 
     private record ItemToTabEventImpl(BuildCreativeModeTabContentsEvent event) implements RegHelper.ItemToTabEvent {
