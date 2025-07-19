@@ -304,7 +304,7 @@ public class RegHelper {
 
 
     public static <A> Registry<A> registerRegistry(ResourceLocation key, boolean synced) {
-        return registerRegistry(ResourceKey.createRegistryKey(key) , synced);
+        return registerRegistry(ResourceKey.createRegistryKey(key), synced);
     }
 
     @ExpectPlatform
@@ -312,12 +312,23 @@ public class RegHelper {
         throw new AssertionError();
     }
 
+    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.Builder<T> builder) {
+        return register(name, () -> builder.build(name.getPath()), Registries.ENTITY_TYPE);
+    }
+
+    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
+        return register(name, type, Registries.ENTITY_TYPE);
+    }
+
+
+    @Deprecated(forRemoval = true)
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
                                                                                    MobCategory category, float width, float height) {
         return registerEntityType(name, factory, category, width, height, 5);
     }
 
     //not needed?
+    @Deprecated(forRemoval = true)
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
                                                                                    MobCategory category, float width,
                                                                                    float height, int clientTrackingRange) {
@@ -325,6 +336,7 @@ public class RegHelper {
     }
 
 
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
                                                                                    MobCategory category, float width, float height,
@@ -377,9 +389,6 @@ public class RegHelper {
         return defenseMap;
     }
 
-    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
-        return register(name, type, Registries.ENTITY_TYPE);
-    }
 
     @Deprecated(forRemoval = true)
     public static void registerCompostable(ItemLike itemLike, float chance) {

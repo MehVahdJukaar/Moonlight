@@ -2,15 +2,13 @@ package net.mehvahdjukaar.moonlight.api.client.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -176,6 +174,7 @@ public class VertexUtil {
     public static int lightV(int light) {
         return light >> 16 & '\uffff';
     }
+
     private static final Direction[] DIRS = new Direction[]{
             Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST,
             Direction.UP, Direction.DOWN, null
