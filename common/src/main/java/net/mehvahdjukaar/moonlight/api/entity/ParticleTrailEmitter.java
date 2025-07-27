@@ -30,7 +30,7 @@ public class ParticleTrailEmitter {
 
     public void tick(Projectile obj, ParticleOptions particleOptions, boolean followSpeed) {
         tick(obj, (position, velocity) -> {
-            var level =  obj.level();
+            var level = obj.level();
             if (followSpeed) {
                 level.addParticle(particleOptions, position.x, position.y, position.z, velocity.x, velocity.y, velocity.z);
             } else {
@@ -54,10 +54,11 @@ public class ParticleTrailEmitter {
 
         double segmentLength = prevPos.distanceTo(currentPosBuf);
         if (segmentLength < minSpeed) return;
+        float h = obj.getBbHeight() / 2f; // half height for vertical offset
 
         // Calculate how many particles we can emit
         double totalAvailable = accumulatedDistanceSinceLastParticle + segmentLength;
-        int particlesToEmit = (int)(totalAvailable / idealSpacing);
+        int particlesToEmit = (int) (totalAvailable / idealSpacing);
         particlesToEmit = Math.min(particlesToEmit, maxParticlesPerTick);
 
         if (particlesToEmit == 0) {
@@ -79,14 +80,10 @@ public class ParticleTrailEmitter {
 
             // Ensure perfect spacing
             Vec3 direction = emitPos.subtract(lastPos).normalize();
-            Vec3 perfectPos = lastPos.add(direction.scale(idealSpacing));
+            Vec3 perfectPos = lastPos.add(direction.scale(idealSpacing))
+                    .add(0, h, 0);
 
-            emitter.emitParticle(  perfectPos, emitVel);
-
-            // Debug output
-            double actualDist = perfectPos.distanceTo(lastPos);
-            System.out.printf("Particle %d | Dist: %.6f | Ideal: %.6f%n",
-                    i, actualDist, idealSpacing);
+            emitter.emitParticle(perfectPos, emitVel);
 
             lastPos = perfectPos;
             spacingSum += idealSpacing;
@@ -128,6 +125,6 @@ public class ParticleTrailEmitter {
     }
 
     public interface Emitter {
-        void emitParticle(  Vec3 position, Vec3 velocity);
+        void emitParticle(Vec3 position, Vec3 velocity);
     }
 }
