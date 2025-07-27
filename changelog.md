@@ -1,1 +1,1 @@
-added a workaround for an issue in a mod i have because i dont want to update that mod
+- fixed an issue with villager trades with newly added professions

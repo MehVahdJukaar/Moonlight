@@ -139,7 +139,8 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         for (var pair : toAdd) {
             ModItemListing listing = pair.getFirst();
             VillagerProfession profession = pair.getSecond();
-            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.get(profession);
+            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.computeIfAbsent(profession, k ->
+                    new Int2ObjectArrayMap<>());
             if (tradeMap != null) {
                 addTrade(tradeMap, listing, true);
                 tradesAdded.computeIfAbsent(profession, k -> new HashSet<>()).add(listing);
@@ -179,12 +180,13 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
     }
 
     private static VillagerTrades.ItemListing[] mergeArrays(VillagerTrades.ItemListing[] existing, boolean add,
-                                                            VillagerTrades.ItemListing ...toAdd) {
+                                                            VillagerTrades.ItemListing... toAdd) {
         var list = new ArrayList<>(List.of(existing));
         if (add) list.addAll(List.of(toAdd));
         else list.removeAll(List.of(toAdd));
         return list.toArray(VillagerTrades.ItemListing[]::new);
     }
+
     private Int2ObjectArrayMap<Set<VillagerTrades.ItemListing>> removeMatchingTrades(
             RemoveNonDataListingListing removal,
             Int2ObjectMap<VillagerTrades.ItemListing[]> originalTrades
