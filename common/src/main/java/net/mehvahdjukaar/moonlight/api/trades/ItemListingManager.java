@@ -112,7 +112,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         for (var pair : toRemove) {
             VillagerProfession profession = pair.getSecond();
             RemoveNonDataListingListing listing = pair.getFirst();
-            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.get(profession);
+            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = getTradeMapForProfession(profession);
             var removed = removeMatchingTrades(listing, tradeMap);
             if (!removed.isEmpty()) {
                 tradesRemoved.computeIfAbsent(profession, k -> new Int2ObjectArrayMap<>())
@@ -139,8 +139,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         for (var pair : toAdd) {
             ModItemListing listing = pair.getFirst();
             VillagerProfession profession = pair.getSecond();
-            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.computeIfAbsent(profession, k ->
-                    new Int2ObjectArrayMap<>());
+            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = getTradeMapForProfession(profession);
             if (tradeMap != null) {
                 addTrade(tradeMap, listing, true);
                 tradesAdded.computeIfAbsent(profession, k -> new HashSet<>()).add(listing);
@@ -172,6 +171,12 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         if (removed > 0) {
             Moonlight.LOGGER.info("Removed {} data villager trades", removed);
         }
+    }
+
+    private static @NotNull Int2ObjectMap<VillagerTrades.ItemListing[]> getTradeMapForProfession(
+            VillagerProfession profession) {
+        return VillagerTrades.TRADES.computeIfAbsent(profession, k ->
+                new Int2ObjectArrayMap<>());
     }
 
     private static void addTrade(Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap, @NotNull ModItemListing listing, boolean add) {
@@ -228,8 +233,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         for (var entry : tradesAdded.entrySet()) {
             VillagerProfession profession = entry.getKey();
             Set<ModItemListing> listings = entry.getValue();
-            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.get(profession);
-            if (tradeMap == null) continue;
+            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = getTradeMapForProfession(profession);
 
             for (ModItemListing listing : listings) {
                 int level = listing.getLevel();
@@ -260,15 +264,9 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         for (var entry : tradesRemoved.entrySet()) {
             VillagerProfession profession = entry.getKey();
             Int2ObjectMap<Set<VillagerTrades.ItemListing>> removedPerLevel = entry.getValue();
-            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.TRADES.get(profession);
-            if (tradeMap == null) continue;
+            Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = getTradeMapForProfession(profession);
 
-            for (var levelEntry : removedPerLevel.int2ObjectEntrySet()) {
-                int level = levelEntry.getIntKey();
-                Set<VillagerTrades.ItemListing> removedTrades = levelEntry.getValue();
-                VillagerTrades.ItemListing[] currentArray = tradeMap.get(level);
-                tradeMap.put(level, mergeArrays(currentArray, true, removedTrades.toArray(VillagerTrades.ItemListing[]::new)));
-            }
+            restoreMap(tradeMap, removedPerLevel);
         }
 
         // Restore removed special/entity-based trades
@@ -278,12 +276,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
                 Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = VillagerTrades.WANDERING_TRADER_TRADES;
                 Int2ObjectMap<Set<VillagerTrades.ItemListing>> removedPerLevel = entry.getValue();
 
-                for (var levelEntry : removedPerLevel.int2ObjectEntrySet()) {
-                    int level = levelEntry.getIntKey();
-                    Set<VillagerTrades.ItemListing> removedTrades = levelEntry.getValue();
-                    VillagerTrades.ItemListing[] currentArray = tradeMap.get(level);
-                    tradeMap.put(level, mergeArrays(currentArray, true, removedTrades.toArray(VillagerTrades.ItemListing[]::new)));
-                }
+                restoreMap(tradeMap, removedPerLevel);
             }
         }
 
@@ -291,6 +284,16 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         specialTradesAdded.clear();
         tradesRemoved.clear();
         specialTradesRemoved.clear();
+    }
+
+    private void restoreMap(Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap,
+                            Int2ObjectMap<Set<VillagerTrades.ItemListing>> removedPerLevel) {
+        for (var levelEntry : removedPerLevel.int2ObjectEntrySet()) {
+            int level = levelEntry.getIntKey();
+            Set<VillagerTrades.ItemListing> removedTrades = levelEntry.getValue();
+            VillagerTrades.ItemListing[] currentArray = tradeMap.get(level);
+            tradeMap.put(level, mergeArrays(currentArray, true, removedTrades.toArray(VillagerTrades.ItemListing[]::new)));
+        }
     }
 
 
@@ -301,7 +304,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
     }
 
     public static List<? extends VillagerTrades.ItemListing> getVillagerListings(VillagerProfession profession, int level) {
-        VillagerTrades.ItemListing[] array = VillagerTrades.TRADES.get(profession).get(level);
+        VillagerTrades.ItemListing[] array = getTradeMapForProfession(profession).get(level);
         if (array == null) return List.of();
         return Arrays.stream(array).toList();
     }

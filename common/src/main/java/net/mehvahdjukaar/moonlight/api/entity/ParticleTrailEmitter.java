@@ -2,9 +2,12 @@ package net.mehvahdjukaar.moonlight.api.entity;
 
 import net.mehvahdjukaar.moonlight.api.misc.RollingBuffer;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
+/**
+ * A utility class for emitting particles along the trail at regular intervals no matter the speed of the entity.
+ */
 public class ParticleTrailEmitter {
 
     private final double idealSpacing;
@@ -24,13 +27,13 @@ public class ParticleTrailEmitter {
         this.accumulatedDistanceSinceLastParticle = -idealSpacing; // delay first particle emission
     }
 
-    public void tick(Projectile obj, ParticleOptions particleOptions) {
+    public void tick(Entity obj, ParticleOptions particleOptions) {
         tick(obj, particleOptions, true);
     }
 
-    public void tick(Projectile obj, ParticleOptions particleOptions, boolean followSpeed) {
+    public void tick(Entity obj, ParticleOptions particleOptions, boolean followSpeed) {
         tick(obj, (position, velocity) -> {
-            var level =  obj.level();
+            var level = obj.level();
             if (followSpeed) {
                 level.addParticle(particleOptions, position.x, position.y, position.z, velocity.x, velocity.y, velocity.z);
             } else {
@@ -39,7 +42,7 @@ public class ParticleTrailEmitter {
         });
     }
 
-    public void tick(Projectile obj, Emitter emitter) {
+    public void tick(Entity obj, Emitter emitter) {
         Vec3 currentVel = obj.getDeltaMovement();
         Vec3 currentPos = obj.position();
 
@@ -55,9 +58,11 @@ public class ParticleTrailEmitter {
         double segmentLength = prevPos.distanceTo(currentPosBuf);
         if (segmentLength < minSpeed) return;
 
+        float h = obj.getBbHeight() / 2;
+
         // Calculate how many particles we can emit
         double totalAvailable = accumulatedDistanceSinceLastParticle + segmentLength;
-        int particlesToEmit = (int)(totalAvailable / idealSpacing);
+        int particlesToEmit = (int) (totalAvailable / idealSpacing);
         particlesToEmit = Math.min(particlesToEmit, maxParticlesPerTick);
 
         if (particlesToEmit == 0) {
@@ -79,14 +84,10 @@ public class ParticleTrailEmitter {
 
             // Ensure perfect spacing
             Vec3 direction = emitPos.subtract(lastPos).normalize();
-            Vec3 perfectPos = lastPos.add(direction.scale(idealSpacing));
+            Vec3 perfectPos = lastPos.add(direction.scale(idealSpacing))
+                    .add(0, h, 0); // make it centered on the entity
 
-            emitter.emitParticle(  perfectPos, emitVel);
-
-            // Debug output
-            double actualDist = perfectPos.distanceTo(lastPos);
-            System.out.printf("Particle %d | Dist: %.6f | Ideal: %.6f%n",
-                    i, actualDist, idealSpacing);
+            emitter.emitParticle(perfectPos, emitVel);
 
             lastPos = perfectPos;
             spacingSum += idealSpacing;
@@ -128,6 +129,6 @@ public class ParticleTrailEmitter {
     }
 
     public interface Emitter {
-        void emitParticle(  Vec3 position, Vec3 velocity);
+        void emitParticle(Vec3 position, Vec3 velocity);
     }
 }
