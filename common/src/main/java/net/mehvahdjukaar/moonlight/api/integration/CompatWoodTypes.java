@@ -20,9 +20,6 @@ public class CompatWoodTypes {
 
     public static void init() {
 
-        // The Undergarden
-        advancedWoodFinder("undergarden", "ancient_root", "ancient_root_planks", "ancient_root");
-
         // Mofu's Better End
         advancedWoodFinder("mofus_better_end_", "weepingstar", "weepingstar_planks", "weepingstar_log",
                 "STRIPPED_LOG-weepingstar_stripped_log", "LEAVES-weepingstar_leaf");
@@ -44,7 +41,7 @@ public class CompatWoodTypes {
         simpleWoodFinder("caverns_and_chasms", "azalea", "azalea_leaves");
 
         // The Outer End
-        advancedWoodFinder("outer_end", "azure", "azure_planks", "_azurestem",
+        advancedWoodFinder("outer_end", "azure", "azure_planks", "azure_stem",
                 "STRIPPED_LOG-azure_stripped_stem", "WOOD-azure_pith", "STRIPPED_WOOD-azure_stripped_pith");
 
         // Upgrade Aquatic
