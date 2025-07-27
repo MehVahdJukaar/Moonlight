@@ -127,10 +127,10 @@ public class LeavesType extends BlockType {
                             childNames.forEach((key, value) -> l.addChild(key, BuiltInRegistries.BLOCK.get(value)));
                             return Optional.of(l);
                         }
-                    }
-                } catch (Exception ignored) {
+                    } else throw new IllegalStateException("Leaves block not found: " + id);
+                } catch (Exception e) {
+                    Moonlight.LOGGER.warn("Failed to find manually defined wood type {}", id, e);
                 }
-                Moonlight.LOGGER.warn("Failed to find custom wood type {}", id);
             }
             return Optional.empty();
         }

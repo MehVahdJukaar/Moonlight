@@ -312,10 +312,12 @@ public class RegHelper {
         throw new AssertionError();
     }
 
+    //TODO: change to supplier
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.Builder<T> builder) {
         return register(name, () -> builder.build(name.getPath()), Registries.ENTITY_TYPE);
     }
 
+    @Deprecated(forRemoval = true)
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
         return register(name, type, Registries.ENTITY_TYPE);
     }

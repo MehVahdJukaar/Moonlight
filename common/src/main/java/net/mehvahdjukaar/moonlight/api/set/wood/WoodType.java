@@ -326,10 +326,12 @@ public class WoodType extends BlockType {
                             if (obj != null && obj != d) w.addChild(key, obj);
                         });
                         return Optional.of(w);
+                    }else {
+                        throw new RuntimeException("No such item or block");
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    Moonlight.LOGGER.warn("Failed to find manually defined wood type {}", id, e);
                 }
-                Moonlight.LOGGER.warn("Failed to find custom wood type {}", id);
             }
             return Optional.empty();
         }

@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.neoforged.neoforge.fluids.FluidStack;
+import org.jetbrains.annotations.NotNull;
 
 public class SoftFluidStackImpl extends SoftFluidStack {
 
@@ -12,7 +13,7 @@ public class SoftFluidStackImpl extends SoftFluidStack {
         super(fluid, count, comp);
     }
 
-    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count,  DataComponentPatch components) {
+    public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, @NotNull DataComponentPatch components) {
         return new SoftFluidStackImpl(fluid, count, components);
     }
 

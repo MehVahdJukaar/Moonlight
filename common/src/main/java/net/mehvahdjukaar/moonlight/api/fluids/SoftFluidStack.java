@@ -69,6 +69,11 @@ public class SoftFluidStack implements DataComponentHolder {
 
     protected SoftFluidStack(Holder<SoftFluid> fluid, int count, DataComponentPatch components) {
         this.fluidHolder = fluid;
+        if (components == null) {
+            //TODO: remove me
+            Moonlight.LOGGER.error("Some mod passed a null components, fix me");
+            components = DataComponentPatch.EMPTY;
+        }
         //validate
         //cant have this because stuff likes to create these from netty thread
         this.fluid = this.fluidHolder.value();

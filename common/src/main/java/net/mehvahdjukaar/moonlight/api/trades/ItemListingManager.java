@@ -27,6 +27,7 @@ import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.trading.MerchantOffer;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -82,7 +83,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
             var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(targetId);
             if (profession.isPresent()) {
                 ModItemListing trade = parseOrThrow(json, id, ops).orElse(null);
-                if (trade != null || (trade instanceof NoOpListing)) {
+                if (trade == null || (trade instanceof NoOpListing)) {
                     continue;
                 } else if (trade instanceof RemoveNonDataListingListing rl) {
                     toRemove.add(Pair.of(rl, profession.get()));
@@ -94,7 +95,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
             var entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(targetId);
             if (entityType.isPresent()) {
                 ModItemListing trade = parseOrThrow(json, id, ops).orElse(null);
-                if (trade != null || (trade instanceof NoOpListing)) {
+                if (trade == null || (trade instanceof NoOpListing)) {
                     continue;
                 } else if (trade instanceof RemoveNonDataListingListing rl) {
                     toRemoveSpecial.add(Pair.of(rl, entityType.get()));
@@ -172,7 +173,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         }
     }
 
-    private static void addTrade(Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap, ModItemListing listing, boolean add) {
+    private static void addTrade(Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap, @NotNull ModItemListing listing, boolean add) {
         var existing = tradeMap.get(listing.getLevel());
         tradeMap.put(listing.getLevel(), mergeArrays(existing, add, listing));
     }
@@ -292,7 +293,9 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
 
 
     private static Optional<ModItemListing> parseOrThrow(JsonElement j, ResourceLocation id, DynamicOps<JsonElement> ops) {
-        return ForgeHelper.conditionalCodec(ModItemListing.CODEC).parse(ops, j).getOrThrow();
+        return ForgeHelper.conditionalCodec(ModItemListing.CODEC)
+                .parse(ops, j)
+                .getOrThrow();
     }
 
     public static List<? extends VillagerTrades.ItemListing> getVillagerListings(VillagerProfession profession, int level) {
