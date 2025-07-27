@@ -1,3 +1,11 @@
+- Removed undergarden:ancient_root from CompatWoodType (no longer existing in the newer version) - [#357](https://github.com/MehVahdJukaar/Moonlight/issues/357)
+- Updated outer_end:azure - _azurestem is now azure_stem -  [#357](https://github.com/MehVahdJukaar/Moonlight/issues/357)
+- Corrected a typo in the method to detect StemType like Garden of the Dead's soulblight, it will be detected
+
+---
+
+## v2.14.13
+
 - Added the missing WOOD & STRIPPED_WOOD for Atmospheric & Upgrade-Aquatic - [#985](https://github.com/MehVahdJukaar/WoodGood/issues/985)
 
 ---
