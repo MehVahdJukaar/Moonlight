@@ -34,11 +34,11 @@ public abstract class MultiPackResourceManagerMixin implements CloseableResource
         //fires on world load or on /reload
         //token to assure that modded resources are included
         if (!((Object)(this) instanceof FilteredResManager) &&
-                Moonlight.CAN_EARLY_RELOAD_HACK.get() &&
                 this.getResource(new ResourceLocation("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
             //one would think that this would be fool proof. Well check again, some mod like to re create this resource manager during block load! All modded resources included aswell
             //so to be EXTRA safe we check if registry phase is over
             if (!PlatHelper.isInitializing()) {
+                Moonlight.LOGGER.info("Reloading dynamic packs before reloading data packs for {}", type);
                 //reload dynamic packs before reloading data packs
                 //first clear all packs. ugly I know
                 //this will be called multiple times. shunt be an issue I hope

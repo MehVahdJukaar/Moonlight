@@ -8,7 +8,6 @@ import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -184,17 +183,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         }
         //generate textures
         if (runsOnEveryReload() || wasFirstReload) {
-            var repository = this.getRepository();
-            if (repository != null) {
-                Moonlight.CAN_EARLY_RELOAD_HACK.set(false);
-                FilteredResManager nonSelfManager = FilteredResManager.excluding(repository, this.dynamicPack.packType,
-                        dynamicPack.packId());
-                Moonlight.CAN_EARLY_RELOAD_HACK.set(true);
-                this.regenerateDynamicAssets(nonSelfManager);
-                nonSelfManager.close();
-            } else this.regenerateDynamicAssets(manager);
+            this.regenerateDynamicAssets(manager);
         }
     }
+
 
     @Nullable
     protected abstract PackRepository getRepository();
@@ -270,19 +262,15 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     static {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
             var stopwatch = Stopwatch.createStarted();
-            List<CompletableFuture<Void>> futures = GENERATORS.stream()
-                    .filter(gen -> gen.dynamicPack.packType == earlyPackReloadEvent.type())
-                    .map(gen -> CompletableFuture.runAsync(() -> gen.onEarlyReload(earlyPackReloadEvent), EXECUTOR_SERVICE))
-                    .toList();
-
-
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            for (var gen : GENERATORS) {
+                if (gen.dynamicPack.packType == earlyPackReloadEvent.type()) {
+                    gen.onEarlyReload(earlyPackReloadEvent); // run synchronously
+                }
+            }
 
             Moonlight.LOGGER.info("Generated runtime resources for {} packs in a total of: {} ms",
                     GENERATORS.size(), stopwatch.elapsed().toMillis());
-
         }, EarlyPackReloadEvent.class);
-
     }
 
     @ApiStatus.Internal
