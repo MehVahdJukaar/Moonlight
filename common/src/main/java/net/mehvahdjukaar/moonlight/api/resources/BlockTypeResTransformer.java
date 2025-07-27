@@ -272,7 +272,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
         // grabs first folder it finds as folder name if given is empty
         String folderRegEx = "(" + folderName + ")/";
 
-        String extraFolderRegex = "(/?(?:\\w+/)*+\\w*?)";
+        String extraFolderRegex = "(/?(?:\\w+/)*\\w*?)";
 
         String typeNameRegex = "(?<![a-zA-Z])"+ oldTypeName+ "(?![a-zA-Z])"; // Matches "oak" as a whole word, not part of another word like "darkoak". However, WILL match "dark_oak" as it's the same as "chair_oak"
 
@@ -300,14 +300,5 @@ public class BlockTypeResTransformer<T extends BlockType> {
             }
         }
         return sb.toString();
-    }
-
-    /// Counting a keyword, "redstone" in redstone_block_redstone_???.json
-    private static int wordCounter(String text, String oldTypeName) {
-        Pattern pattern = Pattern.compile(oldTypeName);
-        Matcher matcher = pattern.matcher(text);
-        int count = 0;
-        while (matcher.find()) count++;
-        return count;
     }
 }

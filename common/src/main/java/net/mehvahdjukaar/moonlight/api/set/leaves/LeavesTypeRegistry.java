@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.LeavesBlock;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
@@ -60,7 +61,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         if (name != null && !isBlacklisted(namespace, path)) {
             if (baseBlock instanceof LeavesBlock) {
                 ResourceLocation id = new ResourceLocation(namespace, name);
-                return Optional.of(new LeavesType(id, baseBlock));
+                if (Objects.isNull(get(id))) return Optional.of(new LeavesType(id, baseBlock));
             }
         }
         return Optional.empty();

@@ -6,6 +6,7 @@ import com.mojang.serialization.DataResult;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
@@ -25,6 +26,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static net.mehvahdjukaar.moonlight.api.set.DebugBlockTypes.appendToDebugFile;
+
+/**
+ * CHILD AVAILABLITY:
+ * <p>BLOCK:</p>
+ * <ul>
+ * planks, log, stripped_log, wood, stripped_wood, leaves,
+ * slab, stairs, fence, fence_gate, door, trapdoor,
+ * button, pressure_plate, hanging_sign, wall_hanging_sign, sign, wall_sign
+ * </ul>
+ * <p>ITEM:</p>
+ * <ul>
+ * boat, chest_boat, sapling
+ * </ul>
+ */
 public class WoodType extends BlockType {
 
     public static final Codec<WoodType> CODEC = ResourceLocation.CODEC.flatXmap(r -> {
@@ -58,6 +74,8 @@ public class WoodType extends BlockType {
         super(id);
         this.planks = baseBlock;
         this.log = logBlock;
+
+        if (ClientConfigs.WOODTYPE_DEBUG.get() && !this.isVanilla()) appendToDebugFile(getTranslationKey());
     }
 
     @Nullable
