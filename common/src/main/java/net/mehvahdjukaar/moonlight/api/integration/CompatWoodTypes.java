@@ -690,7 +690,7 @@ public class CompatWoodTypes {
 
         String[] combined = Stream.concat(standardChildren.stream(), Arrays.stream(childrenIds)).toArray(String[]::new);
 
-        advancedWoodFinder(false, modId, nameStem, nameStem+ "_planks", nameStem+"stem", combined);
+        advancedWoodFinder(false, modId, nameStem, nameStem+ "_planks", nameStem+"_stem", combined);
     }
     /**
      * <p>Using Planks' name instead of Stem's name to detect WoodType's children</p>
