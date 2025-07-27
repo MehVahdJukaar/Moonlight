@@ -312,10 +312,30 @@ public class RegHelper {
         throw new AssertionError();
     }
 
+    public static <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
+            ResourceLocation name, MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+        return register(name, () -> PlatHelper.newParticle(codec, streamCodec), Registries.PARTICLE_TYPE);
+    }
+
+
+    public static <A> Registry<A> registerRegistry(ResourceLocation key, boolean synced) {
+        return registerRegistry(ResourceKey.createRegistryKey(key), synced);
+    }
+
+    @ExpectPlatform
+    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean synced) {
+        throw new AssertionError();
+    }
+
     //TODO: change to supplier
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.Builder<T> builder) {
         return register(name, () -> builder.build(name.getPath()), Registries.ENTITY_TYPE);
     }
+
+    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
+        return register(name, type, Registries.ENTITY_TYPE);
+    }
+
 
     @Deprecated(forRemoval = true)
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
