@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.trades;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
@@ -140,10 +141,8 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
             ModItemListing listing = pair.getFirst();
             VillagerProfession profession = pair.getSecond();
             Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = getTradeMapForProfession(profession);
-            if (tradeMap != null) {
                 addTrade(tradeMap, listing, true);
                 tradesAdded.computeIfAbsent(profession, k -> new HashSet<>()).add(listing);
-            }
         }
 
         // Apply entity-based additions
@@ -175,12 +174,13 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
 
     private static @NotNull Int2ObjectMap<VillagerTrades.ItemListing[]> getTradeMapForProfession(
             VillagerProfession profession) {
-        return VillagerTrades.TRADES.computeIfAbsent(profession, k ->
-                new Int2ObjectArrayMap<>());
+        return VillagerTrades.TRADES.computeIfAbsent(profession, k -> new Int2ObjectArrayMap<>());
     }
 
     private static void addTrade(Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap, @NotNull ModItemListing listing, boolean add) {
-        var existing = tradeMap.get(listing.getLevel());
+        var level = listing.getLevel();
+        // Ensure an array exists for this level, or create a new empty array if absent
+        var existing = tradeMap.computeIfAbsent(level, k -> new VillagerTrades.ItemListing[0]);
         tradeMap.put(listing.getLevel(), mergeArrays(existing, add, listing));
     }
 
