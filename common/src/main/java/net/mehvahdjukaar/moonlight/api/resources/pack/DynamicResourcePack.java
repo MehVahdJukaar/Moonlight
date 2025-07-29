@@ -269,12 +269,24 @@ public abstract class DynamicResourcePack implements PackResources {
         if (addToStatic) markNotClearable(id);
         //debug
         if (generateDebugResources) {
-            try {
-                Path p = Paths.get("debug", "generated_resource_pack").resolve(id.getNamespace() + "/" + id.getPath());
-                Files.createDirectories(p.getParent());
-                Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-            } catch (IOException ignored) {
-            }
+            saveBytes(id, bytes);
+        }
+    }
+
+    public static void saveJson(ResourceLocation id, JsonElement json) {
+        try {
+            saveBytes(id, RPUtils.serializeJson(json).getBytes());
+        } catch (IOException e) {
+            LOGGER.error("Failed to deserialize JSON {}", json, e);
+        }
+    }
+
+    public static void saveBytes(ResourceLocation id, byte[] bytes){
+        try {
+            Path p = Paths.get("debug", "generated_resource_pack").resolve(id.getNamespace() + "/" + id.getPath());
+            Files.createDirectories(p.getParent());
+            Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException ignored) {
         }
     }
 

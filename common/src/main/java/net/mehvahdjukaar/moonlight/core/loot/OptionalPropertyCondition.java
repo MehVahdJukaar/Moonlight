@@ -5,8 +5,14 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.client.Options;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -32,6 +38,7 @@ public class OptionalPropertyCondition implements LootItemCondition {
         this.properties = predicate;
         this.block = block;
         this.blockId = blockId;
+        Options
     }
 
     @Override
