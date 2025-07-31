@@ -40,7 +40,6 @@ public class BlockSetInternal {
 
         var regs = getRegistries();
         regs.forEach(BlockTypeRegistry::buildAll);
-        regs.forEach(BlockTypeRegistry::onBlockInit);
 
         //remove not wanted ones
         REMOVER_ADDER.forEach(Runnable::run);

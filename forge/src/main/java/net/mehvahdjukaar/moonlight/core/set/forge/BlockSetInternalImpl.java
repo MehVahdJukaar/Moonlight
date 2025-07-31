@@ -120,9 +120,6 @@ public class BlockSetInternalImpl {
                 hasFilledBlockSets = true;
             }
 
-            BlockSetInternal.getRegistries().forEach(BlockTypeRegistry::onItemInit);
-
-
             //get the queue corresponding to this certain mod
             var registrationQueues = LATE_REGISTRATION_QUEUE;
 

@@ -38,7 +38,6 @@ public class OptionalPropertyCondition implements LootItemCondition {
         this.properties = predicate;
         this.block = block;
         this.blockId = blockId;
-        Options
     }
 
     @Override

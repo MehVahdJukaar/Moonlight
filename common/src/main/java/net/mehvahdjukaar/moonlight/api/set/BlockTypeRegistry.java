@@ -80,9 +80,11 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     /**
      * Returns an optional block Type based on the given block. Pretty much defines the logic of how a block set is constructed
      */
-    public abstract Optional<T> detectTypeFromBlock(Block block, ResourceLocation blockId);
+    @ApiStatus.Internal
+    protected abstract Optional<T> detectTypeFromBlock(Block block, ResourceLocation blockId);
 
-    public void registerBlockType(T newType) {
+    @ApiStatus.Internal
+    protected void registerBlockType(T newType) {
         if (frozen) {
             throw new UnsupportedOperationException("Tried to register a wood types after registry events");
         }
@@ -118,16 +120,6 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     }
 
     @ApiStatus.Internal
-    public void onBlockInit() {
-        this.getValues().forEach(BlockType::initializeChildrenBlocks);
-    }
-
-    @ApiStatus.Internal
-    public void onItemInit() {
-        this.getValues().forEach(BlockType::initializeChildrenItems);
-    }
-
-    @ApiStatus.Internal
     public void buildAll() {
         if (!frozen) {
             //adds default
@@ -144,14 +136,20 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             notInclude.clear();
             this.finalizeAndFreeze();
         }
+
+        this.getValues().forEach(BlockType::initializeChildrenBlocks);
+        this.getValues().forEach(BlockType::initializeChildrenItems);
     }
 
     /**
      * Called at the right time on language reload. Use to add translations of your block type names.
      * Useful to merge more complex translation strings using RPAwareDynamicTextureProvider::addDynamicLanguage
      */
+    @ApiStatus.Internal
     public void addTypeTranslations(AfterLanguageLoadEvent language) {
-
+        this.getValues().forEach((w) -> {
+            if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
+        });
     }
 
     @Nullable

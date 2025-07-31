@@ -275,7 +275,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     static {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
             var stopwatch = Stopwatch.createStarted();
-
             List<CompletableFuture<Void>> futures = GENERATORS.stream()
                     .filter(gen -> gen.dynamicPack.packType == earlyPackReloadEvent.type())
                     .map(gen -> CompletableFuture.runAsync(() -> gen.onEarlyReload(earlyPackReloadEvent), EXECUTOR_SERVICE))
