@@ -1,1 +1,2 @@
 - dynamic resource gen will now update the progress bar and not hang the main thread while it generates
+- improved block type detection and cleaned up a lot of code there, also improved the api for mods to add new block types finders
