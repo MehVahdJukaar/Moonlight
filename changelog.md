@@ -1,1 +1,1 @@
-- fixed an issue with villager trades with newly added professions
+- Added some more utilities for projectiles like trail emitter

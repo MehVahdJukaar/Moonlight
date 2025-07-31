@@ -263,7 +263,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     static {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
             var stopwatch = Stopwatch.createStarted();
-
             for (var gen : GENERATORS) {
                 if (gen.dynamicPack.packType == earlyPackReloadEvent.type()) {
                     gen.onEarlyReload(earlyPackReloadEvent); // run synchronously

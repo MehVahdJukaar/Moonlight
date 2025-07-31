@@ -3,9 +3,11 @@ package net.mehvahdjukaar.moonlight.api.set;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -17,6 +19,7 @@ import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -63,7 +66,7 @@ public abstract class BlockType {
      */
     public String getAppendableIdWith(String prefix, String suffix) {
         String prefixed = (prefix.isEmpty()) ? "" : prefix + "_";
-        return  this.getNamespace() +"/"+ prefixed + this.getTypeName() +"_"+ suffix;
+        return this.getNamespace() + "/" + prefixed + this.getTypeName() + "_" + suffix;
     }
 
     /**
@@ -87,6 +90,8 @@ public abstract class BlockType {
     public String createFullIdWith(String modIdOrEmpty, String folderOrEmpty, String shortenedId, String prefixOrEmpty, String suffix) {
         String modIded = (modIdOrEmpty.isEmpty()) ? "" : modIdOrEmpty + ":";
         String foldered = (folderOrEmpty.isEmpty()) ? "" : folderOrEmpty + "/";
+        String namespaced = (modIdOrEmpty.equals(this.getNamespace())) ? "" : this.getNamespace() + "/";
+        String shortenedId = (shortenedIdOrEmpty.isEmpty()) ? "" : shortenedIdOrEmpty + "/";
 
         String prefixed = "";
         if (prefixOrEmpty.contains("/")) prefixed = prefixOrEmpty;
@@ -108,6 +113,7 @@ public abstract class BlockType {
      * Use this to get the new id of a block variant
      * NOTE: minecraft will be ignored as namespace
      * TYPENAME == getTypeName()
+     *
      * @param baseName base variant name
      * @return baseName_TYPENAME OR namespace/baseName_TYPENAME
      */
@@ -119,6 +125,7 @@ public abstract class BlockType {
 
     /**
      * NOTE: minecraft will be ignored as namespace
+     *
      * @return prefix_baseName_TYPENAME OR namespace/prefix_baseName_TYPENAME
      */
     public String getVariantId(String baseName, boolean prefix) {
@@ -127,6 +134,7 @@ public abstract class BlockType {
 
     /**
      * NOTE: minecraft will be ignored as namespace
+     *
      * @return prefix_TYPENAME_postfix OR namespace/prefix_TYPENAME_postfix
      */
     public String getVariantId(String postfix, String prefix) {
@@ -145,10 +153,6 @@ public abstract class BlockType {
         return (BlockTypeRegistry<T>) BlockSetInternal.getRegistry(this.getClass());
     }
 
-    @FunctionalInterface
-    public interface SetFinder<T extends BlockType> extends Supplier<Optional<T>> {
-        Optional<T> get();
-    }
 
     @Nullable
     protected <V> V findRelatedEntry(String after, Registry<V> reg) {
@@ -162,14 +166,7 @@ public abstract class BlockType {
                 id.withPath(id.getPath() + "_" + before + after),
                 id.withPath(before + "_" + id.getPath() + after),
         };
-        V found = null;
-        for (var r : targets) {
-            if (reg.containsKey(r)) {
-                found = reg.get(r);
-                break;
-            }
-        }
-        return found;
+        return Utils.findFirstInRegistry(reg, targets);
     }
 
     /**
@@ -284,7 +281,7 @@ public abstract class BlockType {
 
     //for items
     @Nullable
-    public static Item changeItemType(Item current, BlockType originalMat, BlockType destinationMat) {
+    public static Item changeItemType(Item current,  BlockType originalMat,  BlockType destinationMat) {
         Object changed = changeType(current, originalMat, destinationMat);
         //if item swap fails, try to swap blocks instead
         if (changed == null) {
@@ -329,5 +326,61 @@ public abstract class BlockType {
             return b.defaultBlockState().getSoundType();
         }
         return SoundType.STONE;
+    }
+
+
+    //TODO: move out of here
+    @FunctionalInterface
+    public interface SetFinder<T extends BlockType> extends Supplier<Optional<T>> {
+        Optional<T> get();
+    }
+
+    public abstract static class SetFinderBuilder<T extends BlockType> implements SetFinder<T> {
+
+        protected final ResourceLocation id;
+        protected final Map<String, Supplier<ItemLike>> childNames = new HashMap<>();
+
+        public SetFinderBuilder(ResourceLocation id) {
+            this.id = id;
+        }
+
+        public SetFinderBuilder<T> child(String childType, Supplier<ItemLike> child) {
+            this.childNames.put(childType, child);
+            return this;
+        }
+
+        public SetFinderBuilder<T> childItem(String childType, ResourceLocation childName) {
+            return this.child(childType, () -> BuiltInRegistries.ITEM.getOptional(childName).orElseThrow());
+        }
+
+        public SetFinderBuilder<T> childItemPrefix(String childType, String prefix, String suffix) {
+            return this.childItem(childType, prefix + "_" + id.getPath() + "_" + suffix);
+        }
+
+        public SetFinderBuilder<T> childItemSuffix(String childType, String prefix) {
+            return this.childItem(childType, prefix + "_" + id.getPath());
+        }
+
+        public SetFinderBuilder<T> childItem(String childType, String childName) {
+            return this.childItem(childType,
+                    Utils.idWithOptionalNamespace(childName, id.getNamespace()));
+        }
+
+        public SetFinderBuilder<T> childBlock(String childType, ResourceLocation childName) {
+            return this.child(childType, () -> BuiltInRegistries.BLOCK.getOptional(childName).orElseThrow());
+        }
+
+        public SetFinderBuilder<T> childBlockPrefix(String childType, String prefix, String suffix) {
+            return this.childBlock(childType, prefix + id.getPath() + suffix);
+        }
+
+        public SetFinderBuilder<T> childBlockSuffix(String childType, String prefix) {
+            return this.childBlock(childType, prefix + id.getPath());
+        }
+
+        public SetFinderBuilder<T> childBlock(String childType, String childName) {
+            return this.childBlock(childType,
+                    Utils.idWithOptionalNamespace(childName, id.getNamespace()));
+        }
     }
 }

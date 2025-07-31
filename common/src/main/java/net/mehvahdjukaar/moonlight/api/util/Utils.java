@@ -441,4 +441,21 @@ public class Utils {
     }
 
 
+    public static ResourceLocation idWithOptionalNamespace(String id, String namespace) {
+        if (id.contains(":")) {
+            return new ResourceLocation(id);
+        } else {
+            return new ResourceLocation(namespace, id);
+        }
+    }
+
+    @Nullable
+    public static  <T> T findFirstInRegistry(Registry<T> registry, ResourceLocation... id) {
+        for (ResourceLocation r : id) {
+            var optional = registry.getOptional(r);
+            if (optional.isPresent()) return optional.get();
+        }
+        return null;
+    }
+
 }

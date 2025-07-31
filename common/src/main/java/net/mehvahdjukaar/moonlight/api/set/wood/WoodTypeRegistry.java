@@ -21,15 +21,18 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     public static final WoodTypeRegistry INSTANCE = new WoodTypeRegistry();
 
+    @Deprecated(forRemoval = true)
     public static Collection<WoodType> getTypes() {
         return INSTANCE.getValues();
     }
 
+    @Deprecated(forRemoval = true)
     @Nullable
     public static WoodType getValue(ResourceLocation woodTypeId) {
         return INSTANCE.get(woodTypeId);
     }
 
+    @Deprecated(forRemoval = true)
     @Nullable
     public static WoodType getValue(String woodTypeId) {
         return INSTANCE.get(ResourceLocation.parse(woodTypeId));
@@ -40,6 +43,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         return INSTANCE.getFromNBT(name);
     }
 
+    @Deprecated(forRemoval = true)
     public static WoodType fromVanilla(net.minecraft.world.level.block.state.properties.WoodType vanillaType) {
         return INSTANCE.getFromVanilla(vanillaType);
     }
@@ -94,13 +98,13 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         }
         // DEFAULT
         if (path.endsWith("_planks")) { //needs to contain planks in its name
-            name = path.substring(0, path.length() - "_planks".length());
+            name = path.substring(0, path.length() - "_planks" .length());
         } else if (path.startsWith("planks_")) {
-            name = path.substring("planks_".length());
+            name = path.substring("planks_" .length());
         } else if (path.endsWith("_plank")) {
-            name = path.substring(0, path.length() - "_plank".length());
+            name = path.substring(0, path.length() - "_plank" .length());
         } else if (path.startsWith("plank_")) {
-            name = path.substring("plank_".length());
+            name = path.substring("plank_" .length());
         }
         String namespace = baseRes.getNamespace();
         if (name != null && !IGNORED_MODS.contains(namespace)) {
@@ -112,41 +116,13 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 //we do not allow "/" in the wood name
                 name = name.replace("/", "_");
                 ResourceLocation id = baseRes.withPath(name);
-                Block logBlock = findLog(id);
+                Block logBlock = WoodType.findLog(id);
                 if (logBlock != null) {
                     return Optional.of(new WoodType(id, baseBlock, logBlock));
                 }
             }
         }
         return Optional.empty();
-    }
-
-    @Nullable
-    private static Block findLog(ResourceLocation id) {
-        List<String> keywords = List.of("log", "stem", "stalk", "hyphae");
-        List<ResourceLocation> resources = new ArrayList<>();
-        for (String keyword : keywords) {
-            resources.add(id.withPath(id.getPath() + "_" + keyword));
-            resources.add(id.withPath(keyword + "_" + id.getPath()));
-            resources.add(ResourceLocation.parse(id.getPath() + "_" + keyword));
-            resources.add(ResourceLocation.parse(keyword + "_" + id.getPath()));
-        }
-        ResourceLocation[] test = resources.toArray(new ResourceLocation[0]);
-        Block temp = null;
-        for (var r : test) {
-            if (BuiltInRegistries.BLOCK.containsKey(r)) {
-                temp = BuiltInRegistries.BLOCK.get(r);
-                break;
-            }
-        }
-        return temp;
-    }
-
-    @Override
-    public void addTypeTranslations(AfterLanguageLoadEvent language) {
-        getValues().forEach((w) -> {
-            if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
-        });
     }
 
     @Nullable
@@ -160,4 +136,19 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         return fromVanilla.get(woodType);
     }
 
+    //shorthand for add finder. Gives a builder-like object that's meant to be configured inline
+    public WoodType.Finder addSimpleFinder(ResourceLocation typeId) {
+        WoodType.Finder finder = new WoodType.Finder(typeId);
+        this.addFinder(finder);
+        return finder;
+    }
+
+
+    public WoodType.Finder addSimpleFinder(String typeId) {
+        return addSimpleFinder(new ResourceLocation(typeId));
+    }
+
+    public WoodType.Finder addSimpleFinder(String namespace, String name) {
+        return addSimpleFinder(new ResourceLocation(name, name));
+    }
 }

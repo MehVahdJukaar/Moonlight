@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.set.wood;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -21,7 +22,6 @@ import net.minecraft.world.level.block.CeilingHangingSignBlock;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,6 +56,7 @@ public class WoodType extends BlockType {
     public final Block log;
 
     // like this so it can be called early. not too early tho as children might not be initialized
+    //mega ugly. i cant initialize it immediately as mods might have not run setup yet
     private final Supplier<net.minecraft.world.level.block.state.properties.WoodType> vanillaType = Suppliers.memoize(this::detectVanillaWood);
 
     private final Supplier<Boat.Type> boatType = Suppliers.memoize(this::detectVanillaBoat);
@@ -96,60 +97,6 @@ public class WoodType extends BlockType {
         super(id);
         this.planks = baseBlock;
         this.log = logBlock;
-    }
-
-    @Nullable
-    protected Block findStrippedLog(String... possibleNames) {
-        for (var v : possibleNames) {
-            var b = this.getBlockOfThis(v);
-            if (v != null) {
-                Block stripped = AxeItem.STRIPPABLES.get(b);
-                if (stripped != null && stripped != b) {
-                    return stripped;
-                }
-            }
-        }
-        return findLogRelatedBlock("stripped", possibleNames);
-    }
-
-    @Nullable
-    protected Block findLogRelatedBlock(String prefix, String... possibleNames) {
-        for (var n : possibleNames) {
-            var b = findWithPrefix(prefix, n);
-            if (b != null) return b;
-        }
-        return null;
-    }
-
-    @Nullable
-    protected Block findWithPrefix(String prefix, String postfix) {
-        String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
-        var id = this.getId();
-        String logN = Utils.getID(this.log).getPath();
-
-        // SUPPORT: TFC & AFC
-        String path = id.getPath();
-        if (this.id.getNamespace().matches("tfc|afc")) {
-            var o = BuiltInRegistries.BLOCK.getOptional(
-                    id.withPath("wood/" + prefix_ + postfix + "/" + path));
-            if (o.isPresent()) return o.get();
-        }
-
-        Set<ResourceLocation> targets = new HashSet<>();
-        Collections.addAll(targets,
-                id.withPath(path + "_" + prefix_ + postfix),
-                id.withPath(prefix_ + path + "_" + postfix),
-                id.withPath(logN + "_" + prefix_ + postfix),
-                id.withPath(prefix_ + logN + "_" + postfix)
-        );
-        Block found = null;
-        for (var r : targets) {
-            if (BuiltInRegistries.BLOCK.containsKey(r)) {
-                found = BuiltInRegistries.BLOCK.get(r);
-                break;
-            }
-        }
-        return found;
     }
 
     @Override
@@ -210,9 +157,9 @@ public class WoodType extends BlockType {
         this.addChild("planks", this.planks);
         this.addChild("log", this.log);
         this.addChild("leaves", this.findRelatedEntry("leaves", BuiltInRegistries.BLOCK));
-        this.addChild("wood", this.findLogRelatedBlock("", "wood", "hyphae"));
+        this.addChild("wood", this.findLogRelatedBlock("", "wood", "hyphae", "bark"));
         this.addChild("stripped_log", this.findStrippedLog("log", "stem", "stalk"));
-        this.addChild("stripped_wood", this.findStrippedLog("wood", "hyphae"));
+        this.addChild("stripped_wood", this.findStrippedLog("wood", "hyphae", "bark"));
         this.addChild("slab", this.findRelatedEntry("slab", BuiltInRegistries.BLOCK));
         this.addChild("stairs", this.findRelatedEntry("stairs", BuiltInRegistries.BLOCK));
         Block fence = this.findRelatedEntry("fence", BuiltInRegistries.BLOCK);
@@ -279,63 +226,86 @@ public class WoodType extends BlockType {
         return found;
     }
 
-    public static class Finder implements SetFinder<WoodType> {
 
-        private final Map<String, ResourceLocation> childNames = new HashMap<>();
-        private final Supplier<Block> planksFinder;
-        private final Supplier<Block> logFinder;
-        private final ResourceLocation id;
-
-        public Finder(ResourceLocation id, Supplier<Block> planks, Supplier<Block> log) {
-            this.id = id;
-            this.planksFinder = planks;
-            this.logFinder = log;
-        }
-
-        public static Finder simple(String modId, String woodTypeName, String planksName, String logName) {
-            return simple(ResourceLocation.fromNamespaceAndPath(modId, woodTypeName), ResourceLocation.fromNamespaceAndPath(modId, planksName),
-                    ResourceLocation.fromNamespaceAndPath(modId, logName));
-        }
-
-        public static Finder simple(ResourceLocation woodTypeName, ResourceLocation planksName, ResourceLocation logName) {
-            return new Finder(woodTypeName,
-                    () -> BuiltInRegistries.BLOCK.get(planksName),
-                    () -> BuiltInRegistries.BLOCK.get(logName));
-        }
-
-        public void addChild(String childType, String childName) {
-            addChild(childType, id.withPath(childName));
-        }
-
-        public void addChild(String childType, ResourceLocation childName) {
-            this.childNames.put(childType, childName);
-        }
-
-        @ApiStatus.Internal
-        @Override
-        public Optional<WoodType> get() {
-            if (PlatHelper.isModLoaded(id.getNamespace())) {
-                try {
-                    Block plank = planksFinder.get();
-                    Block log = logFinder.get();
-                    var d = BuiltInRegistries.BLOCK.get(BuiltInRegistries.BLOCK.getDefaultKey());
-                    if (plank != d && log != d && plank != null && log != null) {
-                        var w = new WoodType(id, plank, log);
-                        childNames.forEach((key, value) -> {
-                            Block obj = BuiltInRegistries.BLOCK.get(value);
-                            if (obj != null && obj != d) w.addChild(key, obj);
-                        });
-                        return Optional.of(w);
-                    }else {
-                        throw new RuntimeException("No such item or block");
-                    }
-                } catch (Exception e) {
-                    Moonlight.LOGGER.warn("Failed to find manually defined wood type {}", id, e);
+    @Nullable
+    protected Block findStrippedLog(String... possibleNames) {
+        for (var v : possibleNames) {
+            var b = this.getBlockOfThis(v);
+            if (v != null) {
+                Block stripped = AxeItem.STRIPPABLES.get(b);
+                if (stripped != null && stripped != b) {
+                    return stripped;
                 }
             }
-            return Optional.empty();
         }
+        return findLogRelatedBlock("stripped", possibleNames);
     }
+
+    @Nullable
+    protected Block findLogRelatedBlock(String prefix, String... possibleSuffix) {
+        for (var n : possibleSuffix) {
+            var b = findWithPrefix(prefix, n);
+            if (b != null) return b;
+        }
+        return null;
+    }
+
+    @Nullable
+    protected Block findWithPrefix(String prefix, String suffix) {
+        String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
+        var id = this.getId();
+        String logNamespace = Utils.getID(this.log).getPath();
+
+        // SUPPORT: TFC & AFC
+        String path = id.getPath();
+        String namespace = id.getNamespace();
+        if (this.id.getNamespace().matches("tfc|afc")) {
+            var o = BuiltInRegistries.BLOCK.getOptional(
+                    new ResourceLocation(namespace,
+                            "wood/" + prefix_ + suffix + "/" + path));
+            if (o.isPresent()) return o.get();
+        }
+
+        Set<ResourceLocation> targets = new HashSet<>();
+        Collections.addAll(targets,
+                new ResourceLocation(namespace, path + "_" + prefix_ + suffix),
+                new ResourceLocation(namespace, prefix_ + path + "_" + suffix),
+                new ResourceLocation(namespace, logNamespace + "_" + prefix_ + suffix),
+                new ResourceLocation(namespace, prefix_ + logNamespace + "_" + suffix)
+        );
+        //For things like grimwood_wood -> grimwood
+        if (path.endsWith(suffix)) {
+            targets.add(new ResourceLocation(namespace, prefix_ + path));
+        }
+        return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, targets.toArray(new ResourceLocation[0]));
+    }
+
+
+    static ResourceLocation[] makeKnownIDConventions(ResourceLocation id, String... suffixKeyword) {
+        List<ResourceLocation> resources = new ArrayList<>();
+        for (String keyword : suffixKeyword) {
+            String path = id.getPath();
+            String namespace = id.getNamespace();
+            resources.add(new ResourceLocation(namespace, path + "_" + keyword));
+            resources.add(new ResourceLocation(namespace, keyword + "_" + path));
+            //resources.add(new ResourceLocation(path + "_" + keyword));//vanilla
+            //resources.add(new ResourceLocation(keyword + "_" + path)); //vanilla
+        }
+        return resources.toArray(new ResourceLocation[0]);
+    }
+
+    @Nullable
+    static Block findLog(ResourceLocation id) {
+        ResourceLocation[] tests = makeKnownIDConventions(id, "log", "stem", "stalk", "hyphae");
+        return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, tests);
+    }
+
+    @Nullable
+    static Block findPlanks(ResourceLocation id) {
+        ResourceLocation[] tests = makeKnownIDConventions(id, "planks", "plank");
+        return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, tests);
+    }
+
 
     //just copies base properties without calling copy
     public BlockBehaviour.Properties copyProperties() {
@@ -344,6 +314,120 @@ public class WoodType extends BlockType {
         if (this.canBurn()) p.ignitedByLava();
         p.sound(this.getSound());
         return p;
+    }
+
+
+    public static class Finder extends SetFinderBuilder<WoodType> {
+        private Supplier<Block> planksFinder;
+        private Supplier<Block> logFinder;
+
+        public Finder(ResourceLocation id) {
+            super(id);
+            this.log(() -> findLog(id)); // defaults
+            this.planks(() -> findPlanks(id)); // defaults
+        }
+
+        public Finder planks(Supplier<Block> planksFinder) {
+            if (this.planksFinder != null) {
+                throw new IllegalStateException("WoodType builder already has planks defined: " + id);
+            }
+            this.planksFinder = planksFinder;
+            return this;
+        }
+
+        public Finder planks(ResourceLocation id) {
+            return this.planks(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow());
+        }
+
+        public Finder planksSuffix(String prefix) {
+            return planks(id.getPath() + prefix);
+        }
+
+        public Finder planksPrefix(String prefix, String suffix) {
+            return planks(prefix + id.getPath() + suffix);
+        }
+
+        public Finder planks(String planksName) {
+            return this.planks(Utils.idWithOptionalNamespace(planksName, id.getNamespace()));
+        }
+
+        public Finder log(Supplier<Block> logFinder) {
+            if (this.logFinder != null) {
+                throw new IllegalStateException("WoodType builder already has a log defined: " + id);
+            }
+            this.logFinder = logFinder;
+            return this;
+        }
+
+        public Finder log(ResourceLocation id) {
+            return this.log(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow());
+        }
+
+        public Finder log(String logName) {
+            return this.log(Utils.idWithOptionalNamespace(logName, id.getNamespace()));
+        }
+
+        public Finder logSuffix(String prefix) {
+            return log(id.getPath() + prefix);
+        }
+
+        public Finder logPrefix(String prefix, String suffix) {
+            return log(prefix + id.getPath() + suffix);
+        }
+
+        @Override
+        public Optional<WoodType> get() {
+            if (PlatHelper.isModLoaded(id.getNamespace())) {
+                try {
+                    Block plank = Preconditions.checkNotNull(planksFinder.get(), "Manual finder {} failed to find a plank block", id);
+                    Block log = Preconditions.checkNotNull(logFinder.get(), "Manual finder {} failed to find a log block", id);
+                    var w = new WoodType(id, plank, log);
+                    childNames.forEach((key, value) -> {
+                        try {
+                            ItemLike obj = Preconditions.checkNotNull(value.get());
+                            w.addChild(key, obj);
+                        } catch (Exception e) {
+                            Moonlight.LOGGER.warn("Failed to find child for wood type {}: {}. Ignoring", id, key, e);
+                        }
+                    });
+                    return Optional.of(w);
+                } catch (Exception e) {
+                    Moonlight.LOGGER.warn("Failed to find custom wood type {}", id, e);
+                }
+            }
+            return Optional.empty();
+        }
+
+        @Deprecated(forRemoval = true)
+        public Finder(ResourceLocation id, Supplier<Block> planks, Supplier<Block> log) {
+            super(id);
+            this.planksFinder = planks;
+            this.logFinder = log;
+        }
+
+        @Deprecated(forRemoval = true)
+        public static Finder simple(String modId, String woodTypeName, String planksName, String logName) {
+            return simple(ResourceLocation.fromNamespaceAndPath(modId, woodTypeName), ResourceLocation.fromNamespaceAndPath(modId, planksName),
+                    ResourceLocation.fromNamespaceAndPath(modId, logName));
+        }
+
+        @Deprecated(forRemoval = true)
+        public static Finder simple(ResourceLocation woodTypeName, ResourceLocation planksName, ResourceLocation logName) {
+            return new Finder(woodTypeName,
+                    () -> BuiltInRegistries.BLOCK.get(planksName),
+                    () -> BuiltInRegistries.BLOCK.get(logName));
+        }
+
+        @Deprecated(forRemoval = true)
+        public void addChild(String childType, String childName) {
+            this.childBlock(childType, childName);
+        }
+
+        @Deprecated(forRemoval = true)
+        public void addChild(String childType, ResourceLocation childName) {
+            this.childBlock(childType, childName);
+        }
+
     }
 
 }

@@ -6,6 +6,12 @@ import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.FluidContainerList;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
+import net.mehvahdjukaar.moonlight.api.integration.HardcodedBlockTypes;
+import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
+import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
+import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
+import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.misc.*;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
@@ -64,7 +70,7 @@ public class Moonlight {
         BlockSetInternal.registerBlockSetDefinition(WoodTypeRegistry.INSTANCE);
         BlockSetInternal.registerBlockSetDefinition(LeavesTypeRegistry.INSTANCE);
         //MoonlightEventsHelper.addListener( BlockSetInternal::addTranslations, AfterLanguageLoadEvent.class);
-        CompatWoodTypes.init();
+        HardcodedBlockTypes.init();
         MoonlightRegistry.init();
         ItemListingManager.init();
 
