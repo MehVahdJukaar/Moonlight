@@ -15,6 +15,7 @@ import org.jetbrains.annotations.ApiStatus;
 // SO this has become unmanageable, its shouldnt be that every time a new weird wood is found this mod has to be updated
 // EC is the main mod that uses this so this shit when its found can be added there instead for basically same effect
 // also the sheer amount of stuff here is huge, if there are some common conventions those should added to the wood type reg instead
+//Reminder that this class like all others in the mod follow the mod own license. Aka if you need this, depend on the library
 @ApiStatus.Internal
 public class HardcodedBlockTypes {
 
@@ -185,8 +186,17 @@ public class HardcodedBlockTypes {
         woodReg.addSimpleFinder("gardens_of_the_dead", "soulblight");
 
         woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane")
-                .log("whistlecane_wood")
-                .planks("whistlecane_block");
+                .planks("whistlecane_planks")
+                .log("whistlecane_block")
+                .childItem(STICK, "whistlecane");
+
+        woodReg.addSimpleFinder("luminous_nether", "mushroom")
+                .planks("mushroom_planks")
+                .log("goldenstem")
+                .childBlock(STRIPPED_LOG, "shredded_stem")
+                .childBlock(WOOD, "goldmushroom")
+                .childBlock(SAPLING, "golden_mushroom")
+                .childItem(STICK, "whistlecane");
 
         // Desolation
         woodReg.addSimpleFinder("desolation", "charred")
@@ -337,6 +347,7 @@ public class HardcodedBlockTypes {
     private static final String STRIPPED_WOOD = "stripped_wood";
     private static final String SAPLING = "sapling";
     private static final String FENCE = "fence";
+    private static final String STICK = "fence";
 
 
 }

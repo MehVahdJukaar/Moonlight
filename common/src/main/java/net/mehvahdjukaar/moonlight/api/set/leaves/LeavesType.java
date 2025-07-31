@@ -87,7 +87,9 @@ public class LeavesType extends BlockType {
         }
 
         public Finder leaves(ResourceLocation id) {
-            return this.leaves(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow());
+            return this.leaves(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
+                    ()-> new IllegalStateException("Failed to find leaves block: " + id)
+            ));
         }
 
         /**

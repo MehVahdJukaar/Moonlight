@@ -296,7 +296,9 @@ public class WoodType extends BlockType {
         }
 
         public Finder planks(ResourceLocation id) {
-            return this.planks(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow());
+            return this.planks(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
+                    () -> new IllegalStateException("Failed to find planks block: " + id)
+            ));
         }
 
         /**
@@ -325,7 +327,8 @@ public class WoodType extends BlockType {
         }
 
         public Finder log(ResourceLocation id) {
-            return this.log(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow());
+            return this.log(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
+                    () -> new IllegalStateException("Failed to find log block: " + id)));
         }
 
         public Finder log(String logName) {
@@ -369,7 +372,6 @@ public class WoodType extends BlockType {
             }
             return Optional.empty();
         }
-
 
 
         /// USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
