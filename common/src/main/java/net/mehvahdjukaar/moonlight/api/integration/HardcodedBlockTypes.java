@@ -14,7 +14,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 // SO this has become unmanageable, its shouldnt be that every time a new weird wood is found this mod has to be updated
 // EC is the main mod that uses this so this shit when its found can be added there instead for basically same effect
-// also the sheer amount of stuff here is huge, if there are some common conventions those shouldbe added to the wood type reg instead
+// also the sheer amount of stuff here is huge, if there are some common conventions those should added to the wood type reg instead
 @ApiStatus.Internal
 public class HardcodedBlockTypes {
 
