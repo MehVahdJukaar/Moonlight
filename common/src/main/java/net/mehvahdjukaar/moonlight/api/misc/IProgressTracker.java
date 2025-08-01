@@ -3,10 +3,10 @@ package net.mehvahdjukaar.moonlight.api.misc;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface ITaskProgress {
-    Scope subtask(int totalSteps);
+public interface IProgressTracker {
+    Task subtask(int totalSteps);
 
-    interface Scope extends ITaskProgress {
+    interface Task extends IProgressTracker {
         void step();
     }
 
@@ -14,7 +14,7 @@ public interface ITaskProgress {
         return new Tree(totalSteps);
     }
 
-    class Tree implements ITaskProgress.Scope {
+    class Tree implements Task {
         private final List<Tree> subtasks = new ArrayList<>();
 
         private final int totalSteps;
@@ -25,7 +25,7 @@ public interface ITaskProgress {
         }
 
         @Override
-        public synchronized ITaskProgress.Scope subtask(int totalSteps) {
+        public synchronized Task subtask(int totalSteps) {
             Tree subtask = new Tree(totalSteps);
             subtasks.add(subtask);
             return subtask;

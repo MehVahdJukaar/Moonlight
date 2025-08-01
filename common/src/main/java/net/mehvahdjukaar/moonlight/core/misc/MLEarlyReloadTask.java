@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.core.misc;
 import com.google.common.base.Suppliers;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
-import net.mehvahdjukaar.moonlight.api.misc.ITaskProgress;
+import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadInstance;
@@ -22,7 +22,7 @@ public class MLEarlyReloadTask {
         return new WrapperInstance(factory, type, manager);
     }
 
-    private static CompletableFuture<Unit> earlyReloadTask(PackType type, ResourceManager manager, ITaskProgress progressTracker) {
+    private static CompletableFuture<Unit> earlyReloadTask(PackType type, ResourceManager manager, IProgressTracker progressTracker) {
         return CompletableFuture.supplyAsync(() -> {
             DynResourceGenerator.clearBeforeReload(type);
 
@@ -35,12 +35,12 @@ public class MLEarlyReloadTask {
 
         private final Supplier<ReloadInstance> lazyInstance;
         private final CompletableFuture<Unit> beforeTask;
-        private final ITaskProgress.Tree progressTracker;
+        private final IProgressTracker.Tree progressTracker;
         private final int leaves;
 
         public WrapperInstance(Supplier<ReloadInstance> factory,
                                PackType type, ResourceManager manager) {
-            progressTracker = ITaskProgress.createTree(1);
+            progressTracker = IProgressTracker.createTree(1);
             leaves = progressTracker.countLeaves();
             this.beforeTask = earlyReloadTask(type, manager, progressTracker);
             this.lazyInstance = Suppliers.memoize(factory::get);
