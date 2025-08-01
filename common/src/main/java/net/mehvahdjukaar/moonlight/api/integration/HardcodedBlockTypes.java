@@ -50,6 +50,7 @@ public class HardcodedBlockTypes {
                 .childBlock(STRIPPED_LOG, "stripped_blooming_stem");
 
         // Blocks +
+        //why needed?
         woodReg.addSimpleFinder("blocksplus", "chorus");
         woodReg.addSimpleFinder("blocksplus", "bamboo");
         woodReg.addSimpleFinder("blocksplus", "mushroom");

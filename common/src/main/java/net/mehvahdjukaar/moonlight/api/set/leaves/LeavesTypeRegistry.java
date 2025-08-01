@@ -140,8 +140,8 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         addLeavesToWoodMapping(new ResourceLocation(leavedId), new ResourceLocation(woodId));
     }
 
-    public void addLeavesToWoodMapping(String modId, String leavesTypeId, String woodTypeId) {
-        addLeavesToWoodMapping(new ResourceLocation(modId, leavesTypeId), new ResourceLocation(modId, woodTypeId));
+    public void addLeavesToWoodMapping(String modId, String leavesTypeName, String woodTypeName) {
+        addLeavesToWoodMapping(new ResourceLocation(modId, leavesTypeName), new ResourceLocation(modId, woodTypeName));
     }
 
     @Override
