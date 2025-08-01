@@ -27,23 +27,27 @@ public class HardcodedBlockTypes {
         //TODO:replace all with stuff like this
         woodReg.addSimpleFinder("mofus_better_end_", "weepingstar")
                 .childBlockSuffix(LEAVES, "_leaf");
+
         woodReg.addSimpleFinder("mofus_better_end_", "frost_root")
                 .planksSuffix("_plank");
 
         // Burnt
-        mediumWoodFinder("burnt", "smoldering_bamboo", "smoldering_bamboo_block", "");
+        woodReg.addSimpleFinder("burnt", "smoldering_bamboo")
+                .logSuffix("_block");
 
         // Caverns-And-Chasms
-        simpleWoodFinder("caverns_and_chasms", "azalea", "azalea_leaves");
+        woodReg.addSimpleFinder("caverns_and_chasms", "azalea")
+                .childBlockSuffix(LEAVES, "_leaves");
 
         // The Outer End
         woodReg.addSimpleFinder("outer_end", "azure")
                 .childBlockSuffix(WOOD, "_pith")
                 .childBlockSuffix(STRIPPED_WOOD, "_stripped_pith");
 
-
         // Deeper And Darker
-        simplePlanksStemFinder("deeperdarker", "blooming", "bloom_planks");
+        woodReg.addSimpleFinder("deeperdarker", "bloom")
+                .log("blooming_stem")
+                .childBlock(STRIPPED_LOG, "stripped_blooming_stem");
 
         // Blocks +
         woodReg.addSimpleFinder("blocksplus", "chorus");
@@ -51,7 +55,7 @@ public class HardcodedBlockTypes {
         woodReg.addSimpleFinder("blocksplus", "mushroom");
 
         // Integrated Dynamics
-        //TODO: why needed?
+        //TODO: why needed? - blc of sounds (need to check if it's been fixed)
         woodReg.addSimpleFinder("integrateddynamics", "menril");
 
         // Domum Oranmentum
@@ -73,18 +77,41 @@ public class HardcodedBlockTypes {
                 .log("ominous_stalk_block");
 
         // Unusual End
-        advancedWoodFinder(true, "unusualend", "chorus_cane", "chorus_nest_planks", "chorus_cane_block",
-                "STRIPPED_LOG-stripped_chorus_cane_block", "FENCE-chorus_nest_mosaic_fence");
+        woodReg.addSimpleFinder("unusualend", "chorus_nest")
+                .planks("chorus_nest_planks")
+                .log("chorus_cane_block")
+                .childBlock(STRIPPED_LOG, "stripped_chorus_cane_block")
+                .childBlock(FENCE, "chorus_nest_mosaic_fence");
 
         // Spectrum (FABRIC)
-        simplePlanksStemFinder("spectrum", "ivory_noxcap", "ivory_noxwood_planks");
-        simplePlanksStemFinder("spectrum", "slate_noxcap", "slate_noxwood_planks");
-        simplePlanksStemFinder("spectrum", "ebony_noxcap", "ebony_noxwood_planks");
-        simplePlanksStemFinder("spectrum", "chestnut_noxcap", "chestnut_noxwood_planks");
+        woodReg.addSimpleFinder("spectrum", "ivory_noxwood")
+                .log("ivory_noxcap_stem")
+                .childBlock(STRIPPED_LOG, "stripped_ivory_noxcap_stem")
+                .childBlock(WOOD, "ivory_noxcap_hyphae")
+                .childBlock(STRIPPED_WOOD, "stripped_ivory_noxcap_hyphae");
+
+        woodReg.addSimpleFinder("spectrum", "slate_noxwood")
+                .log("slate_noxcap_stem")
+                .childBlock(STRIPPED_LOG, "stripped_slate_noxcap_stem")
+                .childBlock(WOOD, "slate_noxcap_hyphae")
+                .childBlock(STRIPPED_WOOD, "stripped_slate_noxcap_hyphae");
+
+        woodReg.addSimpleFinder("spectrum", "ebony_noxwood")
+                .log("ebony_noxcap_stem")
+                .childBlock(STRIPPED_LOG, "stripped_ebony_noxcap_stem")
+                .childBlock(WOOD, "ebony_noxcap_hyphae")
+                .childBlock(STRIPPED_WOOD, "stripped_ebony_noxcap_hyphae");
+
+        woodReg.addSimpleFinder("spectrum", "chestnut_noxwood")
+                .log("chestnut_noxcap_stem")
+                .childBlock(STRIPPED_LOG, "stripped_chestnut_noxcap_stem")
+                .childBlock(WOOD, "chestnut_noxcap_hyphae")
+                .childBlock(STRIPPED_WOOD, "stripped_chestnut_noxcap_hyphae");
 
         // Ars Nouveau - Do not add other WoodTypes blc it would create too many block variants using archwood_planks
         // The WoodTypes below all are using the same planks. There is no solutions
-        simplePlanksWoodFinder("ars_nouveau", "blue_archwood", "archwood_planks");
+        woodReg.addSimpleFinder("ars_nouveau", "blue_archwood")
+                .planks("archwood_planks");
 
 //        BlockSetAPI.addBlockTypeFinder(WoodType.class,
 //                generalWoodFinder(false, "ars_nouveau", "red_archwood", "archwood_planks", true));
@@ -107,9 +134,8 @@ public class HardcodedBlockTypes {
         woodReg.addSimpleFinder("darkerdepths", "petrified");
 
         // Pokecube Legends
-        //TODO: is this needed?
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple(
-                "pokecube_legends", "concrete", "concrete_planks", "concrete_log"));
+        //TODO: is this needed? - blc of sounds (need to check if it's been fixed)
+        woodReg.addSimpleFinder("pokecube_legends", "concrete");
 
         // Terraqueous
         //TODO: are these even woods???
@@ -124,7 +150,7 @@ public class HardcodedBlockTypes {
                 .log("dense_cloud_column");
 
         // Rats
-        //TODO: is this needed?
+        //TODO: is this needed? - blc of sounds (need to check if it's been fixed)
         woodReg.addSimpleFinder("rats", "pirat");
 
         // Oh The Biomes You'll Go
@@ -140,36 +166,39 @@ public class HardcodedBlockTypes {
                 .log("jabuticaba_log");
 
         // My Nether's Delight
-        mediumWoodFinder("mynethersdelight", "powdery", "powdery_block", "");
+        woodReg.addSimpleFinder("mynethersdelight", "powdery")
+                .logSuffix("_block");
 
         // Nourished End
-        mediumWoodFinder("nourished_end", "verdant", "verdant_stalk", "verdant_hyphae");
+        woodReg.addSimpleFinder("nourished_end", "verdant")
+                .logSuffix("_stalk")
+                .childBlock(WOOD, "verdant_hyphae");
 
-        advancedWoodFinder("nourished_end", "cerulean", "cerulean_planks", "cerulean_stem_thick",
-                "STRIPPED_LOG-cerulean_stem_stripped", "WOOD-cerulean_hyphae", "STRIPPED_WOOD-stripped_cerulean_hyphae");
+        woodReg.addSimpleFinder("nourished_end", "cerulean")
+                .logSuffix("_stem_thick")
+                .childBlockSuffix(STRIPPED_LOG, "_stem_stripped")
+                .childBlockSuffix(WOOD, "_hyphae")
+                .childBlockSuffix(STRIPPED_WOOD, "_hyphae");
 
         // Gardens Of The Dead
         woodReg.addSimpleFinder("gardens_of_the_dead", "soulblight");
 
         woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane")
-                .planks("whistlecane_block")
-                .log("whistlecane_wood");
+                .log("whistlecane_wood")
+                .planks("whistlecane_block");
 
         // Desolation
         woodReg.addSimpleFinder("desolation", "charred")
-                .planks("charred_planks")
                 .log("charredlog");
-        //TODO:huh? is it inverted?
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("desolation",
-                "charred", "charredlog", "charred_planks")); //huh? inverted?
 
         // Damn Of Time Builder
-        //TODO: the names here seem completely off or inverted
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("dawnoftimebuilder",
-                "waxed_oak", "waxed_oak_log_stripped", "waxed_oak_planks"));
-        //here too
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("dawnoftimebuilder",
-                "charred_spruce", "charred_spruce_log_stripped", "charred_spruce_planks"));
+        woodReg.addSimpleFinder("dawnoftimebuilder", "waxed_oak")
+                .log("waxed_oak_log_stripped")
+                .planks("waxed_oak_planks");
+
+        woodReg.addSimpleFinder("dawnoftimebuilder", "charred_spruce")
+                .log("charred_spruce_log_stripped")
+                .planks("charred_spruce_planks");
 
         // Habitat
         woodReg.addSimpleFinder("habitat", "fairy_ring_mushroom")
@@ -217,11 +246,10 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("biomesoplenty:origin", "minecraft:oak");
 
         // BLUE SKIES
-        //TODO why needed?
-        BlockSetAPI.addBlockTypeFinder(LeavesType.class, LeavesType.Finder.simple(
-                "blue_skies", "crystallized", "crystallized_leaves", "blue_skies:crystallized"));
-        leafReg.addLeavesToWoodMapping("blue_skies", "crescent_fruit", "dusk");
+        //TODO why needed? - blc of sounds (need to check if it's been fixed)
+        leafReg.addLeavesToWoodMapping("blue_skies", "crystallized", "crystallized");
 
+        leafReg.addLeavesToWoodMapping("blue_skies", "crescent_fruit", "dusk");
 
         // COLORFUL AZALEAS
         leafReg.addLeavesToWoodMapping("colorfulazaleas", "blue_azalea", "azule_azalea");
@@ -282,7 +310,6 @@ public class HardcodedBlockTypes {
         String crystalLeavesWoodType = PlatHelper.isModLoaded("aether_redux") ?
                 "aether_redux:crystal" : "aether:skyroot";
 
-        //TODO: are these correct?
         leafReg.addLeavesToWoodMapping("aether:crystal", crystalLeavesWoodType);
         leafReg.addLeavesToWoodMapping("aether:crystal_fruit_leaves", crystalLeavesWoodType);
 
@@ -301,13 +328,14 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("alexscaves:ancient_leaves", "minecraftjungle");
     }
 
-    //known children keys
 
+    /// Known Children Keys
     private static final String LEAVES = "leaves";
     private static final String WOOD = "wood";
     private static final String STRIPPED_LOG = "stripped_log";
     private static final String STRIPPED_WOOD = "stripped_wood";
-    private static final String SAPLING = "sampling";
+    private static final String SAPLING = "sapling";
+    private static final String FENCE = "fence";
 
 
 }
