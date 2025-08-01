@@ -61,7 +61,6 @@ public class ParticleTrailEmitter {
         double segmentLength = startPos.distanceTo(endPos);
         Double startT = intersectSphereSegment(lastEmittedPos, wantedSpacing, startPos, endPos);
         if (startT == null) {
-            System.out.println("No intersection found, skipping particle emission.");
             return;
         }
 

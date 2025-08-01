@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
-import net.mehvahdjukaar.moonlight.api.misc.ITaskProgress;
+import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
@@ -23,10 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -75,17 +72,17 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     /**
      * just deprecated as it shouldn't be overwritten anymore and will become final private
      */
-    private void regenerateDynamicAssets(ResourceManager manager, ITaskProgress progress) {
-        var tasks = new ArrayList<ResourceGenTask>();
+    private void regenerateDynamicAssets(ResourceManager manager, IProgressTracker progressTracker) {
+        var genTasks = new ArrayList<ResourceGenTask>();
         regenerateDynamicAssets(manager);
-        regenerateDynamicAssets(tasks::add);
+        regenerateDynamicAssets(genTasks::add);
 
         Stopwatch watch = Stopwatch.createStarted();
 
-        int totalTasks = tasks.size();
-        var reporter = progress.subtask(totalTasks); // child reporter
+        int totalTasks = genTasks.size();
+        var reporter = progressTracker.subtask(totalTasks); // child reporter
 
-        List<CompletableFuture<ResourceSink>> futures = tasks.stream()
+        List<CompletableFuture<ResourceSink>> futures = genTasks.stream()
                 .map(task -> CompletableFuture.supplyAsync(() -> {
                     var localSink = createLocalSink();
                     task.accept(manager, localSink);
@@ -168,7 +165,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     protected void onNormalReload(ResourceManager manager) {
     }
 
-    protected final void onEarlyReload(EarlyPackReloadEvent event, ITaskProgress localReporter) {
+    protected final void onEarlyReload(EarlyPackReloadEvent event, IProgressTracker localReporter) {
         if (event.type() == dynamicPack.packType) {
             try {
                 this.reloadResources(event.manager(), localReporter);
@@ -178,7 +175,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         }
     }
 
-    protected final void reloadResources(ResourceManager manager, ITaskProgress reporter) {
+    protected final void reloadResources(ResourceManager manager, IProgressTracker reporter) {
         //first clear all pack content if it should be cleared
 
         boolean wasFirstReload = false;
@@ -271,7 +268,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             List<DynResourceGenerator<?>> validGen = DynResourceGenerator.GENERATORS.stream()
                     .filter(gen -> gen.dynamicPack.packType == earlyPackReloadEvent.type())
                     .toList();
-            ITaskProgress reporter = earlyPackReloadEvent.progress();
+            IProgressTracker reporter = earlyPackReloadEvent.progress();
             //These are not parallel. pass flat
             for (var gen : validGen) {
                 gen.onEarlyReload(earlyPackReloadEvent, reporter); // run synchronously
