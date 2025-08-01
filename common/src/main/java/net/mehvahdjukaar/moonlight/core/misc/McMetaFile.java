@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO: move out of here
 public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject moddedStuff) {
 
     public static McMetaFile of(@NotNull AnimationMetadataSection vanillaMcmeta) {
