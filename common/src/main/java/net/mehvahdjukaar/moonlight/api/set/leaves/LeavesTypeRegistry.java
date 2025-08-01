@@ -154,7 +154,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     public LeavesType.Finder addSimpleFinder(String namespace, String name) {
-        return addSimpleFinder(new ResourceLocation(name, name));
+        return addSimpleFinder(new ResourceLocation(namespace, name));
     }
 
 }

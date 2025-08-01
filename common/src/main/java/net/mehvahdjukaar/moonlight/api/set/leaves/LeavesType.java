@@ -90,18 +90,27 @@ public class LeavesType extends BlockType {
             return this.leaves(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow());
         }
 
-        public Finder leavesSuffix(String prefix) {
-            return leaves(id.getPath() + prefix);
+        /**
+         * @param prefix include the underscore, "_" if the blockId has one
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        public Finder leavesAffix(String prefix, String suffix) {
+            return leaves(prefix + id.getPath() + suffix);
         }
 
-        public Finder leavesPrefix(String prefix, String suffix) {
-            return leaves(prefix + id.getPath() + suffix);
+        /**
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        @SuppressWarnings("UnusedReturnValue")
+        public Finder leavesSuffix(String suffix) {
+            return leaves(id.getPath() + suffix);
         }
 
         public Finder leaves(String leavesName) {
             return this.leaves(Utils.idWithOptionalNamespace(leavesName, id.getNamespace()));
         }
 
+        @SuppressWarnings("UnusedReturnValue")
         public Finder equivalentWood(String id) {
             LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(this.id, new ResourceLocation(id)); //this is ass too
             return this;
@@ -130,23 +139,27 @@ public class LeavesType extends BlockType {
         }
 
 
+        /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public Finder(ResourceLocation id, Supplier<Block> leaves, @Nullable Supplier<WoodType> wood) {
             this(id, leaves);
         }
 
+        /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public Finder(ResourceLocation id, Supplier<Block> leaves) {
             super(id);
             this.leavesFinder = leaves;
         }
 
+        /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public static Finder simple(String modId, String leavesTypeName, String leavesName) {
             return new Finder(new ResourceLocation(modId, leavesTypeName),
                     () -> BuiltInRegistries.BLOCK.get(new ResourceLocation(modId, leavesName)), null);
         }
 
+        /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public static Finder simple(String modId, String leavesTypeName, String leavesName, String woodTypeID) {
             ResourceLocation leavesId = new ResourceLocation(modId, leavesName);
@@ -155,11 +168,23 @@ public class LeavesType extends BlockType {
                     () -> BuiltInRegistries.BLOCK.get(leavesId));
         }
 
+        /**
+         * USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
+         * <br>add {@link SetFinderBuilder#childBlockAffix(String, String, String)}
+         * <br>OR
+         * <br>add {@link SetFinderBuilder#childBlockSuffix(String, String)}
+         */
         @Deprecated(forRemoval = true)
         public void addChild(String childType, String childName) {
             addChild(childType, new ResourceLocation(id.getNamespace(), childName));
         }
 
+        /**
+         * USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
+         * <br>add {@link SetFinderBuilder#childBlockAffix(String, String, String)}
+         * <br>OR
+         * <br>add {@link SetFinderBuilder#childBlockSuffix(String, String)}
+         */
         @Deprecated(forRemoval = true)
         public void addChild(String childType, ResourceLocation childName) {
             childBlock(childType, childName);
