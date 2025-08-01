@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import net.mehvahdjukaar.moonlight.api.integration.HardcodedBlockTypes;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.misc.MLEarlyReloadTask;
