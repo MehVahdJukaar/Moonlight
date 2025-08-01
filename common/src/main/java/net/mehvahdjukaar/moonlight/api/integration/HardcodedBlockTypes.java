@@ -50,7 +50,7 @@ public class HardcodedBlockTypes {
                 .childBlock(STRIPPED_LOG, "stripped_blooming_stem");
 
         // Blocks +
-        //why needed?
+        //TODO: why needed?  - blc of sounds (need to check if it's been fixed)
         woodReg.addSimpleFinder("blocksplus", "chorus");
         woodReg.addSimpleFinder("blocksplus", "bamboo");
         woodReg.addSimpleFinder("blocksplus", "mushroom");
@@ -234,7 +234,7 @@ public class HardcodedBlockTypes {
                 .leavesSuffix("_blossoms");
         leafReg.addLeavesToWoodMapping("mysticsbiomes", "sea_shrub", "sea_foam");
 
-//TODO: are these correct? oak? shouldnt it be left empty?
+        //TODO: are these correct? oak? shouldnt it be left empty? - need to check
         leafReg.addLeavesToWoodMapping("mysticsbiomes:peony", "minecraft:oak");
         leafReg.addLeavesToWoodMapping("mysticsbiomes:hydrangea", "minecraft:oak");
         leafReg.addLeavesToWoodMapping("mysticsbiomes:budding_peony", "minecraft:oak");
