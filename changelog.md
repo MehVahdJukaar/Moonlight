@@ -1,1 +1,1 @@
-- Added some more utilities for projectiles like trail emitter
+- dynamic resource gen will now update the progress bar and not hang the main thread while it generates

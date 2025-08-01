@@ -15,6 +15,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.client.model.geometry.GeometryLoaderManager;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
