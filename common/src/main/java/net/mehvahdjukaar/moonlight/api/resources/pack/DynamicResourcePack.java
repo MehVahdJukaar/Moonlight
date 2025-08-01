@@ -142,21 +142,22 @@ public abstract class DynamicResourcePack implements PackResources {
     /**
      * Registers this pack. Call on mod init
      */
-    protected void registerPack() {if (wasRegistered) {
+    protected void registerPack() {
+        if (wasRegistered) {
             return;
         } else {
             wasRegistered = true;
         }
         PlatHelper.registerResourcePack(this.packType, () ->
                 Pack.create(
-                            this.packId(),    // id
+                        this.packId(),    // id
                         this.getTitle(), // title
-                            true,    // required -- this MAY need to be true for the pack to be enabled by default
-                            (s) -> this, // pack supplier
-                            new Pack.Info(metadata.get().getDescription(), metadata.get().getPackFormat(), FeatureFlagSet.of()), // description
-                            this.packType,
-                            Pack.Position.TOP,
-                            this.fixed, // fixed position? no
+                        true,    // required -- this MAY need to be true for the pack to be enabled by default
+                        (s) -> this, // pack supplier
+                        new Pack.Info(metadata.get().getDescription(), metadata.get().getPackFormat(), FeatureFlagSet.of()), // description
+                        this.packType,
+                        Pack.Position.TOP,
+                        this.fixed, // fixed position? no
                         PackSource.BUILT_IN));
 
     }
@@ -263,7 +264,7 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
-    public static void saveBytes(ResourceLocation id, byte[] bytes){
+    public static void saveBytes(ResourceLocation id, byte[] bytes) {
         try {
             Path p = Paths.get("debug", "generated_resource_pack").resolve(id.getNamespace() + "/" + id.getPath());
             Files.createDirectories(p.getParent());
@@ -316,35 +317,34 @@ public abstract class DynamicResourcePack implements PackResources {
         if (!CommonConfigs.CLEAR_RESOURCES.get()) return;
         if (this.needsClearingNonStatic) {
             this.needsClearingNonStatic = false;
-        boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
-        // clear trie entirely and re populate as we always expect to have way less staitc resources than others
-        if (!mf) this.searchTrie.clear();
+            boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
+            // clear trie entirely and re populate as we always expect to have way less staitc resources than others
+            if (!mf) this.searchTrie.clear();
 
-        for (var r : this.resources.keySet()) {
-            if (mf && modernFixHack(r.getPath())) {
-                continue;
+            for (var r : this.resources.keySet()) {
+                if (mf && modernFixHack(r.getPath())) {
+                    continue;
+                }
+                if (!this.staticResources.contains(r)) {
+                    this.resources.remove(r);
+                }
             }
-            if (!this.staticResources.contains(r)) {
-                this.resources.remove(r);
-            }
-        }
 
 
-                if (mf) {
-                    List<String> toRemove = new ArrayList<>();
-                    for (String namespace : this.searchTrie.listFolders("")) {
-                        for (String f : this.searchTrie.listFolders(namespace)) {
-                            if (!modernFixHack(f)) {
-                                toRemove.add(namespace + "/" + f);
-                            }
+            if (mf) {
+                List<String> toRemove = new ArrayList<>();
+                for (String namespace : this.searchTrie.listFolders("")) {
+                    for (String f : this.searchTrie.listFolders(namespace)) {
+                        if (!modernFixHack(f)) {
+                            toRemove.add(namespace + "/" + f);
                         }
                     }
-                    toRemove.forEach(this.searchTrie::remove);
                 }
-                // rebuild search trie with just static
-                for (var s : staticResources) {
-                    this.searchTrie.insert(s);
-                }
+                toRemove.forEach(this.searchTrie::remove);
+            }
+            // rebuild search trie with just static
+            for (var s : staticResources) {
+                this.searchTrie.insert(s);
             }
         }
     }
