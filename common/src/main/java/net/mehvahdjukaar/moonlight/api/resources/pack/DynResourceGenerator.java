@@ -3,12 +3,12 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.misc.ITaskProgress;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -73,19 +73,25 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     }
 
     /**
-     * just deprecated as it shouldnt be overritten aymore and will become final private
+     * just deprecated as it shouldn't be overwritten anymore and will become final private
      */
-    @Deprecated(forRemoval = true)
-    public void regenerateDynamicAssets(ResourceManager manager) {
+    private void regenerateDynamicAssets(ResourceManager manager, ITaskProgress progress) {
         var tasks = new ArrayList<ResourceGenTask>();
+        regenerateDynamicAssets(manager);
         regenerateDynamicAssets(tasks::add);
 
         Stopwatch watch = Stopwatch.createStarted();
+
+        int totalTasks = tasks.size();
+        var reporter = progress.subtask(totalTasks); // child reporter
 
         List<CompletableFuture<ResourceSink>> futures = tasks.stream()
                 .map(task -> CompletableFuture.supplyAsync(() -> {
                     var localSink = createLocalSink();
                     task.accept(manager, localSink);
+
+                    reporter.step(); // One step completed
+
                     return localSink;
                 }, getExecutors()))
                 .toList();
@@ -114,7 +120,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             sink.resources.forEach(this.dynamicPack::addBytes);
             sink.notClearable.forEach(this.dynamicPack::markNotClearable);
             for (var e : sink.tags.entrySet()) {
-                allTags.merge(e.getKey(),  e.getValue(), SimpleTagBuilder::merge);
+                allTags.merge(e.getKey(), e.getValue(), SimpleTagBuilder::merge);
             }
         }
 
@@ -131,6 +137,11 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
     protected @NotNull ExecutorService getExecutors() {
         return EXECUTOR_SERVICE;
+    }
+
+    @Deprecated(forRemoval = true)
+    public void regenerateDynamicAssets(ResourceManager manager) {
+
     }
 
     public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
@@ -157,17 +168,17 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     protected void onNormalReload(ResourceManager manager) {
     }
 
-    protected final void onEarlyReload(EarlyPackReloadEvent event) {
+    protected final void onEarlyReload(EarlyPackReloadEvent event, ITaskProgress localReporter) {
         if (event.type() == dynamicPack.packType) {
             try {
-                this.reloadResources(event.manager());
+                this.reloadResources(event.manager(), localReporter);
             } catch (Exception e) {
                 Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}:", this.dynamicPack, e);
             }
         }
     }
 
-    protected final void reloadResources(ResourceManager manager) {
+    protected final void reloadResources(ResourceManager manager, ITaskProgress reporter) {
         //first clear all pack content if it should be cleared
 
         boolean wasFirstReload = false;
@@ -178,7 +189,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         }
         //generate textures
         if (runsOnEveryReload() || wasFirstReload) {
-            this.regenerateDynamicAssets(manager);
+            this.regenerateDynamicAssets(manager, reporter);
         }
     }
 
@@ -256,11 +267,14 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
     static {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
-            var stopwatch = Stopwatch.createStarted();
-            for (var gen : GENERATORS) {
-                if (gen.dynamicPack.packType == earlyPackReloadEvent.type()) {
-                    gen.onEarlyReload(earlyPackReloadEvent); // run synchronously
-                }
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            List<DynResourceGenerator<?>> validGen = DynResourceGenerator.GENERATORS.stream()
+                    .filter(gen -> gen.dynamicPack.packType == earlyPackReloadEvent.type())
+                    .toList();
+            ITaskProgress reporter = earlyPackReloadEvent.progress();
+            //These are not parallel. pass flat
+            for (var gen : validGen) {
+                gen.onEarlyReload(earlyPackReloadEvent, reporter); // run synchronously
             }
 
             Moonlight.LOGGER.info("Generated runtime resources for {} packs in a total of: {} ms",

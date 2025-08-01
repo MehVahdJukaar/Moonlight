@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.map.forge;
 
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraftforge.common.crafting.AbstractIngredient;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
