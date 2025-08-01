@@ -204,17 +204,17 @@ public class WoodType extends BlockType {
     }
 
     @Nullable
-    protected <V> V findRelatedEntry(String before, String after, Registry<V> reg) {
-        if (!after.isEmpty()) after = "_" + after;
+    protected <V> V findRelatedEntry(String prefix, String suffix, Registry<V> reg) {
+        if (!suffix.isEmpty()) suffix = "_" + suffix;
         ResourceLocation[] targets = {
-                id.withPath(id.getPath() + "_" + before + after),
-                id.withPath(before + "_" + id.getPath() + after),
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + prefix + suffix),
+                new ResourceLocation(id.getNamespace(), prefix + "_" + id.getPath() + suffix),
                 //weird conventions here
-                id.withPath(id.getPath() + "_planks_" + before + after),
+                id.withPath(id.getPath() + "_planks_" + prefix + suffix),
                 // TFC & AFC: Include children of wood_type: stairs, slab...
-                id.withPath("wood/planks/" + id.getPath() + "_" + before),
+                id.withPath("wood/planks/" + id.getPath() + "_" + prefix),
                 // TFC & AFC: Include twig (sticks), leaves, planks, sign
-                id.withPath("wood/" + before + after + "/" + id.getPath())
+                id.withPath("wood/" + prefix + suffix + "/" + id.getPath())
         };
         V found = null;
         for (var r : targets) {
@@ -339,12 +339,20 @@ public class WoodType extends BlockType {
             return this.planks(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow());
         }
 
-        public Finder planksSuffix(String prefix) {
-            return planks(id.getPath() + prefix);
+        /**
+         * @param prefix include the underscore, "_" if the blockId has one
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        public Finder planksAffix(String prefix, String suffix) {
+            return planks(prefix + id.getPath() + suffix);
         }
 
-        public Finder planksPrefix(String prefix, String suffix) {
-            return planks(prefix + id.getPath() + suffix);
+        /**
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        @SuppressWarnings("UnusedReturnValue")
+        public Finder planksSuffix(String suffix) {
+            return planks(id.getPath() + suffix);
         }
 
         public Finder planks(String planksName) {
@@ -367,12 +375,19 @@ public class WoodType extends BlockType {
             return this.log(Utils.idWithOptionalNamespace(logName, id.getNamespace()));
         }
 
-        public Finder logSuffix(String prefix) {
-            return log(id.getPath() + prefix);
+        /**
+         * @param prefix include the underscore, "_" if the blockId has one
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        public Finder logAffix(String prefix, String suffix) {
+            return log(prefix + id.getPath() + suffix);
         }
 
-        public Finder logPrefix(String prefix, String suffix) {
-            return log(prefix + id.getPath() + suffix);
+        /**
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        public Finder logSuffix(String suffix) {
+            return log(id.getPath() + suffix);
         }
 
         @Override
@@ -398,6 +413,9 @@ public class WoodType extends BlockType {
             return Optional.empty();
         }
 
+
+
+        /// USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public Finder(ResourceLocation id, Supplier<Block> planks, Supplier<Block> log) {
             super(id);
@@ -405,12 +423,14 @@ public class WoodType extends BlockType {
             this.logFinder = log;
         }
 
+        /// USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public static Finder simple(String modId, String woodTypeName, String planksName, String logName) {
             return simple(ResourceLocation.fromNamespaceAndPath(modId, woodTypeName), ResourceLocation.fromNamespaceAndPath(modId, planksName),
                     ResourceLocation.fromNamespaceAndPath(modId, logName));
         }
 
+        /// USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public static Finder simple(ResourceLocation woodTypeName, ResourceLocation planksName, ResourceLocation logName) {
             return new Finder(woodTypeName,
@@ -418,11 +438,23 @@ public class WoodType extends BlockType {
                     () -> BuiltInRegistries.BLOCK.get(logName));
         }
 
+        /**
+         * USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
+         * <br>add {@link SetFinderBuilder#childBlockAffix(String, String, String)}
+         * <br>OR
+         * <br>add {@link SetFinderBuilder#childBlockSuffix(String, String)}
+         */
         @Deprecated(forRemoval = true)
         public void addChild(String childType, String childName) {
             this.childBlock(childType, childName);
         }
 
+        /**
+         * USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
+         * <br>add {@link SetFinderBuilder#childBlockAffix(String, String, String)}
+         * <br>OR
+         * <br>add {@link SetFinderBuilder#childBlockSuffix(String, String)}
+         */
         @Deprecated(forRemoval = true)
         public void addChild(String childType, ResourceLocation childName) {
             this.childBlock(childType, childName);

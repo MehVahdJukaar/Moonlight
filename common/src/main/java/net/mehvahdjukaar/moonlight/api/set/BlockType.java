@@ -353,12 +353,19 @@ public abstract class BlockType {
             return this.child(childType, () -> BuiltInRegistries.ITEM.getOptional(childName).orElseThrow());
         }
 
-        public SetFinderBuilder<T> childItemPrefix(String childType, String prefix, String suffix) {
-            return this.childItem(childType, prefix + "_" + id.getPath() + "_" + suffix);
+        /**
+         * @param prefix include the underscore, "_" if the blockId has one
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        public SetFinderBuilder<T> childItemAffix(String childType, String prefix, String suffix) {
+            return this.childItem(childType, prefix + id.getPath() + suffix);
         }
 
-        public SetFinderBuilder<T> childItemSuffix(String childType, String prefix) {
-            return this.childItem(childType, prefix + "_" + id.getPath());
+        /**
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        public SetFinderBuilder<T> childItemSuffix(String childType, String suffix) {
+            return this.childItem(childType, id.getPath() + suffix);
         }
 
         public SetFinderBuilder<T> childItem(String childType, String childName) {
@@ -370,12 +377,19 @@ public abstract class BlockType {
             return this.child(childType, () -> BuiltInRegistries.BLOCK.getOptional(childName).orElseThrow());
         }
 
-        public SetFinderBuilder<T> childBlockPrefix(String childType, String prefix, String suffix) {
+        /**
+         * @param prefix include the underscore, "_" if the blockId has one
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        public SetFinderBuilder<T> childBlockAffix(String childType, String prefix, String suffix) {
             return this.childBlock(childType, prefix + id.getPath() + suffix);
         }
 
-        public SetFinderBuilder<T> childBlockSuffix(String childType, String prefix) {
-            return this.childBlock(childType, prefix + id.getPath());
+        /**
+         * @param suffix include the underscore, "_" if the blockId has one
+         */
+        public SetFinderBuilder<T> childBlockSuffix(String childType, String suffix) {
+            return this.childBlock(childType, id.getPath() + suffix);
         }
 
         public SetFinderBuilder<T> childBlock(String childType, String childName) {

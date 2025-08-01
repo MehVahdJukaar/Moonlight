@@ -75,8 +75,11 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         return OAK_TYPE;
     }
 
-    public static Set<String> IGNORED_MODS = new HashSet<>(Set.of("chipped",
-            "compressedblocks", "securitycraft", "absentbydesign", "immersive_weathering", "dynamictrees", "dt"));
+    //- BLACKLISTED_MODS
+    public static Set<String> IGNORED_MODS = new HashSet<>(Set.of(
+            "chipped", "compressedblocks", "securitycraft",
+            "absentbydesign", "immersive_weathering", "dynamictrees", "dt"
+    ));
 
     //returns if this block is the base plank block
     @Override
@@ -149,6 +152,6 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     }
 
     public WoodType.Finder addSimpleFinder(String namespace, String name) {
-        return addSimpleFinder(new ResourceLocation(name, name));
+        return addSimpleFinder(new ResourceLocation(namespace, name));
     }
 }
