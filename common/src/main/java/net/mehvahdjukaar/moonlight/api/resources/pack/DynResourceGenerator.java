@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -174,12 +175,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             wasFirstReload = true;
             this.hasBeenInitialized = true;
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
-        }
-
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
         //generate textures
         if (runsOnEveryReload() || wasFirstReload) {

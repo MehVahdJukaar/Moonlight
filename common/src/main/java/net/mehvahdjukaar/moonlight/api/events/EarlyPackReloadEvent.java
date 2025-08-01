@@ -6,6 +6,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.List;
 
-public record EarlyPackReloadEvent(List<PackResources> packs, ResourceManager manager, PackType type) implements SimpleEvent {
+//TODO:remove packs from here, they can be gathered from the resource manager
+public record EarlyPackReloadEvent(@Deprecated(forRemoval = true) List<PackResources> packs, ResourceManager manager, PackType type) implements SimpleEvent {
 
 }
