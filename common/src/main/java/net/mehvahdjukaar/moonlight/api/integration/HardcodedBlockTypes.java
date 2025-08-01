@@ -46,6 +46,7 @@ public class HardcodedBlockTypes {
         simplePlanksStemFinder("deeperdarker", "blooming", "bloom_planks");
 
         // Blocks +
+        //why needed?
         woodReg.addSimpleFinder("blocksplus", "chorus");
         woodReg.addSimpleFinder("blocksplus", "bamboo");
         woodReg.addSimpleFinder("blocksplus", "mushroom");
