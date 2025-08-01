@@ -280,7 +280,7 @@ public abstract class DynamicResourcePack implements PackResources {
         }
     }
 
-    public static void saveBytes(ResourceLocation id, byte[] bytes){
+    public static void saveBytes(ResourceLocation id, byte[] bytes) {
         try {
             Path p = Paths.get("debug", "generated_resource_pack").resolve(id.getNamespace() + "/" + id.getPath());
             Files.createDirectories(p.getParent());
@@ -350,21 +350,20 @@ public abstract class DynamicResourcePack implements PackResources {
                 }
 
 
-                if (mf) {
-                    List<String> toRemove = new ArrayList<>();
-                    for (String namespace : this.searchTrie.listFolders("")) {
-                        for (String f : this.searchTrie.listFolders(namespace)) {
-                            if (!modernFixHack(f)) {
-                                toRemove.add(namespace + "/" + f);
-                            }
+            if (mf) {
+                List<String> toRemove = new ArrayList<>();
+                for (String namespace : this.searchTrie.listFolders("")) {
+                    for (String f : this.searchTrie.listFolders(namespace)) {
+                        if (!modernFixHack(f)) {
+                            toRemove.add(namespace + "/" + f);
                         }
                     }
-                    toRemove.forEach(this.searchTrie::remove);
                 }
-                // rebuild search trie with just static
-                for (var s : staticResources) {
-                    this.searchTrie.insert(s);
-                }
+                toRemove.forEach(this.searchTrie::remove);
+            }
+            // rebuild search trie with just static
+            for (var s : staticResources) {
+                this.searchTrie.insert(s);
             }
         }
     }

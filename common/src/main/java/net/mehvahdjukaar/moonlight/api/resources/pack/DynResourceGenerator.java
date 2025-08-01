@@ -189,6 +189,11 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
         }
 
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         //generate textures
         if (runsOnEveryReload() || wasFirstReload) {
             this.regenerateDynamicAssets(manager);

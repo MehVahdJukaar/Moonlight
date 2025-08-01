@@ -328,9 +328,6 @@ public class WoodType extends BlockType {
         }
 
         public Finder planks(Supplier<Block> planksFinder) {
-            if (this.planksFinder != null) {
-                throw new IllegalStateException("WoodType builder already has planks defined: " + id);
-            }
             this.planksFinder = planksFinder;
             return this;
         }
@@ -360,9 +357,6 @@ public class WoodType extends BlockType {
         }
 
         public Finder log(Supplier<Block> logFinder) {
-            if (this.logFinder != null) {
-                throw new IllegalStateException("WoodType builder already has a log defined: " + id);
-            }
             this.logFinder = logFinder;
             return this;
         }
