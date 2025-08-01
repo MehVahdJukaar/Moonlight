@@ -84,7 +84,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
         List<CompletableFuture<ResourceSink>> futures = genTasks.stream()
                 .map(task -> CompletableFuture.supplyAsync(() -> {
-                    var localSink = createLocalSink();
+                    ResourceSink localSink = createLocalSink();
                     task.accept(manager, localSink);
 
                     reporter.step(); // One step completed
@@ -141,6 +141,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
     }
 
+    //TODO: make abstract
     public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
         //implement this for multi thead
     }

@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
-import net.mehvahdjukaar.moonlight.core.misc.MLEarlyReloadTask;
+import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.*;
@@ -41,7 +41,7 @@ public abstract class ReloadableClientResourcesMixin {
             //one would think that this would be fool proof. Well check again, some mod like to re create this resource manager during block load! All modded resources included aswell
             //so to be EXTRA safe we check if registry phase is over
             if (!PlatHelper.isInitializing()) {
-               return MLEarlyReloadTask.wrap(()->original.call(resourceManager, listeners,
+               return ReloadInstanceWrapper.wrap(()->original.call(resourceManager, listeners,
                                backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
                        type, this.resources);
             }

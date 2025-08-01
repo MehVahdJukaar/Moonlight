@@ -2,10 +2,9 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
-import net.mehvahdjukaar.moonlight.core.misc.MLEarlyReloadTask;
+import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.PackType;
@@ -40,7 +39,7 @@ public abstract class ReloadableServerResourcesMixin {
             //so to be EXTRA safe we check if registry phase is over
             if (!PlatHelper.isInitializing()) {
                 //hack.we assume its of server type
-                return MLEarlyReloadTask.wrap(
+                return ReloadInstanceWrapper.wrap(
                         ()->original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
                        PackType.SERVER_DATA, resourceManager
                 );
