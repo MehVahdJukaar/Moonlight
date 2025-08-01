@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.util.neoforge;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.BaseMapCodec;
+import net.minecraftforge.client.loading.ForgeLoadingOverlay;
 import net.neoforged.neoforge.common.LenientUnboundedMapCodec;
 
 import java.util.Map;
