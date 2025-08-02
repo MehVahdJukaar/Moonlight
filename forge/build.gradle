@@ -46,6 +46,10 @@ dependencies {
     modRuntimeOnly("curse.maven:yacl-667299:4523736")
     modImplementation ("curse.maven:configured-457570:5180900")
 
+    modImplementation("curse.maven:blueprint-382216:6267669")
+    modImplementation("curse.maven:autumnity-365045:6151402")
+    modImplementation("curse.maven:spelunkery-790530:6122072")
+
     modCompileOnly("curse.maven:autoreglib-250363:3857246")
     modCompileOnly("curse.maven:quark-oddities-301051:3575623")
     modCompileOnly("curse.maven:quark-243121:4463411")

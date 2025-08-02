@@ -33,7 +33,6 @@ public abstract class ReloadableServerResourcesMixin {
         //fires on world load or on /reload
         //token to assure that modded resources are included
         if (!(resourceManager instanceof FilteredResManager) &&
-                 (resourceManager instanceof MultiPackResourceManager mp) &&
                 resourceManager.getResource(new ResourceLocation("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
             //one would think that this would be fool proof. Well check again, some mod like to re create this resource manager during block load! All modded resources included aswell
             //so to be EXTRA safe we check if registry phase is over
