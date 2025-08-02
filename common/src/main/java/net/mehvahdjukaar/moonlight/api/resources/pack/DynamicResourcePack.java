@@ -106,10 +106,6 @@ public abstract class DynamicResourcePack implements PackResources {
     public void setClearOnReload(boolean canBeCleared) {
     }
 
-    @Deprecated(forRemoval = true)
-    public void setClearOnReload(boolean canBeCleared) {
-    }
-
     /**
      * Marks this texture as non-clearable.
      * By default, all textures will be cleared after texture atlases have been created
@@ -350,20 +346,21 @@ public abstract class DynamicResourcePack implements PackResources {
                 }
 
 
-            if (mf) {
-                List<String> toRemove = new ArrayList<>();
-                for (String namespace : this.searchTrie.listFolders("")) {
-                    for (String f : this.searchTrie.listFolders(namespace)) {
-                        if (!modernFixHack(f)) {
-                            toRemove.add(namespace + "/" + f);
+                if (mf) {
+                    List<String> toRemove = new ArrayList<>();
+                    for (String namespace : this.searchTrie.listFolders("")) {
+                        for (String f : this.searchTrie.listFolders(namespace)) {
+                            if (!modernFixHack(f)) {
+                                toRemove.add(namespace + "/" + f);
+                            }
                         }
                     }
+                    toRemove.forEach(this.searchTrie::remove);
                 }
-                toRemove.forEach(this.searchTrie::remove);
-            }
-            // rebuild search trie with just static
-            for (var s : staticResources) {
-                this.searchTrie.insert(s);
+                // rebuild search trie with just static
+                for (var s : staticResources) {
+                    this.searchTrie.insert(s);
+                }
             }
         }
     }
