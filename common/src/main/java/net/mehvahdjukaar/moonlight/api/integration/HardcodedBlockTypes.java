@@ -190,6 +190,7 @@ public class HardcodedBlockTypes {
                 .log("whistlecane_block")
                 .childItem(STICK, "whistlecane");
 
+        // Luminous Nether
         woodReg.addSimpleFinder("luminous_nether", "mushroom")
                 .planks("mushroom_planks")
                 .log("goldenstem")
