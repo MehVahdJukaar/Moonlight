@@ -38,13 +38,14 @@ public class BlockSetInternal {
         if (hasFilledBlockSets()) throw new UnsupportedOperationException("block sets have already bee initialized");
         FINDER_ADDER.forEach(Runnable::run);
         FINDER_ADDER.clear();
-
-        var regs = getRegistries();
-        regs.forEach(BlockTypeRegistry::buildAll);
-
         //remove not wanted ones
         REMOVER_ADDER.forEach(Runnable::run);
         REMOVER_ADDER.clear();
+        var regs = getRegistries();
+        regs.forEach(BlockTypeRegistry::buildAll);
+        regs.forEach(BlockTypeRegistry::finalizeAndFreeze);
+
+
 
         Moonlight.LOGGER.info("Initialized block sets in {}ms", sw.elapsed().toMillis());
     }
@@ -63,6 +64,7 @@ public class BlockSetInternal {
         REGISTRIES_BY_NAME.register(typeRegistry.typeName(), typeRegistry);
     }
 
+    @Deprecated
     public synchronized static <T extends BlockType> void addBlockTypeFinder(Class<T> type, BlockType.SetFinder<T> blockFinder) {
         if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(
@@ -74,6 +76,7 @@ public class BlockSetInternal {
         });
     }
 
+    @Deprecated
     public synchronized static <T extends BlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
         if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(

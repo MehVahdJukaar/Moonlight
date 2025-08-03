@@ -116,29 +116,35 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public Collection<BlockType.SetFinder<T>> getFinders() {
-        return finders;
+        return List.of();
     }
 
-    public void addFinder(BlockType.SetFinder<T> finder) {
+    public synchronized void addFinder(BlockType.SetFinder<T> finder) {
         if (frozen) {
             throw new UnsupportedOperationException("Tried to register a block type finder after registry events");
         }
         finders.add(finder);
     }
 
-    public void addRemover(ResourceLocation id) {
+    public synchronized void addRemover(ResourceLocation id) {
         if (frozen) {
             throw new UnsupportedOperationException("Tried remove a block type after registry events");
         }
         notInclude.add(id);
     }
 
-    protected void finalizeAndFreeze() {
+    @ApiStatus.Internal
+    public void finalizeAndFreeze() {
         if (frozen) {
             throw new UnsupportedOperationException("Block types are already finalized");
         }
         this.frozen = true;
+
+
+        this.getValues().forEach(BlockType::initializeChildrenBlocks);
+        this.getValues().forEach(BlockType::initializeChildrenItems);
     }
 
     @ApiStatus.Internal
@@ -157,11 +163,8 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             }
             finders.clear();
             notInclude.clear();
-            this.finalizeAndFreeze();
         }
 
-        this.getValues().forEach(BlockType::initializeChildrenBlocks);
-        this.getValues().forEach(BlockType::initializeChildrenItems);
     }
 
     /**

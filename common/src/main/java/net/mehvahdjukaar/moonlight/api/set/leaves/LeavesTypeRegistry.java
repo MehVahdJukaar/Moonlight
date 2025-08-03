@@ -93,7 +93,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
 
     @Override
-    protected void finalizeAndFreeze() {
+    public void finalizeAndFreeze() {
         super.finalizeAndFreeze();
 
         // add wood to leaves mapping. we know this runs after wood types are registered
@@ -146,7 +146,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     @Override
     public int priority() {
-        return 101;
+        return 99;
     }
 
     //shorthand for add finder. Gives a builder-like object that's meant to be configured inline
