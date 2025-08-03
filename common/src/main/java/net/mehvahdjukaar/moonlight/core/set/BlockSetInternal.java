@@ -37,13 +37,14 @@ public class BlockSetInternal {
         if (hasFilledBlockSets()) throw new UnsupportedOperationException("block sets have already bee initialized");
         FINDER_ADDER.forEach(Runnable::run);
         FINDER_ADDER.clear();
-
-        var regs = getRegistries();
-        regs.forEach(BlockTypeRegistry::buildAll);
-
         //remove not wanted ones
         REMOVER_ADDER.forEach(Runnable::run);
         REMOVER_ADDER.clear();
+
+        var regs = getRegistries();
+        regs.forEach(BlockTypeRegistry::buildAll);
+        regs.forEach(BlockTypeRegistry::finalizeAndFreeze);
+
 
         Moonlight.LOGGER.info("Initialized block sets in {}ms", sw.elapsed().toMillis());
     }
@@ -52,7 +53,6 @@ public class BlockSetInternal {
     protected static boolean hasFilledBlockSets() {
         throw new AssertionError();
     }
-
 
     public synchronized static <T extends BlockType> void registerBlockSetDefinition(BlockTypeRegistry<T> typeRegistry) {
         if (hasFilledBlockSets()) {
@@ -63,30 +63,34 @@ public class BlockSetInternal {
         REGISTRIES_BY_NAME.register(typeRegistry.typeName(), typeRegistry);
     }
 
+    //TODO: remove
+    @Deprecated
     public synchronized static <T extends BlockType> void addBlockTypeFinder(Class<T> type, BlockType.SetFinder<T> blockFinder) {
         if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(
                     String.format("Tried to register block %s finder %s after registry events", type, blockFinder));
         }
         FINDER_ADDER.add(() -> {
-            BlockTypeRegistry<T> container = getBlockSet(type);
+            BlockTypeRegistry<T> container = getBlockSetReg(type);
             container.addFinder(blockFinder);
         });
     }
 
+    //TODO:remove. use one in block set itself
+    @Deprecated
     public synchronized static <T extends BlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
         if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(
                     String.format("Tried to remove block type %s for type %s after registry events", id, type));
         }
         REMOVER_ADDER.add(() -> {
-            BlockTypeRegistry<T> container = getBlockSet(type);
+            BlockTypeRegistry<T> container = getBlockSetReg(type);
             container.addRemover(id);
         });
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends BlockType> BlockTypeRegistry<T> getBlockSet(Class<T> type) {
+    public static <T extends BlockType> BlockTypeRegistry<T> getBlockSetReg(Class<T> type) {
         return (BlockTypeRegistry<T>) REGISTRIES_BY_CLASS.get(type);
     }
 

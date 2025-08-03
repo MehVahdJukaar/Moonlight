@@ -50,7 +50,7 @@ public class BlockSetAPI {
     }
 
     public static <T extends BlockType> BlockTypeRegistry<T> getBlockSet(Class<T> type) {
-        return BlockSetInternal.getBlockSet(type);
+        return BlockSetInternal.getBlockSetReg(type);
     }
 
     @FunctionalInterface
