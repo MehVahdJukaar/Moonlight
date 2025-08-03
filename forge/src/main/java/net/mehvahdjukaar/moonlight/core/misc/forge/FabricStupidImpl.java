@@ -4,7 +4,8 @@ import net.minecraft.core.RegistryAccess;
 
 import java.lang.reflect.Field;
 
-public class FabricAPIHelperImpl {
+//connector.......pain. not only we got to worry about fabric on fabric but now also on forge...
+public class FabricStupidImpl {
 
     private static final Field FIELD;
 

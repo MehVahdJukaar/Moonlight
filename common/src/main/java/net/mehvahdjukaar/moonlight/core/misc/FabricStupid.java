@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.core.misc;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.RegistryAccess;
 
-public class FabricAPIHelper {
+public class FabricStupid {
 
 
     @ExpectPlatform

@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.core.misc.FabricAPIHelper;
+import net.mehvahdjukaar.moonlight.core.misc.FabricStupid;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
 import net.minecraft.core.RegistryAccess;
@@ -43,7 +43,7 @@ public abstract class ReloadableServerResourcesMixin {
                 //hack.we assume its of server type
                 return ReloadInstanceWrapper.wrap(
                         () -> {
-                            FabricAPIHelper.assignDumbStaticThreadLocal(access);
+                            FabricStupid.assignDumbStaticThreadLocal(access);
 
                             return original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled);
                         },
