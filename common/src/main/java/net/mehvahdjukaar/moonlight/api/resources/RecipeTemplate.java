@@ -12,7 +12,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -85,7 +84,6 @@ public class RecipeTemplate {
         List<Ingredient> newList = convertIngredients(or.getIngredients(), from, to);
         ItemStack originalResult = or.getResultItem(RegistryAccess.EMPTY);
         ItemStack newResult = convertItemStack(originalResult, from, to);
-        if (newResult == null) throw new UnsupportedOperationException("Failed to convert recipe result");
         NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
 
         CraftingBookCategory cat = CraftingBookCategory.MISC;
@@ -101,7 +99,6 @@ public class RecipeTemplate {
         List<Ingredient> newList = convertIngredients(or.getIngredients(), from, to);
         ItemStack originalResult = or.getResultItem(RegistryAccess.EMPTY);
         ItemStack newResult = convertItemStack(originalResult, from, to);
-        if (newResult == null) throw new UnsupportedOperationException("Failed to convert shaped recipe result");
         NonNullList<Ingredient> ingredients = NonNullList.of(Ingredient.EMPTY, newList.toArray(Ingredient[]::new));
 
         ShapedRecipePattern pattern = new ShapedRecipePattern(or.getWidth(), or.getHeight(), ingredients,
@@ -151,10 +148,12 @@ public class RecipeTemplate {
         return new ShapedRecipePattern.Data(key, pattern);
     }
 
-    @Nullable
     public static <T extends BlockType> ItemStack convertItemStack(ItemStack original, T from, T to) {
         Item changed = BlockType.changeItemType(original.getItem(), from, to);
-        if (changed == null) return null;
+        if (changed == null) {
+            throw new UnsupportedOperationException("Failed to convert item stack: could not change " +
+                    original.getItem() + " from " + from.getId() + " to " + to.getId());
+        }
         return original.transmuteCopy(changed);
     }
 
