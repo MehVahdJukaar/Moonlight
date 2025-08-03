@@ -1,1 +1,1 @@
-- fixed an issue with fabric condition api due to fabric api relying on brittle random thread locals static fields
+- connector / fabric on forge surely gives modders way too many headaches

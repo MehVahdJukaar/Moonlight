@@ -9,5 +9,5 @@ public class FabricAPIHelper {
     @ExpectPlatform
     public static void assignDumbStaticThreadLocal(RegistryAccess.Frozen a){
 
-    };
+    }
 }

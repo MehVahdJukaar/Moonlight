@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+// The job of this is to return an instance that first runs the early pack task, then runs the original task.
+// That way the loading overlay will pick up our progress too
 public class ReloadInstanceWrapper implements ReloadInstance {
 
     public static ReloadInstance wrap(Supplier<ReloadInstance> factory, PackType type, ResourceManager manager) {
@@ -82,7 +84,7 @@ public class ReloadInstanceWrapper implements ReloadInstance {
             return;
         }
         if (beforeTask.isCompletedExceptionally()) {
-            beforeTask.join(); // This will throw the exception
+            //beforeTask.join(); // This will throw the exception
         }
         ReloadInstance actual = allErrorsInPackReloadWillHaveThisLineOnTheirStackTrace_DoesntMeanItsTheCause();
         if (actual != null) {

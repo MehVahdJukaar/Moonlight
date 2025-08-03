@@ -5,6 +5,10 @@ import net.minecraft.core.RegistryAccess;
 
 public class FabricAPIHelperImpl {
     public static void assignDumbStaticThreadLocal(RegistryAccess.Frozen a) {
-        ResourceConditionsImpl.CURRENT_REGISTRIES.set(a);
+        try {
+            ResourceConditionsImpl.CURRENT_REGISTRIES.set(a);
+        } catch (Exception ignored) {
+
+        }
     }
 }
