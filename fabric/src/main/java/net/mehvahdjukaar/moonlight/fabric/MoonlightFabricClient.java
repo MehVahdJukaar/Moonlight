@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ParticleEngineAccessor;
 import net.minecraft.client.particle.ParticleRenderType;

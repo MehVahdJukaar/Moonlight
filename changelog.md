@@ -1,1 +1,1 @@
-- fixed dynamic server data not working when other mods would replace the resource manager
+- fixed an issue with fabric condition api due to fabric api relying on brittle random thread locals static fields

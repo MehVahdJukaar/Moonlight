@@ -2,13 +2,15 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.misc.FabricAPIHelper;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -29,7 +31,8 @@ public abstract class ReloadableServerResourcesMixin {
     private static ReloadInstance moonlight$dynamicPackEarlyReload(ResourceManager resourceManager, List<PreparableReloadListener> listeners,
                                                                    Executor backgroundExecutor, Executor gameExecutor,
                                                                    CompletableFuture<Unit> alsoWaitedFor, boolean profiled,
-                                                                   Operation<ReloadInstance> original) {
+                                                                   Operation<ReloadInstance> original,
+                                                                   @Local(argsOnly = true) RegistryAccess.Frozen access) {
         //fires on world load or on /reload
         //token to assure that modded resources are included
         if (!(resourceManager instanceof FilteredResManager) &&
@@ -39,8 +42,12 @@ public abstract class ReloadableServerResourcesMixin {
             if (!PlatHelper.isInitializing()) {
                 //hack.we assume its of server type
                 return ReloadInstanceWrapper.wrap(
-                        ()->original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
-                       PackType.SERVER_DATA, resourceManager
+                        () -> {
+                            FabricAPIHelper.assignDumbStaticThreadLocal(access);
+
+                            return original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled);
+                        },
+                        PackType.SERVER_DATA, resourceManager
                 );
             }
         }
