@@ -41,7 +41,7 @@ public abstract class ReloadableServerResourcesMixin {
                 //hack.we assume its of server type
                 return ReloadInstanceWrapper.wrap(
                         ()->original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
-                       PackType.SERVER_DATA, resourceManager
+                       PackType.SERVER_DATA, resourceManager, backgroundExecutor
                 );
             }
         }

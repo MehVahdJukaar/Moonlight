@@ -14,21 +14,22 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class ReloadInstanceWrapper implements ReloadInstance {
 
-    public static ReloadInstance wrap(Supplier<ReloadInstance> factory, PackType type, ResourceManager manager) {
-        return new ReloadInstanceWrapper(factory, type, manager);
+    public static ReloadInstance wrap(Supplier<ReloadInstance> factory, PackType type, ResourceManager manager, Executor backgroundExecutor) {
+        return new ReloadInstanceWrapper(factory, type, manager, backgroundExecutor);
     }
 
-    private static CompletableFuture<Unit> earlyReloadTask(PackType type, ResourceManager manager, IProgressTracker progressTracker) {
+    private static CompletableFuture<Unit> earlyReloadTask(PackType type, ResourceManager manager, IProgressTracker progressTracker, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             DynResourceGenerator.clearBeforeReload(type);
 
             MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(List.of(), manager, type, progressTracker), EarlyPackReloadEvent.class);
             return Unit.INSTANCE;
-        });
+        }, executor);
     }
 
 
@@ -38,10 +39,10 @@ public class ReloadInstanceWrapper implements ReloadInstance {
     private final int leaves;
 
     public ReloadInstanceWrapper(Supplier<ReloadInstance> factory,
-                           PackType type, ResourceManager manager) {
+                           PackType type, ResourceManager manager,Executor executor) {
         progressTracker = IProgressTracker.createTree(1);
         leaves = progressTracker.countLeaves();
-        this.beforeTask = earlyReloadTask(type, manager, progressTracker);
+        this.beforeTask = earlyReloadTask(type, manager, progressTracker, executor);
         this.lazyInstance = Suppliers.memoize(factory::get);
     }
 
