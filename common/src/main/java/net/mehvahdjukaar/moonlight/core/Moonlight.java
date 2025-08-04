@@ -66,7 +66,6 @@ public class Moonlight {
 
     //called on mod creation
     public static void commonInit() {
-        System.out.println("Mod Thread Context ClassLoader: " + Thread.currentThread().getContextClassLoader());
 
         BlockSetInternal.registerBlockSetDefinition(WoodTypeRegistry.INSTANCE);
         BlockSetInternal.registerBlockSetDefinition(LeavesTypeRegistry.INSTANCE);

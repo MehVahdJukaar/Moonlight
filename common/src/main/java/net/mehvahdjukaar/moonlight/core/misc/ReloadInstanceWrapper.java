@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 // The job of this is to return an instance that first runs the early pack task, then runs the original task.
@@ -25,21 +26,18 @@ public class ReloadInstanceWrapper implements ReloadInstance {
 
     public static final Logger LOGGER = LogManager.getLogger("ReloadInstanceWrapper");
 
-    public static ReloadInstance wrap(Supplier<ReloadInstance> factory, PackType type, ResourceManager manager) {
-        return new ReloadInstanceWrapper(factory, type, manager);
+    public static ReloadInstance wrap(Supplier<ReloadInstance> factory, PackType type, ResourceManager manager, Executor backgroundExecutor) {
+        return new ReloadInstanceWrapper(factory, type, manager, backgroundExecutor);
     }
 
-    private static CompletableFuture<Unit> earlyReloadTask(PackType type, ResourceManager manager, IProgressTracker progressTracker) {
+    private static CompletableFuture<Unit> earlyReloadTask(PackType type, ResourceManager manager, IProgressTracker progressTracker, Executor executor) {
         //If we don't add this line it ends up using jdk internal classloader for some godforsaken reason, causing all sorts of unpredictable issues....
         //does this mean that all CompletableFutures are never safe? Oh, god have mercy
-        ClassLoader correctLoader = Thread.currentThread().getContextClassLoader();
         return CompletableFuture.supplyAsync(() -> {
-            Thread.currentThread().setContextClassLoader(correctLoader);
-            LOGGER.debug("Setting task classloader to {}", correctLoader);
             DynResourceGenerator.clearBeforeReload(type);
             MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(List.of(), manager, type, progressTracker), EarlyPackReloadEvent.class);
             return Unit.INSTANCE;
-        });
+        }, executor);
     }
 
 
@@ -49,10 +47,10 @@ public class ReloadInstanceWrapper implements ReloadInstance {
     private final int leaves;
 
     public ReloadInstanceWrapper(Supplier<ReloadInstance> factory,
-                           PackType type, ResourceManager manager) {
+                           PackType type, ResourceManager manager,Executor executor) {
         progressTracker = IProgressTracker.createTree(1);
         leaves = progressTracker.countLeaves();
-        this.beforeTask = earlyReloadTask(type, manager, progressTracker);
+        this.beforeTask = earlyReloadTask(type, manager, progressTracker, executor);
         this.lazyInstance = Suppliers.memoize(factory::get);
 
     }

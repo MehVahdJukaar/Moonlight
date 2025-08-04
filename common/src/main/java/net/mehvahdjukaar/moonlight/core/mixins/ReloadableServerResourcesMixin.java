@@ -47,7 +47,7 @@ public abstract class ReloadableServerResourcesMixin {
 
                             return original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled);
                         },
-                        PackType.SERVER_DATA, resourceManager
+                        PackType.SERVER_DATA, resourceManager, backgroundExecutor
                 );
             }
         }
