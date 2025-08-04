@@ -51,7 +51,6 @@ dependencies {
     modCompileOnly("curse.maven:quark-243121:4463411")
     modCompileOnly("curse.maven:the-twilight-forest-227639:4755494")
     modCompileOnly("curse.maven:alltheleaks-1091339:5936734")
-    modImplementation("curse.maven:forgified-fabric-api-889079:6289136")
 
     //modRuntimeOnly("curse.maven:official-divinerpg-363543:5715606")
     //modRuntimeOnly("curse.maven:every-compat-628539:5792496")

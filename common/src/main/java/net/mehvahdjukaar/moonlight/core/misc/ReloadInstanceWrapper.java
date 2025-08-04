@@ -5,11 +5,14 @@ import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,14 +23,20 @@ import java.util.function.Supplier;
 // That way the loading overlay will pick up our progress too
 public class ReloadInstanceWrapper implements ReloadInstance {
 
+    public static final Logger LOGGER = LogManager.getLogger("ReloadInstanceWrapper");
+
     public static ReloadInstance wrap(Supplier<ReloadInstance> factory, PackType type, ResourceManager manager) {
         return new ReloadInstanceWrapper(factory, type, manager);
     }
 
     private static CompletableFuture<Unit> earlyReloadTask(PackType type, ResourceManager manager, IProgressTracker progressTracker) {
+        //If we don't add this line it ends up using jdk internal classloader for some godforsaken reason, causing all sorts of unpredictable issues....
+        //does this mean that all CompletableFutures are never safe? Oh, god have mercy
+        ClassLoader correctLoader = Thread.currentThread().getContextClassLoader();
         return CompletableFuture.supplyAsync(() -> {
+            Thread.currentThread().setContextClassLoader(correctLoader);
+            LOGGER.debug("Setting task classloader to {}", correctLoader);
             DynResourceGenerator.clearBeforeReload(type);
-
             MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(List.of(), manager, type, progressTracker), EarlyPackReloadEvent.class);
             return Unit.INSTANCE;
         });
@@ -45,6 +54,7 @@ public class ReloadInstanceWrapper implements ReloadInstance {
         leaves = progressTracker.countLeaves();
         this.beforeTask = earlyReloadTask(type, manager, progressTracker);
         this.lazyInstance = Suppliers.memoize(factory::get);
+
     }
 
     @Nullable

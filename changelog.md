@@ -1,1 +1,1 @@
-- connector / fabric on forge surely gives modders way too many headaches
+- workaround to hopefully prevent some rare and hard to trackdown issue due to classloaders
