@@ -137,11 +137,11 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     public void addLeavesToWoodMapping(String leavedId, String woodId) {
-        addLeavesToWoodMapping(new ResourceLocation(leavedId), new ResourceLocation(woodId));
+        addLeavesToWoodMapping(ResourceLocation.parse(leavedId), ResourceLocation.parse(woodId));
     }
 
     public void addLeavesToWoodMapping(String modId, String leavesTypeName, String woodTypeName) {
-        addLeavesToWoodMapping(new ResourceLocation(modId, leavesTypeName), new ResourceLocation(modId, woodTypeName));
+        addLeavesToWoodMapping(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName), ResourceLocation.fromNamespaceAndPath(modId, woodTypeName));
     }
 
     @Override
@@ -158,11 +158,11 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
 
     public LeavesType.Finder addSimpleFinder(String typeId) {
-        return addSimpleFinder(new ResourceLocation(typeId));
+        return addSimpleFinder(ResourceLocation.parse(typeId));
     }
 
     public LeavesType.Finder addSimpleFinder(String namespace, String name) {
-        return addSimpleFinder(new ResourceLocation(namespace, name));
+        return addSimpleFinder(ResourceLocation.fromNamespaceAndPath(namespace, name));
     }
 
 }
