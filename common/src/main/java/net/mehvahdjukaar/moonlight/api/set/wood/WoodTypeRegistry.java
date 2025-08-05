@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.set.wood;
 
-import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -148,10 +147,10 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
 
     public WoodType.Finder addSimpleFinder(String typeId) {
-        return addSimpleFinder(new ResourceLocation(typeId));
+        return addSimpleFinder(ResourceLocation.parse(typeId));
     }
 
     public WoodType.Finder addSimpleFinder(String namespace, String name) {
-        return addSimpleFinder(new ResourceLocation(namespace, name));
+        return addSimpleFinder(ResourceLocation.fromNamespaceAndPath(namespace, name));
     }
 }
