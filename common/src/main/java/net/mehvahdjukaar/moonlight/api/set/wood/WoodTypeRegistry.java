@@ -82,17 +82,17 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     //returns if this block is the base plank block
     @Override
-    public Optional<WoodType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseRes) {
+    public Optional<WoodType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseId) {
         String name = null;
-        String path = baseRes.getPath();
+        String path = baseId.getPath();
         // Support TerraFirmaCraft (TFC) & ArborFirmaCraft (AFC)
-        if (baseRes.getNamespace().equals("tfc") || baseRes.getNamespace().equals("afc")) {
+        if (baseId.getNamespace().equals("tfc") || baseId.getNamespace().equals("afc")) {
             // Needs to contain palnks in its path
             if (path.contains("wood/planks/")) {
                 var log = BuiltInRegistries.BLOCK.getOptional(
-                        baseRes.withPath(path.replace("planks", "log")));
+                        baseId.withPath(path.replace("planks", "log")));
                 if (log.isPresent()) {
-                    ResourceLocation id = baseRes.withPath(path.replace("wood/planks/", ""));
+                    ResourceLocation id = baseId.withPath(path.replace("wood/planks/", ""));
                     return Optional.of(new WoodType(id, baseBlock, log.get()));
                 }
             }
@@ -108,7 +108,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         } else if (path.startsWith("plank_")) {
             name = path.substring("plank_" .length());
         }
-        String namespace = baseRes.getNamespace();
+        String namespace = baseId.getNamespace();
         if (name != null && !IGNORED_MODS.contains(namespace)) {
 
             BlockState state = baseBlock.defaultBlockState();
@@ -117,7 +117,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 //needs to use wood sound type
                 //we do not allow "/" in the wood name
                 name = name.replace("/", "_");
-                ResourceLocation id = baseRes.withPath(name);
+                ResourceLocation id = baseId.withPath(name);
                 Block logBlock = WoodType.findLog(id);
                 if (logBlock != null) {
                     return Optional.of(new WoodType(id, baseBlock, logBlock));

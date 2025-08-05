@@ -9,8 +9,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Optional;
 import java.util.*;
 
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
@@ -66,19 +64,19 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     //returns if this block is the base plank block
     @Override
-    public Optional<LeavesType> detectTypeFromBlock(Block baseBlock, ResourceLocation blockId) {
+    public Optional<LeavesType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseId) {
         String name = null;
-        String path = blockId.getPath();
+        String path = baseId.getPath();
         //needs to contain planks in its name
         if (path.endsWith("_leaves")) {
             name = path.substring(0, path.length() - "_leaves" .length());
         } else if (path.startsWith("leaves_")) {
             name = path.substring("leaves_" .length());
         }
-        String namespace = blockId.getNamespace();
+        String namespace = baseId.getNamespace();
         if (name != null && !namespace.equals("securitycraft") && !path.contains("hanging")) {
             if (baseBlock instanceof LeavesBlock) {
-                ResourceLocation id = baseRes.withPath(name);
+                ResourceLocation id = baseId.withPath(name);
                 return Optional.of(new LeavesType(id, baseBlock));
             }
         }
