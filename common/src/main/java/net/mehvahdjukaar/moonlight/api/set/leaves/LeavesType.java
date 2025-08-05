@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -113,7 +112,7 @@ public class LeavesType extends BlockType {
 
         @SuppressWarnings("UnusedReturnValue")
         public Finder equivalentWood(String id) {
-            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(this.id, new ResourceLocation(id)); //this is ass too
+            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(this.id, ResourceLocation.parse(id)); //this is ass too
             return this;
         }
 
@@ -163,9 +162,9 @@ public class LeavesType extends BlockType {
         /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public static Finder simple(String modId, String leavesTypeName, String leavesName, String woodTypeID) {
-            ResourceLocation leavesId = new ResourceLocation(modId, leavesName);
-            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(leavesId, new ResourceLocation(woodTypeID));
-            return new Finder(new ResourceLocation(modId, leavesTypeName),
+            ResourceLocation leavesId = ResourceLocation.fromNamespaceAndPath(modId, leavesName);
+            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(leavesId, ResourceLocation.parse(woodTypeID));
+            return new Finder(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName),
                     () -> BuiltInRegistries.BLOCK.get(leavesId));
         }
 
