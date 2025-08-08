@@ -3,6 +3,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
+import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -112,15 +113,16 @@ public class BlockSetRegistryExample {
 
     // example to register wood finders
 
-    public static void init2(){
-        // generic one
-        BlockSetAPI.addBlockTypeFinder(FlowerType.class, ()->{
-            return Optional.of(new FlowerType((FlowerBlock) Blocks.PEONY));
-        });
+    public static void init2() {
 
-        // simple one for wood type
-        BlockSetAPI.addBlockTypeFinder(WoodType.class, WoodType.Finder.simple("my_mod_Id",
-                "my_wood_type", "my_wood_type_planks", "my_wood_type_log"));
+        // adds an undetected wood type and returns a future reference to it
+        var yellowWood = WoodTypeRegistry.INSTANCE.addSimpleFinder(
+                        "some_mod_id", "yellow_wood")
+                .log("yellow_wood_log")
+                .planks("yellowish_plank")
+                .childBlock("stick", "stick_light_yellow")
+                .build();
+
     }
 
 }
