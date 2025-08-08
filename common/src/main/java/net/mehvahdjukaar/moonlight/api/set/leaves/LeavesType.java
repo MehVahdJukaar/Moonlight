@@ -166,9 +166,9 @@ public class LeavesType extends BlockType {
         /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public static Finder simple(String modId, String leavesTypeName, String leavesName, String woodTypeID) {
-            ResourceLocation leavesId = ResourceLocation.fromNamespaceAndPath(modId, leavesName);
-            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(leavesId, ResourceLocation.parse(woodTypeID));
-            return new Finder(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName),
+            ResourceLocation leavesId = new ResourceLocation(modId, leavesName);
+            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(leavesId, new ResourceLocation(woodTypeID));
+            return new Finder(new ResourceLocation(modId, leavesTypeName),
                     () -> BuiltInRegistries.BLOCK.get(leavesId));
         }
 
