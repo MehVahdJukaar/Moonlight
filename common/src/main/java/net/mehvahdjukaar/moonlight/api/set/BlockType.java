@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.set;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
@@ -99,7 +100,7 @@ public abstract class BlockType {
 
         String suffixed = (suffix.isEmpty()) ? "" : "_" + suffix;
 
-        return modIded + foldered + shortenedId +"/"+ this.getNamespace() +"/"+ prefixed + this.getTypeName() + suffixed;
+        return modIded + foldered + shortenedId + "/" + this.getNamespace() + "/" + prefixed + this.getTypeName() + suffixed;
     }
 
     @Override
@@ -281,7 +282,7 @@ public abstract class BlockType {
 
     //for items
     @Nullable
-    public static Item changeItemType(Item current,  BlockType originalMat,  BlockType destinationMat) {
+    public static Item changeItemType(Item current, BlockType originalMat, BlockType destinationMat) {
         Object changed = changeType(current, originalMat, destinationMat);
         //if item swap fails, try to swap blocks instead
         if (changed == null) {
@@ -339,9 +340,11 @@ public abstract class BlockType {
 
         protected final ResourceLocation id;
         protected final Map<String, Supplier<ItemLike>> childNames = new HashMap<>();
+        private final BlockTypeRegistry<T> reg; //TODO:remove this and place this class in registry class
 
-        public SetFinderBuilder(ResourceLocation id) {
+        public SetFinderBuilder(ResourceLocation id, BlockTypeRegistry<T> reg) {
             this.id = id;
+            this.reg = reg;
         }
 
         public SetFinderBuilder<T> child(String childType, Supplier<ItemLike> child) {
@@ -395,6 +398,11 @@ public abstract class BlockType {
         public SetFinderBuilder<T> childBlock(String childType, String childName) {
             return this.childBlock(childType,
                     Utils.idWithOptionalNamespace(childName, id.getNamespace()));
+        }
+
+        // returns a supplier of the found block
+        public INamedSupplier<T> build() {
+            return reg.makeFutureHolder(id);
         }
     }
 }

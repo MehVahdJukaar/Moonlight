@@ -15,9 +15,10 @@ import java.util.*;
 
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
-    public static final LeavesTypeRegistry INSTANCE = new LeavesTypeRegistry();
 
-    public static final LeavesType OAK_TYPE = new LeavesType(ResourceLocation.parse("oak"), Blocks.OAK_LEAVES);
+    @Deprecated(forRemoval = true)
+    public static final LeavesType OAK_TYPE = VanillaLeavesTypes.OAK;
+    public static final LeavesTypeRegistry INSTANCE = new LeavesTypeRegistry();
 
     private final Map<ResourceLocation, ResourceLocation> specialLeavesToWood = new HashMap<>();
     private final Map<LeavesType, WoodType> leavesToWood = new IdentityHashMap<>();
@@ -52,6 +53,11 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     static void touch() {
+    }
+
+    @Override
+    protected LeavesType register(LeavesType newType) {
+        return super.register(newType);
     }
 
     @Override

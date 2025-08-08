@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.CeilingHangingSignBlock;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -317,12 +318,13 @@ public class WoodType extends BlockType {
     }
 
 
+    //TODO:move in wood registry class
     public static class Finder extends SetFinderBuilder<WoodType> {
         private Supplier<Block> planksFinder;
         private Supplier<Block> logFinder;
 
         public Finder(ResourceLocation id) {
-            super(id);
+            super(id, WoodTypeRegistry.INSTANCE);
             this.log(() -> findLog(id)); // defaults
             this.planks(() -> findPlanks(id)); // defaults
         }
@@ -387,6 +389,8 @@ public class WoodType extends BlockType {
             return log(id.getPath() + suffix);
         }
 
+
+        @ApiStatus.Internal
         @Override
         public Optional<WoodType> get() {
             if (PlatHelper.isModLoaded(id.getNamespace())) {
@@ -410,11 +414,10 @@ public class WoodType extends BlockType {
             return Optional.empty();
         }
 
-
         /// USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public Finder(ResourceLocation id, Supplier<Block> planks, Supplier<Block> log) {
-            super(id);
+            super(id, WoodTypeRegistry.INSTANCE);
             this.planksFinder = planks;
             this.logFinder = log;
         }

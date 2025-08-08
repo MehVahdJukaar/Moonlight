@@ -1,9 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.set.leaves;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodTypes;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -42,7 +44,7 @@ public class LeavesType extends BlockType {
     @Deprecated(forRemoval = true)
     public WoodType getWoodType() {
         var w = getAssociatedWoodType();
-        if (w == null) return WoodTypeRegistry.OAK_TYPE;
+        if (w == null) return VanillaWoodTypes.OAK;
         return w;
     }
 
@@ -76,7 +78,7 @@ public class LeavesType extends BlockType {
         private Supplier<Block> leavesFinder;
 
         public Finder(ResourceLocation id) {
-            super(id);
+            super(id, LeavesTypeRegistry.INSTANCE);
             this.leavesSuffix("_leaves"); // defaults
         }
 
@@ -149,7 +151,7 @@ public class LeavesType extends BlockType {
         /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public Finder(ResourceLocation id, Supplier<Block> leaves) {
-            super(id);
+            super(id,LeavesTypeRegistry.INSTANCE);
             this.leavesFinder = leaves;
         }
 
@@ -163,9 +165,9 @@ public class LeavesType extends BlockType {
         /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public static Finder simple(String modId, String leavesTypeName, String leavesName, String woodTypeID) {
-            ResourceLocation leavesId = new ResourceLocation(modId, leavesName);
-            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(leavesId, new ResourceLocation(woodTypeID));
-            return new Finder(new ResourceLocation(modId, leavesTypeName),
+            ResourceLocation leavesId = ResourceLocation.fromNamespaceAndPath(modId, leavesName);
+            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(leavesId, ResourceLocation.parse(woodTypeID));
+            return new Finder(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName),
                     () -> BuiltInRegistries.BLOCK.get(leavesId));
         }
 

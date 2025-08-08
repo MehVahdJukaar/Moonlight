@@ -1,9 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.set.wood;
 
-import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceLocation;
@@ -17,9 +17,9 @@ import java.util.*;
 
 public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
-    public static final WoodType OAK_TYPE = new WoodType(ResourceLocation.parse("oak"), Blocks.OAK_PLANKS, Blocks.OAK_LOG);
-
     public static final WoodTypeRegistry INSTANCE = new WoodTypeRegistry();
+    @Deprecated(forRemoval = true)
+    public static final WoodType OAK_TYPE = VanillaWoodTypes.OAK;
 
     @Deprecated(forRemoval = true)
     public static Collection<WoodType> getTypes() {
@@ -70,9 +70,15 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     static void touch() {
     }
 
+    //manual registry method. Really only for vanilla
+    @Override
+    protected WoodType register(WoodType newType) {
+       return super.register(newType);
+    }
+
     @Override
     public WoodType getDefaultType() {
-        return OAK_TYPE;
+        return VanillaWoodTypes.OAK;
     }
 
     //- BLACKLISTED_MODS
