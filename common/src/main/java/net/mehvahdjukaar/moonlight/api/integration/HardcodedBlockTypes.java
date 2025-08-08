@@ -1,13 +1,14 @@
 package net.mehvahdjukaar.moonlight.api.integration;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
-import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
+import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.ApiStatus;
+
+import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
 
 //TODO: move out of api package
 //place for all known weird hardcoded wood types from mods that aren't getting detected
@@ -19,7 +20,13 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public class HardcodedBlockTypes {
 
+    public static final INamedSupplier<WoodType> BURNT;
+
     public static void init() {
+
+    }
+
+    static {
 
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
@@ -33,8 +40,9 @@ public class HardcodedBlockTypes {
                 .planksSuffix("_plank");
 
         // Burnt
-        woodReg.addSimpleFinder("burnt", "smoldering_bamboo")
-                .logSuffix("_block");
+        BURNT = woodReg.addSimpleFinder("burnt", "smoldering_bamboo")
+                .logSuffix("_block")
+                .build();
 
         // Caverns-And-Chasms
         woodReg.addSimpleFinder("caverns_and_chasms", "azalea")
@@ -340,14 +348,6 @@ public class HardcodedBlockTypes {
     }
 
 
-    /// Known Children Keys
-    private static final String LEAVES = "leaves";
-    private static final String WOOD = "wood";
-    private static final String STRIPPED_LOG = "stripped_log";
-    private static final String STRIPPED_WOOD = "stripped_wood";
-    private static final String SAPLING = "sapling";
-    private static final String FENCE = "fence";
-    private static final String STICK = "fence";
 
 
 }
