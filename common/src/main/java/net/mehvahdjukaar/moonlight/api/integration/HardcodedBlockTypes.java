@@ -21,6 +21,7 @@ import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
 public class HardcodedBlockTypes {
 
     public static final INamedSupplier<WoodType> BURNT;
+    public static final INamedSupplier<WoodType> GODD_WHISTLECANE;
 
     public static void init() {
 
@@ -193,10 +194,11 @@ public class HardcodedBlockTypes {
         // Gardens Of The Dead
         woodReg.addSimpleFinder("gardens_of_the_dead", "soulblight");
 
-        woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane")
+     GODD_WHISTLECANE =   woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane")
                 .planks("whistlecane_planks")
                 .log("whistlecane_block")
-                .childItem(STICK, "whistlecane");
+                .childItem(STICK, "whistlecane")
+             .build();
 
         woodReg.addSimpleFinder("luminous_nether", "mushroom")
                 .planks("mushroom_planks")
