@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static net.mehvahdjukaar.moonlight.api.set.DebugBlockTypes.appendToDebugFile;
+import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
 
 /**
  * CHILD AVAILABLITY:
@@ -123,29 +124,29 @@ public class WoodType extends BlockType {
 
     @Override
     public void initializeChildrenBlocks() {
-        this.addChild("planks", this.planks);
-        this.addChild("log", this.log);
-        this.addChild("leaves", this.findRelatedEntry("leaves", BuiltInRegistries.BLOCK));
-        this.addChild("wood", this.findLogRelatedBlock("", "wood", "hyphae", "bark"));
-        this.addChild("stripped_log", this.findStrippedLog("log", "stem", "stalk"));
-        this.addChild("stripped_wood", this.findStrippedLog("wood", "hyphae", "bark"));
-        this.addChild("slab", this.findRelatedEntry("slab", BuiltInRegistries.BLOCK));
-        this.addChild("stairs", this.findRelatedEntry("stairs", BuiltInRegistries.BLOCK));
+        this.addChild(PLANKS, this.planks);
+        this.addChild(LOG, this.log);
+        this.addChild(LEAVES, this.findRelatedEntry("leaves", BuiltInRegistries.BLOCK));
+        this.addChild(WOOD, this.findLogRelatedBlock("", "wood", "hyphae", "bark"));
+        this.addChild(STRIPPED_LOG, this.findStrippedLog("log", "stem", "stalk"));
+        this.addChild(STRIPPED_WOOD, this.findStrippedLog("wood", "hyphae", "bark"));
+        this.addChild(SLAB, this.findRelatedEntry("slab", BuiltInRegistries.BLOCK));
+        this.addChild(STAIRS, this.findRelatedEntry("stairs", BuiltInRegistries.BLOCK));
         Block fence = this.findRelatedEntry("fence", BuiltInRegistries.BLOCK);
-        this.addChild("fence", fence);
-        this.addChild("fence_gate", this.findRelatedEntry("fence_gate", BuiltInRegistries.BLOCK));
-        this.addChild("door", this.findRelatedEntry("door", BuiltInRegistries.BLOCK));
-        this.addChild("trapdoor", this.findRelatedEntry("trapdoor", BuiltInRegistries.BLOCK));
-        this.addChild("button", this.findRelatedEntry("button", BuiltInRegistries.BLOCK));
-        this.addChild("pressure_plate", this.findRelatedEntry("pressure_plate", BuiltInRegistries.BLOCK));
-        this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign", BuiltInRegistries.BLOCK));
-        this.addChild("wall_hanging_sign", this.findRelatedEntry("wall_hanging_sign", BuiltInRegistries.BLOCK));
-        this.addChild("sign", this.findRelatedEntry("sign", BuiltInRegistries.BLOCK));
-        this.addChild("wall_sign", this.findRelatedEntry("wall_sign", BuiltInRegistries.BLOCK));
+        this.addChild(FENCE, fence);
+        this.addChild(FENCE_GATE, this.findRelatedEntry("fence_gate", BuiltInRegistries.BLOCK));
+        this.addChild(DOOR, this.findRelatedEntry("door", BuiltInRegistries.BLOCK));
+        this.addChild(TRAPDOOR, this.findRelatedEntry("trapdoor", BuiltInRegistries.BLOCK));
+        this.addChild(BUTTON, this.findRelatedEntry("button", BuiltInRegistries.BLOCK));
+        this.addChild(PRESSURE_PLATE, this.findRelatedEntry("pressure_plate", BuiltInRegistries.BLOCK));
+        this.addChild(HANGING_SIGN, this.findRelatedEntry("hanging_sign", BuiltInRegistries.BLOCK));
+        this.addChild(WALL_HANGING_SIGN, this.findRelatedEntry("wall_hanging_sign", BuiltInRegistries.BLOCK));
+        this.addChild(SIGN, this.findRelatedEntry("sign", BuiltInRegistries.BLOCK));
+        this.addChild(WALL_SIGN, this.findRelatedEntry("wall_sign", BuiltInRegistries.BLOCK));
 
         if (this.id.getNamespace().matches("tfc|afc")) { // Including unidue blocks' path
-            this.addChild("sign", this.findRelatedEntry("sign", "", BuiltInRegistries.BLOCK));
-            this.addChild("hanging_sign", this.findRelatedEntry("hanging_sign/wrought_sign", "", BuiltInRegistries.BLOCK));
+            this.addChild(SIGN, this.findRelatedEntry("sign", "", BuiltInRegistries.BLOCK));
+            this.addChild(HANGING_SIGN, this.findRelatedEntry("hanging_sign/wrought_sign", "", BuiltInRegistries.BLOCK));
         }
 
         if (fence != null && CompatHandler.DIAGONALFENCES) {
@@ -158,12 +159,12 @@ public class WoodType extends BlockType {
 
     @Override
     public void initializeChildrenItems() {
-        this.addChild("boat", this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
-        this.addChild("chest_boat", this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
-        this.addChild("sapling", this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
+        this.addChild(BOAT, this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
+        this.addChild(CHEST_BOAT, this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
+        this.addChild(SAPLING, this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
         if (this.id.getNamespace().matches("tfc|afc")) { // Including unidue blocks' path
-            this.addChild("stick", this.findRelatedEntry("twig", BuiltInRegistries.BLOCK));
-            this.addChild("boat", this.findRelatedEntry("boat", "", BuiltInRegistries.BLOCK));
+            this.addChild(STICK, this.findRelatedEntry("twig", BuiltInRegistries.BLOCK));
+            this.addChild(BOAT, this.findRelatedEntry("boat", "", BuiltInRegistries.BLOCK));
         }
     }
 
