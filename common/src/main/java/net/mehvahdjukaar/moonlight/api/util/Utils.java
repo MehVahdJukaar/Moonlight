@@ -443,9 +443,9 @@ public class Utils {
 
     public static ResourceLocation idWithOptionalNamespace(String id, String namespace) {
         if (id.contains(":")) {
-            return new ResourceLocation(id);
+            return ResourceLocation.parse(id);
         } else {
-            return new ResourceLocation(namespace, id);
+            return ResourceLocation.fromNamespaceAndPath(namespace, id);
         }
     }
 

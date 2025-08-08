@@ -9,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodTypes;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -115,7 +114,7 @@ public class LeavesType extends BlockType {
 
         @SuppressWarnings("UnusedReturnValue")
         public Finder equivalentWood(String id) {
-            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(this.id, new ResourceLocation(id)); //this is ass too
+            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(this.id, ResourceLocation.parse(id)); //this is ass too
             return this;
         }
 

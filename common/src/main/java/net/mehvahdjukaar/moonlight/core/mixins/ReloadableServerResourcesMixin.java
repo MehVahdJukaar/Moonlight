@@ -24,7 +24,6 @@ import java.util.concurrent.Executor;
 public abstract class ReloadableServerResourcesMixin {
 
     //should fire right before add reload listener, before packs are reloaded and listeners called
-    //should fire right before add reload listener, before packs are reloaded and listeners called
     @WrapOperation(method = "loadResources", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleReloadInstance;create(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/server/packs/resources/ReloadInstance;"))
     private static ReloadInstance moonlight$dynamicPackEarlyReload(ResourceManager resourceManager, List<PreparableReloadListener> listeners,
                                                                    Executor backgroundExecutor, Executor gameExecutor,
@@ -34,7 +33,7 @@ public abstract class ReloadableServerResourcesMixin {
         //token to assure that modded resources are included
         if (!(resourceManager instanceof FilteredResManager) &&
                  (resourceManager instanceof MultiPackResourceManager mp) &&
-                resourceManager.getResource(new ResourceLocation("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
+                resourceManager.getResource(ResourceLocation.parse("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
             //one would think that this would be fool proof. Well check again, some mod like to re create this resource manager during block load! All modded resources included aswell
             //so to be EXTRA safe we check if registry phase is over
             if (!PlatHelper.isInitializing()) {

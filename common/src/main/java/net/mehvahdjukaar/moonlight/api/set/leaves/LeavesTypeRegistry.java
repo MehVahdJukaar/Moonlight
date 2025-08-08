@@ -9,8 +9,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Optional;
 import java.util.*;
 
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
@@ -72,19 +70,19 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     //returns if this block is the base plank block
     @Override
-    public Optional<LeavesType> detectTypeFromBlock(Block baseBlock, ResourceLocation blockId) {
+    public Optional<LeavesType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseId) {
         String name = null;
-        String path = blockId.getPath();
+        String path = baseId.getPath();
         //needs to contain planks in its name
         if (path.endsWith("_leaves")) {
             name = path.substring(0, path.length() - "_leaves" .length());
         } else if (path.startsWith("leaves_")) {
             name = path.substring("leaves_" .length());
         }
-        String namespace = blockId.getNamespace();
+        String namespace = baseId.getNamespace();
         if (name != null && !namespace.equals("securitycraft") && !path.contains("hanging")) {
             if (baseBlock instanceof LeavesBlock) {
-                ResourceLocation id = baseRes.withPath(name);
+                ResourceLocation id = baseId.withPath(name);
                 return Optional.of(new LeavesType(id, baseBlock));
             }
         }
@@ -143,11 +141,11 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     public void addLeavesToWoodMapping(String leavedId, String woodId) {
-        addLeavesToWoodMapping(new ResourceLocation(leavedId), new ResourceLocation(woodId));
+        addLeavesToWoodMapping(ResourceLocation.parse(leavedId), ResourceLocation.parse(woodId));
     }
 
     public void addLeavesToWoodMapping(String modId, String leavesTypeName, String woodTypeName) {
-        addLeavesToWoodMapping(new ResourceLocation(modId, leavesTypeName), new ResourceLocation(modId, woodTypeName));
+        addLeavesToWoodMapping(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName), ResourceLocation.fromNamespaceAndPath(modId, woodTypeName));
     }
 
     @Override
@@ -164,11 +162,11 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
 
     public LeavesType.Finder addSimpleFinder(String typeId) {
-        return addSimpleFinder(new ResourceLocation(typeId));
+        return addSimpleFinder(ResourceLocation.parse(typeId));
     }
 
     public LeavesType.Finder addSimpleFinder(String namespace, String name) {
-        return addSimpleFinder(new ResourceLocation(namespace, name));
+        return addSimpleFinder(ResourceLocation.fromNamespaceAndPath(namespace, name));
     }
 
 }

@@ -1,9 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import net.mehvahdjukaar.moonlight.api.item.ILeftClickReact;
-import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
-import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
 import net.mehvahdjukaar.moonlight.core.network.ServerBoundItemLeftClickPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
@@ -28,6 +29,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
+
+import static net.mehvahdjukaar.moonlight.api.set.DebugBlockTypes.appendToDebugFile;
 
 /**
  * CHILD AVAILABLITY:
@@ -98,6 +101,8 @@ public class WoodType extends BlockType {
         super(id);
         this.planks = baseBlock;
         this.log = logBlock;
+
+        if (ClientConfigs.WOODTYPE_DEBUG.get() && !this.isVanilla()) appendToDebugFile(getTranslationKey());
     }
 
     @Override
@@ -208,8 +213,8 @@ public class WoodType extends BlockType {
     protected <V> V findRelatedEntry(String prefix, String suffix, Registry<V> reg) {
         if (!suffix.isEmpty()) suffix = "_" + suffix;
         ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + prefix + suffix),
-                new ResourceLocation(id.getNamespace(), prefix + "_" + id.getPath() + suffix),
+                ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath() + "_" + prefix + suffix),
+                ResourceLocation.fromNamespaceAndPath(id.getNamespace(), prefix + "_" + id.getPath() + suffix),
                 //weird conventions here
                 id.withPath(id.getPath() + "_planks_" + prefix + suffix),
                 // TFC & AFC: Include children of wood_type: stairs, slab...
@@ -262,21 +267,21 @@ public class WoodType extends BlockType {
         String namespace = id.getNamespace();
         if (this.id.getNamespace().matches("tfc|afc")) {
             var o = BuiltInRegistries.BLOCK.getOptional(
-                    new ResourceLocation(namespace,
+                    ResourceLocation.fromNamespaceAndPath(namespace,
                             "wood/" + prefix_ + suffix + "/" + path));
             if (o.isPresent()) return o.get();
         }
 
         Set<ResourceLocation> targets = new HashSet<>();
         Collections.addAll(targets,
-                new ResourceLocation(namespace, path + "_" + prefix_ + suffix),
-                new ResourceLocation(namespace, prefix_ + path + "_" + suffix),
-                new ResourceLocation(namespace, logNamespace + "_" + prefix_ + suffix),
-                new ResourceLocation(namespace, prefix_ + logNamespace + "_" + suffix)
+                ResourceLocation.fromNamespaceAndPath(namespace, path + "_" + prefix_ + suffix),
+                ResourceLocation.fromNamespaceAndPath(namespace, prefix_ + path + "_" + suffix),
+                ResourceLocation.fromNamespaceAndPath(namespace, logNamespace + "_" + prefix_ + suffix),
+                ResourceLocation.fromNamespaceAndPath(namespace, prefix_ + logNamespace + "_" + suffix)
         );
         //For things like grimwood_wood -> grimwood
         if (path.endsWith(suffix)) {
-            targets.add(new ResourceLocation(namespace, prefix_ + path));
+            targets.add(ResourceLocation.fromNamespaceAndPath(namespace, prefix_ + path));
         }
         return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, targets.toArray(new ResourceLocation[0]));
     }
@@ -287,8 +292,8 @@ public class WoodType extends BlockType {
         for (String keyword : suffixKeyword) {
             String path = id.getPath();
             String namespace = id.getNamespace();
-            resources.add(new ResourceLocation(namespace, path + "_" + keyword));
-            resources.add(new ResourceLocation(namespace, keyword + "_" + path));
+            resources.add(ResourceLocation.fromNamespaceAndPath(namespace, path + "_" + keyword));
+            resources.add(ResourceLocation.fromNamespaceAndPath(namespace, keyword + "_" + path));
             //resources.add(new ResourceLocation(path + "_" + keyword));//vanilla
             //resources.add(new ResourceLocation(keyword + "_" + path)); //vanilla
         }

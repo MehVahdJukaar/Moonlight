@@ -88,7 +88,7 @@ public abstract class BlockType {
      * @return namespace:folder/shortenedID/namespace/prefix_TYPENAME_suffix
      * OPTIONAL: modId, folder, prefix can be empty
      */
-    public String createFullIdWith(String modIdOrEmpty, String folderOrEmpty, String shortenedId, String prefixOrEmpty, String suffix) {
+    public String createFullIdWith(String modIdOrEmpty, String folderOrEmpty, String shortenedIdOrEmpty, String prefixOrEmpty, String suffix) {
         String modIded = (modIdOrEmpty.isEmpty()) ? "" : modIdOrEmpty + ":";
         String foldered = (folderOrEmpty.isEmpty()) ? "" : folderOrEmpty + "/";
         String namespaced = (modIdOrEmpty.equals(this.getNamespace())) ? "" : this.getNamespace() + "/";
@@ -98,9 +98,11 @@ public abstract class BlockType {
         if (prefixOrEmpty.contains("/")) prefixed = prefixOrEmpty;
         else if (!prefixOrEmpty.isEmpty()) prefixed = prefixOrEmpty + "_";
 
-        String suffixed = (suffix.isEmpty()) ? "" : "_" + suffix;
+        String suffixed = "";
+        if (suffix.matches("\\.(png|json)")) suffixed = suffix;
+        else if (!suffix.isEmpty()) suffixed = "_" + suffix;
 
-        return modIded + foldered + shortenedId + "/" + this.getNamespace() + "/" + prefixed + this.getTypeName() + suffixed;
+        return modIded + foldered + shortenedId + namespaced + prefixed + this.getTypeName() + suffixed;
     }
 
     @Override
