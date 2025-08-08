@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
+import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -39,6 +40,10 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         this.valuesReg = new MapRegistry<>(name);
     }
 
+    public boolean isFrozen() {
+        return frozen;
+    }
+
     public Class<T> getType() {
         return typeClass;
     }
@@ -56,6 +61,9 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     @Nullable
     public T get(ResourceLocation res) {
+        if (!isFrozen()) {
+            throw new AssertionError("Tried to get an object from block set registry before the registry was finalized.");
+        }
         return valuesReg.getValue(res);
     }
 
@@ -84,7 +92,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     protected abstract Optional<T> detectTypeFromBlock(Block block, ResourceLocation blockId);
 
     @ApiStatus.Internal
-    protected void registerBlockType(T newType) {
+    protected T register(T newType) {
         if (frozen) {
             throw new UnsupportedOperationException("Tried to register a wood types after registry events");
         }
@@ -92,6 +100,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         if (!valuesReg.containsKey(newType.id)) {
             valuesReg.register(newType.id, newType);
         }
+        return newType;
     }
 
     public Collection<BlockType.SetFinder<T>> getFinders() {
@@ -131,10 +140,10 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             T defaultType = this.getDefaultType();
             if (defaultType != null) this.registerBlockType(defaultType);
             //adds finders
-            finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::registerBlockType));
+            finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::register));
             for (Block b : BuiltInRegistries.BLOCK) {
                 this.detectTypeFromBlock(b, Utils.getID(b)).ifPresent(t -> {
-                    if (!notInclude.contains(t.getId())) this.registerBlockType(t);
+                    if (!notInclude.contains(t.getId())) this.register(t);
                 });
             }
             finders.clear();
@@ -186,5 +195,9 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     // load priority. higher is loaded first. 100 is default
     public int priority() {
         return 100;
+    }
+
+    public INamedSupplier<T> makeFutureHolder(ResourceLocation id) {
+        return INamedSupplier.memoize(id, () -> this.get(id));
     }
 }
