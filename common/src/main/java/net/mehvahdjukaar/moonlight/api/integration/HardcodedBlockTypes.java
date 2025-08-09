@@ -23,21 +23,19 @@ public class HardcodedBlockTypes {
     public static final INamedSupplier<WoodType> BURNT;
     public static final INamedSupplier<WoodType> GODD_WHISTLECANE;
 
-    public static void init() {
-        /* Defintion of REASONS:
-         *
-         * Id Convention: Id of WoodType can be using Planks' instead of Log's
-         *
-         * Spelling Convention: a typo in the Id, no underscore
-         *
-         * Naming Convention: blocks has unique names that doesn't have "_wood", "_log", "_planks" or has different affix
-         *
-         * Associated WoodType: Leaves have no WoodType, must be included
-         * Associated LeavesType: Wood have no LeavesType, must be included
-         */
+    public static void init() {}
 
-    }
-
+    /* Defintion of REASONS:
+     *
+     * Id Convention: Id of WoodType can be using Planks' instead of Log's
+     *
+     * Spelling Convention: a typo in the Id, no underscore
+     *
+     * Naming Convention: blocks has unique names that doesn't have "_wood", "_log", "_planks" or has different affix
+     *
+     * Associated WoodType: Leaves have no WoodType, must be included
+     * Associated LeavesType: Wood have no LeavesType, must be included
+     */
     static {
 
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
