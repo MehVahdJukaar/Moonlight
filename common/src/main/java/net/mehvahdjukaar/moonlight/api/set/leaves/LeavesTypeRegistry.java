@@ -14,6 +14,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     public static final LeavesTypeRegistry INSTANCE = new LeavesTypeRegistry();
 
+    /// USE {@link VanillaLeavesTypes#OAK}
     @Deprecated(forRemoval = true)
     public static LeavesType OAK_TYPE = VanillaLeavesTypes.OAK;
 

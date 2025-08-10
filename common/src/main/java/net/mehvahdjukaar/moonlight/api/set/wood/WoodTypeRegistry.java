@@ -15,6 +15,8 @@ import java.util.*;
 public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     public static final WoodTypeRegistry INSTANCE = new WoodTypeRegistry();
+
+    /// USE {@link VanillaWoodTypes#OAK}
     @Deprecated(forRemoval = true)
     public static final WoodType OAK_TYPE = VanillaWoodTypes.OAK;
 
