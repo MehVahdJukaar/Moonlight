@@ -19,17 +19,20 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     @Deprecated(forRemoval = true)
     public static final WoodType OAK_TYPE = VanillaWoodTypes.OAK;
 
+    /// USE {@link WoodTypeRegistry}.{@link WoodTypeRegistry#INSTANCE}
     @Deprecated(forRemoval = true)
     public static Collection<WoodType> getTypes() {
         return INSTANCE.getValues();
     }
 
+    /// USE {@link VanillaWoodTypes}.woodTypeId, <br>for example "spruce", then use VanillaWoodTypes.SPRUCE
     @Deprecated(forRemoval = true)
     @Nullable
     public static WoodType getValue(ResourceLocation woodTypeId) {
         return INSTANCE.get(woodTypeId);
     }
 
+    /// USE {@link VanillaWoodTypes}.woodTypeId, <br>for example "spruce", then use VanillaWoodTypes.SPRUCE
     @Deprecated(forRemoval = true)
     @Nullable
     public static WoodType getValue(String woodTypeId) {
