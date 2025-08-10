@@ -245,4 +245,18 @@ public class ResourceSink {
         }
     }
 
+    public void copyResource(ResourceManager manager, ResourceLocation from, ResourceLocation to, boolean lenient) {
+        var resource = manager.getResource(from);
+        if (resource.isPresent()) {
+            var s = StaticResource.of(resource.get(), from);
+            this.addBytes(to, s.data);
+        } else {
+            if (lenient) {
+                Moonlight.LOGGER.info("Resource {} not found for copying to {}", from, to);
+            } else {
+                throw new NoSuchElementException("Resource " + from + " not found for copying to " + to);
+            }
+        }
+    }
+
 }

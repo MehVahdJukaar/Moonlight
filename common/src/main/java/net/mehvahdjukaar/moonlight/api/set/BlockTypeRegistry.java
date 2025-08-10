@@ -62,7 +62,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     @Nullable
     public T get(ResourceLocation res) {
-        if (!isFrozen() && (!hack || PlatHelper.isDev())) {
+        if (!frozen && (!isBeingFrozenHack || PlatHelper.isDev())) {
             throw new AssertionError("Tried to get an object from block set registry before the registry was finalized.");
         }
         return valuesReg.getValue(res);
@@ -135,7 +135,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     }
 
     @Deprecated(forRemoval = true)
-    boolean hack = false;
+    boolean isBeingFrozenHack = false;
 
     @ApiStatus.Internal
     public void buildAll() {
@@ -145,13 +145,13 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             if (defaultType != null) this.register(defaultType);
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::register));
-            hack = true;
+            isBeingFrozenHack = true;
             for (Block b : BuiltInRegistries.BLOCK) {
                 this.detectTypeFromBlock(b, Utils.getID(b)).ifPresent(t -> {
                     if (!notInclude.contains(t.getId())) this.register(t);
                 });
             }
-            hack = false;
+            isBeingFrozenHack = false;
             finders.clear();
             notInclude.clear();
         }

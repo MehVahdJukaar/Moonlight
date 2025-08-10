@@ -74,10 +74,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
      */
     private void regenerateDynamicAssets(ResourceManager manager, IProgressTracker progressTracker) {
         var genTasks = new ArrayList<ResourceGenTask>();
-        regenerateDynamicAssets(manager);
-        regenerateDynamicAssets(genTasks::add);
 
         Stopwatch watch = Stopwatch.createStarted();
+        regenerateDynamicAssets(manager);
+        regenerateDynamicAssets(genTasks::add);
 
         int totalTasks = genTasks.size();
         var reporter = progressTracker.subtask(totalTasks); // child reporter
