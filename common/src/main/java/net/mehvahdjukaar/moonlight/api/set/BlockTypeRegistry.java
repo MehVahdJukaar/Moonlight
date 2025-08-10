@@ -5,9 +5,11 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
+import net.minecraft.core.IdMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -21,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class BlockTypeRegistry<T extends BlockType> {
+public abstract class BlockTypeRegistry<T extends BlockType>implements IdMap<T> {
 
     public static Codec<BlockTypeRegistry<?>> getRegistryCodec() {
         return BlockSetInternal.getRegistriesCodec();
@@ -31,7 +33,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     private final String name;
     private final List<BlockType.SetFinder<T>> finders = new ArrayList<>();
     private final Set<ResourceLocation> notInclude = new HashSet<>();
-    protected final MapRegistry<T> valuesReg; //TODO: extend this instead
+    protected final MapRegistry<T> valuesReg;
     private final Class<T> typeClass;
     private final Object2ObjectOpenHashMap<Object, T> childrenToType = new Object2ObjectOpenHashMap<>();
 
@@ -39,6 +41,21 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         this.typeClass = typeClass;
         this.name = name;
         this.valuesReg = new MapRegistry<>(name);
+    }
+
+    @Override
+    public int size() {
+        return valuesReg.size();
+    }
+
+    @Override
+    public @Nullable T byId(int id) {
+        return valuesReg.byId(id);
+    }
+
+    @Override
+    public int getId(T value) {
+        return valuesReg.getId(value);
     }
 
     public boolean isFrozen() {
