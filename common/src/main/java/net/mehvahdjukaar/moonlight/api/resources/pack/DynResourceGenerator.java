@@ -244,7 +244,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         ResourceLocation newRes = new ResourceLocation(this.modId, builder.toString());
         if (!alreadyHasAssetAtLocation(manager, newRes)) {
 
-            String fullText = new String(resource.data, StandardCharsets.UTF_8);
+            String fullText = resource.asString();
 
 
             fullText = textTransform.apply(fullText);

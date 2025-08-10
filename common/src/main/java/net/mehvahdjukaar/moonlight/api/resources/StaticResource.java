@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 
 /**
@@ -18,6 +19,8 @@ public class StaticResource {
     public final byte[] data;
     public final ResourceLocation location;
     public final String sourceName;
+
+    private String dataAsString = null;
 
     private StaticResource(byte[] data, ResourceLocation location, String sourceName) {
         this.data = data;
@@ -69,5 +72,12 @@ public class StaticResource {
         catch (Exception e){
             throw  new RuntimeException(e);
         }
+    }
+
+    public String asString() {
+        if (this.dataAsString == null) {
+            this.dataAsString = new String(this.data, StandardCharsets.UTF_8);
+        }
+        return this.dataAsString;
     }
 }

@@ -24,7 +24,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -236,7 +235,7 @@ public class ResourceSink {
         ResourceLocation newRes = new ResourceLocation(this.modId, builder.toString());
         if (!alreadyHasAssetAtLocation(manager, newRes)) {
 
-            String fullText = new String(resource.data, StandardCharsets.UTF_8);
+            String fullText = resource.asString();
 
 
             fullText = textTransform.apply(fullText);
