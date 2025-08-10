@@ -78,7 +78,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         if (name != null && !isBlacklisted(namespace, path)) {
             if (baseBlock instanceof LeavesBlock) {
                 ResourceLocation id = new ResourceLocation(namespace, name);
-                if (Objects.isNull(get(id))) return Optional.of(new LeavesType(id, baseBlock));
+                if (!valuesReg.containsKey(id)) return Optional.of(new LeavesType(id, baseBlock));
             }
         }
         return Optional.empty();
