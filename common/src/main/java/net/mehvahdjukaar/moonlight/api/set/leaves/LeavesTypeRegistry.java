@@ -83,7 +83,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         if (name != null && !namespace.equals("securitycraft") && !path.contains("hanging")) {
             if (baseBlock instanceof LeavesBlock) {
                 ResourceLocation id = baseId.withPath(name);
-                return Optional.of(new LeavesType(id, baseBlock));
+                if (!valuesReg.containsKey(id)) return Optional.of(new LeavesType(id, baseBlock));
             }
         }
         return Optional.empty();
