@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
@@ -61,7 +62,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
 
     @Nullable
     public T get(ResourceLocation res) {
-        if (!isFrozen()) {
+        if (!isFrozen() && (!hack || PlatHelper.isDev())) {
             throw new AssertionError("Tried to get an object from block set registry before the registry was finalized.");
         }
         return valuesReg.getValue(res);
@@ -133,6 +134,9 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         this.getValues().forEach(BlockType::initializeChildrenItems);
     }
 
+    @Deprecated(forRemoval = true)
+    boolean hack = false;
+
     @ApiStatus.Internal
     public void buildAll() {
         if (!frozen) {
@@ -141,11 +145,13 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
             if (defaultType != null) this.register(defaultType);
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::register));
+            hack = true;
             for (Block b : BuiltInRegistries.BLOCK) {
                 this.detectTypeFromBlock(b, Utils.getID(b)).ifPresent(t -> {
                     if (!notInclude.contains(t.getId())) this.register(t);
                 });
             }
+            hack = false;
             finders.clear();
             notInclude.clear();
         }
@@ -170,7 +176,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
         if (t != null) return t;
         if (itemLike == Items.AIR || itemLike == Blocks.AIR) return null;
         if (itemLike instanceof BlockItem bi) {
-            var ofBlock=  childrenToType.get(bi.getBlock());
+            var ofBlock = childrenToType.get(bi.getBlock());
             if (ofBlock != null) return ofBlock;
         }
         if (itemLike instanceof Block b) {
