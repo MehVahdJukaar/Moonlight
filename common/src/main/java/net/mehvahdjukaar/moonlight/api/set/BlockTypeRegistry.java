@@ -19,6 +19,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -41,6 +42,11 @@ public abstract class BlockTypeRegistry<T extends BlockType>implements IdMap<T> 
         this.typeClass = typeClass;
         this.name = name;
         this.valuesReg = new MapRegistry<>(name);
+    }
+
+    @Override
+    public @NotNull Iterator<T> iterator() {
+        return valuesReg.iterator();
     }
 
     @Override
