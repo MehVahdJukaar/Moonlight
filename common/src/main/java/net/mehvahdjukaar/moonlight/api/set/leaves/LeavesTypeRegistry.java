@@ -12,13 +12,10 @@ import java.util.*;
 
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
-
     public static final LeavesTypeRegistry INSTANCE = new LeavesTypeRegistry();
-    @Deprecated(forRemoval = true)
-    public static final LeavesType OAK_TYPE = VanillaLeavesTypes.OAK;
 
-    private final Map<ResourceLocation, ResourceLocation> specialLeavesToWood = new HashMap<>();
-    private final Map<LeavesType, WoodType> leavesToWood = new IdentityHashMap<>();
+    @Deprecated(forRemoval = true)
+    public static LeavesType OAK_TYPE = VanillaLeavesTypes.OAK;
 
     @Deprecated(forRemoval = true)
     public static Collection<LeavesType> getTypes() {
@@ -42,6 +39,10 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         return INSTANCE.getFromNBT(name);
     }
 
+
+    private final Map<ResourceLocation, ResourceLocation> specialLeavesToWood = new HashMap<>();
+    private final Map<LeavesType, WoodType> leavesToWood = new IdentityHashMap<>();
+
     public LeavesTypeRegistry() {
         super(LeavesType.class, "leaves_type");
 
@@ -59,7 +60,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     @Override
     public LeavesType getDefaultType() {
-        return OAK_TYPE;
+        return VanillaLeavesTypes.OAK;
     }
 
     @Nullable
