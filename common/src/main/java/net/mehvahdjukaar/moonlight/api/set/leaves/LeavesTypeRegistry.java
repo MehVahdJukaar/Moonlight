@@ -5,7 +5,6 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +14,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     public static final LeavesTypeRegistry INSTANCE = new LeavesTypeRegistry();
 
+    /// USE {@link VanillaLeavesTypes#OAK}
     @Deprecated(forRemoval = true)
     public static LeavesType OAK_TYPE = VanillaLeavesTypes.OAK;
     
