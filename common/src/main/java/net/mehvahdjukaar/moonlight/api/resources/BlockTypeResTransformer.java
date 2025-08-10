@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -164,7 +163,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
      * @return new resource
      */
     public StaticResource transform(StaticResource resource, ResourceLocation blockId, T type) {
-        String newText = new String(resource.data, StandardCharsets.UTF_8);
+        String newText = resource.asString();
 
         for (var m : textModifiers) {
             newText = m.apply(newText, blockId, type);
