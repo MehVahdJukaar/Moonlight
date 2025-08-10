@@ -17,18 +17,20 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     /// USE {@link VanillaLeavesTypes#OAK}
     @Deprecated(forRemoval = true)
     public static LeavesType OAK_TYPE = VanillaLeavesTypes.OAK;
-
+/// USE {@link LeavesTypeRegistry}.{@link LeavesTypeRegistry#INSTANCE}
     @Deprecated(forRemoval = true)
     public static Collection<LeavesType> getTypes() {
         return INSTANCE.getValues();
     }
 
+    /// USE {@link VanillaLeavesTypes}.woodTypeId, <br>For example "spruce", then use VanillaLeavesTypes.SPRUCE
     @Deprecated(forRemoval = true)
     @Nullable
     public static LeavesType getValue(ResourceLocation leavesTypeId) {
         return INSTANCE.get(leavesTypeId);
     }
 
+    /// USE {@link VanillaLeavesTypes}.woodTypeId, <br>For example "spruce", then use VanillaLeavesTypes.SPRUCE
     @Deprecated(forRemoval = true)
     @Nullable
     public static LeavesType getValue(String leavesTypeId) {
