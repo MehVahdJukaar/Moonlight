@@ -116,7 +116,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 name = name.replace("/", "_");
                 ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
                 Block logBlock = WoodType.findLog(id);
-                if (logBlock != null && Objects.isNull(get(id))) {
+                if (logBlock != null && !valuesReg.containsKey(id)) {
                     return Optional.of(new WoodType(id, baseBlock, logBlock));
                 }
             }

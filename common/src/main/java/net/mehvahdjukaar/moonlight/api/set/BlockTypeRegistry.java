@@ -30,7 +30,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> {
     private final String name;
     private final List<BlockType.SetFinder<T>> finders = new ArrayList<>();
     private final Set<ResourceLocation> notInclude = new HashSet<>();
-    private final MapRegistry<T> valuesReg; //TODO: extend this instead
+    protected final MapRegistry<T> valuesReg; //TODO: extend this instead
     private final Class<T> typeClass;
     private final Object2ObjectOpenHashMap<Object, T> childrenToType = new Object2ObjectOpenHashMap<>();
 
