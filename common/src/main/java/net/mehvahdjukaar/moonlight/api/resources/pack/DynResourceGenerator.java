@@ -80,30 +80,36 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         regenerateDynamicAssets(genTasks::add);
 
         int totalTasks = genTasks.size();
-        var reporter = progressTracker.subtask(totalTasks); // child reporter
+        var reporter = progressTracker.subtask(totalTasks);
 
         List<CompletableFuture<ResourceSink>> futures = genTasks.stream()
                 .map(task -> CompletableFuture.supplyAsync(() -> {
-                    ResourceSink localSink = createLocalSink();
-                    task.accept(manager, localSink);
-
-                    reporter.step(); // One step completed
-
-                    return localSink;
+                    try {
+                        ResourceSink localSink = createLocalSink();
+                        task.accept(manager, localSink);
+                        return localSink;
+                    } catch (Exception e) {
+                        getLogger().error("Resource Gen Task failed", e);
+                        return null; // Or a special "empty" sink if you want to keep track
+                    } finally {
+                        reporter.step();
+                    }
                 }, getExecutors()))
                 .toList();
 
-        // Proper join using CompletableFuture
-        CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        // Wait for all tasks to finish, even if some failed
+        CompletableFuture<Void> allDone =
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
-        try {
-            allDone.join(); // joins all futures
-            getLogger().info("Tasks finished in: {} ms", watch.elapsed().toMillis());
-            addAllResourceSinks(futures.stream().map(CompletableFuture::join).toList());
+        allDone.join();
 
-        } catch (Exception e) {
-            throw new RuntimeException("Task failed", e);
-        }
+        List<ResourceSink> successfulSinks = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull) // Remove failed ones
+                .toList();
+
+        getLogger().info("Tasks finished in: {} ms", watch.elapsed().toMillis());
+        addAllResourceSinks(successfulSinks);
 
         getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{} (multithreaded)",
                 this.dynamicPack.getPackType(), this.dynamicPack.packId(), this.modId,
