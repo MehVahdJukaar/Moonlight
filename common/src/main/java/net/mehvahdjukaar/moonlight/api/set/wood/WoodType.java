@@ -68,7 +68,7 @@ public class WoodType extends BlockType {
 
     @Nullable
     private Boat.Type detectVanillaBoat() {
-        if (this == WoodTypeRegistry.OAK_TYPE) return Boat.Type.OAK;
+        if (this == VanillaWoodTypes.OAK) return Boat.Type.OAK;
         var id = this.getId();
         var conventions = Set.of(id.getPath(),
                 id.getNamespace() + id.getPath(),

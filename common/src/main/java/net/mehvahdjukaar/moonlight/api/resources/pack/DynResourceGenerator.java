@@ -110,8 +110,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 .toList();
 
         // Wait for all tasks to finish, even if some failed
-        CompletableFuture<Void> allDone =
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         allDone.join();
 
@@ -147,22 +146,6 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 this.dynamicPack.getPackType(), this.dynamicPack.packId(), this.modId,
                 watch.elapsed().toMillis(),
                 this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
-    }
-
-    protected void addAllResourceSinks(List<ResourceSink> sinks) {
-        Map<TagKey<?>, SimpleTagBuilder> allTags = new HashMap<>();
-        for (ResourceSink sink : sinks) {
-            sink.resources.forEach(this.dynamicPack::addBytes);
-            sink.notClearable.forEach(this.dynamicPack::markNotClearable);
-            for (var e : sink.tags.entrySet()) {
-                allTags.merge(e.getKey(), e.getValue(), SimpleTagBuilder::merge);
-            }
-        }
-
-        //adds tags
-        for (var e : allTags.entrySet()) {
-            this.dynamicPack.addTag(e.getValue(), e.getKey().registry());
-        }
     }
 
     //override if you really need to
