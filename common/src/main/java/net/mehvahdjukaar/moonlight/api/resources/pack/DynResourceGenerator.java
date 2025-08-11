@@ -92,27 +92,35 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         regenerateDynamicAssets(genTasks::add);
 
         int totalTasks = genTasks.size();
-        var reporter = progressTracker.subtask(totalTasks); // child reporter
+        var reporter = progressTracker.subtask(totalTasks);
 
         List<CompletableFuture<ResourceSink>> futures = genTasks.stream()
                 .map(task -> CompletableFuture.supplyAsync(() -> {
-                    ResourceSink localSink = new ResourceSink(this.modId, this.dynamicPack.packId());
-                    task.accept(manager, localSink);
-
-                    reporter.step(); // One step completed
-
-                    return localSink;
+                    try {
+                        ResourceSink localSink = new ResourceSink(this.modId, this.dynamicPack.packId());
+                        task.accept(manager, localSink);
+                        return localSink;
+                    } catch (Exception e) {
+                        getLogger().error("Resource Gen Task failed", e);
+                        return null; // Or a special "empty" sink if you want to keep track
+                    } finally {
+                        reporter.step();
+                    }
                 }, getExecutors()))
                 .toList();
 
-        // Proper join using CompletableFuture
-        CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        // Wait for all tasks to finish, even if some failed
+        CompletableFuture<Void> allDone =
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
+        allDone.join();
 
         try {
             Multimap<TagKey<?>, SimpleTagBuilder> tags = HashMultimap.create();
             allDone.join(); // joins all futures
             for (CompletableFuture<ResourceSink> future : futures) {
                 ResourceSink sink = future.join();
+                if(sink == null)continue;
                 sink.resources.forEach(this.dynamicPack::addBytes);
                 sink.notClearable.forEach(this.dynamicPack::markNotClearable);
                 for (var e : sink.tags.entrySet()) {
