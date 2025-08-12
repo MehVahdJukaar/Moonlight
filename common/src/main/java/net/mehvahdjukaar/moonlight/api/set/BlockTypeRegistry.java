@@ -164,11 +164,12 @@ public abstract class BlockTypeRegistry<T extends BlockType>implements IdMap<T> 
     public void buildAll() {
         if (!frozen) {
             //adds default
+            isBeingFrozenHack = true;
             T defaultType = this.getDefaultType();
             if (defaultType != null) this.register(defaultType);
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::register));
-            isBeingFrozenHack = true;
+            
             for (Block b : BuiltInRegistries.BLOCK) {
                 this.detectTypeFromBlock(b, Utils.getID(b)).ifPresent(t -> {
                     if (!notInclude.contains(t.getId())) this.register(t);
