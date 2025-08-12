@@ -247,6 +247,17 @@ public class HardcodedBlockTypes {
 
 
 //!! LEAVES
+        // FruitFul FUn - REASON: Associated WoodType
+        leafReg.addLeavesToWoodMapping("fruitfulfun:apple", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("fruitfulfun:pomegranate", "minecraft:jungle");
+        leafReg.addLeavesToWoodMapping("fruitfulfun", "grapefruit", "citrus");
+        leafReg.addLeavesToWoodMapping("fruitfulfun", "lemon", "citrus");
+        leafReg.addLeavesToWoodMapping("fruitfulfun", "tangerine", "citrus");
+        leafReg.addLeavesToWoodMapping("fruitfulfun", "lime", "citrus");
+        leafReg.addLeavesToWoodMapping("fruitfulfun", "citron", "citrus");
+        leafReg.addLeavesToWoodMapping("fruitfulfun", "pomelo", "citrus");
+        leafReg.addLeavesToWoodMapping("fruitfulfun", "orange", "citrus");
+
         // Mystic's Biomes - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("mysticsbiomes", "yellow_maple", "white_maple");
 
