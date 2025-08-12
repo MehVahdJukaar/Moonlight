@@ -74,10 +74,10 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     static void touch() {
     }
 
-    //manual registry method. Really only for vanilla
     @Override
-    protected WoodType register(WoodType newType) {
-       return super.register(newType);
+    /// manual registry method. Only for Vanilla WoodType
+    protected WoodType register(WoodType vanillaType) {
+        return super.register(vanillaType);
     }
 
     @Override
