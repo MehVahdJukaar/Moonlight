@@ -52,8 +52,9 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     @Override
-    protected LeavesType register(LeavesType newType) {
-        return super.register(newType);
+    /// manual registry method. Only for Vanilla LeavesType
+    protected LeavesType register(LeavesType vanillaType) {
+        return super.register(vanillaType);
     }
 
     @Override
