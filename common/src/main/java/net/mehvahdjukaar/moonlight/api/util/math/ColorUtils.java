@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.util.math;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
 import org.joml.Vector3f;
@@ -77,6 +78,13 @@ public class ColorUtils {
         int k = Math.min(255, (int) (FastColor.ABGR32.green(color) * amount));
         int l = Math.min(255, (int) (FastColor.ABGR32.blue(color) * amount));
         return FastColor.ABGR32.color(0, l, k, j);
+    }
+
+    public static int lerp(int c0, int c1, float t) {
+        if (t == 0) return c0;
+        if (t == 1) return c1;
+        RGBColor col = new RGBColor(c0);
+        return col.mixWith(new RGBColor(c1), t).toInt();
     }
 
     //ARGB to ABGR and vice versa

@@ -30,6 +30,7 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -73,24 +74,39 @@ public class ResourceSink {
     }
 
 
+    @Deprecated(forRemoval = true)
     public void addAndCloseTexture(ResourceLocation path, TextureImage image) {
         addAndCloseTexture(path, image, true);
+    }
+
+    @Deprecated(forRemoval = true)
+    public void addAndCloseTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
+        try (image) {
+            addTexture(path, image, isOnAtlas);
+        } catch (Exception e) {
+            Moonlight.LOGGER.warn("Failed to add image {} to resource pack {}.", path, this, e);
+        }
     }
 
     /**
      * Adds a new textures and closes the passed native image
      * Last boolean is for textures that aren't stitched so won't be cleared automatically after stitching
-     * Use it for textures such as entity textures of GUI
+     * Use it for textures such as entity textures of GUI.
+     * You must close the texture yourself now
      */
-    public void addAndCloseTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
-        try (image) {
+    public void addTexture(ResourceLocation path, TextureImage image) {
+        addTexture(path, image, true);
+    }
+
+    public void addTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
+        try {
             this.addBytes(path, image.getImage().asByteArray(), ResType.TEXTURES);
             if (!isOnAtlas) this.markNotClearable(ResType.TEXTURES.getPath(path));
             if (image.getMcMeta() != null) {
                 this.addJson(path, image.getMcMeta().toJson(), ResType.MCMETA);
             }
         } catch (Exception e) {
-            Moonlight.LOGGER.warn("Failed to add image {} to resource pack {}.", path, this, e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -244,10 +260,7 @@ public class ResourceSink {
         //adds modified under my namespace
         ResourceLocation newRes = ResourceLocation.fromNamespaceAndPath(this.modId, builder.toString());
         if (!alreadyHasAssetAtLocation(manager, newRes)) {
-
             String fullText = resource.asString();
-
-
             fullText = textTransform.apply(fullText);
 
             this.addBytes(newRes, fullText.getBytes());
@@ -268,4 +281,13 @@ public class ResourceSink {
         }
     }
 
+
+    /**
+     * Utility method to add models overrides in a non-destructive way. Provided overrides will be added on top of whatever model is currently provided by vanilla or mod resources. IE: crossbows
+     */
+    public void appendModelOverride(ResourceManager manager, ResourceLocation modelRes,
+                                    Consumer<RPUtils.OverrideAppender> modelConsumer) {
+        JsonElement json = RPUtils.makeModelOverride(manager, modelRes, modelConsumer);
+        this.addItemModel(modelRes, json);
+    }
 }

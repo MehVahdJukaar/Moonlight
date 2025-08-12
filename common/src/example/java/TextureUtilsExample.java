@@ -1,11 +1,9 @@
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
-import net.mehvahdjukaar.moonlight.api.resources.textures.ImageTransformer;
-import net.mehvahdjukaar.moonlight.api.resources.textures.Palette;
-import net.mehvahdjukaar.moonlight.api.resources.textures.Respriter;
-import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.api.resources.textures.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 
 public class TextureUtilsExample {
 
@@ -44,23 +42,29 @@ public class TextureUtilsExample {
                  TextureImage emerald = TextureImage.open(manager, ResourceLocation.parse("block/emerald"))) {
 
                 // New image is created, so we can keep using old ones
-                TextureImage newImage = diamond.makeCopy();
-                // grayscale the image
-                newImage.toGrayscale();
+               try( TextureImage newImage = diamond.makeCopy()) {
+                   ;
+                   // grayscale the image
+                   TextureOps.grayscale(newImage);
 
-                // We apply an overlay to the texture, drawing a diamond pick on it
-                newImage.applyOverlay(pick);
+                   // We apply an overlay to the texture, drawing a diamond pick on it
+                   TextureOps.applyOverlay(newImage, pick);
 
-                // Here an image transformer object is created; It can copy parts of a texture onto another
-                // In this case it will copy a square from the center of the emerald textures to the two upper cornets of our one
-                ImageTransformer transformer = ImageTransformer.builder(16, 16, 16, 16)
-                        .copyRect(6, 6, 4, 4, 12, 0)
-                        .copyRect(6, 6, 4, 4, 0, 0)
-                        .build();
+                   // Here an image transformer object is created; It can copy parts of a texture onto another
+                   // In this case it will copy a square from the center of the emerald textures to the two upper cornets of our one
+                   TextureCollager transformer = TextureCollager.builder(16, 16, 16, 16)
+                           .copyFrom(6, 6, 4, 4)
+                           .to(12, 0)
+                           .flippedX()
+                           .copyFrom(0,0,4,5)
+                           .to(2,3)
+                           .rotated(Rotation.CLOCKWISE_90)
+                           .build();
 
-                transformer.apply(emerald, newImage);
+                   transformer.apply(emerald, newImage);
 
-                return newImage;
+                   return newImage;
+               }
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

@@ -229,11 +229,11 @@ public final class SpriteUtils {
 
     public static TextureImage savePaletteStrip(ResourceManager manager, List<Integer> colors) {
 
-        try (var image = TextureImage.createNew(16, 16)) {
+        try (TextureImage image = TextureImage.createNew(16, 16)) {
             var it = colors.iterator();
-            image.forEachFramePixel((x, y, f) -> {
+            image.forEachPixel(pixel -> {
                 if (it.hasNext()) {
-                    image.getImage().setPixelRGBA(x, y, it.next());
+                    pixel.setValue(it.next());
                 }
             });
             return image;

@@ -61,8 +61,13 @@ public class StaticResource {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public static StaticResource getOrFail(ResourceManager manager, ResourceLocation location) throws NoSuchElementException {
-        return of(manager.getResource(location).get(), location);
+        return of(manager.getResource(location).orElseThrow(), location);
+    }
+
+    public static StaticResource getOrThrow(ResourceManager manager, ResourceLocation location) throws NoSuchElementException {
+        return of(manager.getResource(location).orElseThrow(), location);
     }
 
     public JsonObject toJson(){

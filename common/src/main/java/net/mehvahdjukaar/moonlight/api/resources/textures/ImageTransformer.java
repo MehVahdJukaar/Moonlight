@@ -6,7 +6,8 @@ import io.netty.util.internal.UnstableApi;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/// use link{TextureCollager}
+@Deprecated(forRemoval = true)
 public class ImageTransformer {
     protected final int originalW;
     protected final int originalH;
