@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HCLColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.LABColor;
+import net.minecraft.core.Registry;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
@@ -721,20 +722,17 @@ public class Palette implements Set<PaletteColor> {
 
         List<Palette> palettes = new ArrayList<>();
 
-        NativeImage mask = textureMask == null ? null : textureMask.getImage();
-        NativeImage image = textureImage.getImage();
-
         List<Map<Integer, PaletteColor>> paletteBuilders = new ArrayList<>();
-
-        textureImage.forEachFramePixel((index, x, y) -> {
+        textureImage.forEachPixel(pixel -> {
+            int index = pixel.frameIndex();
             //when index changes, we add a completed palette
             if (paletteBuilders.size() <= index) {
                 paletteBuilders.add(new HashMap<>());
             }
             var builder = paletteBuilders.get(index);
 
-            if (mask == null || FastColor.ABGR32.alpha(mask.getPixelRGBA(x, y)) == 0) {
-                int color = image.getPixelRGBA(x, y);
+            if (textureMask == null || FastColor.ABGR32.alpha(textureMask.getPixel(pixel.x(), pixel.y())) == 0) {
+                int color = pixel.getValue();
                 if (FastColor.ABGR32.alpha(color) != 0) {
                     var paletteColor = builder.computeIfAbsent(color,
                             p -> new PaletteColor(color));
@@ -745,7 +743,7 @@ public class Palette implements Set<PaletteColor> {
 
         for (var p : paletteBuilders) {
             Palette pal;
-            if (p.size() == 0) {
+            if (p.isEmpty()) {
                 pal = new Palette(new ArrayList<>());
             } else {
                 pal = new Palette(p.values(), tolerance);

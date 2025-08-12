@@ -295,28 +295,33 @@ public class RPUtils {
     /**
      * Utility method to add models overrides in a non-destructive way. Provided overrides will be added on top of whatever model is currently provided by vanilla or mod resources. IE: crossbows
      */
+    @Deprecated(forRemoval = true)
     public static void appendModelOverride(ResourceManager manager, DynamicTexturePack pack,
                                            ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
-        var o = manager.getResource(ResType.ITEM_MODELS.getPath(modelRes));
-        if (o.isPresent()) {
-            try (var model = o.get().open()) {
-                var json = RPUtils.deserializeJson(model);
-                JsonArray overrides;
-                if (json.has("overrides")) {
-                    overrides = json.getAsJsonArray("overrides");
-                    ;
-                } else overrides = new JsonArray();
+        var json = makeModelOverride(manager, modelRes, modelConsumer);
+        pack.addItemModel(modelRes, json);
+    }
 
-                modelConsumer.accept(ov -> overrides.add(serializeOverride(ov)));
+    public static JsonElement makeModelOverride(ResourceManager manager,
+                                                 ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
+        try (var model =  manager.getResourceOrThrow(ResType.ITEM_MODELS.getPath(modelRes)).open()) {
+            var json = RPUtils.deserializeJson(model);
+            JsonArray overrides;
+            if (json.has("overrides")) {
+                overrides = json.getAsJsonArray("overrides");
+            } else overrides = new JsonArray();
 
-                json.add("overrides", overrides);
-                pack.addItemModel(modelRes, json);
-            } catch (Exception ignored) {
-            }
+            modelConsumer.accept(ov -> overrides.add(serializeModelOverride(ov)));
+
+            json.add("overrides", overrides);
+            return json;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private static JsonObject serializeOverride(ItemOverride override) {
+
+    private static JsonObject serializeModelOverride(ItemOverride override) {
         JsonObject json = new JsonObject();
         json.addProperty("model", override.getModel().toString());
         JsonObject predicates = new JsonObject();

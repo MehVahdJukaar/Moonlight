@@ -95,6 +95,7 @@ public class Respriter {
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable AnimationMetadataSection targetAnimationData) {
         return recolorWithAnimation(targetPalettes, targetAnimationData == null ? null : McMetaFile.of(targetAnimationData));
     }
+
     /**
      * Move powerful method that recolors an image using the palette provided and the animation data provided.
      * It will merge a new animation strip made of the first frame of the original image colored with the given colors
@@ -112,14 +113,12 @@ public class Respriter {
             targetAnimationData = imageToRecolor.getMcMeta();
         }
 
-        TextureImage texture = imageToRecolor.createAnimationTemplate(targetPalettes.size(), targetAnimationData);
-
-        NativeImage img = texture.getImage();
+        TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor, targetPalettes.size(), targetAnimationData);
 
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
-        texture.forEachFramePixel((ind, x, y) -> {
-            int finalInd = useMergedPalette ? 0 : ind;
+        texture.forEachPixel(pixel -> {
+            int finalInd = useMergedPalette ? 0 : pixel.frameIndex();
 
             //caches these for each palette
             ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(finalInd, i -> {
@@ -130,10 +129,10 @@ public class Respriter {
 
             if (oldToNewMap != null) {
 
-                Integer oldValue = img.getPixelRGBA(x, y);
+                Integer oldValue = pixel.getValue();
                 Integer newValue = oldToNewMap.mapColor(oldValue);
                 if (newValue != null) {
-                    img.setPixelRGBA(x, y, newValue);
+                    pixel.setValue(newValue);
                 }
             }
         });
@@ -160,13 +159,11 @@ public class Respriter {
         boolean onlyUseFirst = targetPalettes.size() < originalPalettes.size();
 
         TextureImage texture = imageToRecolor.makeCopy();
-        NativeImage img = texture.getImage();
-
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
-        texture.forEachFramePixel((ind, x, y) -> {
+        texture.forEachPixel(pixel -> {
             //caches these for each palette
-
+            int ind = pixel.frameIndex();
             int finalInd = useMergedPalette ? 0 : ind;
             ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(ind, i -> {
                 Palette toPalette = onlyUseFirst ? targetPalettes.get(0) : targetPalettes.get(finalInd);
@@ -177,10 +174,10 @@ public class Respriter {
 
             if (oldToNewMap != null) {
 
-                Integer oldValue = img.getPixelRGBA(x, y);
+                Integer oldValue = pixel.getValue();
                 Integer newValue = oldToNewMap.mapColor(oldValue);
                 if (newValue != null) {
-                    img.setPixelRGBA(x, y, newValue);
+                    pixel.setValue(newValue);
                 }
             }
         });

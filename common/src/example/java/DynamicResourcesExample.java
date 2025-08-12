@@ -3,11 +3,13 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.function.Consumer;
 
 public class DynamicResourcesExample {
 
@@ -26,27 +28,34 @@ public class DynamicResourcesExample {
         }
 
         // generate here your assets
+
+
         @Override
-        public void regenerateDynamicAssets(ResourceManager manager) {
+        public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
 
-            JsonObject json = new JsonObject();
-            json.addProperty("parent", "block/stone");
-            // adds a random json item model
-            this.dynamicPack.addItemModel(Moonlight.res("sturdy_stone_bricks"), json);
+            //add tasks of reasonable size for max performance
+            executor.accept(((manager, sink) -> {
 
-            ResourceLocation textureRes = Moonlight.res("entity/entity_texture");
-            // We create another example texture and add it. The last parameter must be false for non-atlas textures
-            this.dynamicPack.addAndCloseTexture(textureRes, TextureUtilsExample.createTransformedTexture(manager), false);
+                JsonObject json = new JsonObject();
+                json.addProperty("parent", "block/stone");
+                // adds a random json item model
+                sink.addItemModel(Moonlight.res("sturdy_stone_bricks"), json);
 
-            // Helper method to only add a texture if it's not already there added by some pack
-            this.addTextureIfNotPresent(manager, "moonlight:block/sturdy_stone_bricks",
-                    () -> TextureUtilsExample.createRecoloredTexture(manager));
+                ResourceLocation textureRes = Moonlight.res("entity/entity_texture");
+                // We create another example texture and add it. The last parameter must be false for non-atlas textures
+                sink.addAndCloseTexture(textureRes, TextureUtilsExample.createTransformedTexture(manager), false);
 
-            // Helper object to handle resources multiple times
-            StaticResource resource = StaticResource.getOrFail(manager, new ResourceLocation("models/block/stone_bricks.json"));
+                // Helper method to only add a texture if it's not already there added by some pack
+                sink.addTextureIfNotPresent(manager, "moonlight:block/sturdy_stone_bricks",
+                        () -> TextureUtilsExample.createRecoloredTexture(manager));
 
-            // Helper method to add similar resources, just string replaces its content. You can also do more complex operations
-            this.addSimilarJsonResource(manager, resource, "stone_bricks", "sturdy_stone_bricks");
+                // Helper object to handle resources multiple times
+                StaticResource resource = StaticResource.getOrThrow(manager, new ResourceLocation("models/block/stone_bricks.json"));
+
+                // Helper method to add similar resources, just string replaces its content. You can also do more complex operations
+                sink.addSimilarJsonResource(manager, resource, "stone_bricks", "sturdy_stone_bricks");
+            }));
+
         }
 
         @Override
