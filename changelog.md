@@ -1,1 +1,3 @@
-- workaround to hopefully prevent some rare and hard to trackdown issue due to classloaders
+- HardcodedBlockType: Added Fruitful Fun's LeavesType to have Associated WoodType
+- API improvement and improvement in other codes 
+- Updated license
