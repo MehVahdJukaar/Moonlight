@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
@@ -188,23 +187,23 @@ public abstract class BlockTypeRegistry<T extends BlockType>implements IdMap<T> 
      */
     @ApiStatus.Internal
     public void addTypeTranslations(AfterLanguageLoadEvent language) {
-        this.getValues().forEach((w) -> {
-            if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
+        this.getValues().forEach((blockType) -> {
+            if (language.isDefault()) language.addEntry(blockType.getTranslationKey(), blockType.getReadableName());
         });
     }
 
     @Nullable
     public T getBlockTypeOf(ItemLike itemLike) {
         //we must check items and blocks correctly here since map might just contain blocks or items
-        var t = childrenToType.get(itemLike);
-        if (t != null) return t;
+        var blockType = childrenToType.get(itemLike);
+        if (blockType != null) return blockType;
         if (itemLike == Items.AIR || itemLike == Blocks.AIR) return null;
         if (itemLike instanceof BlockItem bi) {
             var ofBlock = childrenToType.get(bi.getBlock());
             if (ofBlock != null) return ofBlock;
         }
-        if (itemLike instanceof Block b) {
-            Item item = b.asItem();
+        if (itemLike instanceof Block block) {
+            Item item = block.asItem();
             if (item == Items.AIR) {
                 return null;
             }
