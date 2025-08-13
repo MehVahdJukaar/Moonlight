@@ -1,13 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.set.leaves;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodTypes;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
-import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -92,6 +90,10 @@ public class LeavesType extends BlockType {
             ));
         }
 
+        public Finder leaves(String leavesName) {
+            return this.leaves(Utils.idWithOptionalNamespace(leavesName, id.getNamespace()));
+        }
+
         /**
          * @param prefix include the underscore, "_" if the blockId has one
          * @param suffix include the underscore, "_" if the blockId has one
@@ -108,11 +110,8 @@ public class LeavesType extends BlockType {
             return leaves(id.getPath() + suffix);
         }
 
-        public Finder leaves(String leavesName) {
-            return this.leaves(Utils.idWithOptionalNamespace(leavesName, id.getNamespace()));
-        }
-
         @SuppressWarnings("UnusedReturnValue")
+        /// Associated WoodType
         public Finder equivalentWood(String id) {
             LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(this.id, ResourceLocation.parse(id)); //this is ass too
             return this;
@@ -122,24 +121,25 @@ public class LeavesType extends BlockType {
         public Optional<LeavesType> get() {
             if (PlatHelper.isModLoaded(id.getNamespace())) {
                 try {
-                    Block leaves = Preconditions.checkNotNull(leavesFinder.get(), "Manual finder {} did not find a Leaf Block", id);
+                    Block leaves = Preconditions.checkNotNull(leavesFinder.get(), "Manual Finder - failed to find a leaf block for {}", id);
                     var w = new LeavesType(id, leaves);
                     childNames.forEach((key, value) -> {
                         try {
                             ItemLike obj = Preconditions.checkNotNull(value.get());
                             w.addChild(key, obj);
                         } catch (Exception e) {
-                            Moonlight.LOGGER.warn("Failed to find child for wood type {}: {}. Ignoring", id, key, e);
+                            Moonlight.LOGGER.warn("Failed to find child for WoodType: {} - {}. Ignored! ERROR: {}", id, key, e.getMessage());
                         }
                     });
                     return Optional.of(w);
                 } catch (Exception e) {
-                    Moonlight.LOGGER.warn("Failed to find custom wood type {}", id, e);
+                    Moonlight.LOGGER.warn("Failed to find custom WoodType:  {} - ", id, e);
                 }
             }
             return Optional.empty();
         }
 
+// ─────────────────────────────────────────── Marked For Removal ────────────────────────────────────────────
 
         /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
