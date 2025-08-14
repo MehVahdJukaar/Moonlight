@@ -293,6 +293,7 @@ public class WoodType extends BlockType {
             this.planks(() -> findPlanks(id)); // defaults
         }
 
+        /// PLANKS \\\
         public Finder planks(Supplier<Block> planksFinder) {
             this.planksFinder = planksFinder;
             return this;
@@ -302,6 +303,10 @@ public class WoodType extends BlockType {
             return this.planks(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
                     () -> new IllegalStateException("Failed to find planks block: " + id)
             ));
+        }
+
+        public Finder planks(String planksName) {
+            return this.planks(Utils.idWithOptionalNamespace(planksName, id.getNamespace()));
         }
 
         /**
@@ -320,22 +325,19 @@ public class WoodType extends BlockType {
             return planks(id.getPath() + suffix);
         }
 
-        public Finder planks(String planksName) {
-            return this.planks(Utils.idWithOptionalNamespace(planksName, id.getNamespace()));
-        }
-
+        /// LOG \\\
         public Finder log(Supplier<Block> logFinder) {
             this.logFinder = logFinder;
             return this;
         }
-
+        /// @param id Full Id of MudType as ResourceLocation
         public Finder log(ResourceLocation id) {
             return this.log(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
                     () -> new IllegalStateException("Failed to find log block: " + id)));
         }
-
-        public Finder log(String logName) {
-            return this.log(Utils.idWithOptionalNamespace(logName, id.getNamespace()));
+        /// @param nameLog name of Log without modId or namespace
+        public Finder log(String nameLog) {
+            return this.log(Utils.idWithOptionalNamespace(nameLog, id.getNamespace()));
         }
 
         /**
@@ -354,29 +356,31 @@ public class WoodType extends BlockType {
         }
 
 
-        @ApiStatus.Internal
         @Override
+        @ApiStatus.Internal
         public Optional<WoodType> get() {
             if (PlatHelper.isModLoaded(id.getNamespace())) {
                 try {
-                    Block plank = Preconditions.checkNotNull(planksFinder.get(), "Manual finder {} failed to find a plank block", id);
-                    Block log = Preconditions.checkNotNull(logFinder.get(), "Manual finder {} failed to find a log block", id);
-                    var w = new WoodType(id, plank, log);
+                    Block plank = Preconditions.checkNotNull(planksFinder.get(), "Manual Finder - failed to find a plank block for {}", id);
+                    Block log = Preconditions.checkNotNull(logFinder.get(), "Manual Finder - failed to find a log block for {}", id);
+                    var woodType = new WoodType(id, plank, log);
                     childNames.forEach((key, value) -> {
                         try {
                             ItemLike obj = Preconditions.checkNotNull(value.get());
-                            w.addChild(key, obj);
+                            woodType.addChild(key, obj);
                         } catch (Exception e) {
-                            Moonlight.LOGGER.warn("Failed to find child for wood type {}: {}. Ignoring", id, key, e);
+                            Moonlight.LOGGER.warn("Failed to find child for WoodType: {} - {}. Ignored! ERROR: {}", id, key, e.getMessage());
                         }
                     });
-                    return Optional.of(w);
+                    return Optional.of(woodType);
                 } catch (Exception e) {
-                    Moonlight.LOGGER.warn("Failed to find custom wood type {}", id, e);
+                    Moonlight.LOGGER.warn("Failed to find custom WoodType:  {} - ", id, e);
                 }
             }
             return Optional.empty();
         }
+
+// ─────────────────────────────────────────── Marked For Removal ────────────────────────────────────────────
 
         /// USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
