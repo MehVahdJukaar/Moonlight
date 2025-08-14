@@ -211,16 +211,10 @@ public class ResourceSink {
         ResourceLocation res = relativePath.contains(":") ? ResourceLocation.parse(relativePath) :
                 ResourceLocation.fromNamespaceAndPath(this.modId, relativePath);
         if (!alreadyHasTextureAtLocation(manager, res)) {
-            TextureImage textureImage = null;
-            try {
-                textureImage = textureSupplier.get();
+            try (TextureImage textureImage = textureSupplier.get()){
+                this.addTexture(res, textureImage, isOnAtlas);
             } catch (Exception e) {
                 Moonlight.LOGGER.error("Failed to generate texture {}: {}", res, e);
-            }
-            if (textureImage == null) {
-                Moonlight.LOGGER.warn("Could not generate texture {}", res);
-            } else {
-                this.addAndCloseTexture(res, textureImage, isOnAtlas);
             }
         }
     }
