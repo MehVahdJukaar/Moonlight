@@ -147,10 +147,8 @@ public final class TextureOps {
         }
         TextureImage im = TextureImage.createNew(newW, newH, meta);
         TextureCollager transformer = TextureCollager.builder(img.frameWidth(), img.frameHeight(), im.frameWidth(), im.frameHeight())
-                .startOp()
-                .from(0, 0, img.frameWidth(), img.frameHeight())
+                .copyFrom(0, 0, img.frameWidth(), img.frameHeight())
                 .to(0, 0)
-                .endOp()
                 .build();
         transformer.apply(img, im);
         return im;

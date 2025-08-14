@@ -1,3 +1,4 @@
-- HardcodedBlockType: Added Fruitful Fun's LeavesType to have Associated WoodType
-- API improvement and improvement in other codes 
-- Updated license
+- added TextureCollager, a class made to sticth, scale, and rotate pieces of a texture onto another
+- added TextureOps, a utility class with many texture transforms methods
+- removed transforms methods from TextureImage itself
+- streamlined more api related to textures

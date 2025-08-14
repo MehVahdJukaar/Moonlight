@@ -6,65 +6,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TextureCollager {
-    protected final int originalW;
-    protected final int originalH;
-    protected final int targetW;
-    protected final int targetH;
+    protected final int originFrameW;
+    protected final int originFrameH;
+    protected final int targetFrameW;
+    protected final int targetFrameH;
     private final List<Operation> operations;
 
     public void apply(TextureImage source, TextureImage destination) {
-        float scaleSourceX = source.imageWidth() / (float) originalW;
-        float scaleSourceY = source.imageHeight() / (float) originalH;
-        float scaleTargetX = destination.imageWidth() / (float) targetW;
-        float scaleTargetY = destination.imageHeight() / (float) targetH;
+        float scaleSourceX = source.frameWidth() / (float) originFrameW;
+        float scaleSourceY = source.frameHeight() / (float) originFrameH;
+        float scaleTargetX = destination.frameWidth() / (float) targetFrameW;
+        float scaleTargetY = destination.frameHeight() / (float) targetFrameH;
 
-        Sampler2D sourceScaleSampler = Sampler2D.scale(source,
-                scaleSourceX, scaleSourceY);
+        int sourceFrames = source.frameCount();
+        int targetFrames = destination.frameCount();
+        int maxFrames = Math.max(sourceFrames, targetFrames);
+
+        for (int i = 0; i < maxFrames; i++) {
+            int cappedSourceFrame = Math.min(i, sourceFrames - 1);
+            int cappedTargetFrame = Math.min(i, targetFrames - 1);
+
+            Sampler2D sourceFrameSampler = source.frameSampler(cappedSourceFrame);
+            sourceFrameSampler = Sampler2D.scale(sourceFrameSampler, scaleSourceX, scaleSourceY);
+            for (Operation op : operations) {
+
+                Sampler2D sampler = op.makeSampler(sourceFrameSampler);
 
 
-        for (Operation op : operations) {
-
-            Sampler2D sampler = Sampler2D.offset(sourceScaleSampler, op.startX, op.startY);
-
-
-            // Apply rotation
-            if (op.rotation != Rotation.NONE) {
-                sampler = Sampler2D.rotate(sampler, op.rotation, op.width, op.height);
-            }
-
-            // Apply flip
-            if (op.flipX) {
-                // Width & height may swap after rotation
-                int w = (op.rotation == Rotation.CLOCKWISE_90 || op.rotation == Rotation.COUNTERCLOCKWISE_90) ? op.height : op.width;
-                sampler = Sampler2D.flippedX(sampler, w);
-            }
-
-            // Add flip Y support - you might want a new boolean flag, e.g. op.flippedY
-            if (op.flipY) {  // <-- You’ll need to add this boolean to your Operation class
-                int h = (op.rotation == Rotation.CLOCKWISE_90 || op.rotation == Rotation.COUNTERCLOCKWISE_90) ? op.width : op.height;
-                sampler = Sampler2D.flippedY(sampler, h);
-            }
-
-            sampler = Sampler2D.scale(sampler, op.width, op.height, op.targetW, op.targetH);
-
-            if (op.bilinear) {
-                sampler = Sampler2D.bilinear(sampler);
-            }
-
-            for (int ty = 0; ty < op.targetH; ty++) {
-                for (int tx = 0; tx < op.targetW; tx++) {
-                    int color = sampler.sample(tx, ty);
-                    destination.setPixel(
-                            (int) ((op.targetX + tx) * scaleTargetX),
-                            (int) ((op.targetY + ty) * scaleTargetY),
-                            color);
-                }
-            }
-            // Write to destination
-            for (int ty = 0; ty < op.targetH; ty++) {
-                for (int tx = 0; tx < op.targetW; tx++) {
-                    int color = sampler.sample(tx, ty);
-                    destination.setPixel(op.targetX + tx, op.targetY + ty, color);
+                //we sample in target space now since original scaling sampler takes care of it
+                for (int ty = 0; ty < op.targetH; ty++) {
+                    for (int tx = 0; tx < op.targetW; tx++) {
+                        int color = sampler.sample(tx, ty);
+                        destination.setFramePixel(cappedTargetFrame,
+                                (int) ((op.targetX + tx) * scaleTargetX),
+                                (int) ((op.targetY + ty) * scaleTargetY),
+                                color);
+                    }
                 }
             }
         }
@@ -72,25 +49,64 @@ public class TextureCollager {
 
 
     private TextureCollager(int originalW, int originalH, int targetW, int targetH, List<Operation> list) {
-        this.originalW = originalW;
-        this.originalH = originalH;
-        this.targetW = targetW;
-        this.targetH = targetH;
+        this.originFrameW = originalW;
+        this.originFrameH = originalH;
+        this.targetFrameW = targetW;
+        this.targetFrameH = targetH;
         this.operations = list;
     }
 
     //needed to support packs of different resolutions
-    public static Builder builder(int originalW, int originalH, int targetW, int targetH) {
-        return new Builder(originalW, originalH, targetW, targetH);
+    public static Builder builder(int originFrameW, int originFrameH, int targetFrameW, int targetFrameH) {
+        return new Builder(originFrameW, originFrameH, targetFrameW, targetFrameH);
     }
 
-    private record Operation(int startX, int startY, int width, int height, int targetX, int targetY, int targetW,
-                             int targetH, boolean flipX, boolean flipY, Rotation rotation, boolean bilinear) {
+    private record Operation(int sourceX, int sourceY, int sourceW, int sourceH,
+                             int targetX, int targetY, int targetW, int targetH,
+                             boolean flipX, boolean flipY, Rotation rotation, boolean bilinear) {
 
+
+        private Sampler2D makeSampler(Sampler2D sampler) {
+
+            sampler = Sampler2D.offset(sampler, sourceX, sourceY);
+            //   sampler = Sampler2D.clamp(sampler, 0, 0, sourceW, sourceH);
+
+            // Apply rotation
+
+            if (flipX) {
+                // Width & sourceH may swap after rotation
+                int w = (rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90) ? sourceH : sourceW;
+                sampler = Sampler2D.flippedX(sampler, w);
+            }
+
+            // Add flip Y support - you might want a new boolean flag, e.g. flippedY
+            if (flipY) {  // <-- You’ll need to add this boolean to your Operation class
+                int h = (rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90) ? sourceW : sourceH;
+                sampler = Sampler2D.flippedY(sampler, h);
+            }
+            if (bilinear) {
+                sampler = Sampler2D.bilinear(sampler);
+            }
+
+            if (rotation != Rotation.NONE) {
+                sampler = Sampler2D.rotate(sampler, rotation, sourceW, sourceH);
+            }
+
+            float opScaleW = sourceW / (float) targetW;
+            float opScaleH = sourceH / (float) targetH;
+
+            if (opScaleW != 1 || opScaleH != 1) {
+                sampler = Sampler2D.scale(sampler, opScaleW, opScaleH);
+            }
+
+            sampler = Sampler2D.offset(sampler, 0.5f, 0.5f);
+
+            return sampler;
+        }
     }
 
     public static class Builder {
-        private final int originalImageW, originalImageH, targetImageW, targetImageH;
+        private final int originalFrameW, originalFrameH, targetFrameW, targetFrameH;
         private final List<Operation> operations = new ArrayList<>();
 
         private Integer startX, startY, width, height;
@@ -100,15 +116,15 @@ public class TextureCollager {
         private boolean bilinear = false;
 
         public Builder(int originalW, int originalH, int targetW, int targetH) {
-            this.originalImageW = originalW;
-            this.originalImageH = originalH;
-            this.targetImageW = targetW;
-            this.targetImageH = targetH;
+            this.originalFrameW = originalW;
+            this.originalFrameH = originalH;
+            this.targetFrameW = targetW;
+            this.targetFrameH = targetH;
         }
 
         public TextureCollager build() {
             addLast();
-            return new TextureCollager(originalImageW, originalImageH, targetImageW, targetImageH, List.copyOf(operations));
+            return new TextureCollager(originalFrameW, originalFrameH, targetFrameW, targetFrameH, List.copyOf(operations));
         }
 
         public Builder copyFrom(int x, int y, int w, int h) {
@@ -172,20 +188,20 @@ public class TextureCollager {
         }
 
         private void validate() {
-            if (startX == null) throw new IllegalStateException("startX must be set");
-            if (startY == null) throw new IllegalStateException("startY must be set");
-            if (width == null) throw new IllegalStateException("width must be set");
-            if (height == null) throw new IllegalStateException("height must be set");
+            if (startX == null) throw new IllegalStateException("sourceX must be set");
+            if (startY == null) throw new IllegalStateException("sourceY must be set");
+            if (width == null) throw new IllegalStateException("sourceW must be set");
+            if (height == null) throw new IllegalStateException("sourceH must be set");
             if (targetX == null) throw new IllegalStateException("targetX must be set");
             if (targetY == null) throw new IllegalStateException("targetY must be set");
 
-            if (startX < 0 || startX + width > originalImageW)
+            if (startX < 0 || startX + width > originalFrameW)
                 throw new IllegalArgumentException("Source rectangle out of bounds");
-            if (startY < 0 || startY + height > originalImageH)
+            if (startY < 0 || startY + height > originalFrameH)
                 throw new IllegalArgumentException("Source rectangle out of bounds");
-            if (targetX < 0 || targetX + targetW > targetImageW)
+            if (targetX < 0 || targetX + targetW > targetFrameW)
                 throw new IllegalArgumentException("Target rectangle out of bounds");
-            if (targetY < 0 || targetY + targetH > targetImageH)
+            if (targetY < 0 || targetY + targetH > targetFrameH)
                 throw new IllegalArgumentException("Target rectangle out of bounds");
         }
     }
