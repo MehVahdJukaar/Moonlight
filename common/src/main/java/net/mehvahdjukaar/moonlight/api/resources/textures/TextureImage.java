@@ -11,6 +11,7 @@ import net.minecraft.client.resources.metadata.animation.AnimationMetadataSectio
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Rotation;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
@@ -165,15 +166,15 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
     @Override
     public int sample(float x, float y) {
-        int iy = Math.min(imageHeight() - 1, Math.max(0, Math.round(y)));
-        int ix = Math.min(imageWidth() - 1, Math.max(0, Math.round(x)));
+        int iy = (int) Mth.clamp(x, 0, imageHeight() - 1);
+        int ix = (int) Mth.clamp(y, 0, imageWidth() - 1);
         return getPixel(iy, ix);
     }
 
     public Sampler2D frameSampler(int frameIndex) {
         return (x, y) -> {
-            int iy = Math.min(frameHeight() - 1, Math.max(0, Math.round(y)));
-            int ix = Math.min(frameWidth() - 1, Math.max(0, Math.round(x)));
+            int iy = (int) Mth.clamp(x, 0, frameHeight() - 1);
+            int ix = (int) Mth.clamp(y, 0, frameWidth() - 1);
             return getFramePixel(frameIndex, ix, iy);
         };
     }

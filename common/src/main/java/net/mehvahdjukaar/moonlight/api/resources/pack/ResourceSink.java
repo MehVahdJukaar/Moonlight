@@ -88,6 +88,14 @@ public class ResourceSink {
         }
     }
 
+    //equivalent safer version of the old method with same name
+    public void addAndCloseTexture(ResourceLocation path, Supplier<TextureImage> image) {
+        try (TextureImage img = image.get()) {
+            addTexture(path, img);
+        }
+    }
+
+
     /**
      * Adds a new textures and closes the passed native image
      * Last boolean is for textures that aren't stitched so won't be cleared automatically after stitching

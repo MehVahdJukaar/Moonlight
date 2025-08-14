@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Rotation;
 
 public interface Sampler2D {
@@ -13,8 +14,8 @@ public interface Sampler2D {
 
     static Sampler2D bilinear(Sampler2D base) {
         return (float x, float y) -> {
-            int x0 = (int) Math.floor(x);
-            int y0 = (int) Math.floor(y);
+            int x0 = (int) x;
+            int y0 = (int) y;
 
             if (x0 == x && y0 == y) {
                 return base.sample(x0, y0);
@@ -38,42 +39,42 @@ public interface Sampler2D {
         };
     }
 
+    static Sampler2D paletted(Sampler2D base, Palette palette) {
+        return (x, y) -> {
+            int color = base.sample(x, y);
+            return palette.getColorClosestTo(new PaletteColor(color)).value();
+        };
+    }
 
     static Sampler2D offset(Sampler2D base, float ox, float oy) {
-        return (x, y) -> base.sample(x - ox, y - oy);
+        return (x, y) -> base.sample(x + ox, y + oy);
     }
 
     static Sampler2D scale(Sampler2D base, float sx, float sy) {
-        return (x, y) -> base.sample(x / sx, y / sy);
-    }
-
-    static Sampler2D scale(Sampler2D base, int srcW, int srcH, int dstW, int dstH) {
-        float scaleX = dstW / (float) srcW;
-        float scaleY = dstH / (float) srcH;
-        return scale(base, scaleX, scaleY);
+        return (x, y) -> base.sample(x * sx, y * sy);
     }
 
     static Sampler2D rotate(Sampler2D base, Rotation rotation, int width, int height) {
         return switch (rotation) {
             case NONE -> base;
-            case CLOCKWISE_90 -> (x, y) -> base.sample(y, width - 1 - x);
-            case CLOCKWISE_180 -> (x, y) -> base.sample(width - 1 - x, height - 1 - y);
-            case COUNTERCLOCKWISE_90 -> (x, y) -> base.sample(height - 1 - y, x);
+            case CLOCKWISE_90 -> (x, y) -> base.sample(y, width  - x);
+            case CLOCKWISE_180 -> (x, y) -> base.sample(width  - x, height - y);
+            case COUNTERCLOCKWISE_90 -> (x, y) -> base.sample(height - y, x);
         };
     }
 
     static Sampler2D flippedX(Sampler2D base, int width) {
-        return (x, y) -> base.sample(width - 1 - x, y);
+        return (x, y) -> base.sample(width - x, y);
     }
 
     static Sampler2D flippedY(Sampler2D base, int height) {
-        return (x, y) -> base.sample(x, height - 1 - y);
+        return (x, y) -> base.sample(x, height  - y);
     }
 
     static Sampler2D clamp(Sampler2D base, int width, int height) {
         return (x, y) -> {
-            int ix = Math.max(0, Math.min(width - 1, (int) x));
-            int iy = Math.max(0, Math.min(height - 1, (int) y));
+            int ix = (int) Mth.clamp(x,0,width);
+            int iy = (int) Mth.clamp(y,0,height);
             return base.sample(ix, iy);
         };
     }

@@ -133,10 +133,8 @@ public abstract class BlockTypeRegistry<T extends BlockType>implements IdMap<T> 
     /**
      * Returns an optional block Type based on the given block. Pretty much defines the logic of how a block set is constructed
      */
-    @ApiStatus.Internal
     protected abstract Optional<T> detectTypeFromBlock(Block block, ResourceLocation blockId);
 
-    @ApiStatus.Internal
     protected T register(T newType) {
         if (frozen) {
             throw new UnsupportedOperationException("Tried to register a block types after registry events");
