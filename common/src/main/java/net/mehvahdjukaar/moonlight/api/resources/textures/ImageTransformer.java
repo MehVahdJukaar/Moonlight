@@ -6,7 +6,10 @@ import io.netty.util.internal.UnstableApi;
 
 import java.util.ArrayList;
 import java.util.List;
-/// use link{TextureCollager}
+
+/**
+ * use {@link net.mehvahdjukaar.moonlight.api.resources.textures.TextureCollager}
+ */
 @Deprecated(forRemoval = true)
 public class ImageTransformer {
     protected final int originalW;
