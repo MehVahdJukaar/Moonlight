@@ -109,7 +109,7 @@ public class TextureCollager {
         private final int originalFrameW, originalFrameH, targetFrameW, targetFrameH;
         private final List<Operation> operations = new ArrayList<>();
 
-        private Integer startX, startY, width, height;
+        private Integer fromX, startY, fromW, fromH;
         private Integer targetX, targetY, targetW, targetH;
         private boolean flipX = false, flipY = false;
         private Rotation rotation = Rotation.NONE;
@@ -129,10 +129,12 @@ public class TextureCollager {
 
         public Builder copyFrom(int x, int y, int w, int h) {
             addLast();
-            this.startX = x;
+            this.fromX = x;
             this.startY = y;
-            this.width = w;
-            this.height = h;
+            this.fromW = w;
+            this.fromH = h;
+            this.targetW = w;
+            this.targetH = h;
             return this;
         }
 
@@ -174,30 +176,30 @@ public class TextureCollager {
             if (targetX == null) return;
             validate();
             // Default target size
-            if (targetW == null) targetW = width;
-            if (targetH == null) targetH = height;
+            if (targetW == null) targetW = fromW;
+            if (targetH == null) targetH = fromH;
 
             // Add operation to parent builder list
             operations.add(new Operation(
-                    startX, startY, width, height,
+                    fromX, startY, fromW, fromH,
                     targetX, targetY, targetW, targetH,
                     flipX, flipY, rotation, bilinear));
 
             //clear
-            startX = startY = width = height = null;
+            fromX = startY = fromW = fromH = null;
         }
 
         private void validate() {
-            if (startX == null) throw new IllegalStateException("sourceX must be set");
+            if (fromX == null) throw new IllegalStateException("sourceX must be set");
             if (startY == null) throw new IllegalStateException("sourceY must be set");
-            if (width == null) throw new IllegalStateException("sourceW must be set");
-            if (height == null) throw new IllegalStateException("sourceH must be set");
+            if (fromW == null) throw new IllegalStateException("sourceW must be set");
+            if (fromH == null) throw new IllegalStateException("sourceH must be set");
             if (targetX == null) throw new IllegalStateException("targetX must be set");
             if (targetY == null) throw new IllegalStateException("targetY must be set");
 
-            if (startX < 0 || startX + width > originalFrameW)
+            if (fromX < 0 || fromX + fromW > originalFrameW)
                 throw new IllegalArgumentException("Source rectangle out of bounds");
-            if (startY < 0 || startY + height > originalFrameH)
+            if (startY < 0 || startY + fromH > originalFrameH)
                 throw new IllegalArgumentException("Source rectangle out of bounds");
             if (targetX < 0 || targetX + targetW > targetFrameW)
                 throw new IllegalArgumentException("Target rectangle out of bounds");
