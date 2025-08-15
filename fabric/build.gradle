@@ -44,6 +44,8 @@ dependencies {
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-item:${project.cca_version}"
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
 
+    modCompileOnly("curse.maven:vics-point-blank-961053:6012499")
+
     //modImplementation("curse.maven:super-better-grass-911433:4744836")
     //modImplementation ("curse.maven:supplementaries-412082:4987505")
    // modRuntimeOnly("net.mehvahdjukaar:supplementaries-fabric:1.20-2.7.17")

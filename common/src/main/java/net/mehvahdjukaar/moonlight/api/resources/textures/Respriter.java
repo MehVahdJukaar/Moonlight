@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import org.jetbrains.annotations.Nullable;
@@ -119,12 +121,19 @@ public class Respriter {
 
         boolean usesTargetAnimationColors = !useMergedPalette && (targetAnimationData == animationData);
         if (usesTargetAnimationColors && texture.frameCount() > targetPalettes.size()) {
-            throw new AssertionError("Target animation data has more frames than provided target palettes. " +
-                    "This is not supported by the recolorWithAnimation method. Debug info: " + targetPalettes.size() + " " + animationData.animation().frames.size() + " " + targetAnimationData + " " + animationData);
+            String s = "Target animation data has more frames than provided target palettes. " +
+                    "This is not supported by the recolorWithAnimation method. Debug info: " + targetPalettes.size() +
+                    " " + animationData.animation().frames.size() + " " + targetAnimationData + " " + animationData;
+            if (PlatHelper.isDev()) throw new IndexOutOfBoundsException(s);
+            else {
+                Moonlight.LOGGER.error(s);
+                //TODO: fix properly
+                usesTargetAnimationColors = false;
+            }
         }
-
+        boolean finalUsesTargetAnimationColors = usesTargetAnimationColors;
         texture.forEachPixel(pixel -> {
-            int finalInd = usesTargetAnimationColors ? pixel.frameIndex() : 0;
+            int finalInd = finalUsesTargetAnimationColors ? pixel.frameIndex() : 0;
 
             //caches these for each palette
             ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(finalInd, i -> {

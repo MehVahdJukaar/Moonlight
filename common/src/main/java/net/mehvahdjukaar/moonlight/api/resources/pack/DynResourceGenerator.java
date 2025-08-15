@@ -76,8 +76,16 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         var genTasks = new ArrayList<ResourceGenTask>();
 
         Stopwatch watch = Stopwatch.createStarted();
-        regenerateDynamicAssets(manager);
-        regenerateDynamicAssets(genTasks::add);
+        try {
+            regenerateDynamicAssets(manager);
+        }catch (Exception e){
+            getLogger().error("Legacy dynamic gen task failed: ", e);
+        }
+        try {
+            regenerateDynamicAssets(genTasks::add);
+        }catch (Exception e){
+            getLogger().error("Failed to add tasks to dynamic resource gen: ", e);
+        }
 
         int totalTasks = genTasks.size();
         var reporter = progressTracker.subtask(totalTasks);

@@ -1,2 +1,1 @@
-- Fixed an issue with texture gen and animated textures not making animations correctly
-- added more functionality to TextureCollager
+- fixed an issue that caused invalid parameters thrown to texture respriter to throw an Error instead of an Exception
