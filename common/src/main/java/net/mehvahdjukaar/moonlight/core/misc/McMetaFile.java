@@ -50,6 +50,10 @@ public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject
         return jo;
     }
 
+    /**
+     *  Furniture, Decoratives are the "mostImportant"<br>
+     *  BlockTypes are the "leastImportant"
+     **/
     public static @Nullable McMetaFile merge(@Nullable McMetaFile mostImportant, @Nullable McMetaFile leastImportant) {
         if (mostImportant == null && leastImportant == null) return null;
         if (leastImportant == null) return mostImportant;
