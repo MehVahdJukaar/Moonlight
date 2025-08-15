@@ -28,13 +28,14 @@ public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject
         return new McMetaFile(vanillaMcmeta, moddedStuff);
     }
 
-    @Nullable
     public static McMetaFile read(Resource resource) throws IOException {
         try (InputStream metadataStream = resource.open()) {
             var bytes = metadataStream.readAllBytes();
-            var metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, new ByteArrayInputStream(bytes));
-            if (metadata == null) return null;
-            var moddedObj = readModdedObj(bytes);
+            AnimationMetadataSection metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, new ByteArrayInputStream(bytes));
+            if (metadata == null){
+                metadata = AnimationMetadataSection.EMPTY;
+            }
+            JsonObject moddedObj = readModdedObj(bytes);
             return new McMetaFile(metadata, moddedObj);
         }
     }
