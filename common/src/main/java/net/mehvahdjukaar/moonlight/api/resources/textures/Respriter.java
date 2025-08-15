@@ -106,9 +106,7 @@ public class Respriter {
         Palette originalPalette = originalPalettes.getFirst();
 
         // in case the SOURCE texture itself has an animation we use it instead. this WILL create issues with animated planks textures but its acceptable as mcmeta of source could have more important stuff like ctm
-        if (imageToRecolor.getMcMeta() != null) {
-            targetAnimationData = imageToRecolor.getMcMeta();
-        }
+        targetAnimationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
 
         TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor,
                 targetAnimationData.animation().frames.size(), targetAnimationData);
