@@ -32,7 +32,7 @@ public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject
         try (InputStream metadataStream = resource.open()) {
             var bytes = metadataStream.readAllBytes();
             AnimationMetadataSection metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, new ByteArrayInputStream(bytes));
-            if (metadata == null){
+            if (metadata == null) {
                 metadata = AnimationMetadataSection.EMPTY;
             }
             JsonObject moddedObj = readModdedObj(bytes);
@@ -48,6 +48,16 @@ public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject
             jo.remove(key);
         }
         return jo;
+    }
+
+    public static @Nullable McMetaFile merge(@Nullable McMetaFile mostImportant, @Nullable McMetaFile leastImportant) {
+        if (mostImportant == null && leastImportant == null) return null;
+        if (leastImportant == null) return mostImportant;
+        if (mostImportant == null) return leastImportant;
+        if (mostImportant.animation == AnimationMetadataSection.EMPTY) {
+            return of(leastImportant.animation, mostImportant.moddedStuff);
+        }
+        return mostImportant;
     }
 
     public JsonObject toJson() {
