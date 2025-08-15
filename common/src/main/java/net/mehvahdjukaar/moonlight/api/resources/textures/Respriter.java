@@ -105,20 +105,22 @@ public class Respriter {
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable McMetaFile targetAnimationData) {
 
         // in case the SOURCE texture itself has an animation we use it instead. this WILL create issues with animated planks textures but its acceptable as mcmeta of source could have more important stuff like ctm
-        targetAnimationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
+        McMetaFile animationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
 
-        if (targetAnimationData == null) return recolor(targetPalettes);
+        if (animationData == null) return recolor(targetPalettes);
 
         //is restricted to use only first original palette since it must merge a new animation following the given one
         Palette originalPalette = originalPalettes.get(0);
 
         TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor,
-                targetAnimationData.animation().frames.size(), targetAnimationData);
+                animationData.animation().frames.size(), animationData);
 
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
+        boolean usesTargetAnimationColors = !useMergedPalette && (targetAnimationData == animationData);
+
         texture.forEachPixel(pixel -> {
-            int finalInd = useMergedPalette ? 0 : pixel.frameIndex();
+            int finalInd = usesTargetAnimationColors ? pixel.frameIndex() : 0;
 
             //caches these for each palette
             ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(finalInd, i -> {
