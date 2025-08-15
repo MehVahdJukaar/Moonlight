@@ -356,15 +356,15 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("aether", "decorated_holiday", "skyroot");
 
         // Aether Redux - REASON: Associated WoodType, Replaces the skyroot logs in crystal trees with their own crystal logs
-        String crystalLeavesWoodType = PlatHelper.isModLoaded("aether_redux") ?
+        String associatedWoodType = PlatHelper.isModLoaded("aether_redux") ?
                 "aether_redux:crystal" : "aether:skyroot";
 
-        leafReg.addLeavesToWoodMapping("aether:crystal", crystalLeavesWoodType);
-        leafReg.addLeavesToWoodMapping("aether:crystal_fruit_leaves", crystalLeavesWoodType);
+        leafReg.addLeavesToWoodMapping("aether:crystal", associatedWoodType);
+        leafReg.addLeavesToWoodMapping("aether:crystal_fruit_leaves", associatedWoodType);
 
         // AETHER GENESIS - REASON: Associated WoodType (same reason as above)
-        leafReg.addLeavesToWoodMapping("aether_genesis:purple_crystal", crystalLeavesWoodType);
-        leafReg.addLeavesToWoodMapping("aether_genesis:purple_crystal_fruit", crystalLeavesWoodType);
+        leafReg.addLeavesToWoodMapping("aether_genesis:purple_crystal", associatedWoodType);
+        leafReg.addLeavesToWoodMapping("aether_genesis:purple_crystal_fruit", associatedWoodType);
 
         // ANCIENT AETHER - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("ancient_aether", "crystal_skyroot", "skyroot");
