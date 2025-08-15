@@ -70,6 +70,7 @@ public class TextureCollager {
 
             sampler = Sampler2D.offset(sampler, sourceX, sourceY);
             //   sampler = Sampler2D.clamp(sampler, 0, 0, sourceW, sourceH);
+            sampler = Sampler2D.offset(sampler, -0.5f, -0.5f);
 
             // Apply rotation
 
@@ -84,6 +85,7 @@ public class TextureCollager {
                 int h = (rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90) ? sourceW : sourceH;
                 sampler = Sampler2D.flippedY(sampler, h);
             }
+
             if (bilinear) {
                 sampler = Sampler2D.bilinear(sampler);
             }
@@ -99,7 +101,6 @@ public class TextureCollager {
                 sampler = Sampler2D.scale(sampler, opScaleW, opScaleH);
             }
 
-            sampler = Sampler2D.offset(sampler, 0.5f, 0.5f);
 
             return sampler;
         }
@@ -109,7 +110,7 @@ public class TextureCollager {
         private final int originalFrameW, originalFrameH, targetFrameW, targetFrameH;
         private final List<Operation> operations = new ArrayList<>();
 
-        private Integer fromX, startY, fromW, fromH;
+        private Integer fromX, fromY, fromW, fromH;
         private Integer targetX, targetY, targetW, targetH;
         private boolean flipX = false, flipY = false;
         private Rotation rotation = Rotation.NONE;
@@ -130,11 +131,11 @@ public class TextureCollager {
         public Builder copyFrom(int x, int y, int w, int h) {
             addLast();
             this.fromX = x;
-            this.startY = y;
+            this.fromY = y;
             this.fromW = w;
             this.fromH = h;
-            this.targetW = w;
-            this.targetH = h;
+            this.targetH = fromH;
+            this.targetW = fromW;
             return this;
         }
 
@@ -181,30 +182,30 @@ public class TextureCollager {
 
             // Add operation to parent builder list
             operations.add(new Operation(
-                    fromX, startY, fromW, fromH,
+                    fromX, fromY, fromW, fromH,
                     targetX, targetY, targetW, targetH,
                     flipX, flipY, rotation, bilinear));
 
             //clear
-            fromX = startY = fromW = fromH = null;
+            fromX = fromY = fromW = fromH = null;
         }
 
         private void validate() {
             if (fromX == null) throw new IllegalStateException("sourceX must be set");
-            if (startY == null) throw new IllegalStateException("sourceY must be set");
+            if (fromY == null) throw new IllegalStateException("sourceY must be set");
             if (fromW == null) throw new IllegalStateException("sourceW must be set");
             if (fromH == null) throw new IllegalStateException("sourceH must be set");
             if (targetX == null) throw new IllegalStateException("targetX must be set");
             if (targetY == null) throw new IllegalStateException("targetY must be set");
 
             if (fromX < 0 || fromX + fromW > originalFrameW)
-                throw new IllegalArgumentException("Source rectangle out of bounds");
-            if (startY < 0 || startY + fromH > originalFrameH)
-                throw new IllegalArgumentException("Source rectangle out of bounds");
+                throw new IllegalArgumentException("Source rectangle out of bounds: fromX");
+            if (fromY < 0 || fromY + fromH > originalFrameH)
+                throw new IllegalArgumentException("Source rectangle out of bounds: fromY");
             if (targetX < 0 || targetX + targetW > targetFrameW)
-                throw new IllegalArgumentException("Target rectangle out of bounds");
+                throw new IllegalArgumentException("Target rectangle out of bounds: targetX");
             if (targetY < 0 || targetY + targetH > targetFrameH)
-                throw new IllegalArgumentException("Target rectangle out of bounds");
+                throw new IllegalArgumentException("Target rectangle out of bounds: targetY");
         }
     }
 }
