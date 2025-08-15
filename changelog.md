@@ -1,4 +1,2 @@
-- added TextureCollager, a class made to sticth, scale, and rotate pieces of a texture onto another
-- added TextureOps, a utility class with many texture transforms methods
-- removed transforms methods from TextureImage itself
-- streamlined more api related to textures
+- Fixed an issue with texture gen and animated textures not making animations correctly
+- added more functionality to TextureCollager

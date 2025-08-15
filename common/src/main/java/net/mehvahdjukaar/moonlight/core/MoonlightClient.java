@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerato
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
+import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -121,6 +122,13 @@ public class MoonlightClient {
                 applyFixedShade();
 
                 executor.accept((manager, sink) -> {
+
+                    try {
+                        var t =    TextureImage.open(manager, Moonlight.res("block/stone_small_bricks"));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
                     sink.addBytes(new ResourceLocation("shaders/include/light.glsl"),
                             ("""
                                     #version 150
