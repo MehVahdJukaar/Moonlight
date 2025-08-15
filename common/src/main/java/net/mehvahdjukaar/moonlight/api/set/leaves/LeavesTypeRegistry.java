@@ -50,7 +50,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         super(LeavesType.class, "leaves_type");
 
         LeavesType.CODEC = this.getCodec();
-        LeavesType.STREAM_CODEC = this.getStreamCodec();
+        LeavesType.STREAM_CODEC = this.getStreamCodecExplicit();
     }
 
     static void touch() {

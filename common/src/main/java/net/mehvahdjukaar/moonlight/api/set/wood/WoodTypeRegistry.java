@@ -65,10 +65,10 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
         });
 
         WoodType.CODEC = this.getCodec();
-        WoodType.STREAM_CODEC = this.getStreamCodec();
+        WoodType.STREAM_CODEC = this.getStreamCodecExplicit();
 
         WoodType.ENTITY_SERIALIZER = RegHelper.registerEntityDataSerializer(Moonlight.res("wood_type"),
-                () -> EntityDataSerializer.forValueType(this.getStreamCodec()));
+                () -> EntityDataSerializer.forValueType(this.getStreamCodecExplicit()));
     }
 
     static void touch() {

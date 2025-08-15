@@ -265,7 +265,7 @@ public class RPUtils {
                     ;
                 } else overrides = new JsonArray();
 
-                modelConsumer.accept(ov -> overrides.add(serializeOverride(ov)));
+                modelConsumer.accept(ov -> overrides.add(serializeModelOverride(ov)));
 
                 json.add("overrides", overrides);
                 pack.addItemModel(modelRes, json);

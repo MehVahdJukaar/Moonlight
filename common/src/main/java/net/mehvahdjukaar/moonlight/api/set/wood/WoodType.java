@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.set.wood;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -49,7 +50,7 @@ import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
 public class WoodType extends BlockType {
 
     public static Codec<WoodType> CODEC;
-    public static StreamCodec<FriendlyByteBuf, WoodType> STREAM_CODEC;
+    public static StreamCodec<ByteBuf, WoodType> STREAM_CODEC;
 
     public static Supplier<EntityDataSerializer<WoodType>> ENTITY_SERIALIZER;
 

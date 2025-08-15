@@ -12,9 +12,6 @@ import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.core.IdMap;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.VarInt;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +19,6 @@ import java.util.*;
 import java.util.function.Function;
 
 public class MapRegistry<T> implements IdMap<T>, Codec<T> {
-    private final StreamCodec<FriendlyByteBuf, T> streamCodec;
 
     private final String name;
 
@@ -35,8 +31,6 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
         this.idToT = Lists.newArrayListWithExpectedSize(32);
         this.tToId = new Reference2IntOpenHashMap<>(32);
         this.tToId.defaultReturnValue(-1);
-        this.streamCodec = new StreamC();
-
     }
 
     public static <B> CodecMapRegistry<B> ofCodec(String name) {
@@ -158,27 +152,4 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
         return this.byId(id) != null;
     }
 
-    @Deprecated(forRemoval = true)
-    public StreamCodec<FriendlyByteBuf, T> getStreamCodec() {
-        return this.streamCodec;
-    }
-
-
-    private class StreamC implements StreamCodec<FriendlyByteBuf, T> {
-        @Override
-        public T decode(FriendlyByteBuf buffer) {
-            int i = VarInt.read(buffer);
-            var obj = byId(i);
-            if (obj == null) {
-                throw new IllegalStateException("Unknown id " + i + " for registry " + name);
-            }
-            return obj;
-        }
-
-        @Override
-        public void encode(FriendlyByteBuf buffer, T value) {
-            int i = getId(value);
-            VarInt.write(buffer, i);
-        }
-    }
 }

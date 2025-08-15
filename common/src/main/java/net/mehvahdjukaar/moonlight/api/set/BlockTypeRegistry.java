@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class BlockTypeRegistry<T extends BlockType>implements IdMap<T> {
+public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T> {
 
 
     public static Codec<BlockTypeRegistry<?>> getRegistryCodec() {
@@ -111,9 +111,6 @@ public abstract class BlockTypeRegistry<T extends BlockType>implements IdMap<T> 
         return valuesReg;
     }
 
-    public StreamCodec<FriendlyByteBuf, T> getStreamCodec() {
-        return valuesReg.getStreamCodec();
-    }
 
 
     public StreamCodec<ByteBuf, T> getStreamCodecExplicit() {
@@ -189,7 +186,7 @@ public abstract class BlockTypeRegistry<T extends BlockType>implements IdMap<T> 
             if (defaultType != null) this.register(defaultType);
             //adds finders
             finders.stream().map(BlockType.SetFinder::get).forEach(f -> f.ifPresent(this::register));
-            
+
             for (Block b : BuiltInRegistries.BLOCK) {
                 //skip stuff that wont be on the client
                 if (CompatHandler.POLYMER && PolymerCompat.isPolymerObj(b)) continue;
@@ -228,7 +225,7 @@ public abstract class BlockTypeRegistry<T extends BlockType>implements IdMap<T> 
         if (itemLike instanceof Block block) {
             Item item = block.asItem();
             if (item == Items.AIR) {
-                throw new IllegalStateException("Block " + b + " has no item. This likely means getBlockTypeOf was called too early. This is a bug");
+                throw new IllegalStateException("Block " + block + " has no item. This likely means getBlockTypeOf was called too early. This is a bug");
             }
             return childrenToType.get(item);
         }

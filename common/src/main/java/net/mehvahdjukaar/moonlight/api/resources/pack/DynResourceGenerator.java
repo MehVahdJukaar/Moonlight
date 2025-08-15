@@ -23,9 +23,11 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -102,7 +104,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                         return localSink;
                     } catch (Exception e) {
                         getLogger().error("Resource Gen Task failed", e);
-                        return null; // Or a special "empty" sink if you want to keep track
+                        return null;
                     } finally {
                         reporter.step();
                     }
@@ -119,7 +121,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
             allDone.join(); // joins all futures
             for (CompletableFuture<ResourceSink> future : futures) {
                 ResourceSink sink = future.join();
-                if(sink == null)continue;
+                if (sink == null) continue;
                 sink.resources.forEach(this.dynamicPack::addBytes);
                 sink.notClearable.forEach(this.dynamicPack::markNotClearable);
                 for (var e : sink.tags.entrySet()) {

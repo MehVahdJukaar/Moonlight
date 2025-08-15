@@ -106,26 +106,6 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         return this.image.getHeight();
     }
 
-    /**
-     * Accepts a consumer that iterates over all image pixels, ordered by frame.
-     * The given coordinates are global texture coordinates while the index represents the currently viewed frame
-     */
-    public void forEachFramePixel(FramePixelConsumer framePixelConsumer) {
-        for (int ind = 0; ind < frameCount; ind++) {
-            int xOff = getFrameStartX(ind);
-            int yOff = getFrameStartY(ind);
-            for (int x = 0; x < frameWidth(); x++) {
-                for (int y = 0; y < frameHeight(); y++) {
-                    framePixelConsumer.accept(ind, x + xOff, y + yOff);
-                }
-            }
-        }
-    }
-
-    public void toGrayscale() {
-        SpriteUtils.grayscaleImage(this.image);
-    }
-
     public int frameCount() {
         return frameCount;
     }
