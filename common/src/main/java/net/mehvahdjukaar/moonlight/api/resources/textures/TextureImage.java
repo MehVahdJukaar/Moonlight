@@ -146,15 +146,15 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
     @Override
     public int sample(float x, float y) {
-        int iy = (int) Mth.clamp(x, 0, imageHeight() - 1);
-        int ix = (int) Mth.clamp(y, 0, imageWidth() - 1);
+        int iy = Mth.clamp(Math.round(x), 0, imageHeight() - 1);
+        int ix = Mth.clamp(Math.round(y), 0, imageWidth() - 1);
         return getPixel(iy, ix);
     }
 
     public Sampler2D frameSampler(int frameIndex) {
         return (x, y) -> {
-            int iy = (int) Mth.clamp(x, 0, frameHeight() - 1);
-            int ix = (int) Mth.clamp(y, 0, frameWidth() - 1);
+            int ix = Mth.clamp(Math.round(x), 0, frameWidth() - 1);
+            int iy = Mth.clamp(Math.round(y), 0, frameHeight() - 1);
             return getFramePixel(frameIndex, ix, iy);
         };
     }

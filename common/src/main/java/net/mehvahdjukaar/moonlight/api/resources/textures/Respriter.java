@@ -113,7 +113,8 @@ public class Respriter {
             targetAnimationData = imageToRecolor.getMcMeta();
         }
 
-        TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor, targetPalettes.size(), targetAnimationData);
+        TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor,
+                targetAnimationData.animation().frames.size(), targetAnimationData);
 
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
