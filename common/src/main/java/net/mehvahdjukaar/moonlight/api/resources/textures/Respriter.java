@@ -101,7 +101,12 @@ public class Respriter {
      */
     // this should only be used when you go from non-animated to animated
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable McMetaFile targetAnimationData) {
-        if (targetAnimationData == null) return recolor(targetPalettes);
+
+        // in case the SOURCE texture itself has an animation we use it instead. this WILL create issues with animated planks textures but its acceptable as mcmeta of source could have more important stuff like ctm
+        McMetaFile animationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
+
+        if (animationData == null) return recolor(targetPalettes);
+
         //is restricted to use only first original palette since it must merge a new animation following the given one
         Palette originalPalette = originalPalettes.getFirst();
 
@@ -109,12 +114,14 @@ public class Respriter {
         targetAnimationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
 
         TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor,
-                targetAnimationData.animation().frames.size(), targetAnimationData);
+                animationData.animation().frames.size(), animationData);
 
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
+        boolean usesTargetAnimationColors = !useMergedPalette && (targetAnimationData == animationData);
+
         texture.forEachPixel(pixel -> {
-            int finalInd = useMergedPalette ? 0 : pixel.frameIndex();
+            int finalInd = usesTargetAnimationColors ? pixel.frameIndex() : 0;
 
             //caches these for each palette
             ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(finalInd, i -> {
