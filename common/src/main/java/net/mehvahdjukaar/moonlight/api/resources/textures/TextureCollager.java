@@ -70,9 +70,12 @@ public class TextureCollager {
 
             sampler = Sampler2D.offset(sampler, sourceX, sourceY);
             //   sampler = Sampler2D.clamp(sampler, 0, 0, sourceW, sourceH);
-            sampler = Sampler2D.offset(sampler, -0.5f, -0.5f);
 
-            // Apply rotation
+            if (bilinear) {
+                sampler = Sampler2D.bilinear(sampler);
+            }
+
+            sampler = Sampler2D.offset(sampler, -0.5f, -0.5f);
 
             if (flipX) {
                 // Width & sourceH may swap after rotation
@@ -86,13 +89,11 @@ public class TextureCollager {
                 sampler = Sampler2D.flippedY(sampler, h);
             }
 
-            if (bilinear) {
-                sampler = Sampler2D.bilinear(sampler);
-            }
-
             if (rotation != Rotation.NONE) {
                 sampler = Sampler2D.rotate(sampler, rotation, sourceW, sourceH);
             }
+
+            sampler = Sampler2D.offset(sampler, 0.5f, 0.5f);
 
             float opScaleW = sourceW / (float) targetW;
             float opScaleH = sourceH / (float) targetH;
