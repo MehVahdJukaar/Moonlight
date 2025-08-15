@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import org.jetbrains.annotations.Nullable;
@@ -104,14 +103,16 @@ public class Respriter {
      */
     // this should only be used when you go from non-animated to animated
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable McMetaFile targetAnimationData) {
-        if (targetAnimationData == null) return recolor(targetPalettes);
-        //is restricted to use only first original palette since it must merge a new animation following the given one
-        Palette originalPalette = originalPalettes.get(0);
 
         // in case the SOURCE texture itself has an animation we use it instead. this WILL create issues with animated planks textures but its acceptable as mcmeta of source could have more important stuff like ctm
         if (imageToRecolor.getMcMeta() != null) {
             targetAnimationData = imageToRecolor.getMcMeta();
         }
+
+        if (targetAnimationData == null) return recolor(targetPalettes);
+
+        //is restricted to use only first original palette since it must merge a new animation following the given one
+        Palette originalPalette = originalPalettes.get(0);
 
         TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor,
                 targetAnimationData.animation().frames.size(), targetAnimationData);
