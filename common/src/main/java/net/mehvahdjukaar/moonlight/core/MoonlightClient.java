@@ -123,12 +123,6 @@ public class MoonlightClient {
 
                 executor.accept((manager, sink) -> {
 
-                    try {
-                        var t =    TextureImage.open(manager, Moonlight.res("block/stone_small_bricks"));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
                     sink.addBytes(new ResourceLocation("shaders/include/light.glsl"),
                             ("""
                                     #version 150
