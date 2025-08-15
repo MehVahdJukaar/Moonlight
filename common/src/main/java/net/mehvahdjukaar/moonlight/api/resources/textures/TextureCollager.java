@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
 import net.minecraft.world.level.block.Rotation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,8 @@ public class TextureCollager {
     private final List<Operation> operations;
 
     public void apply(TextureImage source, TextureImage destination) {
+
+
         float scaleSourceX = source.frameWidth() / (float) originFrameW;
         float scaleSourceY = source.frameHeight() / (float) originFrameH;
         float scaleTargetX = destination.frameWidth() / (float) targetFrameW;
@@ -21,6 +24,7 @@ public class TextureCollager {
         int sourceFrames = source.frameCount();
         int targetFrames = destination.frameCount();
         int maxFrames = Math.max(sourceFrames, targetFrames);
+
 
         for (int i = 0; i < maxFrames; i++) {
             int cappedSourceFrame = Math.min(i, sourceFrames - 1);
@@ -37,10 +41,23 @@ public class TextureCollager {
                 for (int ty = 0; ty < op.targetH; ty++) {
                     for (int tx = 0; tx < op.targetW; tx++) {
                         int color = sampler.sample(tx, ty);
-                        destination.setFramePixel(cappedTargetFrame,
-                                (int) ((op.targetX + tx) * scaleTargetX),
-                                (int) ((op.targetY + ty) * scaleTargetY),
-                                color);
+                        if (op.palettes != null) {
+                            int maxPaletteIndex = Math.min(source.frameCount(), op.palettes.size());
+                            color = op.palettes.get(maxPaletteIndex)
+                                    .getColorClosestTo(new PaletteColor(color))
+                                    .value();
+                        }
+                        if (op.blended) {
+                            destination.blendFramePixel(cappedTargetFrame,
+                                    (int) ((op.targetX + tx) * scaleTargetX),
+                                    (int) ((op.targetY + ty) * scaleTargetY),
+                                    color);
+                        } else {
+                            destination.setFramePixel(cappedTargetFrame,
+                                    (int) ((op.targetX + tx) * scaleTargetX),
+                                    (int) ((op.targetY + ty) * scaleTargetY),
+                                    color);
+                        }
                     }
                 }
             }
@@ -63,7 +80,8 @@ public class TextureCollager {
 
     private record Operation(int sourceX, int sourceY, int sourceW, int sourceH,
                              int targetX, int targetY, int targetW, int targetH,
-                             boolean flipX, boolean flipY, Rotation rotation, boolean bilinear) {
+                             boolean flipX, boolean flipY, Rotation rotation, boolean bilinear,
+                             boolean blended, @Nullable List<Palette> palettes) {
 
 
         private Sampler2D makeSampler(Sampler2D sampler) {
@@ -116,6 +134,9 @@ public class TextureCollager {
         private boolean flipX = false, flipY = false;
         private Rotation rotation = Rotation.NONE;
         private boolean bilinear = false;
+        private boolean blended = false;
+        @Nullable
+        private List<Palette> palettes = null;
 
         public Builder(int originalW, int originalH, int targetW, int targetH) {
             this.originalFrameW = originalW;
@@ -126,7 +147,7 @@ public class TextureCollager {
 
         public TextureCollager build() {
             addLast();
-            return new TextureCollager(originalFrameW, originalFrameH, targetFrameW, targetFrameH, List.copyOf(operations));
+            return new TextureCollager(originalFrameW, originalFrameH, targetFrameW, targetFrameH, java.util.List.copyOf(operations));
         }
 
         public Builder copyFrom(int x, int y, int w, int h) {
@@ -168,6 +189,16 @@ public class TextureCollager {
             return this;
         }
 
+        public Builder blended() {
+            this.blended = true;
+            return this;
+        }
+
+        public Builder paletted(List<Palette> palettes) {
+            this.palettes = palettes;
+            return this;
+        }
+
         public Builder bilinearScaling() {
             this.bilinear = true;
             return this;
@@ -185,7 +216,8 @@ public class TextureCollager {
             operations.add(new Operation(
                     fromX, fromY, fromW, fromH,
                     targetX, targetY, targetW, targetH,
-                    flipX, flipY, rotation, bilinear));
+                    flipX, flipY, rotation,
+                    bilinear, blended, palettes));
 
             //clear
             fromX = fromY = fromW = fromH = null;
@@ -207,6 +239,7 @@ public class TextureCollager {
                 throw new IllegalArgumentException("Target rectangle out of bounds: targetX");
             if (targetY < 0 || targetY + targetH > targetFrameH)
                 throw new IllegalArgumentException("Target rectangle out of bounds: targetY");
+
         }
     }
 }
