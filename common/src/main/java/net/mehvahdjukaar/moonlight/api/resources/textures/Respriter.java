@@ -119,6 +119,10 @@ public class Respriter {
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
         boolean usesTargetAnimationColors = !useMergedPalette && (targetAnimationData == animationData);
+        if (usesTargetAnimationColors && texture.frameCount() > targetPalettes.size()) {
+            throw new AssertionError("Target animation data has more frames than provided target palettes. " +
+                    "This is not supported by the recolorWithAnimation method. Debug info: " + targetPalettes.size() + " " + animationData.animation().frames.size() + " " + targetAnimationData + " " + animationData);
+        }
 
         texture.forEachPixel(pixel -> {
             int finalInd = usesTargetAnimationColors ? pixel.frameIndex() : 0;
