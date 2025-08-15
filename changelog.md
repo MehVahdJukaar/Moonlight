@@ -1,2 +1,1 @@
-- dynamic resource gen will now update the progress bar and not hang the main thread while it generates
-- improved block type detection and cleaned up a lot of code there, also improved the api for mods to add new block types finders
+- fixed an issue that caused invalid parameters thrown to texture respriter to throw an Error instead of an Exception
