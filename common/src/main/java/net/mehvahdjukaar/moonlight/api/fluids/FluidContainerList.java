@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.util.LenientListCodec;
+import net.mehvahdjukaar.moonlight.api.util.LenientListCodec;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -20,7 +21,6 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
 
     public static final Codec<FluidContainerList> CODEC = LenientListCodec.of(Category.CODEC)
             .xmap(FluidContainerList::new, FluidContainerList::getCategories);
-
     private final Map<Item, Category> emptyToFilledMap = new IdentityHashMap<>();
 
     public FluidContainerList(List<Category> categoryList) {
@@ -77,6 +77,12 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
 
     public List<Category> getCategories() {
         return List.copyOf(this.emptyToFilledMap.values());
+    }
+
+
+    @Override
+    public @NotNull Iterator<Category> iterator() {
+        return this.emptyToFilledMap.values().iterator();
     }
 
 

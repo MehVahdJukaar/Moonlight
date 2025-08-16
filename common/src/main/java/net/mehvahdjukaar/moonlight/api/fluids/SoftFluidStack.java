@@ -42,6 +42,8 @@ import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -412,6 +414,7 @@ public class SoftFluidStack implements DataComponentHolder {
 
         return results.toArray(new ItemStack[0]);
     }
+
 
 
     public void copyComponentsTo(DataComponentHolder to) {

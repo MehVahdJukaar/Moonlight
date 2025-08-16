@@ -1,38 +1,21 @@
 package net.mehvahdjukaar.moonlight.neoforge;
 
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
-import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
-import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
-import net.neoforged.neoforge.client.extensions.IModelBakerExtension;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.conditions.ConditionalOps;
-import net.neoforged.neoforge.registries.GameData;
 
 public class MoonlightForgeClient {
 
