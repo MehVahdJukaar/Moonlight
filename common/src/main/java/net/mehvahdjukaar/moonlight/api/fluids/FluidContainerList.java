@@ -4,15 +4,11 @@ import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.util.LenientListCodec;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.minecraft.Util;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.TagKey;
-import net.minecraft.tags.TagManager;
 import net.minecraft.world.item.Item;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -20,11 +16,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 
-public class FluidContainerList {
+public class FluidContainerList implements Iterable<FluidContainerList.Category> {
 
     public static final Codec<FluidContainerList> CODEC = LenientListCodec.of(Category.CODEC)
             .xmap(FluidContainerList::new, FluidContainerList::getCategories);
-
 
     private final Map<Item, Category> emptyToFilledMap = new IdentityHashMap<>();
 
@@ -84,6 +79,12 @@ public class FluidContainerList {
         return List.copyOf(this.emptyToFilledMap.values());
     }
 
+
+    @Override
+    public @NotNull Iterator<Category> iterator() {
+        return this.emptyToFilledMap.values().iterator();
+    }
+
     protected void merge(FluidContainerList other) {
         other.emptyToFilledMap.values().forEach(this::addCategory);
     }
@@ -99,6 +100,7 @@ public class FluidContainerList {
         c.fillSound = fillSound;
         c.emptySound = emptySound;
     }
+
 
     public static class Category {
 
