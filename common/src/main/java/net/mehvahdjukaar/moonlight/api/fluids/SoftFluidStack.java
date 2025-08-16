@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -23,12 +25,15 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -373,23 +378,65 @@ public class SoftFluidStack {
     }
 
 
+    @Deprecated(forRemoval = true)
+    public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
+        var r = toItem(emptyContainer);
+        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getAmount());
+        return r;
+    }
+
+
     /**
      * Fills the item if possible. Returns empty stack if it fails
      *
-     * @param emptyContainer  empty bottle item
-     * @param dontModifyStack if the stack count actually is decremented.
+     * @param emptyContainer empty bottle item
      * @return null if it fails, filled stack otherwise
      */
     @Nullable
-    public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
+    public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer) {
         var opt = fluid().getContainerList().getCategoryFromEmpty(emptyContainer.getItem());
         if (opt.isPresent()) {
-            var category = opt.get();
-            int shrinkAmount = category.getAmount();
-            if (shrinkAmount <= this.getCount()) {
+            FluidContainerList.Category category = opt.get();
+            var filledStacks = createFilledStacks(category, true);
+            if (filledStacks.length != 0) {
+                // still return only the *first* one, to stay consistent
+                return Pair.of(filledStacks[0], category);
+            }
+        }
+        return null;
+    }
 
-                ItemStack filledStack = new ItemStack(category.getFirstFilled().get());
-                //case for lingering potions
+    public Multimap<FluidContainerList.Category, ItemStack> toAllPossibleFilledItems() {
+        Multimap<FluidContainerList.Category, ItemStack> result = ArrayListMultimap.create();
+
+        for (FluidContainerList.Category category : fluid().getContainerList()) {
+            for (ItemStack filled : createFilledStacks(category,false)) {
+                result.put(category, filled);
+            }
+        }
+
+        return result;
+    }
+
+    private ItemStack[] createFilledStacks(FluidContainerList.Category category, boolean onlyFirst) {
+        int shrinkAmount = category.getAmount();
+        if (shrinkAmount > this.getCount()) {
+            return new ItemStack[0];
+        }
+
+        List<ItemStack> results = new ArrayList<>();
+
+        for (ItemLike item : category.getFilledItems()) {
+            ItemStack filledStack = new ItemStack(item);
+
+            // hardcoded potion handling
+            if (category.getEmptyContainer() == Items.GLASS_BOTTLE && this.is(MLBuiltinSoftFluids.POTION)) {
+                PotionBottleType type = PotionBottleType.getOrDefault(this);
+                filledStack = type.getDefaultItem();
+            }
+
+            /*
+                   //case for lingering potions
                 if (this.is(BuiltInSoftFluids.POTION.getHolder()) && this.tag != null) {
                     var type = PotionNBTHelper.getPotionType(this.tag);
                     if (type != null && !Utils.getID(emptyContainer.getItem()).getNamespace().equals("inspirations")) {
@@ -399,20 +446,24 @@ public class SoftFluidStack {
                     }
                 }
 
-                //converts water bottles into potions
-                if (emptyContainer.is(Items.GLASS_BOTTLE) && this.is(BuiltInSoftFluids.WATER)) {
-                    filledStack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
-                }
+             */
 
-                this.applyNBTtoItemStack(filledStack);
+            // converts water bottles into potions
+            if (category.getEmptyContainer() == Items.GLASS_BOTTLE && this.is(BuiltInSoftFluids.WATER)) {
+                filledStack = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
+            }
 
-                if (!dontModifyStack) this.shrink(shrinkAmount);
+            this.applyNBTtoItemStack(filledStack);
+            results.add(filledStack);
 
-                return Pair.of(filledStack, category);
+            if (onlyFirst) {
+                break;
             }
         }
-        return null;
+
+        return results.toArray(new ItemStack[0]);
     }
+
 
     //TODO: clean this nbt hardcoded stuff up
 

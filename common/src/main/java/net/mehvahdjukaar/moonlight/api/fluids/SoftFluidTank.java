@@ -136,10 +136,11 @@ public class SoftFluidTank {
      * @return filled bottle item. null if it failed or if simulated is true and failed
      */
     public InteractionResultHolder<ItemStack> fillItem(ItemStack emptyContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
-        var pair = this.fluidStack.toItem(emptyContainer, simulate);
+        var pair = this.fluidStack.toItem(emptyContainer);
 
         if (pair != null) {
-            var category = pair.getSecond();
+            FluidContainerList.Category category = pair.getSecond();
+            emptyContainer.shrink(category.getAmount());
             SoundEvent sound = category.getEmptySound();
             if (sound != null && pos != null) {
                 level.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);
