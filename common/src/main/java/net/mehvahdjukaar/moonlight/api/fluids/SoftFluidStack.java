@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 // do NOT have these in a static field as they contain registry holders
@@ -345,18 +347,10 @@ public class SoftFluidStack implements DataComponentHolder {
     @Deprecated(forRemoval = true)
     public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
         var r = toItem(emptyContainer);
-        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getCapacity());
+        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getAmount());
         return r;
     }
 
-    /**
-     * Converts to item and decrement the stack by extracted amount
-     */
-    public Pair<ItemStack, FluidContainerList.Category> splitToItem(ItemStack emptyContainer) {
-        var r = toItem(emptyContainer);
-        if (r != null) this.shrink(r.getSecond().getCapacity());
-        return r;
-    }
 
     /**
      * Fills the item if possible. Returns empty stack if it fails
@@ -391,7 +385,7 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     private ItemStack[] createFilledStacks(FluidContainerList.Category category, boolean onlyFirst) {
-        int shrinkAmount = category.getCapacity();
+        int shrinkAmount = category.getAmount();
         if (shrinkAmount > this.getCount()) {
             return new ItemStack[0];
         }
@@ -422,6 +416,7 @@ public class SoftFluidStack implements DataComponentHolder {
 
         return results.toArray(new ItemStack[0]);
     }
+
 
 
 

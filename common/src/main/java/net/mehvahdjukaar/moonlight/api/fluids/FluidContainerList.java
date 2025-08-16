@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.util.LenientListCodec;
+import net.mehvahdjukaar.moonlight.api.util.LenientListCodec;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -84,6 +85,12 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
         return this.emptyToFilledMap.values().iterator();
     }
 
+
+
+    @Override
+    public @NotNull Iterator<Category> iterator() {
+        return this.emptyToFilledMap.values().iterator();
+    }
 
     protected void merge(FluidContainerList other) {
         other.emptyToFilledMap.values().forEach(this::addCategory);
