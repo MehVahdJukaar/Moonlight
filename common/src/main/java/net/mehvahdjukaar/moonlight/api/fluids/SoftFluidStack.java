@@ -12,8 +12,11 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
@@ -32,7 +35,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -80,6 +82,30 @@ public class SoftFluidStack {
 
     private static SoftFluidStack fromCodec(Holder<SoftFluid> fluid, Integer count, Optional<CompoundTag> optionalTag) {
         return of(fluid, count, optionalTag.orElse(null));
+    }
+
+    public static SoftFluidStack loadFromBuffer(FriendlyByteBuf buf) {
+        if (!buf.readBoolean()) {
+            return SoftFluidStack.empty();
+        }
+        Registry<SoftFluid> reg = SoftFluidRegistry.hackyGetRegistry();
+        SoftFluid f = buf.readById(reg);
+        int i = buf.readByte();
+        var nbt = buf.readNbt();
+        return of(reg.wrapAsHolder(f), i, nbt);
+    }
+
+    public void saveToBuffer(FriendlyByteBuf buf) {
+        if (this.isEmpty()) {
+            buf.writeBoolean(false);
+        } else {
+            buf.writeBoolean(true);
+            buf.writeId(SoftFluidRegistry.hackyGetRegistry(), fluid);
+            buf.writeByte(this.getCount());
+            CompoundTag compoundTag = this.getTag();
+
+            buf.writeNbt(compoundTag);
+        }
     }
 
     @Deprecated(forRemoval = true)
@@ -410,7 +436,7 @@ public class SoftFluidStack {
         Multimap<FluidContainerList.Category, ItemStack> result = ArrayListMultimap.create();
 
         for (FluidContainerList.Category category : fluid().getContainerList()) {
-            for (ItemStack filled : createFilledStacks(category,false)) {
+            for (ItemStack filled : createFilledStacks(category, false)) {
                 result.put(category, filled);
             }
         }
@@ -429,24 +455,15 @@ public class SoftFluidStack {
         for (ItemLike item : category.getFilledItems()) {
             ItemStack filledStack = new ItemStack(item);
 
-            // hardcoded potion handling
-            if (category.getEmptyContainer() == Items.GLASS_BOTTLE && this.is(MLBuiltinSoftFluids.POTION)) {
-                PotionBottleType type = PotionBottleType.getOrDefault(this);
-                filledStack = type.getDefaultItem();
-            }
-
-            /*
-                   //case for lingering potions
-                if (this.is(BuiltInSoftFluids.POTION.getHolder()) && this.tag != null) {
-                    var type = PotionNBTHelper.getPotionType(this.tag);
-                    if (type != null && !Utils.getID(emptyContainer.getItem()).getNamespace().equals("inspirations")) {
-                        if (type != PotionNBTHelper.Type.REGULAR) {
-                            filledStack = type.getDefaultItem();
-                        }
+            //case for lingering potions
+            if (this.is(BuiltInSoftFluids.POTION.getHolder()) && this.tag != null) {
+                var type = PotionNBTHelper.getPotionType(this.tag);
+                if (type != null && !Utils.getID(category.getEmptyContainer()).getNamespace().equals("inspirations")) {
+                    if (type != PotionNBTHelper.Type.REGULAR) {
+                        filledStack = type.getDefaultItem();
                     }
                 }
-
-             */
+            }
 
             // converts water bottles into potions
             if (category.getEmptyContainer() == Items.GLASS_BOTTLE && this.is(BuiltInSoftFluids.WATER)) {
