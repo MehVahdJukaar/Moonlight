@@ -111,7 +111,11 @@ public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T>
         return valuesReg;
     }
 
-
+    // use MappedRegistries instead
+    @Deprecated(forRemoval = true)
+    public StreamCodec<ByteBuf, T> getStreamCodec(){
+        return streamCodecSlow;
+    }
 
     public StreamCodec<ByteBuf, T> getStreamCodecExplicit() {
         return streamCodecSlow;
