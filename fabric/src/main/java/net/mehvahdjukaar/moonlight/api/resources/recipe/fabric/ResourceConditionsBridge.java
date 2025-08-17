@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.HolderLookup;
@@ -14,6 +15,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class ResourceConditionsBridge {
 
@@ -64,11 +67,15 @@ public class ResourceConditionsBridge {
 
         @Override
         public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+            if (registryLookup == null) {
+                //not ideal... idk why registryLookup would be null... dub fabric as usual
+                Moonlight.LOGGER.error("Registry Lookup was null, failing tag_empty resource condition check");
+                return !ResourceConditionsImpl.tagsPopulated(tag.registry().location(), List.of(tag.location()));
+            }
             var opt = registryLookup.lookupOrThrow(Registries.ITEM).get(tag);
             return opt.isEmpty() || opt.get().stream().findAny().isEmpty();
         }
     }
-
 
 
     public static final ResourceCondition FALSE = new ResourceCondition() {
