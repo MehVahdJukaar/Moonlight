@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.mixins;
+package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
 public abstract class ReloadableServerResourcesMixin {
 
     //should fire right before add reload listener, before packs are reloaded and listeners called
-    @WrapOperation(method = "loadResources", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleReloadInstance;create(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/server/packs/resources/ReloadInstance;"))
+    @WrapOperation(method = "method_58296", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleReloadInstance;create(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/server/packs/resources/ReloadInstance;"))
     private static ReloadInstance moonlight$dynamicPackEarlyReload(ResourceManager resourceManager, List<PreparableReloadListener> listeners,
                                                                    Executor backgroundExecutor, Executor gameExecutor,
                                                                    CompletableFuture<Unit> alsoWaitedFor, boolean profiled,
@@ -32,7 +32,7 @@ public abstract class ReloadableServerResourcesMixin {
         //fires on world load or on /reload
         //token to assure that modded resources are included
         if (!(resourceManager instanceof FilteredResManager) &&
-                 (resourceManager instanceof MultiPackResourceManager mp) &&
+                (resourceManager instanceof MultiPackResourceManager mp) &&
                 resourceManager.getResource(ResourceLocation.parse("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
             //one would think that this would be fool proof. Well check again, some mod like to re create this resource manager during block load! All modded resources included aswell
             //so to be EXTRA safe we check if registry phase is over
@@ -40,7 +40,7 @@ public abstract class ReloadableServerResourcesMixin {
                 //hack.we assume its of server type
                 return ReloadInstanceWrapper.wrap(
                         ()->original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
-                       PackType.SERVER_DATA, resourceManager, backgroundExecutor
+                        PackType.SERVER_DATA, resourceManager, backgroundExecutor
                 );
             }
         }

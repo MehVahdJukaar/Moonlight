@@ -10,12 +10,12 @@
     "SelfCustomModelLoaderMixin",
     "SelfExtraModelDataProvider",
     "SelfModFluidRendererPropertiesMixin"
-
   ],
   "mixins": [
     "ConditionHackMixin",
     "ContextAwareReloadListenerAccessor",
     "FireBlockMixin",
+    "ReloadableServerResourcesMixin",
     "SelfEntitySpawnDataMixin",
     "SelfModFlowingFluidMixin"
   ],

@@ -33,7 +33,6 @@
     "PistonBlockEntityMixin",
     "PoiMixin",
     "ReloadableClientResourcesMixin",
-    "ReloadableServerResourcesMixin",
     "ServerLevelMixin",
     "ServerPlayerMixin",
     "ShearItemMixin",
