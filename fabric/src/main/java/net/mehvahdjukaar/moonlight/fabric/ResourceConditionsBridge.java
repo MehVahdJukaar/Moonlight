@@ -86,7 +86,7 @@ public class ResourceConditionsBridge {
         Collection<Holder<?>> tags = registryTags.get(id);
         if (tags == null) return true;
         if (tags.size() == 1 && tags.stream().findFirst().get().value() == Items.AIR) {
-            Moonlight.LOGGER.warn("Found broken tag which just contained the empty item: " + id);
+            Moonlight.LOGGER.warn("Found broken tag which just contained the empty item: {}", id);
             return true;
         }
         return tags.isEmpty();

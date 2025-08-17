@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.misc.StrOpt;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.api.util.LenientListCodec;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -164,19 +163,21 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
             return emptyContainer;
         }
 
+
+        /**
+         * @return amount of liquid contained in this item in bottles
+         */
         public int getCapacity() {
+            return containerCapacity;
+        }
+
+        @Deprecated(forRemoval = true)
+        public int getAmount() {
             return containerCapacity;
         }
 
         private void addItem(Item i) {
             if (!i.getDefaultInstance().isEmpty() && !filled.contains(i)) filled.add(i);
-        }
-
-        /**
-         * @return amount of liquid contained in this item in bottles
-         */
-        public int getAmount() {
-            return containerCapacity;
         }
 
         public SoundEvent getFillSound() {

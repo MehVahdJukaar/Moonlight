@@ -366,7 +366,7 @@ public class SoftFluidStack {
 
             if (category.isPresent()) {
 
-                int count = category.get().getAmount();
+                int count = category.get().getCapacity();
 
                 CompoundTag fluidTag = new CompoundTag();
 
@@ -407,7 +407,7 @@ public class SoftFluidStack {
     @Deprecated(forRemoval = true)
     public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
         var r = toItem(emptyContainer);
-        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getAmount());
+        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getCapacity());
         return r;
     }
 
@@ -445,7 +445,7 @@ public class SoftFluidStack {
     }
 
     private ItemStack[] createFilledStacks(FluidContainerList.Category category, boolean onlyFirst) {
-        int shrinkAmount = category.getAmount();
+        int shrinkAmount = category.getCapacity();
         if (shrinkAmount > this.getCount()) {
             return new ItemStack[0];
         }
