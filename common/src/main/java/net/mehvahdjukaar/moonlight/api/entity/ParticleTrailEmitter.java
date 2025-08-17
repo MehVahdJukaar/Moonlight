@@ -13,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 public class ParticleTrailEmitter {
     private final double wantedSpacing;
     private final int maxParticlesPerTick;
+    private final int minParticlesPerTick;
     private final double minSpeed;
     private Vec3 lastEmittedPos = null; // Track last emitted particle position
 
@@ -22,6 +23,7 @@ public class ParticleTrailEmitter {
     private ParticleTrailEmitter(Builder builder) {
         this.wantedSpacing = builder.idealSpacing;
         this.maxParticlesPerTick = builder.maxParticlesPerTick;
+        this.minParticlesPerTick = builder.minParticlesPerTick;
         this.minSpeed = builder.minSpeed;
     }
 
@@ -66,13 +68,18 @@ public class ParticleTrailEmitter {
         }
 
         double remainingLength = segmentLength * (1 - startT);
-        int particlesToEmit = 1 + (int) (remainingLength / wantedSpacing); // +1 to include the first particle
+
         float spacing = (float) wantedSpacing;
 
+        int particlesToEmit = 1 + (int) (remainingLength / wantedSpacing); // +1 to include the first particle
 
+        // Ensure min/max limits
         if (particlesToEmit > maxParticlesPerTick) {
             // If we have too many particles, adjust spacing to fit max particles per tick, equally spaced
             particlesToEmit = maxParticlesPerTick;
+            spacing = (float) (remainingLength / particlesToEmit);
+        } else if (particlesToEmit < minParticlesPerTick) {
+            particlesToEmit = minParticlesPerTick;
             spacing = (float) (remainingLength / particlesToEmit);
         }
 
@@ -133,6 +140,7 @@ public class ParticleTrailEmitter {
     public static class Builder {
         private double idealSpacing = 0.5;
         private int maxParticlesPerTick = 5;
+        private int minParticlesPerTick = 0;
         private double minSpeed = 0.0;
 
         public Builder spacing(double spacing) {
@@ -145,12 +153,20 @@ public class ParticleTrailEmitter {
             return this;
         }
 
+        public Builder minParticlesPerTick(int min) {
+            this.minParticlesPerTick = min;
+            return this;
+        }
+
         public Builder minSpeed(double speed) {
             this.minSpeed = speed;
             return this;
         }
 
         public ParticleTrailEmitter build() {
+            if (minParticlesPerTick > maxParticlesPerTick) {
+                throw new IllegalArgumentException("minParticlesPerTick cannot be greater than maxParticlesPerTick");
+            }
             return new ParticleTrailEmitter(this);
         }
     }
