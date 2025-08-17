@@ -317,7 +317,7 @@ public class SoftFluidStack implements DataComponentHolder {
 
             if (category.isPresent()) {
 
-                int count = category.get().getAmount();
+                int count = category.get().getCapacity();
 
                 DataComponentPatch.Builder fluidComponents = DataComponentPatch.builder();
 
@@ -345,7 +345,7 @@ public class SoftFluidStack implements DataComponentHolder {
     @Deprecated(forRemoval = true)
     public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
         var r = toItem(emptyContainer);
-        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getAmount());
+        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getCapacity());
         return r;
     }
 
@@ -383,7 +383,7 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     private ItemStack[] createFilledStacks(FluidContainerList.Category category, boolean onlyFirst) {
-        int shrinkAmount = category.getAmount();
+        int shrinkAmount = category.getCapacity();
         if (shrinkAmount > this.getCount()) {
             return new ItemStack[0];
         }
