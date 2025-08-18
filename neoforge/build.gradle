@@ -47,12 +47,13 @@ remapJar {
 }
 
 task updateJson {
+    /*
     file('update.json').withWriter { w ->
         file('update_template.json').eachLine { line ->
             w << line.replaceAll("version", project.version) + System.getProperty("line.separator")
         }
         w.close()
-    }
+    }*/
 }
 
 jar {
