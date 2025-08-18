@@ -1,30 +1,34 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.core.misc.FabricStupid;
-import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
-import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.Unit;
+import net.minecraft.world.flag.FeatureFlagSet;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 @Mixin(ReloadableServerResources.class)
 public abstract class ReloadableServerResourcesMixin {
-
+    @Inject(method = "loadResources", at = @At(value = "HEAD"))
+    private static void moonlight$grabRegistryAccess(ResourceManager resourceManager,
+                                                     RegistryAccess.Frozen registryAccess,
+                                                     FeatureFlagSet enabledFeatures,
+                                                     Commands.CommandSelection commandSelection,
+                                                     int functionCompilationLevel, Executor backgroundExecutor,
+                                                     Executor gameExecutor,
+                                                     CallbackInfoReturnable<CompletableFuture<ReloadableServerResources>> cir) {
+        Moonlight.setServerRegistryAccess(registryAccess);
+    }
     //Disabled indefinitely. THis would fire right AFTER dynamic worldgen regsitries are loaded. Not good for overriding those
     /*
     //should fire right before add reload listener, before packs are reloaded and listeners called

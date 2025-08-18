@@ -1,9 +1,11 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
+import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
@@ -123,5 +125,13 @@ public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public int getLogicalFrameCount() {
+        return Math.max(1, animation().frames.size());
+    }
+
+    public boolean hasEmptyAnimation() {
+        return this.animation == AnimationMetadataSection.EMPTY || this.animation.frames.isEmpty();
     }
 }

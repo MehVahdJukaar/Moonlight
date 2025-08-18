@@ -30,7 +30,6 @@ public interface InvPlacer {
         return new SimplePlacer(slots, predicate);
     }
 
-
     //default impls
     static InvPlacer handOrExistingOrAnyAvoidEmptyHand(InteractionHand hand) {
         return exclusiveSequence()
@@ -45,7 +44,7 @@ public interface InvPlacer {
     }
 
     static InvPlacer existingOrAny() {
-        return EXISTING.or(ANY);
+        return DEFAULT;
     }
 
     static SimplePlacer handNotEmpty(InteractionHand hand) {
@@ -69,6 +68,8 @@ public interface InvPlacer {
     SimplePlacer EMPTY = of(SlotProvider.ALL, ItemStack::isEmpty);
 
     SimplePlacer ANY = of(SlotProvider.ALL);
+
+    InvPlacer DEFAULT = EXISTING.or(ANY);
 
     InvPlacer DROP = (stack, inventory, player) -> {
         player.drop(stack, false);

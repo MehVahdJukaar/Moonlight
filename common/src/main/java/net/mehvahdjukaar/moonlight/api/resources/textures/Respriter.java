@@ -114,8 +114,9 @@ public class Respriter {
         //is restricted to use only first original palette since it must merge a new animation following the given one
         Palette originalPalette = originalPalettes.get(0);
 
+        int newFrameAmount = animationData.getLogicalFrameCount();
         TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor,
-                animationData.animation().frames.size(), animationData);
+                newFrameAmount, animationData);
 
         Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
 
@@ -123,7 +124,7 @@ public class Respriter {
         if (usesTargetAnimationColors && texture.frameCount() > targetPalettes.size()) {
             String s = "Target animation data has more frames than provided target palettes. " +
                     "This is not supported by the recolorWithAnimation method. Debug info: " + targetPalettes.size() +
-                    " " + animationData.animation().frames.size() + " " + targetAnimationData + " " + animationData;
+                    " " + newFrameAmount + " " + targetAnimationData + " " + animationData;
             if (PlatHelper.isDev()) throw new IndexOutOfBoundsException(s);
             else {
                 Moonlight.LOGGER.error(s);
