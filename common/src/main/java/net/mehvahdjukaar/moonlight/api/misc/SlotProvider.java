@@ -19,9 +19,8 @@ public interface SlotProvider {
 
 
     static SlotProvider hand(InteractionHand hand) {
-        if (hand == InteractionHand.MAIN_HAND) return inv -> List.of(Slot.invSlot(inv, inv.selected)).iterator();
-        else return inv -> IntStream.range(0, inv.offhand.size() - 1)
-                .mapToObj(i -> Slot.offHandSlot(inv, i)).iterator();
+        if (hand == InteractionHand.MAIN_HAND) return MAIN_HAND;
+        else return OFF_HAND;
     }
 
     static SlotProvider single(int slot) {
@@ -30,6 +29,11 @@ public interface SlotProvider {
 
     SlotProvider ALL = inv -> IntStream.range(0, inv.items.size())
             .mapToObj(i -> Slot.invSlot(inv, i)).iterator();
+
+    SlotProvider OFF_HAND = inv -> IntStream.range(0, inv.offhand.size())
+            .mapToObj(i -> Slot.offHandSlot(inv, i)).iterator();
+
+    SlotProvider MAIN_HAND = inv -> List.of(Slot.invSlot(inv, inv.selected)).iterator();
 
     interface Slot {
         ItemStack getStack();
@@ -44,10 +48,36 @@ public interface SlotProvider {
                 }
 
                 @Override
-                public boolean add(ItemStack stack, Inventory inv, Player player) {
-                    return inv.add(slot, stack);
+                public boolean add(ItemStack toAdd, Inventory inv, Player player) {
+                    ItemStack current = getStack();
+                    //vanilla doesn't do this for some reason... calling add alone will just incrememnt the count of an existing item
+                    if (!current.isEmpty() && !inv.hasRemainingSpaceForItem(current, toAdd)) return false;
+
+                    //same as vanilla .add but no damageable and creative bs logic
+                    if (toAdd.isEmpty()) {
+                        return false;
+                    } else {
+                        try {
+                            int originalCount;
+                            do {
+                                originalCount = toAdd.getCount();
+                                toAdd.setCount(inv.addResource(slot, toAdd));
+                            } while (!toAdd.isEmpty() && toAdd.getCount() < originalCount);
+
+                            return toAdd.getCount() < originalCount;
+                        } catch (Throwable var6) {
+                            CrashReport crashReport = CrashReport.forThrowable(var6, "Adding item to inventory");
+                            CrashReportCategory crashReportCategory = crashReport.addCategory("Item being added");
+                            crashReportCategory.setDetail("Item ID", Item.getId(toAdd.getItem()));
+                            crashReportCategory.setDetail("Item data", toAdd.getDamageValue());
+                            crashReportCategory.setDetail("Item name", () -> toAdd.getHoverName().getString());
+                            throw new ReportedException(crashReport);
+                        }
+                    }
                 }
             };
+
+
         }
 
         static Slot offHandSlot(Inventory inv, int offHandSlot) {
@@ -87,20 +117,22 @@ public interface SlotProvider {
                     }
                 }
 
-                private void addResourceOffHand(ItemStack stack, Inventory inv) {
-                    Item item = stack.getItem();
+                private void addResourceOffHand(ItemStack toAdd, Inventory inv) {
+                    Item item = toAdd.getItem();
                     int stackCount;
                     NonNullList<ItemStack> offHand = inv.offhand;
                     for (int offSlot = 0; offSlot < offHand.size(); offSlot++) {
-                        stackCount = stack.getCount();
+                        stackCount = toAdd.getCount();
                         ItemStack handStack = offHand.get(offSlot);
                         if (handStack.isEmpty()) {
                             handStack = new ItemStack(item, 0);
-                            if (stack.hasTag()) {
-                                handStack.setTag(stack.getTag().copy());
+                            if (toAdd.hasTag()) {
+                                handStack.setTag(toAdd.getTag().copy());
                             }
 
                             offHand.set(offSlot, handStack);
+                        } else if (!inv.hasRemainingSpaceForItem(handStack, toAdd)) {
+                            continue;
                         }
 
                         int addedCount = stackCount;
@@ -117,7 +149,7 @@ public interface SlotProvider {
                             handStack.grow(addedCount);
                             handStack.setPopTime(5);
 
-                            stack.setCount(stackCount);
+                            toAdd.setCount(stackCount);
                         }
                     }
                 }

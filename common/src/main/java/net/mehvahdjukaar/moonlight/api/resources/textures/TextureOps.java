@@ -124,7 +124,13 @@ public final class TextureOps {
      * Creates a new image using the first frame of this one. Its frame data and frame length will be the one provided
      */
     public static TextureImage createSingleFrameAnimation(TextureImage img, int length, McMetaFile animationData) {
+        if (length <= 0) {
+            throw new IllegalArgumentException("Length must be greater than 0");
+        }
         McMetaFile newMetadata = animationData.cloneWithSize(img.frameWidth(), img.frameHeight());
+        if (length == 1) {
+            return img.makeCopyWithMetadata(newMetadata);
+        }
         TextureImage newImage = TextureImage.createNew(img.frameWidth(), img.frameHeight() * length, newMetadata);
 
         newImage.forEachPixel(pixel -> {

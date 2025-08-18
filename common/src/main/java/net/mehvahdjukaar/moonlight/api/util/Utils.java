@@ -58,6 +58,11 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
@@ -146,69 +151,69 @@ public class Utils {
         return object.unwrapKey().get().location();
     }
 
-    public static ResourceLocation getID(Block object) {
+    public static ResourceLocation getID(@NotNull Block object) {
         return BuiltInRegistries.BLOCK.getKey(object);
     }
 
-    public static ResourceLocation getID(EntityType<?> object) {
+    public static ResourceLocation getID(@NotNull EntityType<?> object) {
         return BuiltInRegistries.ENTITY_TYPE.getKey(object);
     }
 
-    public static ResourceLocation getID(Biome object) {
+    public static ResourceLocation getID(@NotNull Biome object) {
         return hackyGetRegistry(Registries.BIOME).getKey(object);
     }
 
-    public static ResourceLocation getID(DamageType type) {
+    public static ResourceLocation getID(@NotNull DamageType type) {
         return hackyGetRegistry(Registries.DAMAGE_TYPE).getKey(type);
     }
 
-    public static ResourceLocation getID(ConfiguredFeature<?, ?> object) {
+    public static ResourceLocation getID(@NotNull ConfiguredFeature<?, ?> object) {
         return hackyGetRegistry(Registries.CONFIGURED_FEATURE).getKey(object);
     }
 
-    public static ResourceLocation getID(Item object) {
+    public static ResourceLocation getID(@NotNull Item object) {
         return BuiltInRegistries.ITEM.getKey(object);
     }
 
-    public static ResourceLocation getID(Fluid object) {
+    public static ResourceLocation getID(@NotNull Fluid object) {
         return BuiltInRegistries.FLUID.getKey(object);
     }
 
-    public static ResourceLocation getID(BlockEntityType<?> object) {
+    public static ResourceLocation getID(@NotNull BlockEntityType<?> object) {
         return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(object);
     }
 
-    public static ResourceLocation getID(RecipeSerializer<?> object) {
+    public static ResourceLocation getID(@NotNull RecipeSerializer<?> object) {
         return BuiltInRegistries.RECIPE_SERIALIZER.getKey(object);
     }
 
     @Deprecated(forRemoval = true)
-    public static ResourceLocation getID(SoftFluid object) {
+    public static ResourceLocation getID(@NotNull SoftFluid object) {
         return SoftFluidRegistry.hackyGetRegistry().getKey(object);
     }
 
     @Deprecated(forRemoval = true)
-    public static ResourceLocation getID(MLMapDecorationType<?, ?> object) {
+    public static ResourceLocation getID(@NotNull MapDecorationType<?, ?> object) {
         return MapDataInternal.hackyGetRegistry().getKey(object);
     }
 
-    public static ResourceLocation getID(Potion object) {
+    public static ResourceLocation getID(@NotNull Potion object) {
         return BuiltInRegistries.POTION.getKey(object);
     }
 
-    public static ResourceLocation getID(MobEffect object) {
+    public static ResourceLocation getID(@NotNull MobEffect object) {
         return BuiltInRegistries.MOB_EFFECT.getKey(object);
     }
 
-    public static ResourceLocation getID(CreativeModeTab object) {
+    public static ResourceLocation getID(@NotNull CreativeModeTab object) {
         return BuiltInRegistries.CREATIVE_MODE_TAB.getKey(object);
     }
 
-    public static ResourceLocation getID(StatType<?> object) {
+    public static ResourceLocation getID(@NotNull StatType<?> object) {
         return BuiltInRegistries.STAT_TYPE.getKey(object);
     }
 
-    public static ResourceLocation getID(Object object) {
+    public static ResourceLocation getID(@NotNull Object object) {
         return switch (object) {
             case Block b -> getID(b);
             case Item b -> getID(b);

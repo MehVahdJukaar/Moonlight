@@ -63,6 +63,9 @@ public class TextureImage implements AutoCloseable, Sampler2D {
     }
 
     public static TextureImage createNew(int width, int height, @Nullable McMetaFile metadata) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Width and height must be positive integers");
+        }
         var v = new TextureImage(new NativeImage(width, height, false), metadata);
         v.clear();
         return v;
@@ -91,8 +94,11 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         this.metadata = metadata;
         int imgWidth = this.imageWidth(); // 16
         int imgHeight = this.imageHeight(); // 48
-        this.frameSize = metadata == null ? new FrameSize(imgWidth, imgHeight) : metadata.animation()
-                .calculateFrameSize(imgWidth, imgHeight);
+        if (metadata == null || metadata.hasEmptyAnimation()) {
+            this.frameSize = new FrameSize(imgWidth, imgHeight);
+        } else {
+            this.frameSize = metadata.animation().calculateFrameSize(imgWidth, imgHeight);
+        }
         this.frameScale = imgWidth / frameSize.width(); // 1
         int frameScaleHeight = imgHeight / frameSize.height(); // 2
         this.frameCount = frameScale * frameScaleHeight; // 2
@@ -194,9 +200,13 @@ public class TextureImage implements AutoCloseable, Sampler2D {
     }
 
     public TextureImage makeCopy() {
+        return makeCopyWithMetadata(this.metadata);
+    }
+
+    public TextureImage makeCopyWithMetadata(McMetaFile mcMetaFile) {
         NativeImage im = new NativeImage(this.imageWidth(), this.imageHeight(), false);
         im.copyFrom(image);
-        return new TextureImage(im, metadata);
+        return new TextureImage(im, mcMetaFile);
     }
 
     @Override

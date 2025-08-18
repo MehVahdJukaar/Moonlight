@@ -119,6 +119,11 @@ public class Moonlight {
         }
     }
 
+    //by mixin, even earlier, needed for recipe manager. not needed in 1.21.1+
+    public static void setServerRegistryAccess(RegistryAccess.Frozen registryAccess) {
+        EARLY_REGISTRY_ACCESS.set(new WeakReference<>(registryAccess));
+    }
+
     @EventCalled
     private static void afterDataReloadOrDataSync(RegistryAccess registryAccess, boolean client) {
         EARLY_REGISTRY_ACCESS.set(new WeakReference<>(registryAccess));
