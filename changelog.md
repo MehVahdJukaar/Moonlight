@@ -1,1 +1,3 @@
 - fixed a dupe with fluid introduced 2 patches ago
+- improved handing of animated textures in resource gen
+- improved more api
