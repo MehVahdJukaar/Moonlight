@@ -30,6 +30,7 @@
     "MapDataMixin",
     "MapItemDataPacketMixin",
     "MapItemMixin",
+    "ServerMultiPackResourceManagerMixin",
     "PistonBlockEntityMixin",
     "PoiMixin",
     "ReloadableClientResourcesMixin",

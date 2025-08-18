@@ -25,15 +25,16 @@ public abstract class ReloadableClientResourcesMixin {
     @Final
     public PackType type;
 
-    @Shadow private CloseableResourceManager resources;
+    @Shadow
+    private CloseableResourceManager resources;
 
     //should fire right before add reload listener, before packs are reloaded and listeners called
     @WrapOperation(method = "createReload", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleReloadInstance;create(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/server/packs/resources/ReloadInstance;"))
-    private ReloadInstance moonlight$dynamicPackEarlyReload(ResourceManager resourceManager,
-                                                            List<PreparableReloadListener> listeners,
-                                                            Executor backgroundExecutor, Executor gameExecutor,
-                                                            CompletableFuture<Unit> alsoWaitedFor, boolean profiled,
-                                                            Operation<ReloadInstance> original) {
+    private ReloadInstance moonlight$clientDynamicPackEarlyReload(ResourceManager resourceManager,
+                                                                  List<PreparableReloadListener> listeners,
+                                                                  Executor backgroundExecutor, Executor gameExecutor,
+                                                                  CompletableFuture<Unit> alsoWaitedFor, boolean profiled,
+                                                                  Operation<ReloadInstance> original) {
         //fires on world load or on /reload
         //token to assure that modded resources are included
         if (!(this.resources instanceof FilteredResManager) &&
@@ -41,9 +42,9 @@ public abstract class ReloadableClientResourcesMixin {
             //one would think that this would be fool proof. Well check again, some mod like to re create this resource manager during block load! All modded resources included aswell
             //so to be EXTRA safe we check if registry phase is over
             if (!PlatHelper.isInitializing()) {
-               return ReloadInstanceWrapper.wrap(()->original.call(resourceManager, listeners,
-                               backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
-                       type, this.resources,backgroundExecutor);
+                return ReloadInstanceWrapper.wrap(() -> original.call(resourceManager, listeners,
+                                backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
+                        type, this.resources, backgroundExecutor);
             }
         }
         return original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled);
