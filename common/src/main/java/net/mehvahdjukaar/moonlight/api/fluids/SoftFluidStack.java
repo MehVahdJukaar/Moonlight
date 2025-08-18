@@ -349,6 +349,14 @@ public class SoftFluidStack implements DataComponentHolder {
         return r;
     }
 
+    /**
+     * Converts to item and decrement the stack by extracted amount
+     */
+    public Pair<ItemStack, FluidContainerList.Category> splitToItem(ItemStack emptyContainer) {
+        var r = toItem(emptyContainer);
+        if (r != null) this.shrink(r.getSecond().getCapacity());
+        return r;
+    }
 
     /**
      * Fills the item if possible. Returns empty stack if it fails

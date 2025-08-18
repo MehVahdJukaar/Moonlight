@@ -1,2 +1,1 @@
-- fixed an issue where server dynamic resources were loading too late, making it impossible to override datapack registry entries
-- added some utility methods
+- fixed a dupe with fluid introduced 2 patches ago

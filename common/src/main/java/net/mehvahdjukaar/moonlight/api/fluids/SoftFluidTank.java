@@ -150,7 +150,7 @@ public class SoftFluidTank {
      * @return filled bottle item. null if it failed or if simulated is true and failed
      */
     public InteractionResultHolder<ItemStack> fillItem(ItemStack emptyContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
-        var pair = this.fluidStack.toItem(emptyContainer);
+        var pair = this.fluidStack.splitToItem(emptyContainer);
 
         if (pair != null) {
             FluidContainerList.Category category = pair.getSecond();
