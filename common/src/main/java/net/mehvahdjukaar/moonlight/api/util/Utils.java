@@ -90,11 +90,11 @@ public class Utils {
 
     @Deprecated(forRemoval = true)
     public static void addStackToExisting(Player player, ItemStack stack, boolean avoidEmptyHands) {
-        addItemOrDrop(player, stack, avoidEmptyHands ? InvPlacer.handOrExistingInvOrAnyAvoidEmptyHand(InteractionHand.MAIN_HAND) : InvPlacer.handOrExistingInvOrAny(InteractionHand.MAIN_HAND));
+        addItemOrDrop(player, stack, avoidEmptyHands ? InvPlacer.handOrExistingOrAnyAvoidEmptyHand(InteractionHand.MAIN_HAND) : InvPlacer.handOrExistingOrAny(InteractionHand.MAIN_HAND));
     }
 
     /**
-     * Adds an item to the player's inventory, trying to stack it in existing slots first, starting from the provided slot.
+     * Adds an item to the player's inventory, uses the given strategy to determine where to place it
      */
     public static void addItemOrDrop(Player player, ItemStack stack, InvPlacer placer) {
         Inventory inv = player.getInventory();
@@ -102,7 +102,7 @@ public class Utils {
     }
 
     public static void addItemOrDrop(Player player, ItemStack stack) {
-        addItemOrDrop(player, stack, InvPlacer.existingOrAny());
+        addItemOrDrop(player, stack, InvPlacer.existingOrAny()); //default impl
     }
 
 
