@@ -6,6 +6,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
+import net.mehvahdjukaar.moonlight.api.misc.InvPlacer;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -31,6 +32,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -85,27 +87,24 @@ public class Utils {
     }
 
     //TODO: add more stuff from item utils
-    public static void addStackToExisting(Player player, ItemStack stack, boolean avoidHands) {
-        var inv = player.getInventory();
-        boolean added = false;
-        for (int j = 0; j < inv.items.size(); j++) {
-            if (inv.getItem(j).is(stack.getItem()) && inv.add(j, stack)) {
-                added = true;
-                break;
-            }
-        }
-        if (avoidHands && !added) {
-            for (int j = 0; j < inv.items.size(); j++) {
-                if (inv.getItem(j).isEmpty() && j != inv.selected && inv.add(j, stack)) {
-                    added = true;
-                    break;
-                }
-            }
-        }
-        if (!added && inv.add(stack)) {
-            player.drop(stack, false);
-        }
+
+    @Deprecated(forRemoval = true)
+    public static void addStackToExisting(Player player, ItemStack stack, boolean avoidEmptyHands) {
+        addItemOrDrop(player, stack, avoidEmptyHands ? InvPlacer.handOrExistingInvOrAnyAvoidEmptyHand(InteractionHand.MAIN_HAND) : InvPlacer.handOrExistingInvOrAny(InteractionHand.MAIN_HAND));
     }
+
+    /**
+     * Adds an item to the player's inventory, trying to stack it in existing slots first, starting from the provided slot.
+     */
+    public static void addItemOrDrop(Player player, ItemStack stack, InvPlacer placer) {
+        Inventory inv = player.getInventory();
+        placer.or(InvPlacer.DROP).place(stack, inv, player);
+    }
+
+    public static void addItemOrDrop(Player player, ItemStack stack) {
+        addItemOrDrop(player, stack, InvPlacer.existingOrAny());
+    }
+
 
     //xp bottle logic
     public static int getXPinaBottle(int bottleCount, RandomSource rand) {
@@ -362,12 +361,13 @@ public class Utils {
     }
 
     @Nullable
-    public static  <T> T findFirstInRegistry(Registry<T> registry, ResourceLocation... id) {
+    public static <T> T findFirstInRegistry(Registry<T> registry, ResourceLocation... id) {
         for (ResourceLocation r : id) {
             var optional = registry.getOptional(r);
             if (optional.isPresent()) return optional.get();
         }
         return null;
     }
+
 
 }
