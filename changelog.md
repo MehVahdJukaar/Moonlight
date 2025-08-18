@@ -1,1 +1,2 @@
-- fixed an issue that caused invalid parameters thrown to texture respriter to throw an Error instead of an Exception
+- fixed an issue where server dynamic resources were loading too late, making it impossible to override datapack registry entries
+- added some utility methods

@@ -5,7 +5,6 @@ import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -30,28 +29,24 @@ public class ReloadInstanceWrapper implements ReloadInstance {
         return new ReloadInstanceWrapper(factory, type, manager, backgroundExecutor);
     }
 
-    private static CompletableFuture<Unit> earlyReloadTask(PackType type, ResourceManager manager, IProgressTracker progressTracker, Executor executor) {
-        //If we don't add this line it ends up using jdk internal classloader for some godforsaken reason, causing all sorts of unpredictable issues....
-        //does this mean that all CompletableFutures are never safe? Oh, god have mercy
-        return CompletableFuture.supplyAsync(() -> {
-            DynResourceGenerator.clearBeforeReload(type);
-            MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(List.of(), manager, type, progressTracker), EarlyPackReloadEvent.class);
-            return Unit.INSTANCE;
-        }, executor);
+    public static void executeEarlyReloadBlocking(PackType type, ResourceManager manager, IProgressTracker progressTracker) {
+        DynResourceGenerator.clearBeforeReload(type);
+        MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(List.of(), manager, type, progressTracker), EarlyPackReloadEvent.class);
     }
-
 
     private final Supplier<ReloadInstance> lazyInstance;
     private final CompletableFuture<Unit> beforeTask;
     private final IProgressTracker.Tree progressTracker;
-    private final int leaves;
 
     public ReloadInstanceWrapper(Supplier<ReloadInstance> factory,
-                           PackType type, ResourceManager manager,Executor executor) {
-        progressTracker = IProgressTracker.createTree(1);
-        leaves = progressTracker.countLeaves();
-        this.beforeTask = earlyReloadTask(type, manager, progressTracker, executor);
+                                 PackType type, ResourceManager manager, Executor executor) {
+        this.progressTracker = IProgressTracker.createTree(1);
         this.lazyInstance = Suppliers.memoize(factory::get);
+        this.beforeTask = CompletableFuture.supplyAsync(() -> {
+            executeEarlyReloadBlocking(type, manager, progressTracker);
+            return Unit.INSTANCE;
+        }, executor);
+
 
     }
 
@@ -73,7 +68,7 @@ public class ReloadInstanceWrapper implements ReloadInstance {
 
     @Override
     public float getActualProgress() {
-        float maxAmount = Mth.clamp(leaves / 100f, 0, 0.5f);
+        float maxAmount = Mth.clamp(0.2f, 0, 0.5f);
         float progress = progressTracker.getProgress() * maxAmount;
         if (!beforeTask.isDone()) {
             return progress;

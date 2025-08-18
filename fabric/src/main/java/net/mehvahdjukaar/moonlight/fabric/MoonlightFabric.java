@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.fabric;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -21,7 +20,6 @@ import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -36,7 +34,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
         Moonlight.commonInit();
 
-
         ModMessages.CHANNEL.register(NetworkDir.PLAY_TO_CLIENT,
                 ClientBoundOpenScreenMessage.class, ClientBoundOpenScreenMessage::new);
 
@@ -49,7 +46,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         CommonLifecycleEvents.TAGS_LOADED.register(Moonlight::afterDataReload);
         ServerLifecycleEvents.SERVER_STOPPING.register(s -> {
             currentServer = null;
-             FakeLevelManager.invalidateAll();
+            FakeLevelManager.invalidateAll();
         });
         ServerWorldEvents.UNLOAD.register((server, world) -> {
             try {

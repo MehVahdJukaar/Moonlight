@@ -25,6 +25,8 @@ import java.util.concurrent.Executor;
 @Mixin(ReloadableServerResources.class)
 public abstract class ReloadableServerResourcesMixin {
 
+    //Disabled indefinitely. THis would fire right AFTER dynamic worldgen regsitries are loaded. Not good for overriding those
+    /*
     //should fire right before add reload listener, before packs are reloaded and listeners called
     //should fire right before add reload listener, before packs are reloaded and listeners called
     @WrapOperation(method = "loadResources", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleReloadInstance;create(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/server/packs/resources/ReloadInstance;"))
@@ -52,5 +54,5 @@ public abstract class ReloadableServerResourcesMixin {
             }
         }
         return original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled);
-    }
+    }*/
 }
