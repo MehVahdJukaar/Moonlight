@@ -117,6 +117,24 @@ public final class TextureOps {
         applyMask(img, mask, false);
     }
 
+    public static void tileTexture(TextureImage image, TextureImage toTileOn, int xOff, int yOff) {
+        int tileW = toTileOn.imageWidth();
+        int tileH = toTileOn.imageHeight();
+
+        // For each pixel in the base image, pick from tiled toTileOn
+        image.forEachPixel(pixel -> {
+            int x = pixel.x();
+            int y = pixel.y();
+
+            // Calculate where this pixel maps to in the tiled texture
+            int srcX = Math.floorMod(x - xOff, tileW);
+            int srcY = Math.floorMod(y - yOff, tileH);
+
+            int val = toTileOn.getPixel(srcX, srcY);
+            pixel.setValue(val);
+        });
+    }
+
 
     //create
 
