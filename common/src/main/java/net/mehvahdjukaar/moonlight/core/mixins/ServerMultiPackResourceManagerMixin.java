@@ -33,6 +33,7 @@ public abstract class ServerMultiPackResourceManagerMixin implements CloseableRe
     //should fire right before add reload listener, before packs are reloaded and listeners called
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void moonlight$serverDynamicPackEarlyReload(PackType type, List<PackResources> packs, CallbackInfo cir) {
+        if(type != PackType.SERVER_DATA) return; //only for server data packs
         //fires on world load or on /reload
         //token to assure that modded resources are included
         if (!((Object) (this) instanceof FilteredResManager) &&
@@ -41,7 +42,8 @@ public abstract class ServerMultiPackResourceManagerMixin implements CloseableRe
             //so to be EXTRA safe we check if registry phase is over
             if (!PlatHelper.isInitializing()) {
                 //reload dynamic packs before reloading data packs
-                ReloadInstanceWrapper.executeEarlyReloadBlocking(type, this, IProgressTracker.createTree(1));
+                ReloadInstanceWrapper.executeEarlyReloadBlocking(type, this,
+                        IProgressTracker.createTree(1));
             }
         }
     }

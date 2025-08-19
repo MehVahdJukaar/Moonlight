@@ -29,4 +29,10 @@ public class VanillaWoodTypes {
             new WoodType(new ResourceLocation("warped"), Blocks.WARPED_PLANKS, Blocks.WARPED_STEM));
 
 
+    static {
+
+        //Ugly ass code here
+        MANGROVE.addChild("sapling", Blocks.MANGROVE_PROPAGULE);
+    }
+
 }

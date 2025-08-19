@@ -15,7 +15,6 @@ import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
@@ -29,6 +28,7 @@ import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
+import net.mehvahdjukaar.moonlight.core.set.DebugBlockTypes;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -66,6 +66,7 @@ public class Moonlight {
 
     //called on mod creation
     public static void commonInit() {
+        CommonConfigs.init();
 
         BlockSetInternal.registerBlockSetDefinition(WoodTypeRegistry.INSTANCE);
         BlockSetInternal.registerBlockSetDefinition(LeavesTypeRegistry.INSTANCE);
@@ -74,7 +75,6 @@ public class Moonlight {
         MoonlightRegistry.init();
 
         ModMessages.init();
-        CommonConfigs.init();
 
         BlockTypeSwapIngredient.init();
         VillagerAIInternal.init();
@@ -104,6 +104,10 @@ public class Moonlight {
         }
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.setupClient();
+        }
+
+        if (CommonConfigs.EXTRA_DEBUG.get()) {
+            DebugBlockTypes.writeToFile();
         }
     }
 

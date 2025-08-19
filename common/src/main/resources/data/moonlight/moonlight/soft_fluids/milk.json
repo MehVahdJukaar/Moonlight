@@ -34,7 +34,8 @@
     },
     {
       "filled": [
-        "minecraft:milk_bucket"
+        "minecraft:milk_bucket",
+        "blue_skies:ventium_milk_bucket"
       ],
       "fill_sound": "minecraft:item.bucket.fill",
       "empty_sound": "minecraft:item.bucket.empty",

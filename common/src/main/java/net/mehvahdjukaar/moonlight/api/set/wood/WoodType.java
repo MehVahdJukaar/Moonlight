@@ -7,13 +7,13 @@ import com.mojang.serialization.DataResult;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CeilingHangingSignBlock;
@@ -24,10 +24,11 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
-import static net.mehvahdjukaar.moonlight.api.set.DebugBlockTypes.appendToDebugFile;
 import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
 
 /**
@@ -77,8 +78,6 @@ public class WoodType extends BlockType {
         super(id);
         this.planks = baseBlock;
         this.log = logBlock;
-
-        if (ClientConfigs.WOODTYPE_DEBUG.get() && !this.isVanilla()) appendToDebugFile(getTranslationKey());
     }
 
     @Override
@@ -159,14 +158,15 @@ public class WoodType extends BlockType {
 
     @Override
     public void initializeChildrenItems() {
-        this.addChild(BOAT, this.findRelatedEntry("boat", BuiltInRegistries.ITEM));
-        this.addChild(CHEST_BOAT, this.findRelatedEntry("chest_boat", BuiltInRegistries.ITEM));
+        this.addChild(BOAT, this.findRelatedItem("boat", "raft"));
+        this.addChild(CHEST_BOAT, this.findRelatedItem("chest_boat", "chest_raft"));
         this.addChild(SAPLING, this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
         if (this.id.getNamespace().matches("tfc|afc")) { // Including unidue blocks' path
             this.addChild(STICK, this.findRelatedEntry("twig", BuiltInRegistries.BLOCK));
             this.addChild(BOAT, this.findRelatedEntry("boat", "", BuiltInRegistries.BLOCK));
         }
     }
+
 
     @Nullable
     protected <V> V findRelatedEntry(String prefix, String suffix, Registry<V> reg) {
@@ -181,14 +181,7 @@ public class WoodType extends BlockType {
                 // TFC & AFC: Include twig (sticks), leaves, planks, sign
                 new ResourceLocation(id.getNamespace(), "wood/" + prefix + suffix + "/" + id.getPath())
         };
-        V found = null;
-        for (var r : targets) {
-            if (reg.containsKey(r)) {
-                found = reg.get(r);
-                break;
-            }
-        }
-        return found;
+        return Utils.findFirstInRegistry(reg, targets);
     }
 
 
@@ -207,67 +200,83 @@ public class WoodType extends BlockType {
     }
 
     @Nullable
-    protected Block findLogRelatedBlock(String prefix, String... possibleSuffix) {
-        for (var n : possibleSuffix) {
-            var b = findWithPrefix(prefix, n);
+    protected Item findRelatedItem(String... names) {
+        for (var n : names) {
+            var b = findRelatedEntry(n, BuiltInRegistries.ITEM);
             if (b != null) return b;
         }
         return null;
     }
 
     @Nullable
-    protected Block findWithPrefix(String prefix, String suffix) {
-        String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
-        var id = this.getId();
-        String logNamespace = Utils.getID(this.log).getPath();
+    protected Block findLogRelatedBlock(String prefix, String... possibleSuffix) {
+        for (var n : possibleSuffix) {
+            var b = findLogWithPrefix(prefix, n);
+            if (b != null) return b;
+        }
+        return null;
+    }
 
+    @Nullable
+    protected Block findLogWithPrefix(String prefix, String suffix) {
+        // ugly, shouldnt be here
         // SUPPORT: TFC & AFC
-        String path = id.getPath();
-        String namespace = id.getNamespace();
         if (this.id.getNamespace().matches("tfc|afc")) {
+            String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
             var o = BuiltInRegistries.BLOCK.getOptional(
-                    new ResourceLocation(namespace,
-                            "wood/" + prefix_ + suffix + "/" + path));
+                    new ResourceLocation(this.getNamespace(),
+                            "wood/" + prefix_ + suffix + "/" + id.getPath()));
             if (o.isPresent()) return o.get();
         }
 
-        Set<ResourceLocation> targets = new HashSet<>();
-        Collections.addAll(targets,
-                new ResourceLocation(namespace, path + "_" + prefix_ + suffix),
-                new ResourceLocation(namespace, prefix_ + path + "_" + suffix),
-                new ResourceLocation(namespace, logNamespace + "_" + prefix_ + suffix),
-                new ResourceLocation(namespace, prefix_ + logNamespace + "_" + suffix)
-        );
-        //For things like grimwood_wood -> grimwood
-        if (path.endsWith(suffix)) {
-            targets.add(new ResourceLocation(namespace, prefix_ + path));
-        }
-        return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, targets.toArray(new ResourceLocation[0]));
+        List<ResourceLocation> targets = makeKnownIDConventionsPrefix(
+                this.id.getNamespace(), this.id.getPath(),
+                prefix, suffix, Utils.getID(this.log).getPath());
+        return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, targets);
     }
 
+    private static @NotNull List<ResourceLocation> makeKnownIDConventionsPrefix(
+            String myNamespace, String myPath,
+            String prefix, String suffix,
+            String alternateNamespace) {
 
-    static ResourceLocation[] makeKnownIDConventions(ResourceLocation id, String... suffixKeyword) {
-        List<ResourceLocation> resources = new ArrayList<>();
-        for (String keyword : suffixKeyword) {
-            String path = id.getPath();
-            String namespace = id.getNamespace();
-            resources.add(new ResourceLocation(namespace, path + "_" + keyword));
-            resources.add(new ResourceLocation(namespace, keyword + "_" + path));
-            //resources.add(new ResourceLocation(path + "_" + keyword));//vanilla
-            //resources.add(new ResourceLocation(keyword + "_" + path)); //vanilla
+        boolean noneEmpty = !prefix.isEmpty() && !suffix.isEmpty();
+        String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
+
+        List<ResourceLocation> targets = new ArrayList<>();
+        targets.add(new ResourceLocation(myNamespace, myPath + "_" + prefix_ + suffix));
+        targets.add(new ResourceLocation(myNamespace, alternateNamespace + "_" + prefix_ + suffix));
+        if (!noneEmpty) {
+            targets.add(new ResourceLocation(myNamespace, prefix_ + myPath + "_" + suffix));
+            targets.add(new ResourceLocation(myNamespace, prefix_ + alternateNamespace + "_" + suffix));
         }
-        return resources.toArray(new ResourceLocation[0]);
+
+        //For things like grimwood_wood -> grimwood
+        if (myPath.endsWith(suffix)) {
+            targets.add(new ResourceLocation(myNamespace, prefix_ + myPath));
+        }
+        return targets;
+    }
+
+    static List<ResourceLocation> makeKnownIDConventions(ResourceLocation id, String... suffixKeyword) {
+        String myPath = id.getPath();
+        String myNamespace = id.getNamespace();
+        List<ResourceLocation> resources = new ArrayList<>();
+        for (String suffix : suffixKeyword) {
+            resources.addAll(makeKnownIDConventionsPrefix(myNamespace, myPath, "", suffix, myPath));
+        }
+        return resources;
     }
 
     @Nullable
     static Block findLog(ResourceLocation id) {
-        ResourceLocation[] tests = makeKnownIDConventions(id, "log", "stem", "stalk", "hyphae");
+        var tests = makeKnownIDConventions(id, "log", "stem", "stalk", "hyphae");
         return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, tests);
     }
 
     @Nullable
     static Block findPlanks(ResourceLocation id) {
-        ResourceLocation[] tests = makeKnownIDConventions(id, "planks", "plank");
+        var tests = makeKnownIDConventions(id, "planks", "plank");
         return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, tests);
     }
 
@@ -330,11 +339,13 @@ public class WoodType extends BlockType {
             this.logFinder = logFinder;
             return this;
         }
+
         /// @param id Full Id of MudType as ResourceLocation
         public Finder log(ResourceLocation id) {
             return this.log(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
                     () -> new IllegalStateException("Failed to find log block: " + id)));
         }
+
         /// @param nameLog name of Log without modId or namespace
         public Finder log(String nameLog) {
             return this.log(Utils.idWithOptionalNamespace(nameLog, id.getNamespace()));
