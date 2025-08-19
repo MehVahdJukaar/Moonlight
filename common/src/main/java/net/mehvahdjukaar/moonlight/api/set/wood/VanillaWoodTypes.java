@@ -28,5 +28,11 @@ public class VanillaWoodTypes {
     public static final WoodType WARPED = WoodTypeRegistry.INSTANCE.register(
             new WoodType(ResourceLocation.withDefaultNamespace("warped"), Blocks.WARPED_PLANKS, Blocks.WARPED_STEM));
 
+    static {
+
+        //Ugly ass code here
+        MANGROVE.addChild("sapling", Blocks.MANGROVE_PROPAGULE);
+        BAMBOO.addChild("sapling", Blocks.BAMBOO_SAPLING);
+    }
 
 }
