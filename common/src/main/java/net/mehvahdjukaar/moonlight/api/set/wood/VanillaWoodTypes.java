@@ -35,4 +35,10 @@ public class VanillaWoodTypes {
         BAMBOO.addChild("sapling", Blocks.BAMBOO_SAPLING);
     }
 
+    static {
+
+        //Ugly ass code here
+        MANGROVE.addChild("sapling", Blocks.MANGROVE_PROPAGULE);
+    }
+
 }

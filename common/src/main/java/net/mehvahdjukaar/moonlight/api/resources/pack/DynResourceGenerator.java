@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
+import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -92,12 +93,12 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         Stopwatch watch = Stopwatch.createStarted();
         try {
             regenerateDynamicAssets(manager);
-        }catch (Exception e){
+        } catch (Exception e) {
             getLogger().error("Legacy dynamic gen task failed: ", e);
         }
         try {
             regenerateDynamicAssets(genTasks::add);
-        }catch (Exception e){
+        } catch (Exception e) {
             getLogger().error("Failed to add tasks to dynamic resource gen: ", e);
         }
 
@@ -218,6 +219,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         }
         //generate textures
         if (runsOnEveryReload() || wasFirstReload) {
+            Moonlight.LOGGER.info("Generating runtime assets for pack {} ({})", this.dynamicPack.packId(), this.modId);
             this.regenerateDynamicAssets(manager, reporter);
         }
     }
@@ -296,17 +298,28 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
     static {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
-            Stopwatch stopwatch = Stopwatch.createStarted();
+            PackType type = earlyPackReloadEvent.type();
             List<DynResourceGenerator<?>> validGen = DynResourceGenerator.GENERATORS.stream()
-                    .filter(gen -> gen.dynamicPack.packType == earlyPackReloadEvent.type())
+                    .filter(gen -> gen.dynamicPack.packType == type)
                     .toList();
+            List<String> modIds = GENERATORS.stream()
+                    .map(g -> g.modId).toList();
+            Moonlight.LOGGER.info("Starting runtime resource generation for pack type {} with generators from mods {}: {}",
+                    type, modIds, validGen);
+
+            if (CommonConfigs.EXTRA_DEBUG.get())
+                Moonlight.LOGGER.info("Current stack trace:", new Throwable("Stack trace dump to see who fired me"));
+
+
+            Stopwatch stopwatch = Stopwatch.createStarted();
+
             IProgressTracker reporter = earlyPackReloadEvent.progress();
             //These are not parallel. pass flat
             for (var gen : validGen) {
                 gen.onEarlyReload(earlyPackReloadEvent, reporter); // run synchronously
             }
 
-            Moonlight.LOGGER.info("Generated runtime resources for {} packs in a total of: {} ms",
+            Moonlight.LOGGER.info("Finished runtime resources generation for {} packs in a total of {} ms",
                     GENERATORS.size(), stopwatch.elapsed().toMillis());
         }, EarlyPackReloadEvent.class);
     }

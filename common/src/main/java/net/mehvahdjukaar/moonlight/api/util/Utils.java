@@ -456,8 +456,17 @@ public class Utils {
     }
 
     @Nullable
-    public static <T> T findFirstInRegistry(Registry<T> registry, ResourceLocation... id) {
-        for (ResourceLocation r : id) {
+    public static <T> T findFirstInRegistry(Registry<T> registry, ResourceLocation... ids) {
+        for (ResourceLocation r : ids) {
+            var optional = registry.getOptional(r);
+            if (optional.isPresent()) return optional.get();
+        }
+        return null;
+    }
+
+    @Nullable
+    public static <T> T findFirstInRegistry(Registry<T> registry, Iterable<ResourceLocation> ids) {
+        for (ResourceLocation r : ids) {
             var optional = registry.getOptional(r);
             if (optional.isPresent()) return optional.get();
         }

@@ -12,9 +12,9 @@ public class ClientConfigs {
     public static final Supplier<Boolean> LAZY_MAP_DATA;
     public static final Supplier<Integer> MAPS_MIPMAP;
     public static final Supplier<ShadeFix> FIX_SHADE;
-    public static final Supplier<Boolean> BLOCKTYPES_DEBUG;
-    public static final Supplier<Boolean> LEAVESTYPE_DEBUG;
-    public static final Supplier<Boolean> WOODTYPE_DEBUG;
+
+    @Deprecated(forRemoval = true)
+    public static final Supplier<Boolean> BLOCKTYPES_DEBUG = ()-> false;
 
     public static final ModConfigHolder CONFIG;
 
@@ -22,7 +22,7 @@ public class ClientConfigs {
         ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.CLIENT);
         builder.push("general");
         MERGE_PACKS = builder.comment("Merge all dynamic resource packs from all mods that use this library into a single pack")
-                .define("merge_dynamic_packs", true);
+                .define("merge_dynamic_resource_packs", true);
         LAZY_MAP_DATA = builder.comment("Prevents map texture from being upladed to GPU when only map markers have changed." +
                         "Could increase performance")
                 .define("lazy_map_upload", true);
@@ -35,10 +35,6 @@ public class ClientConfigs {
                         "Note there is a known compat issue with Figura mod. Keep this True or False with that one")
                 .define("consistent_entity_renderer_shading", ShadeFix.NO_GUI);
 
-        BLOCKTYPES_DEBUG = builder.comment("ONLY for debugging purpose. blocktypes_debug.txt, the file can be found in ~/.minecraft/logs/...")
-                        .define("blocktypes_debug", false);
-        WOODTYPE_DEBUG = builder.define("woodtypes_debug", false);
-        LEAVESTYPE_DEBUG = builder.define("leavestypes_debug", false);
         builder.pop();
         CONFIG = builder.build();
         CONFIG.forceLoad();

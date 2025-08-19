@@ -35,7 +35,6 @@ public class LeavesType extends BlockType {
     protected LeavesType(ResourceLocation id, Block leaves) {
         super(id);
         this.leaves = leaves;
-        //if (ClientConfigs.LEAVESTYPE_DEBUG.get() && !this.isVanilla()) appendToDebugFile(getTranslationKey());
     }
 
     @NotNull
