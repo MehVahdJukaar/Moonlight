@@ -21,7 +21,6 @@ import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
 public class HardcodedBlockTypes {
 
     public static final INamedSupplier<WoodType> BURNT;
-    public static final INamedSupplier<WoodType> GODD_WHISTLECANE;
 
     public static void init() {}
 
@@ -31,7 +30,7 @@ public class HardcodedBlockTypes {
      *
      * Spelling Convention: a typo in the Id, no underscore
      *
-     * Naming Convention: blocks has unique names that doesn't have "_wood", "_log", "_planks" or has different affix
+     * Naming-Convention: blocks has unique names that doesn't have "_wood", "_log", "_planks" or has different affix like "_block"
      *
      * Associated WoodType: Leaves have no WoodType, must be included
      * Associated LeavesType: Wood have no LeavesType, must be included
@@ -41,14 +40,14 @@ public class HardcodedBlockTypes {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
-        // Mofu's Better End - REASON: Naming Convention
+        // Mofu's Better End - REASON: Naming-Convention
         woodReg.addSimpleFinder("mofus_better_end_", "weepingstar")
                 .childBlockSuffix(LEAVES, "_leaf");
 
         woodReg.addSimpleFinder("mofus_better_end_", "frost_root")
                 .planksSuffix("_plank");
 
-        // Burnt - REASON: Naming Convention
+        // Burnt - REASON: Naming-Convention
         BURNT = woodReg.addSimpleFinder("burnt", "smoldering_bamboo")
                 .logSuffix("_block")
                 .build();
@@ -57,7 +56,7 @@ public class HardcodedBlockTypes {
         woodReg.addSimpleFinder("caverns_and_chasms", "azalea")
                 .childBlockSuffix(LEAVES, "_leaves");
 
-        // The Outer End - REASON: Naming Convention
+        // The Outer End - REASON: Naming-Convention
         woodReg.addSimpleFinder("outer_end", "azure")
                 .childBlockSuffix(WOOD, "_pith")
                 .childBlockSuffix(STRIPPED_WOOD, "_stripped_pith");
@@ -172,7 +171,7 @@ public class HardcodedBlockTypes {
         //TODO: is this needed? - blc of sounds (need to check if it's been fixed)
         woodReg.addSimpleFinder("rats", "pirat");
 
-        // Oh The Biomes You'll Go - REASON: Naming Convention
+        // Oh The Biomes You'll Go - REASON: Naming-Convention
         //TODO: shouldnt this need more stuff?
         woodReg.addSimpleFinder("byg", "embur")
                 .planks("embur_pedu")
@@ -183,11 +182,11 @@ public class HardcodedBlockTypes {
                 .planks("jaboticaba_planks")
                 .log("jabuticaba_log");
 
-        // My Nether's Delight - REASON: Naming Convention
+        // My Nether's Delight - REASON: Naming-Convention
         woodReg.addSimpleFinder("mynethersdelight", "powdery")
                 .logSuffix("_block");
 
-        // Nourished End - REASON: Naming Convention
+        // Nourished End - REASON: Naming-Convention
         woodReg.addSimpleFinder("nourished_end", "verdant")
                 .logSuffix("_stalk")
                 .childBlock(WOOD, "verdant_hyphae");
@@ -198,16 +197,13 @@ public class HardcodedBlockTypes {
                 .childBlockSuffix(WOOD, "_hyphae")
                 .childBlockSuffix(STRIPPED_WOOD, "_hyphae");
 
-        // Gardens Of The Dead - REASON: Naming Convention
-        woodReg.addSimpleFinder("gardens_of_the_dead", "soulblight");
-
-        GODD_WHISTLECANE =   woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane")
+        // Gardens Of The Dead - REASON: Naming-Convention
+        woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane")
                 .planks("whistlecane_planks")
                 .log("whistlecane_block")
-                .childItem(STICK, "whistlecane")
-        .build();
+                .childItem(STICK, "whistlecane");
 
-        // Luminous Nether - REASON: Associated WoodType, Naming Convention, Spelling Convention
+        // Luminous Nether - REASON: Associated WoodType, Naming-Convention, Spelling Convention
         woodReg.addSimpleFinder("luminous_nether", "mushroom")
                 .planks("mushroom_planks")
                 .log("goldenstem")
@@ -229,7 +225,7 @@ public class HardcodedBlockTypes {
                 .log("charred_spruce_log_stripped")
                 .planks("charred_spruce_planks");
 
-        // Habitat - REASON: Associated LOG, Naming Convention
+        // Habitat - REASON: Associated LOG, Naming-Convention
         woodReg.addSimpleFinder("habitat", "fairy_ring_mushroom")
                 .planks("fairy_ring_mushroom_planks")
                 .log("enhanced_fairy_ring_mushroom_stem");
@@ -248,8 +244,17 @@ public class HardcodedBlockTypes {
 
 //!! LEAVES
         // Oh The Biomes We've Gone - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("biomeswevegone:flowering_palo_verde", "biomeswevegone:pine_log");
-        leafReg.addLeavesToWoodMapping("biomeswevegone:araucaria", "biomeswevegone:pine_log");
+        leafReg.addLeavesToWoodMapping("biomeswevegone", "flowering_palo_verde", "palo_verde");
+        leafReg.addLeavesToWoodMapping("biomeswevegone", "araucaria", "pine");
+        leafReg.addLeavesToWoodMapping("biomeswevegone", "holly_berry", "holly");
+
+        leafReg.addLeavesToWoodMapping("biomeswevegone:firecracker", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:yucca", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:ripe_yucca", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:flowering_yucca", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:orchard", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:ripe_orchard", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:flowering_orchard", "minecraft:oak");
 
         // Luminous Nether - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("luminous_nether:ash", "luminous_nether:withered");
@@ -268,7 +273,7 @@ public class HardcodedBlockTypes {
         // Mystic's Biomes - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("mysticsbiomes", "yellow_maple", "white_maple");
 
-        //REASON: Naming Convention
+        //REASON: Naming-Convention
         leafReg.addSimpleFinder("mysticsbiomes", "pink_cherry")
                 .leavesSuffix("_blossoms");
         leafReg.addSimpleFinder("mysticsbiomes", "white_cherry")
@@ -307,7 +312,7 @@ public class HardcodedBlockTypes {
         //REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("blue_skies", "crescent_fruit", "dusk");
 
-        // COLORFUL AZALEAS - REASON: Associated WoodType, Naming Convention
+        // COLORFUL AZALEAS - REASON: Associated WoodType, Naming-Convention
         leafReg.addLeavesToWoodMapping("colorfulazaleas", "blue_azalea", "azule_azalea");
         leafReg.addLeavesToWoodMapping("colorfulazaleas", "blue_blooming_azalea", "azule_azalea");
         leafReg.addLeavesToWoodMapping("colorfulazaleas", "blue_flowering_azalea", "azule_azalea");
@@ -336,7 +341,7 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("colorfulazaleas", "yellow_blooming_azalea", "fiss_azalea");
         leafReg.addLeavesToWoodMapping("colorfulazaleas", "yellow_flowering_azalea", "fiss_azalea");
 
-        // POKECUBE LEGENDS - REASON: Naming Convention
+        // POKECUBE LEGENDS - REASON: Naming-Convention
         leafReg.addSimpleFinder("pokecube_legends", "dyna_pastel_pink")
                 .leaves("dyna_leaves_pastel_pink")
                 .equivalentWood("pokecube_legends:aged");
@@ -350,7 +355,7 @@ public class HardcodedBlockTypes {
         // REGIONS UNEXPLORED - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("regions_unexplored:bamboo", "minecraft:jungle");
 
-        // THE TWILIGHT FOREST - REASON: Associated WoodType, Naming Convention
+        // THE TWILIGHT FOREST - REASON: Associated WoodType, Naming-Convention
         leafReg.addLeavesToWoodMapping("twilightforest", "beanstalk", "twilight_oak");
         leafReg.addLeavesToWoodMapping("twilightforest", "thorn", "twilight_oak");
 
@@ -371,10 +376,10 @@ public class HardcodedBlockTypes {
 
         leafReg.addLeavesToWoodMapping("aether:crystal", skyroot_or_crystal);
         leafReg.addLeavesToWoodMapping("aether:crystal_fruit", skyroot_or_crystal);
-        leafReg.addLeavesToWoodMapping("aether", "gilded_oak", "skyroot");
 
         // Aether Redux - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("aether_redux:blighted_skyroot", "aether:skyroot");
+        leafReg.addLeavesToWoodMapping("aether_redux:gilded_oak", "aether:skyroot");
 
         // AETHER GENESIS - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("aether_genesis:purple_crystal", skyroot_or_crystal);
@@ -393,7 +398,7 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("autumnity", "red_maple", "maple");
 
         // ALEX'S CAVES - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("alexscaves:ancient_leaves", "minecraft:jungle");
+        leafReg.addLeavesToWoodMapping("alexscaves:ancient", "minecraft:jungle");
     }
 
 
