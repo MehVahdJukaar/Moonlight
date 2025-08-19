@@ -355,13 +355,13 @@ public class HardcodedBlockTypes {
 
         // AETHER - REASON: Associated WoodType
 
-            leafReg.addLeavesToWoodMapping("aether:crystal", skyroot_or_crystal);
-        leafReg.addLeavesToWoodMapping("aether:crystal_fruit", skyroot_or_crystal);
         // Replaces LeavesType's Associated WoodType if a mod is installed
         String skyroot_or_crystal = PlatHelper.isModLoaded("aether_redux") ?
                 "aether_redux:crystal" : "aether:skyroot";
         String skyroot_or_glacia = PlatHelper.isModLoaded("aether_redux") ?
                 "aether_redux:glacia" : "aether:skyroot";
+        leafReg.addLeavesToWoodMapping("aether:crystal", skyroot_or_crystal);
+        leafReg.addLeavesToWoodMapping("aether:crystal_fruit", skyroot_or_crystal);
 
         leafReg.addLeavesToWoodMapping("aether", "golden_oak", "skyroot");
         leafReg.addLeavesToWoodMapping("aether:holiday", skyroot_or_glacia);

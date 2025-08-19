@@ -23,7 +23,7 @@ public class CommonConfigs {
         builder.pop();
 
         CONFIG = builder.build();
-        CONFIG.loadFromFile();
+        CONFIG.forceLoad();
     }
 
     public static void init() {

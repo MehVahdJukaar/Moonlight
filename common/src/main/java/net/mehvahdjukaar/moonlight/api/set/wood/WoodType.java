@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
@@ -287,11 +288,11 @@ public class WoodType extends BlockType {
         String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
 
         List<ResourceLocation> targets = new ArrayList<>();
-        targets.add(new ResourceLocation(myNamespace, myPath + "_" + prefix_ + suffix));
-        targets.add(new ResourceLocation(myNamespace, alternateNamespace + "_" + prefix_ + suffix));
+        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, myPath + "_" + prefix_ + suffix));
+        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, alternateNamespace + "_" + prefix_ + suffix));
         if (!noneEmpty) {
-            targets.add(new ResourceLocation(myNamespace, prefix_ + myPath + "_" + suffix));
-            targets.add(new ResourceLocation(myNamespace, prefix_ + alternateNamespace + "_" + suffix));
+            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath + "_" + suffix));
+            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + alternateNamespace + "_" + suffix));
         }
 
         //For things like grimwood_wood -> grimwood

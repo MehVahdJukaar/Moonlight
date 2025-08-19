@@ -6,9 +6,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
-import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.InvPlacer;
-import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
@@ -193,7 +191,7 @@ public class Utils {
     }
 
     @Deprecated(forRemoval = true)
-    public static ResourceLocation getID(@NotNull MapDecorationType<?, ?> object) {
+    public static ResourceLocation getID(@NotNull MLMapDecorationType<?, ?> object) {
         return MapDataInternal.hackyGetRegistry().getKey(object);
     }
 

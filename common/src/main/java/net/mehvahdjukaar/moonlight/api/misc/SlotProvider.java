@@ -118,36 +118,23 @@ public interface SlotProvider {
                 }
 
                 private void addResourceOffHand(ItemStack toAdd, Inventory inv) {
-                    Item item = toAdd.getItem();
                     int stackCount;
                     NonNullList<ItemStack> offHand = inv.offhand;
                     for (int offSlot = 0; offSlot < offHand.size(); offSlot++) {
                         stackCount = toAdd.getCount();
-                        ItemStack handStack = offHand.get(offSlot);
-                        if (handStack.isEmpty()) {
-                            handStack = new ItemStack(item, 0);
-                            if (toAdd.hasTag()) {
-                                handStack.setTag(toAdd.getTag().copy());
-                            }
-
-                            offHand.set(offSlot, handStack);
-                        } else if (!inv.hasRemainingSpaceForItem(handStack, toAdd)) {
-                            continue;
+                        ItemStack itemStack = offHand.get(offSlot);
+                        if (itemStack.isEmpty()) {
+                            itemStack = toAdd.copyWithCount(0);
+                            offHand.set(offSlot, itemStack);
+                            return;
                         }
 
-                        int addedCount = stackCount;
-                        if (addedCount > handStack.getMaxStackSize() - handStack.getCount()) {
-                            addedCount = handStack.getMaxStackSize() - handStack.getCount();
-                        }
-
-                        if (addedCount > inv.getMaxStackSize() - handStack.getCount()) {
-                            addedCount = inv.getMaxStackSize() - handStack.getCount();
-                        }
-
+                        int possibleSpace = inv.getMaxStackSize(itemStack) - itemStack.getCount();
+                        int addedCount = Math.min(stackCount, possibleSpace);
                         if (addedCount != 0) {
                             stackCount -= addedCount;
-                            handStack.grow(addedCount);
-                            handStack.setPopTime(5);
+                            itemStack.grow(addedCount);
+                            itemStack.setPopTime(5);
 
                             toAdd.setCount(stackCount);
                         }

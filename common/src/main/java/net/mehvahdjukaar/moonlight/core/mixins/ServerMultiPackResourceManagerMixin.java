@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +38,7 @@ public abstract class ServerMultiPackResourceManagerMixin implements CloseableRe
         //fires on world load or on /reload
         //token to assure that modded resources are included
         if (!((Object) (this) instanceof FilteredResManager) &&
-                this.getResource(new ResourceLocation("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
+                this.getResource(Moonlight.res("moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
             //one would think that this would be fool proof. Well check again, some mod like to re create this resource manager during block load! All modded resources included aswell
             //so to be EXTRA safe we check if registry phase is over
             if (!PlatHelper.isInitializing()) {
