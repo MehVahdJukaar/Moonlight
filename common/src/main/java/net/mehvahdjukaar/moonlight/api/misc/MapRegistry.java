@@ -9,9 +9,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
+import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.core.IdMap;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -152,4 +156,9 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
         return this.byId(id) != null;
     }
 
+
+    @Deprecated(forRemoval = true)
+    public StreamCodec<ByteBuf, T> getStreamCodec() {
+        return  ByteBufCodecs.fromCodec(this);
+    }
 }

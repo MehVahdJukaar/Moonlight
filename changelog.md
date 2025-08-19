@@ -1,3 +1,2 @@
-- fixed a dupe with fluid introduced 2 patches ago
-- improved handing of animated textures in resource gen
-- improved more api
+- hotfix for an issue on fabric servers
+- also added back a deprecated method to not break binary compat with old versions of deps

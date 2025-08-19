@@ -47,12 +47,12 @@ dependencies {
     //modRuntimeOnly("curse.maven:architectury-api-419699:5137936")
 //    modImplementation("pebjebs.mapatlases:map_atlases-fabric:1.21-6.1.2")
 
-    modCompileOnly("maven.modrinth:flashback:0.11.0") // Get latest version from releases
+    //modCompileOnly("maven.modrinth:flashback:0.11.0") // Get latest version from releases
    // modImplementation("curse.maven:supplementaries-412082:6462648") // Get latest version from releases
 
    // modRuntimeOnly("curse.maven:aether-255308:6894657")
  //   modRuntimeOnly("curse.maven:owo-lib-532610:4749199")
-    modRuntimeOnly("curse.maven:accessories-938917:6837982")
+    //modRuntimeOnly("curse.maven:accessories-938917:6837982")
     //modRuntimeOnly("curse.maven:terrablender-fabric-565956:5068219")
     //modRuntimeOnly("curse.maven:forge-config-api-port-fabric-547434:4583000")
     //modImplementation("curse.maven:the-bumblezone-fabric-363949:5332804")
