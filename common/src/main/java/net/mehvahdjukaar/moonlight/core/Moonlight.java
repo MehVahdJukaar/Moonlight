@@ -103,7 +103,7 @@ public class Moonlight {
             MoonlightClient.setupClient();
         }
 
-        if (CommonConfigs.EXTRA_DEBUG.get()) {
+        if (CommonConfigs.EXTRA_DEBUG.get() || PlatHelper.isDev()) {
             DebugBlockTypes.writeToFile();
         }
     }
