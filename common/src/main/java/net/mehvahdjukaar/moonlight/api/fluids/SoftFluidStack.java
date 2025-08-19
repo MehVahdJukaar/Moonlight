@@ -344,13 +344,21 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
 
-    @Deprecated(forRemoval = true)
-    public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
+    /**
+     * Converts to item and decrement the stack by extracted amount
+     */
+    public Pair<ItemStack, FluidContainerList.Category> splitToItem(ItemStack emptyContainer) {
         var r = toItem(emptyContainer);
-        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getAmount());
+        if (r != null) this.shrink(r.getSecond().getCapacity());
         return r;
     }
 
+    @Deprecated(forRemoval = true)
+    public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
+        var r = toItem(emptyContainer);
+        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getCapacity());
+        return r;
+    }
 
     /**
      * Fills the item if possible. Returns empty stack if it fails
@@ -385,7 +393,7 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     private ItemStack[] createFilledStacks(FluidContainerList.Category category, boolean onlyFirst) {
-        int shrinkAmount = category.getAmount();
+        int shrinkAmount = category.getCapacity();
         if (shrinkAmount > this.getCount()) {
             return new ItemStack[0];
         }

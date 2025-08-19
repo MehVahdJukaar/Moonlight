@@ -85,13 +85,6 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
         return this.emptyToFilledMap.values().iterator();
     }
 
-
-
-    @Override
-    public @NotNull Iterator<Category> iterator() {
-        return this.emptyToFilledMap.values().iterator();
-    }
-
     protected void merge(FluidContainerList other) {
         other.emptyToFilledMap.values().forEach(this::addCategory);
     }
