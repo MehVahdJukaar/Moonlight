@@ -1,3 +1,2 @@
-- fixed a dupe with fluid introduced 2 patches ago
-- improved handing of animated textures in resource gen
-- improved more api
+- Updated LeavesTypes' Associated WoodTypes from multiple Wood mods
+- Added 2 mods to include LeavesType's Associated WoodTypes
