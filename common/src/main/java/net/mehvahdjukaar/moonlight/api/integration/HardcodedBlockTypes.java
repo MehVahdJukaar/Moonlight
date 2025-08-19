@@ -244,17 +244,8 @@ public class HardcodedBlockTypes {
 
 //!! LEAVES
         // Oh The Biomes We've Gone - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("biomeswevegone", "flowering_palo_verde", "palo_verde");
-        leafReg.addLeavesToWoodMapping("biomeswevegone", "araucaria", "pine");
-        leafReg.addLeavesToWoodMapping("biomeswevegone", "holly_berry", "holly");
-
-        leafReg.addLeavesToWoodMapping("biomeswevegone:firecracker", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("biomeswevegone:yucca", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("biomeswevegone:ripe_yucca", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("biomeswevegone:flowering_yucca", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("biomeswevegone:orchard", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("biomeswevegone:ripe_orchard", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("biomeswevegone:flowering_orchard", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:flowering_palo_verde", "biomeswevegone:pine_log");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:araucaria", "biomeswevegone:pine_log");
 
         // Luminous Nether - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("luminous_nether:ash", "luminous_nether:withered");
@@ -352,40 +343,48 @@ public class HardcodedBlockTypes {
                 .leaves("dyna_leaves_red")
                 .equivalentWood("pokecube_legends:aged");
 
-        // REGIONS UNEXPLORED - REASON: Different WoodType
+        // REGIONS UNEXPLORED - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("regions_unexplored:bamboo", "minecraft:jungle");
 
-        // THE TWILIGHT FOREST - REASON: Different WoodType, Naming-Convention
+        // THE TWILIGHT FOREST - REASON: Associated WoodType, Naming-Convention
         leafReg.addLeavesToWoodMapping("twilightforest", "beanstalk", "twilight_oak");
         leafReg.addLeavesToWoodMapping("twilightforest", "thorn", "twilight_oak");
 
-        // ULTERLANDS - REASON: Different WoodType
+        // ULTERLANDS - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("ulterlands:souldrained", "minecraft:oak");
 
-        // AETHER - REASON: Different WoodType
+        // AETHER - REASON: Associated WoodType
+
+            leafReg.addLeavesToWoodMapping("aether:crystal", skyroot_or_crystal);
+        leafReg.addLeavesToWoodMapping("aether:crystal_fruit", skyroot_or_crystal);
+        // Replaces LeavesType's Associated WoodType if a mod is installed
+        String skyroot_or_crystal = PlatHelper.isModLoaded("aether_redux") ?
+                "aether_redux:crystal" : "aether:skyroot";
+        String skyroot_or_glacia = PlatHelper.isModLoaded("aether_redux") ?
+                "aether_redux:glacia" : "aether:skyroot";
+
         leafReg.addLeavesToWoodMapping("aether", "golden_oak", "skyroot");
-        leafReg.addLeavesToWoodMapping("aether", "holiday", "skyroot");
-        leafReg.addLeavesToWoodMapping("aether", "decorated_holiday", "skyroot");
+        leafReg.addLeavesToWoodMapping("aether:holiday", skyroot_or_glacia);
+        leafReg.addLeavesToWoodMapping("aether:decorated_holiday", skyroot_or_glacia);
 
         leafReg.addLeavesToWoodMapping("aether:crystal", skyroot_or_crystal);
         leafReg.addLeavesToWoodMapping("aether:crystal_fruit", skyroot_or_crystal);
-        // Aether Redux - REASON: Associated WoodType, Replaces the skyroot logs in crystal trees with their own crystal logs
-        String associatedWoodType = PlatHelper.isModLoaded("aether_redux") ?
-                "aether_redux:crystal" : "aether:skyroot";
-
-        leafReg.addLeavesToWoodMapping("aether:crystal", associatedWoodType);
-        leafReg.addLeavesToWoodMapping("aether:crystal_fruit_leaves", associatedWoodType);
+        leafReg.addLeavesToWoodMapping("aether", "gilded_oak", "skyroot");
         leafReg.addLeavesToWoodMapping("aether_redux:gilded_oak", "aether:skyroot");
 
-        // AETHER GENESIS - REASON: Associated WoodType (same reason as above)
-        leafReg.addLeavesToWoodMapping("aether_genesis:purple_crystal", associatedWoodType);
-        leafReg.addLeavesToWoodMapping("aether_genesis:purple_crystal_fruit", associatedWoodType);
+        // Aether Redux - REASON: Associated WoodType
+        leafReg.addLeavesToWoodMapping("aether_redux:blighted_skyroot", "aether:skyroot");
+
+        // AETHER GENESIS - REASON: Associated WoodType
+        leafReg.addLeavesToWoodMapping("aether_genesis:purple_crystal", skyroot_or_crystal);
+        leafReg.addLeavesToWoodMapping("aether_genesis:purple_crystal_fruit", skyroot_or_crystal);
 
         // ANCIENT AETHER - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("ancient_aether", "crystal_skyroot", "skyroot");
-        leafReg.addLeavesToWoodMapping("ancient_aether", "enchanted_skyroot", "skyroot");
-        leafReg.addLeavesToWoodMapping("ancient_aether", "skyroot_pine", "skyroot");
-        leafReg.addLeavesToWoodMapping("ancient_aether", "blue_skyroot_pine", "skyroot");
+        leafReg.addLeavesToWoodMapping("ancient_aether:crystal_skyroot", "aether:skyroot");
+        leafReg.addLeavesToWoodMapping("ancient_aether:enchanted_skyroot", "aether:skyroot");
+        leafReg.addLeavesToWoodMapping("ancient_aether:skyroot_pine", "aether:skyroot");
+        leafReg.addLeavesToWoodMapping("ancient_aether:blue_skyroot_pine", "aether:skyroot");
+        leafReg.addLeavesToWoodMapping("ancient_aether:wyndcaps_holiday_tree", "aether:skyroot");
 
         // AUTUMNITY - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("autumnity", "yellow_maple", "maple");
