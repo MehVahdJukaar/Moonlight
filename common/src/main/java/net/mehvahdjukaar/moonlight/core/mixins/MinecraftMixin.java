@@ -24,7 +24,7 @@ public abstract class MinecraftMixin {
     //cancel rope slide down sound
     @Inject(method = "startAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/HitResult;getType()Lnet/minecraft/world/phys/HitResult$Type;",
             shift = At.Shift.BEFORE), cancellable = true)
-    private void ml$switchLunchBoxMode(CallbackInfoReturnable<Boolean> cir) {
+    private void ml$onStartAttack(CallbackInfoReturnable<Boolean> cir) {
         InteractionHand hand = InteractionHand.MAIN_HAND;
         ItemStack stack = this.player.getItemInHand(hand);
         if (stack.getItem() instanceof ILeftClickReact lr) {
