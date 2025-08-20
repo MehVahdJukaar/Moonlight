@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
+import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
 import net.minecraft.util.FastColor;
@@ -132,6 +133,23 @@ public final class TextureOps {
 
             int val = toTileOn.getPixel(srcX, srcY);
             pixel.setValue(val);
+        });
+    }
+
+
+    public static void multiplyColor(TextureImage img, int tintColor) {
+        int r = FastColor.ABGR32.red(tintColor);
+        int g = FastColor.ABGR32.green(tintColor);
+        int b = FastColor.ABGR32.blue(tintColor);
+        img.forEachPixel(pixel -> {
+            int oldValue = pixel.getValue();
+            int newColor = FastColor.ABGR32.color(
+                    FastColor.ABGR32.alpha(oldValue),
+                    FastColor.ABGR32.red(oldValue) * r / 255,
+                    FastColor.ABGR32.green(oldValue) * g / 255,
+                    FastColor.ABGR32.blue(oldValue) * b / 255
+            );
+            pixel.setValue(newColor);
         });
     }
 
