@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
-import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
@@ -12,7 +11,6 @@ import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -27,6 +25,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
@@ -211,7 +210,7 @@ public class ResourceSink {
         ResourceLocation res = relativePath.contains(":") ? ResourceLocation.parse(relativePath) :
                 ResourceLocation.fromNamespaceAndPath(this.modId, relativePath);
         if (!alreadyHasTextureAtLocation(manager, res)) {
-            try (TextureImage textureImage = textureSupplier.get()){
+            try (TextureImage textureImage = textureSupplier.get()) {
                 this.addTexture(res, textureImage, isOnAtlas);
             } catch (Exception e) {
                 Moonlight.LOGGER.error("Failed to generate texture {}: {}", res, e);

@@ -22,6 +22,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Function;
 
+//ok this class shouldnt really be used anymore. Use an actual registry or datapack registry instead.
+@Deprecated
 public class MapRegistry<T> implements IdMap<T>, Codec<T> {
 
     private final String name;
@@ -157,6 +159,7 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
     }
 
 
+    //seriously this especially shouldnt be used. Use a real Registry instead.
     @Deprecated(forRemoval = true)
     public StreamCodec<ByteBuf, T> getStreamCodec() {
         return  ByteBufCodecs.fromCodec(this);
