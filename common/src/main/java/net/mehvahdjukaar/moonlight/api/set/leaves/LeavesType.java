@@ -10,7 +10,6 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -36,6 +35,7 @@ public class LeavesType extends BlockType {
         this.leaves = leaves;
     }
 
+    /// USE {@link LeavesType#getAssociatedWoodType()}
     @NotNull
     @Deprecated(forRemoval = true)
     public WoodType getWoodType() {
