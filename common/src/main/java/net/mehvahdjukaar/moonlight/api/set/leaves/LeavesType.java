@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -61,6 +62,15 @@ public class LeavesType extends BlockType {
     @Override
     public void initializeChildrenBlocks() {
         this.addChild("leaves", leaves);
+        WoodType equivalentWood = getAssociatedWoodType();
+        Block log = null;
+        if (equivalentWood != null) {
+            log = equivalentWood.log;
+        }
+        if (log != null) {
+            log = findRelatedEntry("log", BuiltInRegistries.BLOCK);
+        }
+        if (log != null) this.addChild("log", log);
     }
 
     @Override
@@ -84,7 +94,7 @@ public class LeavesType extends BlockType {
 
         public Finder leaves(ResourceLocation id) {
             return this.leaves(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
-                    ()-> new IllegalStateException("Failed to find leaves block: " + id)
+                    () -> new IllegalStateException("Failed to find leaves block: " + id)
             ));
         }
 
@@ -148,7 +158,7 @@ public class LeavesType extends BlockType {
         /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
         @Deprecated(forRemoval = true)
         public Finder(ResourceLocation id, Supplier<Block> leaves) {
-            super(id,LeavesTypeRegistry.INSTANCE);
+            super(id, LeavesTypeRegistry.INSTANCE);
             this.leavesFinder = leaves;
         }
 
