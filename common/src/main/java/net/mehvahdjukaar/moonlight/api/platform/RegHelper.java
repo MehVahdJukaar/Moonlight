@@ -265,14 +265,6 @@ public class RegHelper {
         return register(name, PlatHelper::newParticle, Registries.PARTICLE_TYPE);
     }
 
-    public static <A> Registry<A> registerRegistry(ResourceLocation key, boolean synced) {
-        return registerRegistry(ResourceKey.createRegistryKey(key), synced);
-    }
-
-    @ExpectPlatform
-    public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean synced) {
-        throw new AssertionError();
-    }
 
     public static RegSupplier<BannerPattern> registerBannerPattern(ResourceLocation name) {
         return registerBannerPattern(name, name.toString());
