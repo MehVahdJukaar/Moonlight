@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.integration;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
-import net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodTypes;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
@@ -244,7 +243,9 @@ public class HardcodedBlockTypes {
 
 //!! LEAVES
         // Oh The Biomes We've Gone - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("biomeswevegone", "flowering_palo_verde", "palo_verde");
+        leafReg.addSimpleFinder("biomeswevegone:flowering_palo_verde")
+                .childBlock(LOG, "palo_verde_log");
+
         leafReg.addLeavesToWoodMapping("biomeswevegone", "araucaria", "pine");
         leafReg.addLeavesToWoodMapping("biomeswevegone", "holly_berry", "holly");
 
