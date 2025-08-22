@@ -137,10 +137,8 @@ public class SoftFluidTank {
      */
     public InteractionResultHolder<ItemStack> fillItem(ItemStack emptyContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
         var pair = this.fluidStack.splitToItem(emptyContainer);
-
         if (pair != null) {
             FluidContainerList.Category category = pair.getSecond();
-            emptyContainer.shrink(category.getCapacity());
             SoundEvent sound = category.getEmptySound();
             if (sound != null && pos != null) {
                 level.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);

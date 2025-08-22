@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
@@ -46,6 +47,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.SlabBlock;
