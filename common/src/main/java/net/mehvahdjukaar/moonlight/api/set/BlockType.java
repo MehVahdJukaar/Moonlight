@@ -5,7 +5,6 @@ import com.google.common.collect.HashBiMap;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
@@ -159,16 +158,18 @@ public abstract class BlockType {
 
 
     @Nullable
-    protected <V> V findRelatedEntry(String after, Registry<V> reg) {
-        return findRelatedEntry(after, "", reg);
+    protected <V> V findRelatedEntry(String prefixOrInfix, Registry<V> reg) {
+        return findRelatedEntry(prefixOrInfix, "", reg);
     }
 
     @Nullable
-    protected <V> V findRelatedEntry(String before, String after, Registry<V> reg) {
-        if (!after.isEmpty()) after = "_" + after;
+    protected <V> V findRelatedEntry(String prefixOrInfix, String suffix, Registry<V> reg) {
+        String prefixed = (prefixOrInfix.isEmpty()) ? "" : prefixOrInfix + "_";
+        String infixed = (prefixOrInfix.isEmpty()) ? "" : "_" + prefixOrInfix;
+        String suffixed = (suffix.isEmpty()) ? "" : "_" + suffix;
         ResourceLocation[] targets = {
-                id.withPath(id.getPath() + "_" + before + after),
-                id.withPath(before + "_" + id.getPath() + after),
+                id.withPath(id.getPath() + infixed + suffixed),
+                id.withPath(prefixed + id.getPath() + suffixed),
         };
         return Utils.findFirstInRegistry(reg, targets);
     }
