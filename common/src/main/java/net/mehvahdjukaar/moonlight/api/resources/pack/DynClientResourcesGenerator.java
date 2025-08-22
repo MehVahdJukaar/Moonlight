@@ -55,16 +55,11 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
         ResourceLocation res = relativePath.contains(":") ? ResourceLocation.parse(relativePath) :
                 ResourceLocation.fromNamespaceAndPath(this.modId, relativePath);
         if (!alreadyHasTextureAtLocation(manager, res)) {
-            TextureImage textureImage = null;
-            try {
-                textureImage = textureSupplier.get();
+            try (TextureImage textureImage = textureSupplier.get()) {
+                this.dynamicPack.addAndCloseTexture(res, textureImage, isOnAtlas);
             } catch (Exception e) {
                 getLogger().error("Failed to generate texture {}: {}", res, e);
-            }
-            if (textureImage == null) {
-                getLogger().warn("Could not generate texture {}", res);
-            } else {
-                this.dynamicPack.addAndCloseTexture(res, textureImage, isOnAtlas);
+                if (PlatHelper.isDev()) throw new AssertionError(e);
             }
         }
     }

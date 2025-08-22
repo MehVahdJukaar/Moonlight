@@ -1,2 +1,1 @@
-- hotfix for an issue on fabric servers
-- also added back a deprecated method to not break binary compat with old versions of deps
+- fixed an issue that would cause extraction from fluid containers to consume more items than intended
