@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.integration;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
-import net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodTypes;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
@@ -244,8 +243,19 @@ public class HardcodedBlockTypes {
 
 //!! LEAVES
         // Oh The Biomes We've Gone - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("biomeswevegone:flowering_palo_verde", "biomeswevegone:pine_log");
-        leafReg.addLeavesToWoodMapping("biomeswevegone:araucaria", "biomeswevegone:pine_log");
+        leafReg.addSimpleFinder("biomeswevegone:flowering_palo_verde")
+                .childBlock(LOG, "palo_verde_log");
+
+        leafReg.addLeavesToWoodMapping("biomeswevegone", "araucaria", "pine");
+        leafReg.addLeavesToWoodMapping("biomeswevegone", "holly_berry", "holly");
+
+        leafReg.addLeavesToWoodMapping("biomeswevegone:firecracker", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:yucca", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:ripe_yucca", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:flowering_yucca", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:orchard", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:ripe_orchard", "minecraft:oak");
+        leafReg.addLeavesToWoodMapping("biomeswevegone:flowering_orchard", "minecraft:oak");
 
         // Luminous Nether - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("luminous_nether:ash", "luminous_nether:withered");
