@@ -19,6 +19,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
+
 public class LeavesType extends BlockType {
 
     public static final Codec<LeavesType> CODEC = ResourceLocation.CODEC.flatXmap(r -> {
@@ -61,21 +63,24 @@ public class LeavesType extends BlockType {
 
     @Override
     public void initializeChildrenBlocks() {
-        this.addChild("leaves", leaves);
+        this.addChild(LEAVES, leaves);
+
         WoodType equivalentWood = getAssociatedWoodType();
-        Block log = null;
+        Block log;
         if (equivalentWood != null) {
             log = equivalentWood.log;
         }
-        if (log != null) {
-            log = findRelatedEntry("log", BuiltInRegistries.BLOCK);
+        else {
+            log = findRelatedEntry(LOG, BuiltInRegistries.BLOCK);
+
         }
-        if (log != null) this.addChild("log", log);
+        if (log != null) this.addChild(LOG, log);
+
+        this.addChild(SAPLING, this.findRelatedEntry("sapling", BuiltInRegistries.BLOCK));
     }
 
     @Override
     public void initializeChildrenItems() {
-        this.addChild("sapling", this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
     }
 
     public static class Finder extends SetFinderBuilder<LeavesType> {
