@@ -154,7 +154,6 @@ public class SoftFluidTank {
 
         if (pair != null) {
             FluidContainerList.Category category = pair.getSecond();
-            emptyContainer.shrink(category.getCapacity());
             SoundEvent sound = category.getEmptySound();
             if (sound != null && pos != null) {
                 level.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);
