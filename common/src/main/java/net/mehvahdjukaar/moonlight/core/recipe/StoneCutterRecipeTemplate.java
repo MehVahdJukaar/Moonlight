@@ -61,7 +61,7 @@ public class StoneCutterRecipeTemplate implements IRecipeTemplate<SingleItemReci
         if (ing == null) return null;
 
         SingleItemRecipeBuilder builder = SingleItemRecipeBuilder.stonecutting(
-                ing, determineBookCategory(this.category), newRes);
+                ing, determineBookCategory(this.category), newRes, count);
         builder.group(group);
 
         builder.unlockedBy("has_item", InventoryChangeTrigger.TriggerInstance.hasItems(unlockItem));
