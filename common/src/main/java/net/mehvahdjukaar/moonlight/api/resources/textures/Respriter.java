@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -96,6 +95,12 @@ public class Respriter {
      */
     // this should only be used when you go from non-animated to animated
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable McMetaFile targetAnimationData) {
+        if (targetPalettes.isEmpty()) {
+            if (PlatHelper.isDev()) {
+                throw new IllegalArgumentException("Respriter was given no palettes!");
+            } else Moonlight.LOGGER.error("Respriter was given no palettes!");
+            return imageToRecolor.makeCopy();
+        }
 
         // in case the SOURCE texture itself has an animation we use it instead. this WILL create issues with animated planks textures but its acceptable as mcmeta of source could have more important stuff like ctm
         McMetaFile mergedAnimationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
