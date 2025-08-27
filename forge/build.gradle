@@ -48,12 +48,7 @@ dependencies {
 
     modCompileOnly("curse.maven:the-twilight-forest-227639:4755494")
     modRuntimeOnly("curse.maven:alltheleaks-1091339:5936734")
-    modRuntimeOnly("curse.maven:gardens-of-the-dead-683174:4784269")
-    modRuntimeOnly("curse.maven:architectury-api-419699:5137938")
-    modRuntimeOnly("curse.maven:terrablender-563928:6290448")
    // modImplementation("curse.maven:spelunkery-790530:6122072")
-    implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:${mixin_squared_version}"))
-    implementation(include("com.github.bawnorton.mixinsquared:mixinsquared-forge:${mixin_squared_version}"))
 
     //modRuntimeOnly("curse.maven:official-divinerpg-363543:5715606")
     //modRuntimeOnly("curse.maven:every-compat-628539:5792496")
