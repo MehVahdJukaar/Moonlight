@@ -52,7 +52,9 @@ public class TextureImage implements AutoCloseable, Sampler2D {
                 }
             }
 
-            return of(i, metadata);
+            TextureImage image = of(i, metadata);
+            image.path = relativePath.toString();
+            return image;
         } catch (Exception e) {
             throw new IOException("Failed to open texture at location " + relativePath + ": no such file");
         }
@@ -88,6 +90,8 @@ public class TextureImage implements AutoCloseable, Sampler2D {
     //All frames. Includes unused ones
     private final int frameCount;
     private final int frameScale;
+
+    String path = "none";
 
     private TextureImage(NativeImage image, @Nullable McMetaFile metadata) {
         this.image = image;
@@ -298,7 +302,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
     @Deprecated(forRemoval = true)
     public TextureImage createAnimationTemplate(int length, McMetaFile useDataFrom) {
-        return TextureOps.createSingleFrameAnimation(this, length, useDataFrom);
+        return TextureOps.createSingleFrameAnimation(this, useDataFrom);
     }
 
 

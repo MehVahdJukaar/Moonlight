@@ -141,7 +141,8 @@ public final class TextureOps {
     /**
      * Creates a new image using the first frame of this one. Its frame data and frame length will be the one provided
      */
-    public static TextureImage createSingleFrameAnimation(TextureImage img, int length, McMetaFile animationData) {
+    public static TextureImage createSingleFrameAnimation(TextureImage img, McMetaFile animationData) {
+        int length = animationData.getLogicalFrameCount();
         if (length <= 0) {
             throw new IllegalArgumentException("Length must be greater than 0");
         }
@@ -157,6 +158,11 @@ public final class TextureOps {
             pixel.setValue(img.getFramePixel(0, xo, yo));
         });
         return newImage;
+    }
+
+    @Deprecated(forRemoval = true)
+    public static TextureImage createSingleFrameAnimation(TextureImage img, int length, McMetaFile animationData) {
+        return createSingleFrameAnimation(img, animationData);
     }
 
     public static TextureImage createScaled(TextureImage img, float widthScale, float heightScale) {

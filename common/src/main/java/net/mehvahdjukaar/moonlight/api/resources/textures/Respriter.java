@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
@@ -11,17 +12,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Respriter {
 
     private final TextureImage imageToRecolor;
-    //one palette for each frame. frame order will be the same
+    //one palette for each frame (this is guaranteed). frame order will be the same
+    //these represent the colors that for each frames will be swapped
     private final List<Palette> originalPalettes;
-    //if respriter is not provided a texture list for an animated image, it will use the first palette for all images,
-    //keeping recolors consistent
-    private final boolean useMergedPalette;
+    //if provided, only applies recoloring process to the given areas. Most of the time this isn't needed as it's coveted by the palettes
+    @Nullable
+    private final Sampler2D recoloringMask;
 
     /**
      * Base respriter. Automatically grabs a palette from this image and swaps it in recolorImage with the other one provided
@@ -29,7 +29,7 @@ public class Respriter {
      * @param imageToRecolor base image that needs to be recolored
      */
     public static Respriter of(TextureImage imageToRecolor) {
-        return new Respriter(imageToRecolor, Palette.fromAnimatedImage(imageToRecolor, null, 0));
+        return new Respriter(imageToRecolor, Palette.fromAnimatedImage(imageToRecolor, null, 0), null);
     }
 
     /**
@@ -38,11 +38,11 @@ public class Respriter {
      * @param imageToRecolor base image that needs to be recolored
      */
     public static Respriter masked(TextureImage imageToRecolor, TextureImage colorMask) {
-        return new Respriter(imageToRecolor, List.of(Palette.fromImage(imageToRecolor, colorMask, 0)));
+        return new Respriter(imageToRecolor, List.of(Palette.fromImage(imageToRecolor, colorMask, 0)), colorMask);
     }
 
     public static Respriter ofPalette(TextureImage imageToRecolor, List<Palette> colorsToSwap) {
-        return new Respriter(imageToRecolor, colorsToSwap);
+        return new Respriter(imageToRecolor, colorsToSwap, null);
     }
 
     /**
@@ -53,7 +53,7 @@ public class Respriter {
      *                       Does not care about animated texture and will not treat each frame individually
      */
     public static Respriter ofPalette(TextureImage imageToRecolor, Palette colorsToSwap) {
-        return new Respriter(imageToRecolor, List.of(colorsToSwap));
+        return new Respriter(imageToRecolor, List.of(colorsToSwap), null);
     }
 
     /**
@@ -64,18 +64,12 @@ public class Respriter {
      *                       If the provided list is less than the animation strip length,
      *                       only the first provided palette will be used on the whole image keeping colors consistent among different frames
      */
-    private Respriter(TextureImage imageToRecolor, List<Palette> colorsToSwap) {
+    private Respriter(TextureImage imageToRecolor, List<Palette> colorsToSwap, @Nullable Sampler2D recoloringMask) {
         if (colorsToSwap.isEmpty())
             throw new UnsupportedOperationException("Respriter must have a non empty target palette");
-        // assures that frame size and palette size match
-        if (imageToRecolor.frameCount() > colorsToSwap.size()) {
-            //if it does not have enough colors just uses the first one
-            Palette firstPalette = colorsToSwap.get(0);
-            colorsToSwap = Collections.nCopies(imageToRecolor.frameCount(), firstPalette);
-            this.useMergedPalette = true;
-        } else this.useMergedPalette = false;
         this.imageToRecolor = imageToRecolor;
         this.originalPalettes = colorsToSwap;
+        this.recoloringMask = recoloringMask;
     }
 
 
@@ -105,52 +99,62 @@ public class Respriter {
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable McMetaFile targetAnimationData) {
 
         // in case the SOURCE texture itself has an animation we use it instead. this WILL create issues with animated planks textures but its acceptable as mcmeta of source could have more important stuff like ctm
-        McMetaFile animationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
+        McMetaFile mergedAnimationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
 
-        if (animationData == null) return recolor(targetPalettes);
+        if (mergedAnimationData == null) return recolor(targetPalettes);
 
         //is restricted to use only first original palette since it must merge a new animation following the given one
-        Palette originalPalette = originalPalettes.getFirst();
+        TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor, mergedAnimationData);
 
-        // in case the SOURCE texture itself has an animation we use it instead. this WILL create issues with animated planks textures but its acceptable as mcmeta of source could have more important stuff like ctm
-        targetAnimationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
-
-        int newFrameAmount = animationData.getLogicalFrameCount();
-        TextureImage texture = TextureOps.createSingleFrameAnimation(imageToRecolor,
-                newFrameAmount, animationData);
-
-        Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
-
-        boolean usesTargetAnimationColors = !useMergedPalette && (targetAnimationData == animationData);
-        if (usesTargetAnimationColors && texture.frameCount() > targetPalettes.size()) {
+        //if it uses more than targetPalette first frame
+        int newImageFrameCount = texture.frameCount();
+        if (targetAnimationData != mergedAnimationData) {
+            //just use first frame if we are not using our own animation data
+            targetPalettes = Collections.nCopies(newImageFrameCount, targetPalettes.get(0));
+        } else if (newImageFrameCount > targetPalettes.size()) {
+            //if we are using ouw own target animation and the palette we were given didnt match then we have a problem.probably badly configured
             String s = "Target animation data has more frames than provided target palettes. " +
                     "This is not supported by the recolorWithAnimation method. Debug info: " + targetPalettes.size() +
-                    " " + newFrameAmount + " " + targetAnimationData + " " + animationData;
+                    " " + newImageFrameCount + " " + targetAnimationData + " " + mergedAnimationData;
             if (PlatHelper.isDev()) throw new IndexOutOfBoundsException(s);
             else {
                 Moonlight.LOGGER.error(s);
-                //TODO: fix properly
-                usesTargetAnimationColors = false;
+                //still use first color only
+                targetPalettes = Collections.nCopies(newImageFrameCount, targetPalettes.get(0));
             }
-        }
-        boolean finalUsesTargetAnimationColors = usesTargetAnimationColors;
+        }//else we use the provided animation & metadata together. They always have to match
+
+        FrameColorRemapper colorRemapper = new FrameColorRemapper(originalPalettes, targetPalettes);
+
         texture.forEachPixel(pixel -> {
-            int finalInd = finalUsesTargetAnimationColors ? pixel.frameIndex() : 0;
+            int ind = pixel.frameIndex();
+            Integer newColor = colorRemapper.remapColor(ind, pixel.getValue());
+            if (newColor != null) {
+                pixel.setValue(newColor);
+            }
+        });
 
-            //caches these for each palette
-            ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(finalInd, i -> {
-                Palette toPalette = targetPalettes.get(finalInd);
+        return texture;
+    }
 
-                return ColorToColorMap.create(originalPalette, toPalette);
-            });
+    /**
+     * @param targetPalettes New palettes that will be applied. Frame order will be the same
+     * @return new recolored image. Copy of template if it fails. Always remember to close the provided texture
+     * Does not modify any of the given palettes
+     */
+    public TextureImage recolor(List<Palette> targetPalettes) {
 
-            if (oldToNewMap != null) {
+        //if original palettes < provided palettes just use the first provided for all
+        boolean onlyUseFirst = targetPalettes.size() < originalPalettes.size();
 
-                Integer oldValue = pixel.getValue();
-                Integer newValue = oldToNewMap.mapColor(oldValue);
-                if (newValue != null) {
-                    pixel.setValue(newValue);
-                }
+        TextureImage texture = imageToRecolor.makeCopy();
+        FrameColorRemapper colorRemapper = new FrameColorRemapper(originalPalettes, targetPalettes);
+
+        texture.forEachPixel(pixel -> {
+            int ind = pixel.frameIndex();
+            Integer newColor = colorRemapper.remapColor(ind, pixel.getValue());
+            if (newColor != null) {
+                pixel.setValue(newColor);
             }
         });
         return texture;
@@ -165,72 +169,65 @@ public class Respriter {
         return recolor(List.of(targetPalette));
     }
 
-    /**
-     * @param targetPalettes New palettes that will be applied. Frame order will be the same
-     * @return new recolored image. Copy of template if it fails. Always remember to close the provided texture
-     * Does not modify any of the given palettes
-     */
-    public TextureImage recolor(List<Palette> targetPalettes) {
-
-        //if original palettes < provided palettes just use the first provided for all
-        boolean onlyUseFirst = targetPalettes.size() < originalPalettes.size();
-
-        TextureImage texture = imageToRecolor.makeCopy();
-        Map<Integer, ColorToColorMap> mapForFrameCache = new HashMap<>();
-
-        texture.forEachPixel(pixel -> {
-            //caches these for each palette
-            int ind = pixel.frameIndex();
-            int finalInd = useMergedPalette ? 0 : ind;
-            ColorToColorMap oldToNewMap = mapForFrameCache.computeIfAbsent(ind, i -> {
-                Palette toPalette = onlyUseFirst ? targetPalettes.get(0) : targetPalettes.get(finalInd);
-                Palette originalPalette = originalPalettes.get(finalInd);
-
-                return ColorToColorMap.create(originalPalette, toPalette);
-            });
-
-            if (oldToNewMap != null) {
-
-                Integer oldValue = pixel.getValue();
-                Integer newValue = oldToNewMap.mapColor(oldValue);
-                if (newValue != null) {
-                    pixel.setValue(newValue);
-                }
-            }
-        });
-        return texture;
-    }
 
     //boxed so it's cleaner
 
     /**
      * Does not modify any of the given palettes
      */
-    public record ColorToColorMap(Map<Integer, Integer> map) {
+    private record ColorToColorMap(Int2ObjectArrayMap<Integer> map) {
 
         @Nullable
-        public Integer mapColor(Integer color) {
+        public Integer mapColor(int color) {
             return map.get(color);
         }
 
         @Nullable
         public static ColorToColorMap create(Palette originalPalette, Palette toPalette) {
             //we don't want to modify the original palette for later use here, so we make a copy
-            Palette copy = toPalette.copy();
-            copy.matchSize(originalPalette.size(), originalPalette.getAverageLuminanceStep());
-            if (copy.size() != originalPalette.size()) {
+            toPalette = toPalette.copy();
+            toPalette.matchSize(originalPalette.size(), originalPalette.getAverageLuminanceStep());
+            if (toPalette.size() != originalPalette.size()) {
                 //provided swap palette had too little colors
                 return null;
             }
             //now they should be the same size
-            return new ColorToColorMap(zipToMap(originalPalette.getValues(), copy.getValues()));
+            return new ColorToColorMap(zipToMap(originalPalette.getValues(), toPalette.getValues()));
         }
 
-        private static Map<Integer, Integer> zipToMap(List<PaletteColor> keys, List<PaletteColor> values) {
-            return IntStream.range(0, keys.size()).boxed()
-                    .collect(Collectors.toMap(i -> keys.get(i).value(), i -> values.get(i).value()));
+        private static Int2ObjectArrayMap<Integer> zipToMap(List<PaletteColor> keys, List<PaletteColor> values) {
+            Int2ObjectArrayMap<Integer> map = new Int2ObjectArrayMap<>(keys.size());
+            for (int i = 0; i < keys.size(); i++) {
+                map.put(keys.get(i).value(), (Integer) values.get(i).value());
+            }
+            return map;
         }
 
+    }
+
+    private static class FrameColorRemapper {
+
+        private final Int2ObjectArrayMap<ColorToColorMap> colorMappingsPerFrame = new Int2ObjectArrayMap<>();
+        private final List<Palette> originalPalettes;
+        private final List<Palette> targetPalettes;
+
+        public FrameColorRemapper(List<Palette> originalPalettes, List<Palette> targetPalettes) {
+            this.originalPalettes = originalPalettes;
+            this.targetPalettes = targetPalettes;
+        }
+
+        @Nullable
+        public Integer remapColor(int frameIndex, int color) {
+            //caches these for each palette
+            var map = colorMappingsPerFrame.computeIfAbsent(frameIndex, i -> {
+                Palette toPalette = targetPalettes.get(frameIndex);
+                Palette originalPalette = originalPalettes.get(frameIndex);
+
+                return ColorToColorMap.create(originalPalette, toPalette);
+            });
+            if (map == null) return null;
+            return map.mapColor(color);
+        }
     }
 
 }
