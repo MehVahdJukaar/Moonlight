@@ -1,11 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
-import com.mojang.blaze3d.platform.NativeImage;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HCLColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.LABColor;
-import net.minecraft.core.Registry;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
@@ -713,11 +713,17 @@ public class Palette implements Set<PaletteColor> {
      */
     public static List<Palette> fromAnimatedImage(TextureImage textureImage, @Nullable TextureImage textureMask,
                                                   float tolerance) {
+
+        @Nullable Sampler2D maskSampler = textureMask;
+        //TODO:not comptible with texture packs that change texture size
         if (textureMask != null &&
                 (textureImage.frameCount() != textureMask.frameCount() ||
                         textureMask.frameWidth() < textureImage.frameWidth() ||
                         textureMask.frameHeight() < textureImage.frameHeight())) {
-            throw new UnsupportedOperationException("Palette mask needs to be at least as large as the target image and have the same format");
+            Moonlight.LOGGER.error("Palette mask {} needs to be at least as large as the target image {} and have the same frame count. You must alter the mask to match the texture size", textureImage.path, textureMask.path);
+            if (PlatHelper.isDev()) {
+                throw new IllegalArgumentException("Palette mask " + textureMask.path + " has invalid size or frame count");
+            }
         }
 
         List<Palette> palettes = new ArrayList<>();
@@ -731,7 +737,7 @@ public class Palette implements Set<PaletteColor> {
             }
             var builder = paletteBuilders.get(index);
 
-            if (textureMask == null || FastColor.ABGR32.alpha(textureMask.getPixel(pixel.x(), pixel.y())) == 0) {
+            if (maskSampler == null || FastColor.ABGR32.alpha(maskSampler.sample(pixel.globalX, pixel.globalY)) == 0) {
                 int color = pixel.getValue();
                 if (FastColor.ABGR32.alpha(color) != 0) {
                     var paletteColor = builder.computeIfAbsent(color,
