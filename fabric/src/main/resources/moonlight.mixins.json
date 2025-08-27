@@ -25,6 +25,7 @@
     "TextureAtlasSpriteMixin"
   ],
   "mixins": [
+    "PoiMixin",
     "ConditionsHackMixin",
     "FireBlockMixin",
     "MappedRegistryAccessor",

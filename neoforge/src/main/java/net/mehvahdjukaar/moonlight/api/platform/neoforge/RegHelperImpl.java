@@ -19,6 +19,7 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -30,6 +31,7 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -41,6 +43,7 @@ import net.neoforged.fml.javafmlmod.FMLModContainer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
+import net.neoforged.neoforge.common.world.poi.ExtendPoiTypesEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -49,10 +52,7 @@ import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.registries.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -133,8 +133,8 @@ public class RegHelperImpl {
     }
 
     //mega shit. this so we can have statically initialized stuff that gets its bus subscriptions later
-    public static void runTasksOnInit(){
-        for (var e : RUN_LATER){
+    public static void runTasksOnInit() {
+        for (var e : RUN_LATER) {
             e.getSecond().accept(getModEventBus(e.getFirst()));
         }
         RUN_LATER.clear();
@@ -389,6 +389,29 @@ public class RegHelperImpl {
 
     public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(ResourceLocation name, Supplier<EntityDataSerializer<T>> serializer) {
         return RegHelper.register(name, serializer, NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS);
+    }
+
+    public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
+        MoonlightForge.addPoi(poi, blocks);
+    }
+
+    public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<ExtendPoiTypesEvent> eventConsumer = event -> {
+            eventListener.accept(new RegHelper.ExtraPOIStatesEvent() {
+                @Override
+                public void addBlockToPoi(ResourceKey<PoiType> typeKey, Block block) {
+                    event.addBlockToPoi(typeKey, block);
+                }
+
+                @Override
+                public void addStatesToPoi(ResourceKey<PoiType> typeKey, Set<BlockState> states) {
+                    event.addStatesToPoi(typeKey, states);
+                }
+            });
+        };
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
 }

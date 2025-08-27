@@ -1,1 +1,3 @@
-- fixed an issue that would cause extraction from fluid containers to consume more items than intended
+- Mod now works with neoforge .205, fixing a crash introduced in that updated due to some neoforge changes.
+- Also next time people be less impatient pls
+- updated api on fabric too accordingly since they need to match, deprecated old method

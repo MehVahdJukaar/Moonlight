@@ -20,7 +20,9 @@ import java.util.List;
 @Mixin(Inventory.class)
 public abstract class InventoryMixin {
 
-    @Shadow @Final public Player player;
+    @Shadow
+    @Final
+    public Player player;
 
     @Unique
     private ItemStack moonlight$toRestore = null;
@@ -28,12 +30,12 @@ public abstract class InventoryMixin {
 
     @Inject(method = "dropAll", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;",
             shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void fireDropEvent(CallbackInfo ci, Iterator var1, List<ItemStack> list, int i) {
-        if(this.player.isDeadOrDying() || this.player.dead){
+    public void ml$fireDropEvent(CallbackInfo ci, Iterator var1, List<ItemStack> list, int i) {
+        if (this.player.isDeadOrDying() || this.player.dead) {
             ItemStack stack = list.get(i);
             IDropItemOnDeathEvent event = IDropItemOnDeathEvent.create(stack, player, true);
-            MoonlightEventsHelper.postEvent( event, IDropItemOnDeathEvent.class);
-            if(event.isCanceled()){
+            MoonlightEventsHelper.postEvent(event, IDropItemOnDeathEvent.class);
+            if (event.isCanceled()) {
                 list.set(i, ItemStack.EMPTY);
                 moonlight$toRestore = event.getReturnItemStack();
             }
@@ -42,8 +44,8 @@ public abstract class InventoryMixin {
 
     @Inject(method = "dropAll", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;",
             shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void restoreNotDropped(CallbackInfo ci, Iterator var1, List<ItemStack> list, int i) {
-        if(moonlight$toRestore != null){
+    public void ml$restoreNotDropped(CallbackInfo ci, Iterator var1, List<ItemStack> list, int i) {
+        if (moonlight$toRestore != null) {
             list.set(i, moonlight$toRestore);
             moonlight$toRestore = null;
         }

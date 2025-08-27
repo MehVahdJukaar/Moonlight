@@ -17,9 +17,12 @@ import net.mehvahdjukaar.moonlight.core.misc.neoforge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -29,6 +32,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.world.poi.ExtendPoiTypesEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -40,6 +44,8 @@ import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Author: MehVahdJukaar
@@ -65,6 +71,20 @@ public class MoonlightForge {
 
             if (PlatHelper.isModLoaded("configured")) {
                 ModConfigSelectScreen.registerConfigScreen(MOD_ID, ModConfigSelectScreen::new);
+            }
+        }
+
+        bus.addListener(MoonlightForge::addOldPoiEvent);
+
+    }
+
+    @Deprecated
+    public static void addOldPoiEvent(ExtendPoiTypesEvent event) {
+        for (var e : OLD_POI_EVENT.entrySet()) {
+            var p = e.getKey();
+            Iterable<? extends Block> blocks = e.getValue();
+            for (var b : blocks) {
+                event.addBlockToPoi(p, (Block)b);
             }
         }
     }
@@ -177,5 +197,12 @@ public class MoonlightForge {
         currentModBus.set(lastCurrentBus);
     }
 
+
+    private static final Map<ResourceKey<PoiType>, Iterable<? extends Block>> OLD_POI_EVENT = new ConcurrentHashMap<>();
+
+    public static void addPoi(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
+
+        OLD_POI_EVENT.put(poi, blocks);
+    }
 }
 

@@ -32,7 +32,6 @@
     "MapItemMixin",
     "ServerMultiPackResourceManagerMixin",
     "PistonBlockEntityMixin",
-    "PoiMixin",
     "ReloadableClientResourcesMixin",
     "ServerLevelMixin",
     "ServerPlayerMixin",

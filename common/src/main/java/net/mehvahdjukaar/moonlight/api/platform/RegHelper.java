@@ -23,7 +23,6 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -39,7 +38,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
-import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.schedule.Activity;
@@ -165,20 +163,22 @@ public class RegHelper {
     }
 
     //call in setup when you have blocks
+    @Deprecated(forRemoval = true)
+    @ExpectPlatform
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
-        var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
-        //add vanilla states if they are mutable
-        Set<BlockState> matchingStates = beehivePOI.value().matchingStates();
-        Set<BlockState> newStates = new HashSet<>();
-        try {
-            for (Block block : blocks) {
-                matchingStates.add(block.defaultBlockState());
-                newStates.add(block.defaultBlockState());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to add blocks to POI " + poi.location() + ". Somehow the set was not mutable?", e);
-        }
-        PoiTypes.registerBlockStates(beehivePOI, newStates);
+        throw new AssertionError();
+    }
+
+    public interface ExtraPOIStatesEvent {
+
+        void addBlockToPoi(ResourceKey<PoiType> typeKey, Block block);
+
+        void addStatesToPoi(ResourceKey<PoiType> typeKey, Set<BlockState> states);
+    }
+
+    @ExpectPlatform
+    public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener){
+        throw new AssertionError();
     }
 
     @ExpectPlatform

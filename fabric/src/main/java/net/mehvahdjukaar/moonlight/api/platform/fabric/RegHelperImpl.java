@@ -33,6 +33,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -46,6 +47,7 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -53,10 +55,7 @@ import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -318,5 +317,54 @@ public class RegHelperImpl {
         return b.buildAndRegister();
     }
 
+    public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
+        var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+        //add vanilla states if they are mutable
+        Set<BlockState> matchingStates = beehivePOI.value().matchingStates();
+        Set<BlockState> newStates = new HashSet<>();
+        try {
+            for (Block block : blocks) {
+                matchingStates.add(block.defaultBlockState());
+                newStates.add(block.defaultBlockState());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to add blocks to POI " + poi.location() + ". Somehow the set was not mutable?", e);
+        }
+        PoiTypes.registerBlockStates(beehivePOI, newStates);
+    }
+
+    public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener) {
+        eventListener.accept(new RegHelper.ExtraPOIStatesEvent() {
+            @Override
+            public void addBlockToPoi(ResourceKey<PoiType> poi, Block block) {
+                var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+                //add vanilla states if they are mutable
+                Set<BlockState> matchingStates = beehivePOI.value().matchingStates();
+                Set<BlockState> newStates = new HashSet<>();
+                try {
+                    matchingStates.add(block.defaultBlockState());
+                    newStates.add(block.defaultBlockState());
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to add blocks to POI " + poi.location() + ". Somehow the set was not mutable?", e);
+                }
+                PoiTypes.registerBlockStates(beehivePOI, newStates);
+            }
+
+            @Override
+            public void addStatesToPoi(ResourceKey<PoiType> poi, Set<BlockState> states) {
+                var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+                //add vanilla states if they are mutable
+                Set<BlockState> matchingStates = beehivePOI.value().matchingStates();
+                Set<BlockState> newStates;
+                try {
+                    matchingStates.addAll(states);
+                    newStates = new HashSet<>(states);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to add blocks to POI " + poi.location() + ". Somehow the set was not mutable?", e);
+                }
+                PoiTypes.registerBlockStates(beehivePOI, newStates);
+            }
+        });
+    }
 
 }

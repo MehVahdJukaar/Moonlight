@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.mixins;
+package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
