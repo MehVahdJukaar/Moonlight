@@ -11,7 +11,6 @@ import net.mehvahdjukaar.moonlight.api.misc.*;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
@@ -153,11 +152,11 @@ public class Moonlight {
         }
     }
 
-    public static boolean isInitPhase(){
+    public static boolean isInitPhase() {
         return PlatHelper.isInitializing() || !PlatHelper.getPlatform().isForge();
     }
 
-    public static void assertAfterInitPhase(){
+    public static void assertAfterInitPhase() {
         if (PlatHelper.isInitializing()) {
             throw new AssertionError("Method has to be called after main mod initialization phase. Client and Server initializer are not valid, you must call in the main one");
         }
@@ -180,11 +179,14 @@ public class Moonlight {
     }
 
     public static void crashIfInDev(String message) {
-        if (PlatHelper.isDev()) throw new AssertionError();
+        if (PlatHelper.isDev()) throw new AssertionError(message);
+        else {
+            Moonlight.LOGGER.error(message);
+        }
     }
 
     public static void crashIfInDev() {
-        if (PlatHelper.isDev()) throw new AssertionError();
+        crashIfInDev("");
     }
 
     public static void logIfInDev(String s) {
