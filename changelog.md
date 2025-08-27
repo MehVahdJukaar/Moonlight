@@ -1,3 +1,1 @@
-- Mod now works with neoforge .205, fixing a crash introduced in that updated due to some neoforge changes.
-- Also next time people be less impatient pls
-- updated api on fabric too accordingly since they need to match, deprecated old method
+- fixed an inverted if statement causing some block types children to not be added
