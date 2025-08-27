@@ -106,9 +106,12 @@ public class Respriter {
         if (mergedAnimationData == null) return recolor(targetPalettes);
 
         //is restricted to use only first original palette since it must merge a new animation following the given one
-        TextureImage outputTexture = TextureOps.createSingleFrameAnimation(imageToRecolor, mergedAnimationData);
+        int originalFrameCount = imageToRecolor.frameCount();
+        //if we have multiple frames we use the original image as a base and recolor with single palette, otherwise we clone it and recolor it with the new palettes
+        TextureImage outputTexture = originalFrameCount > 1 ? imageToRecolor.makeCopy() :
+                TextureOps.createSingleFrameAnimation(imageToRecolor, mergedAnimationData);
 
-        FrameColorRemapper colorRemapper = FrameColorRemapper.of(originalPalette, imageToRecolor.frameCount(),
+        FrameColorRemapper colorRemapper = FrameColorRemapper.of(originalPalette, originalFrameCount,
                 targetPalettes, outputTexture.frameCount());
 
         //TODO: add proper mask here. not just a color whitelist like its now
