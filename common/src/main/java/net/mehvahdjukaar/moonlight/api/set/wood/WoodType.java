@@ -169,17 +169,17 @@ public class WoodType extends BlockType {
 
 
     @Nullable
-    protected <V> V findRelatedEntry(String prefix, String suffix, Registry<V> reg) {
+    protected <V> V findRelatedEntry(String prefixOrInfix, String suffix, Registry<V> reg) {
         if (!suffix.isEmpty()) suffix = "_" + suffix;
         ResourceLocation[] targets = {
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + prefix + suffix),
-                new ResourceLocation(id.getNamespace(), prefix + "_" + id.getPath() + suffix),
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_" + prefixOrInfix + suffix),
+                new ResourceLocation(id.getNamespace(), prefixOrInfix + "_" + id.getPath() + suffix),
                 //weird conventions here
-                new ResourceLocation(id.getNamespace(), id.getPath() + "_planks_" + prefix + suffix),
+                new ResourceLocation(id.getNamespace(), id.getPath() + "_planks_" + prefixOrInfix + suffix),
                 // TFC & AFC: Include children of wood_type: stairs, slab...
-                new ResourceLocation(id.getNamespace(), "wood/planks/" + id.getPath() + "_" + prefix),
+                new ResourceLocation(id.getNamespace(), "wood/planks/" + id.getPath() + "_" + prefixOrInfix),
                 // TFC & AFC: Include twig (sticks), leaves, planks, sign
-                new ResourceLocation(id.getNamespace(), "wood/" + prefix + suffix + "/" + id.getPath())
+                new ResourceLocation(id.getNamespace(), "wood/" + prefixOrInfix + suffix + "/" + id.getPath())
         };
         return Utils.findFirstInRegistry(reg, targets);
     }
