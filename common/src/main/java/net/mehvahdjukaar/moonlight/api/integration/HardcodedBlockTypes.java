@@ -243,7 +243,7 @@ public class HardcodedBlockTypes {
 
 //!! LEAVES
         // Oh The Biomes We've Gone - REASON: Associated WoodType
-        leafReg.addSimpleFinder("biomeswevegone:flowering_palo_verde")
+        leafReg.addSimpleFinder("biomeswevegone","flowering_palo_verde")
                 .childBlock(LOG, "palo_verde_log");
 
         leafReg.addLeavesToWoodMapping("biomeswevegone", "araucaria", "pine");

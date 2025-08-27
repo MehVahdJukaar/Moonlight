@@ -127,8 +127,8 @@ public class WoodType extends BlockType {
         this.addChild(LOG, this.log);
         this.addChild(LEAVES, this.findRelatedEntry("leaves", BuiltInRegistries.BLOCK));
         this.addChild(WOOD, this.findLogRelatedBlock("", "wood", "hyphae", "bark"));
-        this.addChild(STRIPPED_LOG, this.findStrippedLog("log", "stem", "stalk"));
-        this.addChild(STRIPPED_WOOD, this.findStrippedLog("wood", "hyphae", "bark"));
+        this.addChild(STRIPPED_LOG, this.findStrippedLog(LOG, "stem", "stalk"));
+        this.addChild(STRIPPED_WOOD, this.findStrippedLog(WOOD, "hyphae", "bark"));
         this.addChild(SLAB, this.findRelatedEntry("slab", BuiltInRegistries.BLOCK));
         this.addChild(STAIRS, this.findRelatedEntry("stairs", BuiltInRegistries.BLOCK));
         Block fence = this.findRelatedEntry("fence", BuiltInRegistries.BLOCK);
@@ -188,7 +188,7 @@ public class WoodType extends BlockType {
     @Nullable
     protected Block findStrippedLog(String... possibleNames) {
         for (var v : possibleNames) {
-            var b = this.getBlockOfThis(v);
+            Block b = this.getBlockOfThis(v);
             if (v != null) {
                 Block stripped = AxeItem.STRIPPABLES.get(b);
                 if (stripped != null && stripped != b) {
@@ -211,7 +211,7 @@ public class WoodType extends BlockType {
     @Nullable
     protected Block findLogRelatedBlock(String prefix, String... possibleSuffix) {
         for (var n : possibleSuffix) {
-            var b = findLogWithPrefix(prefix, n);
+            Block b = findLogWithPrefix(prefix, n);
             if (b != null) return b;
         }
         return null;
@@ -246,7 +246,7 @@ public class WoodType extends BlockType {
         List<ResourceLocation> targets = new ArrayList<>();
         targets.add(new ResourceLocation(myNamespace, myPath + "_" + prefix_ + suffix));
         targets.add(new ResourceLocation(myNamespace, alternateNamespace + "_" + prefix_ + suffix));
-        if (!noneEmpty) {
+        if (noneEmpty) {
             targets.add(new ResourceLocation(myNamespace, prefix_ + myPath + "_" + suffix));
             targets.add(new ResourceLocation(myNamespace, prefix_ + alternateNamespace + "_" + suffix));
         }
