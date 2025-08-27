@@ -99,9 +99,7 @@ public class Respriter {
     // this should only be used when you go from non-animated to animated
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable McMetaFile targetAnimationData) {
         if (targetPalettes.isEmpty()) {
-            if (PlatHelper.isDev()) {
-                throw new IllegalArgumentException("Respriter was given no palettes!");
-            } else Moonlight.LOGGER.error("Respriter was given no palettes!");
+            Moonlight.crashIfInDev("Respriter was given no palettes!");
             return imageToRecolor.makeCopy();
         }
 
@@ -194,9 +192,7 @@ public class Respriter {
             boolean invalidSize = targetFrameCount > targetPalettes.size();
             if (originalFrameCount != 1 || invalidSize) {
                 if (invalidSize) {
-                    if (PlatHelper.isDev()) {
-                        throw new IllegalArgumentException("Respriter was given less palettes than needed");
-                    } else Moonlight.LOGGER.error("Respriter was given less palettes than  needed");
+                    Moonlight.crashIfInDev("Respriter was given less palettes than needed!");
                 }
                 //it means original image is animated. Just use first palette given
                 Color2ColorMap singleColorMap = Color2ColorMap.create(originalPalette, targetPalettes.get(0));

@@ -15,7 +15,6 @@ import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
@@ -181,6 +180,20 @@ public class Moonlight {
         }
     }
 
+    public static void crashIfInDev(String message) {
+        if (PlatHelper.isDev()) throw new AssertionError(message);
+        else {
+            Moonlight.LOGGER.error(message);
+        }
+    }
+
+    public static void crashIfInDev() {
+        crashIfInDev("");
+    }
+
+    public static void logIfInDev(String s) {
+        if (PlatHelper.isDev()) LOGGER.error(s);
+    }
 
     public static void registerBuiltinFluidBehavior(DispenserHelper.Event event) {
         Set<Item> itemSet = new HashSet<>();
