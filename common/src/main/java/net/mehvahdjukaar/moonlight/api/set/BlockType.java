@@ -187,7 +187,8 @@ public abstract class BlockType {
     @Nullable
     public Item getItemOfThis(String key) {
         var v = this.getChild(key);
-        return v instanceof ItemLike i ? i.asItem() : null;
+        Item it = v instanceof ItemLike i ? i.asItem() : null;
+        return it == Items.AIR ? null : it;
     }
 
     @Nullable
