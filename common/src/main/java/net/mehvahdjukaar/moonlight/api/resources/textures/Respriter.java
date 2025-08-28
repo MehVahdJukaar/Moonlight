@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
@@ -104,15 +103,15 @@ public class Respriter {
         }
 
         // in case the SOURCE texture itself has an animation we use it instead. this WILL create issues with animated planks textures but its acceptable as mcmeta of source could have more important stuff like ctm
+        @Nullable
         McMetaFile mergedAnimationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
-
-        if (mergedAnimationData == null) return recolor(targetPalettes);
 
         //is restricted to use only first original palette since it must merge a new animation following the given one
         int originalFrameCount = imageToRecolor.frameCount();
         //if we have multiple frames we use the original image as a base and recolor with single palette, otherwise we clone it and recolor it with the new palettes
-        TextureImage outputTexture = originalFrameCount > 1 ? imageToRecolor.makeCopy() :
-                TextureOps.createSingleFrameAnimation(imageToRecolor, mergedAnimationData);
+        TextureImage outputTexture = (originalFrameCount > 1 && mergedAnimationData != null) ?
+                TextureOps.createSingleFrameAnimation(imageToRecolor, mergedAnimationData) :
+                imageToRecolor.makeCopy();
 
         FrameColorRemapper colorRemapper = FrameColorRemapper.of(originalPalette, originalFrameCount,
                 targetPalettes, outputTexture.frameCount());
