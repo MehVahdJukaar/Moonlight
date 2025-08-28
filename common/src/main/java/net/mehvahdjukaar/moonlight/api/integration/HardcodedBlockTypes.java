@@ -126,8 +126,8 @@ public class HardcodedBlockTypes {
                 .childBlock(STRIPPED_WOOD, "stripped_chestnut_noxcap_hyphae");
 
         // Ars Nouveau - REASON: Associated Planks
-        woodReg.addSimpleFinder("ars_nouveau", "blue_archwood")
-                .planks("archwood_planks");
+        woodReg.addSimpleFinder("ars_nouveau", "archwood")
+                .log("blue_archwood_log");
 
     /// Do not add other WoodTypes blc it would create too many block variants using archwood_planks
     /// The WoodTypes below all are using the same planks. There is no solutions
