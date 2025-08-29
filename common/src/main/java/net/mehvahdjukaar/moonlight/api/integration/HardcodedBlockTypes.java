@@ -34,6 +34,8 @@ public class HardcodedBlockTypes {
      *
      * Associated WoodType: Leaves have no WoodType, must be included
      * Associated LeavesType: Wood have no LeavesType, must be included
+     *
+     * PlANKS-NAME: Children are using planks' name instead of log's name
      */
     static {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
@@ -125,9 +127,14 @@ public class HardcodedBlockTypes {
                 .childBlock(WOOD, "chestnut_noxcap_hyphae")
                 .childBlock(STRIPPED_WOOD, "stripped_chestnut_noxcap_hyphae");
 
-        // Ars Nouveau - REASON: Associated Planks
+        // Ars Nouveau - REASON: PLANKS-NAME
         woodReg.addSimpleFinder("ars_nouveau", "archwood")
-                .log("blue_archwood_log");
+                .log("blue_archwood_log")
+                .childBlock(STRIPPED_LOG, "stripped_blue_archwood_log")
+                .childBlock(WOOD, "blue_archwood_wood")
+                .childBlock(STRIPPED_WOOD, "stripped_blue_archwood_wood")
+                .childBlock(LEAVES, "blue_archwood_leaves")
+                .childBlock(SAPLING, "blue_archwood_sapling");
 
     /// Do not add other WoodTypes blc it would create too many block variants using archwood_planks
     /// The WoodTypes below all are using the same planks. There is no solutions
