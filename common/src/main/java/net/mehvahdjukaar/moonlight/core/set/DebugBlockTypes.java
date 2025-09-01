@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static net.mehvahdjukaar.moonlight.core.CommonConfigs.EXTRA_CHILDREN_DEBUG;
+
 public class DebugBlockTypes {
 
     private static final Path debugDir = Paths.get("debug", "dynamic_registry_dump");
@@ -28,40 +30,48 @@ public class DebugBlockTypes {
 
                 StringBuilder builder = new StringBuilder();
 
+                builder.append("─────────────────────────────── LIST ────────────────────────────────")
+                        .append(System.lineSeparator());
+
                 // Step 1: list all block types
                 for (var entry : reg.getValues()) {
                     builder.append(entry.getId().toString())
                             .append(System.lineSeparator());
                 }
 
-                builder.append(System.lineSeparator()).append(System.lineSeparator());
 
-                // Step 1.5: collect all possible child keys
-                Set<String> allChildKeys = new TreeSet<>(); // TreeSet = alphabetical order
-                for (var entry : reg.getValues()) {
-                    allChildKeys.addAll(entry.getChildren().stream()
-                            .map(Map.Entry::getKey)
-                            .toList());
-                }
+                if (EXTRA_CHILDREN_DEBUG.get()) {
+                    builder.append(System.lineSeparator())
+                            .append("─────────────────────────────── LIST OF CHILDREN ────────────────────────────────")
+                            .append(System.lineSeparator());
 
-                // Step 2: list children for each block type in deterministic order
-                for (var entry : reg.getValues()) {
-                    builder.append("[").append(entry.getId().toString()).append("]").append(System.lineSeparator());
-
-                    if (allChildKeys.isEmpty()) {
-                        builder.append("  (no children)").append(System.lineSeparator());
-                    } else {
-                        for (String key : allChildKeys) {
-                            Object value = entry.getChild(key);
-                            builder.append("  - ").append(key).append(" = ")
-                                    .append(value != null ? formatValue(value) : "MISSING")
-                                    .append(System.lineSeparator());
-                        }
+                    // Step 1.5: collect all possible child keys
+                    Set<String> allChildKeys = new TreeSet<>(); // TreeSet = alphabetical order
+                    for (var entry : reg.getValues()) {
+                        allChildKeys.addAll(entry.getChildren().stream()
+                                .map(Map.Entry::getKey)
+                                .toList());
                     }
 
-                    builder.append(System.lineSeparator()); // spacing between block types
-                }
+                    // Step 2: list children for each block type in deterministic order
+                    for (var entry : reg.getValues()) {
+                        builder.append("[").append(entry.getId().toString()).append("]").append(System.lineSeparator());
 
+                        if (allChildKeys.isEmpty()) {
+                            builder.append("  (no children)").append(System.lineSeparator());
+                        } else {
+                            for (String key : allChildKeys) {
+                                Object value = entry.getChild(key);
+                                builder.append("  - ").append(key).append(" = ")
+                                        .append(value != null ? formatValue(value) : "MISSING")
+                                        .append(System.lineSeparator());
+                            }
+                        }
+
+                        builder.append(System.lineSeparator()); // spacing between block types
+                    }
+
+                }
                 Files.writeString(filePath, builder.toString(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             }
 

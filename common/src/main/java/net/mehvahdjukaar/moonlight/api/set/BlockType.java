@@ -41,7 +41,11 @@ public abstract class BlockType {
     }
 
     public String getTypeName() {
-        return id.getPath();
+        String path = id.getPath();
+        if (path.contains("/")) {
+            return path.substring(path.lastIndexOf("/") + 1);
+        }
+        return path;
     }
 
     public String getNamespace() {
@@ -152,6 +156,7 @@ public abstract class BlockType {
         return this.getNamespace().equals("minecraft");
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends BlockType> BlockTypeRegistry<T> getRegistry() {
         return (BlockTypeRegistry<T>) BlockSetInternal.getRegistry(this.getClass());
     }
@@ -163,10 +168,12 @@ public abstract class BlockType {
     }
 
     @Nullable
+    @SuppressWarnings("SameParameterValue")
     protected <V> V findRelatedEntry(String prefixOrInfix, String suffix, Registry<V> reg) {
         String prefixed = (prefixOrInfix.isEmpty()) ? "" : prefixOrInfix + "_";
         String infixed = (prefixOrInfix.isEmpty()) ? "" : "_" + prefixOrInfix;
         String suffixed = (suffix.isEmpty()) ? "" : "_" + suffix;
+
         ResourceLocation[] targets = {
                 id.withPath(id.getPath() + infixed + suffixed),
                 id.withPath(prefixed + id.getPath() + suffixed),
@@ -276,7 +283,7 @@ public abstract class BlockType {
      * @param destinationMat desired block type
      */
     @Nullable
-    public static Object changeType(Object current, BlockType originalMat, BlockType destinationMat) {
+    public static Object changeType(Object current, @NotNull BlockType originalMat, @NotNull BlockType destinationMat) {
         if (destinationMat == originalMat) return current;
         String key = originalMat.getChildKey(current);
         if (key != null) {
@@ -287,7 +294,7 @@ public abstract class BlockType {
 
     //for items
     @Nullable
-    public static Item changeItemType(Item current, BlockType originalMat, BlockType destinationMat) {
+    public static Item changeItemType(Item current, @NotNull BlockType originalMat, @NotNull BlockType destinationMat) {
         Object changed = changeType(current, originalMat, destinationMat);
         //if item swap fails, try to swap blocks instead
         if (changed == null) {
