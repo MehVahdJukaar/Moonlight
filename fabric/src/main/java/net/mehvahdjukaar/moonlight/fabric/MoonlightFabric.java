@@ -24,11 +24,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Supplier;
 
 public class MoonlightFabric implements ModInitializer, DedicatedServerModInitializer {
 
@@ -122,4 +126,20 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     public static final Queue<Runnable> AFTER_SETUP_WORK = new ConcurrentLinkedQueue<>();
 
 
+    public static final Map<PackType, List<Supplier<Pack>>> EXTRA_RESOURCE_PACKS = new EnumMap<>(PackType.class);
+
+
+    public static Collection<Supplier<Pack>> getAdditionalPacks(@Nullable PackType packType) {
+        List<Supplier<Pack>> list = new ArrayList<>();
+        if (packType == null) {
+            List<Supplier<Pack>> p = EXTRA_RESOURCE_PACKS.get(PackType.CLIENT_RESOURCES);
+            if (p != null) list.addAll(p);
+            packType = PackType.SERVER_DATA;
+        }
+        var suppliers = EXTRA_RESOURCE_PACKS.get(packType);
+        if (suppliers != null) {
+            list.addAll(suppliers);
+        }
+        return list;
+    }
 }

@@ -1,1 +1,2 @@
-- fixed an inverted if statement causing some block types children to not be added
+- fixed an issue with data driven trades on custom villagers
+- fixed forge config sync not working

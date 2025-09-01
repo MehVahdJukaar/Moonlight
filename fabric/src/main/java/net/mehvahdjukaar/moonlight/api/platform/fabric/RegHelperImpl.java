@@ -22,8 +22,10 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -32,6 +34,8 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
@@ -367,4 +371,19 @@ public class RegHelperImpl {
         });
     }
 
+
+    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+        Moonlight.assertInitPhase();
+
+        MoonlightFabric.EXTRA_RESOURCE_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
+        if (packType == PackType.CLIENT_RESOURCES && PlatHelper.getPhysicalSide().isClient()) {
+            if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
+                var newSources = new HashSet<>(rep.getSources());
+                MoonlightFabric.getAdditionalPacks(packType).forEach(l -> {
+                    newSources.add((infoConsumer) -> infoConsumer.accept(l.get()));
+                });
+                rep.setSources(newSources);
+            }
+        }
+    }
 }

@@ -277,22 +277,6 @@ public class PlatHelperImpl {
         NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
-    public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
-        Moonlight.assertInitPhase();
-
-        if (packSupplier == null) return;
-        var bus = MoonlightForge.getCurrentBus();
-        Consumer<AddPackFindersEvent> consumer = event -> {
-            if (event.getPackType() == packType) {
-                var p = packSupplier.get();
-                if (p != null) {
-                    event.addRepositorySource(infoConsumer -> infoConsumer.accept(packSupplier.get()));
-                }
-            }
-        };
-        bus.addListener(consumer);
-    }
-
     public static String getModVersion(String modId) {
         return ModList.get().getModContainerById(modId).map(v -> v.getModInfo().getVersion().toString()).orElse(null);
     }

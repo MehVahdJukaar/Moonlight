@@ -463,24 +463,6 @@ public class Palette implements Set<PaletteColor> {
     }
 
     /**
-     * @return true if there is a significant gap between two neighboring colors
-     */
-    private boolean hasLuminanceGap() {
-        return hasLuminanceGap(1.7f);
-    }
-
-    private boolean hasLuminanceGap(float cutoff) {
-        List<Float> list = getLuminanceSteps();
-        float mean = getAverageLuminanceStep();
-
-        for (var s : list) {
-            //if it has one step that is greater than 1.5 times the mean
-            if (s > cutoff * mean) return true;
-        }
-        return false;
-    }
-
-    /**
      * This is just Normalized Standard Deviation (SD/Mean)
      *
      * @return How much luminance steps differ from eachother
@@ -550,6 +532,7 @@ public class Palette implements Set<PaletteColor> {
      * Adds a color to the palette by interpolating existing colors
      * Only works if it has at least 2 colors
      */
+    @Deprecated(forRemoval = true)
     public PaletteColor increaseInner() {
         assert (this.size() < 2);
         int index = 1;
@@ -571,6 +554,62 @@ public class Palette implements Set<PaletteColor> {
         //always adds, ignoring tolerance since we do want to add something
         this.addUnchecked(newC);
         return newC;
+    }
+
+    //TODO: finish
+
+
+    /**
+     * Adds one more color by resampling the palette as a curve in Lab space.
+     * Keeps first and last colors fixed, redistributes intermediates evenly with jitter.
+     */
+    public void resampleWithOneMore(float jitterFraction) {
+        if (this.size() < 2) return;
+        Random rng = new Random(); // deterministic
+
+        int newSize = this.size() + 1;
+        float firstLum = this.get(0).luminance();
+        float lastLum  = this.get(this.size() - 1).luminance();
+        float span = lastLum - firstLum;
+
+        // Ideal step size in luminance
+        float idealStep = span / (newSize - 1);
+
+        List<PaletteColor> newPalette = new ArrayList<>();
+        newPalette.add(this.get(0)); // keep first
+
+        for (int i = 1; i < newSize - 1; i++) {
+            // Jitter: small offset around evenly spaced luminance
+            float jitter = (float) ((rng.nextDouble() * 2 - 1) * jitterFraction * idealStep);
+            float targetLum = firstLum + i * idealStep + jitter;
+
+            // Clamp to valid range
+            if (targetLum <= firstLum) targetLum = firstLum + 0.01f;
+            if (targetLum >= lastLum) targetLum = lastLum - 0.01f;
+
+            // Find surrounding colors in old palette
+            PaletteColor lower = this.get(0);
+            PaletteColor upper = this.get(this.size() - 1);
+            for (int j = 1; j < this.size(); j++) {
+                if (this.get(j).luminance() >= targetLum) {
+                    lower = this.get(j - 1);
+                    upper = this.get(j);
+                    break;
+                }
+            }
+
+            // Interpolate in HCL/Lab space
+            float ratio = (targetLum - lower.luminance()) /
+                    (upper.luminance() - lower.luminance());
+            PaletteColor mixed = new PaletteColor(lower.hcl().mixWith(upper.hcl(), ratio));
+            newPalette.add(mixed);
+        }
+
+        newPalette.add(this.get(this.size() - 1)); // keep last
+
+        // Replace with resampled palette
+        this.clear();
+        this.addAll(newPalette);
     }
 
     /**
@@ -717,7 +756,7 @@ public class Palette implements Set<PaletteColor> {
         @Nullable Sampler2D maskSampler = textureMask;
         //TODO:not comptible with texture packs that change texture size
         if (textureMask != null &&
-                (textureImage.frameCount() != textureMask.frameCount() ||
+                (
                         textureMask.frameWidth() < textureImage.frameWidth() ||
                         textureMask.frameHeight() < textureImage.frameHeight())) {
             Moonlight.LOGGER.error("Palette mask {} needs to be at least as large as the target image {} and have the same frame count. You must alter the mask to match the texture size", textureImage.path, textureMask.path);
@@ -737,6 +776,7 @@ public class Palette implements Set<PaletteColor> {
             }
             var builder = paletteBuilders.get(index);
 
+            //TODO: check
             if (maskSampler == null || FastColor.ABGR32.alpha(maskSampler.sample(pixel.globalX, pixel.globalY)) == 0) {
                 int color = pixel.getValue();
                 if (FastColor.ABGR32.alpha(color) != 0) {

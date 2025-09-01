@@ -1,16 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
-import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
-import dev.architectury.injectables.annotations.PlatformOnly;
-import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import com.mojang.serialization.JsonOps;
+import io.netty.util.internal.UnstableApi;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
-import net.mehvahdjukaar.moonlight.core.CommonConfigs;
+import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.integration.ModernFixCompat;
 import net.minecraft.SharedConstants;
@@ -18,93 +17,66 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
-import net.minecraft.server.packs.resources.IoSupplier;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.LootDataType;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
-public abstract class DynamicResourcePack implements PackResources {
+@Deprecated(forRemoval = true)
+public abstract class DynamicResourcePack extends InMemoryPackResources {
 
     protected static final Logger LOGGER = LogManager.getLogger();
 
-    protected final PackLocationInfo locationInfo;
-    protected final ResourceLocation resourcePackName;
-    protected final boolean hidden;
-    protected final boolean fixed;
     protected final Pack.Position position;
-    protected final PackType packType;
-    protected final Supplier<PackMetadataSection> metadata;
-    protected final Set<String> namespaces = new HashSet<>();
-    protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
-    protected final ResourceLocationSearchTrie searchTrie = new ResourceLocationSearchTrie();
-    protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
-    protected final String mainNamespace;
 
-    protected Set<ResourceLocation> staticResources = new HashSet<>();
-
-    //for debug or to generate assets
-    protected boolean generateDebugResources;
+    public final String mainNamespace;
+    public final ResourceLocation resourcePackName;
     private boolean needsClearingNonStatic = false;
     boolean addToStatic = false;
-    private boolean wasRegistered = false;
 
     protected DynamicResourcePack(ResourceLocation name, PackType type) {
         this(name, type, Pack.Position.TOP, false, false);
     }
 
     protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
-        this.locationInfo = new PackLocationInfo(
+        super(makeInfo(name),type, makeMetadata(name, type), fixed, hidden);
+        this.position = position;
+        this.mainNamespace = name.getNamespace();
+        this.resourcePackName = name;
+    }
+
+    private static PackMetadataSection makeMetadata(ResourceLocation name, PackType type) {
+        return new PackMetadataSection(Component.literal(name.toString()),
+                SharedConstants.getCurrentVersion().getPackVersion(type), Optional.empty());
+
+    }
+
+    private static PackLocationInfo makeInfo(ResourceLocation name) {
+        return new PackLocationInfo(
                 name.toString(),    // id
                 Component.translatable(LangBuilder.getReadableName(name.toString())), // title
                 PackSource.BUILT_IN,
                 Optional.empty() //no clue what this is
         );
-
-        this.packType = type;
-        this.resourcePackName = name;
-        this.mainNamespace = name.getNamespace();
-        this.namespaces.add(mainNamespace);
-
-        this.position = position;
-        this.fixed = fixed;
-        this.hidden = hidden; //UNUSED. TODO: re add (forge)
-        this.metadata = Suppliers.memoize(() -> new PackMetadataSection(this.makeDescription(),
-                SharedConstants.getCurrentVersion().getPackVersion(type), Optional.empty()));
-        this.generateDebugResources = PlatHelper.isDev();
     }
 
-    @Override
-    public PackLocationInfo location() {
-        return locationInfo;
-    }
-
-    public Component makeDescription() {
-        return Component.translatable(LangBuilder.getReadableName(mainNamespace + "_dynamic_resources"));
-    }
-
-    @Deprecated(forRemoval = true)
-    public void setClearOnReload(boolean canBeCleared) {
-    }
 
     /**
      * Marks this texture as non-clearable.
@@ -112,24 +84,9 @@ public abstract class DynamicResourcePack implements PackResources {
      * Call this for textures that are not on an atlas.
      */
     public void markNotClearable(ResourceLocation texturePath) {
-        this.staticResources.add(texturePath);
     }
 
     public void unMarkNotClearable(ResourceLocation staticResources) {
-        this.staticResources.remove(staticResources);
-    }
-
-    public void setGenerateDebugResources(boolean generateDebugResources) {
-        this.generateDebugResources = generateDebugResources;
-    }
-
-    /**
-     * Dynamic textures are loaded after getNamespaces is called, so unfortunately we need to know those in advance
-     * Call this if you are adding stuff for another mod namespace
-     **/
-    //@ApiStatus.Internal
-    public void addNamespaces(String... namespaces) {
-        this.namespaces.addAll(Arrays.asList(namespaces));
     }
 
     public ResourceLocation id() {
@@ -148,142 +105,17 @@ public abstract class DynamicResourcePack implements PackResources {
     /**
      * Registers this pack. Call on mod init
      */
+    @Deprecated(forRemoval = true)
     public void registerPack() {
-        if (wasRegistered) {
-            return;
-        } else {
-            wasRegistered = true;
-        }
-        PlatHelper.registerResourcePack(this.packType, () ->
-                Pack.readMetaAndCreate(
-                        this.locationInfo,
-                        new Pack.ResourcesSupplier() {
-                            @Override
-                            public PackResources openPrimary(PackLocationInfo location) {
-                                return DynamicResourcePack.this;
-                            }
-
-                            @Override
-                            public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
-                                return DynamicResourcePack.this;
-                            }
-                        },// pack supplier
-                        this.packType,
-                        new PackSelectionConfig(
-                                true,    // required -- this MAY need to be true for the pack to be enabled by default
-                                Pack.Position.TOP,
-                                false // fixed position
-                        )
-                ));
+        RegHelper.registerResourcePack(this);
     }
 
     //@Override
-    @PlatformOnly(PlatformOnly.FORGE)
-    public boolean isHidden() {
-        return this.hidden;
-    }
-
-    @Override
-    public Set<String> getNamespaces(PackType packType) {
-        return this.namespaces;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
-        try {
-            return serializer == PackMetadataSection.TYPE ? (T) this.metadata.get() : null;
-        } catch (Exception exception) {
-            return null;
-        }
-    }
-
-    public void addRootResource(String name, byte[] resource) {
-        this.rootResources.put(name, resource);
-    }
-
-    @Nullable
-    @Override
-    public IoSupplier<InputStream> getRootResource(String... strings) {
-        String fileName = String.join("/", strings);
-        byte[] resource = this.rootResources.get(fileName);
-        return resource == null ? null : () -> new ByteArrayInputStream(resource);
-    }
-
-
-    @Override
-    public void listResources(PackType packType, String namespace, String id, ResourceOutput output) {
-        //why are we only using server resources here?
-        if (packType == this.packType) {
-            //idk why but somebody had an issue with concurrency here during world load
-            synchronized (this) {
-                this.searchTrie.search(namespace + "/" + id)
-                        .forEach(r -> {
-                            byte[] buf = resources.get(r);
-                            output.accept(r, () -> {
-                                if (buf == null) {
-                                    throw new IllegalStateException("Somehow search tree returned a resource not in resources " + r);
-                                }
-                                return new ByteArrayInputStream(buf);
-                            });
-                        });
-            }
-        }
-    }
-
-    @Override
-    public IoSupplier<InputStream> getResource(PackType type, ResourceLocation id) {
-
-        var res = this.resources.get(id);
-        if (res != null) {
-            return () -> {
-                if (type != this.packType) {
-                    throw new IOException(String.format("Tried to access wrong type of resource on %s.", this.resourcePackName));
-                }
-                return new ByteArrayInputStream(res);
-            };
-        }
-        return null;
-    }
-
-    @Override
-    public void close() {
-        // do not clear after reloading texture packs. should always be on
-    }
 
     public FileNotFoundException makeFileNotFoundException(String path) {
         return new FileNotFoundException(String.format("'%s' in ResourcePack '%s'", path, this.resourcePackName));
     }
 
-    protected void addBytes(ResourceLocation id, byte[] bytes) {
-        synchronized (this) {
-            this.namespaces.add(id.getNamespace());
-            this.resources.put(id, bytes);
-            this.searchTrie.insert(id);
-            if (addToStatic) markNotClearable(id);
-            //debug
-            if (generateDebugResources) {
-                saveBytes(id, bytes);
-            }
-        }
-    }
-
-    public static void saveJson(ResourceLocation id, JsonElement json) {
-        try {
-            saveBytes(id, RPUtils.serializeJson(json).getBytes());
-        } catch (IOException e) {
-            LOGGER.error("Failed to deserialize JSON {}", json, e);
-        }
-    }
-
-    public static void saveBytes(ResourceLocation id, byte[] bytes) {
-        try {
-            Path p = Paths.get("debug", "generated_resource_pack").resolve(id.getNamespace() + "/" + id.getPath());
-            Files.createDirectories(p.getParent());
-            Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-        } catch (IOException ignored) {
-        }
-    }
 
 
     @Deprecated(forRemoval = true)
@@ -291,20 +123,40 @@ public abstract class DynamicResourcePack implements PackResources {
         synchronized (this) {
             this.searchTrie.remove(res);
             this.resources.remove(res);
-            this.staticResources.remove(res);
-
         }
     }
 
+
+    // Called after texture have been stitched. Only keeps needed stuff
+    public final void clearNonStatic() {
+        //not used anymore
+    }
+
+    // Called after each reload
+    public void clearAllContent() {
+        synchronized (this) {
+            this.searchTrie.clear();
+            this.resources.clear();
+            this.needsClearingNonStatic = true; //clear non static after dynamic textures have been stitched
+        }
+    }
+
+    private static final boolean MODERN_FIX = CompatHandler.MODERNFIX && ModernFixCompat.areLazyResourcesOn();
+
+    private boolean modernFixHack(String s) {
+        return s.startsWith("model") || s.startsWith("blockstate");
+    }
+
+
     @Deprecated(forRemoval = true)
     public void addResource(StaticResource resource) {
-        this.addBytes(resource.location, resource.data);
+        this.addResource(resource.location, resource.data);
     }
 
     @Deprecated(forRemoval = true)
     private void addJson(ResourceLocation path, JsonElement json) {
         try {
-            this.addBytes(path, RPUtils.serializeJson(json).getBytes());
+            this.addResource(path, RPUtils.serializeJson(json).getBytes());
         } catch (IOException e) {
             LOGGER.error("Failed to write JSON {} to resource pack {}.", path, this.resourcePackName, e);
         }
@@ -317,71 +169,135 @@ public abstract class DynamicResourcePack implements PackResources {
 
     @Deprecated(forRemoval = true)
     public void addBytes(ResourceLocation location, byte[] bytes, ResType resType) {
-        this.addBytes(resType.getPath(location), bytes);
+        this.addResource(resType.getPath(location), bytes);
     }
 
 
-    public PackType getPackType() {
-        return packType;
-    }
+    @Deprecated(forRemoval = true)
+    public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
 
-    // Called after texture have been stitched. Only keeps needed stuff
-    @ApiStatus.Internal
-    protected void clearNonStatic() {
-        if (!CommonConfigs.CLEAR_RESOURCES.get()) return;
-        if (this.needsClearingNonStatic) {
-            synchronized (this) {
-                this.needsClearingNonStatic = false;
-                boolean mf = MODERN_FIX && getPackType() == PackType.CLIENT_RESOURCES;
-                // clear trie entirely and re populate as we always expect to have way less staitc resources than others
-                if (!mf) this.searchTrie.clear();
-
-                for (var r : this.resources.keySet()) {
-                    if (mf && modernFixHack(r.getPath())) {
-                        continue;
-                    }
-                    if (!this.staticResources.contains(r)) {
-                        this.resources.remove(r);
-                    }
-                }
-
-
-                if (mf) {
-                    List<String> toRemove = new ArrayList<>();
-                    for (String namespace : this.searchTrie.listFolders("")) {
-                        for (String f : this.searchTrie.listFolders(namespace)) {
-                            if (!modernFixHack(f)) {
-                                toRemove.add(namespace + "/" + f);
-                            }
-                        }
-                    }
-                    toRemove.forEach(this.searchTrie::remove);
-                }
-                // rebuild search trie with just static
-                for (var s : staticResources) {
-                    this.searchTrie.insert(s);
-                }
+        ResourceLocation tagId = builder.getId();
+        String tagPath = type.location().getPath();
+        ResourceLocation loc = ResType.TAGS.getPath(tagId.withPath(tagPath + "/" + tagId.getPath()));
+        //merge tags
+        //not needed anymore actually
+        if (this.resources.containsKey(loc)) {
+            var r = resources.get(loc);
+            try (var stream = new ByteArrayInputStream(r)) {
+                var oldTag = RPUtils.deserializeJson(stream);
+                builder.addFromJson(oldTag);
+            } catch (Exception ignored) {
             }
         }
+        JsonElement json = builder.serializeToJson();
+        this.addJson(loc, json, ResType.GENERIC);
     }
 
-    // Called after each reload
-    @ApiStatus.Internal
-    protected void clearAllContent() {
-        synchronized (this) {
-            this.searchTrie.clear();
-            this.resources.clear();
-            this.needsClearingNonStatic = true; //clear non static after dynamic textures have been stitched
+    /**
+     * Adds a simple loot table that only drops the block itself
+     *
+     * @param block block to be dropped
+     */
+    @Deprecated(forRemoval = true)
+    public void addSimpleBlockLootTable(Block block) {
+        this.addLootTable(block, createSingleItemTable(block)
+                .setParamSet(LootContextParamSets.BLOCK));
+    }
+
+    @Deprecated(forRemoval = true)
+    public void addLootTable(Block block, LootTable.Builder table) {
+        this.addLootTable(block.getLootTable().location(), table.build());
+    }
+
+    @Deprecated(forRemoval = true)
+    public void addLootTable(ResourceLocation id, LootTable table) {
+        this.addJson(id, LootDataType.TABLE.codec.encodeStart(JsonOps.INSTANCE, table).getOrThrow(), ResType.LOOT_TABLES);
+    }
+
+    protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {
+        return LootTable.lootTable()
+                .withPool(
+                        LootPool.lootPool()
+                                .setRolls(ConstantValue.exactly(1.0F))
+                                .add(LootItem.lootTableItem(itemLike)).unwrap());
+    }
+
+    @Deprecated(forRemoval = true)
+    public void addRecipe(RecipeHolder<?> holder) {
+        addRecipe(holder.value(), holder.id());
+    }
+
+    @UnstableApi
+    public void addRecipe(Recipe<?> recipe, ResourceLocation id) {
+        this.addRecipeNoAdvancement(recipe, id);
+
+        //Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+        // ResourceLocation advancementId = recipe.getAdvancementId();
+        //if (advancementId != null) {
+        //  this.addJson(recipe.getAdvancementId(), recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
+        //}
+    }
+
+    @Deprecated(forRemoval = true)
+    @UnstableApi
+    public void addRecipeNoAdvancement(Recipe<?> recipe, ResourceLocation id) {
+        this.addJson(id, RPUtils.writeRecipe(recipe), ResType.RECIPES);
+    }
+
+
+    @Deprecated(forRemoval = true)
+    public void addAndCloseTexture(ResourceLocation path, TextureImage image) {
+        addAndCloseTexture(path, image, true);
+    }
+
+    /**
+     * Adds a new textures and closes the passed native image
+     * Last boolean is for textures that aren't stitched so won't be cleared automatically after stitching
+     * Use it for textures such as entity textures of GUI
+     */
+    @Deprecated(forRemoval = true)
+    public void addAndCloseTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
+        try (image) {
+            this.addBytes(path, image.getImage().asByteArray(), ResType.TEXTURES);
+            if (!isOnAtlas) this.markNotClearable(ResType.TEXTURES.getPath(path));
+            if (image.getMcMeta() != null) {
+                this.addJson(path, image.getMcMeta().toJson(), ResType.MCMETA);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to add image {} to resource pack {}.", path, this, e);
         }
     }
 
-
-    private static final boolean MODERN_FIX = CompatHandler.MODERNFIX && ModernFixCompat.areLazyResourcesOn();
-
-    private boolean modernFixHack(String s) {
-        return s.startsWith("model") || s.startsWith("blockstate");
+    @Deprecated(forRemoval = true)
+    public void addBlockModel(ResourceLocation modelLocation, JsonElement model) {
+        this.addJson(modelLocation, model, ResType.BLOCK_MODELS);
     }
 
-    public void addTag(SimpleTagBuilder builder, ResourceKey<?> type) {
+    @Deprecated(forRemoval = true)
+    public void addItemModel(ResourceLocation modelLocation, JsonElement model) {
+        this.addJson(modelLocation, model, ResType.ITEM_MODELS);
+    }
+
+    @Deprecated(forRemoval = true)
+    public void addBlockState(ResourceLocation modelLocation, JsonElement model) {
+        this.addJson(modelLocation, model, ResType.BLOCKSTATES);
+    }
+
+    @Deprecated(forRemoval = true)
+    public void addLang(ResourceLocation langName, JsonElement language) {
+        this.addJson(langName, language, ResType.LANG);
+    }
+
+    @Deprecated(forRemoval = true)
+    public void addLang(ResourceLocation langName, LangBuilder builder) {
+        this.addJson(langName, builder.build(), ResType.LANG);
+    }
+
+    @Deprecated(forRemoval = true)
+    public void setGenerateDebugResources(boolean generateDebugResources) {
+    }
+
+    @Deprecated(forRemoval = true)
+    public void setClearOnReload(boolean canBeCleared) {
     }
 }

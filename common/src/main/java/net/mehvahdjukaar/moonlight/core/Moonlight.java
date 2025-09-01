@@ -11,7 +11,6 @@ import net.mehvahdjukaar.moonlight.api.misc.*;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
@@ -22,6 +21,7 @@ import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
 import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
+import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.DebugBlockTypes;
@@ -73,7 +73,7 @@ public class Moonlight {
 
         ModNetworking.init();
 
-
+        DynamicResourcesInternals.init();
         VillagerAIInternal.init();
         MapDataInternal.init();
         SoftFluidInternal.init();
@@ -135,7 +135,7 @@ public class Moonlight {
     private static void afterDataReloadOrDataSync(RegistryAccess registryAccess, boolean client) {
         EARLY_REGISTRY_ACCESS.set(new WeakReference<>(registryAccess));
         RegistryAccessJsonReloadListener.runReloads(registryAccess);
-        DynResourceGenerator.clearAfterReload(PackType.SERVER_DATA);
+        DynamicResourcesInternals.clearAfterReload(PackType.SERVER_DATA);
         DynamicHolder.clearCache();
 
         HolderReference.clearCache();

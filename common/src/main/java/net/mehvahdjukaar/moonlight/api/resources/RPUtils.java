@@ -15,6 +15,7 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -26,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.management.openmbean.InvalidOpenTypeException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -244,6 +247,20 @@ public class RPUtils {
 
     public static <T extends BlockType> RecipeHolder<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, ResourceLocation baseID) {
         return RecipeTemplate.makeSimilarRecipe(original, originalMat, destinationMat, baseID);
+    }
+
+    public static Path getResourcePath(Path path, ResourceLocation k, PackType packType) {
+        return path.resolve(k.getNamespace() + "/" + k.getPath() + "/" + packType.getDirectory());
+    }
+
+    public static void writeResource(ResourceLocation id, byte[] bytes, Path path, PackType packType) {
+        Path p = getResourcePath(path, id, packType);
+        try {
+            Files.createDirectories(p.getParent());
+            Files.write(p, bytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @FunctionalInterface

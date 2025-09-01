@@ -79,8 +79,6 @@ public class Respriter {
         return recolorWithAnimation(List.of(Palette.fromImage(textureImage)), textureImage.getMcMeta());
     }
 
-    //TODO: generalize and merge these two
-
     @Deprecated(forRemoval = true)
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable AnimationMetadataSection targetAnimationData) {
         return recolorWithAnimation(targetPalettes, targetAnimationData == null ? null : McMetaFile.of(targetAnimationData));

@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -165,17 +166,17 @@ public final class ForgeConfigHolder extends ModConfigHolder {
 
     @Override
     public void loadFromBytes(InputStream stream) {
-        try { //this should work the same as below and internaly calls refresh
+        try {
             byte[] b = stream.readAllBytes();
-            acceptConfig(this.modConfig, b);
-            //ConfigTracker.acceptSyncedConfig(this.modConfig, b);
+            //this should work the same as below and internaly calls refresh
+//            acceptConfig(this.modConfig, b);
+            ConfigTracker.acceptSyncedConfig(this.modConfig, b);
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to sync config file {}:", this.getFileName(), e);
         }
-
         //using this isntead so we dont fire the config changes event otherwise this will loop
-        //this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
-        //this.onRefresh();
+       // this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
+       // this.onRefresh();
     }
 
     public static void acceptConfig(ModConfig modConfig, byte[] bytes) {

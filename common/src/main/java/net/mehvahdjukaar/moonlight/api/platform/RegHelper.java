@@ -9,9 +9,12 @@ import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
+import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -30,6 +33,11 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackSelectionConfig;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.*;
@@ -666,6 +674,51 @@ public class RegHelper {
     public static void registerDynamicItemListingSerializer(ResourceLocation id, VillagerTrades.ItemListing instance, int level) {
         ItemListingManager.registerSimple(id, instance, level);
     }
+
+    @ExpectPlatform
+    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+        throw new AssertionError();
+    }
+
+    public static void registerResourcePack(DynamicResourcePack dynamicPack) {
+        PackType packType = dynamicPack.getPackType();
+        registerResourcePack(packType, () ->
+                Pack.readMetaAndCreate(
+                        dynamicPack.location(),
+                        new Pack.ResourcesSupplier() {
+                            @Override
+                            public PackResources openPrimary(PackLocationInfo location) {
+                                return dynamicPack;
+                            }
+
+                            @Override
+                            public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
+                                return dynamicPack;
+                            }
+                        },// pack supplier
+                        packType,
+                        new PackSelectionConfig(
+                                true,    // required -- this MAY need to be true for the pack to be enabled by default
+                                Pack.Position.TOP,
+                                false // fixed position
+                        )
+                ));
+    }
+
+    public static void registerDynamicResourceProvider(DynamicResourcesProvider provider) {
+        PackType packType = provider.getPackType();
+        registerResourcePack(packType, () ->
+                //provider could have also been a Pack itself...
+                Pack.readMetaAndCreate(
+                        provider.getLocationInfo(),
+                        provider,// pack supplier
+                        packType,
+                        provider.getSelectionConfig()
+                ));
+        DynamicResourcesInternals.registerProvider(provider);
+    }
+
+
 
 }
 

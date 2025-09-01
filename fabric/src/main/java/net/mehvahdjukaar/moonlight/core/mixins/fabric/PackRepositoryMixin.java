@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
 import net.mehvahdjukaar.moonlight.api.platform.fabric.PlatHelperImpl;
+import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -19,7 +20,7 @@ public abstract class PackRepositoryMixin {
     @Inject(method = "<init>",
             at = @At("TAIL"))
     private void init(RepositorySource[] repositorySources, CallbackInfo ci) {
-        var list = PlatHelperImpl.getAdditionalPacks(null);
+        var list = MoonlightFabric.getAdditionalPacks(null);
         var newSources = new HashSet<>(((PackRepositoryAccessor) this).getSources());
         list.forEach(l -> {
             newSources.add((infoConsumer) -> infoConsumer.accept(l.get()));

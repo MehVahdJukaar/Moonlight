@@ -12,6 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.ResourceManager;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 /**
@@ -25,19 +27,34 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
         if (PlatHelper.getPhysicalSide().isServer()) {
             throw new IllegalStateException("Client only class registered on server side! Issue from mod" + pack.mainNamespace);
         }
-        //unused now...
-        ClientHelper.addClientReloadListener(() -> this,
-                ResourceLocation.fromNamespaceAndPath(this.modId, "dyn_resources_generator_" + index++));
         MoonlightEventsHelper.addListener(this::addDynamicTranslations, AfterLanguageLoadEvent.class);
     }
-
-    //hack for fabric id
-    private static Integer index = 0;
 
     @Override
     protected PackRepository getRepository() {
         return Minecraft.getInstance().getResourcePackRepository();
     }
+
+
+    /**
+     * Use this method to add language entries that are dynamic and can be created based off existing entries.
+     *
+     * @param languageEvent object used to access all currently registered language entries for the current lang file and add new ones
+     */
+    public void addDynamicTranslations(AfterLanguageLoadEvent languageEvent) {
+    }
+
+
+    protected void onFirstReload() {
+        Path logoPath = ClientHelper.getModIcon(this.dynamicPack.mainNamespace);
+        if (logoPath != null) {
+            try {
+                this.dynamicPack.addRootResource("pack.png", Files.readAllBytes(logoPath));
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
 
     @Deprecated(forRemoval = true)
     public boolean alreadyHasTextureAtLocation(ResourceManager manager, ResourceLocation res) {
@@ -62,14 +79,6 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
                 if (PlatHelper.isDev()) throw new AssertionError(e);
             }
         }
-    }
-
-    /**
-     * Use this method to add language entries that are dynamic and can be created based off existing entries.
-     *
-     * @param languageEvent object used to access all currently registered language entries for the current lang file and add new ones
-     */
-    public void addDynamicTranslations(AfterLanguageLoadEvent languageEvent) {
     }
 
 }

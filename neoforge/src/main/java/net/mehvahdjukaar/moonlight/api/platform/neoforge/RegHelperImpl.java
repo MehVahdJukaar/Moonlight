@@ -18,6 +18,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Inventory;
@@ -44,6 +47,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.common.world.poi.ExtendPoiTypesEvent;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -414,4 +418,19 @@ public class RegHelperImpl {
         MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
+    public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
+        Moonlight.assertInitPhase();
+
+        if (packSupplier == null) return;
+        var bus = MoonlightForge.getCurrentBus();
+        Consumer<AddPackFindersEvent> consumer = event -> {
+            if (event.getPackType() == packType) {
+                var p = packSupplier.get();
+                if (p != null) {
+                    event.addRepositorySource(infoConsumer -> infoConsumer.accept(packSupplier.get()));
+                }
+            }
+        };
+        bus.addListener(consumer);
+    }
 }

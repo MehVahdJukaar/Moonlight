@@ -12,10 +12,14 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
+import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3f;
@@ -66,7 +70,7 @@ public class MoonlightClient {
             super(Moonlight.res("mods_dynamic_assets"));
         }
 
-        @Override
+//        @Override
         public Component makeDescription() {
             return Component.literal("Dynamic resources for " + mods + (mods == 1 ? " mod" : " mods"));
         }
@@ -82,7 +86,7 @@ public class MoonlightClient {
 
     @EventCalled
     public static void afterTextureReload() {
-        DynResourceGenerator.clearAfterReload(PackType.CLIENT_RESOURCES);
+        DynamicResourcesInternals.clearAfterReload(PackType.CLIENT_RESOURCES);
     }
 
     public static void setMipMap(boolean b) {
@@ -147,6 +151,8 @@ public class MoonlightClient {
                 });
             }
         }
+
+
     }
 
     public static ClientConfigs.ShadeFix fixShade = ClientConfigs.ShadeFix.FALSE;

@@ -160,37 +160,6 @@ public class PlatHelperImpl {
         return FabricLoader.getInstance().getGameDir();
     }
 
-    private static final Map<PackType, List<Supplier<Pack>>> EXTRA_PACKS = new EnumMap<>(PackType.class);
-
-    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
-        Moonlight.assertInitPhase();
-
-        EXTRA_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
-        if (packType == PackType.CLIENT_RESOURCES && PlatHelper.getPhysicalSide().isClient()) {
-            if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
-                var newSources = new HashSet<>(rep.getSources());
-                getAdditionalPacks(packType).forEach(l -> {
-                    newSources.add((infoConsumer) -> infoConsumer.accept(l.get()));
-                });
-                rep.setSources(newSources);
-            }
-        }
-    }
-
-    public static Collection<Supplier<Pack>> getAdditionalPacks(@Nullable PackType packType) {
-        List<Supplier<Pack>> list = new ArrayList<>();
-        if (packType == null) {
-            List<Supplier<Pack>> p = EXTRA_PACKS.get(PackType.CLIENT_RESOURCES);
-            if (p != null) list.addAll(p);
-            packType = PackType.SERVER_DATA;
-        }
-        var suppliers = EXTRA_PACKS.get(packType);
-        if (suppliers != null) {
-            list.addAll(suppliers);
-        }
-        return list;
-    }
-
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
         return new SpawnEggItem(entityType.get(), color, outerColor, properties);
     }

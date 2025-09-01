@@ -152,8 +152,8 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
             if (entity == EntityType.WANDERING_TRADER) {
                 Int2ObjectMap<VillagerTrades.ItemListing[]> wanderingTraderTrades = VillagerTrades.WANDERING_TRADER_TRADES;
                 addTrade(wanderingTraderTrades, listing, true);
-                specialTradesAdded.computeIfAbsent(entity, k -> new HashSet<>()).add(listing);
             }
+            specialTradesAdded.computeIfAbsent(entity, k -> new HashSet<>()).add(listing);
         }
 
         int added = specialTradesAdded.values().stream()

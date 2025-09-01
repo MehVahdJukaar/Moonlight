@@ -1,41 +1,40 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
-import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
-import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class DynResourceGenerator<T extends DynamicResourcePack> implements PreparableReloadListener {
+public abstract class DynResourceGenerator<T extends DynamicResourcePack>  {
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
-
 
     public final T dynamicPack;
     protected final String modId;
@@ -48,14 +47,14 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         this.dynamicPack.addNamespaces(additionalNamespaces().toArray(new String[0]));
         this.dynamicPack.addNamespaces(modId);
         this.dynamicPack.registerPack();
-
-        GENERATORS.add(this);
     }
+//TODO: improve
 
     /**
      * Called on Mod Init. just loads this class
      */
     public final void register() {
+        DynamicResourcesInternals.addGenerator(this);
     }
 
     public abstract Logger getLogger();
@@ -73,6 +72,10 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         return dynamicPack;
     }
 
+    public String getModId() {
+        return modId;
+    }
+
     /**
      * If this pack should be cleared on reload. Overrie if you need to have your pack never cleared, for example when making a pack hat just loads once
      */
@@ -80,8 +83,13 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         return runsOnEveryReload();
     }
 
+    //just runs once?
     public boolean runsOnEveryReload() {
         return true;
+    }
+
+    public boolean generateDebugResources() {
+        return PlatHelper.isDev();
     }
 
     /**
@@ -120,44 +128,27 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                 }, getExecutors()))
                 .toList();
 
-        // Wait for all tasks to finish, even if some failed
-        CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-
-        allDone.join();
-
         try {
-            Multimap<TagKey<?>, SimpleTagBuilder> tags = HashMultimap.create();
-            allDone.join(); // joins all futures
-            for (CompletableFuture<ResourceSink> future : futures) {
-                ResourceSink sink = future.join();
-                if (sink == null) continue;
-                sink.resources.forEach(this.dynamicPack::addBytes);
-                sink.notClearable.forEach(this.dynamicPack::markNotClearable);
-                for (var e : sink.tags.entrySet()) {
-                    tags.put(e.getKey(), e.getValue());
-                }
-            }
-            //adds tags
-            for (var key : tags.keySet()) {
-                var it = tags.get(key).iterator();
-                if (it.hasNext()) {
-                    SimpleTagBuilder tag = it.next();
-                    while (it.hasNext()) {
-                        tag.merge(it.next());
-                    }
-                    this.dynamicPack.addTag(tag, key.registry());
-                }
-            }
+            List<ResourceSink> list = futures.stream()
+                    .map(CompletableFuture::join).toList();
+
+            ResourceSink.acceptSinks(dynamicPack, list);
 
         } catch (Exception e) {
             throw new RuntimeException("Task failed", e);
         }
 
+        boolean hasDebugGen = this.generateDebugResources();
+        if (hasDebugGen) {
+            dynamicPack.saveToFile(Paths.get("debug", "generated_resource_pack"));
+        }
+
         getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{} (multithreaded)",
                 this.dynamicPack.getPackType(), this.dynamicPack.packId(), this.modId,
                 watch.elapsed().toMillis(),
-                this.dynamicPack.generateDebugResources ? " (debug resource dump on)" : "");
+                hasDebugGen ? " (debug resource dump on)" : "");
     }
+
 
     //override if you really need to
     protected @NotNull ResourceSink createLocalSink() {
@@ -178,27 +169,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         //implement this for multi thead
     }
 
-    @Override
-    public final @NotNull CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager manager,
-                                                         ProfilerFiller workerProfiler, ProfilerFiller mainProfiler,
-                                                         Executor workerExecutor, Executor mainExecutor) {
-        //not used anymore. Loading early instead
-        if (Moonlight.HAS_BEEN_INIT && PlatHelper.isModLoadingValid()) { //fail safe since some mods for some god damn reason run a reload event before blocks are registered...
-            onNormalReload(manager);
-        } else {
-            Moonlight.LOGGER.error("Cowardly refusing generate assets for a broken mod state");
-        }
-
-        return CompletableFuture.supplyAsync(() -> null, workerExecutor)
-                .thenCompose(stage::wait)
-                .thenAcceptAsync((noResult) -> {
-                }, mainExecutor);
-    }
-
-    protected void onNormalReload(ResourceManager manager) {
-    }
-
-    protected final void onEarlyReload(EarlyPackReloadEvent event, IProgressTracker localReporter) {
+    public final void onEarlyReload(EarlyPackReloadEvent event, IProgressTracker localReporter) {
         if (event.type() == dynamicPack.packType) {
             try {
                 this.reloadResources(event.manager(), localReporter);
@@ -215,7 +186,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         if (!this.hasBeenInitialized) {
             wasFirstReload = true;
             this.hasBeenInitialized = true;
-            if (this.dynamicPack instanceof DynamicTexturePack tp) tp.addPackLogo();
+            this.onFirstReload();
         }
         //generate textures
         if (runsOnEveryReload() || wasFirstReload) {
@@ -224,6 +195,8 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         }
     }
 
+    protected void onFirstReload() {
+    }
 
     @Nullable
     protected abstract PackRepository getRepository();
@@ -282,7 +255,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
 
             fullText = textTransform.apply(fullText);
 
-            this.dynamicPack.addBytes(newRes, fullText.getBytes());
+            this.dynamicPack.addResource(newRes, fullText.getBytes());
         }
     }
 
@@ -293,62 +266,5 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
         }
     }
 
-
-    private static final Set<DynResourceGenerator<?>> GENERATORS = new HashSet<>();
-
-    static {
-        MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
-            PackType type = earlyPackReloadEvent.type();
-            List<DynResourceGenerator<?>> validGen = DynResourceGenerator.GENERATORS.stream()
-                    .filter(gen -> gen.dynamicPack.packType == type)
-                    .toList();
-            List<String> modIds = GENERATORS.stream()
-                    .map(g -> g.modId).toList();
-            Moonlight.LOGGER.info("Starting runtime resource generation for pack type {} with generators from mods {}: {}",
-                    type, modIds, validGen);
-
-            if (CommonConfigs.EXTRA_DEBUG.get())
-                Moonlight.LOGGER.info("Current stack trace:", new Throwable("Stack trace dump to see who fired me"));
-
-
-            Stopwatch stopwatch = Stopwatch.createStarted();
-
-            IProgressTracker reporter = earlyPackReloadEvent.progress();
-            //These are not parallel. pass flat
-            for (var gen : validGen) {
-                gen.onEarlyReload(earlyPackReloadEvent, reporter); // run synchronously
-            }
-
-            Moonlight.LOGGER.info("Finished runtime resources generation for {} packs in a total of {} ms",
-                    GENERATORS.size(), stopwatch.elapsed().toMillis());
-        }, EarlyPackReloadEvent.class);
-    }
-
-    @ApiStatus.Internal
-    public static void clearAfterReload(PackType targetType) {
-        //this will be called multiple times. shunt be an issue I hope
-        Set<DynamicResourcePack> packs = new HashSet<>();
-        for (var g : GENERATORS) {
-            if (g.dynamicPack.packType == targetType && g.shouldClearOnReload()) {
-                packs.add(g.dynamicPack);
-            }
-        }
-        for (var p : packs) {
-            p.clearNonStatic();
-        }
-    }
-
-    @ApiStatus.Internal
-    public static void clearBeforeReload(PackType targetType) {
-        Set<DynamicResourcePack> packs = new HashSet<>();
-        for (var g : GENERATORS) {
-            if (g.dynamicPack.packType == targetType && g.shouldClearOnReload()) {
-                packs.add(g.dynamicPack);
-            }
-        }
-        for (var p : packs) {
-            p.clearAllContent();
-        }
-    }
 
 }

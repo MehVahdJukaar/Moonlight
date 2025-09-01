@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
@@ -25,7 +27,6 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
@@ -37,14 +38,12 @@ public class ResourceSink {
 
     private final String modId;
     private final String packId;
-    final Map<ResourceLocation, byte[]> resources = new HashMap<>();
-    final Set<ResourceLocation> notClearable = new HashSet<>();
-    final Map<TagKey<?>, SimpleTagBuilder> tags = new HashMap<>();
+    private final Map<ResourceLocation, byte[]> resources = new HashMap<>();
+    private final Map<TagKey<?>, SimpleTagBuilder> tags = new HashMap<>();
 
     public ResourceSink(String modId, String packId) {
         this.modId = modId;
         this.packId = packId;
-
     }
 
     protected void addBytes(ResourceLocation id, byte[] bytes) {
@@ -94,6 +93,10 @@ public class ResourceSink {
         }
     }
 
+    @Deprecated(forRemoval = true)
+    public void addTexture(ResourceLocation path, TextureImage image, boolean onAtlas) {
+        addTexture(path, image);
+    }
 
     /**
      * Adds a new textures and closes the passed native image
@@ -102,13 +105,8 @@ public class ResourceSink {
      * You must close the texture yourself now
      */
     public void addTexture(ResourceLocation path, TextureImage image) {
-        addTexture(path, image, true);
-    }
-
-    public void addTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
         try {
             this.addBytes(path, image.getImage().asByteArray(), ResType.TEXTURES);
-            if (!isOnAtlas) this.markNotClearable(ResType.TEXTURES.getPath(path));
             if (image.getMcMeta() != null) {
                 this.addJson(path, image.getMcMeta().toJson(), ResType.MCMETA);
             }
@@ -117,8 +115,8 @@ public class ResourceSink {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public void markNotClearable(ResourceLocation path) {
-        this.notClearable.add(path);
     }
 
     public void addBlockModel(ResourceLocation modelLocation, JsonElement model) {
@@ -291,4 +289,40 @@ public class ResourceSink {
         JsonElement json = RPUtils.makeModelOverride(manager, modelRes, modelConsumer);
         this.addItemModel(modelRes, json);
     }
+
+    // a bit ugly here, also it means resource sink is not reusable in other contexts that much
+    public static void acceptSinks(IEditablePackResources pack, Collection<ResourceSink> sinks) {
+
+        Multimap<TagKey<?>, SimpleTagBuilder> tags = HashMultimap.create();
+        for (ResourceSink sink : sinks) {
+            if (sink == null) continue;
+            for (var r : sink.resources.entrySet()) {
+                pack.addResource(r.getKey(), r.getValue());
+            }
+            for (var e : sink.tags.entrySet()) {
+                tags.put(e.getKey(), e.getValue());
+            }
+        }
+        //special stuff for tags since they are weird and merged
+
+        //adds tags
+        ResourceSink dummy = new ResourceSink("dummy", "dummy");
+        for (var key : tags.keySet()) {
+            var it = tags.get(key).iterator();
+            if (it.hasNext()) {
+                SimpleTagBuilder builder = it.next();
+                while (it.hasNext()) {
+                    builder.merge(it.next());
+                }
+
+                ResourceLocation tagId = builder.getId();
+                ResourceLocation loc = ResType.TAGS.getPath(tagId.withPath(
+                        key.registry().location().getPath() + "/" + tagId.getPath()));
+
+                dummy.addJson(loc, builder.serializeToJson(), ResType.GENERIC);
+            }
+        }
+        dummy.resources.forEach(pack::addResource);
+    }
+
 }

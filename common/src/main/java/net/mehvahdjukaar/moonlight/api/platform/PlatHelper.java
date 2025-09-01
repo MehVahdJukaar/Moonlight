@@ -6,6 +6,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -24,6 +25,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -241,11 +245,10 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
-        throw new AssertionError();
+        RegHelper.registerResourcePack(packType, packSupplier);
     }
-
 
     @Contract
     @ExpectPlatform
