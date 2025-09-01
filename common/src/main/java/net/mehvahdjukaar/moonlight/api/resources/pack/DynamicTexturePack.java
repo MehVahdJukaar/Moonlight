@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -21,7 +22,7 @@ public class DynamicTexturePack extends DynamicResourcePack {
 
     @Override
     public void registerPack() {
-addIcon();
+        addIcon();
         super.registerPack();
     }
 
@@ -32,6 +33,8 @@ addIcon();
                 this.addRootResource("pack.png", Files.readAllBytes(logoPath));
             } catch (Exception ignored) {
             }
+        }else{
+            Moonlight.LOGGER.error("Failed to find mod icon for{}", this.mainNamespace);
         }
 
     }
