@@ -39,7 +39,7 @@ public abstract class ReloadableServerResourcesMixin {
             if (!PlatHelper.isInitializing()) {
                 //hack.we assume its of server type
                 return ReloadInstanceWrapper.wrap(
-                        ()->original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
+                        () -> original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
                         PackType.SERVER_DATA, resourceManager, backgroundExecutor
                 );
             }

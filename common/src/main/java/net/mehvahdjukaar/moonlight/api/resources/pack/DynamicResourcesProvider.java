@@ -44,14 +44,16 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
 
     public DynamicResourcesProvider(ResourceLocation name, PackType packType, PackGenerationStrategy generationPolicy) {
         this.name = name;
+        this.packType = packType;
+        this.generationStrategy = generationPolicy;
         //TODO:maybe make factory with these?
+        //TODO:make these configurable
         this.locationInfo = new PackLocationInfo(
                 name.toString(),    // id
                 Component.translatable(LangBuilder.getReadableName(name.toString())), // title
                 PackSource.BUILT_IN,
                 Optional.empty() //no clue what this is
         );
-        this.packType = packType;
         this.selectionConfig = new PackSelectionConfig(
                 true,    // required -- this MAY need to be true for the pack to be enabled by default
                 Pack.Position.TOP,
@@ -60,9 +62,8 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
         PackMetadataSection metadata = new PackMetadataSection(Component.literal(name.toString()),
                 SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
 
-        this.generationStrategy = generationPolicy;
-        this.packResources = generationPolicy.createPackResources(locationInfo, packType, metadata);
 
+        this.packResources = generationPolicy.createPackResources(locationInfo, packType, metadata);
         this.packResources.addNamespaces(gatherSupportedNamespaces().toArray(new String[0]));
         this.packResources.addNamespaces(name.getNamespace());
     }
