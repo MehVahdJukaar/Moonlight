@@ -47,16 +47,6 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
     }
 
 
-    protected void onFirstReload() {
-        Path logoPath = ClientHelper.getModIcon(this.dynamicPack.mainNamespace);
-        if (logoPath != null) {
-            try {
-                this.dynamicPack.addRootResource("pack.png", Files.readAllBytes(logoPath));
-            } catch (Exception ignored) {
-            }
-        }
-    }
-
 
     @Deprecated(forRemoval = true)
     public boolean alreadyHasTextureAtLocation(ResourceManager manager, ResourceLocation res) {

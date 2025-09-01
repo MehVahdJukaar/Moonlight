@@ -141,8 +141,8 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
             var icon = p.getRootResource("pack.png");
             if (icon != null) {
                 try (var s = icon.get()) {
-                    icons.add(NativeImage.read(s.readAllBytes()));
-                } catch (IOException e) {
+                    icons.add(NativeImage.read(s));
+                } catch (Exception e) {
                     Moonlight.LOGGER.error("Failed to read pack icon from {}", p.packId(), e);
                 }
             }

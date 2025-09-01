@@ -187,16 +187,12 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack>  {
         if (!this.hasBeenInitialized) {
             wasFirstReload = true;
             this.hasBeenInitialized = true;
-            this.onFirstReload();
         }
         //generate textures
         if (runsOnEveryReload() || wasFirstReload) {
             Moonlight.LOGGER.info("Generating runtime assets for pack {} ({})", this.dynamicPack.packId(), this.modId);
             this.regenerateDynamicAssets(manager, reporter);
         }
-    }
-
-    protected void onFirstReload() {
     }
 
     @Nullable
