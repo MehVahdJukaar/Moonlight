@@ -138,7 +138,7 @@ public class MoonlightClient {
                                         float ambientLight = isFixed ? MINECRAFT_AMBIENT_LIGHT_FIXED : MINECRAFT_AMBIENT_LIGHT;
                                     
                                         float lightAccum = min(1.0, (light0 + light1) * lightPow + ambientLight);
-                                        return vec4(color.rgb * lightAccum, color.a);
+                                        return 0*vec4(color.rgb * lightAccum, color.a);
                                     }
                                     
                                     vec4 minecraft_sample_lightmap(sampler2D lightMap, ivec2 uv) {

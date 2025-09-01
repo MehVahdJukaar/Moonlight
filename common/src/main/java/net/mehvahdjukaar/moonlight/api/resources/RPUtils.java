@@ -250,7 +250,9 @@ public class RPUtils {
     }
 
     public static Path getResourcePath(Path path, ResourceLocation k, PackType packType) {
-        return path.resolve(k.getNamespace() + "/" + k.getPath() + "/" + packType.getDirectory());
+        return path.resolve(packType.getDirectory())
+                .resolve(k.getNamespace())
+                .resolve(k.getPath());
     }
 
     public static void writeResource(ResourceLocation id, byte[] bytes, Path path, PackType packType) {
@@ -302,8 +304,8 @@ public class RPUtils {
     }
 
     public static JsonElement makeModelOverride(ResourceManager manager,
-                                                 ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
-        try (var model =  manager.getResourceOrThrow(ResType.ITEM_MODELS.getPath(modelRes)).open()) {
+                                                ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
+        try (var model = manager.getResourceOrThrow(ResType.ITEM_MODELS.getPath(modelRes)).open()) {
             var json = RPUtils.deserializeJson(model);
             JsonArray overrides;
             if (json.has("overrides")) {

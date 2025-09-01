@@ -147,9 +147,10 @@ public interface PackGenerationStrategy {
         }
 
         public Path getCachePath(PackLocationInfo packInfo, PackType type) {
-            return PlatHelper.getGamePath().resolve("dynamic-packs-cache")
-                    .resolve(type.getDirectory())
-                    .resolve(packInfo.id().replace(":", "/"));
+            return PlatHelper.getGamePath().resolve("dynamic-" +
+                            (type == PackType.CLIENT_RESOURCES ? "-resource" : "-data")
+                            + "-pack-cache")
+                    .resolve(packInfo.id().replace(":", "-"));
         }
 
         @Override
