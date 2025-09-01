@@ -20,6 +20,8 @@ import java.util.function.Supplier;
  * Class responsible to generate assets and manage your dynamic resource texture pack (client)
  * Handles and registers your dynamic pack instance, which needs to be provided
  */
+
+@Deprecated(forRemoval = true)
 public abstract class DynClientResourcesGenerator extends DynResourceGenerator<DynamicTexturePack> {
     protected DynClientResourcesGenerator(DynamicTexturePack pack) {
         super(MoonlightClient.maybeMergePack(pack), pack.mainNamespace);

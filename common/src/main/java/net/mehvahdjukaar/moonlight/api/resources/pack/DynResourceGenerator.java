@@ -32,6 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Deprecated(forRemoval = true)
 public abstract class DynResourceGenerator<T extends DynamicResourcePack>  {
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();

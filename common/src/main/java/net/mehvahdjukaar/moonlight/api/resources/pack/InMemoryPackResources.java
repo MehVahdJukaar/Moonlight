@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class InMemoryPackResources extends AbstractPackResources implements IEditablePackResources {
+public class InMemoryPackResources extends AbstractPackResources implements IEditablePackResources, IDebugDumpable {
 
     protected final boolean hidden;
     protected final boolean fixed;
@@ -49,9 +49,6 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
         this.metadata = metadata;
     }
 
-    public PackType getPackType() {
-        return packType;
-    }
 
     @PlatformOnly(PlatformOnly.FORGE)
     public boolean isHidden() {
@@ -167,7 +164,18 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
         }
     }
 
-    public void saveToFile(Path path) {
+    @Override
+    public PackType getPackType() {
+        return packType;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.resources.isEmpty();
+    }
+
+    @Override
+    public void dumpToDisk(Path path) {
         this.resources.forEach((k, v) -> {
             try {
                 Path p = RPUtils.getResourcePath(path, k, packType);

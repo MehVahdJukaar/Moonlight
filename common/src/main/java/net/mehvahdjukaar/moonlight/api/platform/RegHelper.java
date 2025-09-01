@@ -680,31 +680,6 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    public static void registerResourcePack(DynamicResourcePack dynamicPack) {
-        PackType packType = dynamicPack.getPackType();
-        registerResourcePack(packType, () ->
-                Pack.readMetaAndCreate(
-                        dynamicPack.location(),
-                        new Pack.ResourcesSupplier() {
-                            @Override
-                            public PackResources openPrimary(PackLocationInfo location) {
-                                return dynamicPack;
-                            }
-
-                            @Override
-                            public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
-                                return dynamicPack;
-                            }
-                        },// pack supplier
-                        packType,
-                        new PackSelectionConfig(
-                                true,    // required -- this MAY need to be true for the pack to be enabled by default
-                                Pack.Position.TOP,
-                                false // fixed position
-                        )
-                ));
-    }
-
     public static void registerDynamicResourceProvider(DynamicResourcesProvider provider) {
         PackType packType = provider.getPackType();
         registerResourcePack(packType, () ->

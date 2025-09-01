@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
-import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -17,10 +16,12 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -37,11 +38,9 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
     private final PackType packType;
 
     protected final IEditablePackResources packResources;
-    protected final PackCacheStrategy cacheStrategy;
+    protected final PackGenerationStrategy generationStrategy;
 
-    private boolean hasBeenInitialized;
-
-    public DynamicResourcesProvider(ResourceLocation name, PackType packType, PackCacheStrategy cacheStrategy) {
+    public DynamicResourcesProvider(ResourceLocation name, PackType packType, PackGenerationStrategy generationPolicy) {
         this.name = name;
         //TODO:maybe make factory with these?
         this.locationInfo = new PackLocationInfo(
@@ -59,16 +58,16 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
         PackMetadataSection metadata = new PackMetadataSection(Component.literal(name.toString()),
                 SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
 
-        this.cacheStrategy = cacheStrategy;
-        this.packResources = cacheStrategy.createPackResources(locationInfo, packType, metadata);
+        this.generationStrategy = generationPolicy;
+        this.packResources = generationPolicy.createPackResources(locationInfo, packType, metadata);
 
-        this.packResources.addNamespaces(gatherAdditionalNamespaces().toArray(new String[0]));
+        this.packResources.addNamespaces(gatherSupportedNamespaces().toArray(new String[0]));
         this.packResources.addNamespaces(name.getNamespace());
     }
 
-    public abstract Collection<String> gatherAdditionalNamespaces();
-
-    public abstract boolean runsOnEveryReload();
+    public ResourceLocation getName() {
+        return name;
+    }
 
     public PackLocationInfo getLocationInfo() {
         return locationInfo;
@@ -97,47 +96,58 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
         return packResources;
     }
 
-
-    @ApiStatus.Internal
-    public final void onEarlyReload(EarlyPackReloadEvent event, IProgressTracker localReporter) {
-        if (event.type() == this.getPackType()) {
-            try {
-                this.reloadResources(event.manager(), localReporter);
-            } catch (Exception e) {
-                Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}", this, e);
-            }
+    public void prepare() {
+        if (generationStrategy.needsRegeneration(this.packResources,
+                this.getPackRepository().getSelectedPacks())) {
+            this.packResources.clearAllResources();
         }
     }
 
-    private void reloadResources(ResourceManager manager, IProgressTracker reporter) {
-        //first clear all pack content if it should be cleared
-
-        boolean wasFirstReload = false;
-        if (!this.hasBeenInitialized) {
-            wasFirstReload = true;
-            this.hasBeenInitialized = true;
-            //  this.onFirstReload();
-        }
-        //generate textures
-        Collection<Pack> selectedPacks = this.getPackRepository().getSelectedPacks();
-        boolean shouldRunGen = runsOnEveryReload() || wasFirstReload || cacheStrategy
-                .needsRegeneration(this.packResources, selectedPacks);
-        if (shouldRunGen) {
-            Moonlight.LOGGER.info("Generating runtime assets for pack {}", this);
-            this.regenerateDynamicAssets(manager, reporter);
-
-            this.cacheStrategy.markRegenerated(this.packResources, selectedPacks);
+    public void reload(ResourceManager manager, IProgressTracker localReporter) {
+        try {
+            this.doReload(manager, localReporter);
+        } catch (Exception e) {
+            Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}", this, e);
         }
     }
 
+    private void doReload(ResourceManager manager, IProgressTracker reporter) {
+
+        Collection<Pack> selected = getPackRepository().getSelectedPacks();
+        boolean needByStrategy = generationStrategy.needsRegeneration(this.packResources, selected);
+
+        if (needByStrategy) {
+            String reason = "cache strategy requested refresh";
+            Moonlight.LOGGER.info("Regenerating {} due to {}", this, reason);
+
+            Stopwatch watch = Stopwatch.createStarted();
+
+            runGenerationPipeline(manager, reporter);
+
+            generationStrategy.afterRegenerate(this.packResources, selected);
+
+            Moonlight.LOGGER.info("Generated runtime {} for pack {} in {} ms",
+                    this.getPackType(), this.packResources.packId(),
+                    watch.elapsed().toMillis());
+
+            //ugly here but whatever
+            getExecutorService().execute(() -> {
+                if (this.generateDebugResources() && this.packResources instanceof IDebugDumpable d) {
+                    d.dumpToDisk(Paths.get("debug", "generated_resource_pack"));
+                }
+            });
+
+        } else {
+            Moonlight.LOGGER.debug("Skipping regeneration for {} (cache up-to-date)", this);
+        }
+    }
 
     /**
      * just deprecated as it shouldn't be overwritten anymore and will become final private
      */
-    private void regenerateDynamicAssets(ResourceManager manager, IProgressTracker progressTracker) {
+    private void runGenerationPipeline(ResourceManager manager, IProgressTracker progressTracker) {
         List<ResourceGenTask> genTasks = new ArrayList<>();
 
-        Stopwatch watch = Stopwatch.createStarted();
 
         try {
             regenerateDynamicAssets(genTasks::add);
@@ -149,24 +159,21 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
         var reporter = progressTracker.subtask(totalTasks);
 
         List<CompletableFuture<ResourceSink>> futures = genTasks.stream()
+
                 .map(task -> CompletableFuture.supplyAsync(() -> {
-                    try {
-                        ResourceSink localSink = new ResourceSink(this.modId, this.packResources.packId());
-                        task.accept(manager, localSink);
-                        return localSink;
-                    } catch (Exception e) {
-                        Moonlight.LOGGER.error("Resource Gen Task failed", e);
-                        return null;
-                    } finally {
-                        reporter.step();
-                    }
-                }, getExecutorService()))
+                            ResourceSink sink = new ResourceSink(this.name.getNamespace(), this.packResources.packId());
+                            task.accept(manager, sink);               // let exceptions bubble
+                            return sink;
+                        }, getExecutorService()
+                ).whenComplete((sink, ex) -> {
+                    reporter.step();
+                    if (ex != null) Moonlight.LOGGER.error("Resource Gen Task failed", ex);
+                }))
                 .toList();
 
         try {
             List<ResourceSink> list = futures.stream()
                     .map(CompletableFuture::join)
-                    .filter(Objects::nonNull)
                     .toList();
 
             ResourceSink.acceptSinks(this.packResources, list);
@@ -175,23 +182,22 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
             throw new RuntimeException("Task failed", e);
         }
 
-        boolean hasDebugGen = this.generateDebugResources();
-        if (hasDebugGen) {
-            dynamicPack.saveToFile(Paths.get("debug", "generated_resource_pack"));
-        }
-
-        Moonlight.LOGGER.info("Generated runtime {} for pack {} ({}) in: {} ms{} (multithreaded)",
-                this.getPackType(), this.packResources.packId(), this.modId,
-                watch.elapsed().toMillis(),
-                hasDebugGen ? " (debug resource dump on)" : "");
     }
 
     protected Executor getExecutorService() {
         return EXECUTOR_SERVICE;
     }
 
+
+    protected boolean generateDebugResources() {
+        return false;
+    }
+
+    protected abstract Collection<String> gatherSupportedNamespaces();
+
     protected abstract void regenerateDynamicAssets(Consumer<ResourceGenTask> executor);
 
     protected abstract PackRepository getPackRepository();
+
 
 }

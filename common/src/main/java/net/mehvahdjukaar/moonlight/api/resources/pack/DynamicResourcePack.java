@@ -17,6 +17,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
@@ -37,7 +39,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.Optional;
 
 @Deprecated(forRemoval = true)
 public abstract class DynamicResourcePack extends InMemoryPackResources {
@@ -56,7 +58,7 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
     }
 
     protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
-        super(makeInfo(name),type, makeMetadata(name, type), fixed, hidden);
+        super(makeInfo(name), type, makeMetadata(name, type), fixed, hidden);
         this.position = position;
         this.mainNamespace = name.getNamespace();
         this.resourcePackName = name;
@@ -105,9 +107,30 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
     /**
      * Registers this pack. Call on mod init
      */
-    @Deprecated(forRemoval = true)
     public void registerPack() {
-        RegHelper.registerResourcePack(this);
+        PackType packType = this.getPackType();
+        DynamicResourcePack p= this;
+        RegHelper.registerResourcePack(packType, () ->
+                Pack.readMetaAndCreate(
+                        this.location(),
+                        new Pack.ResourcesSupplier() {
+                            @Override
+                            public PackResources openPrimary(PackLocationInfo location) {
+                                return p;
+                            }
+
+                            @Override
+                            public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
+                                return p;
+                            }
+                        },// pack supplier
+                        packType,
+                        new PackSelectionConfig(
+                                true,    // required -- this MAY need to be true for the pack to be enabled by default
+                                Pack.Position.TOP,
+                                false // fixed position
+                        )
+                ));
     }
 
     //@Override
@@ -115,7 +138,6 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
     public FileNotFoundException makeFileNotFoundException(String path) {
         return new FileNotFoundException(String.format("'%s' in ResourcePack '%s'", path, this.resourcePackName));
     }
-
 
 
     @Deprecated(forRemoval = true)

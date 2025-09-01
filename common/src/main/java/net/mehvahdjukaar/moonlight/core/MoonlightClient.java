@@ -1,30 +1,25 @@
 package net.mehvahdjukaar.moonlight.core;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
+import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
-import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
+import net.mehvahdjukaar.moonlight.api.resources.pack.*;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.Pack;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3f;
 
-import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -38,8 +33,7 @@ public class MoonlightClient {
         ClientHelper.addShaderRegistration(MoonlightClient::registerShaders);
         ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluid"));
         ClientConfigs.init();
-        var gen = new Gen();
-        gen.register();
+        RegHelper.registerDynamicResourceProvider(new MLDynamicClientResources());
     }
 
     public static DynamicTexturePack maybeMergePack(DynamicTexturePack pack) {
@@ -101,19 +95,23 @@ public class MoonlightClient {
     }
 
 
-    private static class Gen extends DynClientResourcesGenerator {
-        public Gen() {
-            super(new DynamicTexturePack(Moonlight.res("generated_pack")));
-            this.dynamicPack.addNamespaces("minecraft");
+    private static class MLDynamicClientResources extends DynamicClientResourceProvider {
+
+        protected MLDynamicClientResources() {
+            super(Moonlight.res("dynamic_resources"), PackGenerationStrategy.CACHED);
         }
 
         @Override
-        public Logger getLogger() {
-            return Moonlight.LOGGER;
+        protected void addDynamicTranslations(AfterLanguageLoadEvent afterLanguageLoadEvent) {
         }
 
         @Override
-        public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
+        protected Collection<String> gatherSupportedNamespaces() {
+            return List.of("minecraft");
+        }
+
+        @Override
+        protected void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
             fixShade = ClientConfigs.FIX_SHADE.get();
             if (fixShade != ClientConfigs.ShadeFix.FALSE) {
                // applyFixedShade();
@@ -151,6 +149,7 @@ public class MoonlightClient {
                 });
             }
         }
+
 
 
     }

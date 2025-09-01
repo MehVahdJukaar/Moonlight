@@ -29,20 +29,23 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ResourceSink {
 
-    private final String modId;
+    private final String packNamespace;
     private final String packId;
     private final Map<ResourceLocation, byte[]> resources = new HashMap<>();
     private final Map<TagKey<?>, SimpleTagBuilder> tags = new HashMap<>();
 
-    public ResourceSink(String modId, String packId) {
-        this.modId = modId;
+    public ResourceSink(String packNamespace, String packId) {
+        this.packNamespace = packNamespace;
         this.packId = packId;
     }
 
@@ -199,17 +202,21 @@ public class ResourceSink {
         return alreadyHasAssetAtLocation(manager, res, ResType.TEXTURES);
     }
 
+    @Deprecated(forRemoval = true)
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier) {
         addTextureIfNotPresent(manager, relativePath, textureSupplier, true);
     }
 
+    @Deprecated(forRemoval = true)
     public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier, boolean isOnAtlas) {
+        addTextureIfNotPresent(manager, (relativePath.contains(":") ? ResourceLocation.parse(relativePath) :
+                ResourceLocation.fromNamespaceAndPath(this.packNamespace, relativePath)), textureSupplier);
+    }
 
-        ResourceLocation res = relativePath.contains(":") ? ResourceLocation.parse(relativePath) :
-                ResourceLocation.fromNamespaceAndPath(this.modId, relativePath);
+    public void addTextureIfNotPresent(ResourceManager manager, ResourceLocation res, Supplier<TextureImage> textureSupplier) {
         if (!alreadyHasTextureAtLocation(manager, res)) {
             try (TextureImage textureImage = textureSupplier.get()) {
-                this.addTexture(res, textureImage, isOnAtlas);
+                this.addTexture(res, textureImage);
             } catch (Exception e) {
                 Moonlight.LOGGER.error("Failed to generate texture {}: {}", res, e);
             }
@@ -257,7 +264,7 @@ public class ResourceSink {
             } else builder.append(partial[i]);
         }
         //adds modified under my namespace
-        ResourceLocation newRes = ResourceLocation.fromNamespaceAndPath(this.modId, builder.toString());
+        ResourceLocation newRes = ResourceLocation.fromNamespaceAndPath(this.packNamespace, builder.toString());
         if (!alreadyHasAssetAtLocation(manager, newRes)) {
             String fullText = resource.asString();
             fullText = textTransform.apply(fullText);

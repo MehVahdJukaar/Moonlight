@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.pack;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
@@ -9,9 +11,12 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,7 +24,10 @@ import java.util.Set;
 @ApiStatus.Internal
 public class DynamicResourcesInternals {
 
+    @Deprecated(forRemoval = true)
     private static final Set<DynResourceGenerator<?>> GENERATORS = new HashSet<>();
+
+    private static final Multimap<PackType, DynamicResourcesProvider> PROVIDERS = HashMultimap.create();
 
     public static void init() {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
@@ -27,14 +35,10 @@ public class DynamicResourcesInternals {
             List<DynResourceGenerator<?>> validGen = GENERATORS.stream()
                     .filter(gen -> gen.dynamicPack.getPackType() == type)
                     .toList();
-            List<String> modIds = GENERATORS.stream()
+            List<String> modIds = validGen.stream()
                     .map(DynResourceGenerator::getModId).toList();
             Moonlight.LOGGER.info("Starting runtime resource generation for pack type {} with generators from mods {}: {}",
                     type, modIds, validGen);
-
-            if (CommonConfigs.EXTRA_DEBUG.get())
-                Moonlight.LOGGER.info("Current stack trace:", new Throwable("Stack trace dump to see who fired me"));
-
 
             Stopwatch stopwatch = Stopwatch.createStarted();
 
@@ -47,12 +51,42 @@ public class DynamicResourcesInternals {
             Moonlight.LOGGER.info("Finished runtime resources generation for {} packs in a total of {} ms",
                     GENERATORS.size(), stopwatch.elapsed().toMillis());
         }, EarlyPackReloadEvent.class);
+
+
+        MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
+            PackType type = earlyPackReloadEvent.type();
+            Collection<DynamicResourcesProvider> validGen = PROVIDERS.get(type);
+            List<ResourceLocation> modIds = validGen.stream()
+                    .map(DynamicResourcesProvider::getName).toList();
+            Moonlight.LOGGER.info("Starting runtime resource generation for pack type {} with generators {}",
+                    type, modIds);
+
+            if (CommonConfigs.EXTRA_DEBUG.get()) {
+                Moonlight.LOGGER.info("Current stack trace:", new Throwable("Stack trace dump to see who fired me"));
+            }
+
+            Stopwatch stopwatch = Stopwatch.createStarted();
+
+            IProgressTracker reporter = earlyPackReloadEvent.progress();
+            ResourceManager manager = earlyPackReloadEvent.manager();
+            //These are not parallel. pass flat
+            for (var gen : validGen) {
+                gen.reload(manager, reporter); // run synchronously
+            }
+
+            Moonlight.LOGGER.info("Finished runtime resources generation for {} packs in a total of {} ms",
+                    validGen.size(), stopwatch.elapsed().toMillis());
+        }, EarlyPackReloadEvent.class);
+
     }
 
     public static void addGenerator(DynResourceGenerator<?> generator) {
         GENERATORS.add(generator);
     }
 
+    public static void registerProvider(DynamicResourcesProvider provider) {
+        PROVIDERS.put(provider.getPackType(), provider);
+    }
 
     @ApiStatus.Internal
     public static void clearAfterReload(PackType targetType) {
@@ -60,19 +94,22 @@ public class DynamicResourcesInternals {
     }
 
     @ApiStatus.Internal
-    public static void clearBeforeReload(PackType targetType) {
+    public static void clearBeforeReload(PackType packType) {
         Set<DynamicResourcePack> packs = new HashSet<>();
         for (var g : GENERATORS) {
-            if (g.dynamicPack.getPackType() == targetType && g.shouldClearOnReload()) {
+            if (g.dynamicPack.getPackType() == packType && g.shouldClearOnReload()) {
                 packs.add(g.dynamicPack);
             }
         }
         for (var p : packs) {
             p.clearAllContent();
         }
+
+
+        for (var p : PROVIDERS.get(packType)) {
+            p.prepare();
+        }
     }
 
-    public static void registerProvider(DynamicResourcesProvider provider) {
 
-    }
 }

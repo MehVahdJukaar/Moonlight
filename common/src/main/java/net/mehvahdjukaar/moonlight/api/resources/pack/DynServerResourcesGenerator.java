@@ -7,6 +7,7 @@ import net.minecraft.server.packs.repository.PackRepository;
  * Class responsible to generate assets and manage your dynamic data pack (server)
  * Handles and registers your dynamic pack instance, which needs to be provided
  */
+@Deprecated(forRemoval = true)
 public abstract class DynServerResourcesGenerator extends DynResourceGenerator<DynamicDataPack> {
 
     protected DynServerResourcesGenerator(DynamicDataPack pack) {

@@ -18,16 +18,17 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-public interface PackCacheStrategy {
+//very ugly and confused class
+public interface PackGenerationStrategy {
 
     boolean needsRegeneration(IEditablePackResources packResources, Collection<Pack> loadedPacks);
 
-    void markRegenerated(IEditablePackResources packResources, Collection<Pack> loadedPacks);
+    void afterRegenerate(IEditablePackResources packResources, Collection<Pack> loadedPacks);
 
     IEditablePackResources createPackResources(PackLocationInfo info, PackType type, PackMetadataSection metadata);
 
 
-    PackCacheStrategy NO_CACHE = new PackCacheStrategy() {
+    PackGenerationStrategy REGEN_ON_EVERY_RELOAD = new PackGenerationStrategy() {
 
         @Override
         public boolean needsRegeneration(IEditablePackResources packResources, Collection<Pack> loadedPacks) {
@@ -35,7 +36,7 @@ public interface PackCacheStrategy {
         }
 
         @Override
-        public void markRegenerated(IEditablePackResources pack, Collection<Pack> loadedPacks) {
+        public void afterRegenerate(IEditablePackResources pack, Collection<Pack> loadedPacks) {
             // no cache
         }
 
@@ -45,7 +46,27 @@ public interface PackCacheStrategy {
         }
     };
 
-    PackCacheStrategy SIMPLE_CACHE = new PackCacheStrategy() {
+    PackGenerationStrategy RUN_ONCE = new PackGenerationStrategy() {
+        @Override
+        public boolean needsRegeneration(IEditablePackResources packResources, Collection<Pack> loadedPacks) {
+            return packResources.isEmpty();
+        }
+
+        @Override
+        public void afterRegenerate(IEditablePackResources pack, Collection<Pack> loadedPacks) {
+            // no cache
+        }
+
+        @Override
+        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type, PackMetadataSection metadata) {
+            return new InMemoryPackResources(info, type, metadata);
+        }
+    };
+
+    PackGenerationStrategy CACHED = new SimpleCached();
+
+
+    class SimpleCached implements PackGenerationStrategy {
 
         private static String computeCurrentFingerprint(Collection<Pack> packs) {
             List<String> tokens = new ArrayList<>();
@@ -124,20 +145,20 @@ public interface PackCacheStrategy {
         public boolean needsRegeneration(IEditablePackResources packResources, Collection<Pack> loadedPacks) {
             String oldHash = readFingerprint(packResources);
             String newHash = computeCurrentFingerprint(loadedPacks);
-            return oldHash != newHash;
+            return !oldHash.equals(newHash);
         }
 
         @Override
         public IEditablePackResources createPackResources(PackLocationInfo info, PackType type, PackMetadataSection metadata) {
             //this editable pack resources will save sutf to file whenver its added to it
-            return new CacheBackedPackResources(info, type, metadata, getCachePath(info));
+            return new CacheBackedPackResources(info, type, metadata, getCachePath(info, type));
         }
 
         @Override
-        public void markRegenerated(IEditablePackResources packResources, Collection<Pack> loadedPacks) {
+        public void afterRegenerate(IEditablePackResources packResources, Collection<Pack> loadedPacks) {
             //write new hash
             String newHash = computeCurrentFingerprint(loadedPacks);
-            writeCacheHash(packResources, newHash);
+            writeFingerprint(packResources, newHash);
         }
-    };
+    }
 }

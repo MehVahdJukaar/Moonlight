@@ -20,4 +20,5 @@ public interface IEditablePackResources extends PackResources {
 
     PackType getPackType();
 
+    boolean isEmpty();
 }
