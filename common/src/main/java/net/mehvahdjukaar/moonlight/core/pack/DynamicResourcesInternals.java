@@ -37,7 +37,7 @@ public class DynamicResourcesInternals {
                     .toList();
             List<String> modIds = validGen.stream()
                     .map(DynResourceGenerator::getModId).toList();
-            Moonlight.LOGGER.info("Starting runtime resource generation for pack type {} with generators from mods {}: {}",
+            Moonlight.LOGGER.info("Starting Legacy Runtime Resource Generation for pack type {} with generators from mods {}: {}",
                     type, modIds, validGen);
 
             Stopwatch stopwatch = Stopwatch.createStarted();
@@ -48,7 +48,7 @@ public class DynamicResourcesInternals {
                 gen.onEarlyReload(earlyPackReloadEvent, reporter); // run synchronously
             }
 
-            Moonlight.LOGGER.info("Finished runtime resources generation for {} packs in a total of {} ms",
+            Moonlight.LOGGER.info("Finished Legacy Runtime Resources Generation for {} packs in a total of {} ms",
                     GENERATORS.size(), stopwatch.elapsed().toMillis());
         }, EarlyPackReloadEvent.class);
 

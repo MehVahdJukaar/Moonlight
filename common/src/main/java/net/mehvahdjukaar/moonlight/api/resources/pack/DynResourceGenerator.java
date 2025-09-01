@@ -140,8 +140,8 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack>  {
         }
 
         boolean hasDebugGen = this.generateDebugResources();
-        if (hasDebugGen) {
-            dynamicPack.saveToFile(Paths.get("debug", "generated_resource_pack"));
+        if (hasDebugGen && dynamicPack instanceof IDebugDumpable drp) {
+            drp.dumpToDisk(Paths.get("debug", "generated_resource_pack"));
         }
 
         getLogger().info("Generated runtime {} for pack {} ({}) in: {} ms{} (multithreaded)",

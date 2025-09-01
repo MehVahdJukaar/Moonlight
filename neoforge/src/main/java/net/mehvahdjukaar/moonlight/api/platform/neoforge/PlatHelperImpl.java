@@ -233,7 +233,10 @@ public class PlatHelperImpl {
     }
 
     public static List<String> getInstalledMods() {
-        return ModList.get().getMods().stream().map(IModInfo::getModId).toList();
+        return ModList.get().getMods().stream()
+                .map(IModInfo::getModId)
+                .filter(s->!s.startsWith("generated_"))
+                .toList();
     }
 
     public static Player getFakeServerPlayer(GameProfile id, ServerLevel level) {

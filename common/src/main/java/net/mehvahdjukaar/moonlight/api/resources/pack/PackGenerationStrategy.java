@@ -6,6 +6,7 @@ import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,7 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 
 //very ugly and confused class
@@ -69,20 +70,7 @@ public interface PackGenerationStrategy {
     class SimpleCached implements PackGenerationStrategy {
 
         private static String computeCurrentFingerprint(Collection<Pack> packs) {
-            List<String> tokens = new ArrayList<>();
-
-            // Deterministic mod list: name@version
-            var mods = new ArrayList<>(PlatHelper.getInstalledMods());
-            mods.sort(String::compareTo);
-            for (var mod : mods) {
-                tokens.add(mod + "@" + PlatHelper.getModVersion(mod));
-            }
-
-            // Deterministic packs: id
-            //TODO: consider pack ordering and exclude dynamic packs
-            var sortedPacks = new ArrayList<>(packs);
-            sortedPacks.sort(Comparator.comparing(Pack::getId));
-            for (var p : sortedPacks) tokens.add("pack=" + p.getId());
+            List<String> tokens = computeTokens(packs);
 
             try {
                 var md = MessageDigest.getInstance("SHA-256");
@@ -98,6 +86,29 @@ public interface PackGenerationStrategy {
                 // Fallback: deterministic string hash
                 return Integer.toHexString(tokens.toString().hashCode());
             }
+        }
+
+        private static @NotNull List<String> computeTokens(Collection<Pack> packs) {
+            List<String> tokens = new ArrayList<>();
+
+            // 1) Packs: keep the given order (order-sensitive)
+            int i = 0;
+            for (Pack p : packs) {
+                String id = p.getId();
+                if (p.getPackSource() instanceof DynamicResourcesProvider) continue;
+                if (id.startsWith("mod/")) continue;
+                tokens.add("pack[" + (i++) + "]=" + id);
+            }
+
+            // 2) Mods: order-independent (sort deterministically)
+            List<String> modTokens = new ArrayList<>();
+            for (String mod : PlatHelper.getInstalledMods()) {
+                modTokens.add(mod + "@" + PlatHelper.getModVersion(mod));
+            }
+            Collections.sort(modTokens); // normalize any iteration order
+            tokens.addAll(modTokens);
+
+            return tokens;
         }
 
 
@@ -161,4 +172,6 @@ public interface PackGenerationStrategy {
             writeFingerprint(packResources, newHash);
         }
     }
+
+
 }

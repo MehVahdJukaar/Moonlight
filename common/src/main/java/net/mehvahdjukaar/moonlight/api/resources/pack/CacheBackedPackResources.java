@@ -86,4 +86,14 @@ public class CacheBackedPackResources extends PathPackResources implements IEdit
         } catch (Exception ignored) {
         }
     }
+
+    @Override
+    public PackType getPackType() {
+        return packType;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
 }

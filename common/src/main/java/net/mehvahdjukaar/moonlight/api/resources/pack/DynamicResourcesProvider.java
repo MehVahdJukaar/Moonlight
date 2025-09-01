@@ -40,6 +40,8 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
     protected final IEditablePackResources packResources;
     protected final PackGenerationStrategy generationStrategy;
 
+    private boolean needsRegeneration = true;
+
     public DynamicResourcesProvider(ResourceLocation name, PackType packType, PackGenerationStrategy generationPolicy) {
         this.name = name;
         //TODO:maybe make factory with these?
@@ -100,47 +102,44 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
         if (generationStrategy.needsRegeneration(this.packResources,
                 this.getPackRepository().getSelectedPacks())) {
             this.packResources.clearAllResources();
+            this.needsRegeneration = true;
         }
     }
 
-    public void reload(ResourceManager manager, IProgressTracker localReporter) {
+    public void reload(ResourceManager manager, IProgressTracker reporter) {
         try {
-            this.doReload(manager, localReporter);
+            if (this.needsRegeneration) {
+                this.needsRegeneration = false;
+                Collection<Pack> selected = getPackRepository().getSelectedPacks();
+
+                String reason = "cache strategy requested refresh";
+                Moonlight.LOGGER.info("Regenerating {} due to {}", this, reason);
+
+                Stopwatch watch = Stopwatch.createStarted();
+
+                runGenerationPipeline(manager, reporter);
+
+                generationStrategy.afterRegenerate(this.packResources, selected);
+
+                Moonlight.LOGGER.info("Generated runtime {} for pack {} in {} ms",
+                        this.getPackType(), this.packResources.packId(),
+                        watch.elapsed().toMillis());
+
+                //ugly here but whatever
+                if (this.generateDebugResources() && this.packResources instanceof IDebugDumpable d) {
+                    getExecutorService().execute(() -> {
+                        d.dumpToDisk(Paths.get("debug", "generated_resource_pack"));
+                    });
+                }
+
+            } else {
+                Moonlight.LOGGER.info("Skipping regeneration for {} (cache up-to-date)", this);
+            }
         } catch (Exception e) {
             Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}", this, e);
         }
     }
 
-    private void doReload(ResourceManager manager, IProgressTracker reporter) {
-
-        Collection<Pack> selected = getPackRepository().getSelectedPacks();
-        boolean needByStrategy = generationStrategy.needsRegeneration(this.packResources, selected);
-
-        if (needByStrategy) {
-            String reason = "cache strategy requested refresh";
-            Moonlight.LOGGER.info("Regenerating {} due to {}", this, reason);
-
-            Stopwatch watch = Stopwatch.createStarted();
-
-            runGenerationPipeline(manager, reporter);
-
-            generationStrategy.afterRegenerate(this.packResources, selected);
-
-            Moonlight.LOGGER.info("Generated runtime {} for pack {} in {} ms",
-                    this.getPackType(), this.packResources.packId(),
-                    watch.elapsed().toMillis());
-
-            //ugly here but whatever
-            getExecutorService().execute(() -> {
-                if (this.generateDebugResources() && this.packResources instanceof IDebugDumpable d) {
-                    d.dumpToDisk(Paths.get("debug", "generated_resource_pack"));
-                }
-            });
-
-        } else {
-            Moonlight.LOGGER.debug("Skipping regeneration for {} (cache up-to-date)", this);
-        }
-    }
 
     /**
      * just deprecated as it shouldn't be overwritten anymore and will become final private
