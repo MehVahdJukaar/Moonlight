@@ -57,6 +57,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
 
     @Override
     public Set<String> getNamespaces(PackType packType) {
+        if (packType != this.packType) return Set.of();
         return this.namespaces;
     }
 

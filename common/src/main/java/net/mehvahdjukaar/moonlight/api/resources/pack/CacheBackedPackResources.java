@@ -13,18 +13,28 @@ import org.jetbrains.annotations.Nullable;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CacheBackedPackResources extends PathPackResources implements IEditablePackResources {
 
     private final Path path;
     private final PackMetadataSection metadata;
     private final PackType packType;
+    private final Set<String> namespaces = new HashSet<>();
 
     public CacheBackedPackResources(PackLocationInfo location, PackType type, PackMetadataSection metadata, Path path) {
         super(location, path);
         this.metadata = metadata;
         this.path = path;
         this.packType = type;
+    }
+
+    @Override
+    public Set<String> getNamespaces(PackType type) {
+        if (type != this.packType) return Set.of();
+        return namespaces;
     }
 
     @Override
@@ -51,7 +61,7 @@ public class CacheBackedPackResources extends PathPackResources implements IEdit
 
     @Override
     public void addNamespaces(String... namespaces) {
-        //no op
+        this.namespaces.addAll(Arrays.asList(namespaces));
     }
 
     @Override
