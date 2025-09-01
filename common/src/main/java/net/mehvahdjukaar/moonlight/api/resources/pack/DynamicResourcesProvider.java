@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier {
+public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
@@ -58,6 +58,10 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
         this.packResources.addNamespaces(name.getNamespace());
     }
 
+    public IEditablePackResources getPackResources() {
+        return packResources;
+    }
+
     public ResourceLocation getName() {
         return name;
     }
@@ -84,15 +88,6 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
         return "Dynamic " + getPackType() + " Resources Provider [" + name + "]";
     }
 
-    @Override
-    public PackResources openPrimary(PackLocationInfo location) {
-        return packResources;
-    }
-
-    @Override
-    public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
-        return packResources;
-    }
 
     public void prepare() {
         if (generationStrategy.needsRegeneration(this.packResources,
@@ -197,4 +192,24 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
     protected abstract PackRepository getPackRepository();
 
 
+    @Override
+    public Pack createPack() {
+        IEditablePackResources resources = this.packResources;
+        return Pack.readMetaAndCreate(
+                this.getLocationInfo(),
+                new Pack.ResourcesSupplier() {
+                    @Override
+                    public PackResources openPrimary(PackLocationInfo location) {
+                        return resources;
+                    }
+
+                    @Override
+                    public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
+                        return resources;
+                    }
+                },
+                this.getPackType(),
+                this.createSelectionConfig()
+        );
+    }
 }

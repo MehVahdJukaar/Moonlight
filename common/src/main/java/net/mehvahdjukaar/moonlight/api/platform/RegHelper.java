@@ -10,9 +10,11 @@ import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
+import net.mehvahdjukaar.moonlight.api.resources.pack.SimplePackProvider;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
@@ -34,6 +36,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.*;
@@ -181,7 +184,7 @@ public class RegHelper {
     }
 
     @ExpectPlatform
-    public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener){
+    public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener) {
         throw new AssertionError();
     }
 
@@ -677,18 +680,17 @@ public class RegHelper {
     }
 
     public static void registerDynamicResourceProvider(DynamicResourcesProvider provider) {
-        PackType packType = provider.getPackType();
-        registerResourcePack(packType, () ->
-                //provider could have also been a Pack itself...
-                Pack.readMetaAndCreate(
-                        provider.getLocationInfo(),
-                        provider,// pack supplier
-                        packType,
-                        provider.createSelectionConfig()
-                ));
         DynamicResourcesInternals.registerProvider(provider);
-    }
+        SimplePackProvider packSupplier = provider;
 
+        PackType packType = provider.getPackType();
+        if (packType == PackType.CLIENT_RESOURCES) {
+            SimplePackProvider maybeMerged = MoonlightClient.mergePackSupplier(provider);
+            if (maybeMerged == null) return; //merged, no need to register
+            else packSupplier = maybeMerged;
+        }
+        registerResourcePack(packType, packSupplier::createPack);
+    }
 
 
 }

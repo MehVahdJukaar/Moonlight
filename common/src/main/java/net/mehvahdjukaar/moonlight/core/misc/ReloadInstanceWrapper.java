@@ -4,7 +4,7 @@ import com.google.common.base.Suppliers;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadInstance;
@@ -64,13 +64,13 @@ public class ReloadInstanceWrapper implements ReloadInstance {
     @Override
     public float getActualProgress() {
         float maxAmount = Mth.clamp(0.2f, 0, 0.5f);
-        float progress = progressTracker.getProgress() * maxAmount;
+        float progress = progressTracker.getProgress() ;
         if (!beforeTask.isDone()) {
             return progress;
         }
         ReloadInstance actual = allErrorsInPackReloadWillHaveThisLineOnTheirStackTrace_DoesntMeanItsTheCause();
         if (actual != null) {
-            return progress + actual.getActualProgress() * (1 - maxAmount);
+            return actual.getActualProgress() * (1 );
         }
         return 1;
     }

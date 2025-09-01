@@ -7,6 +7,8 @@
   "message.moonlight.anti_repost_link": "here",
   "message.moonlight.cached": "Cached Resources",
   "message.moonlight.runtime": "Runtime Resources",
+  "message.moonlight.merged_pack.description": "Resources for %s mods",
+  "message.moonlight.merged_pack.title": "Moonlight Dynamic Resources",
 
   "tag.item.moonlight.non_recolorable": "Non recolorable",
   "tag.block.moonlight.non_recolorable": "Non recolorable",
