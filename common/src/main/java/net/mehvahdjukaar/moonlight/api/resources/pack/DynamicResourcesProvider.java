@@ -104,6 +104,8 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
                 this.getPackRepository().getSelectedPacks())) {
             this.packResources.clearAllResources();
             this.needsRegeneration = true;
+        } else {
+            this.needsRegeneration = false;
         }
     }
 
