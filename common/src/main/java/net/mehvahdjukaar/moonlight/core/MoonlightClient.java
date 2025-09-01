@@ -17,7 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +32,12 @@ import java.util.function.Consumer;
 public class MoonlightClient {
 
     private static final ThreadLocal<Boolean> MAP_MIPMAP = ThreadLocal.withInitial(() -> false);
-    private static MergedDynamicTexturePack mergedDynamicPack;
+
+    private static final MergedDynamicClientResourcesProvider INSTANCE = new MergedDynamicClientResourcesProvider(
+            new PackLocationInfo("moonlight:merged_pack",
+                    Component.translatable("message.moonlight.merged_pack.title"),
+                    PackSource.BUILT_IN, Optional.empty())
+    );
 
     public static void initClient() {
         ClientHelper.addShaderRegistration(MoonlightClient::registerShaders);
@@ -42,33 +46,24 @@ public class MoonlightClient {
         RegHelper.registerDynamicResourceProvider(new MLDynamicClientResources());
     }
 
-    private static final MergedDynamicClientResourcesProvider INSTANCE = new MergedDynamicClientResourcesProvider(
-            new PackLocationInfo("moonlight:merged_pack",
-                    Component.translatable("message.moonlight.merged_pack.title"),
-                    PackSource.BUILT_IN, Optional.empty())
-    );
-
     //null when merge happened. not null when it should add normally
     @Nullable
     public static SimplePackProvider mergePackSupplier(DynamicResourcesProvider provider) {
         if (!ClientConfigs.MERGE_PACKS.get()) return provider;
         INSTANCE.add(provider);
-        if (INSTANCE.childSize() == 1) return INSTANCE;
+        if (INSTANCE.size() == 1) return INSTANCE;
         return null; //dont register if we already have stuff here. it means its already registered
     }
 
-
-    public static DynamicTexturePack maybeMergePack(DynamicTexturePack pack) {
-        if (!ClientConfigs.MERGE_PACKS.get()) return pack;
-        if (mergedDynamicPack == null) {
-            mergedDynamicPack = new MergedDynamicTexturePack() {
-            };
-        }
-        Set<String> nameSpaces = pack.getNamespaces(pack.getPackType());
-        for (var n : nameSpaces) mergedDynamicPack.addNamespaces(n);
-        mergedDynamicPack.mods++;
-        return mergedDynamicPack;
+    @Deprecated(forRemoval = true)
+    @Nullable
+    public static Optional<SimplePackProvider> maybeMergeLegacyPack(DynamicResourcePack pack) {
+        if (!ClientConfigs.MERGE_PACKS.get()) return null; //no op
+        INSTANCE.addLegacy(pack);
+        if (INSTANCE.size() == 1) return Optional.of(INSTANCE);
+        return Optional.empty();
     }
+
 
     public static boolean isClientThread() {
         return Minecraft.getInstance().isSameThread();
@@ -76,20 +71,7 @@ public class MoonlightClient {
 
     public static void setupClient() {
         var e = ExtraModelData.EMPTY;
-        //classloader on main thread to prevent possible race condition BS
-    }
-
-    private static class MergedDynamicTexturePack extends DynamicTexturePack {
-        int mods = 0;
-
-        public MergedDynamicTexturePack() {
-            super(Moonlight.res("mods_dynamic_assets"));
-        }
-
-        //        @Override
-        public Component makeDescription() {
-            return Component.literal("Dynamic resources for " + mods + (mods == 1 ? " mod" : " mods"));
-        }
+        //class-loaded on main thread to prevent possible race condition BS
     }
 
     @EventCalled

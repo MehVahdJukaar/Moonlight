@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.pack;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
 import net.mehvahdjukaar.moonlight.api.resources.pack.SimplePackProvider;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -45,6 +46,12 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
             this.packResourcesStack.sort(Comparator.comparing(PackResources::packId));
             this.modNamespaces.add(provider.getName().getNamespace());
         }
+    }
+
+    public void addLegacy(DynamicResourcePack dynPack) {
+        this.packResourcesStack.add(dynPack);
+        this.packResourcesStack.sort(Comparator.comparing(PackResources::packId));
+        this.modNamespaces.add(dynPack.mainNamespace);
     }
 
     @Override
@@ -118,8 +125,8 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
         this.packResourcesStack.forEach(PackResources::close);
     }
 
-    public int childSize() {
-        return this.providers.size();
+    public int size() {
+        return this.packResourcesStack.size();
     }
 
     private void checkInitialized() {

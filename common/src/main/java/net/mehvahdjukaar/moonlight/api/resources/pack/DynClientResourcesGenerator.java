@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 @Deprecated(forRemoval = true)
 public abstract class DynClientResourcesGenerator extends DynResourceGenerator<DynamicTexturePack> {
     protected DynClientResourcesGenerator(DynamicTexturePack pack) {
-        super(MoonlightClient.maybeMergePack(pack), pack.mainNamespace);
+        super(pack, pack.mainNamespace);
 
         if (PlatHelper.getPhysicalSide().isServer()) {
             throw new IllegalStateException("Client only class registered on server side! Issue from mod" + pack.mainNamespace);

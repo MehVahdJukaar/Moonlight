@@ -11,8 +11,8 @@ import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.integration.ModernFixCompat;
-import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -20,7 +20,6 @@ import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.item.crafting.Recipe;
@@ -56,9 +55,11 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
     protected DynamicResourcePack(ResourceLocation name, PackType type) {
         this(name, type, Pack.Position.TOP, false);
     }
+
     protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
         this(name, type, position, hidden);
     }
+
     protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean hidden) {
         super(makeInfo(name), type, hidden);
         this.position = position;
@@ -103,9 +104,18 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
     /**
      * Registers this pack. Call on mod init
      */
+    //shit code here
     public void registerPack() {
         PackType packType = this.getPackType();
-        DynamicResourcePack p= this;
+        DynamicResourcePack p = this;
+        if (packType == PackType.CLIENT_RESOURCES) {
+            Optional<SimplePackProvider> opt = MoonlightClient.maybeMergeLegacyPack(this);
+            if (opt != null) {
+                if (opt.isPresent()) {
+                    RegHelper.registerResourcePack(packType, () -> opt.get().createPack());
+                } else return;
+            }
+        }
         RegHelper.registerResourcePack(packType, () ->
                 Pack.readMetaAndCreate(
                         this.location(),
