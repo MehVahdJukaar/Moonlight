@@ -54,20 +54,16 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
     boolean addToStatic = false;
 
     protected DynamicResourcePack(ResourceLocation name, PackType type) {
-        this(name, type, Pack.Position.TOP, false, false);
+        this(name, type, Pack.Position.TOP, false);
     }
-
     protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean fixed, boolean hidden) {
-        super(makeInfo(name), type, makeMetadata(name, type), fixed, hidden);
+        this(name, type, position, hidden);
+    }
+    protected DynamicResourcePack(ResourceLocation name, PackType type, Pack.Position position, boolean hidden) {
+        super(makeInfo(name), type, hidden);
         this.position = position;
         this.mainNamespace = name.getNamespace();
         this.resourcePackName = name;
-    }
-
-    private static PackMetadataSection makeMetadata(ResourceLocation name, PackType type) {
-        return new PackMetadataSection(Component.literal(name.toString()),
-                SharedConstants.getCurrentVersion().getPackVersion(type), Optional.empty());
-
     }
 
     private static PackLocationInfo makeInfo(ResourceLocation name) {

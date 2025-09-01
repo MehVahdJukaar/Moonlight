@@ -85,7 +85,14 @@ public class DynamicResourcesInternals {
     }
 
     public static void registerProvider(DynamicResourcesProvider provider) {
-        PROVIDERS.put(provider.getPackType(), provider);
+        PackType packType = provider.getPackType();
+        //validate no other with same ID exist
+        for (var p : PROVIDERS.get(packType)) {
+            if (p != provider && p.getName().equals(provider.getName())) {
+                throw new IllegalStateException("Duplicate Dynamic Resource Provider ID: " + provider.getName());
+            }
+        }
+        PROVIDERS.put(packType, provider);
     }
 
     @ApiStatus.Internal

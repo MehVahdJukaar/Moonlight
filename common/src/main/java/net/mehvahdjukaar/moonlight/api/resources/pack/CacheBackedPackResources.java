@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
+import net.minecraft.SharedConstants;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
@@ -10,12 +12,12 @@ import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheBackedPackResources extends PathPackResources implements IEditablePackResources {
 
@@ -23,12 +25,15 @@ public class CacheBackedPackResources extends PathPackResources implements IEdit
     private final PackMetadataSection metadata;
     private final PackType packType;
     private final Set<String> namespaces = new HashSet<>();
+    private final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
 
-    public CacheBackedPackResources(PackLocationInfo location, PackType type, PackMetadataSection metadata, Path path) {
+    public CacheBackedPackResources(PackLocationInfo location, PackType type, Path path) {
         super(location, path);
-        this.metadata = metadata;
         this.path = path;
         this.packType = type;
+        this.metadata = new PackMetadataSection(Component.translatable("message.moonlight.cached"),
+                SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
+
     }
 
     @Override
@@ -66,7 +71,15 @@ public class CacheBackedPackResources extends PathPackResources implements IEdit
 
     @Override
     public void addRootResource(String name, byte[] resource) {
-        //no op
+        this.rootResources.put(name, resource);
+    }
+
+    @Nullable
+    @Override
+    public IoSupplier<InputStream> getRootResource(String... strings) {
+        String fileName = String.join("/", strings);
+        byte[] resource = this.rootResources.get(fileName);
+        return resource == null ? null : () -> new ByteArrayInputStream(resource);
     }
 
     @Override

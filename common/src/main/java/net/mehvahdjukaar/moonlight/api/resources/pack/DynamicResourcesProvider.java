@@ -4,14 +4,12 @@ import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
@@ -34,7 +32,6 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
 
     private final ResourceLocation name;
     private final PackLocationInfo locationInfo;
-    private final PackSelectionConfig selectionConfig;
     private final PackType packType;
 
     protected final IEditablePackResources packResources;
@@ -54,16 +51,9 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
                 PackSource.BUILT_IN,
                 Optional.empty() //no clue what this is
         );
-        this.selectionConfig = new PackSelectionConfig(
-                true,    // required -- this MAY need to be true for the pack to be enabled by default
-                Pack.Position.TOP,
-                false // fixed position
-        );
-        PackMetadataSection metadata = new PackMetadataSection(Component.literal(name.toString()),
-                SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
 
 
-        this.packResources = generationPolicy.createPackResources(locationInfo, packType, metadata);
+        this.packResources = generationPolicy.createPackResources(locationInfo, packType);
         this.packResources.addNamespaces(gatherSupportedNamespaces().toArray(new String[0]));
         this.packResources.addNamespaces(name.getNamespace());
     }
@@ -80,8 +70,13 @@ public abstract class DynamicResourcesProvider implements Pack.ResourcesSupplier
         return packType;
     }
 
-    public PackSelectionConfig getSelectionConfig() {
-        return selectionConfig;
+    //override if needed
+    public PackSelectionConfig createSelectionConfig() {
+        return new PackSelectionConfig(
+                true,    // required -- this MAY need to be true for the pack to be enabled by default
+                Pack.Position.TOP,
+                false // fixed position
+        );
     }
 
     @Override

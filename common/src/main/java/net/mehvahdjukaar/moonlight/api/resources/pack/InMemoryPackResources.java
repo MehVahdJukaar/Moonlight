@@ -3,6 +3,8 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
+import net.minecraft.SharedConstants;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackLocationInfo;
@@ -18,16 +20,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryPackResources extends AbstractPackResources implements IEditablePackResources, IDebugDumpable {
 
     protected final boolean hidden;
-    protected final boolean fixed;
     protected final PackType packType;
     protected final PackMetadataSection metadata;
     protected final Set<String> namespaces = new HashSet<>();
@@ -35,18 +33,17 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final ResourceLocationSearchTrie searchTrie = new ResourceLocationSearchTrie();
 
-    protected InMemoryPackResources(PackLocationInfo info, PackType type, PackMetadataSection metadata) {
-        this(info, type, metadata, false, false);
+    protected InMemoryPackResources(PackLocationInfo info, PackType type) {
+        this(info, type, false);
     }
 
-    protected InMemoryPackResources(PackLocationInfo info, PackType type,
-                                    PackMetadataSection metadata,
-                                    boolean fixed, boolean hidden) {
+    protected InMemoryPackResources(PackLocationInfo info, PackType type, boolean hidden) {
         super(info);
         this.packType = type;
-        this.fixed = fixed;
         this.hidden = hidden;
-        this.metadata = metadata;
+        this.metadata = new PackMetadataSection(Component.translatable("message.moonlight.runtime"),
+                SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
+
     }
 
 

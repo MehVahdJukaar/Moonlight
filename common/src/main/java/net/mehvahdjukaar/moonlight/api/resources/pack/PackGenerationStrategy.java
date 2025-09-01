@@ -26,7 +26,7 @@ public interface PackGenerationStrategy {
 
     void afterRegenerate(IEditablePackResources packResources, Collection<Pack> loadedPacks);
 
-    IEditablePackResources createPackResources(PackLocationInfo info, PackType type, PackMetadataSection metadata);
+    IEditablePackResources createPackResources(PackLocationInfo info, PackType type);
 
 
     PackGenerationStrategy REGEN_ON_EVERY_RELOAD = new PackGenerationStrategy() {
@@ -42,8 +42,8 @@ public interface PackGenerationStrategy {
         }
 
         @Override
-        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type, PackMetadataSection metadata) {
-            return new InMemoryPackResources(info, type, metadata);
+        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
+            return new InMemoryPackResources(info, type);
         }
     };
 
@@ -59,8 +59,8 @@ public interface PackGenerationStrategy {
         }
 
         @Override
-        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type, PackMetadataSection metadata) {
-            return new InMemoryPackResources(info, type, metadata);
+        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
+            return new InMemoryPackResources(info, type);
         }
     };
 
@@ -97,7 +97,7 @@ public interface PackGenerationStrategy {
                 String id = p.getId();
                 if (p.getPackSource() instanceof DynamicResourcesProvider) continue;
                 if (id.startsWith("mod/")) continue;
-                tokens.add("pack[" + (i++) + "]=" + id);
+                tokens.add("pack[" + (i++) + "]=" + id+"@" + p.getDescription().getString());
             }
 
             // 2) Mods: order-independent (sort deterministically)
@@ -161,9 +161,9 @@ public interface PackGenerationStrategy {
         }
 
         @Override
-        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type, PackMetadataSection metadata) {
+        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
             //this editable pack resources will save sutf to file whenver its added to it
-            return new CacheBackedPackResources(info, type, metadata, getCachePath(info, type));
+            return new CacheBackedPackResources(info, type, getCachePath(info, type));
         }
 
         @Override
