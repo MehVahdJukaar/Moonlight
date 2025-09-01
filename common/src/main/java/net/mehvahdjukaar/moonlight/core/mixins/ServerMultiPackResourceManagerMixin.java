@@ -1,10 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
-import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
@@ -27,7 +24,8 @@ import java.util.Optional;
 public abstract class ServerMultiPackResourceManagerMixin implements CloseableResourceManager {
 
     //since we are on server thread we can use old method of doing stuff since its non blocking
-    //must use this way since other one happens too late
+    //must use this way since other one happens too late as its after datapack registry load.
+    // we need here for DATAPACK REGISTRIES
     @Shadow
     public abstract Optional<Resource> getResource(ResourceLocation arg);
 

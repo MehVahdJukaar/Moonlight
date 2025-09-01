@@ -15,7 +15,6 @@
     "ConditionHackMixin",
     "ContextAwareReloadListenerAccessor",
     "FireBlockMixin",
-    "ReloadableServerResourcesMixin",
     "SelfEntitySpawnDataMixin",
     "SelfModFlowingFluidMixin"
   ],
