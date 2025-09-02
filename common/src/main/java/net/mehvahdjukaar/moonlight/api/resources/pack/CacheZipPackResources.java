@@ -144,14 +144,12 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     public void commitChanges(Executor executor) {
         if (dirty) {
             dirty = false;
-            executor.execute(() -> {
-                try {
-                    writeUncompressedZip(tempResources, path.toFile());
-                    this.tempResources.clear();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            try {
+                writeUncompressedZip(tempResources, path.toFile());
+                this.tempResources.clear();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
