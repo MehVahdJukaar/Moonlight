@@ -16,10 +16,7 @@ import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -97,10 +94,9 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
     }
 
     public void reload(ResourceManager manager, IProgressTracker reporter) {
-        try {
-            if (this.needsRegeneration) {
-                this.needsRegeneration = false;
-
+        if (this.needsRegeneration) {
+            this.needsRegeneration = false;
+            try {
                 String reason = "cache strategy requested refresh";
                 Moonlight.LOGGER.info("Regenerating {} due to {}", this, reason);
 
@@ -108,10 +104,14 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
                 runGenerationPipeline(manager, reporter);
 
-
                 Moonlight.LOGGER.info("Generated runtime {} for pack {} in {} ms",
                         this.getPackType(), this.packResources.packId(),
                         watch.elapsed().toMillis());
+
+            } catch (Exception e) {
+                Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}", this, e);
+            }finally {
+                this.packResources.commitChanges(this.getExecutorService());
 
                 //ugly here but whatever
                 if (this.generateDebugResources() && this.packResources instanceof IDebugDumpable d) {
@@ -119,13 +119,9 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
                         d.dumpToDisk(Paths.get("debug", "generated_resource_pack"));
                     });
                 }
-                this.packResources.commitChanges(this.getExecutorService());
-
-            } else {
-                Moonlight.LOGGER.info("Skipping regeneration for {} (cache up-to-date)", this);
             }
-        } catch (Exception e) {
-            Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}", this, e);
+        } else {
+            Moonlight.LOGGER.info("Skipping regeneration for {} (cache up-to-date)", this);
         }
     }
 
@@ -135,7 +131,6 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
      */
     private void runGenerationPipeline(ResourceManager manager, IProgressTracker progressTracker) {
         List<ResourceGenTask> genTasks = new ArrayList<>();
-
 
         try {
             regenerateDynamicAssets(genTasks::add);
@@ -147,30 +142,38 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
         var reporter = progressTracker.subtask(totalTasks);
 
         List<CompletableFuture<ResourceSink>> futures = genTasks.stream()
-
                 .map(task -> CompletableFuture.supplyAsync(() -> {
                             ResourceSink sink = new ResourceSink(this.name.getNamespace(), this.packResources.packId());
-                            task.accept(manager, sink);               // let exceptions bubble
+                            task.accept(manager, sink); // may throw
                             return sink;
                         }, getExecutorService()
-                ).whenComplete((sink, ex) -> {
+                ).handle((sink, ex) -> {
                     reporter.step();
-                    if (ex != null) Moonlight.LOGGER.error("Resource Gen Task failed", ex);
+                    if (ex != null) {
+                        Moonlight.LOGGER.error("Resource Gen Task failed", ex);
+                        return null;
+                    }
+                    return sink;
                 }))
                 .toList();
 
-        try {
-            List<ResourceSink> list = futures.stream()
-                    .map(CompletableFuture::join)
-                    .toList();
+        List<ResourceSink> successful = futures.stream()
+                .map(CompletableFuture::join)   // safe: handle() guarantees normal completion
+                .filter(Objects::nonNull)//ignore failed tasks
+                .toList();
 
-            ResourceSink.acceptSinks(this.packResources, list);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Task failed", e);
+        if (successful.isEmpty()) {
+            Moonlight.LOGGER.warn("No resource sinks produced; all tasks failed or none were scheduled.");
+            return;
         }
 
+        try {
+            ResourceSink.acceptSinks(this.packResources, successful);
+        } catch (Exception e) {
+            Moonlight.LOGGER.error("Failed to accept generated resource sinks", e);
+        }
     }
+
 
     protected Executor getExecutorService() {
         return EXECUTOR_SERVICE;
