@@ -18,7 +18,7 @@ public interface PackGenerationStrategy {
     default void beforeRegenerate(IEditablePackResources packResources, Collection<PackResources> loadedPacks) {
     }
 
-    boolean needsRegeneration();
+    boolean needsRegeneration(PackType packType);
 
     IEditablePackResources createPackResources(PackLocationInfo info, PackType type);
 
@@ -26,7 +26,7 @@ public interface PackGenerationStrategy {
     PackGenerationStrategy REGEN_ON_EVERY_RELOAD = new PackGenerationStrategy() {
 
         @Override
-        public boolean needsRegeneration() {
+        public boolean needsRegeneration(PackType packType) {
             return true;
         }
 
@@ -39,7 +39,7 @@ public interface PackGenerationStrategy {
     PackGenerationStrategy NO_OP = new PackGenerationStrategy() {
 
         @Override
-        public boolean needsRegeneration() {
+        public boolean needsRegeneration(PackType packType) {
             return false;
         }
 
@@ -70,7 +70,7 @@ public interface PackGenerationStrategy {
             }
 
             @Override
-            public boolean needsRegeneration() {
+            public boolean needsRegeneration(PackType packType) {
                 if (!done) {
                     done = true;
                     return true;

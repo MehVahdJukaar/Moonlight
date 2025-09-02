@@ -14,20 +14,19 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class GlobalCachedStrategy implements PackGenerationStrategy {
 
-    public static final ThreadLocal<Boolean> NEEDS_REGEN = ThreadLocal.withInitial(() -> true);
+    public static final Map<PackType,Boolean> NEEDS_REGEN = new HashMap<>();
 
 
     public static void refreshState(PackType packType, Collection<PackResources> loadedPacks) {
         String oldHash = readFingerprint(packType);
         String newHash = computeCurrentFingerprint(loadedPacks);
-        NEEDS_REGEN.set(!oldHash.equals(newHash));
+        boolean shouldRegen = !oldHash.equals(newHash);
+        Moonlight.LOGGER.info("Resource cache state for {}: {}", packType, shouldRegen ? "needs regeneration" : "up to date");
+        NEEDS_REGEN.put(packType, shouldRegen);
 
         //write new state
         writeFingerprint(packType, newHash);
@@ -105,8 +104,8 @@ public class GlobalCachedStrategy implements PackGenerationStrategy {
     }
 
     @Override
-    public boolean needsRegeneration() {
-        return NEEDS_REGEN.get();
+    public boolean needsRegeneration(PackType packType) {
+        return NEEDS_REGEN.get(packType);
     }
 
     protected Path getPath(PackType type) {
