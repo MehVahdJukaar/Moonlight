@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.pack.*;
@@ -25,7 +26,6 @@ import org.joml.Vector3f;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 @ApiStatus.Internal
@@ -56,12 +56,14 @@ public class MoonlightClient {
     }
 
     @Deprecated(forRemoval = true)
-    @Nullable
-    public static Optional<SimplePackProvider> maybeMergeLegacyPack(DynamicResourcePack pack) {
-        if (!ClientConfigs.MERGE_PACKS.get()) return null; //no op
+    public static boolean maybeMergeLegacyPack(DynamicResourcePack pack) {
+        if (!ClientConfigs.MERGE_PACKS.get()) return false; //no op
         INSTANCE.addLegacy(pack);
-        if (INSTANCE.size() == 1) return Optional.of(INSTANCE);
-        return Optional.empty();
+        if (INSTANCE.size() == 1) {
+            PlatHelper.registerResourcePack(PackType.CLIENT_RESOURCES,
+                    INSTANCE::createPack);
+        }
+        return true;
     }
 
 

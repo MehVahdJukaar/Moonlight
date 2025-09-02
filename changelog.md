@@ -1,4 +1,4 @@
 - added new dynamic resource generation system that supports resource caching and is also a lot cleaner looking API
 - old one still works but its deprecated and will be removed in a future update
-- fixed an issue with data driven trades on custom villagers
+- fixed an issue with data driven trades on custom villagers not working
 - fixed forge config sync not working

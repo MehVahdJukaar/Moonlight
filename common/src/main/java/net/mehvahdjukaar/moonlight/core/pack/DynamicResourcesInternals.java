@@ -28,6 +28,7 @@ public class DynamicResourcesInternals {
     private static final Set<DynResourceGenerator<?>> GENERATORS = new HashSet<>();
 
     private static final Multimap<PackType, DynamicResourcesProvider> PROVIDERS = HashMultimap.create();
+    private static final Set<String> DYNAMIC_PACK_IDS = new HashSet<>();
 
     public static void init() {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
@@ -82,6 +83,7 @@ public class DynamicResourcesInternals {
 
     public static void addGenerator(DynResourceGenerator<?> generator) {
         GENERATORS.add(generator);
+        DYNAMIC_PACK_IDS.add(generator.dynamicPack.packId());
     }
 
     public static void registerProvider(DynamicResourcesProvider provider) {
@@ -93,6 +95,7 @@ public class DynamicResourcesInternals {
             }
         }
         PROVIDERS.put(packType, provider);
+        DYNAMIC_PACK_IDS.add(provider.getLocationInfo().id());
     }
 
     @ApiStatus.Internal
@@ -119,4 +122,8 @@ public class DynamicResourcesInternals {
     }
 
 
+    //not great...
+    public static boolean isKnownDynamicPack(String id) {
+        return DYNAMIC_PACK_IDS.contains(id);
+    }
 }

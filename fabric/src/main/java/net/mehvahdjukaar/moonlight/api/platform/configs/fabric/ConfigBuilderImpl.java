@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * Author: MehVhadJukaar
+ * Author: MehVahdJukaar
  */
 public class ConfigBuilderImpl extends ConfigBuilder {
 

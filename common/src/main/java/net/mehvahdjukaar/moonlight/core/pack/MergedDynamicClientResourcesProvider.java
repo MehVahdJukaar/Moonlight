@@ -145,6 +145,8 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
                 } catch (Exception e) {
                     Moonlight.LOGGER.error("Failed to read pack icon from {}", p.packId(), e);
                 }
+            }else{
+                Moonlight.LOGGER.warn("Pack {} has no icon", p.packId());
             }
         }
         try (NativeImage image = ImageMerger.mergeSquare(icons, ImageMerger.Mode.MIN_AREA_NO_UPSCALE, 0xFF000000)) {

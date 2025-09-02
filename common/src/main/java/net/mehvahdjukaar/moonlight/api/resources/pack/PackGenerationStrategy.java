@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
@@ -73,7 +74,7 @@ public interface PackGenerationStrategy {
             List<String> tokens = computeTokens(packs);
 
             try {
-                var md = MessageDigest.getInstance("SHA-256");
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
                 for (String t : tokens) {
                     md.update(t.getBytes(StandardCharsets.UTF_8));
                     md.update((byte) 0x1F);
@@ -90,19 +91,23 @@ public interface PackGenerationStrategy {
 
         private static @NotNull List<String> computeTokens(Collection<Pack> packs) {
             List<String> tokens = new ArrayList<>();
+            boolean fabric = PlatHelper.getPlatform().isFabric();
 
             // 1) Packs: keep the given order (order-sensitive)
             int i = 0;
             for (Pack p : packs) {
                 String id = p.getId();
-                if (p.getPackSource() instanceof DynamicResourcesProvider) continue;
+                if (DynamicResourcesInternals.isKnownDynamicPack(p.location().id())) continue;
                 if (id.startsWith("mod/")) continue;
+                if (fabric && id.startsWith("fabric")) continue;
+                if (id.startsWith("generated")) continue;
                 tokens.add("pack[" + (i++) + "]=" + id+"@" + p.getDescription().getString());
             }
 
             // 2) Mods: order-independent (sort deterministically)
             List<String> modTokens = new ArrayList<>();
             for (String mod : PlatHelper.getInstalledMods()) {
+                if(fabric && mod.startsWith("fabric"))continue;
                 modTokens.add(mod + "@" + PlatHelper.getModVersion(mod));
             }
             Collections.sort(modTokens); // normalize any iteration order

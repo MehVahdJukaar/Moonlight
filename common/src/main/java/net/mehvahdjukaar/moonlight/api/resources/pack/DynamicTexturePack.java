@@ -32,6 +32,7 @@ public class DynamicTexturePack extends DynamicResourcePack {
             try {
                 this.addRootResource("pack.png", Files.readAllBytes(logoPath));
             } catch (Exception ignored) {
+                Moonlight.LOGGER.error("Failed to load mod icon for{}", this.mainNamespace);
             }
         }else{
             Moonlight.LOGGER.error("Failed to find mod icon for{}", this.mainNamespace);

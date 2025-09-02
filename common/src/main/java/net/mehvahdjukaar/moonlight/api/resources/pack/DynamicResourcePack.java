@@ -109,11 +109,8 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
         PackType packType = this.getPackType();
         DynamicResourcePack p = this;
         if (packType == PackType.CLIENT_RESOURCES) {
-            Optional<SimplePackProvider> opt = MoonlightClient.maybeMergeLegacyPack(this);
-            if (opt != null) {
-                if (opt.isPresent()) {
-                    RegHelper.registerResourcePack(packType, () -> opt.get().createPack());
-                } else return;
+            if (MoonlightClient.maybeMergeLegacyPack(this)) {
+                return;
             }
         }
         RegHelper.registerResourcePack(packType, () ->

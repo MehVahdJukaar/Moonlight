@@ -19,11 +19,9 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenCustomMenuMessage;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -44,7 +42,6 @@ import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -70,7 +67,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -246,7 +243,10 @@ public class PlatHelperImpl {
     }
 
     public static List<String> getInstalledMods() {
-        return FabricLoader.getInstance().getAllMods().stream().map(m -> m.getMetadata().getId()).toList();
+        return FabricLoader.getInstance().getAllMods().stream()
+                .map(m -> m.getMetadata().getId())
+                .filter(s -> !s.startsWith("generated_"))
+                .toList();
     }
 
     public static Player getFakeServerPlayer(GameProfile id, ServerLevel level) {

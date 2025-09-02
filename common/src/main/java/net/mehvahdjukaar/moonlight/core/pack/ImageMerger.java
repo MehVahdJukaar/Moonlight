@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.pack;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 
 import java.util.List;
 
@@ -25,6 +27,7 @@ public final class ImageMerger {
         if (images == null || images.isEmpty()) {
             throw new IllegalArgumentException("images is empty");
         }
+        Moonlight.LOGGER.info("Merging {} images using mode {}", images.size(), mode);
 
         // Validate & find min/max sizes
         int minSide = Integer.MAX_VALUE;
