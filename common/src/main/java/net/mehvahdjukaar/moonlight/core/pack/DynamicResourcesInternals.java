@@ -6,9 +6,7 @@ import com.google.common.collect.Multimap;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
+import net.mehvahdjukaar.moonlight.api.resources.pack.*;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
@@ -120,8 +118,10 @@ public class DynamicResourcesInternals {
         }
 
 
+        GlobalCachedStrategy.INSTANCE.refreshState(packType, selectedPacks);
+
         for (var p : PROVIDERS.get(packType)) {
-            p.prepare(selectedPacks);
+            p.prepare();
         }
     }
 

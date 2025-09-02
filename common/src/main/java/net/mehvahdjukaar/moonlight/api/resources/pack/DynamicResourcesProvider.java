@@ -11,7 +11,6 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
@@ -37,7 +36,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
     protected final IEditablePackResources packResources;
     protected final PackGenerationStrategy generationStrategy;
 
-    private boolean needsRegeneration = true;
+    private volatile boolean needsRegeneration = true;
 
     public DynamicResourcesProvider(ResourceLocation name, PackType packType, PackGenerationStrategy generationPolicy) {
         this.name = name;
@@ -89,14 +88,10 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
     }
 
 
-    public void prepare(Collection<PackResources> selectedPacks) {
-        //ulgy.TODO:merge in strategy or something similar
-        if (this.generationStrategy.needsRegeneration(this.packResources, selectedPacks)) {
+    public void prepare() {
+        this.needsRegeneration = this.generationStrategy.needsRegeneration();
+        if (this.needsRegeneration) {
             this.packResources.clearAllResources();
-            this.needsRegeneration = true;
-            this.generationStrategy.beforeRegenerate(this.packResources, selectedPacks);
-        } else {
-            this.needsRegeneration = false;
         }
     }
 
