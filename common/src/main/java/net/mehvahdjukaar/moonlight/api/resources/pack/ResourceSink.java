@@ -302,7 +302,6 @@ public class ResourceSink {
 
         Multimap<TagKey<?>, SimpleTagBuilder> tags = HashMultimap.create();
         for (ResourceSink sink : sinks) {
-            if (sink == null) continue;
             for (var r : sink.resources.entrySet()) {
                 pack.addResource(r.getKey(), r.getValue());
             }

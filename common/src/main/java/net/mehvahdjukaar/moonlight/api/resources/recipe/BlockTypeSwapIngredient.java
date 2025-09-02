@@ -147,12 +147,28 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
             @Override
             public <T> DataResult<BlockTypeSwapIngredient<?>> decode(DynamicOps<T> ops, MapLike<T> input) {
                 var ingCodec = nonEmpty ? Ingredient.CODEC_NONEMPTY : Ingredient.CODEC;
-                Ingredient inner = ingCodec.parse(ops, input.get(ops.createString("ingredient"))).result().orElseThrow();
-                BlockTypeRegistry<?> reg = BlockTypeRegistry.getRegistryCodec().parse(ops, input.get(ops.createString("block_type"))).result().orElseThrow();
+                DataResult<Ingredient> ingResult = ingCodec.parse(ops, input.get(ops.createString("ingredient")));
+                if (ingResult.isError()) {
+                    return DataResult.error(() -> "Failed to decode inner ingredient: " + ingResult.error().get().message());
+                }
+                Ingredient inner = ingResult.result().orElseThrow();
+                DataResult<BlockTypeRegistry<?>> blockTypeResult = BlockTypeRegistry.getRegistryCodec().parse(ops, input.get(ops.createString("block_type")));
+                if (blockTypeResult.isError()) {
+                    return DataResult.error(() -> "Failed to decode block type registry: " + blockTypeResult.error().get().message());
+                }
+                BlockTypeRegistry<?> reg = blockTypeResult.result().orElseThrow();
                 T fromType = ops.createString("from");
-                BlockType from = reg.getCodec().parse(ops, input.get(fromType)).result().orElseThrow();
+                DataResult<?> fromResult = reg.getCodec().parse(ops, input.get(fromType));
+                if (fromResult.isError()) {
+                    return DataResult.error(() -> "Failed to decode 'from' block type: " + fromResult.error().get().message());
+                }
+                BlockType from = (BlockType) fromResult.result().orElseThrow();
                 T toType = ops.createString("to");
-                BlockType to = reg.getCodec().parse(ops, input.get(toType)).result().orElseThrow();
+                DataResult<?> toResult = reg.getCodec().parse(ops, input.get(toType));
+                if (toResult.isError()) {
+                    return DataResult.error(() -> "Failed to decode 'to' block type: " + toResult.error().get().message());
+                }
+                BlockType to = (BlockType) toResult.result().orElseThrow();
                 return DataResult.success(create(inner, from, to, (BlockTypeRegistry<? super BlockType>) reg));
             }
 
