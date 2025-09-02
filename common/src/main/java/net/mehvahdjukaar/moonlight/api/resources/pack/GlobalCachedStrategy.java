@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.server.packs.PackLocationInfo;
@@ -13,8 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,22 +67,7 @@ public class GlobalCachedStrategy implements PackGenerationStrategy {
     }
 
     private static String computeCurrentFingerprint(Collection<PackResources> packs) {
-        List<String> tokens = computeTokens(packs);
-
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            for (String t : tokens) {
-                md.update(t.getBytes(StandardCharsets.UTF_8));
-                md.update((byte) 0x1F);
-            }
-            byte[] d = md.digest();
-            StringBuilder sb = new StringBuilder(d.length * 2);
-            for (byte b : d) sb.append(String.format("%02x", b));
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            // Fallback: deterministic string hash
-            return Integer.toHexString(tokens.toString().hashCode());
-        }
+        return MthUtils.sha256Digest(computeTokens(packs));
     }
 
     private static @NotNull List<String> computeTokens(Collection<PackResources> packs) {
