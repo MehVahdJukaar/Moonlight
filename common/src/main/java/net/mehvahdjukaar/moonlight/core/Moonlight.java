@@ -180,7 +180,7 @@ public class Moonlight {
     }
 
     public static void crashIfInDev(String message) {
-        if (PlatHelper.isDev()) throw new AssertionError(message);
+        if (PlatHelper.isDev()) throw new RuntimeException(message);
         else {
             Moonlight.LOGGER.error(message);
         }
