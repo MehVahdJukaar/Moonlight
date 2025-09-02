@@ -22,25 +22,52 @@ import java.util.List;
 
 public class GlobalCachedStrategy implements PackGenerationStrategy {
 
-    public static final GlobalCachedStrategy INSTANCE = new GlobalCachedStrategy();
+    public static final ThreadLocal<Boolean> NEEDS_REGEN = ThreadLocal.withInitial(() -> true);
 
-    private final ThreadLocal<Boolean> needsRegeneration = ThreadLocal.withInitial(() -> true);
 
-    public void refreshState(PackType packType, Collection<PackResources> loadedPacks) {
+    public static void refreshState(PackType packType, Collection<PackResources> loadedPacks) {
         String oldHash = readFingerprint(packType);
         String newHash = computeCurrentFingerprint(loadedPacks);
-        needsRegeneration.set(!oldHash.equals(newHash));
+        NEEDS_REGEN.set(!oldHash.equals(newHash));
 
         //write new state
         writeFingerprint(packType, newHash);
     }
 
-    @Override
-    public boolean needsRegeneration() {
-        return needsRegeneration.get();
+    private static void writeFingerprint(PackType packType, String fp) {
+        Path dir = getCachePath(packType);
+        Path file = getCacheHashPath(packType);
+        try {
+            Files.createDirectories(dir);
+            Files.writeString(file, fp, StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (Exception e) {
+            Moonlight.LOGGER.debug("Failed writing cache fingerprint for {}: {}", packType, e.toString());
+        }
     }
 
-    protected static String computeCurrentFingerprint(Collection<PackResources> packs) {
+    private static String readFingerprint(PackType packType) {
+        Path file = getCacheHashPath(packType);
+        if (!Files.exists(file)) return "";
+        try {
+            return Files.readString(file, StandardCharsets.UTF_8).trim();
+        } catch (Exception e) {
+            Moonlight.LOGGER.debug("Failed reading cache fingerprint for {}: {}", packType, e.toString());
+            return "";
+        }
+    }
+
+    private static Path getCacheHashPath(PackType packType) {
+        return getCachePath(packType).resolve("hash.txt");
+    }
+
+    private static Path getCachePath(PackType type) {
+        return PlatHelper.getGamePath().resolve("dynamic-" +
+                (type == PackType.CLIENT_RESOURCES ? "resource" : "data")
+                + "-pack-cache");
+    }
+
+    private static String computeCurrentFingerprint(Collection<PackResources> packs) {
         List<String> tokens = computeTokens(packs);
 
         try {
@@ -59,7 +86,7 @@ public class GlobalCachedStrategy implements PackGenerationStrategy {
         }
     }
 
-    protected static @NotNull List<String> computeTokens(Collection<PackResources> packs) {
+    private static @NotNull List<String> computeTokens(Collection<PackResources> packs) {
         List<String> tokens = new ArrayList<>();
         boolean fabric = PlatHelper.getPlatform().isFabric();
 
@@ -93,43 +120,19 @@ public class GlobalCachedStrategy implements PackGenerationStrategy {
         return tokens;
     }
 
-    protected void writeFingerprint(PackType packType, String fp) {
-        Path dir = getCachePath(packType);
-        Path file = getCacheHashPath(packType);
-        try {
-            Files.createDirectories(dir);
-            Files.writeString(file, fp, StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        } catch (Exception e) {
-            Moonlight.LOGGER.debug("Failed writing cache fingerprint for {}: {}", packType, e.toString());
-        }
+    @Override
+    public boolean needsRegeneration() {
+        return NEEDS_REGEN.get();
     }
 
-    protected String readFingerprint(PackType packType) {
-        Path file = getCacheHashPath(packType);
-        if (!Files.exists(file)) return "";
-        try {
-            return Files.readString(file, StandardCharsets.UTF_8).trim();
-        } catch (Exception e) {
-            Moonlight.LOGGER.debug("Failed reading cache fingerprint for {}: {}", packType, e.toString());
-            return "";
-        }
-    }
-
-    protected Path getCacheHashPath(PackType packType) {
-        return getCachePath(packType).resolve("hash.txt");
-    }
-
-    protected Path getCachePath(PackType type) {
-        return PlatHelper.getGamePath().resolve("dynamic-" +
-                (type == PackType.CLIENT_RESOURCES ? "resource" : "data")
-                + "-pack-cache");
+    protected Path getPath(PackType type) {
+        return GlobalCachedStrategy.getCachePath(type);
     }
 
     @Override
     public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
         //this editable pack resources will save sutf to file whenver its added to it
-        return new CacheBackedPackResources(info, type, getCachePath(type)
+        return new CacheZipPackResources(info, type, getPath(type)
                 .resolve(info.id().replace(":", "-")));
     }
 }

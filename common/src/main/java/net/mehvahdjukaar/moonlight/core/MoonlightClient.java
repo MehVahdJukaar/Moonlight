@@ -60,7 +60,7 @@ public class MoonlightClient {
         if (!ClientConfigs.MERGE_PACKS.get()) return false; //no op
         INSTANCE.addLegacy(pack);
         if (INSTANCE.size() == 1) {
-            PlatHelper.registerResourcePack(PackType.CLIENT_RESOURCES,
+            RegHelper.registerResourcePack(PackType.CLIENT_RESOURCES,
                     INSTANCE::createPack);
         }
         return true;

@@ -4,6 +4,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 
+import java.util.concurrent.Executor;
+
 public interface IEditablePackResources extends PackResources {
 
     void addNamespaces(String... namespaces);
@@ -21,4 +23,7 @@ public interface IEditablePackResources extends PackResources {
     PackType getPackType();
 
     boolean isEmpty();
+
+    default void commitChanges(Executor executor) {
+    }
 }

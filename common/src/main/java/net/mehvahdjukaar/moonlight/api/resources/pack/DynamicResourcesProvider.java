@@ -118,6 +118,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
                         d.dumpToDisk(Paths.get("debug", "generated_resource_pack"));
                     });
                 }
+                this.packResources.commitChanges(this.getExecutorService());
 
             } else {
                 Moonlight.LOGGER.info("Skipping regeneration for {} (cache up-to-date)", this);

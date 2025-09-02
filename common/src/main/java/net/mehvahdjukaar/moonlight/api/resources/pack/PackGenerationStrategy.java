@@ -1,24 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
-import org.jetbrains.annotations.NotNull;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 //very ugly and confused class
 public interface PackGenerationStrategy {
@@ -50,7 +36,16 @@ public interface PackGenerationStrategy {
         }
     };
 
-    PackGenerationStrategy CACHED = GlobalCachedStrategy.INSTANCE;
+    PackGenerationStrategy CACHED = new GlobalCachedStrategy();
+
+    PackGenerationStrategy CACHED_ZIPPED = new GlobalCachedStrategy() {
+
+        @Override
+        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
+            return new CacheZipPackResources(info, type,
+                    getPath(type).resolve(info.id().replace(":", "-")));
+        }
+    };
 
     static PackGenerationStrategy runOnce() {
         return new PackGenerationStrategy() {

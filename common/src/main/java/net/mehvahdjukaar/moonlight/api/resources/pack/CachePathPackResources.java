@@ -19,7 +19,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CacheBackedPackResources extends PathPackResources implements IEditablePackResources {
+public class CachePathPackResources extends PathPackResources implements IEditablePackResources {
 
     private final Path path;
     private final PackMetadataSection metadata;
@@ -27,7 +27,7 @@ public class CacheBackedPackResources extends PathPackResources implements IEdit
     private final Set<String> namespaces = new HashSet<>();
     private final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
 
-    public CacheBackedPackResources(PackLocationInfo location, PackType type, Path path) {
+    public CachePathPackResources(PackLocationInfo location, PackType type, Path path) {
         super(location, path);
         this.path = path;
         this.packType = type;

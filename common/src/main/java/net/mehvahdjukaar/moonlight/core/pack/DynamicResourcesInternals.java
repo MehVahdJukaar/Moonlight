@@ -118,7 +118,7 @@ public class DynamicResourcesInternals {
         }
 
 
-        GlobalCachedStrategy.INSTANCE.refreshState(packType, selectedPacks);
+        GlobalCachedStrategy.refreshState(packType, selectedPacks);
 
         for (var p : PROVIDERS.get(packType)) {
             p.prepare();
