@@ -42,7 +42,7 @@ public abstract class ServerMultiPackResourceManagerMixin implements CloseableRe
             if (!PlatHelper.isInitializing()) {
                 //reload dynamic packs before reloading data packs
                 ReloadInstanceWrapper.executeEarlyReloadBlocking(type, this,
-                        IProgressTracker.createTree(1));
+                        IProgressTracker.createTree(1), packs);
             }
         }
     }

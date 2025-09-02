@@ -4,15 +4,17 @@ import com.google.common.base.Suppliers;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -20,12 +22,14 @@ import java.util.function.Supplier;
 
 public class ReloadInstanceWrapper implements ReloadInstance {
 
-    public static ReloadInstance wrap(Supplier<ReloadInstance> factory, PackType type, ResourceManager manager, Executor backgroundExecutor) {
-        return new ReloadInstanceWrapper(factory, type, manager, backgroundExecutor);
+    public static ReloadInstance wrap(Supplier<ReloadInstance> factory, PackType type, ResourceManager manager,
+                                      Executor backgroundExecutor, Collection<PackResources> selectedPacks) {
+        return new ReloadInstanceWrapper(factory, type, manager, backgroundExecutor, selectedPacks);
     }
 
-    public static void executeEarlyReloadBlocking(PackType type, ResourceManager manager, IProgressTracker progressTracker) {
-        DynamicResourcesInternals.clearBeforeReload(type);
+    public static void executeEarlyReloadBlocking(PackType type, ResourceManager manager,
+                                                  IProgressTracker progressTracker, Collection<PackResources> selectedPacks) {
+        DynamicResourcesInternals.clearBeforeReload(type, selectedPacks);
         MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(List.of(), manager, type, progressTracker), EarlyPackReloadEvent.class);
     }
 
@@ -34,11 +38,12 @@ public class ReloadInstanceWrapper implements ReloadInstance {
     private final IProgressTracker.Tree progressTracker;
 
     public ReloadInstanceWrapper(Supplier<ReloadInstance> factory,
-                                 PackType type, ResourceManager manager, Executor executor) {
+                                 PackType type, ResourceManager manager, Executor executor,
+                                 Collection<PackResources> selectedPacks) {
         this.progressTracker = IProgressTracker.createTree(1);
         this.lazyInstance = Suppliers.memoize(factory::get);
         this.beforeTask = CompletableFuture.supplyAsync(() -> {
-            executeEarlyReloadBlocking(type, manager, progressTracker);
+            executeEarlyReloadBlocking(type, manager, progressTracker, selectedPacks);
             return Unit.INSTANCE;
         }, executor);
 
@@ -64,13 +69,13 @@ public class ReloadInstanceWrapper implements ReloadInstance {
     @Override
     public float getActualProgress() {
         float maxAmount = Mth.clamp(0.2f, 0, 0.5f);
-        float progress = progressTracker.getProgress() ;
+        float progress = progressTracker.getProgress();
         if (!beforeTask.isDone()) {
             return progress;
         }
         ReloadInstance actual = allErrorsInPackReloadWillHaveThisLineOnTheirStackTrace_DoesntMeanItsTheCause();
         if (actual != null) {
-            return actual.getActualProgress() * (1 );
+            return actual.getActualProgress() * (1);
         }
         return 1;
     }

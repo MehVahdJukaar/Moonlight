@@ -89,11 +89,11 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
     }
 
 
-    public void prepare() {
-        if (generationStrategy.needsRegeneration(this.packResources,
-                this.getPackRepository().getSelectedPacks())) {
+    public void prepare(Collection<PackResources> selectedPacks) {
+        if (generationStrategy.needsRegeneration(this.packResources, selectedPacks)) {
             this.packResources.clearAllResources();
             this.needsRegeneration = true;
+            this.generationStrategy.beforeRegenerate(this.packResources, selectedPacks);
         } else {
             this.needsRegeneration = false;
         }
@@ -112,7 +112,6 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
                 runGenerationPipeline(manager, reporter);
 
-                generationStrategy.afterRegenerate(this.packResources, selected);
 
                 Moonlight.LOGGER.info("Generated runtime {} for pack {} in {} ms",
                         this.getPackType(), this.packResources.packId(),

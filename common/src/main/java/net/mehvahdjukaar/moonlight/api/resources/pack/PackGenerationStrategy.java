@@ -4,9 +4,9 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
-import net.minecraft.server.packs.repository.Pack;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
@@ -23,9 +23,9 @@ import java.util.List;
 //very ugly and confused class
 public interface PackGenerationStrategy {
 
-    boolean needsRegeneration(IEditablePackResources packResources, Collection<Pack> loadedPacks);
+    boolean needsRegeneration(IEditablePackResources packResources, Collection<PackResources> loadedPacks);
 
-    void afterRegenerate(IEditablePackResources packResources, Collection<Pack> loadedPacks);
+    void beforeRegenerate(IEditablePackResources packResources, Collection<PackResources> loadedPacks);
 
     IEditablePackResources createPackResources(PackLocationInfo info, PackType type);
 
@@ -33,12 +33,12 @@ public interface PackGenerationStrategy {
     PackGenerationStrategy REGEN_ON_EVERY_RELOAD = new PackGenerationStrategy() {
 
         @Override
-        public boolean needsRegeneration(IEditablePackResources packResources, Collection<Pack> loadedPacks) {
+        public boolean needsRegeneration(IEditablePackResources packResources, Collection<PackResources> loadedPacks) {
             return true;
         }
 
         @Override
-        public void afterRegenerate(IEditablePackResources pack, Collection<Pack> loadedPacks) {
+        public void beforeRegenerate(IEditablePackResources pack, Collection<PackResources> loadedPacks) {
             // no cache
         }
 
@@ -50,12 +50,12 @@ public interface PackGenerationStrategy {
 
     PackGenerationStrategy RUN_ONCE = new PackGenerationStrategy() {
         @Override
-        public boolean needsRegeneration(IEditablePackResources packResources, Collection<Pack> loadedPacks) {
+        public boolean needsRegeneration(IEditablePackResources packResources, Collection<PackResources> loadedPacks) {
             return packResources.isEmpty();
         }
 
         @Override
-        public void afterRegenerate(IEditablePackResources pack, Collection<Pack> loadedPacks) {
+        public void beforeRegenerate(IEditablePackResources pack, Collection<PackResources> loadedPacks) {
             // no cache
         }
 
@@ -70,7 +70,7 @@ public interface PackGenerationStrategy {
 
     class SimpleCached implements PackGenerationStrategy {
 
-        private static String computeCurrentFingerprint(Collection<Pack> packs) {
+        private static String computeCurrentFingerprint(Collection<PackResources> packs) {
             List<String> tokens = computeTokens(packs);
 
             try {
@@ -89,25 +89,32 @@ public interface PackGenerationStrategy {
             }
         }
 
-        private static @NotNull List<String> computeTokens(Collection<Pack> packs) {
+        private static @NotNull List<String> computeTokens(Collection<PackResources> packs) {
             List<String> tokens = new ArrayList<>();
             boolean fabric = PlatHelper.getPlatform().isFabric();
 
             // 1) Packs: keep the given order (order-sensitive)
             int i = 0;
-            for (Pack p : packs) {
-                String id = p.getId();
+            for (PackResources p : packs) {
+                String id = p.packId();
                 if (DynamicResourcesInternals.isKnownDynamicPack(p.location().id())) continue;
                 if (id.startsWith("mod/")) continue;
                 if (fabric && id.startsWith("fabric")) continue;
                 if (id.startsWith("generated")) continue;
-                tokens.add("pack[" + (i++) + "]=" + id+"@" + p.getDescription().getString());
+                String description = "";
+                try {
+                    PackMetadataSection metadataSection = p.getMetadataSection(PackMetadataSection.TYPE);
+                    if (metadataSection != null) {
+                        description = metadataSection.description().getString();
+                    }
+                } catch (Exception ignored) {
+                }
+                tokens.add("pack[" + (i++) + "]=" + id + "@" + description);
             }
-
             // 2) Mods: order-independent (sort deterministically)
             List<String> modTokens = new ArrayList<>();
             for (String mod : PlatHelper.getInstalledMods()) {
-                if(fabric && mod.startsWith("fabric"))continue;
+                if (fabric && mod.startsWith("fabric")) continue;
                 modTokens.add(mod + "@" + PlatHelper.getModVersion(mod));
             }
             Collections.sort(modTokens); // normalize any iteration order
@@ -159,7 +166,7 @@ public interface PackGenerationStrategy {
         }
 
         @Override
-        public boolean needsRegeneration(IEditablePackResources packResources, Collection<Pack> loadedPacks) {
+        public boolean needsRegeneration(IEditablePackResources packResources, Collection<PackResources> loadedPacks) {
             String oldHash = readFingerprint(packResources);
             String newHash = computeCurrentFingerprint(loadedPacks);
             return !oldHash.equals(newHash);
@@ -172,7 +179,7 @@ public interface PackGenerationStrategy {
         }
 
         @Override
-        public void afterRegenerate(IEditablePackResources packResources, Collection<Pack> loadedPacks) {
+        public void beforeRegenerate(IEditablePackResources packResources, Collection<PackResources> loadedPacks) {
             //write new hash
             String newHash = computeCurrentFingerprint(loadedPacks);
             writeFingerprint(packResources, newHash);

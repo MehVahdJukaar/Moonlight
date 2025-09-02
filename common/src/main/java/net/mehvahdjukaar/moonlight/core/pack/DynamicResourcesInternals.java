@@ -12,7 +12,9 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -104,7 +106,7 @@ public class DynamicResourcesInternals {
     }
 
     @ApiStatus.Internal
-    public static void clearBeforeReload(PackType packType) {
+    public static void clearBeforeReload(PackType packType, Collection<PackResources> selectedPacks) {
         Set<DynamicResourcePack> packs = new HashSet<>();
         for (var g : GENERATORS) {
             if (g.dynamicPack.getPackType() == packType && g.shouldClearOnReload()) {
@@ -117,7 +119,7 @@ public class DynamicResourcesInternals {
 
 
         for (var p : PROVIDERS.get(packType)) {
-            p.prepare();
+            p.prepare(selectedPacks);
         }
     }
 

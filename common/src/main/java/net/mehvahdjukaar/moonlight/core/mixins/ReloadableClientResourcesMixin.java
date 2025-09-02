@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.*;
 import net.minecraft.util.Unit;
@@ -17,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 @Mixin(ReloadableResourceManager.class)
 public abstract class ReloadableClientResourcesMixin {
@@ -27,6 +29,8 @@ public abstract class ReloadableClientResourcesMixin {
 
     @Shadow
     private CloseableResourceManager resources;
+
+    @Shadow public abstract Stream<PackResources> listPacks();
 
     //should fire right before add reload listener, before packs are reloaded and listeners called
     @WrapOperation(method = "createReload", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleReloadInstance;create(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/server/packs/resources/ReloadInstance;"))
@@ -44,7 +48,8 @@ public abstract class ReloadableClientResourcesMixin {
             if (!PlatHelper.isInitializing()) {
                 return ReloadInstanceWrapper.wrap(() -> original.call(resourceManager, listeners,
                                 backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
-                        type, this.resources, backgroundExecutor);
+                        type, this.resources, backgroundExecutor,
+                        listPacks().toList());
             }
         }
         return original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled);
