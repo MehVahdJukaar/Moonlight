@@ -152,21 +152,22 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
                     return DataResult.error(() -> "Failed to decode inner ingredient: " + ingResult.error().get().message() + " on " + input);
                 }
                 Ingredient inner = ingResult.result().orElseThrow();
-                DataResult<BlockTypeRegistry<?>> blockTypeResult = BlockTypeRegistry.getRegistryCodec().parse(ops, input.get(ops.createString("block_type")));
+                T blockType = input.get(ops.createString("block_type"));
+                DataResult<BlockTypeRegistry<?>> blockTypeResult = BlockTypeRegistry.getRegistryCodec().parse(ops, blockType);
                 if (blockTypeResult.isError()) {
-                    return DataResult.error(() -> "Failed to decode block type registry: " + blockTypeResult.error().get().message() + " on " + input);
+                    return DataResult.error(() -> "Failed to decode block type registry: " + blockType + " " + blockTypeResult.error().get().message() + " on " + input);
                 }
                 BlockTypeRegistry<?> reg = blockTypeResult.result().orElseThrow();
                 T fromType = ops.createString("from");
                 DataResult<?> fromResult = reg.getCodec().parse(ops, input.get(fromType));
                 if (fromResult.isError()) {
-                    return DataResult.error(() -> "Failed to decode 'from' block type: " + fromResult.error().get().message() + " on " + input);
+                    return DataResult.error(() -> "Failed to decode 'from' block type: " + fromType + " " + fromResult.error().get().message() + " on " + input);
                 }
                 BlockType from = (BlockType) fromResult.result().orElseThrow();
                 T toType = ops.createString("to");
                 DataResult<?> toResult = reg.getCodec().parse(ops, input.get(toType));
                 if (toResult.isError()) {
-                    return DataResult.error(() -> "Failed to decode 'to' block type: " + toResult.error().get().message() + " on " + input);
+                    return DataResult.error(() -> "Failed to decode 'to' block type: " + toType + " " + toResult.error().get().message() + " on " + input);
                 }
                 BlockType to = (BlockType) toResult.result().orElseThrow();
                 return DataResult.success(create(inner, from, to, (BlockTypeRegistry<? super BlockType>) reg));
