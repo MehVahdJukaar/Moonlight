@@ -132,7 +132,7 @@ public class GlobalCachedStrategy implements PackGenerationStrategy {
     @Override
     public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
         //this editable pack resources will save sutf to file whenver its added to it
-        return new CacheZipPackResources(info, type, getPath(type)
+        return new CachePathPackResources(info, type, getPath(type)
                 .resolve(info.id().replace(":", "-")));
     }
 }

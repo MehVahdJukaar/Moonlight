@@ -27,6 +27,19 @@ public interface PackGenerationStrategy {
 
         @Override
         public boolean needsRegeneration() {
+            return true;
+        }
+
+        @Override
+        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
+            return new InMemoryPackResources(info, type);
+        }
+    };
+
+    PackGenerationStrategy NO_OP = new PackGenerationStrategy() {
+
+        @Override
+        public boolean needsRegeneration() {
             return false;
         }
 
