@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
@@ -177,7 +178,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
 
     protected boolean generateDebugResources() {
-        return false;
+        return PlatHelper.isDev();
     }
 
     protected abstract Collection<String> gatherSupportedNamespaces();
