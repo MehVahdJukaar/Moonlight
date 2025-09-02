@@ -31,9 +31,4 @@ public abstract class DynamicClientResourceProvider extends DynamicResourcesProv
     }
 
     protected abstract void addDynamicTranslations(AfterLanguageLoadEvent afterLanguageLoadEvent);
-
-    @Override
-    protected PackRepository getPackRepository() {
-        return Minecraft.getInstance().getResourcePackRepository();
-    }
 }

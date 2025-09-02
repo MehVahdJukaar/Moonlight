@@ -90,7 +90,8 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
 
     public void prepare(Collection<PackResources> selectedPacks) {
-        if (generationStrategy.needsRegeneration(this.packResources, selectedPacks)) {
+        //ulgy.TODO:merge in strategy or something similar
+        if (this.generationStrategy.needsRegeneration(this.packResources, selectedPacks)) {
             this.packResources.clearAllResources();
             this.needsRegeneration = true;
             this.generationStrategy.beforeRegenerate(this.packResources, selectedPacks);
@@ -103,7 +104,6 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
         try {
             if (this.needsRegeneration) {
                 this.needsRegeneration = false;
-                Collection<Pack> selected = getPackRepository().getSelectedPacks();
 
                 String reason = "cache strategy requested refresh";
                 Moonlight.LOGGER.info("Regenerating {} due to {}", this, reason);
@@ -186,9 +186,11 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
     protected abstract Collection<String> gatherSupportedNamespaces();
 
-    protected abstract void regenerateDynamicAssets(Consumer<ResourceGenTask> executor);
+    public void addSupportedNamespaces(String... namespace) {
+        this.packResources.addNamespaces(namespace);
+    }
 
-    protected abstract PackRepository getPackRepository();
+    protected abstract void regenerateDynamicAssets(Consumer<ResourceGenTask> executor);
 
 
     @Override
