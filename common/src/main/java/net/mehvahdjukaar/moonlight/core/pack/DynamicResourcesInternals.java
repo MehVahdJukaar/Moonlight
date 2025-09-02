@@ -14,7 +14,6 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -38,6 +37,7 @@ public class DynamicResourcesInternals {
             List<DynResourceGenerator<?>> validGen = GENERATORS.stream()
                     .filter(gen -> gen.dynamicPack.getPackType() == type)
                     .toList();
+            if (validGen.isEmpty()) return;
             List<String> modIds = validGen.stream()
                     .map(DynResourceGenerator::getModId).toList();
             Moonlight.LOGGER.info("Starting Legacy Runtime Resource Generation for pack type {} with generators from mods {}: {}",
@@ -59,6 +59,8 @@ public class DynamicResourcesInternals {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
             PackType type = earlyPackReloadEvent.type();
             Collection<DynamicResourcesProvider> validGen = PROVIDERS.get(type);
+            if (validGen.isEmpty()) return;
+
             List<ResourceLocation> modIds = validGen.stream()
                     .map(DynamicResourcesProvider::getName).toList();
             Moonlight.LOGGER.info("Starting runtime resource generation for pack type {} with generators {}",
