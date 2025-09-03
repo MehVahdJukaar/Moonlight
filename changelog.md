@@ -1,3 +1,2 @@
-- fixed an issue with dynamic gen tags
-- added a cache method that uses zip files
-- other improvements to the dynamic resources api
+- removed some annoying unneded logs
+- fixed an issue with zip cache resources not being cleared properly
