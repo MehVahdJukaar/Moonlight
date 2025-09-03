@@ -254,14 +254,14 @@ public class WoodType extends BlockType {
     @Nullable
     protected Block findLogRelatedBlock(String prefix, String... possibleSuffix) {
         for (var n : possibleSuffix) {
-            Block b = findLogWithPrefix(prefix, n);
+            Block b = findLogWithAffix(prefix, n);
             if (b != null) return b;
         }
         return null;
     }
 
     @Nullable
-    protected Block findLogWithPrefix(String prefix, String suffix) {
+    protected Block findLogWithAffix(String prefix, String suffix) {
         // ugly, shouldnt be here
         // SUPPORT: TFC & AFC
         if (this.id.getNamespace().matches("tfc|afc")) {
@@ -272,28 +272,31 @@ public class WoodType extends BlockType {
             if (o.isPresent()) return o.get();
         }
 
-        List<ResourceLocation> targets = makeKnownIDConventionsPrefix(
+        List<ResourceLocation> targets = makeKnownIDConventionsAffix(
                 this.id.getNamespace(), this.id.getPath(),
                 prefix, suffix, Utils.getID(this.log).getPath());
         return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, targets);
     }
 
-    private static @NotNull List<ResourceLocation> makeKnownIDConventionsPrefix(
+    private static @NotNull List<ResourceLocation> makeKnownIDConventionsAffix(
             String myNamespace, String myPath,
-            String prefix, String suffix,
+            String prefixOrInfix, String suffix,
             @Nullable String alternateNamespace) {
 
-        boolean noneEmpty = !prefix.isEmpty() && !suffix.isEmpty();
-        String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
+        boolean noneEmpty = !prefixOrInfix.isEmpty() && !suffix.isEmpty();
+        String prefix_ = prefixOrInfix.isEmpty() ? "" : prefixOrInfix + "_";
+        String _infix = prefixOrInfix.isEmpty() ? "" : "_" + prefixOrInfix;
+        String _suffix = suffix.isEmpty() ? "" : "_" + prefixOrInfix;
 
         List<ResourceLocation> targets = new ArrayList<>();
-        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, myPath + "_" + prefix_ + suffix));
+        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, myPath + _infix + _suffix));
+        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath));
         if (alternateNamespace != null)
-            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, alternateNamespace + "_" + prefix_ + suffix));
+            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, alternateNamespace + _infix + _suffix));
         if (noneEmpty) {
-            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath + "_" + suffix));
+            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath + _suffix));
             if (alternateNamespace != null)
-                targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + alternateNamespace + "_" + suffix));
+                targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + alternateNamespace + _suffix));
         }
 
         //For things like grimwood_wood -> grimwood
@@ -303,13 +306,13 @@ public class WoodType extends BlockType {
         return targets;
     }
 
-    static List<ResourceLocation> makeKnownIDConventions(ResourceLocation id, String... suffixKeyword) {
+    static List<ResourceLocation> makeKnownIDConventions(ResourceLocation id, String... affixKeyword) {
         String myPath = id.getPath();
         String myNamespace = id.getNamespace();
         List<ResourceLocation> possibleTargets = new ArrayList<>();
-        for (String suffix : suffixKeyword) {
-            possibleTargets.addAll(makeKnownIDConventionsPrefix(myNamespace, myPath, "", suffix, null));
-            possibleTargets.addAll(makeKnownIDConventionsPrefix(myNamespace, myPath, suffix, "", null));
+        for (String affix : affixKeyword) {
+            possibleTargets.addAll(makeKnownIDConventionsAffix(myNamespace, myPath, "", affix, null));
+            possibleTargets.addAll(makeKnownIDConventionsAffix(myNamespace, myPath, affix, "", null));
         }
         return possibleTargets;
     }
