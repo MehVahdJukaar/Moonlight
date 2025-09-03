@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.zip.CRC32;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -150,7 +151,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
         if (dirty) {
             dirty = false;
             try {
-                writeUncompressedZip(tempResources, path.toFile());
+                writeZipNoCompressionDEFLATED(tempResources, path.toFile());
                 this.tempResources.clear();
                 this.zipResources = new FilePackResources.FileResourcesSupplier(path.toFile())
                         .openPrimary(this.locationInfo);
@@ -160,7 +161,31 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
         }
     }
 
-    public void writeUncompressedZip(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException {
+
+    public void writeZipNoCompressionDEFLATED(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(outputZip);
+             BufferedOutputStream bos = new BufferedOutputStream(fos);
+             ZipOutputStream zos = new ZipOutputStream(bos)) {
+
+            // No compression, but still uses DEFLATED method (no manual CRC/size needed)
+            zos.setLevel(Deflater.NO_COMPRESSION);
+
+            for (var entry : files.entrySet()) {
+                String name = packType.getDirectory() + "/" +
+                        entry.getKey().toString().replace(':', '/').replace('\\', '/');
+
+                ZipEntry ze = new ZipEntry(name);
+                // Optional: make builds reproducible
+                // ze.setTime(0L);
+
+                zos.putNextEntry(ze);
+                zos.write(entry.getValue());
+                zos.closeEntry();
+            }
+        }
+    }
+
+    public void writeUncompressedZipSTORED(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(outputZip);
              BufferedOutputStream bos = new BufferedOutputStream(fos);
              ZipOutputStream zos = new ZipOutputStream(bos)) {

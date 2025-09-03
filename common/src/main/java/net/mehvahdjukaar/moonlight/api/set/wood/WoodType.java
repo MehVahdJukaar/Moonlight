@@ -272,45 +272,41 @@ public class WoodType extends BlockType {
             if (o.isPresent()) return o.get();
         }
 
-        List<ResourceLocation> targets = makeKnownIDConventionsStandard(
+        List<ResourceLocation> targets = makeKnownIDConventionsPrefix(
                 this.id.getNamespace(), this.id.getPath(),
                 prefix, suffix, Utils.getID(this.log).getPath());
         return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, targets);
     }
 
-    private static @NotNull List<ResourceLocation> makeKnownIDConventionsStandard(
-            String myNamespace, String nameWood,
+    private static @NotNull List<ResourceLocation> makeKnownIDConventionsPrefix(
+            String myNamespace, String myPath,
             String prefix, String suffix,
             String alternateNamespace) {
 
         boolean noneEmpty = !prefix.isEmpty() && !suffix.isEmpty();
         String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
-        String _infix = prefix.isEmpty() ? "" : "_" + prefix;
-        String _suffix = prefix.isEmpty() ? "" : "_" + suffix;
 
         List<ResourceLocation> targets = new ArrayList<>();
-        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + nameWood + _suffix));
-        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, nameWood + _infix + _suffix));
-        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, alternateNamespace + _infix + _suffix));
+        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, myPath + "_" + prefix_ + suffix));
+        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, alternateNamespace + "_" + prefix_ + suffix));
         if (noneEmpty) {
-            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + nameWood + _suffix));
-            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + alternateNamespace + _suffix));
+            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath + "_" + suffix));
+            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + alternateNamespace + "_" + suffix));
         }
 
         //For things like grimwood_wood -> grimwood
-        if (nameWood.endsWith(suffix)) {
-            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + nameWood));
+        if (myPath.endsWith(suffix)) {
+            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath));
         }
         return targets;
     }
 
-    static List<ResourceLocation> makeKnownIDConventions(ResourceLocation id, String... affixKeyword) {
-        String nameWood = id.getPath();
+    static List<ResourceLocation> makeKnownIDConventions(ResourceLocation id, String... suffixKeyword) {
+        String myPath = id.getPath();
         String myNamespace = id.getNamespace();
         List<ResourceLocation> resources = new ArrayList<>();
-        for (String affix : affixKeyword) {
-            resources.addAll(makeKnownIDConventionsStandard(myNamespace, nameWood, "", affix, nameWood));
-            resources.addAll(makeKnownIDConventionsStandard(myNamespace, nameWood, affix, "", nameWood));
+        for (String suffix : suffixKeyword) {
+            resources.addAll(makeKnownIDConventionsPrefix(myNamespace, myPath, "", suffix, myPath));
         }
         return resources;
     }
