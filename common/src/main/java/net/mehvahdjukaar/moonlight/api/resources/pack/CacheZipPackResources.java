@@ -64,14 +64,20 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     @Override
     public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
         if (packType != this.packType) return;
-        if (zipResources == null) return;
+        if (zipResources == null){
+            this.zipResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
+                    .openPrimary(this.locationInfo);
+        }
         this.zipResources.listResources(packType, namespace, path, resourceOutput);
     }
 
     @Override
     public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
         if (packType != this.packType) return null;
-        if (zipResources == null) return null;
+        if (zipResources == null){
+            this.zipResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
+                    .openPrimary(this.locationInfo);
+        }
         return this.zipResources.getResource(packType, location);
     }
 
@@ -135,6 +141,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
             if (zipResources != null) {
                 this.zipResources.close();
             }
+            this.zipResources = null;
             Files.deleteIfExists(path);
         } catch (Exception ignored) {
         }
@@ -159,6 +166,13 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     public void commitChanges(Executor executor) {
         if (dirty) {
             dirty = false;
+            //idk how this could happen but just in case
+            if (zipResources != null) {
+                Moonlight.LOGGER.error("Zip fie resources was not cleared. How?");
+                if (!clearAllResources()) {
+                    throw new RuntimeException("Could not clear resources");
+                }
+            }
             try {
                 writeZipNoCompressionDEFLATED(tempResources, path.toFile());
                 this.tempResources.clear();
