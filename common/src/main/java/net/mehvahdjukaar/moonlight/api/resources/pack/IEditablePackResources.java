@@ -18,7 +18,7 @@ public interface IEditablePackResources extends PackResources {
 
     void removeRootResource(String name);
 
-    void clearAllResources();
+    boolean clearAllResources();
 
     PackType getPackType();
 

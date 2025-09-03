@@ -281,17 +281,19 @@ public class WoodType extends BlockType {
     private static @NotNull List<ResourceLocation> makeKnownIDConventionsPrefix(
             String myNamespace, String myPath,
             String prefix, String suffix,
-            String alternateNamespace) {
+            @Nullable String alternateNamespace) {
 
         boolean noneEmpty = !prefix.isEmpty() && !suffix.isEmpty();
         String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
 
         List<ResourceLocation> targets = new ArrayList<>();
         targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, myPath + "_" + prefix_ + suffix));
-        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, alternateNamespace + "_" + prefix_ + suffix));
+        if (alternateNamespace != null)
+            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, alternateNamespace + "_" + prefix_ + suffix));
         if (noneEmpty) {
             targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath + "_" + suffix));
-            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + alternateNamespace + "_" + suffix));
+            if (alternateNamespace != null)
+                targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + alternateNamespace + "_" + suffix));
         }
 
         //For things like grimwood_wood -> grimwood
@@ -304,11 +306,12 @@ public class WoodType extends BlockType {
     static List<ResourceLocation> makeKnownIDConventions(ResourceLocation id, String... suffixKeyword) {
         String myPath = id.getPath();
         String myNamespace = id.getNamespace();
-        List<ResourceLocation> resources = new ArrayList<>();
+        List<ResourceLocation> possibleTargets = new ArrayList<>();
         for (String suffix : suffixKeyword) {
-            resources.addAll(makeKnownIDConventionsPrefix(myNamespace, myPath, "", suffix, myPath));
+            possibleTargets.addAll(makeKnownIDConventionsPrefix(myNamespace, myPath, "", suffix, null));
+            possibleTargets.addAll(makeKnownIDConventionsPrefix(myNamespace, myPath, suffix, "", null));
         }
-        return resources;
+        return possibleTargets;
     }
 
     @Nullable

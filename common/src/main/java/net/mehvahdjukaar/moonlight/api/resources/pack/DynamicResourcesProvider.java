@@ -87,10 +87,8 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
 
     public void prepare() {
-        this.needsRegeneration = this.generationStrategy.needsRegeneration(packType);
-        if (this.needsRegeneration) {
-            this.packResources.clearAllResources();
-        }
+        this.needsRegeneration = this.generationStrategy.needsRegeneration(packType) &&
+                this.packResources.clearAllResources();
     }
 
     public void reload(ResourceManager manager, IProgressTracker reporter) {
@@ -110,7 +108,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
             } catch (Exception e) {
                 Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}", this, e);
-            }finally {
+            } finally {
                 this.packResources.commitChanges(this.getExecutorService());
 
                 //ugly here but whatever

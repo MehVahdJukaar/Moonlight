@@ -154,12 +154,13 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
     }
 
     @Override
-    public void clearAllResources() {
+    public boolean clearAllResources() {
         synchronized (this) {
             this.resources.clear();
             this.rootResources.clear();
             this.searchTrie.clear();
         }
+        return true;
     }
 
     @Override

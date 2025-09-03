@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -102,12 +103,17 @@ public class CachePathPackResources extends PathPackResources implements IEditab
     }
 
     @Override
-    public void clearAllResources() {
+    public boolean clearAllResources() {
         //delete the whole folder
         try {
             Files.deleteIfExists(path);
         } catch (Exception ignored) {
         }
+        boolean doesntExist = !Files.exists(path);
+        if (!doesntExist) {
+            Moonlight.LOGGER.error("Failed to delete cached resource pack at {}", path);
+        }
+        return doesntExist;
     }
 
     @Override
