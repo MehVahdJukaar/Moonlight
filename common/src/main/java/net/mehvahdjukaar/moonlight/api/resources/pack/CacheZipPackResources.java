@@ -30,16 +30,17 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     private final Set<String> namespaces = new HashSet<>();
     private final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     private final Map<ResourceLocation, byte[]> tempResources = new ConcurrentHashMap<>();
+    private final PackLocationInfo locationInfo;
 
-    private final PackResources zipResources;
+    @Nullable
+    private PackResources zipResources;
     private boolean dirty = true;
 
     public CacheZipPackResources(PackLocationInfo location, PackType type, Path path) {
         if (!path.getFileName().toString().endsWith(".zip")) {
             path = path.resolveSibling(path.getFileName() + ".zip");
         }
-        this.zipResources = new FilePackResources.FileResourcesSupplier(path.toFile())
-                .openPrimary(location);
+        this.locationInfo = location;
         this.path = path;
         this.packType = type;
         this.metadata = new PackMetadataSection(Component.translatable("message.moonlight.cached_zipped"),
@@ -49,7 +50,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
 
     @Override
     public PackLocationInfo location() {
-        return this.zipResources.location();
+        return locationInfo;
     }
 
     @Override
@@ -61,12 +62,14 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     @Override
     public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
         if (packType != this.packType) return;
+        if (zipResources == null) return;
         this.zipResources.listResources(packType, namespace, path, resourceOutput);
     }
 
     @Override
     public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
         if (packType != this.packType) return null;
+        if(zipResources == null)return null;
         return this.zipResources.getResource(packType, location);
     }
 
@@ -113,7 +116,9 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
 
     @Override
     public void close() {
-        this.zipResources.close();
+        if(zipResources != null) {
+            this.zipResources.close();
+        }
     }
 
     @Override
@@ -147,6 +152,8 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
             try {
                 writeUncompressedZip(tempResources, path.toFile());
                 this.tempResources.clear();
+                this.zipResources = new FilePackResources.FileResourcesSupplier(path.toFile())
+                        .openPrimary(this.locationInfo);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
