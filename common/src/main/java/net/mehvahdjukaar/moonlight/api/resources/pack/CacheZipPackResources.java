@@ -70,7 +70,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     @Override
     public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
         if (packType != this.packType) return null;
-        if(zipResources == null)return null;
+        if (zipResources == null) return null;
         return this.zipResources.getResource(packType, location);
     }
 
@@ -117,7 +117,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
 
     @Override
     public void close() {
-        if(zipResources != null) {
+        if (zipResources != null) {
             this.zipResources.close();
         }
     }
@@ -131,6 +131,9 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     public void clearAllResources() {
         //delete the whole folder
         try {
+            if (zipResources != null) {
+                this.zipResources.close();
+            }
             Files.deleteIfExists(path);
         } catch (Exception ignored) {
         }
