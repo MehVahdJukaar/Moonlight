@@ -48,6 +48,11 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
         this.metadata = new PackMetadataSection(Component.translatable("message.moonlight.cached_zipped"),
                 SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
 
+        if (Files.exists(path)) {
+            this.zipResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
+                    .openPrimary(this.locationInfo);
+        }
+
     }
 
     @Override
@@ -64,9 +69,8 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     @Override
     public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
         if (packType != this.packType) return;
-        if (zipResources == null){
-            this.zipResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
-                    .openPrimary(this.locationInfo);
+        if (zipResources == null) {
+            return;
         }
         this.zipResources.listResources(packType, namespace, path, resourceOutput);
     }
@@ -74,9 +78,8 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     @Override
     public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
         if (packType != this.packType) return null;
-        if (zipResources == null){
-            this.zipResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
-                    .openPrimary(this.locationInfo);
+        if (zipResources == null) {
+            return null;
         }
         return this.zipResources.getResource(packType, location);
     }

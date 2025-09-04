@@ -109,11 +109,7 @@ public class CachePathPackResources extends PathPackResources implements IEditab
             Files.deleteIfExists(path);
         } catch (Exception ignored) {
         }
-        boolean doesntExist = !Files.exists(path);
-        if (!doesntExist) {
-            Moonlight.LOGGER.error("Failed to delete cached resource pack at {}", path);
-        }
-        return doesntExist;
+        return true;
     }
 
     @Override
