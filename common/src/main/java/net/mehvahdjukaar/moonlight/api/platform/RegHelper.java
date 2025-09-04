@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
+import net.mehvahdjukaar.moonlight.api.misc.IAttachmentType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
@@ -15,6 +16,7 @@ import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
+import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
@@ -34,9 +36,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.*;
@@ -73,6 +75,7 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -693,6 +696,61 @@ public class RegHelper {
     }
 
 
+    @ApiStatus.NonExtendable
+    public interface AttachmentBuilder<A> {
+
+        static <A> AttachmentBuilder<A> create(Supplier<A> initializer) {
+            return new AttachmentBuilderImpl<>(initializer);
+        }
+
+        /**
+         * Declares that attachments should persist between server restarts, using the provided {@link Codec} for
+         * (de)serialization.
+         *
+         * @param codec the codec used for (de)serialization
+         * @return the builder
+         */
+        AttachmentBuilder<A> persistent(Codec<A> codec);
+
+        /**
+         * Declares that when a player dies and respawns, the attachments of this type should remain.
+         *
+         * @return the builder
+         */
+        AttachmentBuilder<A> copyOnDeath();
+
+        /**
+         * Sets the default initializer for this attachment type.
+         *
+         * <p>It is <i>encouraged</i> for {@link A} to be an immutable data type, such as a primitive type
+         * or an immutable record.</p>
+         *
+         * <p>Otherwise, it is important to ensure that attachments <i>do not share any mutable state</i>.
+         * As an example, for a (mutable) list/array attachment type,
+         * the initializer should create a new independent instance each time it is called.</p>
+         *
+         * @param initializer the initializer
+         * @return the builder
+         */
+
+        /**
+         * Declares that this attachment type may be automatically synchronized with some clients, as determined by {@code syncPredicate}.
+         *
+         * @param packetCodec   the codec used to serialize the attachment data over the network
+         * @param syncPredicate an {@link BiPredicate} determining with which clients to synchronize data
+         * @return the builder
+         */
+        AttachmentBuilder<A> syncWith(StreamCodec<? super RegistryFriendlyByteBuf, A> packetCodec, BiPredicate<Object, ServerPlayer> syncPredicate);
+
+        default AttachmentBuilder<A> syncWith(StreamCodec<? super RegistryFriendlyByteBuf, A> packetCodec) {
+            return syncWith(packetCodec, (provider, player) -> true);
+        }
+    }
+
+    @ExpectPlatform
+    public static  <A> IAttachmentType<A> regDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
+        throw new AssertionError();
+    }
 }
 
 

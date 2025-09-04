@@ -4,12 +4,14 @@ import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
+import net.mehvahdjukaar.moonlight.api.misc.IAttachmentType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -18,7 +20,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.entity.*;
@@ -43,6 +44,8 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.javafmlmod.FMLModContainer;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.attachment.IAttachmentHolder;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
@@ -433,4 +436,47 @@ public class RegHelperImpl {
         };
         bus.addListener(consumer);
     }
+
+    public static <A> IAttachmentType<A> regDataAttachment(ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config) {
+        var attachment = RegHelper.register(id,
+                () -> makeDataAttachmentBuilder(config).build(),
+                NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
+        return new AttachmentWrapper<>(attachment);
+    }
+
+    private static <A> AttachmentType.Builder<A> makeDataAttachmentBuilder(Supplier<RegHelper.AttachmentBuilder<A>> config) {
+        var c = (AttachmentBuilderImpl<A>) config.get();
+        var b = AttachmentType.builder(c.initializer);
+        if (c.sync != null) {
+            b.sync((iAttachmentHolder, player) -> c.sync.getSecond()
+                    .test(iAttachmentHolder, player), c.sync.getFirst());
+        }
+        if (c.persistentCodec != null) {
+            b.serialize(c.persistentCodec);
+        }
+        if (c.copyOnDeath) {
+            b.copyOnDeath();
+        }
+        return b;
+    }
+
+    private record AttachmentWrapper<A>(Supplier<AttachmentType<A>> typeSupplier) implements IAttachmentType<A> {
+
+        @Override
+        public A getOrCreate(Object attachmentHolder) {
+            if (attachmentHolder instanceof IAttachmentHolder h) {
+                return h.getData(typeSupplier);
+            }
+            throw new IllegalArgumentException("Object " + attachmentHolder + " is not an attachment holder");
+        }
+
+        @Override
+        public A getOrNull(Object attachmentHolder) {
+            if (attachmentHolder instanceof IAttachmentHolder h) {
+                return h.getExistingDataOrNull(typeSupplier);
+            }
+            return null;
+        }
+    }
+
 }
