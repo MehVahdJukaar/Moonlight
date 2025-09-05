@@ -118,4 +118,9 @@ public class GlobalCachedStrategy implements PackGenerationStrategy {
         return new CachePathPackResources(info, type, getPath(type)
                 .resolve(info.id().replace(":", "-")));
     }
+
+    @Override
+    public String toString() {
+        return "CACHED";
+    }
 }

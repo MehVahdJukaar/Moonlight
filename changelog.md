@@ -1,2 +1,2 @@
-- removed some annoying unneded logs
-- fixed an issue with zip cache resources not being cleared properly
+- new helper to register attachment types in common
+- fixed rare issue with resource cache where it failed to delete the cache 

@@ -95,8 +95,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
         if (this.needsRegeneration) {
             this.needsRegeneration = false;
             try {
-                String reason = "cache strategy requested refresh";
-                Moonlight.LOGGER.info("Regenerating {} due to {}", this, reason);
+                Moonlight.LOGGER.info("Regenerating {}, requested by strategy {}", this, generationStrategy);
 
                 Stopwatch watch = Stopwatch.createStarted();
 

@@ -11,6 +11,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PathPackResources;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModContainer;
@@ -74,7 +75,6 @@ public final class ForgeConfigHolder extends ModConfigHolder {
         var bus = modContainer.getEventBus();
         if (onChange != null || this.isSynced() || !specialValues.isEmpty()) bus.addListener(this::onConfigChange);
         if (this.isSynced()) {
-
             NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
             NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         }

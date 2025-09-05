@@ -34,6 +34,11 @@ public interface PackGenerationStrategy {
         public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
             return new InMemoryPackResources(info, type);
         }
+
+        @Override
+        public String toString() {
+            return "REGEN_ON_EVERY_RELOAD";
+        }
     };
 
     PackGenerationStrategy NO_OP = new PackGenerationStrategy() {
@@ -47,6 +52,11 @@ public interface PackGenerationStrategy {
         public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
             return new InMemoryPackResources(info, type);
         }
+
+        @Override
+        public String toString() {
+            return "NO_OP";
+        }
     };
 
     PackGenerationStrategy CACHED = new GlobalCachedStrategy();
@@ -57,6 +67,12 @@ public interface PackGenerationStrategy {
         public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
             return new CacheZipPackResources(info, type,
                     getPath(type).resolve(info.id().replace(":", "-")));
+
+        }
+
+        @Override
+        public String toString() {
+            return "CACHED_ZIPPED";
         }
     };
 
@@ -76,6 +92,11 @@ public interface PackGenerationStrategy {
                     return true;
                 }
                 return false;
+            }
+
+            @Override
+            public String toString() {
+                return "RUN_ONCE";
             }
         };
     }
