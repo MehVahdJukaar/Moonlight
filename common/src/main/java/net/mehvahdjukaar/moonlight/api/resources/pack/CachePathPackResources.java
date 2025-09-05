@@ -12,6 +12,7 @@ import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.resources.IoSupplier;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -61,6 +62,7 @@ public class CachePathPackResources extends PathPackResources implements IEditab
     @Override
     public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
         if (packType != this.packType) return null;
+        //super.getReesource(packType, location);
         Path path = this.path.resolve(packType.getDirectory()).resolve(location.getNamespace());
         return getResource(location, path);
     }
@@ -119,8 +121,9 @@ public class CachePathPackResources extends PathPackResources implements IEditab
     public void removeResource(ResourceLocation id) {
         Path resPath = RPUtils.getResourcePath(path, id, this.packType);
         try {
-            Files.deleteIfExists(resPath);
-        } catch (Exception ignored) {
+            FileUtils.deleteDirectory(resPath.toFile());
+        } catch (Exception e) {
+            Moonlight.LOGGER.warn("Failed to delete resource {}", id, e);
         }
     }
 
@@ -133,8 +136,9 @@ public class CachePathPackResources extends PathPackResources implements IEditab
     public boolean clearAllResources() {
         //delete the whole folder
         try {
-            Files.deleteIfExists(path);
-        } catch (Exception ignored) {
+            FileUtils.deleteDirectory(path.toFile());
+        } catch (Exception e) {
+            Moonlight.LOGGER.warn("Failed to clear cache pack resources at {}", path, e);
         }
         return true;
     }
