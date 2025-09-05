@@ -46,7 +46,8 @@ public abstract class ReloadableClientResourcesMixin {
             //one would think that this would be fool proof. Well check again, some mod like to re create this resource manager during block load! All modded resources included aswell
             //so to be EXTRA safe we check if registry phase is over
             if (!PlatHelper.isInitializing()) {
-                return ReloadInstanceWrapper.wrap(() -> original.call(resourceManager, listeners,
+                return ReloadInstanceWrapper.wrap(() -> original.call(resourceManager,
+                               List.copyOf(listeners), //TODO: maybe change. some mod are adding stuff to these incorrectly after the reload instance is created. Doing this so we dont get reports redirected here aswell
                                 backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
                         type, this.resources, backgroundExecutor,
                         listPacks().toList());

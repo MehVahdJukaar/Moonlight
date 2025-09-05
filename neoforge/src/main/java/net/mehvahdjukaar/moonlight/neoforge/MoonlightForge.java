@@ -6,6 +6,9 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.neoforge.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicServerResourceProvider;
+import net.mehvahdjukaar.moonlight.api.resources.pack.PackGenerationStrategy;
+import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.ModIngredientTypes;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -30,6 +33,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ConfigTracker;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -46,8 +50,11 @@ import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * Author: MehVahdJukaar
@@ -77,6 +84,20 @@ public class MoonlightForge {
         }
 
         bus.addListener(MoonlightForge::addOldPoiEvent);
+
+
+        RegHelper.registerDynamicResourceProvider(new DynamicServerResourceProvider(Moonlight.res("serverres"),
+                PackGenerationStrategy.CACHED) {
+            @Override
+            protected Collection<String> gatherSupportedNamespaces() {
+                return List.of("minecraft");
+            }
+
+            @Override
+            protected void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
+
+            }
+        });
 
     }
 

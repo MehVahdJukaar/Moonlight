@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.FileUtil;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -17,8 +16,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,39 +46,13 @@ public class CachePathPackResources extends PathPackResources implements IEditab
     @Override
     public void listResources(PackType packType, String namespace, String p, ResourceOutput resourceOutput) {
         if (packType != this.packType) return;
-
-        FileUtil.decomposePath(p).ifSuccess((list) -> {
-            Path path = this.path.resolve(packType.getDirectory()).resolve(namespace);
-            listPath(namespace, path, list, resourceOutput);
-        }).ifError((error) -> {
-         Moonlight.LOGGER.error("C Invalid path {}: {}", path, error);
-        });
-      //  super.listResources(packType, namespace, path, resourceOutput);
+        super.listResources(packType, namespace, p, resourceOutput);
     }
 
     @Override
     public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
         if (packType != this.packType) return null;
-        //super.getReesource(packType, location);
-        Path path = this.path.resolve(packType.getDirectory()).resolve(location.getNamespace());
-        return getResource(location, path);
-    }
-
-    //TODO dlete these an duse sper
-    @Nullable
-    public static IoSupplier<InputStream> getResource(ResourceLocation location, Path path) {
-        return FileUtil.decomposePath(location.getPath()).mapOrElse((list) -> {
-            Path path2 = FileUtil.resolvePath(path, list);
-            return returnFileIfExists(path2);
-        }, (error) -> {
-            Moonlight.LOGGER.error("C Invalid path {}: {}", location, error);
-            return null;
-        });
-    }
-
-    @Nullable
-    private static IoSupplier<InputStream> returnFileIfExists(Path path) {
-        return Files.exists(path) && validatePath(path) ? IoSupplier.create(path) : null;
+        return super.getResource(packType, location);
     }
 
     @SuppressWarnings("unchecked")

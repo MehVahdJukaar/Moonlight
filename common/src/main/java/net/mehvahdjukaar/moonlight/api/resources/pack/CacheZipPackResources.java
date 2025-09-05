@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
+import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
@@ -177,10 +178,12 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
                 }
             }
             try {
+                Stopwatch stopwatch = Stopwatch.createStarted();
                 writeZipNoCompressionDEFLATED(tempResources, path.toFile());
                 this.tempResources.clear();
                 this.zipResources = new FilePackResources.FileResourcesSupplier(path.toFile())
                         .openPrimary(this.locationInfo);
+                Moonlight.LOGGER.info("Wrote cached resource pack to {} in {}", path, stopwatch);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
