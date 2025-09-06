@@ -26,4 +26,8 @@ public interface IEditablePackResources extends PackResources {
 
     default void commitChanges(Executor executor) {
     }
+
+    default boolean checkPathValidity() {
+        return true;
+    }
 }

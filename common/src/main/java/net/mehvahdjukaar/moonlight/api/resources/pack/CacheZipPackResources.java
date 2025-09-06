@@ -157,6 +157,11 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     }
 
     @Override
+    public boolean checkPathValidity() {
+        return Files.exists(path);
+    }
+
+    @Override
     public PackType getPackType() {
         return packType;
     }

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -112,6 +113,11 @@ public class CachePathPackResources extends PathPackResources implements IEditab
             Moonlight.LOGGER.warn("Failed to clear cache pack resources at {}", path, e);
         }
         return true;
+    }
+
+    @Override
+    public boolean checkPathValidity() {
+        return Files.isDirectory(path);
     }
 
     @Override

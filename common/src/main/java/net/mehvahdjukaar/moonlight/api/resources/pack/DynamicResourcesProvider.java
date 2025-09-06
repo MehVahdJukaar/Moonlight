@@ -87,8 +87,12 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
 
     public void prepare() {
-        this.needsRegeneration = this.generationStrategy.needsRegeneration(packType) &&
-                this.packResources.clearAllResources();
+        boolean needsR = this.generationStrategy.needsRegeneration(packType);
+        if(needsR){
+            this.needsRegeneration = this.packResources.clearAllResources();
+        }else{
+            this.needsRegeneration = !this.packResources.checkPathValidity();
+        }
     }
 
     public void reload(ResourceManager manager, IProgressTracker reporter) {
