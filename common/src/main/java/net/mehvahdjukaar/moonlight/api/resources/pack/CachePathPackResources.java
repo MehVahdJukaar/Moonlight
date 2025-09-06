@@ -3,86 +3,20 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
-import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
-import net.minecraft.server.packs.resources.IoSupplier;
 import org.apache.commons.io.FileUtils;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class CachePathPackResources extends PathPackResources implements IEditablePackResources {
-
-    private final Path path;
-    private final PackMetadataSection metadata;
-    private final PackType packType;
-    private final Set<String> namespaces = new HashSet<>();
-    private final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
+public class CachePathPackResources extends AbstractCachedEditableResources {
 
     public CachePathPackResources(PackLocationInfo location, PackType type, Path path) {
-        super(location, path);
-        this.path = path;
-        this.packType = type;
-        this.metadata = new PackMetadataSection(Component.translatable("message.moonlight.cached"),
-                SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
-
-    }
-
-    @Override
-    public Set<String> getNamespaces(PackType type) {
-        if (type != this.packType) return Set.of();
-        return namespaces;
-    }
-
-    @Override
-    public void listResources(PackType packType, String namespace, String p, ResourceOutput resourceOutput) {
-        if (packType != this.packType) return;
-        super.listResources(packType, namespace, p, resourceOutput);
-    }
-
-    @Override
-    public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
-        if (packType != this.packType) return null;
-        return super.getResource(packType, location);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
-        try {
-            return serializer == PackMetadataSection.TYPE ? (T) this.metadata : null;
-        } catch (Exception exception) {
-            return null;
-        }
-    }
-
-    @Override
-    public void addNamespaces(String... namespaces) {
-        this.namespaces.addAll(Arrays.asList(namespaces));
-    }
-
-    @Override
-    public void addRootResource(String name, byte[] resource) {
-        this.rootResources.put(name, resource);
-    }
-
-    @Nullable
-    @Override
-    public IoSupplier<InputStream> getRootResource(String... strings) {
-        String fileName = String.join("/", strings);
-        byte[] resource = this.rootResources.get(fileName);
-        return resource == null ? null : () -> new ByteArrayInputStream(resource);
+        super(path, location, type, Component.translatable("message.moonlight.cached"));
     }
 
     @Override
@@ -120,7 +54,12 @@ public class CachePathPackResources extends PathPackResources implements IEditab
 
     @Override
     public boolean checkValidityAndInitialize() {
-        return Files.isDirectory(path);
+        boolean dirExists = Files.isDirectory(path);
+        if (dirExists) {
+            this.cachedResources = new PathPackResources.PathResourcesSupplier(path)
+                    .openPrimary(locationInfo);
+        }
+        return dirExists;
     }
 
     @Override

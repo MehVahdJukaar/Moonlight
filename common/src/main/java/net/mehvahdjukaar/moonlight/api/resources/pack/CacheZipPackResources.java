@@ -2,26 +2,20 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
-import net.minecraft.server.packs.resources.IoSupplier;
 import org.apache.commons.compress.archivers.zip.ParallelScatterZipCreator;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipMethod;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -30,87 +24,16 @@ import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class CacheZipPackResources implements PackResources, IEditablePackResources {
+public class CacheZipPackResources extends AbstractCachedEditableResources {
 
-    private final Path path;
-    private final PackMetadataSection metadata;
-    private final PackType packType;
-    private final Set<String> namespaces = new HashSet<>();
-    private final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     private final Map<ResourceLocation, byte[]> tempResources = new ConcurrentHashMap<>();
-    private final PackLocationInfo locationInfo;
 
-    @Nullable
-    private PackResources zipResources;
     private boolean dirty = false;
 
     public CacheZipPackResources(PackLocationInfo location, PackType type, Path path) {
-        if (!path.getFileName().toString().endsWith(".zip")) {
-            path = path.resolveSibling(path.getFileName() + ".zip");
-        }
-        this.locationInfo = location;
-        this.path = path;
-        this.packType = type;
-        this.metadata = new PackMetadataSection(Component.translatable("message.moonlight.cached_zipped"),
-                SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
-    }
-
-    @Override
-    public PackLocationInfo location() {
-        return locationInfo;
-    }
-
-    @Override
-    public Set<String> getNamespaces(PackType type) {
-        if (type != this.packType) return Set.of();
-        return namespaces;
-    }
-
-    @Override
-    public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
-        if (packType != this.packType) return;
-        if (zipResources == null) {
-            return;
-        }
-        this.zipResources.listResources(packType, namespace, path, resourceOutput);
-    }
-
-    @Override
-    public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
-        if (packType != this.packType) return null;
-        if (zipResources == null) {
-            return null;
-        }
-        return this.zipResources.getResource(packType, location);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
-        try {
-            return serializer == PackMetadataSection.TYPE ? (T) this.metadata : null;
-        } catch (Exception exception) {
-            return null;
-        }
-    }
-
-    @Override
-    public void addNamespaces(String... namespaces) {
-        this.namespaces.addAll(Arrays.asList(namespaces));
-    }
-
-    @Override
-    public void addRootResource(String name, byte[] resource) {
-        this.rootResources.put(name, resource);
-    }
-
-
-    @Nullable
-    @Override
-    public IoSupplier<InputStream> getRootResource(String... strings) {
-        String fileName = String.join("/", strings);
-        byte[] resource = this.rootResources.get(fileName);
-        return resource == null ? null : () -> new ByteArrayInputStream(resource);
+        super((!path.getFileName().toString().endsWith(".zip")) ?
+                        path.resolveSibling(path.getFileName() + ".zip") : path,
+                location, type, Component.translatable("message.moonlight.cached_zipped"));
     }
 
     @Override
@@ -126,13 +49,6 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     }
 
     @Override
-    public void close() {
-        if (zipResources != null) {
-            this.zipResources.close();
-        }
-    }
-
-    @Override
     public void removeRootResource(String name) {
         //no op
     }
@@ -142,10 +58,10 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
         //delete the whole folder
         Stopwatch stopwatch = Stopwatch.createStarted();
         try {
-            if (zipResources != null) {
-                this.zipResources.close();
+            if (cachedResources != null) {
+                this.cachedResources.close();
             }
-            this.zipResources = null;
+            this.cachedResources = null;
             Files.deleteIfExists(path);
         } catch (Exception ignored) {
         }
@@ -162,7 +78,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
         //initialize if not valid
         boolean cacheExists = Files.exists(path);
         if (cacheExists) {
-            this.zipResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
+            this.cachedResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
                     .openPrimary(this.locationInfo);
         }
         return cacheExists;
@@ -183,7 +99,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
         if (dirty) {
             dirty = false;
             //idk how this could happen but just in case
-            if (zipResources != null) {
+            if (cachedResources != null) {
                 Moonlight.LOGGER.error("Zip fie resources was not cleared. How?");
                 if (!clearAllResources()) {
                     throw new RuntimeException("Could not clear resources");
@@ -193,7 +109,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
                 Stopwatch stopwatch = Stopwatch.createStarted();
                 writeZipStoredCommons(tempResources, path.toFile());
                 this.tempResources.clear();
-                this.zipResources = new FilePackResources.FileResourcesSupplier(path.toFile())
+                this.cachedResources = new FilePackResources.FileResourcesSupplier(path.toFile())
                         .openPrimary(this.locationInfo);
                 Moonlight.LOGGER.info("Wrote cached resource pack to {} in {}", path, stopwatch);
             } catch (Exception e) {
