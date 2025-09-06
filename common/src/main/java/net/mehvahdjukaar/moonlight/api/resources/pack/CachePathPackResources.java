@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
+import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.SharedConstants;
@@ -107,16 +108,18 @@ public class CachePathPackResources extends PathPackResources implements IEditab
     @Override
     public boolean clearAllResources() {
         //delete the whole folder
+        Stopwatch stopwatch = Stopwatch.createStarted();
         try {
             FileUtils.deleteDirectory(path.toFile());
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to clear cache pack resources at {}", path, e);
         }
+        Moonlight.LOGGER.info("Cleared cache pack resources at {} in {}", path, stopwatch);
         return true;
     }
 
     @Override
-    public boolean checkPathValidity() {
+    public boolean checkValidityAndInitialize() {
         return Files.isDirectory(path);
     }
 

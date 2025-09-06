@@ -748,9 +748,10 @@ public class RegHelper {
     }
 
     @ExpectPlatform
-    public static  <A> IAttachmentType<A> regDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
+    public static <A> IAttachmentType<A> regDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
         throw new AssertionError();
     }
+
 }
 
 

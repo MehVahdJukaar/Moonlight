@@ -1,2 +1,4 @@
-- new helper to register attachment types in common
-- fixed rare issue with resource cache where it failed to delete the cache 
+- added a concurrent stopwatch implementation utility
+- zip cache use stored mode instead of deflated
+- delayed zip resource creation for the cache FilePackResources
+- fixe an issue with resource cache did not regenerate when changing modes or when the process was interrupted while generating

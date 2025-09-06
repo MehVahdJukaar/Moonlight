@@ -9,15 +9,6 @@ import java.util.Collection;
 //very ugly and confused class
 public interface PackGenerationStrategy {
 
-    @Deprecated(forRemoval = true)
-    default boolean needsRegeneration(IEditablePackResources packResources, Collection<PackResources> loadedPacks) {
-        return true;
-    }
-
-    @Deprecated(forRemoval = true)
-    default void beforeRegenerate(IEditablePackResources packResources, Collection<PackResources> loadedPacks) {
-    }
-
     boolean needsRegeneration(PackType packType);
 
     IEditablePackResources createPackResources(PackLocationInfo info, PackType type);

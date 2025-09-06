@@ -123,6 +123,8 @@ public class DynamicResourcesInternals {
         for (var p : PROVIDERS.get(packType)) {
             p.prepare();
         }
+
+        GlobalCachedStrategy.writeNewState(packType);
     }
 
 

@@ -18,8 +18,9 @@ import java.util.*;
 
 public class GlobalCachedStrategy implements PackGenerationStrategy {
 
-    public static final Map<PackType,Boolean> NEEDS_REGEN = new HashMap<>();
+    private static final Map<PackType, Boolean> NEEDS_REGEN = new HashMap<>();
 
+    private static final Map<PackType, String> LAST_KNOWN_HASH = new HashMap<>();
 
     public static void refreshState(PackType packType, Collection<PackResources> loadedPacks) {
         String oldHash = readFingerprint(packType);
@@ -27,9 +28,16 @@ public class GlobalCachedStrategy implements PackGenerationStrategy {
         boolean shouldRegen = !oldHash.equals(newHash);
         Moonlight.LOGGER.info("Resource cache state for {}: {}", packType, shouldRegen ? "needs regeneration" : "up to date");
         NEEDS_REGEN.put(packType, shouldRegen);
+        LAST_KNOWN_HASH.put(packType, newHash);
 
-        //write new state
-        writeFingerprint(packType, newHash);
+    }
+
+    public static void writeNewState(PackType packType) {
+        String newHash = LAST_KNOWN_HASH.get(packType);
+        if (newHash != null) {
+            writeFingerprint(packType, newHash);
+            NEEDS_REGEN.put(packType, false);
+        }
     }
 
     private static void writeFingerprint(PackType packType, String fp) {

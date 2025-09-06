@@ -12,6 +12,10 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.resources.IoSupplier;
+import org.apache.commons.compress.archivers.zip.ParallelScatterZipCreator;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.compress.archivers.zip.ZipMethod;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -19,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
@@ -37,7 +42,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
 
     @Nullable
     private PackResources zipResources;
-    private boolean dirty = true;
+    private boolean dirty = false;
 
     public CacheZipPackResources(PackLocationInfo location, PackType type, Path path) {
         if (!path.getFileName().toString().endsWith(".zip")) {
@@ -48,12 +53,6 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
         this.packType = type;
         this.metadata = new PackMetadataSection(Component.translatable("message.moonlight.cached_zipped"),
                 SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
-
-        if (Files.exists(path)) {
-            this.zipResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
-                    .openPrimary(this.locationInfo);
-        }
-
     }
 
     @Override
@@ -141,6 +140,7 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
     @Override
     public boolean clearAllResources() {
         //delete the whole folder
+        Stopwatch stopwatch = Stopwatch.createStarted();
         try {
             if (zipResources != null) {
                 this.zipResources.close();
@@ -153,12 +153,19 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
         if (!doesntExist) {
             Moonlight.LOGGER.error("Failed to delete cached resource pack at {}", path);
         }
+        Moonlight.LOGGER.info("Cleared zipped cached resource pack at {} in {}", path, stopwatch);
         return doesntExist;
     }
 
     @Override
-    public boolean checkPathValidity() {
-        return Files.exists(path);
+    public boolean checkValidityAndInitialize() {
+        //initialize if not valid
+        boolean cacheExists = Files.exists(path);
+        if (cacheExists) {
+            this.zipResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
+                    .openPrimary(this.locationInfo);
+        }
+        return cacheExists;
     }
 
     @Override
@@ -184,19 +191,37 @@ public class CacheZipPackResources implements PackResources, IEditablePackResour
             }
             try {
                 Stopwatch stopwatch = Stopwatch.createStarted();
-                writeZipNoCompressionDEFLATED(tempResources, path.toFile());
+                writeZipStoredCommons(tempResources, path.toFile());
                 this.tempResources.clear();
                 this.zipResources = new FilePackResources.FileResourcesSupplier(path.toFile())
                         .openPrimary(this.locationInfo);
                 Moonlight.LOGGER.info("Wrote cached resource pack to {} in {}", path, stopwatch);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
 
-    public void writeZipNoCompressionDEFLATED(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException {
+    public void writeZipStoredCommons(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException, ExecutionException, InterruptedException {
+        try (var out = new java.io.FileOutputStream(outputZip)) {
+            var scatter = new ParallelScatterZipCreator(); // computes CRC/size for you
+            for (var e : files.entrySet()) {
+                String name = packType.getDirectory() + "/" +
+                        e.getKey().toString().replace(':', '/').replace('\\', '/');
+
+                var zae = new ZipArchiveEntry(name);
+                zae.setMethod(ZipMethod.STORED.getCode()); // no compression
+                scatter.addArchiveEntry(zae, () -> new ByteArrayInputStream(e.getValue()));
+            }
+
+            try (var zipOut = new ZipArchiveOutputStream(out)) {
+                scatter.writeTo(zipOut); // entries are emitted with correct size+CRC
+            }
+        }
+    }
+
+    public void writeZipDeflated(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(outputZip);
              BufferedOutputStream bos = new BufferedOutputStream(fos);
              ZipOutputStream zos = new ZipOutputStream(bos)) {

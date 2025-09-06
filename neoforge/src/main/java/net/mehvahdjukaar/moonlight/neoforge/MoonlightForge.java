@@ -85,20 +85,6 @@ public class MoonlightForge {
 
         bus.addListener(MoonlightForge::addOldPoiEvent);
 
-
-        RegHelper.registerDynamicResourceProvider(new DynamicServerResourceProvider(Moonlight.res("serverres"),
-                PackGenerationStrategy.CACHED) {
-            @Override
-            protected Collection<String> gatherSupportedNamespaces() {
-                return List.of("minecraft");
-            }
-
-            @Override
-            protected void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
-
-            }
-        });
-
     }
 
     @Deprecated
