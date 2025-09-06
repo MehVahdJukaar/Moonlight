@@ -33,6 +33,7 @@ public class VanillaWoodTypes {
         //Ugly ass code here
         MANGROVE.addChild("sapling", Blocks.MANGROVE_PROPAGULE);
         BAMBOO.addChild("sapling", Blocks.BAMBOO_SAPLING);
+        BAMBOO.removeChild("wood");
     }
 
     static {

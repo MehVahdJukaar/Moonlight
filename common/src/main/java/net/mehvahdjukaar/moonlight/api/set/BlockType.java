@@ -341,6 +341,10 @@ public abstract class BlockType {
         return SoundType.STONE;
     }
 
+    public void removeChild(String childKey) {
+        this.children.remove(childKey);
+    }
+
 
     //TODO: move out of here
     @FunctionalInterface
