@@ -92,7 +92,7 @@ public class FastSearchPathPackResources extends AbstractPackResources {
         }
 
 
-        Moonlight.LOGGER.info("generated search trie for fast zip file access in {}", watch);
+        Moonlight.LOGGER.info("Populated search tree for pack at {} in {}", this.root, watch);
     }
 
     @Nullable

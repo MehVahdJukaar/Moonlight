@@ -58,7 +58,7 @@ public class FastSearchFilePackResources extends AbstractPackResources {
             String name = ze.getName();
             searchTrie.insertPath(name); // assumes trie supports insert(String fullPath)
         }
-        Moonlight.LOGGER.info("generated search trie for fast zip file access in {}", watch);
+        Moonlight.LOGGER.info("Populated search tree for pack at {} in {}", this.zipFileAccess , watch);
     }
 
     private static String getPathFromLocation(PackType packType, ResourceLocation location) {
@@ -142,6 +142,11 @@ public class FastSearchFilePackResources extends AbstractPackResources {
 
                 return this.zipFile;
             }
+        }
+
+        @Override
+        public String toString() {
+            return file.toString();
         }
 
         public void close() {

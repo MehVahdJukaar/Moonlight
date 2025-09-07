@@ -105,9 +105,8 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
                 runGenerationPipeline(manager, reporter);
 
-                Moonlight.LOGGER.info("Generated runtime {} for pack {} in {} ms",
-                        this.getPackType(), this.packResources.packId(),
-                        watch.elapsed().toMillis());
+                Moonlight.LOGGER.info("Generated runtime {} for pack {} in {}",
+                        this.getPackType(), this.packResources.packId(), watch);
 
             } catch (Exception e) {
                 Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}", this, e);

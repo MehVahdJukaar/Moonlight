@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
+import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -78,7 +79,12 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
         //initialize if not valid
         boolean cacheExists = Files.exists(path);
         if (cacheExists) {
-            this.cachedResources = new FastSearchFilePackResources(locationInfo, this.path.toFile(), packType);
+            if (CommonConfigs.FASTER_CACHE_SEARCH.get()) {
+                this.cachedResources = new FastSearchFilePackResources(locationInfo, this.path.toFile(), packType);
+            }else{
+                this.cachedResources = new FilePackResources.FileResourcesSupplier(path.toFile())
+                        .openPrimary(this.locationInfo);
+            }
         }
         return cacheExists;
     }
@@ -99,7 +105,7 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
             dirty = false;
             //idk how this could happen but just in case
             if (cachedResources != null) {
-                Moonlight.LOGGER.error("Zip fie resources was not cleared. How?");
+                Moonlight.LOGGER.error("Zip file resources was not cleared. How?");
                 if (!clearAllResources()) {
                     throw new RuntimeException("Could not clear resources");
                 }
@@ -119,7 +125,7 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
 
 
     public void writeZipStoredCommons(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException, ExecutionException, InterruptedException {
-        try (var out = new java.io.FileOutputStream(outputZip)) {
+        try (var out = new FileOutputStream(outputZip)) {
             var scatter = new ParallelScatterZipCreator(); // computes CRC/size for you
             for (var e : files.entrySet()) {
                 String name = packType.getDirectory() + "/" +
@@ -146,7 +152,8 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
 
             for (var entry : files.entrySet()) {
                 String name = packType.getDirectory() + "/" +
-                        entry.getKey().toString().replace(':', '/').replace('\\', '/');
+                        entry.getKey().toString().replace(':', '/')
+                                .replace('\\', '/');
 
                 ZipEntry ze = new ZipEntry(name);
                 // Optional: make builds reproducible

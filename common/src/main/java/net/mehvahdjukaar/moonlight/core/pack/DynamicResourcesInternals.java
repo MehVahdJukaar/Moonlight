@@ -32,6 +32,16 @@ public class DynamicResourcesInternals {
     public static void init() {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
             PackType type = earlyPackReloadEvent.type();
+            Set<DynamicResourcePack> packs = new HashSet<>();
+            for (var g : GENERATORS) {
+                if (g.dynamicPack.getPackType() == type && g.shouldClearOnReload()) {
+                    packs.add(g.dynamicPack);
+                }
+            }
+            for (var p : packs) {
+                p.clearAllContent();
+            }
+
             List<DynResourceGenerator<?>> validGen = GENERATORS.stream()
                     .filter(gen -> gen.dynamicPack.getPackType() == type)
                     .toList();
@@ -59,6 +69,16 @@ public class DynamicResourcesInternals {
             Collection<DynamicResourcesProvider> validGen = PROVIDERS.get(type);
             if (validGen.isEmpty()) return;
 
+            var selectedPacks = earlyPackReloadEvent.selectedPacks();
+
+
+            GlobalCachedStrategy.refreshState(type, selectedPacks);
+
+            for (var p : PROVIDERS.get(type)) {
+                p.prepare();
+            }
+
+
             List<ResourceLocation> modIds = validGen.stream()
                     .map(DynamicResourcesProvider::getName).toList();
             Moonlight.LOGGER.info("Starting runtime resource generation for pack type {} with generators {}",
@@ -77,8 +97,11 @@ public class DynamicResourcesInternals {
                 gen.reload(manager, reporter); // run synchronously
             }
 
-            Moonlight.LOGGER.info("Finished runtime resources generation for {} packs in a total of {} ms",
-                    validGen.size(), stopwatch.elapsed().toMillis());
+            Moonlight.LOGGER.info("Finished runtime resources generation for {} packs in a total of {} ",
+                    validGen.size(), stopwatch);
+
+            GlobalCachedStrategy.writeNewState(type);
+
         }, EarlyPackReloadEvent.class);
 
     }
@@ -100,31 +123,8 @@ public class DynamicResourcesInternals {
         DYNAMIC_PACK_IDS.add(provider.getLocationInfo().id());
     }
 
-    @ApiStatus.Internal
     public static void clearAfterReload(PackType targetType) {
         //not used anymore
-    }
-
-    @ApiStatus.Internal
-    public static void clearBeforeReload(PackType packType, Collection<PackResources> selectedPacks) {
-        Set<DynamicResourcePack> packs = new HashSet<>();
-        for (var g : GENERATORS) {
-            if (g.dynamicPack.getPackType() == packType && g.shouldClearOnReload()) {
-                packs.add(g.dynamicPack);
-            }
-        }
-        for (var p : packs) {
-            p.clearAllContent();
-        }
-
-
-        GlobalCachedStrategy.refreshState(packType, selectedPacks);
-
-        for (var p : PROVIDERS.get(packType)) {
-            p.prepare();
-        }
-
-        GlobalCachedStrategy.writeNewState(packType);
     }
 
 

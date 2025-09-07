@@ -2,11 +2,13 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
+import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
 import org.apache.commons.io.FileUtils;
 
 import java.nio.file.Files;
@@ -55,7 +57,12 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
     public boolean checkValidityAndInitialize() {
         boolean dirExists = Files.isDirectory(path);
         if (dirExists) {
-            this.cachedResources = new FastSearchPathPackResources(locationInfo, path, packType);
+            if (CommonConfigs.FASTER_CACHE_SEARCH.get()) {
+                this.cachedResources = new FastSearchPathPackResources(locationInfo, path, packType);
+            } else {
+                this.cachedResources = new PathPackResources.PathResourcesSupplier(path)
+                        .openPrimary(this.locationInfo);
+            }
         }
         return dirExists;
     }

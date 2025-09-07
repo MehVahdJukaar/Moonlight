@@ -29,8 +29,7 @@ public class ReloadInstanceWrapper implements ReloadInstance {
 
     public static void executeEarlyReloadBlocking(PackType type, ResourceManager manager,
                                                   IProgressTracker progressTracker, Collection<PackResources> selectedPacks) {
-        DynamicResourcesInternals.clearBeforeReload(type, selectedPacks);
-        MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(List.of(), manager, type, progressTracker), EarlyPackReloadEvent.class);
+        MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(selectedPacks, manager, type, progressTracker), EarlyPackReloadEvent.class);
     }
 
     private final Supplier<ReloadInstance> lazyInstance;
