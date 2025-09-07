@@ -13,6 +13,7 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.OptionalRecipeC
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
+import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;

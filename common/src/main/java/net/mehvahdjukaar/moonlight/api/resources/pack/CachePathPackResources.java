@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.PathPackResources;
 import org.apache.commons.io.FileUtils;
 
 import java.nio.file.Files;
@@ -56,8 +55,7 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
     public boolean checkValidityAndInitialize() {
         boolean dirExists = Files.isDirectory(path);
         if (dirExists) {
-            this.cachedResources = new PathPackResources.PathResourcesSupplier(path)
-                    .openPrimary(locationInfo);
+            this.cachedResources = new FastSearchPathPackResources(locationInfo, path, packType);
         }
         return dirExists;
     }

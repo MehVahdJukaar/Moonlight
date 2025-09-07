@@ -82,7 +82,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
         if (packType == this.packType) {
             //idk why but somebody had an issue with concurrency here during world load
             synchronized (this) {
-                this.searchTrie.search(namespace + "/" + id)
+                this.searchTrie .search(namespace + "/" + id)
                         .forEach(r -> {
                             byte[] buf = resources.get(r);
                             output.accept(r, () -> {

@@ -78,8 +78,7 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
         //initialize if not valid
         boolean cacheExists = Files.exists(path);
         if (cacheExists) {
-            this.cachedResources = new FilePackResources.FileResourcesSupplier(this.path.toFile())
-                    .openPrimary(this.locationInfo);
+            this.cachedResources = new FastSearchFilePackResources(locationInfo, this.path.toFile(), packType);
         }
         return cacheExists;
     }

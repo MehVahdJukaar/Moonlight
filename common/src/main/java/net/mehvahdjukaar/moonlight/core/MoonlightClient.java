@@ -104,7 +104,7 @@ public class MoonlightClient {
     private static class MLDynamicClientResources extends DynamicClientResourceProvider {
 
         protected MLDynamicClientResources() {
-            super(Moonlight.res("dynamic_resources"), PackGenerationStrategy.CACHED_ZIPPED);
+            super(Moonlight.res("dynamic_resources"), PackGenerationStrategy.CACHED);
         }
 
         @Override
