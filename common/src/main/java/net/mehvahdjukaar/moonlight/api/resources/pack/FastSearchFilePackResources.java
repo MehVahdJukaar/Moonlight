@@ -48,17 +48,22 @@ public class FastSearchFilePackResources extends AbstractPackResources {
 
     private void buildIndex() {
         Stopwatch watch = Stopwatch.createStarted();
-        ZipFile zip = this.zipFileAccess.getOrCreateZipFile();
+        try {
+            ZipFile zip = this.zipFileAccess.getOrCreateZipFile();
 
-        assert zip != null;
-        Enumeration<? extends ZipEntry> e = zip.entries();
-        while (e.hasMoreElements()) {
-            ZipEntry ze = e.nextElement();
-            if (ze.isDirectory()) continue;
-            String name = ze.getName();
-            searchTrie.insertPath(name); // assumes trie supports insert(String fullPath)
+            assert zip != null;
+            Enumeration<? extends ZipEntry> e = zip.entries();
+            while (e.hasMoreElements()) {
+                ZipEntry ze = e.nextElement();
+                if (ze.isDirectory()) continue;
+                String name = ze.getName();
+                searchTrie.insertPath(name); // assumes trie supports insert(String fullPath)
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to index zip file {}", this.zipFileAccess, e);
+        } finally {
+            Moonlight.LOGGER.info("Populated search tree for pack at {} in {}", this.zipFileAccess, watch);
         }
-        Moonlight.LOGGER.info("Populated search tree for pack at {} in {}", this.zipFileAccess , watch);
     }
 
     private static String getPathFromLocation(PackType packType, ResourceLocation location) {

@@ -1,4 +1,1 @@
-- added a concurrent stopwatch implementation utility
-- zip cache use stored mode instead of deflated
-- delayed zip resource creation for the cache FilePackResources
-- fixe an issue with resource cache did not regenerate when changing modes or when the process was interrupted while generating
+- removed usage of apache common compress since production servers apparently dont have it

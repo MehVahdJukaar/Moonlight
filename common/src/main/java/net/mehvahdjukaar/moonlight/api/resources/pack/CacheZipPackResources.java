@@ -8,18 +8,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
-import org.apache.commons.compress.archivers.zip.ParallelScatterZipCreator;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipMethod;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -75,13 +69,13 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
     }
 
     @Override
-    public boolean checkValidityAndInitialize() {
+    public boolean initializeIfValid() {
         //initialize if not valid
         boolean cacheExists = Files.exists(path);
         if (cacheExists) {
             if (CommonConfigs.FASTER_CACHE_SEARCH.get()) {
                 this.cachedResources = new FastSearchFilePackResources(locationInfo, this.path.toFile(), packType);
-            }else{
+            } else {
                 this.cachedResources = new FilePackResources.FileResourcesSupplier(path.toFile())
                         .openPrimary(this.locationInfo);
             }
@@ -100,7 +94,7 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
     }
 
     @Override
-    public void commitChanges(Executor executor) {
+    public void commitChanges() {
         if (dirty) {
             dirty = false;
             //idk how this could happen but just in case
@@ -112,10 +106,9 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
             }
             try {
                 Stopwatch stopwatch = Stopwatch.createStarted();
-                writeZipStoredCommons(tempResources, path.toFile());
+                writeZipPreferStored(tempResources, path);
                 this.tempResources.clear();
-                this.cachedResources = new FilePackResources.FileResourcesSupplier(path.toFile())
-                        .openPrimary(this.locationInfo);
+                this.initializeIfValid();
                 Moonlight.LOGGER.info("Wrote cached resource pack to {} in {}", path, stopwatch);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -123,78 +116,81 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
         }
     }
 
+    public void writeZipPreferStored(Map<ResourceLocation, byte[]> files, Path outputZip) throws IOException {
+        Path parent = outputZip.getParent();
+        if (parent == null) {
+            parent = Paths.get(System.getProperty("java.io.tmpdir"));
+        } else {
+            Files.createDirectories(parent);
+        }
 
-    public void writeZipStoredCommons(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException, ExecutionException, InterruptedException {
-        try (var out = new FileOutputStream(outputZip)) {
-            var scatter = new ParallelScatterZipCreator(); // computes CRC/size for you
-            for (var e : files.entrySet()) {
-                String name = packType.getDirectory() + "/" +
-                        e.getKey().toString().replace(':', '/').replace('\\', '/');
-
-                var zae = new ZipArchiveEntry(name);
-                zae.setMethod(ZipMethod.STORED.getCode()); // no compression
-                scatter.addArchiveEntry(zae, () -> new ByteArrayInputStream(e.getValue()));
+        Path tmp = Files.createTempFile(parent, "dynpack-", ".zip");
+        boolean wrote = false;
+        try {
+            // Try STORED
+            try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(tmp, StandardOpenOption.TRUNCATE_EXISTING));
+                 ZipOutputStream zos = new ZipOutputStream(os)) {
+                writeEntriesStored(zos, files);
             }
-
-            try (var zipOut = new ZipArchiveOutputStream(out)) {
-                scatter.writeTo(zipOut); // entries are emitted with correct size+CRC
+            moveIntoPlace(tmp, outputZip);
+            wrote = true;
+        } catch (Exception storedEx) {
+            Moonlight.LOGGER.warn("Could not write zip using STORED method, falling back to DEFLATED: {}", String.valueOf(storedEx));
+            // Fallback: DEFLATED (no compression level set here means default compression)
+            try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(tmp, StandardOpenOption.TRUNCATE_EXISTING));
+                 ZipOutputStream zos = new ZipOutputStream(os)) {
+                writeEntriesDeflated(zos, files, Deflater.NO_COMPRESSION); // or choose another level if you prefer
+            }
+            moveIntoPlace(tmp, outputZip);
+            wrote = true;
+        } finally {
+            if (!wrote) {
+                try { Files.deleteIfExists(tmp); } catch (IOException ignored) {}
             }
         }
     }
 
-    public void writeZipDeflated(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(outputZip);
-             BufferedOutputStream bos = new BufferedOutputStream(fos);
-             ZipOutputStream zos = new ZipOutputStream(bos)) {
-
-            // No compression, but still uses DEFLATED method (no manual CRC/size needed)
-            zos.setLevel(Deflater.NO_COMPRESSION);
-
-            for (var entry : files.entrySet()) {
-                String name = packType.getDirectory() + "/" +
-                        entry.getKey().toString().replace(':', '/')
-                                .replace('\\', '/');
-
-                ZipEntry ze = new ZipEntry(name);
-                // Optional: make builds reproducible
-                // ze.setTime(0L);
-
-                zos.putNextEntry(ze);
-                zos.write(entry.getValue());
-                zos.closeEntry();
-            }
+    private void moveIntoPlace(Path tmp, Path target) throws IOException {
+        try {
+            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (AtomicMoveNotSupportedException ex) {
+            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
-    public void writeUncompressedZipSTORED(Map<ResourceLocation, byte[]> files, File outputZip) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(outputZip);
-             BufferedOutputStream bos = new BufferedOutputStream(fos);
-             ZipOutputStream zos = new ZipOutputStream(bos)) {
+    private void writeEntriesStored(ZipOutputStream zos, Map<ResourceLocation, byte[]> files) throws IOException {
+        for (var e : files.entrySet()) {
+            String name = packType.getDirectory() + "/" +
+                    e.getKey().toString().replace(':', '/').replace('\\', '/');
 
-            for (Map.Entry<ResourceLocation, byte[]> entry : files.entrySet()) {
+            byte[] data = e.getValue();
+            CRC32 crc = new CRC32();
+            crc.update(data);
 
-                String path = this.packType.getDirectory() + "/" +
-                        entry.getKey().toString().replace(":", "/")
-                                .replace("\\", "/"); // Normalize path
-                byte[] data = entry.getValue();
+            ZipEntry ze = new ZipEntry(name);
+            ze.setMethod(ZipEntry.STORED);
+            ze.setSize(data.length);
+            ze.setCompressedSize(data.length);
+            ze.setCrc(crc.getValue());
+            // ze.setTime(0L); // reproducible builds (optional)
 
-                ZipEntry zipEntry = new ZipEntry(path);
-                zipEntry.setMethod(ZipEntry.STORED);
-                zipEntry.setSize(data.length);
-                zipEntry.setCompressedSize(data.length);
-                zipEntry.setCrc(computeCRC32(data));
-
-                zos.putNextEntry(zipEntry);
-                zos.write(data);
-                zos.closeEntry();
-            }
+            zos.putNextEntry(ze);
+            zos.write(data);
+            zos.closeEntry();
         }
     }
 
+    private void writeEntriesDeflated(ZipOutputStream zos, Map<ResourceLocation, byte[]> files, int level) throws IOException {
+        zos.setLevel(level);
+        for (var e : files.entrySet()) {
+            String name = packType.getDirectory() + "/" +
+                    e.getKey().toString().replace(':', '/').replace('\\', '/');
 
-    private static long computeCRC32(byte[] data) {
-        CRC32 crc = new CRC32();
-        crc.update(data);
-        return crc.getValue();
+            ZipEntry ze = new ZipEntry(name);
+            // ze.setTime(0L); // reproducible builds (optional)
+            zos.putNextEntry(ze);
+            zos.write(e.getValue());
+            zos.closeEntry();
+        }
     }
 }

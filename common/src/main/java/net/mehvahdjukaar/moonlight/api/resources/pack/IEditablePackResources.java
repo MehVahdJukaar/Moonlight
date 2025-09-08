@@ -24,10 +24,15 @@ public interface IEditablePackResources extends PackResources {
 
     boolean isEmpty();
 
+    @Deprecated(forRemoval = true)
     default void commitChanges(Executor executor) {
+        commitChanges();
     }
 
-    default boolean checkValidityAndInitialize() {
+    default void commitChanges() {
+    }
+
+    default boolean initializeIfValid() {
         return true;
     }
 }

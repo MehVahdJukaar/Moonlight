@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.Executor;
 
 public class CachePathPackResources extends AbstractCachedEditableResources {
 
@@ -54,7 +55,7 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
     }
 
     @Override
-    public boolean checkValidityAndInitialize() {
+    public boolean initializeIfValid() {
         boolean dirExists = Files.isDirectory(path);
         if (dirExists) {
             if (CommonConfigs.FASTER_CACHE_SEARCH.get()) {
@@ -65,6 +66,11 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
             }
         }
         return dirExists;
+    }
+
+    @Override
+    public void commitChanges() {
+        initializeIfValid();
     }
 
     @Override

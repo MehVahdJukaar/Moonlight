@@ -91,7 +91,10 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
         if (needsR) {
             this.needsRegeneration = this.packResources.clearAllResources();
         } else {
-            this.needsRegeneration = !this.packResources.checkValidityAndInitialize();
+            this.needsRegeneration = !this.packResources.initializeIfValid();
+            if (this.needsRegeneration) {
+                Moonlight.LOGGER.info("Cache for {} at {} is invalid, will regenerate", this, this.packResources);
+            }
         }
     }
 
@@ -111,7 +114,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
             } catch (Exception e) {
                 Moonlight.LOGGER.error("An error occurred while trying to generate dynamic assets for {}", this, e);
             } finally {
-                this.packResources.commitChanges(this.getExecutorService());
+                this.packResources.commitChanges();
 
                 //ugly here but whatever
                 if (this.generateDebugResources() && this.packResources instanceof IDebugDumpable d) {

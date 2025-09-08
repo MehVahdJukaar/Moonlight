@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class FastSearchPathPackResources extends AbstractPackResources {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -50,12 +51,13 @@ public class FastSearchPathPackResources extends AbstractPackResources {
         final Path base = this.root.resolve(this.packType.getDirectory()); // "assets" or "data"
 
         if (!Files.exists(base)) {
+            Moonlight.LOGGER.info("Pack at {} does not contain {}, skipping index", this.root, this.packType.getDirectory());
             return;
         }
 
         try {
             // Walk all regular files under <root>/<assets|data>
-            try (java.util.stream.Stream<Path> stream =
+            try (Stream<Path> stream =
                          java.nio.file.Files.find(base, Integer.MAX_VALUE,
                                  (p, attrs) -> attrs.isRegularFile())) {
 
@@ -89,10 +91,9 @@ public class FastSearchPathPackResources extends AbstractPackResources {
         } catch (IOException e) {
             LOGGER.error("Failed to build index for {}", base, e);
             // Mark built to avoid retry loops; remove this line if you prefer retry-on-next-call
+        } finally {
+            Moonlight.LOGGER.info("Populated search tree for pack at {} in {}", this.root, watch);
         }
-
-
-        Moonlight.LOGGER.info("Populated search tree for pack at {} in {}", this.root, watch);
     }
 
     @Nullable
