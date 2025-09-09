@@ -57,8 +57,7 @@ public class FastSearchPathPackResources extends AbstractPackResources {
 
         try {
             // Walk all regular files under <root>/<assets|data>
-            try (Stream<Path> stream =
-                         java.nio.file.Files.find(base, Integer.MAX_VALUE,
+            try (Stream<Path> stream = Files.find(base, Integer.MAX_VALUE,
                                  (p, attrs) -> attrs.isRegularFile())) {
 
                 stream.forEach(file -> {

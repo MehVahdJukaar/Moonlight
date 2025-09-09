@@ -50,13 +50,18 @@ public class FastSearchFilePackResources extends AbstractPackResources {
         Stopwatch watch = Stopwatch.createStarted();
         try {
             ZipFile zip = this.zipFileAccess.getOrCreateZipFile();
-
+            String pathName = this.packType.getDirectory() + "/";
             assert zip != null;
             Enumeration<? extends ZipEntry> e = zip.entries();
             while (e.hasMoreElements()) {
                 ZipEntry ze = e.nextElement();
                 if (ze.isDirectory()) continue;
                 String name = ze.getName();
+                if (name.startsWith(pathName)) {
+                    name = name.substring(pathName.length());
+                } else {
+                    continue;
+                }
                 searchTrie.insertPath(name); // assumes trie supports insert(String fullPath)
             }
         } catch (Exception e) {
@@ -107,11 +112,12 @@ public class FastSearchFilePackResources extends AbstractPackResources {
     @Override
     public void listResources(PackType packType, String namespace, String path, PackResources.ResourceOutput output) {
         if (packType != this.packType) return;
+        String prefix = packType.getDirectory() + "/";
         ZipFile zipFile = this.zipFileAccess.getOrCreateZipFile();
         if (zipFile != null) {
             this.searchTrie.search(namespace + "/" + path)
                     .forEach(r -> {
-                        ZipEntry zipEntry = zipFile.getEntry(ResourceLocationSearchTrie.getResPath(r));
+                        ZipEntry zipEntry = zipFile.getEntry(prefix + r.getNamespace()+"/"+r.getPath());
                         if (zipEntry == null) {
                             throw new RuntimeException("Zip file entry was null");
                         }
