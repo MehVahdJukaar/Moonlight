@@ -1,6 +1,7 @@
 ## v2.16.9
 - Corrected the name of WoodType from "blue_archwood" to "archwood"
     - main problem: The WoodType's children wasn't detected with the correct name
+- Improved WoodType's detection to include logs that has "log_" instead of "_log"
 
 ## v2.16.8
 - fixed the generated texture not being animated - [#1022](https://github.com/MehVahdJukaar/WoodGood/issues/1022)
