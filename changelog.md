@@ -1,1 +1,1 @@
-- removed usage of apache common compress since production servers apparently dont have it
+- Fixed the WoodType's detection that get the wrong block for childkey
