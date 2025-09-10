@@ -243,18 +243,15 @@ public class WoodType extends BlockType {
         boolean noneEmpty = !prefixOrInfix.isEmpty() && !suffix.isEmpty();
         String prefix_ = prefixOrInfix.isEmpty() ? "" : prefixOrInfix + "_";
         String _infix = prefixOrInfix.isEmpty() ? "" : "_" + prefixOrInfix;
-        String _suffix = suffix.isEmpty() ? "" : "_" + prefixOrInfix;
+        String _suffix = suffix.isEmpty() ? "" : "_" + suffix;
 
         List<ResourceLocation> targets = new ArrayList<>();
         targets.add(new ResourceLocation(myNamespace, myPath + _infix + _suffix));
-        targets.add(new ResourceLocation(myNamespace, prefix_ + myPath));
+        targets.add(new ResourceLocation(myNamespace, prefix_ + myPath + _suffix));
         if (alternateNamespace != null)
             targets.add(new ResourceLocation(myNamespace, alternateNamespace + _infix + _suffix));
-        if (noneEmpty) {
-            targets.add(new ResourceLocation(myNamespace, prefix_ + myPath + _suffix));
-            if (alternateNamespace != null)
-                targets.add(new ResourceLocation(myNamespace, prefix_ + alternateNamespace + _suffix));
-        }
+        if (noneEmpty && alternateNamespace != null)
+            targets.add(new ResourceLocation(myNamespace, prefix_ + alternateNamespace + _suffix));
 
         //For things like grimwood_wood -> grimwood
         if (myPath.endsWith(suffix)) {
