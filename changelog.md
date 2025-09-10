@@ -1,3 +1,6 @@
+## v2.16.10
+- Fixed the WoodType's detection that get the wrong block for childkey
+
 ## v2.16.9
 - Corrected the name of WoodType from "blue_archwood" to "archwood"
     - main problem: The WoodType's children wasn't detected with the correct name
