@@ -1,9 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.EncoderException;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.markers.MapBlockMarker;
@@ -15,14 +12,12 @@ import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -77,8 +71,10 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
     @Inject(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V",
             at = @At("RETURN"))
     private void readExtraData(FriendlyByteBuf buf, CallbackInfo ci) {
-        //we always need to send enough data to create the correct map type because we dont know if client has it
-        if(!buf.isReadable()) {
+        // we always need to send enough data to create the correct map type because we don't know if client has it
+        // again velocity BS
+        if (!buf.isReadable()) {
+            Moonlight.warnInvalidServer();
             return;
         }
 
@@ -128,7 +124,6 @@ public class MapItemDataPacketMixin implements IMapDataPacketExtension {
         }
     }
 
-    @NotNull
     @Override
     public void moonlight$sendCustomDecorations(Collection<CustomMapDecoration> decorations) {
 

@@ -217,5 +217,13 @@ public class Moonlight {
         }
     }
 
+    private static boolean warnedInvalidServer = false;
 
+    public static void warnInvalidServer() {
+        if (!warnedInvalidServer) {
+            LOGGER.error("It seems like you are on a VANILLA server. This could cause issues and is NOT supported and you are OUT OF SUPPORT!");
+            warnedInvalidServer = true;
+        }
+
+    }
 }

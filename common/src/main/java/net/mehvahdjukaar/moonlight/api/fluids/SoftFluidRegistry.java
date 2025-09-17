@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.mixins.MapItemDataPacketMixin;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -31,13 +32,8 @@ public class SoftFluidRegistry {
         return Utils.hackyGetRegistry(KEY);
     }
 
-    /**
-     * 返回 moonlight:soft_fluids 注册表。
-     * 当客户端处于原版服或注册表尚未创建时可能返回 <b>null</b>，调用方务必检查。
-     */
-    @Nullable
     public static Registry<SoftFluid> getRegistry(RegistryAccess registryAccess) {
-        return registryAccess.registry(KEY).orElse(null);
+        return registryAccess.registry(KEY).orElseThrow();
     }
 
     public static Collection<SoftFluid> getValues() {

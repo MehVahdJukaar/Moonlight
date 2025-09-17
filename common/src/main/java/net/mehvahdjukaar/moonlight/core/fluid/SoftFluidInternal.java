@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -75,7 +76,7 @@ public class SoftFluidInternal {
         FLUID_MAP.clear();
         ITEM_MAP.clear();
         //ok so here the extra registered fluids should have already been sent to the client
-        SoftFluidColors.refreshParticleColors();
+        SoftFluidColors.refreshParticleColors(Utils.hackyGetRegistryAccess());
     }
 
     public static void onDataSyncToPlayer(ServerPlayer player, boolean isJoined) {
