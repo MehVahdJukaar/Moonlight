@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -20,34 +21,37 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
 
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
-
-        //also using this to reset texture cache
         RenderedTexturesManager.clearCache();
-
-        //also using for this
         TextureCache.clear();
-
         refreshParticleColors();
     }
 
     public static void refreshParticleColors() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
-        var fluids = SoftFluidRegistry.getRegistry(mc.level.registryAccess()).entrySet();
 
+        Registry<SoftFluid> reg = SoftFluidRegistry.getRegistry(mc.level.registryAccess());
+        if (reg == null) {                          // ← 防御：注册表不存在
+            // 清空旧缓存，避免脏数据
+            for (SoftFluid f : SoftFluidRegistry.getValues())
+                f.averageTextureTint = -1;
+            return;                                 // 安静返回，不继续跑
+        }
+
+        var fluids = reg.entrySet();
         for (var entry : fluids) {
             SoftFluid fluid = entry.getValue();
             ResourceLocation location = fluid.getStillTexture();
             int averageColor = -1;
-
             int tint = fluid.getTintMethod().appliesToStill() ? fluid.getTintColor() : -1;
 
-            TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
+            TextureAtlas textureMap = mc.getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
             TextureAtlasSprite sprite = textureMap.getSprite(location);
             try {
                 averageColor = getAverageColor(sprite, tint);
             } catch (Exception e) {
-                Moonlight.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
+                Moonlight.LOGGER.warn("Failed to load particle color for " + sprite +
+                        " using current resource pack. might be a broken png.mcmeta");
             }
             fluid.averageTextureTint = averageColor;
         }
@@ -71,7 +75,6 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
 
                         int pixel = ClientHelper.getPixelRGBA(sprite, tryFrame, x, y);
 
-                        // this is in 0xAABBGGRR format, not the usual 0xAARRGGBB.
                         int pixelB = pixel >> 16 & 255;
                         int pixelG = pixel >> 8 & 255;
                         int pixelR = pixel & 255;
@@ -96,11 +99,8 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
                 totalB / total * tintB / 255);
     }
 
-
     @ExpectPlatform
     public static int getSpecialColor(SoftFluidStack softFluidStack, BlockAndTintGetter world, BlockPos pos) {
         throw new AssertionError();
     }
-
-
 }
