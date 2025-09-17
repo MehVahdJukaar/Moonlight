@@ -8,6 +8,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,8 +31,13 @@ public class SoftFluidRegistry {
         return Utils.hackyGetRegistry(KEY);
     }
 
+    /**
+     * 返回 moonlight:soft_fluids 注册表。
+     * 当客户端处于原版服或注册表尚未创建时可能返回 <b>null</b>，调用方务必检查。
+     */
+    @Nullable
     public static Registry<SoftFluid> getRegistry(RegistryAccess registryAccess) {
-        return registryAccess.registryOrThrow(KEY);
+        return registryAccess.registry(KEY).orElse(null);
     }
 
     public static Collection<SoftFluid> getValues() {
@@ -64,8 +70,4 @@ public class SoftFluidRegistry {
             id = Moonlight.res(id.getPath()); //backwards compat
         return id;
     }
-
-
-
 }
-
