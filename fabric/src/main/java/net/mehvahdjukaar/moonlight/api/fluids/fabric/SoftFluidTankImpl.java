@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.fluids.fabric;
 
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 
 /**
@@ -14,14 +17,14 @@ public class SoftFluidTankImpl extends SoftFluidTank {
 
     @Deprecated(forRemoval = true)
     protected SoftFluidTankImpl(int capacity) {
-        super(capacity, Utils.hackyGetRegistryAccess());
+        this(capacity, SoftFluidRegistry.get(Utils.hackyGetRegistryAccess()).asLookup());
     }
 
-    protected SoftFluidTankImpl(int capacity, HolderLookup.Provider registries) {
+    protected SoftFluidTankImpl(int capacity, HolderGetter<SoftFluid> registries) {
         super(capacity, registries);
     }
 
-    public static SoftFluidTank create(int capacity, HolderLookup.Provider registries) {
+    public static SoftFluidTank create(int capacity, HolderGetter<SoftFluid> registries) {
         return new SoftFluidTankImpl(capacity, registries);
     }
 

@@ -1,11 +1,20 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -27,6 +36,51 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("unused")
 public class SoftFluidTank {
 
+    public static final StreamCodec<RegistryFriendlyByteBuf, SoftFluidTank> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public SoftFluidTank decode(RegistryFriendlyByteBuf object) {
+            int capacity = ByteBufCodecs.INT.decode(object);
+            SoftFluidStack stack = SoftFluidStack.STREAM_CODEC.decode(object);
+            return SoftFluidTank.create(stack, capacity, object.registryAccess()
+                    .lookup(SoftFluidRegistry.KEY).get());
+        }
+
+        @Override
+        public void encode(RegistryFriendlyByteBuf object, SoftFluidTank object2) {
+            ByteBufCodecs.INT.encode(object, object2.getCapacity());
+            SoftFluidStack.STREAM_CODEC.encode(object, object2.getFluid());
+        }
+    };
+
+    public static final Codec<SoftFluidTank> CODEC = new Codec<>() {
+
+        @Override
+        public <T> DataResult<Pair<SoftFluidTank, T>> decode(DynamicOps<T> ops, T input) {
+            if (ops instanceof RegistryOps<?> registryOps) {
+                var reg = registryOps.getter(SoftFluidRegistry.KEY);
+                if (reg.isEmpty()) {
+                    return DataResult.error(() -> "Failed to find registry from registry lookup!");
+                }
+                DataResult<Pair<SoftFluidStack, T>> result1 = SoftFluidStack.CODEC.decode(ops, input);
+                DataResult<Pair<Integer, T>> result2 = Codec.INT.decode(ops, input);
+                return result1.flatMap(r1 -> result2.map(r2 -> {
+                    SoftFluidTank tank = SoftFluidTank.create(r1.getFirst(), r2.getFirst(), reg.get());
+                    return Pair.of(tank, r2.getSecond());
+                }));
+            } else {
+                return DataResult.error(() -> "Registry ops required!");
+            }
+        }
+
+        @Override
+        public <T> DataResult<T> encode(SoftFluidTank input, DynamicOps<T> ops, T prefix) {
+            DataResult<T> result1 = SoftFluidStack.CODEC.encode(input.getFluid(), ops, prefix);
+            DataResult<T> result2 = Codec.INT.encode(input.getCapacity(), ops, prefix);
+            if (result1.error().isPresent()) return result1;
+            if (result2.error().isPresent()) return result2;
+            return DataResult.success(prefix);
+        }
+    };
 
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
@@ -34,7 +88,7 @@ public class SoftFluidTank {
 
 
     //so we don't need to ask for this on every darn operation
-    private final HolderLookup.Provider registries;
+    private final HolderGetter<SoftFluid> fluidReg;
 
     protected final int capacity;
     protected @NotNull SoftFluidStack fluidStack;
@@ -46,9 +100,13 @@ public class SoftFluidTank {
     protected boolean needsColorRefresh = true;
 
     protected SoftFluidTank(int capacity, HolderLookup.Provider registries) {
+        this(capacity, registries.lookupOrThrow(SoftFluidRegistry.KEY));
+    }
+
+    protected SoftFluidTank(int capacity, HolderGetter<SoftFluid> fluidReg) {
         this.capacity = capacity;
-        this.registries = registries;
-        this.fluidStack = SoftFluidStack.empty(registries);
+        this.fluidReg = fluidReg;
+        this.fluidStack = SoftFluidStack.empty(fluidReg);
     }
 
     @Deprecated(forRemoval = true)
@@ -56,29 +114,35 @@ public class SoftFluidTank {
         this(capacity, Utils.hackyGetRegistryAccess());
     }
 
-    @ExpectPlatform
     public static SoftFluidTank create(int capacity, HolderLookup.Provider registries) {
+        return create(capacity, registries.lookupOrThrow(SoftFluidRegistry.KEY));
+    }
+
+    @ExpectPlatform
+    public static SoftFluidTank create(int capacity, HolderGetter<SoftFluid> fluidReg) {
         throw new AssertionError();
     }
 
     @Deprecated(forRemoval = true)
     public static SoftFluidTank create(int capacity) {
-        return create(capacity, Utils.hackyGetRegistryAccess());
+        return create(capacity, SoftFluidRegistry.get(
+                Utils.hackyGetRegistryAccess()).asLookup());
     }
 
     @Deprecated(forRemoval = true)
     public static SoftFluidTank create(SoftFluidStack stack, int capacity) {
-        return create(stack, capacity, Utils.hackyGetRegistryAccess());
+        return create(stack, capacity,
+                SoftFluidRegistry.get(Utils.hackyGetRegistryAccess()).asLookup());
     }
 
-    public static SoftFluidTank create(SoftFluidStack stack, int capacity, HolderLookup.Provider registries) {
-        SoftFluidTank tank = create(capacity, registries);
+    public static SoftFluidTank create(SoftFluidStack stack, int capacity, HolderGetter<SoftFluid> fluidReg) {
+        SoftFluidTank tank = create(capacity, fluidReg);
         tank.setFluid(stack);
         return tank;
     }
 
     public SoftFluidTank makeCopy() {
-        SoftFluidTank tank = create(this.capacity, this.registries);
+        SoftFluidTank tank = create(this.capacity, this.fluidReg);
         tank.copyContent(this);
         return tank;
     }
@@ -262,7 +326,7 @@ public class SoftFluidTank {
      * @return removed fluid
      */
     public SoftFluidStack removeFluid(int amount, boolean simulate) {
-        if (this.isEmpty()) return SoftFluidStack.empty(this.registries);
+        if (this.isEmpty()) return SoftFluidStack.empty(this.fluidReg);
         int toRemove = Math.min(amount, this.fluidStack.getCount());
         SoftFluidStack stack = this.fluidStack.copyWithCount(toRemove);
         if (!simulate) {
@@ -353,7 +417,7 @@ public class SoftFluidTank {
      * resets & clears the tank
      */
     public void clear() {
-        this.setFluid(SoftFluidStack.empty(this.registries));
+        this.setFluid(SoftFluidStack.empty(this.fluidReg));
     }
 
     /**

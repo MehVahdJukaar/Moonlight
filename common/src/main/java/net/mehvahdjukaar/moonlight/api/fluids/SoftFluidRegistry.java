@@ -2,10 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -23,6 +20,10 @@ public class SoftFluidRegistry {
 
     public static Holder<SoftFluid> getEmpty(HolderLookup.Provider pr) {
         return MLBuiltinSoftFluids.EMPTY.getHolder(pr);
+    }
+
+    public static Holder<SoftFluid> getEmpty(HolderGetter<SoftFluid> reg) {
+        return MLBuiltinSoftFluids.EMPTY.lookup(reg);
     }
 
     public static Registry<SoftFluid> get(RegistryAccess registryAccess) {

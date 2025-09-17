@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.misc;
 
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -97,13 +98,16 @@ public class HolderReference<T> {
         return holder;
     }
 
-    public Holder<T> lookup(HolderLookup.RegistryLookup<T> lookup) {
+    public Holder<T> lookup(HolderGetter<T> lookup) {
         try {
             return lookup.getOrThrow(key);
         } catch (Exception e) {
+            String extra = "";
+            if (lookup instanceof HolderLookup<T> l) {
+                extra = ".\nRegistry content was: " + l.listElements().map(b -> b.key().location()).toList();
+            }
             throw new RuntimeException("Failed to get object from registry: " + key +
-                    ".\nCalled from " + Thread.currentThread() + ".\n" +
-                    "Registry content was: " + lookup.listElements().map(b -> b.key().location()).toList(), e);
+                    ".\nCalled from " + Thread.currentThread() + ".\n" + extra);
         }
     }
 
@@ -222,7 +226,7 @@ public class HolderReference<T> {
 
         @Nullable
         @Override
-        public Holder<T> lookup(HolderLookup.RegistryLookup<T> lookup) {
+        public Holder<T> lookup(HolderGetter<T> lookup) {
             try {
                 return super.lookup(lookup);
             } catch (Exception e) {

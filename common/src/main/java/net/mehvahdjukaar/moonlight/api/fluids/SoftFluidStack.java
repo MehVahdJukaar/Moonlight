@@ -155,6 +155,10 @@ public class SoftFluidStack implements DataComponentHolder {
         return of(SoftFluidRegistry.getEmpty(lookupProvider), 0);
     }
 
+    public static SoftFluidStack empty(HolderGetter<SoftFluid> reg) {
+        return of(SoftFluidRegistry.getEmpty(reg), 0);
+    }
+
     public Component getDisplayName() {
         if (MLBuiltinSoftFluids.POTION.is(this.fluidHolder)) {
             PotionBottleType bottle = PotionBottleType.getOrDefault(this);

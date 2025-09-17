@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.fluids.neoforge;
 
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -11,19 +14,19 @@ import static net.mehvahdjukaar.moonlight.api.fluids.neoforge.SoftFluidStackImpl
 /**
  * instance this fluid tank in your tile entity
  */
-@Deprecated() //forgot why
+@Deprecated() //move forge specific to a helper class //forgot why
 public class SoftFluidTankImpl extends SoftFluidTank {
 
-    public static SoftFluidTank create(int capacity, HolderLookup.Provider registries) {
+    public static SoftFluidTank create(int capacity, HolderGetter<SoftFluid> registries) {
         return new SoftFluidTankImpl(capacity, registries);
     }
 
     @Deprecated(forRemoval = true)
     protected SoftFluidTankImpl(int capacity) {
-        super(capacity, Utils.hackyGetRegistryAccess());
+        super(capacity, SoftFluidRegistry.get(Utils.hackyGetRegistryAccess()).asLookup());
     }
 
-    protected SoftFluidTankImpl(int capacity, HolderLookup.Provider registries) {
+    protected SoftFluidTankImpl(int capacity, HolderGetter<SoftFluid> registries) {
         super(capacity, registries);
     }
 
