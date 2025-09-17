@@ -111,7 +111,7 @@ public class SoftFluidInternal {
             f.afterInit();
         }
         //ok so here the extra registered fluids should have already been sent to the client
-        SoftFluidColors.refreshParticleColors();
+        SoftFluidColors.refreshParticleColors(reg);
     }
 
     public static void onDataSyncToPlayer(ServerPlayer player, boolean isJoined) {

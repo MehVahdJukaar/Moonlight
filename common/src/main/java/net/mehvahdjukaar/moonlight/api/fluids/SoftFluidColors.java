@@ -6,9 +6,11 @@ import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesM
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -20,23 +22,20 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
 
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
-
         //also using this to reset texture cache
         RenderedTexturesManager.clearCache();
 
         //also using for this
         TextureCache.clear();
 
-        refreshParticleColors();
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level != null) {
+            refreshParticleColors(SoftFluidRegistry.get(level.registryAccess()));
+        }
     }
 
-    public static void refreshParticleColors() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) return;
-        var fluids = SoftFluidRegistry.get(mc.level.registryAccess()).entrySet();
-
-        for (var entry : fluids) {
-            SoftFluid fluid = entry.getValue();
+    public static void refreshParticleColors(Registry<SoftFluid> reg) {
+        for (var fluid : reg) {
             ResourceLocation location = fluid.getStillTexture();
             int averageColor = -1;
 
@@ -47,7 +46,7 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
             try {
                 averageColor = getAverageColor(sprite, tint);
             } catch (Exception e) {
-                Moonlight.LOGGER.warn("Failed to load particle color for " + sprite + " using current resource pack. might be a broken png.mcmeta");
+                Moonlight.LOGGER.warn("Failed to load particle color for {} using current resource pack. might be a broken png.mcmeta", sprite);
             }
             fluid.averageTextureTint = averageColor;
         }
