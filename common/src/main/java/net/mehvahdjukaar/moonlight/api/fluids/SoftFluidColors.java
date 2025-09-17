@@ -1,25 +1,36 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
+import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.level.BlockAndTintGetter;
 
+import java.util.Map;
+
 // client class
-public class SoftFluidColors implements ResourceManagerReloadListener {
+public class SoftFluidColors extends RegistryAccessJsonReloadListener {
+
+    protected SoftFluidColors() {
+        super(new Gson(), "moonlight/dummy");
+    }
+
 
     @Override
-    public void onResourceManagerReload(ResourceManager resourceManager) {
+    public void parse(Map<ResourceLocation, JsonElement> jsonMap, RegistryAccess access) {
 
         //also using this to reset texture cache
         RenderedTexturesManager.clearCache();
@@ -27,13 +38,13 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
         //also using for this
         TextureCache.clear();
 
-        refreshParticleColors();
+        refreshParticleColors(access);
     }
 
-    public static void refreshParticleColors() {
+    public static void refreshParticleColors(RegistryAccess access) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
-        var fluids = SoftFluidRegistry.getRegistry(mc.level.registryAccess()).entrySet();
+        var fluids = SoftFluidRegistry.getRegistry(access).entrySet();
 
         for (var entry : fluids) {
             SoftFluid fluid = entry.getValue();
