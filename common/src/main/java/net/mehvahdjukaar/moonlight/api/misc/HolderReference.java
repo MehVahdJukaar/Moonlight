@@ -74,6 +74,7 @@ public class HolderReference<T> {
         return getHolder(r).value();
     }
 
+    @Deprecated(forRemoval = true)
     public Holder<T> getHolderUnsafe() {
         return getHolder(Utils.hackyGetRegistryAccess());
     }
@@ -206,6 +207,7 @@ public class HolderReference<T> {
             return super.getHolder(level);
         }
 
+        @Deprecated(forRemoval = true)
         @Nullable
         @Override
         public Holder<T> getHolderUnsafe() {

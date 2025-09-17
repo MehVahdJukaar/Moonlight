@@ -13,10 +13,7 @@ import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.HolderSet;
+import net.minecraft.core.*;
 import net.minecraft.core.component.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -127,10 +124,17 @@ public class SoftFluidStack implements DataComponentHolder {
         return fromFluid(fluid, amount, DataComponentPatch.EMPTY);
     }
 
+    @Deprecated(forRemoval = true)
     @NotNull
     public static SoftFluidStack fromFluid(Fluid fluid, int amount, @NotNull DataComponentPatch component) {
-        Holder<SoftFluid> f = SoftFluidInternal.fromVanillaFluid(fluid, Utils.hackyGetRegistryAccess());
-        if (f == null) return empty();
+        RegistryAccess reg = Utils.hackyGetRegistryAccess();
+        return fromFluid(fluid, amount, component, reg);
+    }
+
+    @NotNull
+    public static SoftFluidStack fromFluid(Fluid fluid, int amount, @NotNull DataComponentPatch component, HolderLookup.Provider reg) {
+        Holder<SoftFluid> f = SoftFluidInternal.fromVanillaFluid(fluid, reg);
+        if (f == null) return empty(reg);
         return of(f, amount, component);
     }
 
@@ -142,7 +146,7 @@ public class SoftFluidStack implements DataComponentHolder {
         return fromFluid(fluid.getType(), SoftFluid.BUCKET_COUNT, DataComponentPatch.EMPTY);
     }
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public static SoftFluidStack empty() {
         return of(SoftFluidRegistry.hackyGetEmpty(), 0);
     }

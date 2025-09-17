@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.fluids.neoforge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.minecraft.core.HolderLookup;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
@@ -12,12 +14,17 @@ import static net.mehvahdjukaar.moonlight.api.fluids.neoforge.SoftFluidStackImpl
 @Deprecated() //forgot why
 public class SoftFluidTankImpl extends SoftFluidTank {
 
-    public static SoftFluidTank create(int capacity) {
-        return new SoftFluidTankImpl(capacity);
+    public static SoftFluidTank create(int capacity, HolderLookup.Provider registries) {
+        return new SoftFluidTankImpl(capacity, registries);
     }
 
+    @Deprecated(forRemoval = true)
     protected SoftFluidTankImpl(int capacity) {
-        super(capacity);
+        super(capacity, Utils.hackyGetRegistryAccess());
+    }
+
+    protected SoftFluidTankImpl(int capacity, HolderLookup.Provider registries) {
+        super(capacity, registries);
     }
 
     /**
@@ -69,7 +76,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
             if (this.fluidStack.isEmpty()) {
                 this.setFluid(drainable);
                 transfer = true;
-            } else if (((SoftFluidStackImpl)fluidStack).isFluidEqual(drainable)) {
+            } else if (((SoftFluidStackImpl) fluidStack).isFluidEqual(drainable)) {
                 transfer = true;
             }
             if (transfer) {

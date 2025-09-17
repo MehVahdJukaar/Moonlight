@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundFinalizeFluidsMessage;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,11 +39,12 @@ public class SoftFluidInternal {
         return m;
     });
 
-    public static Holder<SoftFluid> fromVanillaFluid(Fluid fluid, RegistryAccess registryAccess) {
+
+    public static Holder<SoftFluid> fromVanillaFluid(Fluid fluid, HolderLookup.Provider registryAccess) {
         return FLUID_MAP.get(registryAccess).get(fluid);
     }
 
-    public static Holder<SoftFluid> fromVanillaItem(Item item, RegistryAccess registryAccess) {
+    public static Holder<SoftFluid> fromVanillaItem(Item item, HolderLookup.Provider registryAccess) {
         return ITEM_MAP.get(registryAccess).get(item);
     }
 

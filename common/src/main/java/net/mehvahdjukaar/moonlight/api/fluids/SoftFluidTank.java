@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -26,12 +27,17 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("unused")
 public class SoftFluidTank {
 
+
     public static final int BOTTLE_COUNT = 1;
     public static final int BOWL_COUNT = 2;
     public static final int BUCKET_COUNT = 4;
 
+
+    //so we don't need to ask for this on every darn operation
+    private final HolderLookup.Provider registries;
+
     protected final int capacity;
-    protected SoftFluidStack fluidStack = SoftFluidStack.empty();
+    protected @NotNull SoftFluidStack fluidStack;
 
     //Minor optimization. Caches the tint color for the fluid
     protected int stillTintCache = 0;
@@ -39,23 +45,40 @@ public class SoftFluidTank {
     protected int particleTintCache = 0;
     protected boolean needsColorRefresh = true;
 
-    protected SoftFluidTank(int capacity) {
+    protected SoftFluidTank(int capacity, HolderLookup.Provider registries) {
         this.capacity = capacity;
+        this.registries = registries;
+        this.fluidStack = SoftFluidStack.empty(registries);
+    }
+
+    @Deprecated(forRemoval = true)
+    protected SoftFluidTank(int capacity) {
+        this(capacity, Utils.hackyGetRegistryAccess());
     }
 
     @ExpectPlatform
-    public static SoftFluidTank create(int capacity) {
+    public static SoftFluidTank create(int capacity, HolderLookup.Provider registries) {
         throw new AssertionError();
     }
 
+    @Deprecated(forRemoval = true)
+    public static SoftFluidTank create(int capacity) {
+        return create(capacity, Utils.hackyGetRegistryAccess());
+    }
+
+    @Deprecated(forRemoval = true)
     public static SoftFluidTank create(SoftFluidStack stack, int capacity) {
-        SoftFluidTank tank = create(capacity);
+        return create(stack, capacity, Utils.hackyGetRegistryAccess());
+    }
+
+    public static SoftFluidTank create(SoftFluidStack stack, int capacity, HolderLookup.Provider registries) {
+        SoftFluidTank tank = create(capacity, registries);
         tank.setFluid(stack);
         return tank;
     }
 
     public SoftFluidTank makeCopy() {
-        SoftFluidTank tank = create(this.capacity);
+        SoftFluidTank tank = create(this.capacity, this.registries);
         tank.copyContent(this);
         return tank;
     }
@@ -239,7 +262,7 @@ public class SoftFluidTank {
      * @return removed fluid
      */
     public SoftFluidStack removeFluid(int amount, boolean simulate) {
-        if (this.isEmpty()) return SoftFluidStack.empty();
+        if (this.isEmpty()) return SoftFluidStack.empty(this.registries);
         int toRemove = Math.min(amount, this.fluidStack.getCount());
         SoftFluidStack stack = this.fluidStack.copyWithCount(toRemove);
         if (!simulate) {
@@ -330,7 +353,7 @@ public class SoftFluidTank {
      * resets & clears the tank
      */
     public void clear() {
-        this.setFluid(SoftFluidStack.empty());
+        this.setFluid(SoftFluidStack.empty(this.registries));
     }
 
     /**
