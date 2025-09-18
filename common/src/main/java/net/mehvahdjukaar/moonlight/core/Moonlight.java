@@ -27,12 +27,14 @@ import net.mehvahdjukaar.moonlight.core.set.DebugBlockTypes;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -97,6 +99,7 @@ public class Moonlight {
 
 
     private static void commonSetup() {
+
         BlocksColorInternal.setup();
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.setupClient();

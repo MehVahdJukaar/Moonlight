@@ -86,18 +86,23 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
     }
 
 
-    public void prepare() {
-        boolean needsR = this.generationStrategy.needsRegeneration(packType);
-        if (needsR) {
-            this.needsRegeneration = this.packResources.clearAllResources();
+    public final void prepare() {
+        this.needsRegeneration = needsToRegenerate();
+    }
+
+    public boolean needsToRegenerate() {
+        if (this.generationStrategy.needsRegeneration(packType)) {
+            return this.packResources.clearAllResources();
         } else {
-            this.needsRegeneration = !this.packResources.initializeIfValid();
-            if (this.needsRegeneration) {
+            boolean shouldRegenDueToInvalid = !this.packResources.initializeIfValid();
+            if (shouldRegenDueToInvalid) {
                 Moonlight.LOGGER.info("Cache for {} at {} is invalid, will regenerate", this, this.packResources);
             }
+            return shouldRegenDueToInvalid;
         }
     }
 
+    //called on every reload
     public void reload(ResourceManager manager, IProgressTracker reporter) {
         if (this.needsRegeneration) {
             this.needsRegeneration = false;

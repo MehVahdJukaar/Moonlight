@@ -28,6 +28,7 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.OptionalRecipeCon
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
+import net.mehvahdjukaar.moonlight.core.mixins.fabric.PoiTypeAccessor;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.minecraft.client.Minecraft;
@@ -329,16 +330,15 @@ public class RegHelperImpl {
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
         var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
         //add vanilla states if they are mutable
-        Set<BlockState> matchingStates = beehivePOI.value().matchingStates();
+        Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
         Set<BlockState> newStates = new HashSet<>();
-        try {
-            for (Block block : blocks) {
-                matchingStates.add(block.defaultBlockState());
-                newStates.add(block.defaultBlockState());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to add blocks to POI " + poi.location() + ". Somehow the set was not mutable?", e);
+        for (Block block : blocks) {
+            matchingStates.add(block.defaultBlockState());
+            newStates.add(block.defaultBlockState());
         }
+        ((PoiTypeAccessor) (Object) beehivePOI.value())
+                .setMatchingStates(matchingStates);
+
         PoiTypes.registerBlockStates(beehivePOI, newStates);
     }
 

@@ -25,13 +25,14 @@
     "TextureAtlasSpriteMixin"
   ],
   "mixins": [
-    "PoiMixin",
     "ConditionsHackMixin",
     "FireBlockMixin",
     "MappedRegistryAccessor",
     "MenuTypeAccessor",
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
+    "PoiMixin",
+    "PoiTypeAccessor",
     "ServerPlayerAccessor"
   ],
   "injectors": {
