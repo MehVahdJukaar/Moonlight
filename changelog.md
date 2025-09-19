@@ -1,2 +1,1 @@
-- Improved logging and possibly error handling for non vanilla servers
-- note that using this mod (which is a server & client mod) on a vanilla (non forge/fabric) server is NOT supported
+- Added Cultural's Delights' undetected WoodType and 1 LeavesType's missing Associated WoodType - [#1050](https://github.com/MehVahdJukaar/WoodGood/issues/1050)

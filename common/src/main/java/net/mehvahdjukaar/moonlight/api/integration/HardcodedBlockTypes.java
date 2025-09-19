@@ -26,20 +26,25 @@ public class HardcodedBlockTypes {
 
     /* Defintion of REASONS:
      *
-     * Id Convention: Id of WoodType can be using Planks' instead of Log's
-     *
-     * Spelling Convention: a typo in the Id, no underscore
+     * Spelling-Convention: a typo in the Id, no underscore
      *
      * Naming-Convention: blocks has unique names that doesn't have "_wood", "_log", "_planks" or has different affix like "_block"
      *
-     * Associated WoodType: Leaves have no WoodType, must be included
-     * Associated LeavesType: Wood have no LeavesType, must be included
+     * Associated-WoodType: Leaves have no WoodType, must be included
      *
-     * PlANKS-NAME: Children are using planks' name instead of log's name
+     * Associated-LeavesType: Wood have no LeavesType, must be included
+     *
+     * Associated-Planks: WoodType has no its own planks & use a different planks. it went undetected
+     *
+     * Planks-Name: Children are using planks' name instead of log's name
      */
     static {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
+
+        // Cultural Delights - REASON: Associated-Planks
+        woodReg.addSimpleFinder("culturaldelights", "avocado")
+                .planks("minecraft:jungle_planks");
 
         // Sniffed Out - REASON: Naming-Convention
         woodReg.addSimpleFinder("sniffed_out", "vessel")
@@ -92,23 +97,23 @@ public class HardcodedBlockTypes {
                 .log(() -> Blocks.CACTUS);
 
 
-        // Jaden's Nether Expansion - REASON: Id Convention
+        // Jaden's Nether Expansion - REASON: Planks-Name
         woodReg.addSimpleFinder("netherexp", "claret")
                 .log("cerebrage_claret_stem")
                 .childBlock(WOOD, "cerebrage_claret_hyphae");
 
-        // Piglin Ruins - REASON: Id Convention
+        // Piglin Ruins - REASON: Planks-Name
         woodReg.addSimpleFinder("piglin_ruins", "ominous")
                 .log("ominous_stalk_block");
 
-        // Unusual End - REASON: Id Convention
+        // Unusual End - REASON: Planks-Name
         woodReg.addSimpleFinder("unusualend", "chorus_nest")
                 .planks("chorus_nest_planks")
                 .log("chorus_cane_block")
                 .childBlock(STRIPPED_LOG, "stripped_chorus_cane_block")
                 .childBlock(FENCE, "chorus_nest_mosaic_fence");
 
-        // Spectrum (FABRIC) - REASON: Id Convention
+        // Spectrum (FABRIC) - REASON: Planks-Name
         woodReg.addSimpleFinder("spectrum", "ivory_noxwood")
                 .log("ivory_noxcap_stem")
                 .childBlock(STRIPPED_LOG, "stripped_ivory_noxcap_stem")
@@ -255,6 +260,10 @@ public class HardcodedBlockTypes {
 
 
 //!! LEAVES
+        // Cultural Delights - REASON: Associated WoodType
+        leafReg.addSimpleFinder("culturaldelights", "fruiting_avocado")
+                .childBlock(LOG,"avocado_log");
+
         // Oh The Biomes We've Gone - REASON: Associated WoodType
         leafReg.addSimpleFinder("biomeswevegone","flowering_palo_verde")
                 .childBlock(LOG, "palo_verde_log");
