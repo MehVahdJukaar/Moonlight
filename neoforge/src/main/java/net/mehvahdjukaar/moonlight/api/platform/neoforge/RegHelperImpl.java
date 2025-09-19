@@ -399,6 +399,7 @@ public class RegHelperImpl {
         return RegHelper.register(name, serializer, NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS);
     }
 
+    @Deprecated(forRemoval = true)
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
         MoonlightForge.addPoi(poi, blocks);
     }

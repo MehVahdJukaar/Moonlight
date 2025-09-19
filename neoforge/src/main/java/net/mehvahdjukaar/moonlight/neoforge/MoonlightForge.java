@@ -94,6 +94,7 @@ public class MoonlightForge {
 
 
         PlatHelper.addCommonSetup(() -> {
+            //stop bundling fabric api into shit!
             if (ModList.get().isLoaded("fabric_api")) {
                 List<IModInfo> modsThatHaveFabric = new ArrayList<>();
                 for (var modInfo : ModList.get().getMods()) {
@@ -102,12 +103,12 @@ public class MoonlightForge {
                         modsThatHaveFabric.add(modInfo);
                     }
                 }
-                Moonlight.LOGGER.error("Fabric API detected! This is not a Fabric mod, so please dont report related issues to MoonlightLib or its dependant. This can usually happen with connector or when having a mod that does NOT have a proper Forge native implementation as they SHOULD. This can easily lead to poor compatibility and issues. Proceed ar your own risk. \n Mods that bundled Fabric API: {}", modsThatHaveFabric);
+                Moonlight.LOGGER.error("Fabric API detected! This is not a Fabric mod, so please dont report related issues to MoonlightLib or its dependant. This can usually happen with connector or when having a mod that does NOT have a proper native Neoforge implementation as they SHOULD. This can easily lead to poor compatibility and issues. Proceed ar your own risk. \n Mods that bundled Fabric API: {}", modsThatHaveFabric);
             }
         });
     }
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public static void addOldPoiEvent(ExtendPoiTypesEvent event) {
         for (var e : OLD_POI_EVENT.entrySet()) {
             var p = e.getKey();
@@ -207,6 +208,7 @@ public class MoonlightForge {
     private static final ThreadLocal<WeakReference<IEventBus>> currentModBus = new ThreadLocal<>(); //ideally the bus of the mod we are constructing
 
 
+    //mega hack
     public static IEventBus getCurrentBus() {
         var threadLocalBus = currentModBus.get();
         if (threadLocalBus != null && threadLocalBus.get() != null) {
@@ -230,7 +232,6 @@ public class MoonlightForge {
     private static final Map<ResourceKey<PoiType>, Iterable<? extends Block>> OLD_POI_EVENT = new ConcurrentHashMap<>();
 
     public static void addPoi(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
-
         OLD_POI_EVENT.put(poi, blocks);
     }
 }
