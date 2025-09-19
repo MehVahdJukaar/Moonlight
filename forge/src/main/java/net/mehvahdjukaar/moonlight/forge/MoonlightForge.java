@@ -25,13 +25,17 @@ import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Author: MehVahdJukaar
@@ -49,6 +53,19 @@ public class MoonlightForge {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init();
         }
+
+        PlatHelper.addCommonSetup(() -> {
+            if (ModList.get().isLoaded("fabric_api")) {
+                List<ModInfo> modsThatHaveFabric = new ArrayList<>();
+                for (ModInfo modInfo : ModList.get().getMods()) {
+                    var jij = modInfo.getOwningFile().getMods();
+                    if (jij.stream().anyMatch(m -> m.getModId().equals("fabric_api"))) {
+                        modsThatHaveFabric.add(modInfo);
+                    }
+                }
+                Moonlight.LOGGER.error("Fabric API detected! This is not a Fabric mod, so please dont report related issues to MoonlightLib or its dependant. This can usually happen with connector or when having a mod that does NOT have a proper Forge native implementation. This can easily lead to poor compatibility and issues. Proceed ar your own risk. \n Mods that bundled Fabric API: " + modsThatHaveFabric);
+            }
+        });
     }
 
 
