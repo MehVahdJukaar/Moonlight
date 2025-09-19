@@ -35,8 +35,10 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ConfigTracker;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -50,9 +52,11 @@ import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
+import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +91,20 @@ public class MoonlightForge {
         }
 
         bus.addListener(MoonlightForge::addOldPoiEvent);
+
+
+        PlatHelper.addCommonSetup(() -> {
+            if (ModList.get().isLoaded("fabric_api")) {
+                List<IModInfo> modsThatHaveFabric = new ArrayList<>();
+                for (var modInfo : ModList.get().getMods()) {
+                    var jij = modInfo.getOwningFile().getMods();
+                    if (jij.stream().anyMatch(m -> m.getModId().equals("fabric_api"))) {
+                        modsThatHaveFabric.add(modInfo);
+                    }
+                }
+                Moonlight.LOGGER.error("Fabric API detected! This is not a Fabric mod, so please dont report related issues to MoonlightLib or its dependant. This can usually happen with connector or when having a mod that does NOT have a proper Forge native implementation as they SHOULD. This can easily lead to poor compatibility and issues. Proceed ar your own risk. \n Mods that bundled Fabric API: {}", modsThatHaveFabric);
+            }
+        });
     }
 
     @Deprecated
