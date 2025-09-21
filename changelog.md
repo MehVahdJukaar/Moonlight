@@ -1,1 +1,2 @@
-- Fixed the WoodType's detection that get the wrong block for childkey
+- delayed block set instantiation on fabric to happen after items are added to be more similar to the logic that happens on the forge version
+- misc api cleanups and improved docs

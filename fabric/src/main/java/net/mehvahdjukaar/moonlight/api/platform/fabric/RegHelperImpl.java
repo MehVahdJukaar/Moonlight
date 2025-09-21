@@ -103,7 +103,7 @@ public class RegHelperImpl {
                     throw new RuntimeException("Failed to initialize registry objects for namespace [" + s + "]", e);
                 }
             }
-            if (entry.getKey() == Registries.BLOCK) {
+            if (entry.getKey() == Registries.ITEM) {
                 //dynamic block registration after all blocks
                 BlockSetInternalImpl.initializeBlockSets();
             }

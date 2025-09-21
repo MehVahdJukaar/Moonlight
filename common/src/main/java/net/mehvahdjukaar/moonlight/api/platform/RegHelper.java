@@ -470,7 +470,7 @@ public class RegHelper {
 
             for (var i : items) {
                 if (i.asItem().getDefaultInstance().isEmpty()) {
-                    throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs");
+                    throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs. It's likely that some mod tried to call asItem before items were registered\");");
                 } else stacks.add(i.asItem().getDefaultInstance());
             }
             addItems(tab, target, true, stacks);
@@ -484,7 +484,7 @@ public class RegHelper {
             List<ItemStack> stacks = new ArrayList<>();
             for (var i : items) {
                 if (i.asItem().getDefaultInstance().isEmpty()) {
-                    throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs");
+                    throw new IllegalStateException("Attempted to add empty item " + i + " to item tabs. It's likely that some mod tried to call asItem before items were registered");
                 } else stacks.add(i.asItem().getDefaultInstance());
             }
             addItems(tab, target, false, stacks);
