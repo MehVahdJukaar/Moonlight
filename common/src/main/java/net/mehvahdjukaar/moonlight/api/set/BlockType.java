@@ -231,6 +231,7 @@ public abstract class BlockType {
         }
         if (obj != null) {
             try {
+                if (this.children.get(genericName) == obj) return; //already added, no need to log
                 this.children.put(genericName, obj);
                 var registry = BlockSetInternal.getRegistry(this.getClass());
                 if (registry != null) {

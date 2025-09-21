@@ -107,6 +107,8 @@ public class RegHelperImpl {
                 //dynamic block registration after all blocks
                 BlockSetInternalImpl.initializeBlockSets();
             }
+        }
+        for (var entry : REGISTRIES.entrySet()) {
             BlockSetInternalImpl.registerDynamicEntries(entry.getKey());
         }
         BlockSetInternalImpl.finish();

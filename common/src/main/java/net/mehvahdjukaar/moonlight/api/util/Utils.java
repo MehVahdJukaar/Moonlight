@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.BaseMapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
@@ -271,6 +272,7 @@ public class Utils {
 
     //very very hacky
     //attempts to grab the right registry access for the current thread, hopefully matching the logical side one
+    @UnstableApi
     public static RegistryAccess hackyGetRegistryAccess() {
         var s = PlatHelper.getCurrentServer();
         if (PlatHelper.getPhysicalSide().isClient()) {

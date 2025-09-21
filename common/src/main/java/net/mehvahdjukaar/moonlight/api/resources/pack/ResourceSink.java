@@ -5,6 +5,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
+import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
@@ -202,6 +203,16 @@ public class ResourceSink {
         }
     }
 
+    public void addJsonUnlessPresent(ResourceManager manager, ResourceLocation path, ThrowingSupplier<JsonElement> jsonSupplier) {
+        if (!alreadyHasAssetAtLocation(manager, path)) {
+            try {
+                this.addJson(path, jsonSupplier.get());
+            } catch (Exception e) {
+                Moonlight.LOGGER.error("Failed to write JSON {} to resource pack.", path, e);
+            }
+        }
+    }
+
     public boolean alreadyHasTextureAtLocation(ResourceManager manager, ResourceLocation res) {
         return alreadyHasAssetAtLocation(manager, res, ResType.TEXTURES);
     }
@@ -218,6 +229,16 @@ public class ResourceSink {
     }
 
     public void addTextureIfNotPresent(ResourceManager manager, ResourceLocation res, Supplier<TextureImage> textureSupplier) {
+        if (!alreadyHasTextureAtLocation(manager, res)) {
+            try (TextureImage textureImage = textureSupplier.get()) {
+                this.addTexture(res, textureImage);
+            } catch (Exception e) {
+                Moonlight.LOGGER.error("Failed to generate texture {}: {}", res, e);
+            }
+        }
+    }
+
+    public void addTextureUnlessPresent(ResourceManager manager, ResourceLocation res, ThrowingSupplier<TextureImage> textureSupplier) {
         if (!alreadyHasTextureAtLocation(manager, res)) {
             try (TextureImage textureImage = textureSupplier.get()) {
                 this.addTexture(res, textureImage);
