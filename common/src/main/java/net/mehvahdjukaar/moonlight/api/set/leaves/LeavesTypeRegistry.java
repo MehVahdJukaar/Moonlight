@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.LOG;
+
 public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     public static final LeavesTypeRegistry INSTANCE = new LeavesTypeRegistry();
@@ -103,31 +105,32 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         for (var l : this.getValues()) {
             ResourceLocation leavesId = l.id;
             ResourceLocation id = specialLeavesToWood.getOrDefault(leavesId, leavesId);
-            WoodType o = WoodTypeRegistry.INSTANCE.get(id);
+            WoodType woodType = WoodTypeRegistry.INSTANCE.get(id);
             String path = id.getPath();
             String namespace = id.getNamespace();
-            if (o == null) {
+            if (woodType == null) {
                 for (WoodType w : WoodTypeRegistry.INSTANCE.getValues()) {
                     if (w.id.getPath().equals(path)) {
-                        o = w;
+                        woodType = w;
                         break;
                     }
                 }
             }
-            if (o == null) {
+            if (woodType == null) {
                 //this assigns "variant leaves types" to their expected vanilla woods
                 //i.e. "blossoming_oak" -> "oak"
                 for (WoodType w : WoodTypeRegistry.INSTANCE.getValues()) {
                     if (w.isVanilla() || w.id.getNamespace().equals(namespace)) { //true vanilla
                         if (path.endsWith(w.id.getPath())) {
-                            o = w;
+                            woodType = w;
                             //don't break to avoid associating "oak" instead of "dark_oak"
                         }
                     }
                 }
             }
-            if (o != null) {
-                leavesToWood.put(l, o);
+            if (woodType != null) {
+                leavesToWood.put(l, woodType);
+                l.addChild(LOG, woodType.log);
             }
         }
     }
