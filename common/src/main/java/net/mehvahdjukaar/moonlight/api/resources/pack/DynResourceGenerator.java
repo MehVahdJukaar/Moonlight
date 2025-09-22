@@ -292,7 +292,7 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
                     type, modIds, validGen);
 
             if (CommonConfigs.EXTRA_DEBUG.get())
-                Moonlight.LOGGER.info("Current stack trace:", new Throwable("Stack trace dump to see who fired me"));
+                Moonlight.LOGGER.info("Current stack trace:", new Throwable("EXTRA_DEBUG is enabled. Stack trace dump to see who fired me"));
 
 
             Stopwatch stopwatch = Stopwatch.createStarted();
