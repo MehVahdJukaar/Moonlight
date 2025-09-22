@@ -294,25 +294,32 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("fruitfulfun", "orange", "citrus");
 
         // Mystic's Biomes - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("mysticsbiomes", "yellow_maple", "white_maple");
+        leafReg.addSimpleFinder("mysticsbiomes", "pink_cherry") //REASON: Naming-Convention
+                .leavesSuffix("_blossoms")
+                .childBlock(LOG, "cherry_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "white_cherry") //REASON: Naming-Convention
+                .leavesSuffix("_blossoms")
+                .childBlock(LOG, "cherry_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "strawberry") //REASON: Naming-Convention
+                .leavesSuffix("_blossoms");
+        leafReg.addSimpleFinder("mysticsbiomes", "jacaranda") //REASON: Naming-Convention
+                .leavesSuffix("_blossoms");
+        leafReg.addSimpleFinder("mysticsbiomes", "sea_shrub") //REASON: 2-Words
+                .childBlock(LOG, "sea_foam_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "yellow_maple") //REASON: 2-Words
+                .childBlock(LOG, "white_maple_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "orange_maple") //REASON: 2-Words
+                .childBlock(LOG, "maple_log");
 
-        //REASON: Naming-Convention
-        leafReg.addSimpleFinder("mysticsbiomes", "pink_cherry")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "white_cherry")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "strawberry")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "peach")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "jacaranda")
-                .leavesSuffix("_blossoms");
-        leafReg.addLeavesToWoodMapping("mysticsbiomes", "sea_shrub", "sea_foam");
-
-        //TODO: are these correct? oak? shouldnt it be left empty? - need to check
-        leafReg.addLeavesToWoodMapping("mysticsbiomes:peony", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("mysticsbiomes:hydrangea", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("mysticsbiomes:budding_peony", "minecraft:oak");
+            //REASON: Somehow went undetected
+        leafReg.addSimpleFinder("mysticsbiomes", "peach");
+        leafReg.addSimpleFinder("mysticsbiomes", "tropical");
+        leafReg.addSimpleFinder("mysticsbiomes", "peony") //REASON: Associated WoodType
+                .childBlock(LOG, "minecraft:oak_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "hydrangea") //REASON: Associated WoodType
+                .childBlock(LOG, "minecraft:oak_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "budding_peony") //REASON: 2-Words
+                .childBlock(LOG, "minecraft:oak_log");
 
         // Environmental - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("environmental", "pink_wisteria", "wisteria");
