@@ -42,10 +42,6 @@ public class HardcodedBlockTypes {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
-        // Cultural Delights - REASON: Associated-Planks
-        woodReg.addSimpleFinder("culturaldelights", "avocado")
-                .planks("minecraft:jungle_planks");
-
         // Sniffed Out - REASON: Naming-Convention
         woodReg.addSimpleFinder("sniffed_out", "vessel")
                 .log("crude_vessel_stem")
