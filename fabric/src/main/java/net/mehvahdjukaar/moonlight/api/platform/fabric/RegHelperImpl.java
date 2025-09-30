@@ -57,6 +57,7 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
@@ -415,6 +416,11 @@ public class RegHelperImpl {
             b.copyOnDeath();
         }
         return b;
+    }
+
+    public static void addExtraBEBlockStatesRegistration(Consumer<RegHelper.ExtraBEStatesEvent> eventListener) {
+        PlatHelper.addCommonSetup(() -> eventListener.accept((typeKey, block) ->
+                Arrays.stream(block).forEach(typeKey::addSupportedBlock)));
     }
 
     private record AttachmentWrapper<A>(AttachmentType<A> type) implements IAttachmentType<A> {

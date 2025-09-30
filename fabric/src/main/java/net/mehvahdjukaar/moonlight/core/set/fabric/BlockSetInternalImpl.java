@@ -1,13 +1,18 @@
 package net.mehvahdjukaar.moonlight.core.set.fabric;
 
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
-import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.packs.FilePackResources;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 
+import java.nio.file.Path;
 import java.util.*;
 
 public class BlockSetInternalImpl {

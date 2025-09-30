@@ -36,6 +36,7 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
@@ -51,10 +52,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.common.world.poi.ExtendPoiTypesEvent;
-import net.neoforged.neoforge.event.AddPackFindersEvent;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.LootTableLoadEvent;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.*;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.registries.*;
@@ -460,6 +458,14 @@ public class RegHelperImpl {
             b.copyOnDeath();
         }
         return b;
+    }
+
+    public static void addExtraBEBlockStatesRegistration(Consumer<RegHelper.ExtraBEStatesEvent> eventListener) {
+        Moonlight.assertInitPhase();
+        Consumer<BlockEntityTypeAddBlocksEvent> eventConsumer = event -> {
+            eventListener.accept(event::modify);
+        };
+        MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
     private record AttachmentWrapper<A>(Supplier<AttachmentType<A>> typeSupplier) implements IAttachmentType<A> {

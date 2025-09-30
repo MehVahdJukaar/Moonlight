@@ -191,6 +191,16 @@ public class RegHelper {
         throw new AssertionError();
     }
 
+    public interface ExtraBEStatesEvent {
+
+        void addBlocks(BlockEntityType<?> typeKey, Block ...block);
+    }
+
+    @ExpectPlatform
+    public static void addExtraBEBlockStatesRegistration(Consumer<RegHelper.ExtraBEStatesEvent> eventListener){
+        throw new AssertionError();
+    }
+
     @ExpectPlatform
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
         throw new AssertionError();
