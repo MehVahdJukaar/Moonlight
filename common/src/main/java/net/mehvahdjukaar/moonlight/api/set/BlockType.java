@@ -284,7 +284,7 @@ public abstract class BlockType {
      * @param destinationMat desired block type
      */
     @Nullable
-    public static Object changeType(Object current, @NotNull BlockType originalMat, @NotNull BlockType destinationMat) {
+    public static <T extends BlockType> Object changeType(Object current, @NotNull T originalMat, @NotNull T destinationMat) {
         if (destinationMat == originalMat) return current;
         String key = originalMat.getChildKey(current);
         if (key != null) {
@@ -295,7 +295,7 @@ public abstract class BlockType {
 
     //for items
     @Nullable
-    public static Item changeItemType(Item current, @NotNull BlockType originalMat, @NotNull BlockType destinationMat) {
+    public static <T extends BlockType> Item changeItemType(Item current, @NotNull T originalMat, @NotNull T destinationMat) {
         Object changed = changeType(current, originalMat, destinationMat);
         //if item swap fails, try to swap blocks instead
         if (changed == null) {
@@ -319,7 +319,7 @@ public abstract class BlockType {
 
     //for blocks
     @Nullable
-    public static Block changeBlockType(@NotNull Block current, BlockType originalMat, BlockType destinationMat) {
+    public static <T extends  BlockType> Block changeBlockType(@NotNull Block current, T originalMat, T destinationMat) {
         Object changed = changeType(current, originalMat, destinationMat);
         //if block swap fails, try to swap items instead
         if (changed == null) {

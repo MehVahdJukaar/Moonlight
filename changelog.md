@@ -1,2 +1,1 @@
-- delayed block set instantiation on fabric to happen after items are added to be more similar to the logic that happens on the forge version
-- misc api cleanups and improved docs
+added helper method to register extra states to BE, using forge and faric api
