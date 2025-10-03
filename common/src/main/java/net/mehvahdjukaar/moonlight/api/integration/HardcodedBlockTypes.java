@@ -41,6 +41,10 @@ public class HardcodedBlockTypes {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
+        // Dungeon's Delight
+        woodReg.addSimpleFinder("dungeonsdelight", "wormwood")
+                .log("wormroots_block");
+
         // Mofu's Better End - REASON: Naming-Convention
         woodReg.addSimpleFinder("mofus_better_end_", "weepingstar")
                 .childBlockSuffix(LEAVES, "_leaf");
