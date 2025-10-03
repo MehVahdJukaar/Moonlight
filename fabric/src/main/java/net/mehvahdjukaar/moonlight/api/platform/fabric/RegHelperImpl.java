@@ -57,7 +57,6 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
@@ -330,6 +329,7 @@ public class RegHelperImpl {
         return b.buildAndRegister();
     }
 
+    @Deprecated(forRemoval = true)
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
         var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
         //add vanilla states if they are mutable
@@ -351,14 +351,12 @@ public class RegHelperImpl {
             public void addBlockToPoi(ResourceKey<PoiType> poi, Block block) {
                 var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
                 //add vanilla states if they are mutable
-                Set<BlockState> matchingStates = beehivePOI.value().matchingStates();
-                Set<BlockState> newStates = new HashSet<>();
-                try {
-                    matchingStates.add(block.defaultBlockState());
-                    newStates.add(block.defaultBlockState());
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to add blocks to POI " + poi.location() + ". Somehow the set was not mutable?", e);
-                }
+                Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
+                matchingStates.addAll(block.getStateDefinition().getPossibleStates());
+                Set<BlockState> newStates = new HashSet<>(block.getStateDefinition().getPossibleStates());
+                ((PoiTypeAccessor) (Object) beehivePOI.value())
+                        .setMatchingStates(matchingStates);
+
                 PoiTypes.registerBlockStates(beehivePOI, newStates);
             }
 
@@ -366,14 +364,12 @@ public class RegHelperImpl {
             public void addStatesToPoi(ResourceKey<PoiType> poi, Set<BlockState> states) {
                 var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
                 //add vanilla states if they are mutable
-                Set<BlockState> matchingStates = beehivePOI.value().matchingStates();
-                Set<BlockState> newStates;
-                try {
-                    matchingStates.addAll(states);
-                    newStates = new HashSet<>(states);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to add blocks to POI " + poi.location() + ". Somehow the set was not mutable?", e);
-                }
+                Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
+                Set<BlockState> newStates = new HashSet<>();
+                matchingStates.addAll(states);
+                newStates.addAll(states);
+                ((PoiTypeAccessor) (Object) beehivePOI.value())
+                        .setMatchingStates(matchingStates);
                 PoiTypes.registerBlockStates(beehivePOI, newStates);
             }
         });
