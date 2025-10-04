@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 //Interface for Modders!
 public class BlockSetAPI {
@@ -35,6 +36,7 @@ public class BlockSetAPI {
      * @param type        the block type class you are registering this for (WoodType.class, LeafType.class...)
      * @param blockFinder Finder object that will provide the modded block type when the time is right
      */
+    @Deprecated
     public static <T extends BlockType> void addBlockTypeFinder(Class<T> type, BlockType.SetFinder<T> blockFinder) {
         BlockSetInternal.addBlockTypeFinder(type, blockFinder);
     }
@@ -45,6 +47,7 @@ public class BlockSetAPI {
      *
      * @param id id of the block that is getting erroneously added and should be removed
      */
+    @Deprecated
     public static <T extends BlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
         BlockSetInternal.addBlockTypeRemover(type, id);
     }
@@ -66,20 +69,28 @@ public class BlockSetAPI {
      *
      * @param registrationFunction registry function
      */
+    @Deprecated(forRemoval = true)
     public static <T extends BlockType> void addDynamicBlockRegistration(
             BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
         addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.BLOCK);
     }
 
+    @Deprecated(forRemoval = true)
     public static <T extends BlockType> void addDynamicItemRegistration(
             BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
         addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.ITEM);
     }
 
+    @Deprecated(forRemoval = true)
     public static <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType,
             Registry<E> registry) {
         BlockSetInternal.addDynamicRegistration(registrationFunction, blockType, registry);
+    }
+
+    public static <E> void addDynamicRegistration(
+            String myModId, Consumer<Registrator<E>> registrationFunction, Registry<E> registry) {
+        BlockSetInternal.addDynamicRegistration(myModId, registrationFunction, registry);
     }
 
 

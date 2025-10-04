@@ -31,7 +31,6 @@
     "MenuTypeAccessor",
     "PackRepositoryAccessor",
     "PackRepositoryMixin",
-    "PoiMixin",
     "PoiTypeAccessor",
     "ServerPlayerAccessor"
   ],

@@ -108,10 +108,7 @@ public class RegHelperImpl {
                 BlockSetInternalImpl.initializeBlockSets();
             }
         }
-        for (var entry : REGISTRIES.entrySet()) {
-            BlockSetInternalImpl.registerDynamicEntries(entry.getKey());
-        }
-        BlockSetInternalImpl.finish();
+        BlockSetInternalImpl.registerDynamicOrdered(REGISTRIES.keySet().stream().toList());
 
         REGISTRIES.clear();
     }

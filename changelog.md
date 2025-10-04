@@ -1,1 +1,1 @@
-added helper method to register extra states to BE, using forge and faric api
+fixed a helper for POI on fabric

@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
+import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
@@ -20,6 +21,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 @ApiStatus.Internal
 public class BlockSetInternal {
@@ -102,6 +104,13 @@ public class BlockSetInternal {
     public static <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType,
             Registry<E> registry) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static <T> void  addDynamicRegistration(String modId,
+            Consumer<Registrator<T>> registrationFunction,
+            Registry<T> registry) {
         throw new AssertionError();
     }
 

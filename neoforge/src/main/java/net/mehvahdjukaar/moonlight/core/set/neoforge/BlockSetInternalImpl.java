@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.set.neoforge;
 
+import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
@@ -14,7 +15,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,28 +39,67 @@ public class BlockSetInternalImpl {
 
     private static boolean hasFilledBlockSets = false;
 
-    //aaaa
-    public static <T extends BlockType, E> void addDynamicRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
+
+    public static <T> void addDynamicRegistration(String modId, Consumer<Registrator<T>> registrationFunction, Registry<T> registry) {
+        //this is horrible. worst shit ever
+        IEventBus bus = ModList.get().getModContainerById(modId).orElseThrow().getEventBus();
+        //get the queue corresponding to this certain mod
         if (registry == BuiltInRegistries.BLOCK) {
-            addEvent(BuiltInRegistries.BLOCK, (BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
+            addEvent (bus, modId, BuiltInRegistries.BLOCK, (BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction);
         } else if (registry == BuiltInRegistries.ITEM) {
-            addEvent(BuiltInRegistries.ITEM, (BlockSetAPI.BlockTypeRegistryCallback<Item, T>) registrationFunction, blockType);
+            addEvent(bus, modId,BuiltInRegistries.ITEM, (BlockSetAPI.BlockTypeRegistryCallback<Item, T>) registrationFunction);
         } else if (registry == BuiltInRegistries.FLUID || registry == BuiltInRegistries.SOUND_EVENT) {
             throw new IllegalArgumentException("Fluid and Sound Events registry not supported here");
         } else {
             //ensure has filled block set
-            getOrAddQueue(Registries.POTION);
+            getOrAddQueue(bus, modId,Registries.POTION);
+            //other entries
+            RegHelper.registerInBatch(registry, registrationFunction);
+        }
+    }
+
+    //aaaa
+    @Deprecated
+    public static <T extends BlockType, E> void addDynamicRegistration(
+            BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType, Registry<E> registry) {
+        //this is horrible. worst shit ever
+        IEventBus bus = MoonlightForge.getCurrentBus();
+        //get the queue corresponding to this certain mod
+        String modId = ModLoadingContext.get().getActiveContainer().getModId();
+        if (registry == BuiltInRegistries.BLOCK) {
+            addEvent (bus, modId, BuiltInRegistries.BLOCK, (BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction, blockType);
+        } else if (registry == BuiltInRegistries.ITEM) {
+            addEvent(bus, modId,BuiltInRegistries.ITEM, (BlockSetAPI.BlockTypeRegistryCallback<Item, T>) registrationFunction, blockType);
+        } else if (registry == BuiltInRegistries.FLUID || registry == BuiltInRegistries.SOUND_EVENT) {
+            throw new IllegalArgumentException("Fluid and Sound Events registry not supported here");
+        } else {
+            //ensure has filled block set
+            getOrAddQueue(bus, modId,Registries.POTION);
             //other entries
             RegHelper.registerInBatch(registry, e -> registrationFunction.accept(e, BlockSetAPI.getBlockSet(blockType).getValues()));
         }
     }
 
+    private static <E> void addEvent(IEventBus bus, String modId, Registry<E> reg,
+                                                          Consumer<Registrator<E>> registrationFunction) {
 
-    public static <T extends BlockType, E> void addEvent(Registry<E> reg,
+        List<Runnable> registrationQueues = getOrAddQueue(bus, modId, reg.key());
+
+        //if block makes a function that just adds the bus and runnable to the queue whenever reg block is fired
+        //actual runnable which will registers the blocks
+        Runnable lateRegistration = () -> {
+            registrationFunction.accept((r, o) -> Registry.register(reg, r, o));
+        };
+        //when this reg block event fires we only add a runnable to the queue
+        registrationQueues.add(lateRegistration);
+    }
+
+    @Deprecated
+    private static <T extends BlockType, E> void addEvent(IEventBus bus, String modId, Registry<E> reg,
                                                          BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction,
                                                          Class<T> blockType) {
-        List<Runnable> registrationQueues = getOrAddQueue( reg.key());
+
+        List<Runnable> registrationQueues = getOrAddQueue(bus, modId, reg.key());
 
         //if block makes a function that just adds the bus and runnable to the queue whenever reg block is fired
         //actual runnable which will registers the blocks
@@ -70,12 +112,7 @@ public class BlockSetInternalImpl {
     }
 
     @NotNull
-    private static List<Runnable> getOrAddQueue(@Nullable ResourceKey<? extends Registry<?>> regKey) {
-        //this is horrible. worst shit ever
-        IEventBus bus = MoonlightForge.getCurrentBus();
-        //get the queue corresponding to this certain mod
-        String modId = ModLoadingContext.get().getActiveContainer().getModId();
-
+    private static List<Runnable> getOrAddQueue(IEventBus bus, String modId, @Nullable ResourceKey<? extends Registry<?>> regKey) {
         return LATE_REGISTRATION_QUEUE.computeIfAbsent(modId,
                 m -> {
                     Map<ResourceKey<? extends Registry<?>>, List<Runnable>> map = new HashMap<>();
@@ -127,6 +164,7 @@ public class BlockSetInternalImpl {
     public static boolean hasFilledBlockSets() {
         return hasFilledBlockSets;
     }
+
 
 
 }
