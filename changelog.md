@@ -1,1 +1,4 @@
-fixed a helper for POI on fabric
+- **Undetected WoodType**:
+    - Added Dungeon's Delight, wormwood
+    - Added Abundant Atmosphere, red_bamboo
+- fixed a helper for POI on fabric
