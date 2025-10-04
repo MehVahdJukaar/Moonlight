@@ -172,9 +172,10 @@ public class RegHelper {
         });
     }
 
-    //call in setup when you have blocks
+    //call in init when you have blocks
     @Deprecated(forRemoval = true)
     @ExpectPlatform
+    /// USE {@link RegHelper#addExtraPOIStatesRegistration(Consumer)} and it must be called in Init, not Setup
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
         throw new AssertionError();
     }
