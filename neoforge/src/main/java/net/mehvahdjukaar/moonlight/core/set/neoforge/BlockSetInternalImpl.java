@@ -45,9 +45,9 @@ public class BlockSetInternalImpl {
         IEventBus bus = ModList.get().getModContainerById(modId).orElseThrow().getEventBus();
         //get the queue corresponding to this certain mod
         if (registry == BuiltInRegistries.BLOCK) {
-            addEvent (bus, modId, BuiltInRegistries.BLOCK, (BlockSetAPI.BlockTypeRegistryCallback<Block, T>) registrationFunction);
+            addEvent (bus, modId, BuiltInRegistries.BLOCK, (Consumer<Registrator<Block>>) (Object) registrationFunction);
         } else if (registry == BuiltInRegistries.ITEM) {
-            addEvent(bus, modId,BuiltInRegistries.ITEM, (BlockSetAPI.BlockTypeRegistryCallback<Item, T>) registrationFunction);
+            addEvent(bus, modId,BuiltInRegistries.ITEM, (Consumer<Registrator<Item>>) (Object) registrationFunction);
         } else if (registry == BuiltInRegistries.FLUID || registry == BuiltInRegistries.SOUND_EVENT) {
             throw new IllegalArgumentException("Fluid and Sound Events registry not supported here");
         } else {
