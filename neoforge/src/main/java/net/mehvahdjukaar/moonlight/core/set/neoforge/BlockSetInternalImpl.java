@@ -41,13 +41,13 @@ public class BlockSetInternalImpl {
 
 
     public static <T> void addDynamicRegistration(String modId, Consumer<Registrator<T>> registrationFunction, Registry<T> registry) {
-        //this is horrible. worst shit ever
+        //not great. lets hope the bus is thread safe
         IEventBus bus = ModList.get().getModContainerById(modId).orElseThrow().getEventBus();
         //get the queue corresponding to this certain mod
         if (registry == BuiltInRegistries.BLOCK) {
             addEvent (bus, modId, BuiltInRegistries.BLOCK, (Consumer<Registrator<Block>>) (Object) registrationFunction);
         } else if (registry == BuiltInRegistries.ITEM) {
-            addEvent(bus, modId,BuiltInRegistries.ITEM, (Consumer<Registrator<Item>>) (Object) registrationFunction);
+            addEvent(bus, modId, BuiltInRegistries.ITEM, (Consumer<Registrator<Item>>) (Object) registrationFunction);
         } else if (registry == BuiltInRegistries.FLUID || registry == BuiltInRegistries.SOUND_EVENT) {
             throw new IllegalArgumentException("Fluid and Sound Events registry not supported here");
         } else {

@@ -68,7 +68,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
 
         ModConfig.Type forgeType = this.getConfigType() == ConfigType.CLIENT ? ModConfig.Type.CLIENT : ModConfig.Type.COMMON;
 
-        ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
+        ModContainer modContainer = ModList.get().getModContainerById(this.getModId()).orElseThrow();
         // create config and registers immediately
         this.modConfig = ConfigTracker.INSTANCE.registerConfig(forgeType, spec, modContainer, this.getFileName());
 
