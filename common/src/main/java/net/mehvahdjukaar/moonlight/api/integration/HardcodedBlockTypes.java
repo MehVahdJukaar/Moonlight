@@ -35,10 +35,16 @@ public class HardcodedBlockTypes {
      * Associated WoodType: Leaves have no WoodType, must be included
      * Associated LeavesType: Wood have no LeavesType, must be included
      *
+     * 2-Words: WoodType or LeavesType having 2-words instead of 1-words for a name
      */
     static {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
+
+        // Abundant Atmosphere - REASON: Naming-Convention, 2-Words
+        woodReg.addSimpleFinder("abundant_atmosphere", "red_bamboo")
+                .log("red_bamboo_block")
+                .childBlock(STRIPPED_LOG, "stripped_red_bamboo_block");
 
         // Dungeon's Delight - REASON: Naming-Convention, PLANKS-NAME
         woodReg.addSimpleFinder("dungeonsdelight", "wormwood")
