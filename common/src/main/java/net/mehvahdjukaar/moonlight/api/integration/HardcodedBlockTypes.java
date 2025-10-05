@@ -26,21 +26,24 @@ public class HardcodedBlockTypes {
 
     /* Defintion of REASONS:
      *
-     * Spelling-Convention: a typo in the Id, no underscore
+     * PlANKS-NAME: Children are using planks' name instead of log's name
+     *
+     * Spelling Convention: a typo in the Id, no underscore
      *
      * Naming-Convention: blocks has unique names that doesn't have "_wood", "_log", "_planks" or has different affix like "_block"
      *
-     * Associated-WoodType: Leaves have no WoodType, must be included
+     * Associated WoodType: Leaves have no WoodType, must be included
+     * Associated LeavesType: Wood have no LeavesType, must be included
      *
-     * Associated-LeavesType: Wood have no LeavesType, must be included
-     *
-     * Associated-Planks: WoodType has no its own planks & use a different planks. it went undetected
-     *
-     * Planks-Name: Children are using planks' name instead of log's name
+     * 2-Words: WoodType or LeavesType having 2-words instead of 1-words for a name
      */
     static {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
+
+        // Dungeon's Delight - REASON: Naming-Convention, PLANKS-NAME
+        woodReg.addSimpleFinder("dungeonsdelight", "wormwood")
+                .log("wormroots_block");
 
         // Sniffed Out - REASON: Naming-Convention
         woodReg.addSimpleFinder("sniffed_out", "vessel")
@@ -93,23 +96,23 @@ public class HardcodedBlockTypes {
                 .log(() -> Blocks.CACTUS);
 
 
-        // Jaden's Nether Expansion - REASON: Planks-Name
+        // Jaden's Nether Expansion - REASON: PLANKS-NAME, Naming-Convention
         woodReg.addSimpleFinder("netherexp", "claret")
                 .log("cerebrage_claret_stem")
                 .childBlock(WOOD, "cerebrage_claret_hyphae");
 
-        // Piglin Ruins - REASON: Planks-Name
+        // Piglin Ruins - REASON: PLANKS-NAME, Naming-Convention
         woodReg.addSimpleFinder("piglin_ruins", "ominous")
                 .log("ominous_stalk_block");
 
-        // Unusual End - REASON: Planks-Name
+        // Unusual End - REASON: PLANKS-NAME, Naming-Convention
         woodReg.addSimpleFinder("unusualend", "chorus_nest")
                 .planks("chorus_nest_planks")
                 .log("chorus_cane_block")
                 .childBlock(STRIPPED_LOG, "stripped_chorus_cane_block")
                 .childBlock(FENCE, "chorus_nest_mosaic_fence");
 
-        // Spectrum (FABRIC) - REASON: Planks-Name
+        // Spectrum (FABRIC) - REASON: PLANKS-NAME, Naming-Convention
         woodReg.addSimpleFinder("spectrum", "ivory_noxwood")
                 .log("ivory_noxcap_stem")
                 .childBlock(STRIPPED_LOG, "stripped_ivory_noxcap_stem")
