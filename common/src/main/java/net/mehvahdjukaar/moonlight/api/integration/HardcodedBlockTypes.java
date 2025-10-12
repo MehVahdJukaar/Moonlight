@@ -50,6 +50,12 @@ public class HardcodedBlockTypes {
         woodReg.addSimpleFinder("dungeonsdelight", "wormwood")
                 .log("wormroots_block");
 
+        // Sniffed Out - REASON: Naming-Convention
+        woodReg.addSimpleFinder("sniffed_out", "vessel")
+                .log("crude_vessel_stem")
+                .childBlock(WOOD, "crude_vessel_cuticle")
+                .childBlock(STRIPPED_WOOD, "stripped_vessel_cuticle");
+
         // Mofu's Better End - REASON: Naming-Convention
         woodReg.addSimpleFinder("mofus_better_end_", "weepingstar")
                 .childBlockSuffix(LEAVES, "_leaf");
