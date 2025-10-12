@@ -319,17 +319,16 @@ public class SoftFluid {
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<SoftFluid>> STREAM_CODEC =
             ByteBufCodecs.holderRegistry(SoftFluidRegistry.KEY);
 
-    public static final Codec<Component> COMPONENT_CODEC = Codec.STRING.xmap(
+    public static final Codec<Component> TRANSLATABLE_COMPONENT = Codec.STRING.xmap(
             Component::translatable,
             Component::getString
     );
-
 
     //Direct codec
     public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
             ResourceLocation.CODEC.fieldOf("flowing_texture").forGetter(SoftFluid::getFlowingTexture),
-            COMPONENT_CODEC.optionalFieldOf("translation_key", Component.translatable("fluid.moonlight.generic_fluid"))
+            TRANSLATABLE_COMPONENT.optionalFieldOf("translation_key", Component.translatable("fluid.moonlight.generic_fluid"))
                     .forGetter(SoftFluid::getTranslatedName),
             Codec.intRange(0, 15).optionalFieldOf("luminosity", 0).forGetter(SoftFluid::getLuminosity),
             Codec.intRange(0, 15).optionalFieldOf("emissivity", 0).forGetter(SoftFluid::getEmissivity),

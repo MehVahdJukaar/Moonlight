@@ -59,6 +59,7 @@ public class HolderReference<T> {
         return new HolderReference.Opt<>(ResourceKey.createRegistryKey(key.registry()), key);
     }
 
+    @Deprecated(forRemoval = true)
     public T getUnsafe() {
         return get(Utils.hackyGetRegistryAccess());
     }

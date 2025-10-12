@@ -11,6 +11,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
@@ -57,15 +58,20 @@ public class TextUtil {
         return Pair.of(splitLines, 1f / scalingFactor);
     }
 
-    public static FormattedText parseText(String s) {
+    public static FormattedText parseText(String s, HolderLookup.Provider provider) {
         try {
-            FormattedText mutableComponent = Component.Serializer.fromJson(s, Utils.hackyGetRegistryAccess());
+            FormattedText mutableComponent = Component.Serializer.fromJson(s, provider);
             if (mutableComponent != null) {
                 return mutableComponent;
             }
         } catch (Exception ignored) {
         }
         return FormattedText.of(s);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static FormattedText parseText(String s) {
+        return parseText(s, Utils.hackyGetRegistryAccess());
     }
 
 

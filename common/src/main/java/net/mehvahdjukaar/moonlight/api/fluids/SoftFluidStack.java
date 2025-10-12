@@ -138,12 +138,18 @@ public class SoftFluidStack implements DataComponentHolder {
         return of(f, amount, component);
     }
 
+    @Deprecated(forRemoval = true)
     @NotNull
     public static SoftFluidStack fromFluid(FluidState fluid) {
+        return fromFluid(fluid, Utils.hackyGetRegistryAccess());
+    }
+
+    @NotNull
+    public static SoftFluidStack fromFluid(FluidState fluid, HolderLookup.Provider reg) {
         if (fluid.is(FluidTags.WATER)) {
-            return fromFluid(fluid.getType(), SoftFluid.WATER_BUCKET_COUNT, DataComponentPatch.EMPTY);
+            return fromFluid(fluid.getType(), SoftFluid.WATER_BUCKET_COUNT, DataComponentPatch.EMPTY, reg);
         }
-        return fromFluid(fluid.getType(), SoftFluid.BUCKET_COUNT, DataComponentPatch.EMPTY);
+        return fromFluid(fluid.getType(), SoftFluid.BUCKET_COUNT, DataComponentPatch.EMPTY, reg);
     }
 
     @Deprecated(forRemoval = true)
@@ -316,10 +322,15 @@ public class SoftFluidStack implements DataComponentHolder {
 
     // item conversion
 
-    @Nullable
+    @Deprecated(forRemoval = true)
     public static Pair<SoftFluidStack, FluidContainerList.Category> fromItem(ItemStack itemStack) {
+        return fromItem(itemStack, Utils.hackyGetRegistryAccess());
+    }
+
+    @Nullable
+    public static Pair<SoftFluidStack, FluidContainerList.Category> fromItem(ItemStack itemStack, HolderLookup.Provider reg) {
         Item filledContainer = itemStack.getItem();
-        Holder<SoftFluid> fluid = SoftFluidInternal.fromVanillaItem(filledContainer, Utils.hackyGetRegistryAccess());
+        Holder<SoftFluid> fluid = SoftFluidInternal.fromVanillaItem(filledContainer, reg);
 
         if (fluid != null && !MLBuiltinSoftFluids.EMPTY.is(fluid)) {
             var category = fluid.value().getContainerList()
@@ -334,7 +345,7 @@ public class SoftFluidStack implements DataComponentHolder {
                 //convert potions to water bottles
                 PotionContents potion = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
                 if (potion.is(Potions.WATER)) {
-                    fluid = MLBuiltinSoftFluids.WATER.getHolderUnsafe();
+                    fluid = MLBuiltinSoftFluids.WATER.getHolder(reg);
                 }
                 //add tags to splash and lingering potions
                 else if (potion.hasEffects()) {

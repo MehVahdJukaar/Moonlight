@@ -289,6 +289,7 @@ public class Utils {
         throw new UnsupportedOperationException("Failed to get registry access. This is a bug");
     }
 
+    @UnstableApi
     public static <T> Registry<T> hackyGetRegistry(ResourceKey<Registry<T>> key) {
         return hackyGetRegistryAccess().registryOrThrow(key);
     }
