@@ -1,1 +1,1 @@
-minor internal changes, deprecated many more methods that dont take a registry access argument. fixed a tooltip issue
+- fixed an issue on fabric introduced in latest updated caused wrong order of operation in dynamic registration

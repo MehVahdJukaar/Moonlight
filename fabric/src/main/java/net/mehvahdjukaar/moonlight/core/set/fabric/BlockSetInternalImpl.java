@@ -59,19 +59,19 @@ public class BlockSetInternalImpl {
                 q2.registerEntries();
                 QUEUES.remove(registry);
             }
-
-            for (var qq : QUEUES_OLD.values()) {
-                for (var e : qq.entrySet()) {
-                    e.getValue().registerEntries();
-                }
-            }
-            QUEUES_OLD.clear();
-
-            for (var qq2 : QUEUES.values()) {
-                qq2.registerEntries();
-            }
-            QUEUES.clear();
         }
+
+        for (var qq : QUEUES_OLD.values()) {
+            for (var e : qq.entrySet()) {
+                e.getValue().registerEntries();
+            }
+        }
+        QUEUES_OLD.clear();
+
+        for (var qq2 : QUEUES.values()) {
+            qq2.registerEntries();
+        }
+        QUEUES.clear();
     }
 
     @Deprecated
