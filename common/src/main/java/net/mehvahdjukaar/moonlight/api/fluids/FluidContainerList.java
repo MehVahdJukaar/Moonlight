@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -110,8 +109,10 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
                 BuiltInRegistries.ITEM.byNameCodec().fieldOf("empty").forGetter(c -> c.emptyContainer),
                 SoftFluid.Capacity.INT_CODEC.fieldOf("capacity").forGetter(Category::getCapacity),
                 BuiltInRegistries.ITEM.byNameCodec().listOf().fieldOf("filled").forGetter(c -> c.filled),
-                BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("fill_sound").forGetter(getHackyOptional(Category::getFillSound)),
-                BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("empty_sound").forGetter(getHackyOptional(Category::getEmptySound))
+                BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("fill_sound")
+                        .forGetter(c -> Optional.ofNullable(c.getFillSound())),
+                BuiltInRegistries.SOUND_EVENT.byNameCodec().optionalFieldOf("empty_sound")
+                        .forGetter(c -> Optional.ofNullable(c.getEmptySound()))
         ).apply(instance, Category::decode));
 
         private final Item emptyContainer;
@@ -184,14 +185,5 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
         public Optional<Item> getFirstFilled() {
             return this.filled.stream().findFirst();
         }
-    }
-
-    //hacky. gets an optional if the fluid value is its default one
-    private static <T> Function<Category, Optional<T>> getHackyOptional(final Function<Category, T> getter) {
-        return f -> {
-            var value = getter.apply(f);
-            var def = getter.apply(Category.EMPTY.get());
-            return value.equals(def) ? Optional.empty() : Optional.of(value);
-        };
     }
 }
