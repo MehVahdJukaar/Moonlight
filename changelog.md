@@ -1,1 +1,4 @@
-- fixed an issue on fabric introduced in latest updated caused wrong order of operation in dynamic registration
+- fixed recipe conditions not being copied over
+- fixed fluid fill and empty sound not working correctly
+- minor API additions
+- minor bug fixes
