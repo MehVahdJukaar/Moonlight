@@ -4,14 +4,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
-import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
-import net.mehvahdjukaar.moonlight.api.resources.ResType;
-import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
-import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
+import net.mehvahdjukaar.moonlight.api.resources.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -312,6 +311,24 @@ public class ResourceSink {
         }
     }
 
+    public <T extends BlockType> void addBlockTypeSwapRecipe(ResourceManager manager, ResourceLocation originalRecipeId,
+                                                                               T originalMat, T destinationMat, ResourceLocation baseID) {
+        StaticResource originalResource = StaticResource.getOrThrow(manager, originalRecipeId);
+        JsonObject originalJson = originalResource.toJson();
+        Recipe<?> originalRecipe = RPUtils.readRecipe(originalJson);
+        RecipeHolder<?> newRecipe = RecipeTemplate.makeSimilarRecipe(originalRecipe, originalMat, destinationMat, baseID);
+        JsonElement newJson = RPUtils.writeRecipe(newRecipe.value());
+        //copy conditions
+        if (newJson instanceof JsonObject jo) {
+            for (var e : originalJson.entrySet()) {
+                var key = e.getKey();
+                if (key.contains("condition") && !jo.has(key)) {
+                    jo.add(key, e.getValue());
+                }
+            }
+        }
+        this.addJson(newRecipe.id(), newJson, ResType.RECIPES);
+    }
 
     /**
      * Utility method to add models overrides in a non-destructive way. Provided overrides will be added on top of whatever model is currently provided by vanilla or mod resources. IE: crossbows

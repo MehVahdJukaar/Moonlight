@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 
+//TODO: change name
 public class RecipeTemplate {
 
     private static final Map<Class<? extends Recipe<?>>, TriFunction<Recipe<?>, BlockType, BlockType, Recipe<?>>> REMAPPERS = new HashMap<>();
