@@ -408,12 +408,12 @@ public class RegHelperImpl {
         Consumer<ExtendPoiTypesEvent> eventConsumer = event -> {
             eventListener.accept(new RegHelper.ExtraPOIStatesEvent() {
                 @Override
-                public void addBlockToPoi(ResourceKey<PoiType> typeKey, Block block) {
+                public void addBlock(ResourceKey<PoiType> typeKey, Block block) {
                     event.addBlockToPoi(typeKey, block);
                 }
 
                 @Override
-                public void addStatesToPoi(ResourceKey<PoiType> typeKey, Set<BlockState> states) {
+                public void addStates(ResourceKey<PoiType> typeKey, Set<BlockState> states) {
                     event.addStatesToPoi(typeKey, states);
                 }
             });

@@ -182,9 +182,25 @@ public class RegHelper {
 
     public interface ExtraPOIStatesEvent {
 
-        void addBlockToPoi(ResourceKey<PoiType> typeKey, Block block);
+        @Deprecated(forRemoval = true)
+        default void addStatesToPoi(ResourceKey<PoiType> typeKey, Set<BlockState> states) {
+            addStates(typeKey, states);
+        }
 
-        void addStatesToPoi(ResourceKey<PoiType> typeKey, Set<BlockState> states);
+        @Deprecated(forRemoval = true)
+        default void addBlockToPoi(ResourceKey<PoiType> typeKey, Block block) {
+            addBlock(typeKey, block);
+        }
+
+        void addBlock(ResourceKey<PoiType> typeKey, Block block);
+
+        void addStates(ResourceKey<PoiType> typeKey, Set<BlockState> states);
+
+        default void addBlocks(ResourceKey<PoiType> typeKey, Collection<Block> blocks) {
+            for (Block b : blocks) {
+                addBlock(typeKey, b);
+            }
+        }
     }
 
     @ExpectPlatform
@@ -194,11 +210,11 @@ public class RegHelper {
 
     public interface ExtraBEStatesEvent {
 
-        void addBlocks(BlockEntityType<?> typeKey, Block ...block);
+        void addBlocks(BlockEntityType<?> typeKey, Block... block);
     }
 
     @ExpectPlatform
-    public static void addExtraBEBlockStatesRegistration(Consumer<RegHelper.ExtraBEStatesEvent> eventListener){
+    public static void addExtraBEBlockStatesRegistration(Consumer<RegHelper.ExtraBEStatesEvent> eventListener) {
         throw new AssertionError();
     }
 
@@ -298,6 +314,7 @@ public class RegHelper {
         }, Registries.RECIPE_TYPE);
     }
 
+
     public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(ResourceLocation name,
                                                                                                                Supplier<T> blockEntity) {
         return register(name, blockEntity, Registries.BLOCK_ENTITY_TYPE);
@@ -308,6 +325,7 @@ public class RegHelper {
         return registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply, blocks));
     }
 
+    @SafeVarargs
     public static <E extends BlockEntity> RegSupplier<BlockEntityType<E>> registerBlockEntityType(
             ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Supplier<Block>... blocks) {
         return registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply,

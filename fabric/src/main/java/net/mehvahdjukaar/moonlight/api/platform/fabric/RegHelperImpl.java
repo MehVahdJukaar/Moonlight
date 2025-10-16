@@ -345,7 +345,7 @@ public class RegHelperImpl {
     public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener) {
         eventListener.accept(new RegHelper.ExtraPOIStatesEvent() {
             @Override
-            public void addBlockToPoi(ResourceKey<PoiType> poi, Block block) {
+            public void addBlock(ResourceKey<PoiType> poi, Block block) {
                 var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
                 //add vanilla states if they are mutable
                 Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
@@ -358,7 +358,7 @@ public class RegHelperImpl {
             }
 
             @Override
-            public void addStatesToPoi(ResourceKey<PoiType> poi, Set<BlockState> states) {
+            public void addStates(ResourceKey<PoiType> poi, Set<BlockState> states) {
                 var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
                 //add vanilla states if they are mutable
                 Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
