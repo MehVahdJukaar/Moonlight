@@ -26,25 +26,24 @@ public class HardcodedBlockTypes {
 
     /* Defintion of REASONS:
      *
-     * Spelling-Convention: a typo in the Id, no underscore
+     * PlANKS-NAME: Children are using planks' name instead of log's name
+     *
+     * Spelling Convention: a typo in the Id, no underscore
      *
      * Naming-Convention: blocks has unique names that doesn't have "_wood", "_log", "_planks" or has different affix like "_block"
      *
-     * Associated-WoodType: Leaves have no WoodType, must be included
+     * Associated WoodType: Leaves have no WoodType, must be included
+     * Associated LeavesType: Wood have no LeavesType, must be included
      *
-     * Associated-LeavesType: Wood have no LeavesType, must be included
-     *
-     * Associated-Planks: WoodType has no its own planks & use a different planks. it went undetected
-     *
-     * Planks-Name: Children are using planks' name instead of log's name
+     * 2-Words: WoodType or LeavesType having 2-words instead of 1-words for a name
      */
     static {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
-        // Cultural Delights - REASON: Associated-Planks
-        woodReg.addSimpleFinder("culturaldelights", "avocado")
-                .planks("minecraft:jungle_planks");
+        // Dungeon's Delight - REASON: Naming-Convention, PLANKS-NAME
+        woodReg.addSimpleFinder("dungeonsdelight", "wormwood")
+                .log("wormroots_block");
 
         // Sniffed Out - REASON: Naming-Convention
         woodReg.addSimpleFinder("sniffed_out", "vessel")
@@ -97,23 +96,23 @@ public class HardcodedBlockTypes {
                 .log(() -> Blocks.CACTUS);
 
 
-        // Jaden's Nether Expansion - REASON: Planks-Name
+        // Jaden's Nether Expansion - REASON: PLANKS-NAME, Naming-Convention
         woodReg.addSimpleFinder("netherexp", "claret")
                 .log("cerebrage_claret_stem")
                 .childBlock(WOOD, "cerebrage_claret_hyphae");
 
-        // Piglin Ruins - REASON: Planks-Name
+        // Piglin Ruins - REASON: PLANKS-NAME, Naming-Convention
         woodReg.addSimpleFinder("piglin_ruins", "ominous")
                 .log("ominous_stalk_block");
 
-        // Unusual End - REASON: Planks-Name
+        // Unusual End - REASON: PLANKS-NAME, Naming-Convention
         woodReg.addSimpleFinder("unusualend", "chorus_nest")
                 .planks("chorus_nest_planks")
                 .log("chorus_cane_block")
                 .childBlock(STRIPPED_LOG, "stripped_chorus_cane_block")
                 .childBlock(FENCE, "chorus_nest_mosaic_fence");
 
-        // Spectrum (FABRIC) - REASON: Planks-Name
+        // Spectrum (FABRIC) - REASON: PLANKS-NAME, Naming-Convention
         woodReg.addSimpleFinder("spectrum", "ivory_noxwood")
                 .log("ivory_noxcap_stem")
                 .childBlock(STRIPPED_LOG, "stripped_ivory_noxcap_stem")
@@ -294,25 +293,32 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("fruitfulfun", "orange", "citrus");
 
         // Mystic's Biomes - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("mysticsbiomes", "yellow_maple", "white_maple");
+        leafReg.addSimpleFinder("mysticsbiomes", "pink_cherry") //REASON: Naming-Convention
+                .leavesSuffix("_blossoms")
+                .childBlock(LOG, "cherry_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "white_cherry") //REASON: Naming-Convention
+                .leavesSuffix("_blossoms")
+                .childBlock(LOG, "cherry_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "strawberry") //REASON: Naming-Convention
+                .leavesSuffix("_blossoms");
+        leafReg.addSimpleFinder("mysticsbiomes", "jacaranda") //REASON: Naming-Convention
+                .leavesSuffix("_blossoms");
+        leafReg.addSimpleFinder("mysticsbiomes", "sea_shrub") //REASON: 2-Words
+                .childBlock(LOG, "sea_foam_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "yellow_maple") //REASON: 2-Words
+                .childBlock(LOG, "white_maple_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "orange_maple") //REASON: 2-Words
+                .childBlock(LOG, "maple_log");
 
-        //REASON: Naming-Convention
-        leafReg.addSimpleFinder("mysticsbiomes", "pink_cherry")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "white_cherry")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "strawberry")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "peach")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "jacaranda")
-                .leavesSuffix("_blossoms");
-        leafReg.addLeavesToWoodMapping("mysticsbiomes", "sea_shrub", "sea_foam");
-
-        //TODO: are these correct? oak? shouldnt it be left empty? - need to check
-        leafReg.addLeavesToWoodMapping("mysticsbiomes:peony", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("mysticsbiomes:hydrangea", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("mysticsbiomes:budding_peony", "minecraft:oak");
+            //REASON: Somehow went undetected
+        leafReg.addSimpleFinder("mysticsbiomes", "peach");
+        leafReg.addSimpleFinder("mysticsbiomes", "tropical");
+        leafReg.addSimpleFinder("mysticsbiomes", "peony") //REASON: Associated WoodType
+                .childBlock(LOG, "minecraft:oak_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "hydrangea") //REASON: Associated WoodType
+                .childBlock(LOG, "minecraft:oak_log");
+        leafReg.addSimpleFinder("mysticsbiomes", "budding_peony") //REASON: 2-Words
+                .childBlock(LOG, "minecraft:oak_log");
 
         // Environmental - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("environmental", "pink_wisteria", "wisteria");
