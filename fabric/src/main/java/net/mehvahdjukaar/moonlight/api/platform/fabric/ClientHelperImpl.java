@@ -128,17 +128,29 @@ public class ClientHelperImpl {
 
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation name) {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(
-                new ReloadWrapper(Suppliers.memoize(listener::get), name));
+                new ReloadWrapper(listener, name));
     }
 
-    private record ReloadWrapper(Supplier<PreparableReloadListener> inner,
-                                 ResourceLocation getFabricId) implements IdentifiableResourceReloadListener {
+    private static final class ReloadWrapper implements IdentifiableResourceReloadListener, PreparableReloadListener {
+        private final Supplier<PreparableReloadListener> inner;
+        private final ResourceLocation getFabricId;
+
+        private ReloadWrapper(Supplier<PreparableReloadListener> listenerSupplier,
+                              ResourceLocation getFabricId) {
+            this.inner = Suppliers.memoize(listenerSupplier::get);
+            this.getFabricId = getFabricId;
+        }
 
         @Override
         public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
                                               ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
                                               Executor backgroundExecutor, Executor gameExecutor) {
             return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+        }
+
+        @Override
+        public ResourceLocation getFabricId() {
+            return getFabricId;
         }
     }
 
