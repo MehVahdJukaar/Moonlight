@@ -104,8 +104,8 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
     protected void add(Item empty, Item filled, int amount, SoundEvent fillSound, SoundEvent emptySound) {
         var c = this.emptyToFilledMap.computeIfAbsent(empty, i -> new Category(i, amount));
         c.addItem(filled);
-        c.fillSound = fillSound;
-        c.emptySound = emptySound;
+        if (c.fillSound == null) c.fillSound = fillSound;
+        if (c.emptySound == null) c.emptySound = emptySound;
     }
 
 
@@ -134,8 +134,8 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
         private Category(Item emptyContainer, int capacity, @Nullable SoundEvent fillSound, @Nullable SoundEvent emptySound) {
             this.emptyContainer = emptyContainer;
             this.containerCapacity = capacity;
-            this.fillSound = fillSound == null ? SoundEvents.BOTTLE_FILL : fillSound;
-            this.emptySound = emptySound == null ? SoundEvents.BOTTLE_EMPTY : emptySound;
+            this.fillSound = fillSound;
+            this.emptySound = emptySound;
         }
 
         private Category(Item emptyContainer, int capacity) {
@@ -182,11 +182,11 @@ public class FluidContainerList implements Iterable<FluidContainerList.Category>
         }
 
         public SoundEvent getFillSound() {
-            return fillSound;
+            return fillSound == null ? SoundEvents.BOTTLE_FILL : fillSound;
         }
 
         public SoundEvent getEmptySound() {
-            return emptySound;
+            return emptySound == null ? SoundEvents.BOTTLE_EMPTY : emptySound;
         }
 
         public List<Item> getFilledItems() {
