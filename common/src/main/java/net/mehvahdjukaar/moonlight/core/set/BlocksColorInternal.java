@@ -279,26 +279,7 @@ public class BlocksColorInternal {
          * Kind of expensive. don't call too often
          */
         private HolderSet<T> makeHolderSet(Registry<T> registry) {
-            //standard tag location
-            var v = registry.getTag(TagKey.create(registry.key(),
-                    new ResourceLocation(id.getNamespace(), id.getPath() + "s")));
-            if (v.isEmpty()) {
-                v = registry.getTag(TagKey.create(registry.key(),
-                        new ResourceLocation(PlatHelper.getPlatform().isForge() ? "forge" : "c", id.getPath() + "s")));
-            }
-            if (v.isPresent()) {
-                var tag = v.get();
-                boolean success = true;
-                for (var t : colorsToObj.values()) {
-                    if (!tag.contains(registry.getHolderOrThrow(registry.getResourceKey(t).get()))) {
-                        success = false;
-                        break;
-                    }
-                }
-                if (success) return tag;
-            }
-            return HolderSet.direct(t -> registry.getHolderOrThrow(registry.getResourceKey(t).get()),
-                    new ArrayList<>(colorsToObj.values()));
+            return HolderSet.direct(registry::wrapAsHolder, new ArrayList<>(colorsToObj.values()));
         }
 
         /**
