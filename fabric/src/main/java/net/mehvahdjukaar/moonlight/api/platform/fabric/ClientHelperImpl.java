@@ -129,21 +129,31 @@ public class ClientHelperImpl {
     }
 
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation name) {
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
-            private final Supplier<PreparableReloadListener> inner = Suppliers.memoize(listener::get);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(
+                new ReloadWrapper(listener, name));
+    }
 
-            @Override
-            public ResourceLocation getFabricId() {
-                return name;
-            }
+    private static final class ReloadWrapper implements IdentifiableResourceReloadListener, PreparableReloadListener {
+        private final Supplier<PreparableReloadListener> inner;
+        private final ResourceLocation getFabricId;
 
-            @Override
-            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
-                                                  ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
-                                                  Executor backgroundExecutor, Executor gameExecutor) {
-                return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
-            }
-        });
+        private ReloadWrapper(Supplier<PreparableReloadListener> listenerSupplier,
+                              ResourceLocation getFabricId) {
+            this.inner = Suppliers.memoize(listenerSupplier::get);
+            this.getFabricId = getFabricId;
+        }
+
+        @Override
+        public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
+                                              ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
+                                              Executor backgroundExecutor, Executor gameExecutor) {
+            return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+        }
+
+        @Override
+        public ResourceLocation getFabricId() {
+            return getFabricId;
+        }
     }
 
     public static final Map<ItemLike, IItemDecoratorRenderer> ITEM_DECORATORS = new IdentityHashMap<>();
