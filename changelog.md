@@ -1,3 +1,8 @@
+- Improved POI code & progress tracker concurrency
+- Fixed Reload issue on FABRIC side
+
+## v2.16.14
+
 - **Undetected WoodType**
     - Added Sniffed-Out, vessel
     - Added Dungeon's Delight, wormwood
