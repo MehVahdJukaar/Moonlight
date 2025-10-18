@@ -8,16 +8,15 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -58,7 +57,7 @@ public class RenderedTexturesManager {
      */
     public static FrameBufferBackedDynamicTexture requestTexture(
             ResourceLocation id, int textureSize,
-            Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction,
+            @NotNull Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction,
             boolean updateEachFrame) {
 
         var texture = TEXTURE_CACHE.getIfPresent(id);
@@ -72,6 +71,7 @@ public class RenderedTexturesManager {
 
             RenderSystem.recordRenderCall(texture::initialize);
         }
+        texture.markUsed();
         return texture;
     }
 

@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -27,6 +28,7 @@ import java.util.function.Consumer;
 public class FrameBufferBackedDynamicTexture extends AbstractTexture {
 
     //runs when texture is initialized and populates it. Runs each tick if its tickable
+    @NotNull
     protected final Consumer<FrameBufferBackedDynamicTexture> drawingFunction;
     private boolean initialized = false;
 
@@ -42,7 +44,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
     private NativeImage cpuImage;
 
     public FrameBufferBackedDynamicTexture(ResourceLocation resourceLocation, int width, int height,
-                                           @Nullable Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction) {
+                                           @NotNull Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction) {
         this.width = width;
         this.height = height;
         this.resourceLocation = resourceLocation;
@@ -50,7 +52,7 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
     }
 
     public FrameBufferBackedDynamicTexture(ResourceLocation resourceLocation, int size,
-                                           @Nullable Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction) {
+                                           @NotNull Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction) {
         this(resourceLocation, size, size, textureDrawingFunction);
     }
 
@@ -70,15 +72,11 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         if (!RenderSystem.isOnRenderThreadOrInit()) {
             RenderSystem.recordRenderCall(() -> {
                 bind();
-                if (drawingFunction != null) {
-                    drawingFunction.accept(this);
-                }
+                drawingFunction.accept(this);
             });
         } else {
             bind();
-            if (drawingFunction != null) {
-                drawingFunction.accept(this);
-            }
+            drawingFunction.accept(this);
         }
     }
 
@@ -150,9 +148,9 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
             this.cpuImage.close();
             this.cpuImage = null;
         }
-        //destroy render buffer
         //dont do this, it causes many issues
-        // if (this.initialized) Minecraft.getInstance().getTextureManager().release(resourceLocation);
+        //it also causes it to keep being drawn...
+        if (this.initialized) Minecraft.getInstance().getTextureManager().release(resourceLocation);
     }
 
     public NativeImage getPixels() {
@@ -218,5 +216,8 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         textureFiles.add(output);
 
         return textureFiles;
+    }
+
+    protected void markUsed() {
     }
 }

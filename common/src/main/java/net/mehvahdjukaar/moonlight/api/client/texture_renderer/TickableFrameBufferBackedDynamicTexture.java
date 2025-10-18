@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 public class TickableFrameBufferBackedDynamicTexture extends FrameBufferBackedDynamicTexture implements Tickable {
 
+    private boolean shouldTick = true;
 
     public TickableFrameBufferBackedDynamicTexture(ResourceLocation resourceLocation, int width, int height,
                                                    @NotNull Consumer<FrameBufferBackedDynamicTexture> textureDrawingFunction) {
@@ -21,6 +22,13 @@ public class TickableFrameBufferBackedDynamicTexture extends FrameBufferBackedDy
 
     @Override
     public void tick() {
-        drawingFunction.accept(this);
+        if (!shouldTick) return;
+        shouldTick = false;
+        redraw();
+    }
+
+    @Override
+    protected void markUsed() {
+        shouldTick = true;
     }
 }

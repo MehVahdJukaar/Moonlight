@@ -15,7 +15,13 @@ public class DummyCamera extends Camera {
     public void setPosition(Vec3 pPos) {
         super.setPosition(pPos);
     }
+
     public void setPosition(BlockPos pPos) {
         super.setPosition(Vec3.atCenterOf(pPos));
+    }
+
+    @Override
+    public void setRotation(float yRot, float xRot) {
+        super.setRotation(yRot, xRot);
     }
 }
