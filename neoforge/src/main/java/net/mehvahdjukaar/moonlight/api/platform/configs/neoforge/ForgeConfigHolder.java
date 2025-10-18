@@ -56,11 +56,10 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     private final ModConfigSpec spec;
     private final ModConfig modConfig;
 
-    private final Map<ModConfigSpec.ConfigValue<?>, Object> requireRestartValues;
     private final List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues;
 
     ForgeConfigHolder(ResourceLocation name, ModConfigSpec spec, ConfigType type,
-                      @Nullable Runnable onChange, List<ModConfigSpec.ConfigValue<?>> requireRestart,
+                      @Nullable Runnable onChange,
                       List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues) {
         super(name, "toml", FMLPaths.CONFIGDIR.get(), type, onChange);
         this.spec = spec;
@@ -79,11 +78,6 @@ public final class ForgeConfigHolder extends ModConfigHolder {
             NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         }
         //for event
-
-        if (!requireRestart.isEmpty()) {
-            forceLoad(); //Early load if this has world reload ones as we need to get their current values. Isn't there a better way?
-        }
-        this.requireRestartValues = requireRestart.stream().collect(Collectors.toMap(e -> e, ModConfigSpec.ConfigValue::get));
 
         BY_FORGE_CONFIG.put(this.modConfig, this);
     }
@@ -186,13 +180,5 @@ public final class ForgeConfigHolder extends ModConfigHolder {
             });
         }
     }
-
-
-    public boolean requiresGameRestart(ModConfigSpec.ConfigValue<?> value) {
-        var v = requireRestartValues.get(value);
-        if (v == null) return false;
-        else return v != value.get();
-    }
-
 
 }

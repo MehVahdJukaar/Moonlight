@@ -3,14 +3,17 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.mehvahdjukaar.moonlight.api.block.ILightable;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -21,7 +24,7 @@ import java.util.function.Supplier;
  */
 public abstract class ConfigBuilder {
 
-    protected final Map<String, String> comments = new HashMap<>();
+    protected final Map<String, String> translations = new HashMap<>();
     private String currentComment;
     private String currentKey;
     protected Runnable changeCallback;
@@ -45,7 +48,7 @@ public abstract class ConfigBuilder {
         this.name = name;
         this.type = type;
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
-            if (e.isDefault()) comments.forEach(e::addEntry);
+            if (e.isDefault()) translations.forEach(e::addEntry);
         };
         MoonlightEventsHelper.addListener(consumer, AfterLanguageLoadEvent.class);
     }
@@ -144,11 +147,12 @@ public abstract class ConfigBuilder {
     }
 
     public String tooltipKey(String name) {
-        return "config." + this.name.getNamespace() + "." + currentCategory() + "." + name + ".description";
+        return this.name.getNamespace() + ".configuration." + currentCategory() + "." + name + ".description";
     }
 
     public String translationKey(String name) {
-        return "config." + this.name.getNamespace() + "." + currentCategory() + "." + name;
+        return this.name.getNamespace() + ".configuration." + currentCategory() +
+                (name.isEmpty() ? "" : "." + name);
     }
 
 
@@ -159,7 +163,7 @@ public abstract class ConfigBuilder {
     public ConfigBuilder comment(String comment) {
         this.currentComment = comment;
         if (this.currentComment != null && this.currentKey != null) {
-            comments.put(currentKey, currentComment);
+            translations.put(currentKey, currentComment);
             this.currentComment = null;
             this.currentKey = null;
         }
@@ -175,14 +179,18 @@ public abstract class ConfigBuilder {
 
     public abstract ConfigBuilder gameRestart();
 
-    protected void maybeAddTranslationString(String name) {
+    protected void addTranslationsAndComments(String name) {
+        //name translation
+        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        //comment translation
         this.currentKey = this.tooltipKey(name);
         if (this.currentComment != null && this.currentKey != null) {
-            this.comments.put(currentKey, currentComment);
+            this.translations.put(currentKey, currentComment);
             this.currentComment = null;
             this.currentKey = null;
         }
-        if (this.currentCategory() == null && PlatHelper.isDev()) throw new AssertionError("Current config category was null. How?");
+        if (this.currentCategory() == null && PlatHelper.isDev())
+            throw new AssertionError("Current config category was null. How?");
     }
 
     public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;

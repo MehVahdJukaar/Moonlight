@@ -6,7 +6,6 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.http.annotation.Experimental;
 import org.jetbrains.annotations.NotNull;
@@ -65,9 +64,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     private void doAddConfig(String name, ConfigValue<?> config) {
         config.setTranslationKey(this.translationKey(name));
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
         var tooltipKey = this.tooltipKey(name);
-        if (this.comments.containsKey(tooltipKey)) {
+        if (this.translations.containsKey(tooltipKey)) {
             config.setDescriptionKey(tooltipKey);
         }
 
@@ -152,12 +151,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var config = new ObjectConfigValue<>(name, defaultValue, codec);
         doAddConfig(name, config);
         return config;
-    }
-
-    @Override
-    protected void maybeAddTranslationString(String name) {
-        comments.put(this.translationKey(name), LangBuilder.getReadableName(name));
-        super.maybeAddTranslationString(name);
     }
 
     //NYI

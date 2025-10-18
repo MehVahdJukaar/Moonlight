@@ -8,6 +8,7 @@ import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -22,8 +23,6 @@ import java.util.function.Supplier;
 
 public class ConfigBuilderImpl extends ConfigBuilder {
 
-    private final List<ModConfigSpec.ConfigValue<?>> requireGameRestart = new ArrayList<>();
-    private boolean currentGameRestart;
     private ModConfigSpec.ConfigValue<?> currentValue;
     private final List<ValueWrapper<?, ?>> specialValues = new ArrayList<>();
 
@@ -49,13 +48,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public ForgeConfigHolder build() {
         return new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
-                this.changeCallback, this.requireGameRestart, specialValues);
+                this.changeCallback, specialValues);
     }
 
     @Override
     public ConfigBuilderImpl push(String category) {
         builder.push(category);
         cat.push(category);
+        this.translations.put(translationKey(""), LangBuilder.getReadableName(category));
         return this;
     }
 
@@ -68,28 +68,25 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue);
         this.currentValue = value;
-        maybeAddGameRestart();
         return value;
     }
 
     @Override
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
         this.currentValue = value;
-        maybeAddGameRestart();
         return value;
     }
 
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
         this.currentValue = value;
-        maybeAddGameRestart();
         return value;
     }
 
@@ -97,12 +94,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Experimental
     @Override
     public Supplier<Float> define(String name, float defaultValue, float min, float max) {
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
 
         var value = builder.defineInRange(name, defaultValue, min, max);
 
         this.currentValue = value;
-        maybeAddGameRestart();
 
         var wrapper = new ValueWrapper<Float, Double>(value) {
             @Override
@@ -117,13 +113,12 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Integer> defineColor(String name, int defaultValue) {
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
         String def = (String) ColorUtils.CODEC.encodeStart(JavaOps.INSTANCE, defaultValue).getOrThrow();
         var value = builder.define(name, def,
                 o -> o instanceof String s && ColorUtils.isValidString(s));
 
         this.currentValue = value;
-        maybeAddGameRestart();
 
         var wrapper = new ValueWrapper<Integer, String>(value) {
             @Override
@@ -138,27 +133,24 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
         this.currentValue = value;
-        maybeAddGameRestart();
         return value;
     }
 
     public <T> Supplier<T> define(String name, Supplier<T> defaultValue, Predicate<Object> validator) {
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
         this.currentValue = value;
-        maybeAddGameRestart();
         return value;
     }
 
     @Override
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
         var value = builder.defineList(name, defaultValue, predicate);
         this.currentValue = value;
-        maybeAddGameRestart();
         return () -> (List<String>) value.get();
     }
 
@@ -278,25 +270,15 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
-        maybeAddTranslationString(name);
+        addTranslationsAndComments(name);
         var value = builder.defineEnum(name, defaultValue);
         this.currentValue = value;
-        maybeAddGameRestart();
         return value;
-    }
-
-    private void maybeAddGameRestart() {
-        if (currentGameRestart && currentValue != null) {
-            requireGameRestart.add(currentValue);
-            currentGameRestart = false;
-            currentValue = null;
-        }
     }
 
     @Override
     public ConfigBuilder gameRestart() {
-        this.currentGameRestart = true;
-        maybeAddGameRestart();
+        builder.gameRestart();
         return this;
     }
 
@@ -304,6 +286,12 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public ConfigBuilder worldReload() {
         builder.worldRestart();
         return this;
+    }
+
+    @Override
+    protected void addTranslationsAndComments(String name) {
+        builder.translation(translationKey(name));
+        super.addTranslationsAndComments(name);
     }
 
     @Override

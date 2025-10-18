@@ -402,8 +402,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
         private final ItemStack item;
         protected final int iconOffset;
-        protected final boolean needsGameRestart;
-        protected boolean doesNeedsGameRestart = false;
 
         protected Button button;
         private int ticks = 0;
@@ -418,23 +416,12 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             }
             button.setMessage(Component.literal(""));
 
-            this.needsGameRestart = mlConfig.requiresGameRestart(((NeoForgeValue<Boolean>) holder).configValue);
-
             this.item = item;
             this.iconOffset = item.isEmpty() ? 0 : 7;
         }
 
         public BooleanWrapper(IConfigValue<Boolean> holder) {
             this(holder, ItemStack.EMPTY);
-        }
-
-        @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            boolean success = super.mouseClicked(mouseX, mouseY, button);
-            if (success && needsGameRestart) {
-                this.doesNeedsGameRestart = !this.doesNeedsGameRestart;
-            }
-            return success;
         }
 
         @Override
@@ -449,17 +436,6 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             }
 
             this.lastTick = CustomConfigScreen.this.ticks;
-
-            //world restart stuff for forge values
-            if (doesNeedsGameRestart) {
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                graphics.blit(IconButton.ICONS, left - 18, top + 5, 11, 11, 51.0F, 22.0F, 11, 11, 64, 64);
-                if (MthUtils.isWithinRectangle(left - 18, top + 5, 11, 11, mouseX, mouseY)) {
-                    String translationKey = "configured.gui.requires_game_restart";
-                    int outline = -1438090048;
-                    CustomConfigScreen.this.setActiveTooltip(Component.translatable(translationKey), outline);
-                }
-            }
 
             int iconX = iconOffset + (int) (this.button.getX() + Math.ceil((this.button.getWidth() - ICON_SIZE) / 2f));
             int iconY = (int) (this.button.getY() + Math.ceil(((this.button.getHeight() - ICON_SIZE) / 2f)));
