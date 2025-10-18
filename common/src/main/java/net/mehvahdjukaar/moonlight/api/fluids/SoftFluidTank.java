@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
@@ -52,6 +53,11 @@ public class SoftFluidTank {
         }
     };
 
+    private static final Codec<Pair<SoftFluidStack, Integer>> CONTENT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            SoftFluidStack.CODEC.fieldOf("fluid").forGetter(Pair::getFirst),
+            Codec.INT.fieldOf("capacity").forGetter(Pair::getSecond)
+    ).apply(instance, Pair::of));
+
     public static final Codec<SoftFluidTank> CODEC = new Codec<>() {
 
         @Override
@@ -61,12 +67,9 @@ public class SoftFluidTank {
                 if (reg.isEmpty()) {
                     return DataResult.error(() -> "Failed to find registry from registry lookup!");
                 }
-                DataResult<Pair<SoftFluidStack, T>> result1 = SoftFluidStack.CODEC.decode(ops, input);
-                DataResult<Pair<Integer, T>> result2 = Codec.INT.decode(ops, input);
-                return result1.flatMap(r1 -> result2.map(r2 -> {
-                    SoftFluidTank tank = SoftFluidTank.create(r1.getFirst(), r2.getFirst(), reg.get());
-                    return Pair.of(tank, r2.getSecond());
-                }));
+                var content = CONTENT_CODEC.decode(ops, input);
+                var c = content.getOrThrow().getFirst();
+                return content.map(p -> Pair.of(SoftFluidTank.create(c.getFirst(), c.getSecond(), reg.get()), p.getSecond()));
             } else {
                 return DataResult.error(() -> "Registry ops required!");
             }
@@ -74,11 +77,7 @@ public class SoftFluidTank {
 
         @Override
         public <T> DataResult<T> encode(SoftFluidTank input, DynamicOps<T> ops, T prefix) {
-            DataResult<T> result1 = SoftFluidStack.CODEC.encode(input.getFluid(), ops, prefix);
-            DataResult<T> result2 = Codec.INT.encode(input.getCapacity(), ops, prefix);
-            if (result1.error().isPresent()) return result1;
-            if (result2.error().isPresent()) return result2;
-            return DataResult.success(prefix);
+            return CONTENT_CODEC.encode(Pair.of(input.getFluid(), input.getCapacity()), ops, prefix);
         }
     };
 

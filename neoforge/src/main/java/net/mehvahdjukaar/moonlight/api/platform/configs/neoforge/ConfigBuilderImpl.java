@@ -55,7 +55,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public ConfigBuilderImpl push(String category) {
         builder.push(category);
         cat.push(category);
-        this.translations.put(translationKey(""), LangBuilder.getReadableName(category));
+        translations.put(translationKey(""), LangBuilder.getReadableName(category));
         return this;
     }
 
