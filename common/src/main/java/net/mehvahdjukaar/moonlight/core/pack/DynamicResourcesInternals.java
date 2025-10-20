@@ -6,11 +6,13 @@ import com.google.common.collect.Multimap;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
-import net.mehvahdjukaar.moonlight.api.resources.pack.*;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
+import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -85,7 +87,7 @@ public class DynamicResourcesInternals {
                     type, modIds);
 
             if (CommonConfigs.EXTRA_DEBUG.get()) {
-                Moonlight.LOGGER.info("Current stack trace:", new Throwable("Stack trace dump to see who fired me"));
+                Moonlight.LOGGER.info("Current stack trace:", new Throwable("EXTRA_DEBUG is enabled. Stack trace dump to see who fired me"));
             }
 
             Stopwatch stopwatch = Stopwatch.createStarted();
