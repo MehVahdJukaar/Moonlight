@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
-import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
@@ -18,6 +17,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -58,7 +58,7 @@ public class TextUtil {
         return Pair.of(splitLines, 1f / scalingFactor);
     }
 
-    public static FormattedText parseText(String s, HolderLookup.Provider provider) {
+    public static FormattedText parseText(String s, @Nullable HolderLookup.Provider provider) {
         try {
             FormattedText mutableComponent = Component.Serializer.fromJson(s, provider);
             if (mutableComponent != null) {

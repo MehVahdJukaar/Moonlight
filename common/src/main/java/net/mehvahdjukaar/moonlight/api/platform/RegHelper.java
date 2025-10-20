@@ -5,11 +5,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
-import net.mehvahdjukaar.moonlight.api.misc.IAttachmentType;
-import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
-import net.mehvahdjukaar.moonlight.api.misc.Registrator;
-import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.misc.*;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
 import net.mehvahdjukaar.moonlight.api.resources.pack.SimplePackProvider;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
@@ -36,6 +34,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -345,6 +344,15 @@ public class RegHelper {
         throw new AssertionError();
     }
 
+    //give null network codec for no syncing
+    public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
+            ResourceLocation key, Function<ServerLevel, A> constructor,
+            Codec<A> codec, @Nullable StreamCodec<RegistryFriendlyByteBuf, A> networkCodec) {
+        WorldSavedDataType<A> instance = new WorldSavedDataType<>(key, constructor, codec, networkCodec);
+        register(key, () -> instance, MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.key());
+        return instance;
+    }
+
     public static <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
             ResourceLocation name, MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
         return register(name, () -> PlatHelper.newParticle(codec, streamCodec), Registries.PARTICLE_TYPE);
@@ -454,6 +462,12 @@ public class RegHelper {
     @ExpectPlatform
     public static <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
         throw new AssertionError();
+    }
+
+    public static <T> ResourceKey<Registry<T>> registerDataPackRegistry(ResourceLocation id, Codec<T> codec, @Nullable Codec<T> networkCodec) {
+        ResourceKey<Registry<T>> key = ResourceKey.createRegistryKey(id);
+        registerDataPackRegistry(key, codec, networkCodec);
+        return key;
     }
 
     @ExpectPlatform
@@ -777,8 +791,13 @@ public class RegHelper {
     }
 
     @ExpectPlatform
-    public static <A> IAttachmentType<A> regDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
+    public static <A> IAttachmentType<A> registerDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
         throw new AssertionError();
+    }
+
+    @Deprecated(forRemoval = true)
+    public static <A> IAttachmentType<A> regDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
+        return registerDataAttachment(id, config);
     }
 
 }

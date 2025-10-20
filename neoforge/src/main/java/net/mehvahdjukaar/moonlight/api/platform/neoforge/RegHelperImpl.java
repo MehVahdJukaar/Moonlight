@@ -437,7 +437,7 @@ public class RegHelperImpl {
         bus.addListener(consumer);
     }
 
-    public static <A> IAttachmentType<A> regDataAttachment(ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config) {
+    public static <A> IAttachmentType<A> registerDataAttachment(ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config) {
         var attachment = RegHelper.register(id,
                 () -> makeDataAttachmentBuilder(config).build(),
                 NeoForgeRegistries.Keys.ATTACHMENT_TYPES);

@@ -16,6 +16,7 @@ public class ModNetworking {
         event.registerClientBound(ClientBoundSendLoginPacket.TYPE);
         event.registerClientBound(ClientBoundOnPistonMovedBlockPacket.TYPE);
         event.registerClientBound(ClientBoundParticleAroundBlockPacket.TYPE);
+        event.registerClientBound(ClientBoundSyncWorldDataMessage.TYPE);
         event.registerServerBound(ServerBoundItemLeftClickPacket.TYPE);
         event.registerBidirectional(SyncConfigsMessage.TYPE);
 

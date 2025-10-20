@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api;
 
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.BlockPlacerItem;
 import net.mehvahdjukaar.moonlight.api.map.MLMapDecorationsComponent;
+import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -9,6 +10,7 @@ import net.mehvahdjukaar.moonlight.core.criteria_triggers.GrindItemTrigger;
 import net.mehvahdjukaar.moonlight.core.loot.OptionalItemPool;
 import net.mehvahdjukaar.moonlight.core.loot.OptionalPropertyCondition;
 import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.item.Item;
@@ -28,6 +30,8 @@ public class MoonlightRegistry {
     public static void init() {
     }
 
+    public static final Registry<WorldSavedDataType<?>> WORLD_SAVED_DATA_TYPE_REGISTRY =
+            RegHelper.registerRegistry(res("world_saved_data_type"), true);
 
     public static final Supplier<PlacementModifierType<CaveFilter>> CAVE_MODIFIER = RegHelper.registerPlacementModifier(
             res("below_heightmaps"), CaveFilter.Type::new);

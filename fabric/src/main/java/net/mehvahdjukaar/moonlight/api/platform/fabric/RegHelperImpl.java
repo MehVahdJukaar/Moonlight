@@ -389,7 +389,7 @@ public class RegHelperImpl {
     }
 
 
-    public static <A> IAttachmentType<A> regDataAttachment(ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config) {
+    public static <A> IAttachmentType<A> registerDataAttachment(ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config) {
         var obj = makeDataAttachmentBuilder(config).buildAndRegister(id);
         return new AttachmentWrapper<>(obj);
     }
