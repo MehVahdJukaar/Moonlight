@@ -1,1 +1,1 @@
-- fixed a critical issue with fluid tanks codec being incorrect which caused them to create invalid nbt having a termination nbt tag which would then abruptly cutoff chunk data when that was inserted as game would stop reading there causing the chunk data to be invalid and truncated
+- added helpers to easily register synced world tied data
