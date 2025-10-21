@@ -1,9 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
-public interface IAttachmentType<A> {
+import org.jetbrains.annotations.Nullable;
+
+public interface IAttachmentType<A, T> {
 
     //Unchecked, Only works with attachment holders objects
-    A getOrCreate(Object obj);
+    A getOrCreate(T obj);
 
-    A getOrNull(Object obj);
+    A getOrNull(T obj);
+
+    void set(T attachmentHolder, @Nullable A data);
+
+    void sync(T attachmentHolder);
 }

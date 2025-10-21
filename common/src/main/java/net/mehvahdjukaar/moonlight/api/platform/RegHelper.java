@@ -495,8 +495,9 @@ public class RegHelper {
     }
 
 
-    @FunctionalInterface
     public interface ItemToTabEvent {
+
+        CreativeModeTab.ItemDisplayParameters getParameters();
 
         void addItems(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> target, boolean after, List<ItemStack> items);
 
@@ -791,13 +792,15 @@ public class RegHelper {
     }
 
     @ExpectPlatform
-    public static <A> IAttachmentType<A> registerDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
+    public static <A, T> IAttachmentType<A, T> registerDataAttachment(ResourceLocation id,
+                                                                   Supplier<AttachmentBuilder<A>> config,
+                                                                   Class<T> targetClass) {
         throw new AssertionError();
     }
 
     @Deprecated(forRemoval = true)
-    public static <A> IAttachmentType<A> regDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
-        return registerDataAttachment(id, config);
+    public static <A> IAttachmentType<A, Object> regDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
+        return registerDataAttachment(id, config, Object.class);
     }
 
 }

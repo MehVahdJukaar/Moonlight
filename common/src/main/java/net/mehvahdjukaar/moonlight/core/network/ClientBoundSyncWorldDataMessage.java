@@ -1,13 +1,17 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
 import com.google.common.base.Preconditions;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.misc.WorldSavedData;
 import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
+@SuppressWarnings("unchecked")
 public class ClientBoundSyncWorldDataMessage<D extends WorldSavedData> implements Message {
     private final D data;
 
@@ -26,20 +30,27 @@ public class ClientBoundSyncWorldDataMessage<D extends WorldSavedData> implement
 
     @Override
     public void write(RegistryFriendlyByteBuf buf) {
-        WorldSavedDataType<WorldSavedData> type = this.data.getType();
+        WorldSavedDataType<WorldSavedData> type = (WorldSavedDataType<WorldSavedData>) this.data.getType();
         WorldSavedDataType.STREAM_CODEC.encode(buf, type);
-        Preconditions.checkNotNull(this.data.getType().getStreamCodec()).encode(buf, this.data);
+        Preconditions.checkNotNull(type.getStreamCodec()).encode(buf, this.data);
     }
 
     @Override
     public void handle(Context context) {
-        //assigns data to client
-        this.data.getType().setClientInstance(this.data);
-        Moonlight.LOGGER.info("Synced Custom World Data [{}]", this.data.getType().getName());
+        handleSyncWorldData(this);
     }
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE.type();
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static void handleSyncWorldData(ClientBoundSyncWorldDataMessage<?> message) {
+        var l = Minecraft.getInstance().level;
+        //assigns data to client
+        WorldSavedDataType<WorldSavedData> type = (WorldSavedDataType<WorldSavedData>) message.data.getType();
+        type.setData(l, message.data);
+        Moonlight.LOGGER.info("Synced Custom World Data [{}]", type.getName());
     }
 }

@@ -65,7 +65,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
                 Moonlight.LOGGER.error("Failed to unload fake players for level {}", world, e);
             }
         });
-        ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(SoftFluidInternal::onDataSyncToPlayer);
+        ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(Moonlight::onDataSyncToPlayer);
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(DataMapBridge::onDataSyncToPlayer);
         ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
 

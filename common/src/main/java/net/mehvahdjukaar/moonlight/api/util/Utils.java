@@ -68,6 +68,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -329,6 +331,15 @@ public class Utils {
     public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> getTicker(BlockEntityType<A> type, BlockEntityType<E> targetType, BlockEntityTicker<? super E> ticker) {
         return targetType == type ? (BlockEntityTicker<A>) ticker : null;
     }
+
+    @Nullable
+    public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> getTicker(
+            BlockEntityType<A> type, BlockEntityType<E> targetType,
+            Consumer<A> tickFunc) {
+        return targetType == type ?
+        (level, blockPos, blockState, blockEntity) -> tickFunc.accept(blockEntity) : null;
+    }
+
 
     public static BlockState readBlockState(CompoundTag compound, @Nullable Level level) {
         HolderGetter<Block> holderGetter = level != null ? level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK.asLookup();

@@ -96,7 +96,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
         } else {
             boolean shouldRegenDueToInvalid = !this.packResources.initializeIfValid();
             if (shouldRegenDueToInvalid) {
-                Moonlight.LOGGER.info("Cache for {} at {} is invalid, will regenerate", this, this.packResources);
+                Moonlight.LOGGER.info("Cache for {} at {} is invalid or absent, will regenerate", this, this.packResources);
             }
             return shouldRegenDueToInvalid;
         }

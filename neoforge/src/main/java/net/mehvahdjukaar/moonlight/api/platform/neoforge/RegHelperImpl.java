@@ -21,6 +21,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.entity.*;
@@ -297,7 +298,13 @@ public class RegHelperImpl {
 
     private record ItemToTabEventImpl(BuildCreativeModeTabContentsEvent event) implements RegHelper.ItemToTabEvent {
 
+        @Override
+        public CreativeModeTab.ItemDisplayParameters getParameters() {
+            return event.getParameters();
+        }
+
         public void removeItems(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target) {
+
             event.getParentEntries().removeIf(target);
             event.getSearchEntries().removeIf(target);
         }
@@ -437,7 +444,11 @@ public class RegHelperImpl {
         bus.addListener(consumer);
     }
 
-    public static <A> IAttachmentType<A> registerDataAttachment(ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config) {
+    public static <A, T> IAttachmentType<A, T> registerDataAttachment(
+            ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config,  Class<T> targetClass) {
+        if (IAttachmentHolder.class.isAssignableFrom(targetClass)) {
+            Moonlight.LOGGER.warn("Registering data attachment for class {} that implements IAttachmentHolder. This is not necessary and may cause issues.", targetClass.getName());
+        }
         var attachment = RegHelper.register(id,
                 () -> makeDataAttachmentBuilder(config).build(),
                 NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
@@ -468,10 +479,10 @@ public class RegHelperImpl {
         MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
-    private record AttachmentWrapper<A>(Supplier<AttachmentType<A>> typeSupplier) implements IAttachmentType<A> {
+    private record AttachmentWrapper<A, T>(Supplier<AttachmentType<A>> typeSupplier) implements IAttachmentType<A, T> {
 
         @Override
-        public A getOrCreate(Object attachmentHolder) {
+        public A getOrCreate(T attachmentHolder) {
             if (attachmentHolder instanceof IAttachmentHolder h) {
                 return h.getData(typeSupplier);
             }
@@ -479,11 +490,30 @@ public class RegHelperImpl {
         }
 
         @Override
-        public A getOrNull(Object attachmentHolder) {
+        public A getOrNull(T attachmentHolder) {
             if (attachmentHolder instanceof IAttachmentHolder h) {
                 return h.getExistingDataOrNull(typeSupplier);
             }
             return null;
+        }
+
+        public void set(T attachmentHolder, @Nullable A data) {
+            if (attachmentHolder instanceof IAttachmentHolder h) {
+                if (data == null) {
+                    h.removeData(typeSupplier);
+                }
+                else h.setData(typeSupplier, data);
+            } else {
+                throw new IllegalArgumentException("Object " + attachmentHolder + " is not an attachment holder");
+            }
+        }
+
+        public void sync(T attachmentHolder) {
+            if (attachmentHolder instanceof IAttachmentHolder h) {
+                h.syncData(typeSupplier);
+            } else {
+                throw new IllegalArgumentException("Object " + attachmentHolder + " is not an attachment holder");
+            }
         }
     }
 

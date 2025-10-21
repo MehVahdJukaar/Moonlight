@@ -167,10 +167,13 @@ public class MoonlightForge {
 
     @SubscribeEvent
     public static void onDataSync(OnDatapackSyncEvent event) {
-        //send syncing packets just on login
         if (event.getPlayer() != null) {
-            SoftFluidInternal.onDataSyncToPlayer(event.getPlayer(), true);
-        }//else joined = false
+            Moonlight.onDataSyncToPlayer(event.getPlayer(), true);
+        } else {
+            for (var p : event.getPlayerList().getPlayers()) {
+                Moonlight.onDataSyncToPlayer(p, false);
+            }
+        }
     }
 
     @SubscribeEvent

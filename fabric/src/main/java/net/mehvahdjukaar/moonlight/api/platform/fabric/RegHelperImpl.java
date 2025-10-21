@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -52,6 +53,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -253,20 +255,28 @@ public class RegHelperImpl {
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
         Moonlight.assertInitPhase();
-        MoonlightFabric.AFTER_SETUP_WORK.add(() -> {
-            RegHelper.ItemToTabEvent event = (tab, target, after, items) ->
-                    ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> {
-                        if (target == null) {
-                            entries.acceptAll(items);
+        ItemGroupEvents.MODIFY_ENTRIES_ALL.register((creativeModeTab, entries) -> {
+            ResourceKey<CreativeModeTab> tabKey = BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(creativeModeTab).get();
+            eventListener.accept(new RegHelper.ItemToTabEvent() {
+                @Override
+                public CreativeModeTab.ItemDisplayParameters getParameters() {
+                    return entries.getContext();
+                }
+
+                @Override
+                public void addItems(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> target, boolean after, List<ItemStack> items) {
+                    if (tab != tabKey) return;
+                    if (target == null) {
+                        entries.acceptAll(items);
+                    } else {
+                        if (after) {
+                            entries.addAfter(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                         } else {
-                            if (after) {
-                                entries.addAfter(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                            } else {
-                                entries.addBefore(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-                            }
+                            entries.addBefore(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                         }
-                    });
-            eventListener.accept(event);
+                    }
+                }
+            });
         });
     }
 
@@ -389,7 +399,11 @@ public class RegHelperImpl {
     }
 
 
-    public static <A> IAttachmentType<A> registerDataAttachment(ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config) {
+    public static <A, T> IAttachmentType<A, T> registerDataAttachment(
+            ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config, Class<T> targetClass) {
+        if (AttachmentTarget.class.isAssignableFrom(targetClass)) {
+            Moonlight.LOGGER.warn("Registering data attachment for class {} that implements AttachmentHolder. This is not necessary and may cause issues.", targetClass.getName());
+        }
         var obj = makeDataAttachmentBuilder(config).buildAndRegister(id);
         return new AttachmentWrapper<>(obj);
     }
@@ -416,10 +430,10 @@ public class RegHelperImpl {
                 Arrays.stream(block).forEach(typeKey::addSupportedBlock)));
     }
 
-    private record AttachmentWrapper<A>(AttachmentType<A> type) implements IAttachmentType<A> {
+    private record AttachmentWrapper<A, T>(AttachmentType<A> type) implements IAttachmentType<A, T> {
 
         @Override
-        public A getOrCreate(Object obj) {
+        public A getOrCreate(T obj) {
             if (obj instanceof AttachmentTarget h) {
                 return h.getAttachedOrCreate(type);
             }
@@ -427,11 +441,29 @@ public class RegHelperImpl {
         }
 
         @Override
-        public A getOrNull(Object obj) {
+        public A getOrNull(T obj) {
             if (obj instanceof AttachmentTarget h) {
                 return h.getAttached(type);
             }
             return null;
+        }
+
+        @Override
+        public void set(T attachmentHolder, @Nullable A data) {
+            if (attachmentHolder instanceof AttachmentTarget h) {
+                if (data == null) {
+                    h.removeAttached(type);
+                } else h.setAttached(type, data);
+            } else {
+                throw new IllegalArgumentException("Object " + attachmentHolder + " is not an attachment holder");
+            }
+        }
+
+        @Override
+        public void sync(T attachmentHolder) {
+            if (attachmentHolder instanceof AttachmentTarget h) {
+                h.modifyAttached(type, (a) -> a);
+            }
         }
     }
 }

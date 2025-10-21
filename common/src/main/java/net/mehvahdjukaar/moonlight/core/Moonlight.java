@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.integration.HardcodedBlockTypes;
 import net.mehvahdjukaar.moonlight.api.misc.*;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
@@ -19,6 +20,7 @@ import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundSyncWorldDataMessage;
 import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
@@ -26,15 +28,15 @@ import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.DebugBlockTypes;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -125,6 +127,19 @@ public class Moonlight {
                 }
                 i++;
             }
+        }
+    }
+
+    @EventCalled
+    public static void onDataSyncToPlayer(ServerPlayer player, boolean joined) {
+        //send syncing packets just on login. datapack registries don't change on reload
+        if (joined) {
+            SoftFluidInternal.onDataSyncToPlayer(player, true);
+        }
+        Level world = player.level();
+        for (var type : MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY) {
+            WorldSavedData data = type.getData(world);
+            NetworkHelper.sendToClientPlayer(player, new ClientBoundSyncWorldDataMessage<>(data));
         }
     }
 

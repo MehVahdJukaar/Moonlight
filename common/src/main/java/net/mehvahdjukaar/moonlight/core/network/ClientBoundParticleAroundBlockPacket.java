@@ -52,7 +52,7 @@ public class ClientBoundParticleAroundBlockPacket implements Message {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void handleSpawnBlockParticlePacket(ClientBoundParticleAroundBlockPacket message) {
+    private static void handleSpawnBlockParticlePacket(ClientBoundParticleAroundBlockPacket message) {
         var l = Minecraft.getInstance().level;
 
         switch (message.type) {
