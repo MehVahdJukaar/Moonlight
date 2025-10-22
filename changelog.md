@@ -1,1 +1,1 @@
-- added helpers to easily register synced world tied data
+- fixed a very rare concurrency issue

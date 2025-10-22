@@ -72,6 +72,8 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import org.jetbrains.annotations.ApiStatus;
@@ -356,6 +358,11 @@ public class RegHelper {
     public static <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
             ResourceLocation name, MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
         return register(name, () -> PlatHelper.newParticle(codec, streamCodec), Registries.PARTICLE_TYPE);
+    }
+
+    public static <T extends LootItemFunction> RegSupplier<LootItemFunctionType<T>> registerLootFunction(
+            ResourceLocation name, MapCodec<T> codec) {
+        return register(name, () -> new LootItemFunctionType<>(codec), Registries.LOOT_FUNCTION_TYPE);
     }
 
     //TODO: change to supplier

@@ -41,7 +41,7 @@ public class ColorUtils {
             int parsedValue = Integer.parseUnsignedInt(st, 16);
             return DataResult.success(st);
         } catch (NumberFormatException e) {
-            return DataResult.error(() -> "Invalid color format. Must be in hex format (0xff00ff00, #ff00ff00, ff00ff00) or integer value");
+            return DataResult.error(() -> "Invalid color format. Must be in ARGB hex format ('0xff00ff00', '#ff00ff00', 'ff00ff00') or its Integer value");
         }
     }
 

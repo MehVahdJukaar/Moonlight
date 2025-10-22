@@ -61,7 +61,12 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         this.initialized = true;
         //this.bind(); // assign gpu texture id
         //register this texture. Call at the right time or stuff will get messed up
-        Minecraft.getInstance().getTextureManager().register(resourceLocation, this);
+        if (RenderSystem.isOnRenderThread()) {
+            Minecraft.getInstance().getTextureManager().register(resourceLocation, this);
+        } else {
+            RenderSystem.recordRenderCall(() ->
+                    Minecraft.getInstance().getTextureManager().register(resourceLocation, this));
+        }
         redraw();
     }
 
@@ -150,7 +155,13 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         }
         //dont do this, it causes many issues
         //it also causes it to keep being drawn...
-        if (this.initialized) Minecraft.getInstance().getTextureManager().release(resourceLocation);
+        if (this.initialized) {
+            if (RenderSystem.isOnRenderThread()) {
+                Minecraft.getInstance().getTextureManager().release(resourceLocation);
+            } else {
+                RenderSystem.recordRenderCall(() -> Minecraft.getInstance().getTextureManager().release(resourceLocation));
+            }
+        }
     }
 
     public NativeImage getPixels() {
