@@ -30,7 +30,9 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
     @Override
     public void addResource(ResourceLocation id, byte[] bytes) {
         try {
-            writer.writeFast(path, bytes);
+            // Write to the actual resource file path (not the root directory)
+            Path resPath = RPUtils.getResourcePath(this.path, id, this.packType);
+            writer.writeFast(resPath, bytes);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -38,9 +40,9 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
 
     @Override
     public void removeResource(ResourceLocation id) {
-        Path resPath = RPUtils.getResourcePath(path, id, this.packType);
+        Path resPath = RPUtils.getResourcePath(this.path, id, this.packType);
         try {
-            FileUtils.deleteDirectory(resPath.toFile());
+            deleteRecursively(resPath);
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to delete resource {}", id, e);
         }
@@ -48,18 +50,24 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
 
     @Override
     public void removeRootResource(String name) {
-        //no op
+        // no-op
     }
 
     @Override
     public boolean clearAllResources() {
-        //delete the whole folder
+        // delete the whole folder (or heal if a stray file exists at root)
         Stopwatch stopwatch = Stopwatch.createStarted();
         try {
             writer.clear();
-            FileUtils.deleteDirectory(path.toFile());
+            if (Files.isDirectory(path)) {
+                FileUtils.deleteDirectory(path.toFile());
+            } else {
+                // old/bad state: root path is a file; just delete it
+                Files.deleteIfExists(path);
+            }
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to clear cache pack resources at {}", path, e);
+            return false;
         }
         Moonlight.LOGGER.info("Cleared cache pack resources at {} in {}", path, stopwatch);
         return true;
@@ -67,6 +75,16 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
 
     @Override
     public boolean initializeIfValid() {
+        // Heal state where the root path was accidentally created as a file
+        if (Files.exists(path) && !Files.isDirectory(path)) {
+            try {
+                Files.delete(path);
+            } catch (IOException e) {
+                Moonlight.LOGGER.warn("Failed to remove invalid cache file at {}", path, e);
+                return false;
+            }
+        }
+
         boolean dirExists = Files.isDirectory(path);
         if (dirExists) {
             if (CommonConfigs.FASTER_CACHE_SEARCH.get()) {
@@ -94,15 +112,22 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
         return false;
     }
 
+    private static void deleteRecursively(Path p) throws IOException {
+        if (Files.isDirectory(p)) {
+            FileUtils.deleteDirectory(p.toFile());
+        } else {
+            Files.deleteIfExists(p);
+        }
+    }
 
     private final class SafeWriter {
         private final Set<Path> dirCache = ConcurrentHashMap.newKeySet();
 
-        public void writeFast(Path path, byte[] bytes) throws IOException {
-            final Path parent = path.getParent();
-            final Path normParent = parent == null ? null : parent.toAbsolutePath().normalize();
+        public void writeFast(Path filePath, byte[] bytes) throws IOException {
+            final Path parent = filePath.getParent();
+            final Path normParent = (parent == null) ? null : parent.toAbsolutePath().normalize();
 
-            // Fast path: create once per unique parent
+            // Fast path: create the parent directory once per unique parent
             if (normParent != null && dirCache.add(normParent)) {
                 Files.createDirectories(normParent);
             }
@@ -110,7 +135,7 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
             int attempts = 0;
             while (true) {
                 try {
-                    Files.write(path, bytes,
+                    Files.write(filePath, bytes,
                             StandardOpenOption.CREATE,
                             StandardOpenOption.TRUNCATE_EXISTING);
                     return; // success

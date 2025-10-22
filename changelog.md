@@ -1,1 +1,1 @@
-- fixed a very rare concurrency issue
+- another hotfix for a issue when deleting resource caches
