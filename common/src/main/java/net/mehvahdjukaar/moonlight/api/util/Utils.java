@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import io.netty.util.internal.UnstableApi;
@@ -57,19 +58,12 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -337,7 +331,7 @@ public class Utils {
             BlockEntityType<A> type, BlockEntityType<E> targetType,
             Consumer<A> tickFunc) {
         return targetType == type ?
-        (level, blockPos, blockState, blockEntity) -> tickFunc.accept(blockEntity) : null;
+                (level, blockPos, blockState, blockEntity) -> tickFunc.accept(blockEntity) : null;
     }
 
 
@@ -400,6 +394,11 @@ public class Utils {
         return null;
     }
 
+    public static <A> MapCodec<A> safeOptFieldOf(Codec<A> c, String name, Supplier<A> defaultValue) {
+        return Codec.optionalField(name, c, false).xmap(
+                (o) -> o.orElse(defaultValue.get()),
+                (a) -> Objects.equals(a, defaultValue.get()) ? Optional.empty() : Optional.of(a));
+    }
 
     @ExpectPlatform
     public static <K, V, C extends BaseMapCodec<K, V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec) {

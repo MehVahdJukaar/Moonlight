@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
+import com.google.common.base.Preconditions;
 import com.mojang.serialization.Lifecycle;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.mehvahdjukaar.moonlight.api.client.ICustomItemRendererProvider;
@@ -82,7 +83,7 @@ public class RegistryQueue<T> {
 
         @Override
         public Holder<T> getHolder() {
-            return holder;
+            return Preconditions.checkNotNull(holder, "Registry entry not initialized yet: " + id);
         }
 
         void initialize() {
