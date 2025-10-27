@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.api.EnvType;
@@ -16,9 +17,13 @@ import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenCustomMenuMessage;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundSpawnCustomEntityMessage;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
@@ -44,6 +49,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.*;
@@ -282,6 +288,21 @@ public class PlatHelperImpl {
 
     public static boolean isFakePlayer(ServerPlayer instance) {
         return instance instanceof FakePlayer;
+    }
+
+    private record FabricCondition(ResourceCondition condition) implements LoaderCondition {
+        @Override
+        public boolean test(HolderLookup.Provider ra) {
+            return condition.test(ra);
+        }
+    }
+
+    private static final MapCodec<FabricCondition> CONDITION_CODEC =
+            ResourceCondition.CONDITION_CODEC.xmap(FabricCondition::new,
+                    FabricCondition::condition).fieldOf("fabric:load_conditions");
+
+    public static MapCodec<LoaderCondition> getConditionCodec() {
+       return (MapCodec) CONDITION_CODEC;
     }
 
 

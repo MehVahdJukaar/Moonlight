@@ -440,6 +440,7 @@ public class RegHelperImpl {
             throw new IllegalArgumentException("Object " + obj + " is not an attachment holder");
         }
 
+        @Nullable
         @Override
         public A getOrNull(T obj) {
             if (obj instanceof AttachmentTarget h) {

@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -42,6 +43,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -224,6 +226,10 @@ public class ForgeHelperImpl {
 
     public static boolean isInFluidThatCanExtinguish(Entity entity) {
         return entity.isInFluidType((a, b) -> a.canExtinguish(entity));
+    }
+
+    public static ResourceLocation getQueriedLootTableId(LootContext lootContext) {
+        return lootContext.getQueriedLootTableId();
     }
 }
 

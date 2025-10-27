@@ -23,20 +23,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class OptionalItemPool extends LootPoolSingletonContainer {
+public class ConfigItemPoolEntry extends LootPoolSingletonContainer {
 
-    public static final MapCodec<OptionalItemPool> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
+    public static final MapCodec<ConfigItemPoolEntry> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
             Codec.STRING.fieldOf("name").forGetter(o -> o.tagOrItemId)
-    ).and(singletonFields(instance)).apply(instance, OptionalItemPool::new));
+    ).and(singletonFields(instance)).apply(instance, ConfigItemPoolEntry::new));
 
     @Nullable
     private final Item item;
     private final String tagOrItemId;
 
-    OptionalItemPool(String tagOrItemId, int quality, int weight, List<LootItemCondition> lootItemConditions, List<LootItemFunction> lootItemFunctions) {
+    ConfigItemPoolEntry(String tagOrItemId, int quality, int weight, List<LootItemCondition> lootItemConditions, List<LootItemFunction> lootItemFunctions) {
         super(quality, weight, disableIfInvalid(tagOrItemId, lootItemConditions), lootItemFunctions);
         this.item = getOptional(tagOrItemId);
         this.tagOrItemId = tagOrItemId;
+
     }
 
     @Nullable
@@ -76,7 +77,7 @@ public class OptionalItemPool extends LootPoolSingletonContainer {
     }
 
     public static Builder<?> lootTableOptionalItem(String itemRes) {
-        return simpleBuilder((i, j, lootItemConditions, lootItemFunctions) -> new OptionalItemPool(itemRes, i, j, lootItemConditions, lootItemFunctions));
+        return simpleBuilder((i, j, lootItemConditions, lootItemFunctions) -> new ConfigItemPoolEntry(itemRes, i, j, lootItemConditions, lootItemFunctions));
     }
 
 }

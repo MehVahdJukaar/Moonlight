@@ -2,11 +2,15 @@ package net.mehvahdjukaar.moonlight.api.platform.neoforge;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
+import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleProvider;
@@ -50,6 +54,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
@@ -63,6 +68,7 @@ import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.common.MutableDataComponentHolder;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.conditions.AndCondition;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
@@ -303,6 +309,20 @@ public class PlatHelperImpl {
     }
 
 
+    private record ForgeCondition(ICondition condition) implements LoaderCondition {
+        @Override
+        public boolean test(HolderLookup.Provider ra) {
+            return condition.test(ICondition.IContext.EMPTY); //not the best
+        }
+    }
+
+    private static final MapCodec<ForgeCondition> CONDITION_CODEC =
+            ResourceConditionsBridge.SINGLE_OR_LIST.xmap(ForgeCondition::new,
+                    ForgeCondition::condition).fieldOf("neoforge:conditions");
+
+    public static MapCodec<LoaderCondition> getConditionCodec() {
+        return (MapCodec) CONDITION_CODEC;
+    }
 
 
 }

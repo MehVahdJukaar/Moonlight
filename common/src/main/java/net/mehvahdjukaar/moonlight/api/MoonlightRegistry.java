@@ -7,8 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.GrindItemTrigger;
-import net.mehvahdjukaar.moonlight.core.loot.OptionalItemPool;
-import net.mehvahdjukaar.moonlight.core.loot.OptionalPropertyCondition;
+import net.mehvahdjukaar.moonlight.core.loot.*;
 import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -41,13 +40,29 @@ public class MoonlightRegistry {
                     Blocks.VOID_AIR, new Item.Properties()));
 
     public static final Supplier<LootPoolEntryType> LAZY_ITEM = RegHelper.registerLootPoolEntry(
-            res("optional_item"), () -> OptionalItemPool.CODEC);
+            res("optional_item"), () -> OptionalItemPoolEntry.CODEC);
+
+    public static final Supplier<LootPoolEntryType> CONFIG_ITEM = RegHelper.registerLootPoolEntry(
+            res("config_item"), () -> ConfigItemPoolEntry.CODEC);
 
     public static final Supplier<LootItemConditionType> LAZY_PROPERTY = RegHelper.registerLootCondition(
             res("optional_block_state_property"), () -> OptionalPropertyCondition.CODEC);
 
     public static final Supplier<GrindItemTrigger> GRIND_TRIGGER = RegHelper.registerTriggerType(
             res("grind_item"), GrindItemTrigger::new);
+
+    @Deprecated(forRemoval = true)
+    public static final Supplier<LootItemConditionType> ICONDITION_LOOT_CONDITION = RegHelper.registerLootCondition(
+            Moonlight.res("iconditions"), () -> ResourceLootItemCondition.CODEC);
+
+    public static final Supplier<LootItemConditionType> RESOURCE_CONDITION_LOOT_ITEM_CONDITION = RegHelper.registerLootCondition(
+            Moonlight.res("load_conditions"), () -> ResourceLootItemCondition.CODEC);
+
+    public static final Supplier<LootItemConditionType> PATTERN_MATCH_CONDITION = RegHelper.registerLootCondition(
+            Moonlight.res("loot_table_id_pattern"), () -> PatternMatchLootItemCondition.CODEC);
+
+
+
 
     public static final Supplier<DataComponentType<PotionBottleType>> BOTTLE_TYPE = RegHelper.registerDataComponent(
             res("bottle_type"), () -> DataComponentType.<PotionBottleType>builder()

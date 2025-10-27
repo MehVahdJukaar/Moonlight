@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -188,5 +190,9 @@ public class ForgeHelperImpl {
 
     public static <T> Codec<Optional<T>> conditionalCodec(Codec<T> codec) {
         return codec.xmap(Optional::of, Optional::get);
+    }
+
+    public static ResourceLocation getQueriedLootTableId(LootContext lootContext) {
+        return ResourceLocation.withDefaultNamespace("unknown"); //TODO: add
     }
 }

@@ -3,9 +3,7 @@ package net.mehvahdjukaar.moonlight.api.events;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AfterLanguageLoadEvent implements SimpleEvent {
 
@@ -16,6 +14,14 @@ public class AfterLanguageLoadEvent implements SimpleEvent {
     public AfterLanguageLoadEvent(Map<String, String> lines, List<String> info) {
         this.languageInfo = info;
         this.languageLines = lines;
+    }
+
+    public Collection<String> getLanguageInfo() {
+        return new ArrayList<>(languageInfo);
+    }
+
+    public Collection<String> getAllEntries() {
+        return languageLines.values();
     }
 
     @Nullable

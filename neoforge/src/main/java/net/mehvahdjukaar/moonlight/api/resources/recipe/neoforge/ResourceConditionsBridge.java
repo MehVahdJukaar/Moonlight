@@ -27,8 +27,8 @@ public class ResourceConditionsBridge {
                     .dispatch("type", ICondition::codec, Function.identity());
     //we must use "type" key instead of "condition" that fabric uses as compound conditions do expect that
 
-    private static final Codec<List<ICondition>> LIST_CODEC = Utils.lenientListCodec(REMAPPING_CODEC);
-    private static final Codec<ICondition> SINGLE_OR_LIST = Codec.withAlternative(REMAPPING_CODEC, LIST_CODEC,
+    public static final Codec<List<ICondition>> LIST_CODEC = Utils.lenientListCodec(REMAPPING_CODEC);
+    public static final Codec<ICondition> SINGLE_OR_LIST = Codec.withAlternative(REMAPPING_CODEC, LIST_CODEC,
             AndCondition::new);
 
 

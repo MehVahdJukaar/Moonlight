@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.fabric;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -43,6 +44,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     public void onInitialize() {
 
         Moonlight.commonInit();
+
 
         ServerPlayConnectionEvents.JOIN.register((l, s, m) -> NetworkHelper.sendToClientPlayer(l.player,
                 new ClientBoundSendLoginPacket()));

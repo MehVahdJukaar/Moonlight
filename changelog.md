@@ -1,1 +1,2 @@
-- another hotfix for a issue when deleting resource caches
+- more api additions and improvements
+- added 2 new loot item conditions that allow loading forge and fabric conditions inside a loot condtionN

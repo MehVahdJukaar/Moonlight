@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+//TODO: extend DynamicTexture and initialize instantly
 public class FrameBufferBackedDynamicTexture extends AbstractTexture {
 
     //runs when texture is initialized and populates it. Runs each tick if its tickable

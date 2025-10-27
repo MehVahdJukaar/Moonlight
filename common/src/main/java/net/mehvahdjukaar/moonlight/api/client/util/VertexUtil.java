@@ -114,10 +114,10 @@ public class VertexUtil {
         float ny = vector3f.y;
         float nz = vector3f.z;
         //avoids having to multiply 3 times
-        vertF(builder, poseStack, x0, y1, 0, u0, v0, r, g, b, a, lu, lv, nx, ny, nz);
-        vertF(builder, poseStack, x1, y1, 0, u1, v0, r, g, b, a, lu, lv, nx, ny, nz);
-        vertF(builder, poseStack, x1, y0, 0, u1, v1, r, g, b, a, lu, lv, nx, ny, nz);
-        vertF(builder, poseStack, x0, y0, 0, u0, v1, r, g, b, a, lu, lv, nx, ny, nz);
+        vertF(builder, poseStack, x0, y1, 0, u1, v0, r, g, b, a, lu, lv, nx, ny, nz);
+        vertF(builder, poseStack, x1, y1, 0, u0, v0, r, g, b, a, lu, lv, nx, ny, nz);
+        vertF(builder, poseStack, x1, y0, 0, u0, v1, r, g, b, a, lu, lv, nx, ny, nz);
+        vertF(builder, poseStack, x0, y0, 0, u1, v1, r, g, b, a, lu, lv, nx, ny, nz);
     }
 
     public static void vert(VertexConsumer builder, PoseStack poseStack, float x, float y, float z,

@@ -2,17 +2,10 @@ package net.mehvahdjukaar.moonlight.neoforge;
 
 
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
-import net.mehvahdjukaar.moonlight.api.resources.ResType;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicServerResourceProvider;
-import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
-import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -24,17 +17,12 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Consumer;
-
 public class MoonlightForgeClient {
 
     public static void init(IEventBus modEventBus) {
         modEventBus.addListener(MoonlightForgeClient::afterLoad);
         modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
         NeoForge.EVENT_BUS.addListener(MoonlightForgeClient::onInputUpdate);
-
     }
 
     public static void afterLoad(FMLLoadCompleteEvent event) {

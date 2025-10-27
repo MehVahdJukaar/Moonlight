@@ -6,27 +6,17 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.neoforge.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
-import net.mehvahdjukaar.moonlight.api.resources.ResType;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicServerResourceProvider;
-import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
-import net.mehvahdjukaar.moonlight.api.resources.pack.PackGenerationStrategy;
-import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.ModIngredientTypes;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
-import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.integration.neoforge.ModConfigSelectScreen;
-import net.mehvahdjukaar.moonlight.core.misc.neoforge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.neoforge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.VanillaPackResourcesBuilder;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -37,8 +27,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ConfigTracker;
-import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -57,11 +45,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 /**
  * Author: MehVahdJukaar
@@ -78,7 +64,6 @@ public class MoonlightForge {
         NeoForge.EVENT_BUS.register(MoonlightForge.class);
         bus.addListener(MoonlightForge::registerCapabilities);
         ModLootModifiers.register();
-        ModLootConditions.register();
         ModIngredientTypes.register();
         ResourceConditionsBridge.init();
 

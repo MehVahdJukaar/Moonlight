@@ -7,6 +7,7 @@ public interface IAttachmentType<A, T> {
     //Unchecked, Only works with attachment holders objects
     A getOrCreate(T obj);
 
+    @Nullable
     A getOrNull(T obj);
 
     void set(T attachmentHolder, @Nullable A data);

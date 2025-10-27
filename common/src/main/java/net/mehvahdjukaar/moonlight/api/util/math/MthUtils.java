@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
+import com.google.common.base.Preconditions;
+import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -41,6 +43,20 @@ public class MthUtils {
         return (float) Mth.atan2(x1 * y1 - y1 * x2, x1 * x2 + y1 * y2);
     }
 
+    public static BlockPos relativePos(BlockPos pos, Direction normal, int left, int top, int forward) {
+        Preconditions.checkArgument(normal.getAxis() != Direction.Axis.Y, "Normal direction cannot be vertical");
+        if (forward != 0) {
+            pos = pos.relative(normal, forward);
+        }
+        if (left != 0) {
+            Direction leftDir = normal.getCounterClockWise();
+            pos = pos.relative(leftDir, left);
+        }
+        if (top != 0) {
+            pos = pos.above(top);
+        }
+        return pos;
+    }
 
     /**
      * Clamps the given angle between two boundary angles, handling wrap-around at 360 degrees.

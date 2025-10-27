@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.saveddata.maps.MapDecorationType;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -59,6 +61,7 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
+    //TODO: move these 3 to plat helper
     @Deprecated(forRemoval = true)
     public static <T> DynamicOps<T> addConditionOps(DynamicOps<T> ops) {
         return ops;
@@ -273,5 +276,10 @@ public class ForgeHelper {
     @ExpectPlatform
     public static void registerDefaultContainerCap(BlockEntityType<? extends Container> container) {
 
+    }
+
+    @ExpectPlatform
+    public static ResourceLocation getQueriedLootTableId(LootContext lootContext) {
+        throw new AssertionError();
     }
 }

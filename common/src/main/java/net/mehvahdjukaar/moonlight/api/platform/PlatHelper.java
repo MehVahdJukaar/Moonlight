@@ -2,11 +2,13 @@ package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
+import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -122,6 +124,11 @@ public class PlatHelper {
 
     @ExpectPlatform
     public static boolean isFakePlayer(ServerPlayer instance) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static MapCodec<LoaderCondition> getConditionCodec() {
         throw new AssertionError();
     }
 

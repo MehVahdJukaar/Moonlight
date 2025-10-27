@@ -53,10 +53,15 @@ public abstract class DynamicRenderedItemDisplayTile extends ItemDisplayTile imp
      *
      * @return true if the block should render with TESR
      */
+    @Deprecated(forRemoval = true)
     public boolean shouldRenderFancy(Vec3 cameraPos) {
+        return shouldRenderFancy();
+    }
+
+    public boolean shouldRenderFancy() {
         if (isNeverFancy()) return false;
 
-        boolean newFancyStatus = getFancyDistance(cameraPos);
+        boolean newFancyStatus = getFancyDistance();
         boolean oldStatus = this.isFancy;
         if (oldStatus != newFancyStatus) {
             this.isFancy = newFancyStatus;
@@ -75,8 +80,8 @@ public abstract class DynamicRenderedItemDisplayTile extends ItemDisplayTile imp
         return isFancy;
     }
 
-    protected boolean getFancyDistance(Vec3 cameraPos) {
-        LOD lod = new LOD(cameraPos, this.getBlockPos());
+    protected boolean getFancyDistance() {
+        LOD lod = LOD.at(this);
         return lod.isNear();
     }
 
