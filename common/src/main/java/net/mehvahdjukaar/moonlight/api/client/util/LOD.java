@@ -51,7 +51,7 @@ public final class LOD {
         this.camPos = camera.getPosition();
         this.camDir = new Vec3(camera.getLookVector()).normalize();
         this.objCenter = objCenter;
-        this.distSq = _isScoping() ? 1 : camPos.distanceToSqr(objCenter);
+        this.distSq = isScoping() ? 1 : camPos.distanceToSqr(objCenter);
     }
 
     // Private ctor for MAX and legacy paths that only care about distance

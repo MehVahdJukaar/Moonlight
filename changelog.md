@@ -1,2 +1,3 @@
-- more api additions and improvements
-- added 2 new loot item conditions that allow loading forge and fabric conditions inside a loot condtionN
+- reload instance wrapper will keep the vanilla reload instance running on the render thread, preventing some issues with mods initializing render calls in this time. Still all rendering calls should be made thread safe so that's primairly their issue too.
+- fixed and improved LOD class
+- 
