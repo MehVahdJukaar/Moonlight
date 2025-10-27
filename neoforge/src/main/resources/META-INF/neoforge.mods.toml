@@ -5,6 +5,7 @@ loaderVersion = "${loader_version_range}"
 license = "${mod_license}"
 issueTrackerURL = "${mod_github}/issues"
 
+
 [[mixins]]
 config = "${mod_id}.mixins.json"
 [[mixins]]
@@ -19,7 +20,8 @@ authors = "${mod_authors}"
 credits = "${mod_credits}"
 description = '''${mod_description}'''
 modUrl = "${mod_homepage}"
-itemIcon="minecraft:brush" #catalogue icon
+updateJSONURL = "https://api.modrinth.com/updates/${mod_id}/neoforge_updates.json"
+itemIcon = "minecraft:brush" #catalogue icon
 
 [[dependencies.${mod_id}]]
     modId = "neoforge"
