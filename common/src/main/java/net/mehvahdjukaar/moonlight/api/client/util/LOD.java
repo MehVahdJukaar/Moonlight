@@ -70,7 +70,10 @@ public final class LOD {
     }
 
     // ---- BACKWARD-COMP: old constructors ----
-    /** Old: new LOD(Camera, BlockPos) */
+
+    /**
+     * Old: new LOD(Camera, BlockPos)
+     */
     @Deprecated(forRemoval = true)
     public LOD(Camera camera, BlockPos pos) {
         this.camPos = camera.getPosition();
@@ -79,7 +82,9 @@ public final class LOD {
         this.distSq = isScoping() ? 1 : this.camPos.distanceToSqr(this.objCenter);
     }
 
-    /** Old: new LOD(Vec3 cameraPos, BlockPos pos) */
+    /**
+     * Old: new LOD(Vec3 cameraPos, BlockPos pos)
+     */
     @Deprecated(forRemoval = true)
     public LOD(Vec3 cameraPos, BlockPos pos) {
         this.camPos = cameraPos;
@@ -89,18 +94,38 @@ public final class LOD {
     }
 
     // ---- distance helpers (use precomputed distSq) ----
-    public boolean isVeryNear() { return distSq <= VERY_NEAR_DIST; }
-    public boolean isNear()     { return distSq <= NEAR_DIST; }
-    public boolean isNearMed()  { return distSq <= NEAR_MED_DIST; }
-    public boolean isMedium()   { return distSq <= MEDIUM_DIST; }
-    public boolean isFar()      { return distSq <= FAR_DIST; }
+    public boolean isVeryNear() {
+        return distSq <= VERY_NEAR_DIST;
+    }
 
-    /** Generic max range check (if you want custom per-object limits). */
-    public boolean within(double maxDistSq) { return distSq <= maxDistSq; }
+    public boolean isNear() {
+        return distSq <= NEAR_DIST;
+    }
+
+    public boolean isNearMed() {
+        return distSq <= NEAR_MED_DIST;
+    }
+
+    public boolean isMedium() {
+        return distSq <= MEDIUM_DIST;
+    }
+
+    public boolean isFar() {
+        return distSq <= FAR_DIST;
+    }
+
+    /**
+     * Generic max range check (if you want custom per-object limits).
+     */
+    public boolean within(double maxDist) {
+        return distSq <= (maxDist * maxDist);
+    }
 
     // ---- plane facing / culling ----
 
-    /** Returns true if the plane should be culled (i.e., not rendered). */
+    /**
+     * Returns true if the plane should be culled (i.e., not rendered).
+     */
     public boolean isPlaneCulled(Vec3 normalVec) {
         return isPlaneCulled(normalVec, null, 0.0f);
     }
@@ -111,8 +136,8 @@ public final class LOD {
     }
 
     /**
-     * @param planeNormal unit-length normal (outward from the visible face)
-     * @param offset      optional offset from object center (null for none)
+     * @param planeNormal  unit-length normal (outward from the visible face)
+     * @param offset       optional offset from object center (null for none)
      * @param cosTolerance require normal·toCam > cosTolerance (0 = any front-facing)
      * @return true if culled (behind camera or backfacing beyond tolerance)
      */
@@ -136,13 +161,17 @@ public final class LOD {
 
     // ---- BACKWARD-COMP: old angle/focus helpers ----
 
-    /** Old API: quick helper */
+    /**
+     * Old API: quick helper
+     */
     @Deprecated(forRemoval = true)
     public static boolean isOutOfFocus(Vec3 cameraPos, BlockPos pos, float blockYaw) {
         return isOutOfFocus(cameraPos, pos, blockYaw, 0, Direction.UP, 0);
     }
 
-    /** Old API: full helper using direction and offset */
+    /**
+     * Old API: full helper using direction and offset
+     */
     @Deprecated(forRemoval = true)
     public static boolean isOutOfFocus(Vec3 cameraPos, BlockPos pos, float blockYaw,
                                        float degMargin, Direction dir, float offset) {
@@ -150,20 +179,26 @@ public final class LOD {
         return isOutOfFocus(relAngle, blockYaw, degMargin);
     }
 
-    /** Old API: angle-only overload */
+    /**
+     * Old API: angle-only overload
+     */
     @Deprecated(forRemoval = true)
     public static boolean isOutOfFocus(float relativeAngle, float blockYaw, float degMargin) {
         // Preserve old logic (note: this matched the legacy semantics)
         return (net.minecraft.util.Mth.degreesDifference(relativeAngle, blockYaw - 90) > -degMargin);
     }
 
-    /** Old API: relative angle camera->block center */
+    /**
+     * Old API: relative angle camera->block center
+     */
     @Deprecated(forRemoval = true)
     public static float getRelativeAngle(Vec3 cameraPos, BlockPos pos) {
         return getRelativeAngle(cameraPos, pos, Direction.UP, 0);
     }
 
-    /** Old API: relative angle with offset along a face direction */
+    /**
+     * Old API: relative angle with offset along a face direction
+     */
     @Deprecated(forRemoval = true)
     public static float getRelativeAngle(Vec3 cameraPos, BlockPos pos, Direction dir, float offset) {
         // Matches legacy implementation
@@ -173,5 +208,7 @@ public final class LOD {
     }
 
     // ---- small util ----
-    public static int sq(int v) { return v * v; }
+    public static int sq(int v) {
+        return v * v;
+    }
 }

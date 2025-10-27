@@ -22,6 +22,7 @@ import org.joml.Matrix4f;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class RenderedTexturesManager {
 
@@ -42,6 +43,29 @@ public class RenderedTexturesManager {
     //clears the texture cache and forge all to be re-rendered
     public static void clearCache() {
         TEXTURE_CACHE.invalidateAll();
+    }
+
+
+    /**
+     * Gets a texture object on which you'll be able to directly draw onto as its in essence a frame buffer
+     * Remember to call isInitialized() as the returned texture might be empty
+     * For practical purposes you are only interested to call something like buffer.getBuffer(RenderType.entityCutout(texture.getTextureLocation()));
+     *
+     * @param id                     id of this texture. must be unique
+     **/
+    public static <T extends FrameBufferBackedDynamicTexture> T  requestTexture(
+            ResourceLocation id, Supplier<T> textureSupplier) {
+        var texture = TEXTURE_CACHE.getIfPresent(id);
+        if (texture == null) {
+            texture = textureSupplier.get();
+            TEXTURE_CACHE.put(id, texture);
+            //add to queue which will render them next rendering cycle. Returned texture will be blank
+            //REQUESTED_FOR_RENDERING.add(texture);
+
+            RenderSystem.recordRenderCall(texture::initialize);
+        }
+        texture.markForUpdate();
+        return (T) texture;
     }
 
     /**
@@ -71,7 +95,7 @@ public class RenderedTexturesManager {
 
             RenderSystem.recordRenderCall(texture::initialize);
         }
-        texture.markUsed();
+        texture.markForUpdate();
         return texture;
     }
 

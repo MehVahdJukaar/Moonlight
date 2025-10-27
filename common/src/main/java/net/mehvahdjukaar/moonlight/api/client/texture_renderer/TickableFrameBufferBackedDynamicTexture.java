@@ -28,7 +28,12 @@ public class TickableFrameBufferBackedDynamicTexture extends FrameBufferBackedDy
     }
 
     @Override
-    protected void markUsed() {
+    public void markForUpdate() {
         shouldTick = true;
+    }
+
+    @Override
+    public void unMarkForUpdate() {
+        shouldTick = false;
     }
 }

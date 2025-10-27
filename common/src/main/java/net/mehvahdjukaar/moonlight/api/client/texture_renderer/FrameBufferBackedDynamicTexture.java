@@ -7,7 +7,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -231,6 +230,8 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
         return textureFiles;
     }
 
-    protected void markUsed() {
+    public void markForUpdate() {
+    }
+    public void unMarkForUpdate() {
     }
 }
