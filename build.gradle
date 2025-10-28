@@ -1,92 +1,71 @@
+import me.modmuss50.mpp.ReleaseType
+
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id "architectury-plugin" version "3.4-SNAPSHOT" apply false
     id "dev.architectury.loom" version "1.11-SNAPSHOT" apply false
-    id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
-    id "com.matthewprenger.cursegradle" version "1.4.0"
-    id "com.modrinth.minotaur" version "2.+"
+    id "io.github.juuxel.loom-quiltflower" version "1.7.1" apply false
+    id "me.modmuss50.mod-publish-plugin" version "0.8.4"
+    //id "com.matthewprenger.cursegradle" version "1.+"
+    //id "com.modrinth.minotaur" version "2.+"
 }
-
-architectury {
-    minecraft = minecraft_version
-}
-
 
 allprojects {
     apply plugin: "java"
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    archivesBaseName = mod_id
-    version = mod_version
     group = mod_group_id
-
+    version = mod_version
+    archivesBaseName = mod_id
 
     repositories {
-
-        flatDir {
-            dirs 'mods'
-        }
-
-        mavenLocal()
         mavenCentral()
+        mavenLocal()
+
+        flatDir { dirs "mods" }
 
         maven { url "https://maven.parchmentmc.org" }
-
-        maven {
-            url = "https://www.cursemaven.com"
-            allowInsecureProtocol = true
-        }
-
-        maven {
-            url "https://maven.firstdarkdev.xyz/snapshots"
-        }
-
-        maven {
-            name = 'Ladysnake Mods'
-            url = 'https://maven.ladysnake.org/releases'
-        }
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://maven.neoforged.net' }
-        maven { url "https://api.modrinth.com/maven"}
-        maven { url "https://maven.blamejared.com/"}
-
-        maven {
-            name = "Sinytra"
-            url = "https://maven.su5ed.dev/releases"
-        }
-
+        maven { url "https://www.cursemaven.com" }
+        maven { url "https://maven.firstdarkdev.xyz/snapshots" }
+        maven { url "https://maven.ladysnake.org/releases" }
+        maven { url "https://jitpack.io" }
+        maven { url "https://maven.neoforged.net" }
+        maven { url "https://api.modrinth.com/maven" }
+        maven { url "https://maven.blamejared.com/" }
+        maven { url "https://maven.su5ed.dev/releases" }
         maven { url "https://maven.shedaniel.me/" }
         maven { url "https://maven.terraformersmc.com/releases" }
-
-    }
-
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-        options.release = rootProject.java_version.toInteger()
     }
 
     java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(rootProject.java_version.toInteger())
+        }
         withSourcesJar()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = "UTF-8"
     }
 }
 
+architectury {
+    minecraft = minecraft_version
+}
 
 subprojects {
     apply plugin: "dev.architectury.loom"
     apply plugin: "io.github.juuxel.loom-quiltflower"
-    apply plugin: "com.matthewprenger.cursegradle"
-    apply plugin: "com.modrinth.minotaur"
+    apply plugin: "me.modmuss50.mod-publish-plugin"
+    //apply plugin: "com.matthewprenger.cursegradle"
+    //apply plugin: "com.modrinth.minotaur"
 
-    loom {
-        silentMojangMappingsLicense()
-    }
+    loom { silentMojangMappingsLicense() }
 
     dependencies {
         minecraft "com.mojang:minecraft:${minecraft_version}"
         mappings loom.layered() {
-            it.officialMojangMappings {
-                setNameSyntheticMembers(false)
-            }
+            it.officialMojangMappings { setNameSyntheticMembers(false) }
             it.parchment("org.parchmentmc.data:parchment-${parchment_version}")
         }
     }
@@ -95,9 +74,9 @@ subprojects {
         repositories {
             mavenLocal()
 
-            def nexusToken = System.getenv("NEXUS_TOKEN")
-            def nexusUser = System.getenv("NEXUS_USER")
-            if (nexusToken != null && nexusUser != null) {
+            def nexusToken = providers.environmentVariable("NEXUS_TOKEN")
+            def nexusUser = providers.environmentVariable("NEXUS_USER")
+            if (nexusToken && nexusUser) {
                 maven {
                     url = uri("https://registry.somethingcatchy.net/repository/maven-releases/")
                     credentials {
@@ -109,131 +88,113 @@ subprojects {
         }
     }
 
+    // --- Release metadata & per-loader config
+    def modLoader = project.name
+    def changelogFile = rootProject.file("changelog.md")
+    def mcVersions = listGameVersions(minecraft_min_version, minecraft_version)
+    def cfToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+    def mrToken = providers.environmentVariable("MODRINTH_TOKEN")
 
-    var env = System.getenv()
-    var modLoader = name
+    publishMods {
+        file = remapJar.archiveFile
+        type = parseReleaseType(release_type)
+        changelog = changelogFile.exists() ? changelogFile.text : ""
+        displayName = file.map { it.asFile.name }
 
-    var changelogFile = rootProject.file("changelog.md")
-    var changelogText = changelogFile.exists() ? changelogFile.text : ""
-
-    var versions = listGameVersions(minecraft_min_version, minecraft_version)
-
-    if (env.MODRINTH_TOKEN) {
-        modrinth {
-            projectId = rootProject.mod_id
-            uploadFile = tasks.remapJar
-            additionalFiles.add(tasks.remapSourcesJar)
-            gameVersions = versions
-            if (modLoader == "forge") {
-                loaders = ["neoforge"]
-            } else loaders = [modLoader]
-            changelog = changelogText
-            versionNumber = mod_version + "-" + modLoader
-            versionType = release_type
-            if (modLoader == "fabric") {
-                dependencies {
-                    required.project "fabric-api"
-                }
-            } else {
-                dependencies {
-                }
-            }
-        }
-    }
-
-    if (env.CURSEFORGE_TOKEN) {
-        curseforge {
-            apiKey = env.CURSEFORGE_TOKEN
-            project {
-                id = project_id
-                changelog = changelogText
-                releaseType = release_type
-                for (var ver : versions) {
-                    addGameVersion ver
-                }
-
-
-                if (modLoader == "neoforge") {
-                    addGameVersion("NeoForge")
-                } else addGameVersion modLoader.capitalize()
-
-                mainArtifact(tasks.remapJar)
-                addArtifact(tasks.remapSourcesJar)
-
+        if (cfToken) {
+            curseforge {
+                accessToken = cfToken
+                projectId = cf_project_id
+                clientRequired = true
+                serverRequired = true
+                minecraftVersions = mcVersions
+                modLoaders.add(modLoader)
                 if (modLoader == "fabric") {
-                    relations {
-                        requiredDependency "fabric-api"
+                    requires {
+                        slug = "fabric-api"
                     }
                 } else {
+                    requires {
+
+                    }
+                }
+            }
+        }
+
+        if (mrToken) {
+            modrinth {
+                accessToken = mrToken
+                projectId = mr_project_id
+                modLoaders.add(modLoader)
+                if (modLoader == "fabric") {
+                    requires {
+                        slug = "fabric-api"
+                    }
+                } else {
+                    requires {
+
+                    }
                 }
             }
         }
     }
+
 }
 
+ext.replaceProperties = [
+        minecraft_version    : minecraft_version,
+        minecraft_min_version: minecraft_min_version,
+        minecraft_max_version: minecraft_max_version,
+        pack_format_number   : pack_format_number,
 
-ext {
-    replaceProperties = [
-            minecraft_version    : minecraft_version,
-            minecraft_min_version: minecraft_min_version,
-            minecraft_max_version: minecraft_max_version,
-            pack_format_number   : pack_format_number,
+        mod_id               : mod_id,
+        mod_name             : mod_name,
+        mod_version          : mod_version,
+        mod_license          : mod_license,
+        mod_authors          : mod_authors,
+        mod_description      : mod_description,
+        mod_credits          : mod_credits,
+        mod_homepage         : mod_homepage,
+        mod_github           : mod_github,
 
-            mod_id               : mod_id,
-            mod_name             : mod_name,
-            mod_version          : mod_version,
-            mod_license          : mod_license,
-            mod_authors          : mod_authors,
-            mod_description      : mod_description,
-            mod_credits          : mod_credits,
-            mod_homepage         : mod_homepage,
-            mod_github           : mod_github,
+        neo_version          : neo_version,
+        neo_version_range    : neo_version_range,
+        loader_version_range : loader_version_range,
+]
 
-            neo_version          : neo_version,
-            neo_version_range    : neo_version_range,
-            loader_version_range : loader_version_range,
-    ]
-}
-
-
-task buildAndPublishAll {
-    dependsOn ':clean'
-    dependsOn ':build'
-    dependsOn ':neoforge:curseforge'
-    dependsOn ':neoforge:modrinth'
-    dependsOn ':fabric:curseforge'
-    dependsOn ':fabric:modrinth'
-}
-
-buildAndPublishAll.group = 'build'
-buildAndPublishAll.description = 'Runs clean, build, and publish forge and fabric'
-
-task buildAndPublishAllM {
-    dependsOn buildAndPublishAll
-    dependsOn ':publishToMavenLocal'
-}
-
-buildAndPublishAllM.group = 'build'
-buildAndPublishAllM.description = 'Runs clean, build, publish forge and fabric and uploads to maven local'
-
-static def listGameVersions(String string1, String string2) {
-    // Extract the base version and the starting and ending patch numbers
-    String baseVersion = string1
-    int startPatch = 0
-    int endPatch = Integer.parseInt(string2.split('\\.')[2])
-
-    // Initialize an array to hold the generated versions
+// --- Utils
+static def listGameVersions(String minVersion, String maxVersion) {
+// minVersion like "1.20", maxVersion like "1.20.4"
     def versions = []
-
-    // Add the base version (string1) to the array
-    versions << baseVersion
-
-    // Generate and add the patch versions
-    for (int i = startPatch + 1; i <= endPatch; i++) {
-        versions << "${baseVersion}.${i}"
+    versions << minVersion
+    int endPatch = Integer.parseInt(maxVersion.split('\\.')[2])
+    for (int i = 1; i <= endPatch; i++) {
+        versions << "${minVersion}.${i}"
     }
-
-    // Return the generated versions
     return versions
 }
 
+static ReleaseType parseReleaseType(String s) {
+    switch (s.toLowerCase()) {
+        case "alpha":
+            return ReleaseType.ALPHA
+        case "beta":
+            return ReleaseType.BETA
+        default:
+            return ReleaseType.STABLE
+    }
+}
+
+
+tasks.register('buildAndpublishAll') {
+    dependsOn ':clean'
+    dependsOn ':build'
+    dependsOn ':neoforge:publishCurseforge'
+    dependsOn ':neoforge:publishModrinth'
+    dependsOn ':fabric:publishCurseforge'
+    dependsOn ':fabric:publishModrinth'
+    dependsOn ':publish'
+
+    group = 'build'
+    description = 'Runs clean, build, and publish neoforge and fabric'
+}
