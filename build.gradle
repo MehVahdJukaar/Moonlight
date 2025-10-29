@@ -162,7 +162,7 @@ subprojects {
 
     if (cfToken.isPresent()) {
         curseforge {
-            apiKey = cfToken
+            apiKey = cfToken.get()
             project {
                 id = cf_project_id
                 changelog = changelogText
