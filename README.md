@@ -50,7 +50,7 @@ api("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
 Forge Forge Gradle import line:
 
 ```
-api("net.mehvahdjukaar:moonlight-forgee:${moonlight_version}")
+api(fg.deobf("net.mehvahdjukaar:moonlight-forgee:${moonlight_version}"))
 ```
 
 Where `moonlight_version` could be for instance `1.21-2.25.5`
