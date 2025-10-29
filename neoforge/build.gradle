@@ -42,18 +42,8 @@ remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     archiveClassifier = "neoforge"
-    atAccessWideners.add("${rootProject.mod_id}.accesswidener") // this is a path inside the mod jar
+    atAccessWideners.add("${mod_id}.accesswidener") // this is a path inside the mod jar
     exclude('net/mehvahdjukaar/moonlight/example/**')
-}
-
-task updateJson {
-    /*
-    file('update.json').withWriter { w ->
-        file('update_template.json').eachLine { line ->
-            w << line.replaceAll("version", project.version) + System.getProperty("line.separator")
-        }
-        w.close()
-    }*/
 }
 
 jar {
