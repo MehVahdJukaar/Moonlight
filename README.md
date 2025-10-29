@@ -15,6 +15,26 @@ These include some highly specialized features such as dynamic asset generation,
 - Data driven bottle based "Soft Fluid" virtual fluid system
 - Many helper classes
 
+## Depending
+
+Add this to your repositories block:
+```maven { url = "https://registry.somethingcatchy.net/repository/maven-releases/" }```
+
+Fabric Loom import line:
+
+```modImplementation("net.mehvahdjukaar:moonlight-fabric:${moonlight_version}")```
+
+Neoforge Loom import line:
+
+```modImplementation("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")```
+
+Neoforge Mod Gradle import line:
+```implementation fg.deobf("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")```
+
+Where `moonlight_version` could be for instance `1.21-2.25.5`
+
+        
+
 ## Documentation
 All the classes in the api package have some javadocs explaining their use
 
