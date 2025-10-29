@@ -18,18 +18,28 @@ These include some highly specialized features such as dynamic asset generation,
 ## Depending
 
 Add this to your repositories block:
-```maven { url = "https://registry.somethingcatchy.net/repository/maven-releases/" }```
+
+```
+maven { url = "https://registry.somethingcatchy.net/repository/maven-releases/" }
+```
 
 Fabric Loom import line:
 
-```modImplementation("net.mehvahdjukaar:moonlight-fabric:${moonlight_version}")```
+```
+modImplementation("net.mehvahdjukaar:moonlight-fabric:${moonlight_version}")
+```
 
 Neoforge Loom import line:
 
-```modImplementation("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")```
+```
+modImplementation("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
+```
 
 Neoforge Mod Gradle import line:
-```implementation fg.deobf("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")```
+
+```
+implementation fg.deobf("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
+```
 
 Where `moonlight_version` could be for instance `1.21-2.25.5`
 
