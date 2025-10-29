@@ -26,19 +26,19 @@ maven { url = "https://registry.somethingcatchy.net/repository/maven-releases/" 
 Fabric Loom import line:
 
 ```
-modImplementation("net.mehvahdjukaar:moonlight-fabric:${moonlight_version}")
+modApi("net.mehvahdjukaar:moonlight-fabric:${moonlight_version}")
 ```
 
 Neoforge Loom import line:
 
 ```
-modImplementation("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
+modApi("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
 ```
 
 Neoforge Mod Gradle import line:
 
 ```
-implementation fg.deobf("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
+modApi(fg.deobf("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}"))
 ```
 
 Where `moonlight_version` could be for instance `1.21-2.25.5`
