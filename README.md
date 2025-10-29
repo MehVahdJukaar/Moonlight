@@ -41,13 +41,13 @@ Forge Loom import line:
 modApi("net.mehvahdjukaar:moonlight-forge:${moonlight_version}")
 ```
 
-Neoforge Mod Gradle import line:
+Neoforge ModGradle import line:
 
 ```
 api("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
 ```
 
-Forge Forge Gradle import line:
+Forge ForgeGradle import line:
 
 ```
 api(fg.deobf("net.mehvahdjukaar:moonlight-forgee:${moonlight_version}"))
