@@ -80,8 +80,8 @@ subprojects {
                 maven {
                     url = uri("https://registry.somethingcatchy.net/repository/maven-releases/")
                     credentials {
-                        username = nexusUser
-                        password = nexusToken
+                        username = nexusUser.get()
+                        password = nexusToken.get()
                     }
                 }
             }
@@ -102,7 +102,7 @@ subprojects {
         changelog = changelogText
         displayName = file.map { it.asFile.name }
 
-        if (cfToken) {
+        if (cfToken.isPresent()) {
             curseforge {
                 accessToken = cfToken
                 projectId = cf_project_id
@@ -120,7 +120,7 @@ subprojects {
             }
         }
 
-        if (mrToken) {
+        if (mrToken.isPresent()) {
             modrinth {
                 accessToken = mrToken
                 projectId = mr_project_id
@@ -138,7 +138,7 @@ subprojects {
     }
 
 
-    if (mrToken) {
+    if (mrToken.isPresent()) {
         modrinth {
             projectId = mod_id
             uploadFile = tasks.remapJar
@@ -160,7 +160,7 @@ subprojects {
         }
     }
 
-    if (cfToken) {
+    if (cfToken.isPresent()) {
         curseforge {
             apiKey = cfToken
             project {
