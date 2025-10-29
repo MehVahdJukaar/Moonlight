@@ -35,6 +35,12 @@ Neoforge Loom import line:
 modApi("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
 ```
 
+Common Loom import line:
+
+```
+modApi("net.mehvahdjukaar:moonlight:${moonlight_version}")
+```
+
 Forge Loom import line:
 
 ```
