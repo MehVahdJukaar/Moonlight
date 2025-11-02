@@ -2,12 +2,12 @@ package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
+import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
+import net.mehvahdjukaar.moonlight.core.fake_player.FakeLocalPlayer;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,9 +27,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -122,9 +119,17 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    @Contract
     @ExpectPlatform
     public static boolean isFakePlayer(ServerPlayer instance) {
         throw new AssertionError();
+    }
+
+    public static boolean isAFakePlayer(Player player) {
+        if (player instanceof FakeGenericPlayer) return true;
+        if (PlatHelper.getPhysicalSide().isClient() && player instanceof FakeLocalPlayer) return true;
+        if (player instanceof ServerPlayer sp && isFakePlayer(sp)) return true;
+        return false;
     }
 
     @ExpectPlatform
