@@ -106,9 +106,17 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    @Contract
     @ExpectPlatform
     public static boolean isFakePlayer(ServerPlayer instance) {
         throw new AssertionError();
+    }
+
+    public static boolean isAFakePlayer(Player player) {
+        if (player instanceof FakeGenericPlayer) return true;
+        if (PlatHelper.getPhysicalSide().isClient() && player instanceof FakeLocalPlayer) return true;
+        if (player instanceof ServerPlayer sp && isFakePlayer(sp)) return true;
+        return false;
     }
 
     public enum Platform {
