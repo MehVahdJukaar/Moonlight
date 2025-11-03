@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.moonlight.api.client.CoreShaderContainer;
 import net.mehvahdjukaar.moonlight.api.client.ItemRenderExtension;
 import net.mehvahdjukaar.moonlight.api.client.ItemStackRenderer;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
@@ -49,7 +50,6 @@ import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -115,6 +115,10 @@ public class ClientHelper {
 
     public interface ShaderEvent {
         void register(ResourceLocation id, VertexFormat vertexFormat, Consumer<ShaderInstance> setter);
+
+        default void register(ResourceLocation id, VertexFormat vertexFormat, CoreShaderContainer container) {
+            register(id, vertexFormat, container::assign);
+        }
     }
 
     @ExpectPlatform

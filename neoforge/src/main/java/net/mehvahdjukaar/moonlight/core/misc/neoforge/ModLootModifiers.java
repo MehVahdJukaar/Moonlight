@@ -40,7 +40,7 @@ public class ModLootModifiers {
         private final ItemStack addedItemStack;
 
 
-        protected AddItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
+        public AddItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
             super(conditionsIn);
             this.addedItemStack = addedItemStack;
         }
