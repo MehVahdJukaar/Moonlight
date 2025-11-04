@@ -48,7 +48,7 @@ public class ModLootModifiers {
         private final ItemStack addedItemStack;
 
 
-        protected AddItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
+        public AddItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
             super(conditionsIn);
             this.addedItemStack = addedItemStack;
         }
@@ -89,7 +89,7 @@ public class ModLootModifiers {
 
         private final ItemStack itemStack;
 
-        protected ReplaceItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
+        public ReplaceItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
             super(conditionsIn);
             this.itemStack = addedItemStack;
         }
@@ -119,7 +119,7 @@ public class ModLootModifiers {
 
         private final ResourceLocation injectTableId;
 
-        protected AddTableModifier(LootItemCondition[] conditionsIn, ResourceLocation addedItemStack) {
+        public AddTableModifier(LootItemCondition[] conditionsIn, ResourceLocation addedItemStack) {
             super(conditionsIn);
             this.injectTableId = addedItemStack;
         }
