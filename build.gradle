@@ -3,6 +3,7 @@ plugins {
     id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
     id "com.matthewprenger.cursegradle" version "1.4.0"
     id "com.modrinth.minotaur" version "2.8.10"
+    id "com.possible-triangle.publishing" version "1.2.+" apply false
 }
 
 architectury {
@@ -12,7 +13,7 @@ architectury {
 allprojects {
     apply plugin: "java"
     apply plugin: "architectury-plugin"
-    apply plugin: "maven-publish"
+    apply plugin: "com.possible-triangle.publishing"
 
     archivesBaseName = rootProject.mod_id
     version = rootProject.mod_version
