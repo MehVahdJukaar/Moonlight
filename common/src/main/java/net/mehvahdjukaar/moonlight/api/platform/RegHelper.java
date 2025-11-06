@@ -46,6 +46,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.schedule.Activity;
@@ -147,6 +148,32 @@ public class RegHelper {
     @ExpectPlatform
     public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(ResourceLocation name, Supplier<EntityDataSerializer<T>> serializer) {
         throw new AssertionError();
+    }
+
+    public static RegSupplier<VillagerProfession> registerVillagerProfession(
+            ResourceLocation name,
+            Predicate<Holder<PoiType>> heldJobSite, Predicate<Holder<PoiType>> acquirableJobSite,
+            ImmutableSet<Item> requestedItems, ImmutableSet<Block> secondaryWorkSite,
+            @Nullable Supplier<SoundEvent> workSound) {
+        Supplier<VillagerProfession> factory = () -> new VillagerProfession(name.getPath(),
+                heldJobSite, acquirableJobSite,
+                requestedItems, secondaryWorkSite,
+                workSound == null ? null : workSound.get());
+        return register(name, factory, Registries.VILLAGER_PROFESSION);
+    }
+
+    public static RegSupplier<VillagerProfession> registerVillagerProfession(ResourceLocation name,
+                                                                             Supplier<PoiType> heldJobSite,
+                                                                             Supplier<PoiType> acquirableJobSite,
+                                                                             ImmutableSet<Item> requestedItems,
+                                                                             ImmutableSet<Block> secondaryPoi,
+                                                                             @Nullable Supplier<SoundEvent> workSound) {
+        return registerVillagerProfession(name,
+                holder -> holder.value() == heldJobSite.get(),
+                holder -> holder.value() == acquirableJobSite.get(),
+                requestedItems,
+                secondaryPoi,
+                workSound);
     }
 
     public static RegSupplier<PoiType> registerPOI(ResourceLocation name, Supplier<PoiType> poi) {
@@ -800,8 +827,8 @@ public class RegHelper {
 
     @ExpectPlatform
     public static <A, T> IAttachmentType<A, T> registerDataAttachment(ResourceLocation id,
-                                                                   Supplier<AttachmentBuilder<A>> config,
-                                                                   Class<T> targetClass) {
+                                                                      Supplier<AttachmentBuilder<A>> config,
+                                                                      Class<T> targetClass) {
         throw new AssertionError();
     }
 
