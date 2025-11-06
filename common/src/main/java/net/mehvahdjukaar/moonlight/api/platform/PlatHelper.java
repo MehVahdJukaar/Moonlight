@@ -3,6 +3,8 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
+import net.mehvahdjukaar.moonlight.core.fake_player.FakeLocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
