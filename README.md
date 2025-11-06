@@ -4,15 +4,20 @@ These include some highly specialized features such as dynamic asset generation,
 
 ## Main Features
 
-- Dynamic Assets creation and texture manipulation
-- Dynamic Block registration and BlockSetAPI
-- BlockColorAPI with automatic color grouping and detection
-- Usual cross platform utilities to develop for Forge and Fabric
-- Custom Baked Models
-- Dispenser Behavior wrapping helper
-- VillagerAIHooks to add new schedules and activities to villagers
-- Data driven Map Markers system
+- Dynamic Assets creation and texture manipulation. A very extensive and powerful system.
+- Runtime data and resource packs.
+- Dynamic Block registration and BlockSetAPI.
+- BlockColorAPI with automatic color grouping and detection.
+- Usual Cross-Platform utilities to develop for (Neo)Forge and Fabric. Simple and all you'll need really.
+- Custom Baked Models.
+- Dispenser Behavior wrapping helper.
+- VillagerAIHooks to add new schedules and activities to villagers.
+- Data driven Villager Trades
+- Data driven Map Markers system.
 - Data driven bottle based "Soft Fluid" virtual fluid system
+- Custom first and third person hand animations interfaces for items.
+- Many helpful interfaces for blocks, entities and items.
+- Texture Renderer system, allows to create texture containing rendered objects like items or entities.
 - Many helper classes
 
 ## Depending

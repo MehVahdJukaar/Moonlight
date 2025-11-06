@@ -1,9 +1,9 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.11-SNAPSHOT" apply false
     id "com.matthewprenger.cursegradle" version "1.4.0"
     id "com.modrinth.minotaur" version "2.8.10"
-    id "com.possible-triangle.publishing" version "1.2.+" apply false
+    id "com.possible-triangle.publishing" version "1.2.67" apply false
 }
 
 architectury {
