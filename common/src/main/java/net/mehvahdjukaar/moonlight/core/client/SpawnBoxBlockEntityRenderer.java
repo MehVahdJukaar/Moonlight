@@ -40,8 +40,8 @@ public class SpawnBoxBlockEntityRenderer implements BlockEntityRenderer<SpawnBox
 
                     VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.lines());
                     float red = 0.9F;
-                    float green = 0.6F;
-                    float blue = 0.0F;
+                    float green = 0.2F;
+                    float blue = 0.7F;
                     LevelRenderer.renderLineBox(poseStack, vertexConsumer, j, startY, k, l, endY, m,
                             red, green, blue, 1.0F);
                 }

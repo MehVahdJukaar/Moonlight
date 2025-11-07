@@ -46,13 +46,11 @@ public class JigsawPlacementMixin {
             shift = At.Shift.BEFORE))
     public void ml$AddSpawnBoxPieces(PoolElementStructurePiece piece, MutableObject<VoxelShape> free, int depth, boolean useExpansionHack,
                                      LevelHeightAccessor level, RandomState random, PoolAliasLookup poolAliasLookup,
-                                     LiquidSettings liquidSettings, CallbackInfo ci,
-                                     @Local(ordinal = 0) StructurePoolElement structurePoolElement, @Local(ordinal = 0) BlockPos blockPos,
-                                     @Local(ordinal = 0) Rotation rotation, @Local(ordinal = 0) StructureTemplatePool.Projection projection) {
+                                     LiquidSettings liquidSettings, CallbackInfo ci) {
 
 
         List<? extends PoolElementStructurePiece> extraPieces = SpawnBoxStructurePiece
-                .getSpawnBoxPieces(piece, structurePoolElement, structureTemplateManager, blockPos, rotation, liquidSettings);
+                .getSpawnBoxPieces(piece, structureTemplateManager, liquidSettings);
         this.pieces.addAll(extraPieces);
 
     }

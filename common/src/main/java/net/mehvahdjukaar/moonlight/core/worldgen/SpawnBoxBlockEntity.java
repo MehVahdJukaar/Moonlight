@@ -12,9 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SpawnBoxBlockEntity extends BlockEntity implements IScreenProvider {
@@ -46,23 +44,31 @@ public class SpawnBoxBlockEntity extends BlockEntity implements IScreenProvider 
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         this.targetName = (tag.getString("name"));
-        int i = Mth.clamp(tag.getInt("posX"), -48, 48);
-        int j = Mth.clamp(tag.getInt("posY"), -48, 48);
-        int k = Mth.clamp(tag.getInt("posZ"), -48, 48);
-        this.boxOffset = new BlockPos(i, j, k);
-        int l = Mth.clamp(tag.getInt("sizeX"), 0, 48);
-        int m = Mth.clamp(tag.getInt("sizeY"), 0, 48);
-        int n = Mth.clamp(tag.getInt("sizeZ"), 0, 48);
-        this.boxSize = new Vec3i(l, m, n);
+        this.boxOffset = readOffsetPos(tag);
+        this.boxSize = readBoxSize(tag);
         this.showBoundingBox = tag.getBoolean("showBB");
         this.finalState = tag.getString("final_state");
     }
 
-    public String getFinalState(){
+    public static Vec3i readBoxSize(CompoundTag tag) {
+        int l = Mth.clamp(tag.getInt("sizeX"), 0, 48);
+        int m = Mth.clamp(tag.getInt("sizeY"), 0, 48);
+        int n = Mth.clamp(tag.getInt("sizeZ"), 0, 48);
+        return new Vec3i(l, m, n);
+    }
+
+    public static BlockPos readOffsetPos(CompoundTag tag) {
+        int i = Mth.clamp(tag.getInt("posX"), -48, 48);
+        int j = Mth.clamp(tag.getInt("posY"), -48, 48);
+        int k = Mth.clamp(tag.getInt("posZ"), -48, 48);
+        return new BlockPos(i, j, k);
+    }
+
+    public String getFinalState() {
         return finalState;
     }
 
-    public void setFinalState(String state){
+    public void setFinalState(String state) {
         this.finalState = state;
     }
 

@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "net.mehvahdjukaar.moonlight.core.mixins.MixinPlugin",
   "client": [
+
     "ClientPacketListenerMixin",
     "DebugRendererMixin",
     "DynamicTextureMixin",
@@ -28,6 +29,7 @@
     "InventoryMixin",
     "ItemMixin",
     "JigsawPlacementMixin",
+    "JigsawReplacementProcessorMixin",
     "JigsawStructureMixin",
     "LevelChunkMixin",
     "LightningEntityMixin",

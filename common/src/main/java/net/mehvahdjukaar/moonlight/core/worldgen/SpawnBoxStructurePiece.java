@@ -3,11 +3,11 @@ package net.mehvahdjukaar.moonlight.core.worldgen;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -81,7 +81,6 @@ public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
     }
 
 
-
     //same that find jigsaw does
 
     private static List<StructureTemplate.StructureBlockInfo> findSpawnBoxesInStructure(
@@ -98,34 +97,38 @@ public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
         if (sp != null) {
             StructureTemplate structureTemplate = sp.getTemplate(manager);
             return structureTemplate.filterBlocks(
-                    pos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true
+                    pos, new StructurePlaceSettings().setRotation(rotation), MoonlightRegistry.SPAWN_BOX_BLOCK.get(), true
             );
         }
         return List.of();
     }
 
     public static List<SpawnBoxStructurePiece> getSpawnBoxPieces(
-            StructurePiece parentPiece,
-            StructurePoolElement structurePoolElement, StructureTemplateManager structureTemplateManager,
-            BlockPos blockPos, Rotation rotation, LiquidSettings liquidSettings) {
+            PoolElementStructurePiece parentPiece, StructureTemplateManager structureTemplateManager, LiquidSettings liquidSettings) {
+        var structurePoolElement = parentPiece.getElement();
+        BlockPos parentPiecePos = parentPiece.getPosition();
+        Rotation parentPieceRot = parentPiece.getRotation();
         var list = findSpawnBoxesInStructure(structurePoolElement,
-                structureTemplateManager, blockPos, rotation);
+                structureTemplateManager, parentPiecePos, parentPieceRot);
         List<SpawnBoxStructurePiece> result = new ArrayList<>();
 
-        for (var structureBlockInfo : list) {
-            BlockPos relativePos = structureBlockInfo.pos();
-            BlockPos absolutePos = blockPos.offset(relativePos);
+        for (var spawnBox : list) {
+            if (spawnBox.nbt() == null) continue;
+            BlockPos spawnBoxPos = spawnBox.pos();
+            BlockPos offset = SpawnBoxBlockEntity.readOffsetPos(spawnBox.nbt());
+            Vec3i size = SpawnBoxBlockEntity.readBoxSize(spawnBox.nbt());
+            BlockPos startBoxPos = spawnBoxPos.offset(offset);
+            BlockPos endBoxPos = startBoxPos.offset(size);
 
-            BoundingBox boundingBox = parentPiece.getBoundingBox();
-            int minParentY = boundingBox.minY();
-            int someY = relativePos.getY() - minParentY;
+            BoundingBox box = BoundingBox.encapsulatingPositions(List.of(
+                    startBoxPos, endBoxPos.offset(-1, -1, -1)
+            )).orElseThrow();
+
             int groundLevelDelta = structurePoolElement.getGroundLevelDelta();
-
-            BoundingBox bb = parentPiece.getBoundingBox().inflatedBy(-1);
 
             SpawnBoxStructurePiece newPiece = new SpawnBoxStructurePiece(
                     structureTemplateManager, structurePoolElement.getProjection(),
-                    absolutePos, groundLevelDelta, rotation, bb, liquidSettings
+                    spawnBoxPos, groundLevelDelta, parentPieceRot, box, liquidSettings
             );
             result.add(newPiece);
         }

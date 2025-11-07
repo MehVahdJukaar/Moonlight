@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.renderer.debug.GoalSelectorDebugRenderer;
 import net.minecraft.client.renderer.debug.PathfindingRenderer;
+import net.minecraft.client.renderer.debug.StructureRenderer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,6 +29,8 @@ public class DebugRendererMixin {
     @Final
     public PathfindingRenderer pathfindingRenderer;
 
+    @Shadow @Final public StructureRenderer structureRenderer;
+
     @Inject(method = "render", at = @At("TAIL"))
     public void supp$renderVanillaDebug(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, double camX, double camY, double camZ, CallbackInfo ci) {
 
@@ -35,6 +38,7 @@ public class DebugRendererMixin {
             this.goalSelectorRenderer.render(poseStack, bufferSource, camX, camY, camZ);
             this.neighborsUpdateRenderer.render(poseStack, bufferSource, camX, camY, camZ);
             this.pathfindingRenderer.render(poseStack, bufferSource, camX, camY, camZ);
+            this.structureRenderer.render(poseStack, bufferSource, camX, camY, camZ);
         }
     }
 }

@@ -80,12 +80,13 @@ public abstract class DebugPacketsMixin {
 
     @Inject(method = "sendStructurePacket", at = @At("HEAD"))
     private static void ml$StructureDebug(WorldGenLevel level, StructureStart structureStart, CallbackInfo ci) {
-        if (DebugRenderersCommand.structureDebug && level instanceof ServerLevel sl) {
+        if (DebugRenderersCommand.structureDebug) {
             List<StructuresDebugPayload.PieceInfo> infos = new ArrayList<>();
             for (var s : structureStart.getPieces()) {
-                infos.add(new StructuresDebugPayload.PieceInfo(s.getBoundingBox(), s.getGenDepth() == 0));
+                infos.add(new StructuresDebugPayload.PieceInfo(s.getBoundingBox(), s.getGenDepth() <= 0));
             }
-            sendPacketToAllPlayers(sl, new StructuresDebugPayload(((ServerLevel) level).dimension(),
+            ServerLevel sl = level.getLevel();
+            sendPacketToAllPlayers(sl, new StructuresDebugPayload(sl.dimension(),
                     structureStart.getBoundingBox(), infos));
         }
     }
