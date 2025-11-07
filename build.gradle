@@ -25,6 +25,9 @@ allprojects {
 
         flatDir { dirs "mods" }
 
+        // Our publishing repo
+        maven { url "https://registry.somethingcatchy.net/repository/maven-releases/" }
+
         maven { url "https://maven.parchmentmc.org" }
         maven { url "https://www.cursemaven.com" }
         maven { url "https://maven.firstdarkdev.xyz/snapshots" }
@@ -75,14 +78,14 @@ subprojects {
         repositories {
             mavenLocal()
 
-            def nexusToken = providers.environmentVariable("NEXUS_TOKEN")
-            def nexusUser = providers.environmentVariable("NEXUS_USER")
+            def nexusToken = providers.environmentVariable("NEXUS_TOKEN").get()
+            def nexusUser = providers.environmentVariable("NEXUS_USER").get()
             if (nexusToken && nexusUser) {
                 maven {
                     url = uri("https://registry.somethingcatchy.net/repository/maven-releases/")
                     credentials {
-                        username = nexusUser.get()
-                        password = nexusToken.get()
+                        username = nexusUser
+                        password = nexusToken
                     }
                 }
             }

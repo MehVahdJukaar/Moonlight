@@ -106,7 +106,7 @@ public class Respriter {
         //if we have multiple frames we use the original image as a base and recolor with single palette, otherwise we clone it and recolor it with the new palettes
         TextureImage outputTexture = (originalFrameCount == 1 && mergedAnimationData != null) ?
                 TextureOps.createSingleFrameAnimation(imageToRecolor, mergedAnimationData) :
-                imageToRecolor.makeCopy();
+                imageToRecolor.makeCopy(); //ignore mcmeta? guess it uses the same anyways
 
         FrameColorRemapper colorRemapper = FrameColorRemapper.of(originalPalette, originalFrameCount,
                 targetPalettes, outputTexture.frameCount());

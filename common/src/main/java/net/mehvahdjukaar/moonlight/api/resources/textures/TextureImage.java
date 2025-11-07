@@ -98,7 +98,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         this.metadata = metadata;
         int imgWidth = this.imageWidth(); // 16
         int imgHeight = this.imageHeight(); // 48
-        if (metadata == null || metadata.hasEmptyAnimation()) {
+        if (metadata == null) {
             this.frameSize = new FrameSize(imgWidth, imgHeight);
         } else {
             this.frameSize = metadata.animation().calculateFrameSize(imgWidth, imgHeight);
@@ -106,6 +106,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         this.frameScale = imgWidth / frameSize.width(); // 1
         int frameScaleHeight = imgHeight / frameSize.height(); // 2
         this.frameCount = frameScale * frameScaleHeight; // 2
+        //frame count won't be 0
     }
 
     public int imageWidth() {
@@ -217,6 +218,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
     public void close() {
         this.image.close();
     }
+
 
 
     @FunctionalInterface

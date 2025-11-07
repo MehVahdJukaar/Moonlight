@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
@@ -123,11 +122,4 @@ public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject
         }
     }
 
-    public int getLogicalFrameCount() {
-        return Math.max(1, animation().frames.size());
-    }
-
-    public boolean hasEmptyAnimation() {
-        return this.animation == AnimationMetadataSection.EMPTY || this.animation.frames.isEmpty();
-    }
 }

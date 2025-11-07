@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
@@ -10,7 +9,6 @@ import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -20,7 +18,10 @@ import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.mehvahdjukaar.moonlight.api.client.fabric.IFabricMenuType;
-import net.mehvahdjukaar.moonlight.api.misc.*;
+import net.mehvahdjukaar.moonlight.api.misc.IAttachmentType;
+import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
+import net.mehvahdjukaar.moonlight.api.misc.Registrator;
+import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.OptionalRecipeCondition;
@@ -399,8 +400,8 @@ public class RegHelperImpl {
 
     public static <A, T> IAttachmentType<A, T> registerDataAttachment(
             ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config, Class<T> targetClass) {
-        if (AttachmentTarget.class.isAssignableFrom(targetClass)) {
-            Moonlight.LOGGER.warn("Registering data attachment for class {} that implements AttachmentHolder. This is not necessary and may cause issues.", targetClass.getName());
+        if (!AttachmentTarget.class.isAssignableFrom(targetClass)) {
+            Moonlight.LOGGER.warn("Registering data attachment for invalid class {} that does not implements AttachmentTarget. ", targetClass.getName());
         }
         var obj = makeDataAttachmentBuilder(config).buildAndRegister(id);
         return new AttachmentWrapper<>(obj);

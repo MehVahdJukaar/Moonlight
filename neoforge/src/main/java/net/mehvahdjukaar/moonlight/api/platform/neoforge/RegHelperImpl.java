@@ -446,8 +446,8 @@ public class RegHelperImpl {
 
     public static <A, T> IAttachmentType<A, T> registerDataAttachment(
             ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config,  Class<T> targetClass) {
-        if (IAttachmentHolder.class.isAssignableFrom(targetClass)) {
-            Moonlight.LOGGER.warn("Registering data attachment for class {} that implements IAttachmentHolder. This is not necessary and may cause issues.", targetClass.getName());
+        if (!IAttachmentHolder.class.isAssignableFrom(targetClass)) {
+            Moonlight.LOGGER.warn("Registering data attachment for invalid class {} that does not implements IAttachmentHolder. ", targetClass.getName());
         }
         var attachment = RegHelper.register(id,
                 () -> makeDataAttachmentBuilder(config).build(),

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
@@ -58,6 +59,8 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -425,6 +428,11 @@ public class Utils {
                 a -> a.stream().map(reg::getKey).toList());
     }
 
+    public static final Codec<AABB> AABB_CODEC = RecordCodecBuilder.create(i -> i.group(
+                    Vec3.CODEC.fieldOf("from").forGetter(AABB::getMinPosition),
+                    Vec3.CODEC.fieldOf("to").forGetter(AABB::getMaxPosition)
+            ).apply(i, AABB::new)
+    );
 
     /**
      * Like listOf but won't fail for missing entries.
