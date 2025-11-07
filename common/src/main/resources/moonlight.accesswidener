@@ -14,6 +14,15 @@ mutable field net/minecraft/client/renderer/RenderStateShard setupState Ljava/la
 accessible method net/minecraft/world/entity/player/Inventory hasRemainingSpaceForItem (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
 accessible method net/minecraft/world/entity/player/Inventory addResource (ILnet/minecraft/world/item/ItemStack;)I
 
+#debug renderers
+accessible method net/minecraft/world/level/pathfinder/Path setDebug ([Lnet/minecraft/world/level/pathfinder/Node;[Lnet/minecraft/world/level/pathfinder/Node;Ljava/util/Set;)V
+
+#jigsaw placement
+accessible class net/minecraft/world/level/levelgen/structure/pools/JigsawPlacement$Placer
+accessible method net/minecraft/world/level/levelgen/structure/pools/SinglePoolElement getTemplate (Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplateManager;)Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;
+accessible field net/minecraft/world/level/levelgen/structure/pools/ListPoolElement elements Ljava/util/List;
+
+
 accessible field net/minecraft/server/packs/resources/ReloadableResourceManager type Lnet/minecraft/server/packs/PackType;
 accessible class net/minecraft/server/packs/resources/SimpleReloadInstance$StateFactory
 

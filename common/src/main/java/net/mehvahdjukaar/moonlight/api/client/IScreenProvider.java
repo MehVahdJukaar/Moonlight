@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundOpenScreenPacket;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundOpenScreenMessage;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -30,7 +30,7 @@ public interface IScreenProvider {
         } else {
             throw new IllegalStateException("IScreenProvider must be a BlockEntity or Entity");
         }
-        NetworkHelper.sendToClientPlayer(player, new ClientBoundOpenScreenPacket(target, hitFace));
+        NetworkHelper.sendToClientPlayer(player, new ClientBoundOpenScreenMessage(target, hitFace));
     }
 
 }

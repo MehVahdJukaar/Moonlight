@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "moonlight:block/spawn_box"
+    }
+  }
+}

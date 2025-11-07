@@ -4,8 +4,7 @@ import net.mehvahdjukaar.moonlight.api.block.IBlockHolder;
 import net.mehvahdjukaar.moonlight.api.block.IPistonMotionReact;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedPistonTile;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundOnPistonMovedBlockPacket;
-import net.mehvahdjukaar.moonlight.core.network.ModNetworking;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundOnPistonMovedBlockMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -87,7 +86,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
     public void onFinishedShortPulse(CallbackInfo ci) {
         if (!level.isClientSide && this.movedState.getBlock() instanceof IPistonMotionReact pr) {
             NetworkHelper.sendToAllClientPlayersInDefaultRange((ServerLevel) level, worldPosition,
-                    new ClientBoundOnPistonMovedBlockPacket(this.worldPosition, this.movedState, this.direction, this.extending));
+                    new ClientBoundOnPistonMovedBlockMessage(this.worldPosition, this.movedState, this.direction, this.extending));
             pr.onMoved(this.level, this.worldPosition, this.movedState, this.direction, this.extending);
         }
     }
@@ -98,7 +97,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
         BlockState movedState = blockEntity.getMovedState();
         if (!level.isClientSide && movedState.getBlock() instanceof IPistonMotionReact pr) {
             NetworkHelper.sendToAllClientPlayersInDefaultRange((ServerLevel) level, pos,
-                    new ClientBoundOnPistonMovedBlockPacket(pos, movedState,
+                    new ClientBoundOnPistonMovedBlockMessage(pos, movedState,
                             blockEntity.getDirection(), blockEntity.isExtending()));
             //calls on server here and client above
             pr.onMoved(level, blockEntity.getBlockPos(), movedState, blockEntity.getDirection(), blockEntity.isExtending());
@@ -111,7 +110,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
         BlockState movedState = blockEntity.getMovedState();
         if (!level.isClientSide && movedState.getBlock() instanceof IPistonMotionReact pr) {
             NetworkHelper.sendToAllClientPlayersInDefaultRange((ServerLevel) level, pos,
-                    new ClientBoundOnPistonMovedBlockPacket(pos, movedState,
+                    new ClientBoundOnPistonMovedBlockMessage(pos, movedState,
                             blockEntity.getDirection(), blockEntity.isExtending()));
             pr.onMoved(level, blockEntity.getBlockPos(), movedState, blockEntity.getDirection(), blockEntity.isExtending());
         }

@@ -12,20 +12,20 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.valueproviders.UniformInt;
 
-public class ClientBoundParticleAroundBlockPacket implements Message {
+public class ClientBoundParticleAroundBlockMessage implements Message {
 
-    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundParticleAroundBlockPacket> TYPE = Message.makeType(
-            Moonlight.res("s2c_particle"), ClientBoundParticleAroundBlockPacket::new);
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundParticleAroundBlockMessage> TYPE = Message.makeType(
+            Moonlight.res("s2c_particle"), ClientBoundParticleAroundBlockMessage::new);
 
     public final Kind type;
     public final BlockPos pos;
 
-    public ClientBoundParticleAroundBlockPacket(RegistryFriendlyByteBuf buffer) {
+    public ClientBoundParticleAroundBlockMessage(RegistryFriendlyByteBuf buffer) {
         this.type = buffer.readEnum(Kind.class);
         this.pos = buffer.readBlockPos();
     }
 
-    public ClientBoundParticleAroundBlockPacket(BlockPos pos, Kind type) {
+    public ClientBoundParticleAroundBlockMessage(BlockPos pos, Kind type) {
         this.pos = pos;
         this.type = type;
     }
@@ -52,7 +52,7 @@ public class ClientBoundParticleAroundBlockPacket implements Message {
     }
 
     @Environment(EnvType.CLIENT)
-    private static void handleSpawnBlockParticlePacket(ClientBoundParticleAroundBlockPacket message) {
+    private static void handleSpawnBlockParticlePacket(ClientBoundParticleAroundBlockMessage message) {
         var l = Minecraft.getInstance().level;
 
         switch (message.type) {

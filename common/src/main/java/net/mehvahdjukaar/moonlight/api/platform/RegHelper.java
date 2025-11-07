@@ -355,7 +355,7 @@ public class RegHelper {
 
     @SafeVarargs
     public static <E extends BlockEntity> RegSupplier<BlockEntityType<E>> registerBlockEntityType(
-            ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Supplier<Block>... blocks) {
+            ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Supplier<? extends Block>... blocks) {
         return registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply,
                 Arrays.stream(blocks).map(Supplier::get).toArray(Block[]::new)));
     }

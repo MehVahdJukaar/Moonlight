@@ -12,7 +12,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.integration.neoforge.ModConfigSelectScreen;
 import net.mehvahdjukaar.moonlight.core.misc.neoforge.ModLootModifiers;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -165,7 +165,7 @@ public class MoonlightForge {
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             try {
-                NetworkHelper.sendToClientPlayer(player, new ClientBoundSendLoginPacket());
+                NetworkHelper.sendToClientPlayer(player, new ClientBoundSendLoginMessage());
             } catch (Exception ignored) {
             }
         }

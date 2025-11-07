@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundParticleAroundBlockPacket;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundParticleAroundBlockMessage;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,7 +39,7 @@ public interface IWaxable {
                 player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
 
                 NetworkHelper.sendToAllClientPlayersInParticleRange(serverPlayer.serverLevel(), pos,
-                        new ClientBoundParticleAroundBlockPacket(pos, ClientBoundParticleAroundBlockPacket.Kind.WAX_ON));
+                        new ClientBoundParticleAroundBlockMessage(pos, ClientBoundParticleAroundBlockMessage.Kind.WAX_ON));
             }
 
             return ItemInteractionResult.sidedSuccess(level.isClientSide);

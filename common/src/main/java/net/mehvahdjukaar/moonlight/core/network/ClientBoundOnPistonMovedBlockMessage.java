@@ -5,31 +5,30 @@ import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 
-public class ClientBoundOnPistonMovedBlockPacket implements Message {
+public class ClientBoundOnPistonMovedBlockMessage implements Message {
 
-    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundOnPistonMovedBlockPacket> TYPE =
-            Message.makeType(Moonlight.res("s2c_on_piston_moved_block"), ClientBoundOnPistonMovedBlockPacket::new);
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundOnPistonMovedBlockMessage> TYPE =
+            Message.makeType(Moonlight.res("s2c_on_piston_moved_block"), ClientBoundOnPistonMovedBlockMessage::new);
 
     public final BlockPos pos;
     private final Direction dir;
     private final BlockState movedState;
     private final boolean extending;
 
-    public ClientBoundOnPistonMovedBlockPacket(RegistryFriendlyByteBuf buffer) {
+    public ClientBoundOnPistonMovedBlockMessage(RegistryFriendlyByteBuf buffer) {
         this.pos = buffer.readBlockPos();
         this.dir = Direction.from3DDataValue(buffer.readVarInt());
         this.movedState = buffer.readById(Block.BLOCK_STATE_REGISTRY::byIdOrThrow);
         this.extending = buffer.readBoolean();
     }
 
-    public ClientBoundOnPistonMovedBlockPacket(BlockPos pos, BlockState movedState, Direction direction, boolean extending) {
+    public ClientBoundOnPistonMovedBlockMessage(BlockPos pos, BlockState movedState, Direction direction, boolean extending) {
         this.pos = pos;
         this.movedState = movedState;
         this.dir = direction;

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
@@ -11,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.pack.*;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
+import net.mehvahdjukaar.moonlight.core.client.SpawnBoxBlockEntityRenderer;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
 import net.minecraft.client.Minecraft;
@@ -40,10 +42,15 @@ public class MoonlightClient {
     );
 
     public static void initClient() {
+        ClientConfigs.init();
         ClientHelper.addShaderRegistration(MoonlightClient::registerShaders);
         ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluid"));
-        ClientConfigs.init();
+        ClientHelper.addBlockEntityRenderersRegistration(event -> {
+            event.register(MoonlightRegistry.SPAWN_BOX_BLOCK_ENTITY.get(), SpawnBoxBlockEntityRenderer::new);
+        });
+
         RegHelper.registerDynamicResourceProvider(new MLDynamicClientResources());
+
     }
 
     //null when merge happened. not null when it should add normally

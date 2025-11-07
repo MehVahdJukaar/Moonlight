@@ -7,15 +7,15 @@ import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public class ClientBoundSendLoginPacket implements Message {
+public class ClientBoundSendLoginMessage implements Message {
 
-    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundSendLoginPacket> TYPE = Message.makeType(
-            Moonlight.res("s2c_send_login"), ClientBoundSendLoginPacket::new);
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundSendLoginMessage> TYPE = Message.makeType(
+            Moonlight.res("s2c_send_login"), ClientBoundSendLoginMessage::new);
 
-    public ClientBoundSendLoginPacket(RegistryFriendlyByteBuf buf) {
+    public ClientBoundSendLoginMessage(RegistryFriendlyByteBuf buf) {
     }
 
-    public ClientBoundSendLoginPacket() {
+    public ClientBoundSendLoginMessage() {
     }
 
     @Override

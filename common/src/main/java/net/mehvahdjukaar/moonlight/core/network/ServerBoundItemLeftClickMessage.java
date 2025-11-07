@@ -3,19 +3,18 @@ package net.mehvahdjukaar.moonlight.core.network;
 import net.mehvahdjukaar.moonlight.api.item.ILeftClickReact;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-public record ServerBoundItemLeftClickPacket(InteractionHand hand) implements Message {
+public record ServerBoundItemLeftClickMessage(InteractionHand hand) implements Message {
 
-    public static final TypeAndCodec<RegistryFriendlyByteBuf, ServerBoundItemLeftClickPacket> TYPE =
-            Message.makeType(Moonlight.res("c2s_item_left_click"), ServerBoundItemLeftClickPacket::new);
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ServerBoundItemLeftClickMessage> TYPE =
+            Message.makeType(Moonlight.res("c2s_item_left_click"), ServerBoundItemLeftClickMessage::new);
 
-    public ServerBoundItemLeftClickPacket(RegistryFriendlyByteBuf buf) {
+    public ServerBoundItemLeftClickMessage(RegistryFriendlyByteBuf buf) {
         this(buf.readEnum(InteractionHand.class));
     }
 
@@ -30,7 +29,7 @@ public record ServerBoundItemLeftClickPacket(InteractionHand hand) implements Me
         Player player = context.getPlayer();
 
         ItemStack stack = player.getItemInHand(hand);
-        if(stack.getItem() instanceof ILeftClickReact lr){
+        if (stack.getItem() instanceof ILeftClickReact lr) {
             lr.onLeftClick(stack, player, hand);
         }
     }

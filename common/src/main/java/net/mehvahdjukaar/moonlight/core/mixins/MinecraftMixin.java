@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import net.mehvahdjukaar.moonlight.api.item.ILeftClickReact;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
-import net.mehvahdjukaar.moonlight.core.network.ServerBoundItemLeftClickPacket;
+import net.mehvahdjukaar.moonlight.core.network.ServerBoundItemLeftClickMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -29,7 +29,7 @@ public abstract class MinecraftMixin {
         ItemStack stack = this.player.getItemInHand(hand);
         if (stack.getItem() instanceof ILeftClickReact lr) {
             boolean cancel = lr.onLeftClick(stack, this.player, hand);
-            NetworkHelper.sendToServer(new ServerBoundItemLeftClickPacket(hand));
+            NetworkHelper.sendToServer(new ServerBoundItemLeftClickMessage(hand));
             if (cancel) {
                 this.player.swing(InteractionHand.MAIN_HAND);
                 cir.setReturnValue(false);

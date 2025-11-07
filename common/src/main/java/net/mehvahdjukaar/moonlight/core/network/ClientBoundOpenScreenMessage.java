@@ -12,20 +12,20 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 
-public class ClientBoundOpenScreenPacket implements Message {
+public class ClientBoundOpenScreenMessage implements Message {
 
-    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundOpenScreenPacket> TYPE = Message.makeType(
-            Moonlight.res("s2c_open_screen"), ClientBoundOpenScreenPacket::new);
+    public static final TypeAndCodec<RegistryFriendlyByteBuf, ClientBoundOpenScreenMessage> TYPE = Message.makeType(
+            Moonlight.res("s2c_open_screen"), ClientBoundOpenScreenMessage::new);
 
     public final TileOrEntityTarget target;
     private final Direction dir;
 
-    public ClientBoundOpenScreenPacket(RegistryFriendlyByteBuf buffer) {
+    public ClientBoundOpenScreenMessage(RegistryFriendlyByteBuf buffer) {
         this.target = TileOrEntityTarget.read(buffer);
         this.dir = Direction.from3DDataValue(buffer.readVarInt());
     }
 
-    public ClientBoundOpenScreenPacket(TileOrEntityTarget target,@Nullable Direction hitFace) {
+    public ClientBoundOpenScreenMessage(TileOrEntityTarget target, @Nullable Direction hitFace) {
         this.target = target;
         this.dir = hitFace == null ? Direction.UP : hitFace;
     }

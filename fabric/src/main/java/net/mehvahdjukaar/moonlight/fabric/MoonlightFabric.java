@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.fabric;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -19,8 +18,7 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.ResourceCondition
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
-import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -47,7 +45,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
 
         ServerPlayConnectionEvents.JOIN.register((l, s, m) -> NetworkHelper.sendToClientPlayer(l.player,
-                new ClientBoundSendLoginPacket()));
+                new ClientBoundSendLoginMessage()));
         ServerLifecycleEvents.SERVER_STARTING.register(s -> {
             currentServer = s;
             Moonlight.beforeServerStart(s.registryAccess());

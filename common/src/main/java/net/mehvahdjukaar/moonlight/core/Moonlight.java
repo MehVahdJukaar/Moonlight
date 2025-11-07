@@ -17,6 +17,7 @@ import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
+import net.mehvahdjukaar.moonlight.core.commands.ModCommands;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerAIInternal;
@@ -31,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -75,6 +77,7 @@ public class Moonlight {
         ItemListingManager.init();
 
         ModNetworking.init();
+        ModCommands.init();
 
         DynamicResourcesInternals.init();
         VillagerAIInternal.init();
@@ -91,6 +94,10 @@ public class Moonlight {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.initClient();
         }
+
+        RegHelper.addItemsToTabsRegistration(event -> {
+            event.add(CreativeModeTabs.OP_BLOCKS, MoonlightRegistry.SPAWN_BOX_BLOCK.get());
+        });
 
         BlockSetAPI.addDynamicBlockRegistration(Moonlight::ensureBlockSetsInitialized, LeavesType.class);
     }

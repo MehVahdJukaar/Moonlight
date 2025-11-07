@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
@@ -12,6 +13,7 @@ public class ClientConfigs {
     public static final Supplier<Boolean> LAZY_MAP_DATA;
     public static final Supplier<Integer> MAPS_MIPMAP;
     public static final Supplier<ShadeFix> FIX_SHADE;
+    public static final Supplier<Boolean> DEBUG_RENDERS;
 
     @Deprecated(forRemoval = true)
     public static final Supplier<Boolean> BLOCKTYPES_DEBUG = ()-> false;
@@ -35,6 +37,8 @@ public class ClientConfigs {
                         "Note there is a known compat issue with Figura mod. Keep this True or False with that one")
                 .define("consistent_entity_renderer_shading", ShadeFix.NO_GUI);
 
+        DEBUG_RENDERS = builder.comment("Enables some debug renderers. Require the use of the /supp debug command to enable their data being sent")
+                .define("debug_renderers", PlatHelper.isDev());
         builder.pop();
         CONFIG = builder.build();
         CONFIG.forceLoad();

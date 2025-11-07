@@ -1,16 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
-import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
-import net.mehvahdjukaar.moonlight.core.network.ClientBoundParticleAroundBlockPacket;
+import net.mehvahdjukaar.moonlight.core.network.ClientBoundParticleAroundBlockMessage;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -42,7 +39,7 @@ public interface IGlowable {
                 player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
 
                 NetworkHelper.sendToAllClientPlayersInParticleRange(serverPlayer.serverLevel(), pos,
-                        new ClientBoundParticleAroundBlockPacket(pos, ClientBoundParticleAroundBlockPacket.Kind.GLOW_ON));
+                        new ClientBoundParticleAroundBlockMessage(pos, ClientBoundParticleAroundBlockMessage.Kind.GLOW_ON));
             }
 
             return ItemInteractionResult.sidedSuccess(level.isClientSide);

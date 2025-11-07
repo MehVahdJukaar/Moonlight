@@ -9,12 +9,18 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.GrindItemTrigger;
 import net.mehvahdjukaar.moonlight.core.loot.*;
 import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
+import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxBlock;
+import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxBlockEntity;
+import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxStructurePiece;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import org.jetbrains.annotations.ApiStatus;
@@ -62,7 +68,15 @@ public class MoonlightRegistry {
             Moonlight.res("loot_table_id_pattern"), () -> PatternMatchLootItemCondition.CODEC);
 
 
+    public static final Supplier<SpawnBoxBlock> SPAWN_BOX_BLOCK = RegHelper.registerBlockWithItem(
+            Moonlight.res("spawn_box"), SpawnBoxBlock::new);
 
+    public static final Supplier<BlockEntityType<SpawnBoxBlockEntity>> SPAWN_BOX_BLOCK_ENTITY =
+            RegHelper.registerBlockEntityType(Moonlight.res("spawn_box"),
+                    SpawnBoxBlockEntity::new, SPAWN_BOX_BLOCK);
+
+    public static final Supplier<StructurePieceType> SPAWN_BOX_PIECE = RegHelper.register(
+            Moonlight.res("spawn_box"), () -> SpawnBoxStructurePiece::new, Registries.STRUCTURE_PIECE);
 
     public static final Supplier<DataComponentType<PotionBottleType>> BOTTLE_TYPE = RegHelper.registerDataComponent(
             res("bottle_type"), () -> DataComponentType.<PotionBottleType>builder()

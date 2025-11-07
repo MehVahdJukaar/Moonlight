@@ -12,12 +12,13 @@ public class ModNetworking {
 
     private static void registerMessages(NetworkHelper.RegisterMessagesEvent event) {
         event.registerClientBound(ClientBoundFinalizeFluidsMessage.TYPE);
-        event.registerClientBound(ClientBoundOpenScreenPacket.TYPE);
-        event.registerClientBound(ClientBoundSendLoginPacket.TYPE);
-        event.registerClientBound(ClientBoundOnPistonMovedBlockPacket.TYPE);
-        event.registerClientBound(ClientBoundParticleAroundBlockPacket.TYPE);
+        event.registerClientBound(ClientBoundOpenScreenMessage.TYPE);
+        event.registerClientBound(ClientBoundSendLoginMessage.TYPE);
+        event.registerClientBound(ClientBoundOnPistonMovedBlockMessage.TYPE);
+        event.registerClientBound(ClientBoundParticleAroundBlockMessage.TYPE);
         event.registerClientBound(ClientBoundSyncWorldDataMessage.TYPE);
-        event.registerServerBound(ServerBoundItemLeftClickPacket.TYPE);
+        event.registerServerBound(ServerBoundItemLeftClickMessage.TYPE);
+        event.registerServerBound(ServerBoundUpdateBoxBlockTileMessage.TYPE);
         event.registerBidirectional(SyncConfigsMessage.TYPE);
 
         ModNetworking.loaderDependent(event);
