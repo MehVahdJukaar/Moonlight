@@ -40,6 +40,7 @@
     "ServerMultiPackResourceManagerMixin",
     "ServerPlayerMixin",
     "ShearItemMixin",
+    "TemplateStructurePieceMixin",
     "ThrownPotionMixin",
     "VillagerMixin",
     "accessor.BrainAccessor",

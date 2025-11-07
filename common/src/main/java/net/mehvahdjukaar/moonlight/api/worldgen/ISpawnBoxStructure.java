@@ -20,7 +20,7 @@ public interface ISpawnBoxStructure extends ISpecialSpawnsStructure {
             StructureManager structureManager, Structure structure, BlockPos pos, LongSet chunkPosReferences,
             MobCategory category) {
 
-        SpawnBoxSettings settings = this.ml$getSpecialSpawnsSettings();
+        SpawnBoxSettings settings = this.ml$getSpawnBoxSettings();
         if (!settings.hasCategory(category)) return null;
 
         AtomicReference<String> boxName = new AtomicReference<>();
@@ -43,9 +43,9 @@ public interface ISpawnBoxStructure extends ISpecialSpawnsStructure {
 
 
     @NotNull
-    SpawnBoxSettings ml$getSpecialSpawnsSettings();
+    SpawnBoxSettings ml$getSpawnBoxSettings();
 
-    void ml$setSpecialSpawnsSettings(@NotNull SpawnBoxSettings settings);
-
+    default void ml$setSpawnBoxSettings(@NotNull SpawnBoxSettings settings) {
+    }
 
 }

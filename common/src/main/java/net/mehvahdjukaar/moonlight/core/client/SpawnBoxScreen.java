@@ -98,7 +98,7 @@ public class SpawnBoxScreen extends Screen {
         this.sizeZEdit.setValue(Integer.toString(vec3i.getZ()));
         this.addRenderableWidget(this.sizeZEdit);
 
-        this.finalStateEdit = new EditBox(this.font, this.width / 2 - 153, 125, 300, 20, FINAL_STATE_LABEL);
+        this.finalStateEdit = new EditBox(this.font, this.width / 2 - 153, 160, 300, 20, FINAL_STATE_LABEL);
         this.finalStateEdit.setMaxLength(256);
         this.finalStateEdit.setValue(this.tile.getFinalState());
         this.addRenderableWidget(this.finalStateEdit);
@@ -185,7 +185,7 @@ public class SpawnBoxScreen extends Screen {
 
         guiGraphics.drawString(this.font, SHOW_BOUNDING_BOX_LABEL, this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 10526880);
 
-        guiGraphics.drawString(this.font, FINAL_STATE_LABEL, this.width / 2 - 153, 115, 10526880);
+        guiGraphics.drawString(this.font, FINAL_STATE_LABEL, this.width / 2 - 153, 150, 10526880);
     }
 
     @Override

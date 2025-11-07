@@ -19,12 +19,12 @@ public class JigsawStructureMixin implements ISpawnBoxStructure {
 
 
     @Override
-    public @NotNull SpawnBoxSettings ml$getSpecialSpawnsSettings() {
+    public @NotNull SpawnBoxSettings ml$getSpawnBoxSettings() {
         return ml$specialSpawnsSettings;
     }
 
     @Override
-    public void ml$setSpecialSpawnsSettings(@NotNull SpawnBoxSettings settings) {
+    public void ml$setSpawnBoxSettings(@NotNull SpawnBoxSettings settings) {
         this.ml$specialSpawnsSettings = settings;
     }
 

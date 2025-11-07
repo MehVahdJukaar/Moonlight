@@ -13,7 +13,8 @@ plugins {
 allprojects {
     apply plugin: "java"
     apply plugin: "architectury-plugin"
-    apply plugin: "com.possible-triangle.publishing"
+   // apply plugin: "com.possible-triangle.publishing"
+    apply plugin: "maven-publish"
 
     group = mod_group_id
     version = mod_version

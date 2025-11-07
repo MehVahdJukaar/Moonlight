@@ -1,6 +1,7 @@
 {
-	"parent": "minecraft:block/cube_all",
+	"parent": "minecraft:block/cube_column",
 	"textures": {
-		"all": "moonlight:block/spawn_box"
+		"end": "moonlight:block/spawn_box_block_top",
+		"side": "moonlight:block/spawn_box_block"
 	}
 }

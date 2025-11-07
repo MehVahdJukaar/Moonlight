@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 public class JigsawCodecWithExtra extends MapCodec<JigsawStructure> {
 
-    private static final String BOX_KEY = "special_spawns";
+    private static final String BOX_KEY = "spawn_boxes";
     private static final MapCodec<SpawnBoxSettings> BOX_CODEC = SpawnBoxSettings.CODEC.optionalFieldOf(BOX_KEY, SpawnBoxSettings.EMPTY);
     private final MapCodec<JigsawStructure> original;
 
@@ -35,7 +35,7 @@ public class JigsawCodecWithExtra extends MapCodec<JigsawStructure> {
         if (result.isSuccess()) {
             Structure value = result.getOrThrow();
             if (value instanceof ISpawnBoxStructure sb) {
-                sb.ml$setSpecialSpawnsSettings(boxResult.getOrThrow());
+                sb.ml$setSpawnBoxSettings(boxResult.getOrThrow());
             }
         }
 
@@ -48,7 +48,7 @@ public class JigsawCodecWithExtra extends MapCodec<JigsawStructure> {
         RecordBuilder<T> rb = original.encode(jigsawStructure, dynamicOps, recordBuilder);
         Structure str = jigsawStructure;
         if (str instanceof ISpawnBoxStructure sb) {
-            SpawnBoxSettings s = sb.ml$getSpecialSpawnsSettings();
+            SpawnBoxSettings s = sb.ml$getSpawnBoxSettings();
             if (!s.isEmpty()) {
                 rb = BOX_CODEC.encode(s, dynamicOps, rb);
             }
