@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.worldgen;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxStructurePiece;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.random.WeightedRandomList;
@@ -35,7 +37,12 @@ public interface ISpawnBoxStructure extends ISpecialSpawnsStructure {
 
         String boxID = boxName.get();
         if (boxID != null) {
-            return settings.get(boxID, category);
+            var found = settings.get(boxID, category);
+            if (found == null) {
+                Moonlight.LOGGER.warn("Spawn Box in structure '{}' is missing spawns settings for name '{}' and category '{}'",
+                        structure.type(), boxID, category.getName());
+            }
+            return found;
         }
 
         return null;
