@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -31,43 +32,38 @@ public class DebugRenderersCommand {
                 .requires(cs -> cs.hasPermission(2))
 
                 .then(Commands.literal("neighbors_update")
-                        .then(Commands.argument("active", BoolArgumentType.bool())
-                                .executes(DebugRenderersCommand::neighbors)))
+                        .executes(DebugRenderersCommand::neighbors))
                 .then(Commands.literal("navigation")
-                        .then(Commands.argument("active", BoolArgumentType.bool())
+                        .executes(DebugRenderersCommand::navigation)
+                        .then(Commands.argument("entity", ResourceKeyArgument.key(Registries.ENTITY_TYPE))
                                 .executes(DebugRenderersCommand::navigation)
-                                .then(Commands.argument("entity", ResourceKeyArgument.key(Registries.ENTITY_TYPE))
-                                        .then(Commands.argument("active", BoolArgumentType.bool())
-                                                .executes(DebugRenderersCommand::navigation)
-                                        )
+                                .then(Commands.argument("active", BoolArgumentType.bool())
+                                        .executes(DebugRenderersCommand::navigation)
                                 )
                         )
                 )
                 .then(Commands.literal("goals_selector")
-                        .then(Commands.argument("active", BoolArgumentType.bool())
+                        .executes(DebugRenderersCommand::goals)
+                        .then(Commands.argument("entity", ResourceKeyArgument.key(Registries.ENTITY_TYPE))
                                 .executes(DebugRenderersCommand::goals)
-                                .then(Commands.argument("entity", ResourceKeyArgument.key(Registries.ENTITY_TYPE))
-                                        .then(Commands.argument("active", BoolArgumentType.bool())
-                                                .executes(DebugRenderersCommand::goals)
-                                        )
+                                .then(Commands.argument("active", BoolArgumentType.bool())
+                                        .executes(DebugRenderersCommand::goals)
                                 )
-
                         )
                 )
                 .then(Commands.literal("structures")
-                        .then(Commands.argument("active", BoolArgumentType.bool())
+                        .executes(DebugRenderersCommand::structures)
+                        .then(Commands.argument("structure", STRUCTURE_ARG)
                                 .executes(DebugRenderersCommand::structures)
-                                .then(Commands.argument("structure", STRUCTURE_ARG)
-                                        .then(Commands.argument("active", BoolArgumentType.bool())
-                                                .executes(DebugRenderersCommand::structures)
-                                        )
+                                .then(Commands.argument("active", BoolArgumentType.bool())
+                                        .executes(DebugRenderersCommand::structures)
                                 )
                         )
                 );
     }
 
     private static int navigation(CommandContext<CommandSourceStack> context) {
-        toggle(context, "entity", Registries.ENTITY_TYPE, DEBUG_PATHFINDING, "navigation");
+        toggle(context, "entity", DEBUG_PATHFINDING, "navigation");
         return 0;
     }
 
@@ -80,31 +76,33 @@ public class DebugRenderersCommand {
 
 
     private static int goals(CommandContext<CommandSourceStack> context) {
-        toggle(context, "entity", Registries.ENTITY_TYPE, DEBUG_GOAL_SELECTOR, "goal_selector");
+        toggle(context, "entity", DEBUG_GOAL_SELECTOR, "goal_selector");
         return 0;
     }
 
     private static int structures(CommandContext<CommandSourceStack> context) {
-        toggle(context, "structure", Registries.STRUCTURE, DEBUG_STRUCTURES_BB, "structures");
+        toggle(context, "structure", DEBUG_STRUCTURES_BB, "structures");
         return 0;
     }
 
 
-    private static <T> void toggle(CommandContext<CommandSourceStack> context,
-                                   String keyKey, ResourceKey<Registry<T>> registry,
-                                   DebugConfig config, String translation) {
-        boolean active = BoolArgumentType.getBool(context, "active");
-        ResourceKey<T> key = getResourceKey(context, keyKey, registry).orElse(null);
+    private static <T> void toggle(CommandContext<CommandSourceStack> ctx,
+                                   String keyKey, DebugConfig<T> config, String translation) {
+        Boolean active = getOptArg(ctx, "active", Boolean.class);
+
         Component comp;
-        if (key != null) {
-            ResourceLocation location = key.location();
+       var key = getResourceKey(ctx, keyKey, config.registryKey);
+        if (key.isPresent()) {
+            ResourceLocation location = key.get().location();
+            active = active != null ? active : !config.keys.contains(location);
             if (active) {
-                comp = Component.translatable("commands.moonlight." + translation + ".add", location);
+                comp = Component.translatable("commands.moonlight." + translation + ".add", location.toString());
             } else {
-                comp = Component.translatable("commands.moonlight." + translation + ".remove", location);
+                comp = Component.translatable("commands.moonlight." + translation + ".remove", location.toString());
             }
             config.toggleKey(location, active);
         } else {
+            active = !config.allActive;
             if (active) {
                 comp = Component.translatable("commands.moonlight." + translation + ".on");
 
@@ -113,13 +111,26 @@ public class DebugRenderersCommand {
             }
             config.setActive(active);
         }
-        context.getSource().sendSuccess(() -> comp, false);
+        ctx.getSource().sendSuccess(() -> comp, false);
+    }
+
+    @Nullable
+    private static Boolean getOptArg(CommandContext<CommandSourceStack> ctx, String active, Class<Boolean> booleanClass) {
+        try {
+            return ctx.getArgument(active, booleanClass);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private static <T> Optional<ResourceKey<T>> getResourceKey(CommandContext<CommandSourceStack> ctx, String name,
                                                                ResourceKey<Registry<T>> registryKey) {
-        ResourceKey<?> key = ctx.getArgument(name, ResourceKey.class);
-        return key.cast(registryKey);
+        try {
+            ResourceKey<?> key = ctx.getArgument(name, ResourceKey.class);
+            return key.cast(registryKey);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public static boolean DEBUG_NEIGHBOR_UPDATES = false;

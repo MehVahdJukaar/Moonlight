@@ -17,7 +17,7 @@ public class IUsedToRollTheDice implements Command<CommandSourceStack> {
         return Commands.literal("roll")
                 .requires(cs -> cs.hasPermission(0))
                 .then(Commands.argument("dice", IntegerArgumentType.integer(1))
-                        .executes( new IUsedToRollTheDice()));
+                        .executes(new IUsedToRollTheDice()));
     }
 
     @Override
@@ -26,7 +26,7 @@ public class IUsedToRollTheDice implements Command<CommandSourceStack> {
         int dice = IntegerArgumentType.getInteger(context, "dice");
 
         int roll = r.nextInt(dice);
-        context.getSource().sendSuccess(()->Component.translatable("commands.moonlight.dice", dice, roll), false);
+        context.getSource().sendSuccess(() -> Component.translatable("commands.moonlight.dice", dice, roll), false);
 
         return roll;
     }

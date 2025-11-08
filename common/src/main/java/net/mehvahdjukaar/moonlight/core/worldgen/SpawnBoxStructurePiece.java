@@ -126,7 +126,7 @@ public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
 
             //mojang. dont ask why I got no idea.
 
-            EmptyBoxPoolElement boxPoolElement = new EmptyBoxPoolElement(size, startRelativePos);
+            EmptyBoxPoolElement boxPoolElement = new EmptyBoxPoolElement(size, offset);
 
             int groundLevelDelta = structurePoolElement.getGroundLevelDelta();
 

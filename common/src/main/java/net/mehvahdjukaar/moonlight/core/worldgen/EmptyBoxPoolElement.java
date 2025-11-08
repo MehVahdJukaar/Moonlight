@@ -12,6 +12,7 @@ import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -55,9 +56,13 @@ public class EmptyBoxPoolElement extends StructurePoolElement {
     }
 
     @Override
-    public BoundingBox getBoundingBox(StructureTemplateManager structureTemplateManager, BlockPos startPos, Rotation rotation) {
-        var settings = new StructurePlaceSettings().setRotation(rotation);
-        return getBoundingBox(startPos.offset(this.offset), settings.getRotation(),
+    public BoundingBox getBoundingBox(StructureTemplateManager structureTemplateManager, BlockPos spawnBoxPos, Rotation rotation) {
+       BlockPos pivot =spawnBoxPos.offset(this.offset);
+        var settings = new StructurePlaceSettings()
+                .setRotationPivot(BlockPos.ZERO)
+                .setRotation(Rotation.NONE);
+        BlockPos startPos = spawnBoxPos.offset(offset);
+        return getBoundingBox(spawnBoxPos, settings.getRotation(),
                 settings.getRotationPivot(),
                 settings.getMirror(), this.size);
     }
