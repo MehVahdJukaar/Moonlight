@@ -16,7 +16,7 @@ import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
-import net.mehvahdjukaar.moonlight.core.worldgen.EmptyBoxPoolElement;
+import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxPoolElement;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -180,7 +180,7 @@ public class RegHelper {
     }
 
 
-    public static Supplier<StructurePoolElementType<EmptyBoxPoolElement>> registerStructurePoolElement(ResourceLocation id, MapCodec<EmptyBoxPoolElement> codec) {
+    public static Supplier<StructurePoolElementType<SpawnBoxPoolElement>> registerStructurePoolElement(ResourceLocation id, MapCodec<SpawnBoxPoolElement> codec) {
         return register(id, () -> () -> codec, Registries.STRUCTURE_POOL_ELEMENT);
     }
 

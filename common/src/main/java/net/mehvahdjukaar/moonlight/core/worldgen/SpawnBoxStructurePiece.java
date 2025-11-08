@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.worldgen;
 
-import com.google.common.annotations.VisibleForTesting;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -9,7 +8,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -21,7 +19,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.pools.ListPoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
-import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -35,7 +32,7 @@ import java.util.List;
 public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
 
     public SpawnBoxStructurePiece(StructureTemplateManager structureTemplateManager,
-                                  EmptyBoxPoolElement poolElement,
+                                  SpawnBoxPoolElement poolElement,
                                   BlockPos blockPos, int groundLevelDelta, Rotation rotation,
                                   LiquidSettings liquidSettings) {
         super(structureTemplateManager, poolElement,
@@ -58,7 +55,11 @@ public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
         //do nothing
     }
 
+    @Nullable
     private String targetName() {
+        if (this.element instanceof SpawnBoxPoolElement sbe) {
+            return sbe.getTargetName();
+        }
         return null;
     }
 
@@ -121,17 +122,13 @@ public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
             BlockPos spawnBoxPos = spawnBox.pos();
             BlockPos offset = SpawnBoxBlockEntity.readOffsetPos(spawnBox.nbt());
             Vec3i size = SpawnBoxBlockEntity.readBoxSize(spawnBox.nbt());
-            Vec3i relativePos = spawnBoxPos.subtract(parentPiecePos);
-            BlockPos startRelativePos = offset.offset(relativePos);
+            String name = SpawnBoxBlockEntity.readBoxName(spawnBox.nbt());
 
-            //mojang. dont ask why I got no idea.
-
-            EmptyBoxPoolElement boxPoolElement = new EmptyBoxPoolElement(size, offset);
+            SpawnBoxPoolElement element = new SpawnBoxPoolElement(size, offset, name);
 
             int groundLevelDelta = structurePoolElement.getGroundLevelDelta();
-
             SpawnBoxStructurePiece newPiece = new SpawnBoxStructurePiece(
-                    structureTemplateManager, boxPoolElement,
+                    structureTemplateManager, element,
                     spawnBoxPos, groundLevelDelta, parentPieceRot, liquidSettings
             );
             result.add(newPiece);
@@ -139,7 +136,6 @@ public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
 
         return result;
     }
-
 
 
 }

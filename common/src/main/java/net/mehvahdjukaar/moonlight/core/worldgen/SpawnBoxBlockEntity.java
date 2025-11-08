@@ -43,7 +43,7 @@ public class SpawnBoxBlockEntity extends BlockEntity implements IScreenProvider 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        this.targetName = (tag.getString("name"));
+        this.targetName = readBoxName(tag);
         this.boxOffset = readOffsetPos(tag);
         this.boxSize = readBoxSize(tag);
         this.showBoundingBox = tag.getBoolean("showBB");
@@ -62,6 +62,10 @@ public class SpawnBoxBlockEntity extends BlockEntity implements IScreenProvider 
         int j = Mth.clamp(tag.getInt("posY"), -48, 48);
         int k = Mth.clamp(tag.getInt("posZ"), -48, 48);
         return new BlockPos(i, j, k);
+    }
+
+    public static String readBoxName(CompoundTag nbt) {
+        return nbt.getString("name");
     }
 
     public String getFinalState() {

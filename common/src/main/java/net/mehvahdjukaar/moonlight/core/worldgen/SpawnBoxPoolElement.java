@@ -1,10 +1,9 @@
 package net.mehvahdjukaar.moonlight.core.worldgen;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
-import net.mehvahdjukaar.moonlight.core.mixins.DebugPacketsMixin;
-import net.mehvahdjukaar.moonlight.core.mixins.DebugRendererMixin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.RandomSource;
@@ -12,7 +11,6 @@ import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -25,21 +23,28 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 import java.util.List;
 
-public class EmptyBoxPoolElement extends StructurePoolElement {
+public class SpawnBoxPoolElement extends StructurePoolElement {
 
-    public static final MapCodec<EmptyBoxPoolElement> CODEC = RecordCodecBuilder.mapCodec(
+    public static final MapCodec<SpawnBoxPoolElement> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                             Vec3i.CODEC.fieldOf("size").forGetter(e -> e.size),
-                            Vec3i.CODEC.fieldOf("offset").forGetter(e -> e.offset))
-                    .apply(instance, EmptyBoxPoolElement::new)
+                            Vec3i.CODEC.fieldOf("offset").forGetter(e -> e.offset),
+                            Codec.STRING.fieldOf("target_name").forGetter(e -> e.targetName))
+                    .apply(instance, SpawnBoxPoolElement::new)
     );
     private final Vec3i size;
     private final Vec3i offset;
+    private final String targetName;
 
-    public EmptyBoxPoolElement(Vec3i size, Vec3i offset) {
+    public SpawnBoxPoolElement(Vec3i size, Vec3i offset, String targetName) {
         super(StructureTemplatePool.Projection.RIGID);
         this.size = size;
         this.offset = offset;
+        this.targetName = targetName;
+    }
+
+    public String getTargetName() {
+        return targetName;
     }
 
     @Override
@@ -57,12 +62,13 @@ public class EmptyBoxPoolElement extends StructurePoolElement {
 
     @Override
     public BoundingBox getBoundingBox(StructureTemplateManager structureTemplateManager, BlockPos spawnBoxPos, Rotation rotation) {
-       BlockPos pivot =spawnBoxPos.offset(this.offset);
+        BlockPos startPos = spawnBoxPos.offset(this.offset);
+        BlockPos toPivotRelative = spawnBoxPos.subtract(startPos);
         var settings = new StructurePlaceSettings()
-                .setRotationPivot(BlockPos.ZERO)
-                .setRotation(Rotation.NONE);
-        BlockPos startPos = spawnBoxPos.offset(offset);
-        return getBoundingBox(spawnBoxPos, settings.getRotation(),
+                .setRotation(rotation)
+                .setRotationPivot(toPivotRelative)
+                .setMirror(Mirror.NONE);
+        return getBoundingBox(startPos, settings.getRotation(),
                 settings.getRotationPivot(),
                 settings.getMirror(), this.size);
     }
@@ -76,7 +82,6 @@ public class EmptyBoxPoolElement extends StructurePoolElement {
         return BoundingBox.fromCorners(blockPos, blockPos2).move(startPos);
     }
 
-
     @Override
     public boolean place(StructureTemplateManager structureTemplateManager, WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, RandomSource randomSource, LiquidSettings liquidSettings, boolean bl) {
         return true;
@@ -84,6 +89,6 @@ public class EmptyBoxPoolElement extends StructurePoolElement {
 
     @Override
     public StructurePoolElementType<?> getType() {
-        return MoonlightRegistry.EMPTY_BOX_POOL_ELEMENT.get();
+        return MoonlightRegistry.SPAWN_BOX_POOL_ELEMENT.get();
     }
 }

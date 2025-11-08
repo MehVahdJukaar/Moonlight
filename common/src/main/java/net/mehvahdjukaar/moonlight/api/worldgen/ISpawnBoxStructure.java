@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.worldgen;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxStructurePiece;
 import net.minecraft.core.BlockPos;
@@ -23,12 +22,13 @@ public interface ISpawnBoxStructure extends ISpecialSpawnsStructure {
             MobCategory category) {
 
         SpawnBoxSettings settings = this.ml$getSpawnBoxSettings();
+        if (settings == SpawnBoxSettings.EMPTY) return null;
         if (!settings.hasCategory(category)) return null;
 
         AtomicReference<String> boxName = new AtomicReference<>();
 
         structureManager.fillStartsForStructure(structure, chunkPosReferences, structureStart -> {
-            if (boxName.get() == null) return;
+            if (boxName.get() != null) return;
             String foundName = SpawnBoxStructurePiece.getNamedBoxesAt(structureStart, pos);
             if (foundName != null) {
                 boxName.set(foundName);

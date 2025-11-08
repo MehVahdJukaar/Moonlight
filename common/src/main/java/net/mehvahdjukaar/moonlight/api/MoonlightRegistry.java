@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api;
 
-import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.BlockPlacerItem;
 import net.mehvahdjukaar.moonlight.api.map.MLMapDecorationsComponent;
 import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
@@ -10,13 +9,12 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.GrindItemTrigger;
 import net.mehvahdjukaar.moonlight.core.loot.*;
 import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
-import net.mehvahdjukaar.moonlight.core.worldgen.EmptyBoxPoolElement;
+import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxPoolElement;
 import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxBlock;
 import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxBlockEntity;
 import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxStructurePiece;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.item.GameMasterBlockItem;
 import net.minecraft.world.item.Item;
@@ -87,8 +85,9 @@ public class MoonlightRegistry {
     public static final Supplier<StructurePieceType> SPAWN_BOX_PIECE = RegHelper.registerStructurePiece(
             Moonlight.res("spawn_box"), SpawnBoxStructurePiece::new);
 
-    public static final Supplier<StructurePoolElementType<EmptyBoxPoolElement>> EMPTY_BOX_POOL_ELEMENT = RegHelper.registerStructurePoolElement(
-            Moonlight.res("empty_box"), EmptyBoxPoolElement.CODEC);
+    public static final Supplier<StructurePoolElementType<SpawnBoxPoolElement>> SPAWN_BOX_POOL_ELEMENT = RegHelper.registerStructurePoolElement(
+            Moonlight.res("spawn_box"), SpawnBoxPoolElement.CODEC);
+
 
     public static final Supplier<DataComponentType<PotionBottleType>> BOTTLE_TYPE = RegHelper.registerDataComponent(
             res("bottle_type"), () -> DataComponentType.<PotionBottleType>builder()

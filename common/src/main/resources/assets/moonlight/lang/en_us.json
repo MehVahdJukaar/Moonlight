@@ -11,7 +11,7 @@
   "message.moonlight.merged_pack.description": "Resources for %s mods",
   "message.moonlight.merged_pack.title": "Moonlight Dynamic Resources",
   "message.moonlight.spawn_box_block.size": "Spawn Box Size",
-  "block.moonlight.spawn_box": "Spawn Box",
+  "block.moonlight.spawn_box": "Spawn Box Block",
   "commands.moonlight.dice": "Rolled D%1$d: %2$d",
   "commands.moonlight.navigation.add": "Enabled Pathfinding Debug Renderers for %s",
   "commands.moonlight.navigation.remove": "Disabled Pathfinding Debug Renderers for %s",
