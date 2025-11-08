@@ -34,6 +34,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.FolderRepositorySource;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -41,11 +43,13 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.validation.DirectoryValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.ref.WeakReference;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -90,9 +94,28 @@ public class Moonlight {
         BlockSetAPI.addDynamicRegistration((reg, wood) -> AdditionalItemPlacementsAPI.afterItemReg(),
                 WoodType.class, BuiltInRegistries.BLOCK_ENTITY_TYPE);
 
+        addGlobalDatapackLoader();
+
         //client init
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.initClient();
+        }
+    }
+
+    private static void addGlobalDatapackLoader() {
+        //global datapacks
+        String globalPacksDir = CommonConfigs.GLOBAL_DATAPACKS_DIR.get();
+        if (!globalPacksDir.isEmpty()) {
+            Path path = PlatHelper.getGamePath().resolve(globalPacksDir);
+            //create folder if not exists
+            DirectoryValidator validator = new DirectoryValidator(a -> true);
+            RegHelper.registerResourcePackSource(PackType.SERVER_DATA,
+                    new FolderRepositorySource(path,
+                            PackType.SERVER_DATA, PackSource.DEFAULT, validator));
+            try {
+                path.toFile().mkdirs();
+            } catch (Exception ignored) {
+            }
         }
     }
 

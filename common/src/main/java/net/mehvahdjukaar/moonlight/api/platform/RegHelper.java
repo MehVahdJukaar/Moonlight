@@ -23,6 +23,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.*;
@@ -558,6 +563,32 @@ public class RegHelper {
         List<ItemStack> chickenFood = new ArrayList<>(List.of(Chicken.FOOD_ITEMS.getItems()));
         Arrays.stream(food).forEach(f -> chickenFood.add(f.asItem().getDefaultInstance()));
         Chicken.FOOD_ITEMS = Ingredient.of(chickenFood.stream());
+    }
+
+    @ExpectPlatform
+    public static void registerResourcePackSource(PackType packType, RepositorySource packSource) {
+        throw new AssertionError();
+    }
+
+    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+        if (packSupplier == null) return;
+        registerResourcePackSource(packType, loader -> {
+            Pack t = packSupplier.get();
+            if (t != null) loader.accept(t);
+        });
+    }
+
+    public static void registerDynamicResourceProvider(DynamicResourcesProvider provider) {
+        DynamicResourcesInternals.registerProvider(provider);
+        SimplePackProvider packSupplier = provider;
+
+        PackType packType = provider.getPackType();
+        if (packType == PackType.CLIENT_RESOURCES) {
+            SimplePackProvider maybeMerged = MoonlightClient.mergePackSupplier(provider);
+            if (maybeMerged == null) return; //merged, no need to register
+            else packSupplier = maybeMerged;
+        }
+        registerResourcePack(packType, packSupplier::createPack);
     }
 
     public static void registerHorseFood(ItemLike... food) {

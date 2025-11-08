@@ -15,6 +15,7 @@
     "ConditionHackMixin",
     "FireBlockMixin",
     "PacketDistributorHackMixin",
+    "MinecraftServerMixin",
     "SelfEntitySpawnDataMixin",
     "SelfItemDisplayTileMixin",
     "SelfModFlowingFluidMixin"

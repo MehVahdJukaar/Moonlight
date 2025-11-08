@@ -30,6 +30,8 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
@@ -302,6 +304,19 @@ public class RegHelperImpl {
         PoiTypes.registerBlockStates(beehivePOI, newStates);
     }
 
+    public static void registerResourcePackSource(PackType packType, RepositorySource packSource) {
+        Moonlight.assertInitPhase();
 
+        //client is already loaded. add immediately, saving hassle
+        if (packType == PackType.CLIENT_RESOURCES && PlatHelper.getPhysicalSide().isClient()) {
+            if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
+                var newSources = new HashSet<>(rep.getSources());
+                rep.setSources(newSources);
+            }
+        }
+        if(packType == PackType.SERVER_DATA){
+            MoonlightFabric.EXTRA_DATA_PACK_SOURCES.add(packSource);
+        }
+    }
 
 }

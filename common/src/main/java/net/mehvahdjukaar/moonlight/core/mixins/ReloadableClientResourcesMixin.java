@@ -44,7 +44,7 @@ public abstract class ReloadableClientResourcesMixin {
             if (!PlatHelper.isInitializing()) {
                 return ReloadInstanceWrapper.wrap(() -> original.call(resourceManager, listeners,
                                 backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
-                        type, this.resources, backgroundExecutor);
+                        type, this.resources, backgroundExecutor, gameExecutor);
             }
         }
         return original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled);

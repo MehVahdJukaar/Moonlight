@@ -42,6 +42,7 @@
     "ShearItemMixin",
     "ThrownPotionMixin",
     "VillagerMixin",
+    "WorldLoaderMixin",
     "accessor.BrainAccessor",
     "accessor.DispenserBlockAccessor",
     "accessor.DispenserBlockEntityAccessor",

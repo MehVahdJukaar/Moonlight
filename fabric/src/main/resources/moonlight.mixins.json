@@ -26,12 +26,14 @@
   ],
   "mixins": [
     "ConditionsHackMixin",
+    "CreateWorldScreenMixin",
     "FireBlockMixin",
     "MappedRegistryAccessor",
     "MenuTypeAccessor",
+    "MinecraftServerMixin",
     "PackRepositoryAccessor",
-    "PackRepositoryMixin",
     "PoiTypeAccessor",
+    "ServerPackSourceMixin",
     "ServerPlayerAccessor"
   ],
   "injectors": {

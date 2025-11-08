@@ -1,98 +1,71 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
-import com.google.common.base.Suppliers;
+import com.mojang.datafixers.util.Unit;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.Mth;
-import net.minecraft.util.Unit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-// The job of this is to return an instance that first runs the early pack task, then runs the original task.
-// That way the loading overlay will pick up our progress too
 public class ReloadInstanceWrapper implements ReloadInstance {
 
-    public static final Logger LOGGER = LogManager.getLogger("ReloadInstanceWrapper");
-
-    public static ReloadInstance wrap(Supplier<ReloadInstance> factory, PackType type, ResourceManager manager, Executor backgroundExecutor) {
-        return new ReloadInstanceWrapper(factory, type, manager, backgroundExecutor);
+    public static ReloadInstance wrap(
+            Supplier<ReloadInstance> factory,
+            PackType type,
+            ResourceManager manager,
+            Executor backgroundExecutor,
+            Executor mainExecutor
+    ) {
+        return new ReloadInstanceWrapper(factory, type, manager, backgroundExecutor, mainExecutor);
     }
 
-    public static void executeEarlyReloadBlocking(PackType type, ResourceManager manager, IProgressTracker progressTracker) {
-        DynResourceGenerator.clearBeforeReload(type);
-        MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(List.of(), manager, type, progressTracker), EarlyPackReloadEvent.class);
+    public static void executeEarlyReloadBlocking(PackType type, ResourceManager manager,
+                                                  IProgressTracker progressTracker) {
+        MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(manager.listPacks().toList(), manager, type, progressTracker), EarlyPackReloadEvent.class);
     }
 
-    private final Supplier<ReloadInstance> lazyInstance;
     private final CompletableFuture<Unit> beforeTask;
+    private final CompletableFuture<ReloadInstance> instanceFuture;
     private final IProgressTracker.Tree progressTracker;
 
     public ReloadInstanceWrapper(Supplier<ReloadInstance> factory,
-                                 PackType type, ResourceManager manager, Executor executor) {
+                                 PackType type, ResourceManager manager,
+                                 Executor backgroundExecutor,
+                                 Executor mainExecutor) {
+
         this.progressTracker = IProgressTracker.createTree(1);
-        this.lazyInstance = Suppliers.memoize(factory::get);
+
         this.beforeTask = CompletableFuture.supplyAsync(() -> {
             executeEarlyReloadBlocking(type, manager, progressTracker);
             return Unit.INSTANCE;
-        }, executor);
+        }, backgroundExecutor);
 
-
-    }
-
-    @Nullable
-    private ReloadInstance allErrorsInPackReloadWillHaveThisLineOnTheirStackTrace_DoesntMeanItsTheCause() {
-        if (beforeTask.isDone() && !beforeTask.isCompletedExceptionally()) {
-            return lazyInstance.get();
-        }
-        return null;
+        // Ensure the actual instance is created on the main thread.
+        this.instanceFuture = beforeTask.thenApplyAsync(u -> factory.get(), mainExecutor);
     }
 
     @Override
     public CompletableFuture<?> done() {
-        return beforeTask.thenCompose(unused -> {
-            ReloadInstance actual = allErrorsInPackReloadWillHaveThisLineOnTheirStackTrace_DoesntMeanItsTheCause();
-            return actual.done();
-        });
+        return instanceFuture.thenCompose(ReloadInstance::done);
     }
 
     @Override
     public float getActualProgress() {
-        float maxAmount = Mth.clamp(0.2f, 0, 0.5f);
-        float progress = progressTracker.getProgress() * maxAmount;
-        if (!beforeTask.isDone()) {
-            return progress;
-        }
-        ReloadInstance actual = allErrorsInPackReloadWillHaveThisLineOnTheirStackTrace_DoesntMeanItsTheCause();
-        if (actual != null) {
-            return progress + actual.getActualProgress() * (1 - maxAmount);
-        }
-        return 1;
+        if (!beforeTask.isDone()) return progressTracker.getProgress();
+        ReloadInstance actual = instanceFuture.getNow(null);
+        return actual != null ? actual.getActualProgress() : 1f;
     }
-
 
     @Override
     public void checkExceptions() {
-        if (!beforeTask.isDone()) {
-            return;
-        }
-        if (beforeTask.isCompletedExceptionally()) {
-            //beforeTask.join(); // This will throw the exception
-        }
-        ReloadInstance actual = allErrorsInPackReloadWillHaveThisLineOnTheirStackTrace_DoesntMeanItsTheCause();
-        if (actual != null) {
-            actual.checkExceptions();
-        }
+        if (!beforeTask.isDone()) return;
+        if (beforeTask.isCompletedExceptionally()) beforeTask.join();
+        ReloadInstance actual = instanceFuture.getNow(null);
+        if (actual != null) actual.checkExceptions();
     }
-
 }

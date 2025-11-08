@@ -20,6 +20,14 @@ import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenScreenMessage;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.repository.RepositorySource;
+import net.minecraft.world.level.EmptyBlockGetter;
+import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -104,4 +112,5 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     public static final Queue<Runnable> AFTER_SETUP_WORK = new ConcurrentLinkedQueue<>();
 
 
+    public static final List<RepositorySource> EXTRA_DATA_PACK_SOURCES = new ArrayList<>();
 }

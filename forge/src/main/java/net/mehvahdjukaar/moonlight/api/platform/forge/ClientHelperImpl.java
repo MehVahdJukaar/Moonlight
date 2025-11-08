@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -260,7 +261,7 @@ public class ClientHelperImpl {
     public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
         Moonlight.assertInitPhase();
 
-        PlatHelper.registerResourcePack(PackType.CLIENT_RESOURCES,
+        RegHelper.registerResourcePack(PackType.CLIENT_RESOURCES,
                 () -> {
                     IModFile file = ModList.get().getModFileById(folderName.getNamespace()).getFile();
                     try (PathPackResources pack = new PathPackResources(
