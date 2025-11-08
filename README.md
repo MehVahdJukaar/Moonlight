@@ -22,6 +22,7 @@ registration system as well as your usual multi loader helpers and wrappers to d
 - Many helpful interfaces for blocks, entities and items.
 - Texture Renderer system, allows to create texture containing rendered objects like items or entities.
 - Many helper classes
+- Helper commands like debug renderers or registry search (/mnl)
 
 ## Documentation
 

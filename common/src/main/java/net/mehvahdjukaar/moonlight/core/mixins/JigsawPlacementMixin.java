@@ -48,7 +48,6 @@ public class JigsawPlacementMixin {
                                      LevelHeightAccessor level, RandomState random, PoolAliasLookup poolAliasLookup,
                                      LiquidSettings liquidSettings, CallbackInfo ci) {
 
-
         List<? extends PoolElementStructurePiece> extraPieces = SpawnBoxStructurePiece
                 .getSpawnBoxPieces(piece, structureTemplateManager, liquidSettings);
         this.pieces.addAll(extraPieces);

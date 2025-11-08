@@ -34,7 +34,9 @@ public abstract class DebugPacketsMixin {
 
     @Inject(method = "sendPathFindingPacket", at = @At("HEAD"))
     private static void ml$sendPathfindingDebug(Level level, Mob mob, @Nullable Path path, float maxDistanceToWaypoint, CallbackInfo ci) {
-        if (path != null && DebugRenderersCommand.debugNavigation && level instanceof ServerLevel sl) {
+        if (path != null && level instanceof ServerLevel sl) {
+            if (!DebugRenderersCommand.DEBUG_PATHFINDING.isActive(mob.getType(), sl)) return;
+
             Path.DebugData debugData = path.debugData();
             if (debugData == null) {
                 List<Node> close = new ArrayList<>();
@@ -62,14 +64,16 @@ public abstract class DebugPacketsMixin {
 
     @Inject(method = "sendNeighborsUpdatePacket", at = @At("HEAD"))
     private static void ml$neighborUpdatesDebug(Level level, BlockPos pos, CallbackInfo ci) {
-        if (DebugRenderersCommand.debugNeighbors && level instanceof ServerLevel sl) {
+        if (DebugRenderersCommand.DEBUG_NEIGHBOR_UPDATES && level instanceof ServerLevel sl) {
             sendPacketToAllPlayers(sl, new NeighborUpdatesDebugPayload(level.getGameTime(), pos));
         }
     }
 
     @Inject(method = "sendGoalSelector", at = @At("HEAD"))
     private static void ml$goalDebug(Level level, Mob mob, GoalSelector goalSelector, CallbackInfo ci) {
-        if (DebugRenderersCommand.debugGoals && level instanceof ServerLevel sl) {
+        if (level instanceof ServerLevel sl) {
+            if (!DebugRenderersCommand.DEBUG_GOAL_SELECTOR.isActive(mob.getType(), sl)) return;
+
             List<GoalDebugPayload.DebugGoal> goals = new ArrayList<>();
             for (var g : goalSelector.getAvailableGoals()) {
                 goals.add(new GoalDebugPayload.DebugGoal(g.getPriority(), g.isRunning(), g.getGoal().toString()));
@@ -80,15 +84,15 @@ public abstract class DebugPacketsMixin {
 
     @Inject(method = "sendStructurePacket", at = @At("HEAD"))
     private static void ml$StructureDebug(WorldGenLevel level, StructureStart structureStart, CallbackInfo ci) {
-        if (DebugRenderersCommand.structureDebug) {
-            List<StructuresDebugPayload.PieceInfo> infos = new ArrayList<>();
-            for (var s : structureStart.getPieces()) {
-                infos.add(new StructuresDebugPayload.PieceInfo(s.getBoundingBox(), s.getGenDepth() <= 0));
-            }
-            ServerLevel sl = level.getLevel();
-            sendPacketToAllPlayers(sl, new StructuresDebugPayload(sl.dimension(),
-                    structureStart.getBoundingBox(), infos));
+        ServerLevel sl = level.getLevel();
+        if (!DebugRenderersCommand.DEBUG_STRUCTURES_BB.isActive(structureStart.getStructure(), sl)) return;
+
+        List<StructuresDebugPayload.PieceInfo> infos = new ArrayList<>();
+        for (var s : structureStart.getPieces()) {
+            infos.add(new StructuresDebugPayload.PieceInfo(s.getBoundingBox(), s.getGenDepth() <= 0));
         }
+        sendPacketToAllPlayers(sl, new StructuresDebugPayload(sl.dimension(),
+                structureStart.getBoundingBox(), infos));
     }
 
 }

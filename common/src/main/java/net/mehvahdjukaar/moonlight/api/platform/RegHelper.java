@@ -16,6 +16,7 @@ import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
+import net.mehvahdjukaar.moonlight.core.worldgen.EmptyBoxPoolElement;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -70,6 +71,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
@@ -176,6 +179,19 @@ public class RegHelper {
                 workSound);
     }
 
+
+    public static Supplier<StructurePoolElementType<EmptyBoxPoolElement>> registerStructurePoolElement(ResourceLocation id, MapCodec<EmptyBoxPoolElement> codec) {
+        return register(id, () -> () -> codec, Registries.STRUCTURE_POOL_ELEMENT);
+    }
+
+    public static RegSupplier<StructurePieceType> registerStructurePiece(ResourceLocation name, StructurePieceType pieceType) {
+        return register(name, () -> pieceType, Registries.STRUCTURE_PIECE);
+    }
+
+    public static RegSupplier<StructurePieceType> register(ResourceLocation name, StructurePieceType pieceType) {
+        return register(name, () -> pieceType, Registries.STRUCTURE_PIECE);
+    }
+
     public static RegSupplier<PoiType> registerPOI(ResourceLocation name, Supplier<PoiType> poi) {
         return register(name, poi, Registries.POINT_OF_INTEREST_TYPE);
     }
@@ -207,6 +223,7 @@ public class RegHelper {
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
         throw new AssertionError();
     }
+
 
     public interface ExtraPOIStatesEvent {
 

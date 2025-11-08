@@ -155,7 +155,8 @@ public class RegistryCommand {
         return builder.buildFuture();
     }
 
-    private static <T> Optional<ResourceKey<T>> getResourceKey(CommandContext<CommandSourceStack> ctx, String name, ResourceKey<Registry<T>> registryKey) {
+    private static <T> Optional<ResourceKey<T>> getResourceKey(CommandContext<CommandSourceStack> ctx, String name,
+                                                               ResourceKey<Registry<T>> registryKey) {
         ResourceKey<?> key = ctx.getArgument(name, ResourceKey.class);
         return key.cast(registryKey);
     }

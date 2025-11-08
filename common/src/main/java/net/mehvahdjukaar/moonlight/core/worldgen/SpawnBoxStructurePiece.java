@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.worldgen;
 
+import com.google.common.annotations.VisibleForTesting;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -8,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -33,11 +35,13 @@ import java.util.List;
 public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
 
     public SpawnBoxStructurePiece(StructureTemplateManager structureTemplateManager,
-                                  StructureTemplatePool.Projection projection,
+                                  EmptyBoxPoolElement poolElement,
                                   BlockPos blockPos, int groundLevelDelta, Rotation rotation,
-                                  BoundingBox boundingBox, LiquidSettings liquidSettings) {
-        super(structureTemplateManager, StructurePoolElement.empty().apply(projection),
-                blockPos, groundLevelDelta, rotation, boundingBox, liquidSettings);
+                                  LiquidSettings liquidSettings) {
+        super(structureTemplateManager, poolElement,
+                blockPos, groundLevelDelta, rotation,
+                poolElement.getBoundingBox(structureTemplateManager, blockPos, rotation),
+                liquidSettings);
     }
 
     public SpawnBoxStructurePiece(StructurePieceSerializationContext context, CompoundTag tag) {
@@ -117,22 +121,25 @@ public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
             BlockPos spawnBoxPos = spawnBox.pos();
             BlockPos offset = SpawnBoxBlockEntity.readOffsetPos(spawnBox.nbt());
             Vec3i size = SpawnBoxBlockEntity.readBoxSize(spawnBox.nbt());
-            BlockPos startBoxPos = spawnBoxPos.offset(offset);
-            BlockPos endBoxPos = startBoxPos.offset(size);
+            Vec3i relativePos = spawnBoxPos.subtract(parentPiecePos);
+            BlockPos startRelativePos = offset.offset(relativePos);
 
-            BoundingBox box = BoundingBox.encapsulatingPositions(List.of(
-                    startBoxPos, endBoxPos.offset(-1, -1, -1)
-            )).orElseThrow();
+            //mojang. dont ask why I got no idea.
+
+            EmptyBoxPoolElement boxPoolElement = new EmptyBoxPoolElement(size, startRelativePos);
 
             int groundLevelDelta = structurePoolElement.getGroundLevelDelta();
 
             SpawnBoxStructurePiece newPiece = new SpawnBoxStructurePiece(
-                    structureTemplateManager, structurePoolElement.getProjection(),
-                    spawnBoxPos, groundLevelDelta, parentPieceRot, box, liquidSettings
+                    structureTemplateManager, boxPoolElement,
+                    spawnBoxPos, groundLevelDelta, parentPieceRot, liquidSettings
             );
             result.add(newPiece);
         }
 
         return result;
     }
+
+
+
 }
