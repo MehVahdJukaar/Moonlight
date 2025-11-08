@@ -13,7 +13,6 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.neoforge.OptionalRecipeC
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
-import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -21,9 +20,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Inventory;
@@ -37,7 +35,6 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
@@ -428,24 +425,19 @@ public class RegHelperImpl {
         MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
-    public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
+    public static void registerResourcePackSource(PackType packType, RepositorySource packSource) {
         Moonlight.assertInitPhase();
-
-        if (packSupplier == null) return;
-        var bus = MoonlightForge.getCurrentBus();
+        IEventBus bus = MoonlightForge.getCurrentBus();
         Consumer<AddPackFindersEvent> consumer = event -> {
             if (event.getPackType() == packType) {
-                var p = packSupplier.get();
-                if (p != null) {
-                    event.addRepositorySource(infoConsumer -> infoConsumer.accept(packSupplier.get()));
-                }
+                event.addRepositorySource(packSource);
             }
         };
         bus.addListener(consumer);
     }
 
     public static <A, T> IAttachmentType<A, T> registerDataAttachment(
-            ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config,  Class<T> targetClass) {
+            ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config, Class<T> targetClass) {
         if (!IAttachmentHolder.class.isAssignableFrom(targetClass)) {
             Moonlight.LOGGER.warn("Registering data attachment for invalid class {} that does not implements IAttachmentHolder. ", targetClass.getName());
         }
@@ -501,8 +493,7 @@ public class RegHelperImpl {
             if (attachmentHolder instanceof IAttachmentHolder h) {
                 if (data == null) {
                     h.removeData(typeSupplier);
-                }
-                else h.setData(typeSupplier, data);
+                } else h.setData(typeSupplier, data);
             } else {
                 throw new IllegalArgumentException("Object " + attachmentHolder + " is not an attachment holder");
             }

@@ -31,6 +31,8 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.FolderRepositorySource;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -39,11 +41,13 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.validation.DirectoryValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.ref.WeakReference;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -90,6 +94,8 @@ public class Moonlight {
 
         PlatHelper.addServerReloadListener(ItemListingManager::new, Moonlight.res("villager_trade"));
 
+        addGlobalDatapackLoader();
+
         //client init
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.initClient();
@@ -100,6 +106,24 @@ public class Moonlight {
         });
 
         BlockSetAPI.addDynamicBlockRegistration(Moonlight::ensureBlockSetsInitialized, LeavesType.class);
+
+    }
+
+    private static void addGlobalDatapackLoader() {
+        //global datapacks
+        String globalPacksDir = CommonConfigs.GLOBAL_DATAPACKS_DIR.get();
+        if (!globalPacksDir.isEmpty()) {
+            Path path = PlatHelper.getGamePath().resolve(globalPacksDir);
+            //create folder if not exists
+            DirectoryValidator validator = new DirectoryValidator(a -> true);
+            RegHelper.registerResourcePackSource(PackType.SERVER_DATA,
+                    new FolderRepositorySource(path,
+                            PackType.SERVER_DATA, PackSource.DEFAULT, validator));
+            try {
+                path.toFile().mkdirs();
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     //dumb

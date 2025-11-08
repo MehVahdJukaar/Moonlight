@@ -49,8 +49,7 @@ public abstract class ReloadableClientResourcesMixin {
                 return ReloadInstanceWrapper.wrap(() -> original.call(resourceManager,
                                List.copyOf(listeners), //TODO: maybe change. some mod are adding stuff to these incorrectly after the reload instance is created. Doing this so we dont get reports redirected here aswell
                                 backgroundExecutor, gameExecutor, alsoWaitedFor, profiled),
-                        type, this.resources, backgroundExecutor, gameExecutor,
-                        listPacks().toList());
+                        type, this.resources, backgroundExecutor, gameExecutor);
             }
         }
         return original.call(resourceManager, listeners, backgroundExecutor, gameExecutor, alsoWaitedFor, profiled);

@@ -39,6 +39,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.*;
@@ -773,8 +774,16 @@ public class RegHelper {
     }
 
     @ExpectPlatform
-    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+    public static void registerResourcePackSource(PackType packType, RepositorySource packSource) {
         throw new AssertionError();
+    }
+
+    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+        if (packSupplier == null) return;
+        registerResourcePackSource(packType, loader -> {
+            Pack t = packSupplier.get();
+            if (t != null) loader.accept(t);
+        });
     }
 
     public static void registerDynamicResourceProvider(DynamicResourcesProvider provider) {

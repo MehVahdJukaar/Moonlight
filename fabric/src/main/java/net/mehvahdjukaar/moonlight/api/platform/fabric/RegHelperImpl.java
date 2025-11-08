@@ -41,7 +41,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
@@ -381,19 +381,18 @@ public class RegHelperImpl {
         });
     }
 
-
-    public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
+    public static void registerResourcePackSource(PackType packType, RepositorySource packSource) {
         Moonlight.assertInitPhase();
 
-        MoonlightFabric.EXTRA_RESOURCE_PACKS.computeIfAbsent(packType, p -> new ArrayList<>()).add(packSupplier);
+        //client is already loaded. add immediately, saving hassle
         if (packType == PackType.CLIENT_RESOURCES && PlatHelper.getPhysicalSide().isClient()) {
             if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
                 var newSources = new HashSet<>(rep.getSources());
-                MoonlightFabric.getAdditionalPacks(packType).forEach(l -> {
-                    newSources.add((infoConsumer) -> infoConsumer.accept(l.get()));
-                });
                 rep.setSources(newSources);
             }
+        }
+        if(packType == PackType.SERVER_DATA){
+            MoonlightFabric.EXTRA_DATA_PACK_SOURCES.add(packSource);
         }
     }
 

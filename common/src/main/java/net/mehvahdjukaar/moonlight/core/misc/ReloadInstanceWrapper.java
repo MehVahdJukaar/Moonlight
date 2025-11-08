@@ -4,12 +4,10 @@ import com.mojang.datafixers.util.Unit;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
 
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
@@ -21,14 +19,14 @@ public class ReloadInstanceWrapper implements ReloadInstance {
             PackType type,
             ResourceManager manager,
             Executor backgroundExecutor,
-            Executor mainExecutor,                     // <- add this
-            Collection<PackResources> selectedPacks) {
-        return new ReloadInstanceWrapper(factory, type, manager, backgroundExecutor, mainExecutor, selectedPacks);
+            Executor mainExecutor
+    ) {
+        return new ReloadInstanceWrapper(factory, type, manager, backgroundExecutor, mainExecutor);
     }
 
     public static void executeEarlyReloadBlocking(PackType type, ResourceManager manager,
-                                                  IProgressTracker progressTracker, Collection<PackResources> selectedPacks) {
-        MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(selectedPacks, manager, type, progressTracker), EarlyPackReloadEvent.class);
+                                                  IProgressTracker progressTracker) {
+        MoonlightEventsHelper.postEvent(new EarlyPackReloadEvent(manager.listPacks().toList(), manager, type, progressTracker), EarlyPackReloadEvent.class);
     }
 
     private final CompletableFuture<Unit> beforeTask;
@@ -38,13 +36,12 @@ public class ReloadInstanceWrapper implements ReloadInstance {
     public ReloadInstanceWrapper(Supplier<ReloadInstance> factory,
                                  PackType type, ResourceManager manager,
                                  Executor backgroundExecutor,
-                                 Executor mainExecutor,               // <- pass main executor in
-                                 Collection<PackResources> selectedPacks) {
+                                 Executor mainExecutor) {
 
         this.progressTracker = IProgressTracker.createTree(1);
 
         this.beforeTask = CompletableFuture.supplyAsync(() -> {
-            executeEarlyReloadBlocking(type, manager, progressTracker, selectedPacks);
+            executeEarlyReloadBlocking(type, manager, progressTracker);
             return Unit.INSTANCE;
         }, backgroundExecutor);
 

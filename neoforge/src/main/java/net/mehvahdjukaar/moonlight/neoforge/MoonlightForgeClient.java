@@ -2,10 +2,14 @@ package net.mehvahdjukaar.moonlight.neoforge;
 
 
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.FolderRepositorySource;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.neoforged.bus.api.EventPriority;
@@ -17,6 +21,9 @@ import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
+
+import java.nio.file.Path;
 
 public class MoonlightForgeClient {
 
@@ -24,7 +31,10 @@ public class MoonlightForgeClient {
         modEventBus.addListener(MoonlightForgeClient::afterLoad);
         modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
         NeoForge.EVENT_BUS.addListener(MoonlightForgeClient::onInputUpdate);
+
     }
+
+
 
     public static void afterLoad(FMLLoadCompleteEvent event) {
         for (var config : ModConfigHolder.getTrackedSpecs()) {
