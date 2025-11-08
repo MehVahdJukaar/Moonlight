@@ -4,3 +4,4 @@
 - added debug renderers. enabled with command
 - added a structure box block. Used in jigsaw structures. check the wiki
 - added teleport random tpr command
+- fixed an issue with respriter not handling well animated textures with no explicit frames
