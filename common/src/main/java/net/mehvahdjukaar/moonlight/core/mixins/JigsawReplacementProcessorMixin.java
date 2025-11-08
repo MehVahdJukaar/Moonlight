@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 //Yes we could have also registered a custom processor and added it to the Jigsaw but might aswell do it here since we would have needed a mixin anyways
 @Mixin(JigsawReplacementProcessor.class)
-public class JigsawReplacementProcessorMixin {
+public abstract class JigsawReplacementProcessorMixin {
 
     @ModifyReturnValue(method = "processBlock", at = @At("RETURN"))
     private StructureTemplate.StructureBlockInfo ml$processSpawnBoxes(

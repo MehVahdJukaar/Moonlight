@@ -102,8 +102,10 @@ public class ChangeDimensionCommand {
         } else {
             float f = Mth.wrapDegrees(entity.getYRot());
             float g = Mth.wrapDegrees(entity.getXRot());
-            if (entity.teleportTo( level, x, y, z, relativeList, f, g)) {
-
+            BlockPos oldPos = entity.blockPosition();
+            var oldDim = entity.level().dimension();
+            if (entity.teleportTo(level, x, y, z, relativeList, f, g)) {
+                BackCommand.onTeleported(entity, oldPos, oldDim);
                 label23:
                 {
                     if (entity instanceof LivingEntity livingEntity) {

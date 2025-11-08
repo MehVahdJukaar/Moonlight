@@ -1,1 +1,6 @@
-more api improvements
+- moved a bunch of supplementaries command here
+- these are under /mnl. Try them out
+- added back command to tp back from where you last tpd
+- added debug renderers. enabled with command
+- added a structure box block. Used in jigsaw structures. check the wiki
+- added teleport random tpr command

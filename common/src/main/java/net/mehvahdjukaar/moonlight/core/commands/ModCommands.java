@@ -20,7 +20,9 @@ public class ModCommands {
                         .then(RegistryCommand.register())
                         .then(IUsedToRollTheDice.register(context))
                         .then(DebugRenderersCommand.register(context))
+                        .then(RandomTeleportCommand.register(context))
                         .then(ChangeDimensionCommand.register(context))
+                        .then(BackCommand.register(context))
                         .then(MapMarkerCommand.register(context))
         );
 

@@ -27,15 +27,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(JigsawPlacement.Placer.class)
-public class JigsawPlacementMixin {
+public abstract class JigsawPlacementMixin {
 
     @Shadow
     @Final
     private StructureTemplateManager structureTemplateManager;
-
-    @Shadow
-    @Final
-    private RandomSource random;
 
     @Shadow
     @Final

@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TemplateStructurePiece.class)
-public class TemplateStructurePieceMixin {
+public abstract class TemplateStructurePieceMixin {
 
     @Shadow
     protected StructureTemplate template;

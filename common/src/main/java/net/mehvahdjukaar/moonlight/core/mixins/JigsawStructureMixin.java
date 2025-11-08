@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(JigsawStructure.class)
-public class JigsawStructureMixin implements ISpawnBoxStructure {
+public abstract class JigsawStructureMixin implements ISpawnBoxStructure {
 
     @Unique
     private SpawnBoxSettings ml$specialSpawnsSettings = SpawnBoxSettings.EMPTY;
