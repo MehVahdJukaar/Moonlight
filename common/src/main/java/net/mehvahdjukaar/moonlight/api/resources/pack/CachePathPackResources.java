@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
+import net.mehvahdjukaar.moonlight.api.util.FastCachedWriter;
+import net.mehvahdjukaar.moonlight.api.util.FilesHelper;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
@@ -13,15 +15,11 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class CachePathPackResources extends AbstractCachedEditableResources {
 
-    private final SafeWriter writer = new SafeWriter();
+    private final FastCachedWriter writer = new FastCachedWriter();
 
     public CachePathPackResources(PackLocationInfo location, PackType type, Path path) {
         super(path, location, type, Component.translatable("message.moonlight.cached"));
@@ -34,7 +32,7 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
             Path resPath = RPUtils.getResourcePath(this.path, id, this.packType);
             writer.writeFast(resPath, bytes);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("An error occurred while adding a resource to the dynamic pack: ", e);
         }
     }
 
@@ -59,12 +57,7 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
         Stopwatch stopwatch = Stopwatch.createStarted();
         try {
             writer.clear();
-            if (Files.isDirectory(path)) {
-                FileUtils.deleteDirectory(path.toFile());
-            } else {
-                // old/bad state: root path is a file; just delete it
-                Files.deleteIfExists(path);
-            }
+            FilesHelper.fastRemove(path);
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to clear cache pack resources at {}", path, e);
             return false;
@@ -77,12 +70,7 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
     public boolean initializeIfValid() {
         // Heal state where the root path was accidentally created as a file
         if (Files.exists(path) && !Files.isDirectory(path)) {
-            try {
-                Files.delete(path);
-            } catch (IOException e) {
-                Moonlight.LOGGER.warn("Failed to remove invalid cache file at {}", path, e);
-                return false;
-            }
+            FilesHelper.fastRemove(path);
         }
 
         boolean dirExists = Files.isDirectory(path);
@@ -120,37 +108,4 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
         }
     }
 
-    private final class SafeWriter {
-        private final Set<Path> dirCache = ConcurrentHashMap.newKeySet();
-
-        public void writeFast(Path filePath, byte[] bytes) throws IOException {
-            final Path parent = filePath.getParent();
-            final Path normParent = (parent == null) ? null : parent.toAbsolutePath().normalize();
-
-            // Fast path: create the parent directory once per unique parent
-            if (normParent != null && dirCache.add(normParent)) {
-                Files.createDirectories(normParent);
-            }
-
-            int attempts = 0;
-            while (true) {
-                try {
-                    Files.write(filePath, bytes,
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING);
-                    return; // success
-                } catch (NoSuchFileException e) {
-                    // Parent likely deleted between calls → recreate and retry
-                    if (normParent == null || ++attempts > 2) throw e;
-                    Files.createDirectories(normParent);
-                    dirCache.add(normParent); // refresh cache after recreation
-                    // loop and retry
-                }
-            }
-        }
-
-        public void clear() {
-            dirCache.clear();
-        }
-    }
 }

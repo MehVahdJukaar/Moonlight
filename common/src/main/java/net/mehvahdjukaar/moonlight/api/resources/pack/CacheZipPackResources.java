@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Stopwatch;
+import net.mehvahdjukaar.moonlight.api.util.FilesHelper;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
@@ -8,7 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
-import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -58,13 +58,7 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
                 this.cachedResources.close();
             }
             this.cachedResources = null;
-
-            if (Files.isDirectory(path)) {
-                // heal accidental directory-at-zip-path case
-                FileUtils.deleteDirectory(path.toFile());
-            } else {
-                Files.deleteIfExists(path);
-            }
+            FilesHelper.fastRemove(path);
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to clear zipped cached resource pack at {}", path, e);
         }
@@ -80,12 +74,7 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
     public boolean initializeIfValid() {
         // Heal: if a directory exists where the zip should be, remove it so we can write/open the zip
         if (Files.exists(path) && Files.isDirectory(path)) {
-            try {
-                FileUtils.deleteDirectory(path.toFile());
-            } catch (IOException e) {
-                Moonlight.LOGGER.warn("Could not remove directory at zip path {}: {}", path, e.toString());
-                return false;
-            }
+            FilesHelper.fastRemove(path);
         }
 
         boolean cacheExists = Files.isRegularFile(path);
@@ -167,7 +156,10 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
             moved = true;
         } finally {
             if (!moved) {
-                try { Files.deleteIfExists(tmp); } catch (IOException ignored) {}
+                try {
+                    Files.deleteIfExists(tmp);
+                } catch (IOException ignored) {
+                }
             }
         }
     }
