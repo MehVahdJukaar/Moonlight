@@ -12,6 +12,7 @@ registration system as well as your usual multi loader helpers and wrappers to d
 - BlockColorAPI with automatic color grouping and detection.
 - Usual Cross-Platform utilities to develop for (Neo)Forge and Fabric. Simple and all you'll need really.
 - Custom Baked Models.
+- Global datapack folder
 - Spawn Box Block, allows to have dedicated spawning areas in a structure
 - Dispenser Behavior wrapping helper.
 - VillagerAIHooks to add new schedules and activities to villagers.
