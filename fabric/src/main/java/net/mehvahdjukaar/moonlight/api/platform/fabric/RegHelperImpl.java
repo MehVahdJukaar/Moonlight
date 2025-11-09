@@ -263,6 +263,11 @@ public class RegHelperImpl {
                 }
 
                 @Override
+                public CreativeModeTab getTab() {
+                    return creativeModeTab;
+                }
+
+                @Override
                 public void addItems(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> target, boolean after, List<ItemStack> items) {
                     if (tab != tabKey) return;
                     if (target == null) {

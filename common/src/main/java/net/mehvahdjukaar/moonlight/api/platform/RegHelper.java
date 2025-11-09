@@ -551,6 +551,8 @@ public class RegHelper {
 
         CreativeModeTab.ItemDisplayParameters getParameters();
 
+        CreativeModeTab getTab();
+
         void addItems(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> target, boolean after, List<ItemStack> items);
 
         default void add(ResourceKey<CreativeModeTab> tab, ItemLike... items) {

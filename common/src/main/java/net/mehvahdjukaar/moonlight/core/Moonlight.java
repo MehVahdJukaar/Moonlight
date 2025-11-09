@@ -27,7 +27,10 @@ import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.DebugBlockTypes;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -102,11 +105,13 @@ public class Moonlight {
         }
 
         RegHelper.addItemsToTabsRegistration(event -> {
-            event.add(CreativeModeTabs.OP_BLOCKS, MoonlightRegistry.SPAWN_BOX_BLOCK.get());
+            if(event.getTab().hasAnyItems()) {
+                event.add(CreativeModeTabs.OP_BLOCKS, MoonlightRegistry.SPAWN_BOX_BLOCK.get());
+            }
         });
 
-        BlockSetAPI.addDynamicBlockRegistration(Moonlight::ensureBlockSetsInitialized, LeavesType.class);
-
+        //dumb. ensure stuff registered
+        BlockSetAPI.addDynamicRegistration(Moonlight.MOD_ID, r->{}, BuiltInRegistries.BLOCK);
     }
 
     private static void addGlobalDatapackLoader() {
@@ -125,11 +130,6 @@ public class Moonlight {
             }
         }
     }
-
-    //dumb
-    private static void ensureBlockSetsInitialized(Registrator<Block> blockRegistrator, Collection<LeavesType> blockTypes) {
-    }
-
 
     private static void commonSetup() {
 

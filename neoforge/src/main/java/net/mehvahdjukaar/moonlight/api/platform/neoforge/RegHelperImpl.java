@@ -28,6 +28,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.FireworkExplosion;
@@ -298,6 +299,10 @@ public class RegHelperImpl {
         @Override
         public CreativeModeTab.ItemDisplayParameters getParameters() {
             return event.getParameters();
+        }
+
+        public CreativeModeTab getTab(){
+            return event.getTab();
         }
 
         public void removeItems(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target) {
