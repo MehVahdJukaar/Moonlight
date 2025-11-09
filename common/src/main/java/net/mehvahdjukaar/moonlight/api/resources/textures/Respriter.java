@@ -111,9 +111,12 @@ public class Respriter {
         FrameColorRemapper colorRemapper = FrameColorRemapper.of(originalPalette, originalFrameCount,
                 targetPalettes, outputTexture.frameCount());
 
-        //TODO: add proper mask here. not just a color whitelist like its now
         outputTexture.forEachPixel(pixel -> {
             int ind = pixel.frameIndex();
+            // If there's a recoloring mask, sample it. Skip recoloring if mask is "off" at this pixel
+            if (recoloringMask != null && recoloringMask.sample(pixel.x(), pixel.y()) != 0) {
+                return; // skip recoloring this pixel
+            }
             Integer newColor = colorRemapper.remapColor(ind, pixel.getValue());
             if (newColor != null) {
                 pixel.setValue(newColor);
