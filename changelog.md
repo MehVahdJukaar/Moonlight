@@ -1,7 +1,5 @@
-- moved a bunch of supplementaries command here
-- these are under /mnl. Try them out
-- added back command to tp back from where you last tpd
-- added debug renderers. enabled with command
-- added a structure box block. Used in jigsaw structures. check the wiki
-- added teleport random tpr command
-- fixed an issue with respriter not handling well animated textures with no explicit frames
+- fixed an issue where dynamic data resources reload was firing twice on world join in some specific circumstances
+- improved fabric code for adding pack repositories to be more correct
+- minor api additions
+- dynamic path pack resources will delete files by first moving them to a temp location and then deleting them offthread
+- minor fixes
