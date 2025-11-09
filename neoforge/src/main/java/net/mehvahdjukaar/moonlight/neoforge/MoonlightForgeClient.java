@@ -14,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
@@ -22,6 +23,7 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 import java.nio.file.Path;
 
@@ -31,10 +33,12 @@ public class MoonlightForgeClient {
         modEventBus.addListener(MoonlightForgeClient::afterLoad);
         modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
         NeoForge.EVENT_BUS.addListener(MoonlightForgeClient::onInputUpdate);
-
+        NeoForge.EVENT_BUS.addListener( EventPriority.LOWEST, MoonlightForgeClient::itemTooltipEvent);
     }
 
-
+    public static void itemTooltipEvent(ItemTooltipEvent event) {
+        MoonlightClient.onItemTooltip(event.getItemStack(), event.getContext(), event.getFlags(), event.getToolTip());
+    }
 
     public static void afterLoad(FMLLoadCompleteEvent event) {
         for (var config : ModConfigHolder.getTrackedSpecs()) {

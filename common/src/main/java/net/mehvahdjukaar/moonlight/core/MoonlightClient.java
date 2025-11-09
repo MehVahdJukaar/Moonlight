@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.pack.*;
@@ -15,12 +14,20 @@ import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.mehvahdjukaar.moonlight.core.client.SpawnBoxBlockEntityRenderer;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -50,7 +57,6 @@ public class MoonlightClient {
         });
 
         RegHelper.registerDynamicResourceProvider(new MLDynamicClientResources());
-
     }
 
     //null when merge happened. not null when it should add normally
@@ -81,6 +87,32 @@ public class MoonlightClient {
     public static void setupClient() {
         var e = ExtraModelData.EMPTY;
         //class-loaded on main thread to prevent possible race condition BS
+    }
+
+    @EventCalled
+    public static void onItemTooltip(ItemStack stack, Item.TooltipContext tooltipContext, TooltipFlag tooltipFlag, List<Component> list) {
+        if (ClientConfigs.TAGS_TOOLTIP.get().isOn(tooltipFlag)) {
+            Item item = stack.getItem();
+            // BLOCK TAGS
+            if (item instanceof BlockItem bi) {
+                Block b = bi.getBlock();
+                BlockState state = b.defaultBlockState();
+                var tags = state.getTags().toList();
+                if (!tags.isEmpty()) {
+                    list.add(Component.translatable("tooltip.moonlight.block_tags").withStyle(ChatFormatting.GREEN));
+                    tags.forEach((k) -> list.add(Component.literal("-" + k.location())
+                            .withStyle(Style.EMPTY.withColor(0xc8ffc8))));
+                }
+            }
+
+            // ITEM TAGS
+            var tags = stack.getTags().toList();
+            if (!tags.isEmpty()) {
+                list.add(Component.translatable("tooltip.moonlight.item_tags").withStyle(ChatFormatting.LIGHT_PURPLE));
+                tags.forEach((k) -> list.add(Component.literal("-" + k.location())
+                        .withStyle(Style.EMPTY.withColor(0xffc8ff))));
+            }
+        }
     }
 
     @EventCalled

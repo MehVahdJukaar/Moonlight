@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.minecraft.world.item.TooltipFlag;
 
 import java.util.function.Supplier;
 
@@ -14,9 +15,10 @@ public class ClientConfigs {
     public static final Supplier<Integer> MAPS_MIPMAP;
     public static final Supplier<ShadeFix> FIX_SHADE;
     public static final Supplier<Boolean> DEBUG_RENDERS;
+    public static final Supplier<TooltipMode> TAGS_TOOLTIP;
 
     @Deprecated(forRemoval = true)
-    public static final Supplier<Boolean> BLOCKTYPES_DEBUG = ()-> false;
+    public static final Supplier<Boolean> BLOCKTYPES_DEBUG = () -> false;
 
     public static final ModConfigHolder CONFIG;
 
@@ -39,6 +41,9 @@ public class ClientConfigs {
 
         DEBUG_RENDERS = builder.comment("Enables some debug renderers. Require the use of the /supp debug command to enable their data being sent")
                 .define("debug_renderers", PlatHelper.isDev());
+
+        TAGS_TOOLTIP = builder.comment("Show Item and Block tags on item tooltip")
+                .define("tags_tooltips", PlatHelper.isDev() ? TooltipMode.ON : TooltipMode.OFF);
         builder.pop();
         CONFIG = builder.build();
         CONFIG.forceLoad();
@@ -51,6 +56,17 @@ public class ClientConfigs {
         FALSE,
         NO_GUI,
         TRUE;
+    }
 
+    public enum TooltipMode {
+        OFF, ON, ADVANCED_ONLY;
+
+        public boolean isOn(TooltipFlag flag) {
+            return switch (this) {
+                case ON -> true;
+                case ADVANCED_ONLY -> flag.isAdvanced();
+                default -> false;
+            };
+        }
     }
 }
