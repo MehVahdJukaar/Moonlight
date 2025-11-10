@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.level.block.Rotation;
@@ -92,7 +94,11 @@ public final class TextureOps {
 
     private static void applyMask(TextureImage img, TextureImage mask, boolean discardOpaque) {
         if (mask.imageWidth() < img.imageWidth() || mask.imageHeight() < img.imageHeight()) {
-            throw new IllegalArgumentException("Mask must be at least as large as the image.");
+            Moonlight.LOGGER.error("Palette mask {} needs to be at least as large as the target image {} and have the same frame count. You must alter the mask to match the texture size", img.path, mask.path);
+            if (PlatHelper.isDev()) {
+                throw new IllegalArgumentException("Palette mask " + mask.path + " has invalid size or frame count");
+            }
+            return;
         }
 
         img.forEachPixel(pixel -> {

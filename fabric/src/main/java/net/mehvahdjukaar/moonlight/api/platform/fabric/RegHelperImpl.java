@@ -311,10 +311,11 @@ public class RegHelperImpl {
         if (packType == PackType.CLIENT_RESOURCES && PlatHelper.getPhysicalSide().isClient()) {
             if (Minecraft.getInstance().getResourcePackRepository() instanceof PackRepositoryAccessor rep) {
                 var newSources = new HashSet<>(rep.getSources());
+                newSources.add(packSource);
                 rep.setSources(newSources);
             }
         }
-        if(packType == PackType.SERVER_DATA){
+        if (packType == PackType.SERVER_DATA) {
             MoonlightFabric.EXTRA_DATA_PACK_SOURCES.add(packSource);
         }
     }

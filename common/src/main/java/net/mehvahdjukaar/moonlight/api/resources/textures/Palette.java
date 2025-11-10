@@ -715,7 +715,7 @@ public class Palette implements Set<PaletteColor> {
                                                   float tolerance) {
 
         @Nullable Sampler2D maskSampler = textureMask;
-        //TODO:not comptible with texture packs that change texture size
+        //TODO:not comptible with texture packs that change texture size. soft fail here
         if (textureMask != null &&
                 (textureImage.frameCount() != textureMask.frameCount() ||
                         textureMask.frameWidth() < textureImage.frameWidth() ||
