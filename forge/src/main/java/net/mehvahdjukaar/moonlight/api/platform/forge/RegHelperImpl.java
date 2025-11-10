@@ -19,6 +19,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -46,6 +48,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CompoundIngredient;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -66,6 +69,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import static net.mehvahdjukaar.moonlight.forge.MoonlightForge.getCurrentBus;
 
 
 public class RegHelperImpl {
@@ -135,7 +140,7 @@ public class RegHelperImpl {
         IEventBus bus;
         if (!(cont instanceof FMLModContainer container)) {
             Moonlight.LOGGER.warn("Failed to get mod container for mod {}", modId);
-            bus = FMLJavaModLoadingContext.get().getModEventBus();
+            bus = getCurrentBus();
         } else bus = container.getEventBus();
         return bus;
     }
@@ -150,7 +155,7 @@ public class RegHelperImpl {
                 eventListener.accept(event.getForgeRegistry()::register);
             }
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
@@ -240,7 +245,7 @@ public class RegHelperImpl {
         Consumer<EntityAttributeCreationEvent> eventConsumer = event -> {
             eventListener.accept((e, b) -> event.put(e, b.build()));
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void addCommandRegistration(RegHelper.CommandRegistration eventListener) {
@@ -267,7 +272,7 @@ public class RegHelperImpl {
             RegHelper.SpawnPlacementEvent spawnPlacementEvent = new PlacementEventImpl(event);
             eventListener.accept(spawnPlacementEvent);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
@@ -322,7 +327,7 @@ public class RegHelperImpl {
             });
             eventListener.accept(itemToTabEvent);
         };
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.LOW, eventConsumer);
+        getCurrentBus().addListener(EventPriority.LOW, eventConsumer);
     }
 
 
@@ -378,6 +383,17 @@ public class RegHelperImpl {
             }
         });
         //PoiTypes.registerBlockStates(beehivePOI, newStates);
+    }
+
+    public static void registerResourcePackSource(PackType packType, RepositorySource packSource) {
+        Moonlight.assertInitPhase();
+        IEventBus bus = getCurrentBus();
+        Consumer<AddPackFindersEvent> consumer = event -> {
+            if (event.getPackType() == packType) {
+                event.addRepositorySource(packSource);
+            }
+        };
+        bus.addListener(consumer);
     }
 
     private static final ResourceLocation BLOCKSTATE_TO_POINT_OF_INTEREST_TYPE = new ResourceLocation("minecraft:blockstatetopointofinteresttype");

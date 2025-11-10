@@ -24,6 +24,7 @@ import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
@@ -147,6 +148,12 @@ public class MoonlightForge {
     @SubscribeEvent
     public static void onLevelLoaded(LevelEvent.Unload event) {
         DynamicHolder.clearCache();
+    }
+
+
+
+    public static IEventBus getCurrentBus() {
+        return FMLJavaModLoadingContext.get().getModEventBus();
     }
 
 }

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.forge;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,6 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.MenuProvider;
@@ -52,6 +54,7 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -74,6 +77,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static net.mehvahdjukaar.moonlight.forge.MoonlightForge.getCurrentBus;
 
 public class PlatHelperImpl {
 
@@ -226,7 +231,7 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLCommonSetupEvent> eventConsumer = event -> event.enqueueWork(commonSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
 
 
@@ -234,9 +239,8 @@ public class PlatHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<FMLCommonSetupEvent> eventConsumer = event -> commonSetup.run();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(eventConsumer);
+        getCurrentBus().addListener(eventConsumer);
     }
-
 
     //maybe move these
 
@@ -248,19 +252,7 @@ public class PlatHelperImpl {
     }
 
     public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
-        Moonlight.assertInitPhase();
-
-        if (packSupplier == null) return;
-        var bus = FMLJavaModLoadingContext.get().getModEventBus();
-        Consumer<AddPackFindersEvent> consumer = event -> {
-            if (event.getPackType() == packType) {
-                var p = packSupplier.get();
-                if (p != null) {
-                    event.addRepositorySource(infoConsumer -> infoConsumer.accept(packSupplier.get()));
-                }
-            }
-        };
-        bus.addListener(consumer);
+        RegHelper.registerResourcePack(packType, packSupplier);
     }
 
     public static String getModVersion(String modId) {

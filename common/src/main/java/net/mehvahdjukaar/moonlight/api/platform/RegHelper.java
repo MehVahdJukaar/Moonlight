@@ -578,19 +578,6 @@ public class RegHelper {
         });
     }
 
-    public static void registerDynamicResourceProvider(DynamicResourcesProvider provider) {
-        DynamicResourcesInternals.registerProvider(provider);
-        SimplePackProvider packSupplier = provider;
-
-        PackType packType = provider.getPackType();
-        if (packType == PackType.CLIENT_RESOURCES) {
-            SimplePackProvider maybeMerged = MoonlightClient.mergePackSupplier(provider);
-            if (maybeMerged == null) return; //merged, no need to register
-            else packSupplier = maybeMerged;
-        }
-        registerResourcePack(packType, packSupplier::createPack);
-    }
-
     public static void registerHorseFood(ItemLike... food) {
         List<ItemStack> horseFood = new ArrayList<>(List.of(AbstractHorse.FOOD_ITEMS.getItems()));
         Arrays.stream(food).forEach(f -> horseFood.add(f.asItem().getDefaultInstance()));
