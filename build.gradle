@@ -241,12 +241,11 @@ static ReleaseType parseReleaseType(String s) {
 tasks.register('buildAndpublishAll') {
     dependsOn ':clean'
     dependsOn ':build'
-    dependsOn ':neoforge:publishCurseforge'
-    dependsOn ':neoforge:publishModrinth'
-    dependsOn ':fabric:publishCurseforge'
-    dependsOn ':fabric:publishModrinth'
-    dependsOn ':neoforge:publish'
-    dependsOn ':fabric:publish'
+    dependsOn ':neoforge:curseforge'
+    dependsOn ':neoforge:modrinth'
+    dependsOn ':fabric:curseforge'
+    dependsOn ':fabric:modrinth'
+    dependsOn ':publish'
 
     group = 'build'
     description = 'Runs clean, build, and publish neoforge and fabric'

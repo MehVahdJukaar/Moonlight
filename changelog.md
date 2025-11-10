@@ -1,5 +1,2 @@
-- fixed an issue where dynamic data resources reload was firing twice on world join in some specific circumstances
-- improved fabric code for adding pack repositories to be more correct
-- minor api additions
-- dynamic path pack resources will delete files by first moving them to a temp location and then deleting them offthread
-- minor fixes
+- fixed a bug on fabric
+- some texture operations will now soft fail instead of throwing an error 
