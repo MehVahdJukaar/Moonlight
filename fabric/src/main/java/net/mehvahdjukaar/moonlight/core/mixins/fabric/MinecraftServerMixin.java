@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins.fabric;
 
+import com.google.common.collect.ImmutableList;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
@@ -7,6 +9,8 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
@@ -27,10 +31,9 @@ public abstract class MinecraftServerMixin {
 
     //should fire right before add reload listener, before packs are reloaded and listeners called
     @Inject(method = "method_29437",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/LayeredRegistryAccess;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$Frozen;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
                     shift = At.Shift.BEFORE))
-    private void moonlight$serverDynamicPackEarlyReload(ImmutableList immutableList, CallbackInfoReturnable<CompletionStage> cir,
-                                                        @Local CloseableResourceManager manager) {
+    private void moonlight$serverDynamicPackEarlyReload(RegistryAccess.Frozen frozen, ImmutableList immutableList, CallbackInfoReturnable<CompletionStage> cir, @Local CloseableResourceManager manager) {
         //fires on world load or on /reload
         //token to assure that modded resources are included
         if (!((manager) instanceof FilteredResManager) &&

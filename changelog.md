@@ -1,2 +1,2 @@
-fixed some things not working when used with fabric client initializer
-minor api changes
+- backported recent fixes..
+- ..and some new changes like the global datapack folder

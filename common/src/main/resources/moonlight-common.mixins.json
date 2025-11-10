@@ -32,7 +32,6 @@
     "MapExtendingRecipeMixin",
     "MapItemDataPacketMixin",
     "MapItemMixin",
-    "ServerMultiPackResourceManagerMixin",
     "PistonBlockEntityMixin",
     "PoiMixin",
     "ReloadableClientResourcesMixin",

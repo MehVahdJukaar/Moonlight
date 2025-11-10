@@ -108,10 +108,9 @@ public class Moonlight {
         if (!globalPacksDir.isEmpty()) {
             Path path = PlatHelper.getGamePath().resolve(globalPacksDir);
             //create folder if not exists
-            DirectoryValidator validator = new DirectoryValidator(a -> true);
             RegHelper.registerResourcePackSource(PackType.SERVER_DATA,
                     new FolderRepositorySource(path,
-                            PackType.SERVER_DATA, PackSource.DEFAULT, validator));
+                            PackType.SERVER_DATA, PackSource.DEFAULT));
             try {
                 path.toFile().mkdirs();
             } catch (Exception ignored) {

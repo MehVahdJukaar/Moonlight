@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.mixins.neoforge;
+package net.mehvahdjukaar.moonlight.core.mixins.forge;
 
 import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
@@ -26,10 +27,10 @@ public abstract class MinecraftServerMixin {
     // we need here for DATAPACK REGISTRIES
 
     //should fire right before add reload listener, before packs are reloaded and listeners called
-    @Inject(method = "lambda$reloadResources$29",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/LayeredRegistryAccess;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
+    @Inject(method = "lambda$reloadResources$25",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$Frozen;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
                     shift = At.Shift.BEFORE))
-    private void moonlight$serverDynamicPackEarlyReload(ImmutableList immutableList, CallbackInfoReturnable<CompletionStage> cir,
+    private void moonlight$serverDynamicPackEarlyReload(RegistryAccess.Frozen registryaccess$frozen, ImmutableList immutableList, CallbackInfoReturnable<CompletionStage> cir,
                                                         @Local CloseableResourceManager manager) {
         //fires on world load or on /reload
         //token to assure that modded resources are included
