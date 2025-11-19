@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.neoforge;
 
-import com.electronwill.nightconfig.core.concurrent.ConcurrentCommentedConfig;
+import com.electronwill.nightconfig.core.CommentedConfig;
+import com.electronwill.nightconfig.core.InMemoryCommentedFormat;
+import com.electronwill.nightconfig.core.concurrent.SynchronizedConfig;
 import com.electronwill.nightconfig.core.io.ParsingMode;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
@@ -8,16 +10,16 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.Util;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.PathPackResources;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.config.ConfigTracker;
+import net.neoforged.fml.config.IConfigSpec;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.loading.FMLPaths;
@@ -30,7 +32,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -38,7 +43,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("all")
 public final class ForgeConfigHolder extends ModConfigHolder {
@@ -49,9 +53,6 @@ public final class ForgeConfigHolder extends ModConfigHolder {
         return BY_FORGE_CONFIG.get(config);
     }
 
-    private static final Method LOAD_CONFIG = ObfuscationReflectionHelper.findMethod(
-            ConfigTracker.class, "loadConfig",
-            ModConfig.class, Path.class, Function.class);
 
     private final ModConfigSpec spec;
     private final ModConfig modConfig;
@@ -92,6 +93,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     public void forceLoad() {
         if (this.isLoaded()) return;
         try {
+            //same as ConfigTracker.openConfig but without file tracker
             LOAD_CONFIG.invoke(ConfigTracker.INSTANCE, this.modConfig, this.getFullPath(),
                     (Function<ModConfig, ModConfigEvent>) ModConfigEvent.Loading::new);
         } catch (Exception e) {
@@ -159,26 +161,84 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     }
 
     @Override
-    public void loadFromBytes(InputStream stream) {
+    protected byte[] getConfigFileData() throws IOException {
+        //get path succeded. get from  file
+        //this.modConfig.getFullPath();
+        //return super.getConfigFileData();
+        //get path failed. This means the config is in memory and thus we should read it there and not from file
+        try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+            CommentedConfig data = this.modConfig.getLoadedConfig().config();
+            TomlFormat.instance().createWriter().write(data, stream);
+            return stream.toByteArray();
+        }
+    }
+
+    @Override
+    public void loadFromBytes(InputStream stream, boolean readOnly) {
+        //read only is when we are on the logical client
+        //ignore read only on integrated server. no need here. technically not needed but still
+        //if (readOnly && PlatHelper.isIntegratedServer()) return;
+        readOnly = readOnly && !PlatHelper.isIntegratedServer();
         try {
             byte[] b = stream.readAllBytes();
-            //this should work the same as below and internaly calls refresh
-//            acceptConfig(this.modConfig, b);
-            ConfigTracker.acceptSyncedConfig(this.modConfig, b);
+            if (readOnly) {
+                //set client configs in a non editable state
+                ConfigTracker.acceptSyncedConfig(this.modConfig, b);
+            } else {
+                //client configs accepted by server. semi in place. still allows editing
+                acceptClientConfigs(this.modConfig, b);
+            }
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to sync config file {}:", this.getFileName(), e);
         }
         //using this isntead so we dont fire the config changes event otherwise this will loop
-       // this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
-       // this.onRefresh();
+        // this.getSpec().setConfig(TomlFormat.instance().createParser().parse(stream));
+        // this.onRefresh();
     }
 
-    public static void acceptConfig(ModConfig modConfig, byte[] bytes) {
-        if (modConfig.getLoadedConfig().config() instanceof ConcurrentCommentedConfig cc) {
-            cc.bulkCommentedUpdate(view -> {
-                TomlFormat.instance().createParser().parse(new ByteArrayInputStream(bytes), view, ParsingMode.REPLACE);
-            });
+
+    //same as accepts synced configs but also sets the path, allowing them to saved
+    public void acceptClientConfigs(ModConfig modConfig, byte[] bytes) {
+        Moonlight.LOGGER.info("Set configs {} at path {} with configs from op client", modConfig.getLoadedConfig(), modConfig.getFileName());
+        var newConfig = new SynchronizedConfig(InMemoryCommentedFormat.defaultInstance(), LinkedHashMap::new);
+        newConfig.bulkCommentedUpdate(view -> {
+            TomlFormat.instance().createParser().parse(new ByteArrayInputStream(bytes), view, ParsingMode.REPLACE);
+        });
+        Path path = this.getFullPath();
+        //modConfig.setConfig(new LoadedConfig(newConfig, null, modConfig), ModConfigEvent.Reloading::new);
+        try {
+            var loadedConfig = NEW_LOADED_CONFIG.newInstance(newConfig, path, modConfig);
+            //this sets the values
+            SET_CONFIG.invoke(modConfig, loadedConfig, (Function<ModConfig, ModConfigEvent>) ModConfigEvent.Reloading::new);
+            ((IConfigSpec.ILoadedConfig) loadedConfig).save(); //save to disk
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
+
+    private static final Class<?> LOADED_CONFIG_CLASS = Util.make(() -> {
+        try {
+            return Class.forName("net.neoforged.fml.config.LoadedConfig");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    });
+
+    private static final Method SET_CONFIG = ObfuscationReflectionHelper.findMethod(
+            ModConfig.class, "setConfig",
+            LOADED_CONFIG_CLASS, Function.class);
+
+    private static final Constructor NEW_LOADED_CONFIG = ObfuscationReflectionHelper.findConstructor(
+            LOADED_CONFIG_CLASS,
+            CommentedConfig.class, Path.class, ModConfig.class);
+
+    private static final Method GET_PATH = ObfuscationReflectionHelper.findMethod(
+            LOADED_CONFIG_CLASS, "path"
+    );
+
+    private static final Method LOAD_CONFIG = ObfuscationReflectionHelper.findMethod(
+            ConfigTracker.class, "loadConfig",
+            ModConfig.class, Path.class, Function.class);
+
 
 }

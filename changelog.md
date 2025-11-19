@@ -1,2 +1,1 @@
-- fixed a bug on fabric
-- some texture operations will now soft fail instead of throwing an error 
+- fixed an issue with synced config saving

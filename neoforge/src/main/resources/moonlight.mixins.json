@@ -13,6 +13,7 @@
   ],
   "mixins": [
     "ConditionHackMixin",
+    "ConfigTrackerMixin",
     "ContextAwareReloadListenerAccessor",
     "FireBlockMixin",
     "MinecraftServerMixin",

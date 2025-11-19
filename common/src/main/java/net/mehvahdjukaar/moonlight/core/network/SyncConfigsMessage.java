@@ -43,10 +43,10 @@ public class SyncConfigsMessage implements Message {
                 return;
             }
         }
-        var config = ModConfigHolder.getConfigSpec(this.configId);
+        ModConfigHolder config = ModConfigHolder.getConfigSpec(this.configId);
         if (config != null) {
             try (var stream = new ByteArrayInputStream(this.configData)) {
-                config.loadFromBytes(stream);
+                config.loadFromBytes(stream, context.getDirection() == NetworkDir.CLIENT_BOUND);
                 Moonlight.LOGGER.info("Synced {} configs", config.getFileName());
             } catch (Exception ignored) {
             }

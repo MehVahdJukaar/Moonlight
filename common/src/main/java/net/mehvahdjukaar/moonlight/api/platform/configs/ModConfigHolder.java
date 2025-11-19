@@ -102,7 +102,7 @@ public abstract class ModConfigHolder {
         return filePath;
     }
 
-    public abstract void loadFromBytes(InputStream stream);
+    public abstract void loadFromBytes(InputStream stream, boolean readOnly);
 
     @Nullable
     @Environment(EnvType.CLIENT)
@@ -121,22 +121,28 @@ public abstract class ModConfigHolder {
     public void syncConfigsToPlayer(ServerPlayer player) {
         if (this.isSynced()) {
             try {
-                final byte[] configData = Files.readAllBytes(this.getFullPath());
+                final byte[] configData = getConfigFileData();
                 NetworkHelper.sendToClientPlayer(player, new SyncConfigsMessage(configData, this.getId()));
             } catch (IOException e) {
                 Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
             }
         } else throw new UnsupportedOperationException("Tried to sync a config of type " + this.getConfigType());
     }
+
+    //send configs from client -> server
     public void sendChangedConfigToServer(){
         if (this.isSynced()) {
             try {
-                final byte[] configData = Files.readAllBytes(this.getFullPath());
+                final byte[] configData = getConfigFileData();
                 NetworkHelper.sendToServer(new SyncConfigsMessage(configData, this.getId()));
             } catch (IOException e) {
                 Moonlight.LOGGER.error("Failed to sync common configs {}", this.getFileName(), e);
             }
-        } else throw new UnsupportedOperationException("Tried to sync a config of type " + this.getConfigType());
+        }
+    }
+
+    protected byte[] getConfigFileData() throws IOException {
+        return Files.readAllBytes(this.getFullPath());
     }
 
 
