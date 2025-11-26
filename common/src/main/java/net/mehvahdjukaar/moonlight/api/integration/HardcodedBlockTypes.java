@@ -143,7 +143,7 @@ public class HardcodedBlockTypes {
                 .childBlock(STRIPPED_WOOD, "stripped_chestnut_noxcap_hyphae");
 
         // Ars Nouveau - REASON: PLANKS-NAME
-        woodReg.addSimpleFinder("ars_nouveau", "archwood")
+        if (!PlatHelper.isModLoaded("archwood_good")) woodReg.addSimpleFinder("ars_nouveau", "archwood")
                 .log("blue_archwood_log")
                 .childBlock(STRIPPED_LOG, "stripped_blue_archwood_log")
                 .childBlock(WOOD, "blue_archwood_wood")
