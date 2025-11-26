@@ -1,1 +1,1 @@
-- fixed an issue with synced config saving
+- Excluded WoodType, `ars_nouveau:archwood` if **Archwood Good** is installed as it added 4 archwood WoodTypes
