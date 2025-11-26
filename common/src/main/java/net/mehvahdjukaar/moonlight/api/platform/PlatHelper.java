@@ -137,6 +137,10 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    public static boolean isIntegratedServer() {
+        return PlatHelper.getPhysicalSide().isClient() && getCurrentServer() != null;
+    }
+
     public enum Platform {
         FORGE, FABRIC;
         private static boolean quilt = false;
@@ -235,6 +239,7 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    @Contract
     @Nullable
     @ExpectPlatform
     public static MinecraftServer getCurrentServer() {

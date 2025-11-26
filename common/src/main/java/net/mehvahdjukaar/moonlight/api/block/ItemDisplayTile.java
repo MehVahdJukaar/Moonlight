@@ -188,20 +188,22 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         return 1;
     }
 
-    //use the one below
-    @Deprecated(forRemoval = true)
-    @ApiStatus.Internal
-    @Override
-    public AbstractContainerMenu createMenu(int id, Inventory player) {
-        return ChestMenu.threeRows(id, player, this);
-    }
-
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
+    public AbstractContainerMenu createMenu(int id, Inventory player) {
         return null;
     }
 
+    @ApiStatus.Internal
+    @Override
+    public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
+        return super.createMenu(i, inventory, player);
+    }
+
+    @Override
+    protected Component getDefaultName() {
+        return this.getBlockState().getBlock().getName();
+    }
 
     @Override
     protected NonNullList<ItemStack> getItems() {

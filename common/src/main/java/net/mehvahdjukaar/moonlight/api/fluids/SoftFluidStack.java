@@ -120,8 +120,13 @@ public class SoftFluidStack implements DataComponentHolder {
         return of(fluid, SoftFluid.BOTTLE_COUNT);
     }
 
+    @Deprecated(forRemoval = true)
     public static SoftFluidStack fromFluid(Fluid fluid, int amount) {
         return fromFluid(fluid, amount, DataComponentPatch.EMPTY);
+    }
+
+    public static SoftFluidStack fromFluid(Fluid fluid, int amount, @NotNull HolderLookup.Provider reg) {
+        return fromFluid(fluid, amount, DataComponentPatch.EMPTY, reg);
     }
 
     @Deprecated(forRemoval = true)

@@ -12,11 +12,11 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
-import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
+import net.mehvahdjukaar.moonlight.core.commands.BackCommand;
 import net.mehvahdjukaar.moonlight.core.commands.ModCommands;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
@@ -27,10 +27,9 @@ import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.DebugBlockTypes;
-import net.minecraft.core.Registry;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -43,7 +42,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.validation.DirectoryValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -105,13 +103,14 @@ public class Moonlight {
         }
 
         RegHelper.addItemsToTabsRegistration(event -> {
-            if(event.getTab().hasAnyItems()) {
+            if (event.getTab().hasAnyItems()) {
                 event.add(CreativeModeTabs.OP_BLOCKS, MoonlightRegistry.SPAWN_BOX_BLOCK.get());
             }
         });
 
         //dumb. ensure stuff registered
-        BlockSetAPI.addDynamicRegistration(Moonlight.MOD_ID, r->{}, BuiltInRegistries.BLOCK);
+        BlockSetAPI.addDynamicRegistration(Moonlight.MOD_ID, r -> {
+        }, BuiltInRegistries.BLOCK);
     }
 
     private static void addGlobalDatapackLoader() {
@@ -145,6 +144,9 @@ public class Moonlight {
 
     @EventCalled
     public static void onPlayerCloned(Player oldPlayer, Player newPlayer, boolean wasDeath) {
+        BlockPos oldPos = oldPlayer.blockPosition();
+        var oldDim = oldPlayer.level().dimension();
+        BackCommand.onTeleported(newPlayer, oldPos, oldDim);
         if (wasDeath && !oldPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
             var inv = oldPlayer.getInventory();
             int i = 0;

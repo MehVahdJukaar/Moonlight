@@ -135,7 +135,6 @@ public class MoonlightForge {
                 (sidedContainer, side) -> side == null ? new InvWrapper((Container) sidedContainer) : new SidedInvWrapper((WorldlyContainer) sidedContainer, side));
     }
 
-
     @Nullable
     private static WeakReference<ICondition.IContext> context = null;
 

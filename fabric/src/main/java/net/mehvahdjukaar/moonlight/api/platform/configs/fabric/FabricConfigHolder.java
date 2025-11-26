@@ -12,14 +12,14 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.level.block.StairBlock;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.*;
@@ -124,7 +124,8 @@ public final class FabricConfigHolder extends ModConfigHolder {
     }
 
     @Override
-    public void loadFromBytes(InputStream stream) {
+    public void loadFromBytes(InputStream stream, boolean readOnly) {
+        //if (readOnly && PlatHelper.isIntegratedServer()) return;
         InputStreamReader inputStreamReader = new InputStreamReader(stream, StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         JsonElement config = GSON.fromJson(bufferedReader, JsonElement.class);

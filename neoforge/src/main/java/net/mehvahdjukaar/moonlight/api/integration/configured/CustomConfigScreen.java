@@ -19,7 +19,8 @@ import com.mrcrayfish.configured.util.ConfigHelper;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.neoforge.ForgeConfigHolder;
-import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
+import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -40,6 +41,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -175,10 +177,10 @@ public abstract class CustomConfigScreen extends ConfigScreen {
             if (LABEL != null) {
                 int changedEntries = getChangedConfigs(folderEntry);
                 try {
-                    String s = (changedEntries == 0) ? "": " (§3" + changedEntries + "§r)";
+                    String s = (changedEntries == 0) ? "" : " (§3" + changedEntries + "§r)";
                     LABEL.set(this.saveButton,
                             Component.literal(Component.translatable("configured.gui.save").getString() + s));
-                }catch (Exception e){
+                } catch (Exception e) {
                     if (PlatHelper.isDev()) {
                         throw new RuntimeException("Failed to set save button label");
                     }
@@ -222,12 +224,10 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     }
 
     private void trySyncToServer() {
-        if (!ConfigHelper.isSingleplayer() && !ConfigHelper.isPlayingLan()) {
-            if (ConfigHelper.isPlayingGame()) {
-                Player player = ConfigHelper.getClientPlayer();
-                if (player != null && ConfigHelper.isOperator(player)) {
-                    this.mlConfig.sendChangedConfigToServer();
-                }
+        if (ConfigHelper.isPlayingGame()) {
+            Player player = ConfigHelper.getClientPlayer();
+            if (player != null && ConfigHelper.isOperator(player)) {
+                this.mlConfig.sendChangedConfigToServer();
             }
         }
     }

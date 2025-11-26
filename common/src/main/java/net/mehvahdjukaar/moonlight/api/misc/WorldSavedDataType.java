@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -47,6 +48,8 @@ public final class WorldSavedDataType<D extends WorldSavedData> {
                 this::load, null);
     }
 
+    //only null when called on client too early
+    @Nullable
     public D getData(Level level) {
         if (level.isClientSide && !this.isSyncable()) {
             throw new IllegalStateException("Tried to access unsyncable world saved data on client side!");
