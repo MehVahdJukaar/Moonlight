@@ -13,6 +13,7 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
     protected T value;
     private String translationKey;
     private String descriptionKey;
+    private String rawDescription;
 
     protected ConfigValue(String name, T defaultValue) {
         super(name);
@@ -56,4 +57,15 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
     }
 
 
+    public String getRawDescription() {
+        return rawDescription;
+    }
+
+    public void setRawDescription(String rawDescription) {
+        this.rawDescription = rawDescription;
+    }
+
+    public String getExtraInfo(){
+        return "";
+    }
 }

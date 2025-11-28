@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 

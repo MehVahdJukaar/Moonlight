@@ -52,4 +52,9 @@ public class FloatConfigValue extends ConfigValue<Float> {
     public Float getMin() {
         return min;
     }
+
+    @Override
+    public String getExtraInfo() {
+        return "Accepted range: " + min + " to " + max;
+    }
 }

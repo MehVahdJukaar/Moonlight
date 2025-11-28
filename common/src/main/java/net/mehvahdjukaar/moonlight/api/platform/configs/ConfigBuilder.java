@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 public abstract class ConfigBuilder {
 
     protected final Map<String, String> translations = new HashMap<>();
-    private String currentComment;
-    private String currentKey;
+    protected String currentComment;
+    protected String currentKey;
     protected Runnable changeCallback;
 
     //always on. can be called to disable
@@ -163,7 +163,7 @@ public abstract class ConfigBuilder {
     public ConfigBuilder comment(String comment) {
         this.currentComment = comment;
         if (this.currentComment != null && this.currentKey != null) {
-            translations.put(currentKey, currentComment);
+            this.translations.put(currentKey, currentComment);
             this.currentComment = null;
             this.currentKey = null;
         }

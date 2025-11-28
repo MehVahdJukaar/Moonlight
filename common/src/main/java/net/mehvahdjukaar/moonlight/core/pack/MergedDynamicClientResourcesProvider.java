@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.pack;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
+import net.mehvahdjukaar.moonlight.api.resources.pack.IEditablePackResources;
 import net.mehvahdjukaar.moonlight.api.resources.pack.SimplePackProvider;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.SharedConstants;

@@ -3,7 +3,9 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
+import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -85,10 +87,9 @@ public class GlobalCachedStrategy implements PackGenerationStrategy {
         int i = 0;
         for (PackResources p : packs) {
             String id = p.packId();
-            if (DynamicResourcesInternals.isKnownDynamicPack(p.location().id())) continue;
-            if (id.startsWith("mod/")) continue;
-            if (fabric && id.startsWith("fabric")) continue;
-            if (id.startsWith("generated")) continue;
+            if(FilteredResManager.isDynamicPackResource(p)) continue;
+            if(FilteredResManager.isModResourcePack(p)) continue;
+
             String description = "";
             try {
                 PackMetadataSection metadataSection = p.getMetadataSection(PackMetadataSection.TYPE);

@@ -1,1 +1,1 @@
-- fixed an issue with synced config saving
+- dynamic resource packs will only use vanilla and more ressources by default to avoid issues with masked textures and such. Can be changed with method override in the pack 

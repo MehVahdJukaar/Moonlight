@@ -2,9 +2,12 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.fabric;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.ConfigValue;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 public class ConfigSubCategory extends ConfigEntry {
@@ -21,6 +24,18 @@ public class ConfigSubCategory extends ConfigEntry {
 
     public List<ConfigEntry> getEntries() {
         return entries;
+    }
+
+    public Collection<ConfigValue<?>> gatherAllValues() {
+        List<ConfigValue<?>> list = new ArrayList<>();
+        for (ConfigEntry e : entries) {
+            if (e instanceof ConfigValue<?> v) {
+                list.add(v);
+            } else if (e instanceof ConfigSubCategory c) {
+                list.addAll(c.gatherAllValues());
+            }
+        }
+        return list;
     }
 
     @Override

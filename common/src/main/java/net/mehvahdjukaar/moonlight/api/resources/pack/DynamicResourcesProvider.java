@@ -55,19 +55,28 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
         this.packResources.addNamespaces(name.getNamespace());
     }
 
-    public IEditablePackResources getPackResources() {
+    /**
+     * @return true if the assets here can depend on external resource packs (eg. user added texture packs assets) and not just vanilla + mod resources.
+     * In other words, for instance, if textures generated here can depend on external texture packs
+     */
+    public boolean canUseExternalResourcePacks() {
+        return false;
+    }
+
+    //TODO: turn these info field access
+    public final IEditablePackResources getPackResources() {
         return packResources;
     }
 
-    public ResourceLocation getName() {
+    public final ResourceLocation getName() {
         return name;
     }
 
-    public PackLocationInfo getLocationInfo() {
+    public final PackLocationInfo getLocationInfo() {
         return locationInfo;
     }
 
-    public PackType getPackType() {
+    public final PackType getPackType() {
         return packType;
     }
 

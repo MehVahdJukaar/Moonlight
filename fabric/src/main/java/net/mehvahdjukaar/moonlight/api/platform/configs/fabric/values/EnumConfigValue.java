@@ -50,4 +50,9 @@ public class EnumConfigValue<T extends Enum<T>> extends ConfigValue<T> {
     }
 
 
+    @Override
+    public String getExtraInfo() {
+        return "Accepted values: " + String.join(", ",
+                java.util.Arrays.stream(acceptedValues).map(Enum::name).toList());
+    }
 }

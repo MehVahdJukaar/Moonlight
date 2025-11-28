@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -29,7 +30,6 @@ public class DynamicResourcesInternals {
     private static final Set<DynResourceGenerator<?>> GENERATORS = new HashSet<>();
 
     private static final Multimap<PackType, DynamicResourcesProvider> PROVIDERS = HashMultimap.create();
-    private static final Set<String> DYNAMIC_PACK_IDS = new HashSet<>();
 
     public static void init() {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
@@ -94,9 +94,15 @@ public class DynamicResourcesInternals {
 
             IProgressTracker reporter = earlyPackReloadEvent.progress();
             ResourceManager manager = earlyPackReloadEvent.manager();
+            ResourceManager vanillaManager = null;
             //These are not parallel. pass flat
             for (var gen : validGen) {
-                gen.reload(manager, reporter); // run synchronously
+                if (!gen.canUseExternalResourcePacks()) {
+                    if (vanillaManager == null) {
+                        vanillaManager = FilteredResManager.vanilla(manager, type);
+                    }
+                    gen.reload(vanillaManager, reporter); // run synchronously
+                } else gen.reload(manager, reporter); // run synchronously
             }
 
             Moonlight.LOGGER.info("Finished runtime resources generation for {} packs in a total of {} ",
@@ -110,7 +116,6 @@ public class DynamicResourcesInternals {
 
     public static void addGenerator(DynResourceGenerator<?> generator) {
         GENERATORS.add(generator);
-        DYNAMIC_PACK_IDS.add(generator.dynamicPack.packId());
     }
 
     public static void registerProvider(DynamicResourcesProvider provider) {
@@ -122,16 +127,9 @@ public class DynamicResourcesInternals {
             }
         }
         PROVIDERS.put(packType, provider);
-        DYNAMIC_PACK_IDS.add(provider.getLocationInfo().id());
     }
 
     public static void clearAfterReload(PackType targetType) {
         //not used anymore
-    }
-
-
-    //not great...
-    public static boolean isKnownDynamicPack(String id) {
-        return DYNAMIC_PACK_IDS.contains(id);
     }
 }

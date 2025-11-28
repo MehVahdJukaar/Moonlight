@@ -40,4 +40,8 @@ public class ColorConfigValue extends IntConfigValue {
     }
 
 
+    @Override
+    public String getExtraInfo() {
+        return "Accepted format: Hexadecimal color code (e.g., #RRGGBB or #AARRGGBB)";
+    }
 }
