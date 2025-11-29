@@ -31,10 +31,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -153,8 +150,13 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     @EventCalled
     public void onConfigChange(ModConfigEvent event) {
         if (event.getConfig().getSpec() == this.getSpec()) {
+            Moonlight.LOGGER.info("Detected config change in {}, from neoforge config event", this.getFileName());
             //send this configuration to connected clients if on server
-            if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()) sendSyncedConfigsToAllPlayers();
+            if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()){
+                Moonlight.LOGGER.info("Sending changed configs to client", this.getFileName());
+
+                sendSyncedConfigsToAllPlayers();
+            }
             onRefresh();
             specialValues.forEach(ConfigBuilderImpl.ValueWrapper::clearCache);
         }
@@ -178,15 +180,18 @@ public final class ForgeConfigHolder extends ModConfigHolder {
         //read only is when we are on the logical client
         //ignore read only on integrated server. no need here. technically not needed but still
         //if (readOnly && PlatHelper.isIntegratedServer()) return;
-        readOnly = readOnly && !PlatHelper.isIntegratedServer();
+        if(PlatHelper.isIntegratedServer()){
+            readOnly = false;
+        }
         try {
             byte[] b = stream.readAllBytes();
             if (readOnly) {
                 //set client configs in a non editable state
                 ConfigTracker.acceptSyncedConfig(this.modConfig, b);
             } else {
+                //editable configs. for integrated server
                 //client configs accepted by server. semi in place. still allows editing
-                acceptClientConfigs(this.modConfig, b);
+                acceptEditableConfigs(this.modConfig, b);
             }
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to sync config file {}:", this.getFileName(), e);
@@ -198,8 +203,8 @@ public final class ForgeConfigHolder extends ModConfigHolder {
 
 
     //same as accepts synced configs but also sets the path, allowing them to saved
-    public void acceptClientConfigs(ModConfig modConfig, byte[] bytes) {
-        Moonlight.LOGGER.info("Set configs {} at path {} with configs from op client", modConfig.getLoadedConfig(), modConfig.getFileName());
+    public void acceptEditableConfigs(ModConfig modConfig, byte[] bytes) {
+        Moonlight.LOGGER.info("Overriding configs {} with synced configs (editable)",  modConfig.getFileName());
         var newConfig = new SynchronizedConfig(InMemoryCommentedFormat.defaultInstance(), LinkedHashMap::new);
         newConfig.bulkCommentedUpdate(view -> {
             TomlFormat.instance().createParser().parse(new ByteArrayInputStream(bytes), view, ParsingMode.REPLACE);
