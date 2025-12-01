@@ -1,29 +1,47 @@
 package net.mehvahdjukaar.moonlight.api.client.neoforge;
 
+import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.fluids.FluidType;
 
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ModFluidType extends FluidType {
+@EventBusSubscriber(modid = Moonlight.MOD_ID, value = Dist.CLIENT)
+public class ForgeFluidTypeHelper {
 
-    private static final ThreadLocal<ModFlowingFluid> HACK = new ThreadLocal<>();
+    private static final List<Pair<ModFlowingFluid, FluidType>> flowingFluids = new ArrayList<>();
 
-    public static ModFluidType create(ModFlowingFluid.Properties properties, ModFlowingFluid fluid) {
-        HACK.set(fluid);
-        var m = new ModFluidType(properties);
-        HACK.remove();
-        return m;
+    public static FluidType create(ModFlowingFluid.Properties properties, ModFlowingFluid fluid) {
+        FluidType type = create(properties);
+        flowingFluids.add(Pair.of(fluid, type));
+        return type;
     }
+
+    @SubscribeEvent
+    public static void registerFluidExtensions(RegisterClientExtensionsEvent event) {
+        for (var e : flowingFluids) {
+            ModFlowingFluid flowingFluid = e.getFirst();
+            FluidType fluidType = e.getSecond();
+
+            event.registerFluidType((IClientFluidTypeExtensions) flowingFluid.createRenderProperties(), fluidType);
+        }
+    }
+
 
     /**
      * Default constructor.
      *
      * @param properties the general properties of the fluid type
      */
-    private ModFluidType(ModFlowingFluid.Properties properties) {
-        super(Properties.create()
+    private static FluidType create(ModFlowingFluid.Properties properties) {
+        new FluidType(FluidType.Properties.create()
                 .adjacentPathType(properties.adjacentPathType)
                 .canExtinguish(properties.canExtinguish)
                 .fallDistanceModifier(properties.fallDistanceModifier)
@@ -44,8 +62,4 @@ public class ModFluidType extends FluidType {
         );
     }
 
-    @Override
-    public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
-        consumer.accept((IClientFluidTypeExtensions) HACK.get().createRenderProperties());
-    }
 }

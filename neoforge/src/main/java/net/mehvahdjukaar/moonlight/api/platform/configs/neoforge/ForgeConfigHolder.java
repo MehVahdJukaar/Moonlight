@@ -5,6 +5,7 @@ import com.electronwill.nightconfig.core.InMemoryCommentedFormat;
 import com.electronwill.nightconfig.core.concurrent.SynchronizedConfig;
 import com.electronwill.nightconfig.core.io.ParsingMode;
 import com.electronwill.nightconfig.toml.TomlFormat;
+import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -154,7 +155,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
             //send this configuration to connected clients if on server
             if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()){
                 Moonlight.LOGGER.info("Sending changed configs to client", this.getFileName());
-
+                ModFlowingFluid
                 sendSyncedConfigsToAllPlayers();
             }
             onRefresh();

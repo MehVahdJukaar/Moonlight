@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins.neoforge;
 
-import net.mehvahdjukaar.moonlight.api.client.neoforge.ModFluidType;
+import net.mehvahdjukaar.moonlight.api.client.neoforge.ForgeFluidTypeHelper;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -19,7 +19,7 @@ public abstract class SelfModFlowingFluidMixin extends FlowingFluid {
 
     @Overwrite(remap = false)
     private void afterInit(ModFlowingFluid.Properties properties) {
-        var t = ModFluidType.create(properties, (ModFlowingFluid) (Object) this);
+        var t = ForgeFluidTypeHelper.create(properties, (ModFlowingFluid) (Object) this);
         this.type = () -> t; //this also needs to be registered later
     }
 
