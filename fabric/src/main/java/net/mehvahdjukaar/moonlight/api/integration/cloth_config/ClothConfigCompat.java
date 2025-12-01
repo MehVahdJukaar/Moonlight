@@ -73,7 +73,7 @@ public class ClothConfigCompat {
                     .startAlphaColorField(col.getTranslation(), col.get())
                     .setDefaultValue(col.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setSaveConsumer(col::set);// Recommended: Called when user save the config
-            var description = col.getDescription();
+            var description = col.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof IntConfigValue ic) {
@@ -83,7 +83,7 @@ public class ClothConfigCompat {
                     .setMin(ic.getMin())
                     .setDefaultValue(ic.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setSaveConsumer(ic::set); // Recommended: Called when user save the config
-            var description = ic.getDescription();
+            var description = ic.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof DoubleConfigValue dc) {
@@ -93,7 +93,7 @@ public class ClothConfigCompat {
                     .setMin(dc.getMin())
                     .setDefaultValue(dc.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setSaveConsumer(dc::set); // Recommended: Called when user save the config
-            var description = dc.getDescription();
+            var description = dc.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if ( entry instanceof FloatConfigValue fc) {
@@ -103,7 +103,7 @@ public class ClothConfigCompat {
                     .setMin(fc.getMin())
                     .setDefaultValue(fc.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setSaveConsumer(fc::set); // Recommended: Called when user save the config
-            var description = fc.getDescription();
+            var description = fc.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         }
@@ -112,7 +112,7 @@ public class ClothConfigCompat {
                     .startStrField(sc.getTranslation(), sc.get())
                     .setDefaultValue(sc.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setSaveConsumer(sc::set); // Recommended: Called when user save the config
-            var description = sc.getDescription();
+            var description = sc.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof BoolConfigValue bc) {
@@ -120,7 +120,7 @@ public class ClothConfigCompat {
                     .startBooleanToggle(bc.getTranslation(), bc.get())
                     .setDefaultValue(bc.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setSaveConsumer(bc::set); // Recommended: Called when user save the config
-            var description = bc.getDescription();
+            var description = bc.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof EnumConfigValue<?> ec) {
@@ -130,7 +130,7 @@ public class ClothConfigCompat {
                     .startStrList(lc.getTranslation(), lc.get())
                     .setDefaultValue(lc.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setSaveConsumer(lc::set); // Recommended: Called when user save the config
-            var description = lc.getDescription();
+            var description = lc.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         }
@@ -146,7 +146,7 @@ public class ClothConfigCompat {
                 .startEnumSelector(ec.getTranslation(), ec.getEnumClass(), ec.get())
                 .setDefaultValue(ec.getDefaultValue()) // Recommended: Used when user click "Reset"
                 .setSaveConsumer(ec::set); // Recommended: Called when user save the config
-        var description = ec.getDescription();
+        var description = ec.getCommentComponent();
         if (description != null) e.setTooltip(description);// Shown when the user hover over this option
         return e.build(); // Builds the option entry for cloth config
     }

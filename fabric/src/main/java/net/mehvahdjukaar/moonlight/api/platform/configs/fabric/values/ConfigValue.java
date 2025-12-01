@@ -2,18 +2,20 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.ConfigEntry;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
+@ApiStatus.Internal
 public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> {
 
     protected final T defaultValue;
     protected T value;
-    private String translationKey;
-    private String descriptionKey;
-    private String rawDescription;
+    private String translationKey = "";
+    private String commentKey = "";
+    private String rawComment = "";
 
     protected ConfigValue(String name, T defaultValue) {
         super(name);
@@ -38,8 +40,8 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
         return value;
     }
 
-    public void setDescriptionKey(String descriptionKey) {
-        this.descriptionKey = descriptionKey;
+    public void setCommentKey(String descriptionKey) {
+        this.commentKey = descriptionKey;
     }
 
     public void setTranslationKey(String translationKey) {
@@ -51,21 +53,20 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
     }
 
     @Nullable
-    public Component getDescription() {
-        if (this.descriptionKey == null) return null;
-        return Component.translatable(descriptionKey);
+    public Component getCommentComponent() {
+        if (this.commentKey.isEmpty()) return null;
+        return Component.translatable(commentKey);
     }
 
-
-    public String getRawDescription() {
-        return rawDescription;
+    public String getRawComment() {
+        return rawComment;
     }
 
-    public void setRawDescription(String rawDescription) {
-        this.rawDescription = rawDescription;
+    public void getRawComment(String rawDescription) {
+        this.rawComment = rawDescription;
     }
 
-    public String getExtraInfo(){
+    public String getExtraInfo() {
         return "";
     }
 }

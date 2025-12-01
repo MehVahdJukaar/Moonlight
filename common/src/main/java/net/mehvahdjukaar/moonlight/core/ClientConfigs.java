@@ -32,7 +32,6 @@ public class ClientConfigs {
                 .define("lazy_map_upload", true);
         MAPS_MIPMAP = builder.comment("Renders map textures using mipmap. Vastly improves look from afar as well when inside a Map Atlas from Map Atlases or similar. Set to 0 to have no mipmap like vanilla")
                 .define("maps_mipmap", 3, 0, 4);
-
         FIX_SHADE = builder.comment("Fix minecraft entity shading to be exactly the same that blocks use. (1 for up,0.8 for north, 0.6 for west and 0.5 for down)." +
                         "This means that if you have a model and render it with a tile renderer or entity it will appear identical as one rendered via baked models." +
                         "Using no gui will prevent it from changing item rendered in GUIs, in case you dont like that look." +

@@ -3,7 +3,9 @@ package net.mehvahdjukaar.moonlight.api.fluids.fabric;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 
@@ -33,10 +35,15 @@ public class SoftFluidStackImpl extends SoftFluidStack {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public static SoftFluidStack fromFabricFluid(FluidVariant variant, int bottlesAmount) {
+        return fromFabricFluid(variant, bottlesAmount, Utils.hackyGetRegistryAccess());
+    }
+
+    public static SoftFluidStack fromFabricFluid(FluidVariant variant, int bottlesAmount, HolderLookup.Provider reg) {
         var comps = variant.getComponents();
         var patch = DataComponentPatch.builder();
-        var softFluid = SoftFluidStack.fromFluid(variant.getFluid(), bottlesAmount);
+        var softFluid = SoftFluidStack.fromFluid(variant.getFluid(), bottlesAmount, reg);
         for (var t : softFluid.fluid().getPreservedComponents()) {
             setComp(t.value(), comps, patch);
         }

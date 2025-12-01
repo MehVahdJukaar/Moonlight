@@ -104,10 +104,13 @@ public final class FabricConfigHolder extends ModConfigHolder {
             mainEntry.gatherAllValues().forEach(e -> {
                 String key = e.getName();
                 // name of the JSON key
-                String comment = e.getRawDescription();
+                String comment = e.getRawComment();
                 String extraComment = e.getExtraInfo();
                 if (!extraComment.isEmpty()) {
-                    comment += "\n" + extraComment;
+                    if (!comment.isEmpty()) {
+                        comment += "\n";
+                    }
+                    comment += extraComment;
                 }
                 // textual comment you want to insert
                 if (!comment.isEmpty()) {

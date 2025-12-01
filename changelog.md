@@ -1,1 +1,2 @@
-- dynamic resource packs will only use vanilla and more ressources by default to avoid issues with masked textures and such. Can be changed with method override in the pack 
+- fabric configs now can save comments in the json file
+- fixed an issue with neoforge fluid types

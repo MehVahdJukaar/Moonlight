@@ -79,7 +79,7 @@ public class YACLCompat {
                     .name(col.getTranslation())
                     .binding(new Color(col.getDefaultValue()), () -> new Color(col.get()), v -> col.set(v.getRGB()))
                     .controller(ColorControllerBuilder::create);
-            var description = col.getDescription();
+            var description = col.getCommentComponent();
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
@@ -91,7 +91,7 @@ public class YACLCompat {
                             .range(ic.getMin(), ic.getMax())
                             .step(1)
                     );
-            var description = ic.getDescription();
+            var description = ic.getCommentComponent();
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
@@ -104,7 +104,7 @@ public class YACLCompat {
                             .step(0.0001d)
                             .formatValue(DOUBLE_FORMATTER)
                     );
-            var description = dc.getDescription();
+            var description = dc.getCommentComponent();
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
@@ -117,7 +117,7 @@ public class YACLCompat {
                             .step(0.0001f)
                             .formatValue(FLOAT_FORMATTER)
                     );
-            var description = fc.getDescription();
+            var description = fc.getCommentComponent();
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
@@ -126,7 +126,7 @@ public class YACLCompat {
                     .name(sc.getTranslation())
                     .binding(sc.getDefaultValue(), sc, sc::set)
                     .controller(StringControllerBuilder::create);
-            var description = sc.getDescription();
+            var description = sc.getCommentComponent();
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
@@ -135,7 +135,7 @@ public class YACLCompat {
                     .name(bc.getTranslation())
                     .binding(bc.getDefaultValue(), bc, bc::set)
                     .controller(TickBoxControllerBuilder::create);
-            var description = bc.getDescription();
+            var description = bc.getCommentComponent();
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
@@ -146,7 +146,7 @@ public class YACLCompat {
                     .name(lc.getTranslation())
                     .binding(Binding.immutable(Component.literal("String Lists are not supported")))
                     .customController(LabelController::new);
-            var description = lc.getDescription();
+            var description = lc.getCommentComponent();
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
@@ -156,7 +156,7 @@ public class YACLCompat {
                     .name(lc.getTranslation())
                     .binding(Binding.immutable(Component.literal("Object fields are not supported. Edit the config manually instead")))
                     .customController(LabelController::new);
-            var description = lc.getDescription();
+            var description = lc.getCommentComponent();
             if (description != null) e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         }
@@ -171,7 +171,7 @@ public class YACLCompat {
                 .name(ec.getTranslation())
                 .binding(ec.getDefaultValue(), ec, ec::set)
                 .controller(EnumControllerBuilder::create);
-        var description = ec.getDescription();
+        var description = ec.getCommentComponent();
         if (description != null)
             e.description(OptionDescription.of(description));// Shown when the user hover over this option
         return e.build(); // Builds the option entry for cloth config
