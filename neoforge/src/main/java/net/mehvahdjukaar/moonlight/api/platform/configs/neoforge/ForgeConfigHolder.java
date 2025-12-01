@@ -155,7 +155,6 @@ public final class ForgeConfigHolder extends ModConfigHolder {
             //send this configuration to connected clients if on server
             if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()){
                 Moonlight.LOGGER.info("Sending changed configs to client", this.getFileName());
-                ModFlowingFluid
                 sendSyncedConfigsToAllPlayers();
             }
             onRefresh();

@@ -41,7 +41,7 @@ public class ForgeFluidTypeHelper {
      * @param properties the general properties of the fluid type
      */
     private static FluidType create(ModFlowingFluid.Properties properties) {
-        new FluidType(FluidType.Properties.create()
+      return   new FluidType(FluidType.Properties.create()
                 .adjacentPathType(properties.adjacentPathType)
                 .canExtinguish(properties.canExtinguish)
                 .fallDistanceModifier(properties.fallDistanceModifier)
