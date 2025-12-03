@@ -6,10 +6,13 @@ import com.mojang.serialization.codecs.BaseMapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import io.netty.util.internal.UnstableApi;
+import net.mehvahdjukaar.moonlight.api.block.IOneUserInteractable;
+import net.mehvahdjukaar.moonlight.api.client.IScreenProvider;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.InvPlacer;
+import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
@@ -33,6 +36,7 @@ import net.minecraft.stats.StatType;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
@@ -71,6 +75,34 @@ import java.util.function.Supplier;
 
 
 public class Utils {
+
+    // orchestrator for opening block entity GUIs with claim checks
+    public static boolean openGuiIfPossible(BlockEntity be, ServerPlayer player, ItemStack stack, Direction hitFace) {
+        //this is likely not needed
+        BlockPos pos = be.getBlockPos();
+        if (!Utils.mayPerformBlockAction(player, pos, stack)) {
+            return false;
+        }
+        if (be instanceof IOneUserInteractable ci && !ci.canBeUsedBy(pos, player)) {
+            return false;
+        }
+        if (be instanceof IScreenProvider sp) {
+            if (be instanceof IOneUserInteractable ci) {
+                ci.setCurrentUser(player.getUUID());
+            }
+            sp.sendOpenGuiPacket(player, hitFace);
+            return false;
+        }
+        if (be instanceof MenuProvider mp) {
+            if (be instanceof IOneUserInteractable ci) {
+                ci.setCurrentUser(player.getUUID());
+            }
+            TileOrEntityTarget target = TileOrEntityTarget.of(be);
+            PlatHelper.openCustomMenu(player, mp, target::write);
+            return true;
+        }
+        return false;
+    }
 
     public static void spawnItemWithTileData(Player player, RandomizableContainerBlockEntity tile) {
         Level level = player.level();

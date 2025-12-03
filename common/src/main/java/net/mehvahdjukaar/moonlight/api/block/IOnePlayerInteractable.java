@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 // Interface for tile entities that can be edited by one player at a time like signs and such
+@Deprecated(forRemoval = true)
 public interface IOnePlayerInteractable {
 
     void setPlayerWhoMayEdit(@Nullable UUID uuid);

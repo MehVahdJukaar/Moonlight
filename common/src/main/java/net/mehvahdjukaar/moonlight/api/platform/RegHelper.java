@@ -207,6 +207,7 @@ public class RegHelper {
         });
     }
 
+    @SafeVarargs
     public static RegSupplier<PoiType> registerPOI(ResourceLocation name, int searchDistance, int maxTickets, Supplier<Block>... blocks) {
         return registerPOI(name, () -> {
             ImmutableSet.Builder<BlockState> builder = ImmutableSet.builder();
