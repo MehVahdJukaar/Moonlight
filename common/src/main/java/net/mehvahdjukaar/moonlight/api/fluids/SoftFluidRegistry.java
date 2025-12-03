@@ -47,17 +47,17 @@ public class SoftFluidRegistry {
 
     @Deprecated(forRemoval = true)
     public static Holder<SoftFluid> getEmpty() {
-        return MLBuiltinSoftFluids.EMPTY.getHolderUnsafe();
+        return MLBuiltinSoftFluids.EMPTY.getHolder(Utils.hackyGetRegistryAccess());
     }
 
     @Deprecated(forRemoval = true)
     public static Holder<SoftFluid> hackyGetEmpty() {
-        return MLBuiltinSoftFluids.EMPTY.getHolderUnsafe();
+        return MLBuiltinSoftFluids.EMPTY.getHolder(Utils.hackyGetRegistryAccess());
     }
 
     @Deprecated(forRemoval = true)
     public static SoftFluid empty() {
-        return MLBuiltinSoftFluids.EMPTY.getUnsafe();
+        return MLBuiltinSoftFluids.EMPTY.get(Utils.hackyGetRegistryAccess());
     }
 
     @Deprecated(forRemoval = true)

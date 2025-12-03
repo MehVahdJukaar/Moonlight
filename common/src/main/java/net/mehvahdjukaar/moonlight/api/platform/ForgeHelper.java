@@ -171,6 +171,7 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static boolean isDye(ItemStack itemstack) {
         throw new AssertionError();

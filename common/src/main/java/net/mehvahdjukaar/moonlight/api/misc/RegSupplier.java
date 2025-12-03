@@ -9,8 +9,9 @@ import java.util.function.Supplier;
 
 /**
  * Basically a registry object wrapper and simple supplier with id and holder functionality for fabric
+ * Supplier of a builtin registry. for the others use HolderRef or OptHolderRef
  */
-// maybe implement holder here?
+// maybe implement holder here
 public interface RegSupplier<T> extends Supplier<T> {
 
     @Override

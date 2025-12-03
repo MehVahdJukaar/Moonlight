@@ -4,6 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
+/**
+ * A stopwatch that can be started and stopped multiple times concurrently from different threads.
+ * It keeps track of the actual in-game time regardless of overlapping intervals.
+ */
 public final class ConcurrentStopwatch {
     private final LongAdder accumulated = new LongAdder();
     private final AtomicInteger active = new AtomicInteger();

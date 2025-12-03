@@ -7,7 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
-import net.mehvahdjukaar.moonlight.api.misc.HolderReference;
+import net.mehvahdjukaar.moonlight.api.misc.HolderRef;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -41,10 +41,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 // do NOT have these in a static field as they contain registry holders
@@ -193,7 +189,7 @@ public class SoftFluidStack implements DataComponentHolder {
         return CODEC.parse(lookupProvider.createSerializationContext(NbtOps.INSTANCE), tag).getOrThrow();
     }
 
-    public boolean is(HolderReference<SoftFluid> fluid) {
+    public boolean is(HolderRef<SoftFluid> fluid) {
         return fluid.is(this.fluidHolder);
     }
 

@@ -2,6 +2,11 @@ package net.mehvahdjukaar.moonlight.api.misc;
 
 import java.util.*;
 
+/**
+ * A collection that orders its elements based on their frequency of occurrence.
+ * Elements with higher frequencies appear before those with lower frequencies.
+ * @param <T>
+ */
 public class FrequencyOrderedCollection<T> implements Collection<T> {
     private final Map<T, Integer> frequencies = new HashMap<>();
     private List<Map.Entry<T, Integer>> sortedEntries = new ArrayList<>();

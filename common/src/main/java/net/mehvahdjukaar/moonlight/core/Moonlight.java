@@ -188,7 +188,7 @@ public class Moonlight {
         DynamicResourcesInternals.clearAfterReload(PackType.SERVER_DATA);
         DynamicHolder.clearCache();
 
-        HolderReference.clearCache();
+        HolderRef.clearCache();
         DispenserHelper.reload(registryAccess, client);
     }
 
