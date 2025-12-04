@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.api.EnvType;
@@ -18,10 +17,8 @@ import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
-import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.resources.recipe.fabric.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
 import net.mehvahdjukaar.moonlight.core.network.fabric.ClientBoundOpenCustomMenuMessage;
@@ -49,7 +46,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.tags.TagManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.*;
@@ -183,12 +179,14 @@ public class PlatHelperImpl {
         return new FlowerPotBlock(supplier.get(), properties);
     }
 
-    public static SimpleParticleType newParticle() {
+    public static SimpleParticleType newSimpleParticle() {
         return FabricParticleTypes.simple(true);
     }
 
-    public static <T extends ParticleOptions> ParticleType<T> newParticle(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
-        return FabricParticleTypes.complex(true, codec, streamCodec);
+    public static <T extends ParticleOptions> ParticleType<T> newParticle(
+            Function<ParticleType<T>, MapCodec<T>> codec, Function<ParticleType<T>,
+            StreamCodec<? super RegistryFriendlyByteBuf, T>> streamCodec, boolean overrideLimiter) {
+        return FabricParticleTypes.complex(overrideLimiter, codec, streamCodec);
     }
 
     public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(PlatHelper.BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
@@ -302,7 +300,7 @@ public class PlatHelperImpl {
                     FabricCondition::condition).fieldOf("fabric:load_conditions");
 
     public static MapCodec<LoaderCondition> getConditionCodec() {
-       return (MapCodec) CONDITION_CODEC;
+        return (MapCodec) CONDITION_CODEC;
     }
 
 

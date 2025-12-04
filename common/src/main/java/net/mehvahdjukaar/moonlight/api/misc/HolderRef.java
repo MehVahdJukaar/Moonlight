@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
@@ -9,6 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,6 +46,10 @@ public class HolderRef<T> {
         REFERENCES.add(this);
     }
 
+    public static <A> HolderRef<A> wrap(A obj, ResourceKey<Registry<A>> registry) {
+        return of(Utils.getID(obj), registry);
+    }
+
     public static <A> HolderRef<A> of(String id, ResourceKey<Registry<A>> registry) {
         return of(ResourceLocation.tryParse(id), registry);
     }
@@ -67,7 +74,12 @@ public class HolderRef<T> {
         return get(entity.level());
     }
 
+    //TODO: remove
     public T get(Level level) {
+        return get(level.registryAccess());
+    }
+
+    public T get(LevelReader level) {
         return get(level.registryAccess());
     }
 
@@ -79,7 +91,7 @@ public class HolderRef<T> {
         return getHolder(r).value() == object;
     }
 
-    public boolean is(T object, Level level) {
+    public boolean is(T object, LevelReader level) {
         return is(object, level.registryAccess());
     }
 
@@ -87,7 +99,7 @@ public class HolderRef<T> {
         return getHolder(r).is(tag);
     }
 
-    public boolean is(TagKey<T> tag, Level level) {
+    public boolean is(TagKey<T> tag, LevelReader level) {
         return is(tag, level.registryAccess());
     }
 
@@ -96,6 +108,10 @@ public class HolderRef<T> {
     }
 
     public Holder<T> getHolder(Level level) {
+        return getHolder(level.registryAccess());
+    }
+
+    public Holder<T> getHolder(LevelReader level) {
         return getHolder(level.registryAccess());
     }
 

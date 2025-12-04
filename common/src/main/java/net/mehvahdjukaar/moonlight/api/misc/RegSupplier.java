@@ -26,4 +26,8 @@ public interface RegSupplier<T> extends Supplier<T> {
     default boolean is(TagKey<T> tag) {
         return this.getHolder().is(tag);
     }
+
+    default boolean is(T other) {
+        return this.get() == other;
+    }
 }

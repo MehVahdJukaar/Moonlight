@@ -379,10 +379,6 @@ public class RegHelper {
                 Arrays.stream(blocks).map(Supplier::get).toArray(Block[]::new)));
     }
 
-    public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
-        return register(name, PlatHelper::newParticle, Registries.PARTICLE_TYPE);
-    }
-
     public static <A> Registry<A> registerRegistry(ResourceLocation key, boolean synced) {
         return registerRegistry(ResourceKey.createRegistryKey(key), synced);
     }
@@ -393,6 +389,7 @@ public class RegHelper {
     }
 
     //give null network codec for no syncing
+
     public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
             ResourceLocation key, Function<ServerLevel, A> constructor,
             Codec<A> codec, @Nullable StreamCodec<RegistryFriendlyByteBuf, A> networkCodec) {
@@ -400,10 +397,23 @@ public class RegHelper {
         register(key, () -> instance, MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.key());
         return instance;
     }
+    public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
+        return register(name, PlatHelper::newSimpleParticle, Registries.PARTICLE_TYPE);
+    }
 
     public static <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
             ResourceLocation name, MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
-        return register(name, () -> PlatHelper.newParticle(codec, streamCodec), Registries.PARTICLE_TYPE);
+        return register(name, () -> PlatHelper.newParticle(codec, streamCodec, false), Registries.PARTICLE_TYPE);
+    }
+
+    public static  <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
+            ResourceLocation name,
+            boolean overrideLimiter,
+            Function<ParticleType<T>, MapCodec<T>> codecGetter,
+            Function<ParticleType<T>, StreamCodec<? super RegistryFriendlyByteBuf, T>> streamCodecGetter
+    ) {
+        return register(name, () -> PlatHelper.newParticle(codecGetter, streamCodecGetter, overrideLimiter),
+                Registries.PARTICLE_TYPE);
     }
 
     public static <T extends LootItemFunction> RegSupplier<LootItemFunctionType<T>> registerLootFunction(

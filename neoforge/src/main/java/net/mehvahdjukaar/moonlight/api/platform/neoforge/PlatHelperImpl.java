@@ -194,21 +194,20 @@ public class PlatHelperImpl {
         return new FlowerPotBlock(emptyPot, supplier, properties);
     }
 
-    public static SimpleParticleType newParticle() {
+    public static SimpleParticleType newSimpleParticle() {
         return new SimpleParticleType(true);
     }
 
-    public static <T extends ParticleOptions> ParticleType<T> newParticle(
-            MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
-        return new ParticleType<>(true) {
+    public static  <T extends ParticleOptions> ParticleType<T> newParticle(Function<ParticleType<T>, MapCodec<T>> codec, Function<ParticleType<T>, StreamCodec<? super RegistryFriendlyByteBuf, T>> streamCodec, boolean overrideLimiter) {
+        return new ParticleType<>(overrideLimiter) {
             @Override
             public MapCodec<T> codec() {
-                return codec;
+                return codec.apply(this);
             }
 
             @Override
             public StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec() {
-                return streamCodec;
+                return streamCodec.apply(this);
             }
         };
     }
@@ -323,6 +322,7 @@ public class PlatHelperImpl {
     public static MapCodec<LoaderCondition> getConditionCodec() {
         return (MapCodec) CONDITION_CODEC;
     }
+
 
 
 }

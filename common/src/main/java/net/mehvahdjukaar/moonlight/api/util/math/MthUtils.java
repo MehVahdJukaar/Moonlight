@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
 import com.google.common.base.Preconditions;
-import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,15 +16,20 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.joml.Vector2i;
 
+import java.awt.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MthUtils {
 
@@ -535,4 +539,15 @@ public class MthUtils {
             return Integer.toHexString(tokens.toString().hashCode());
         }
     }
+
+    public static Stream<BlockPos> streamSpiralCircle(BlockPos center, int radius) {
+
+    }
+
+    public static Stream<BlockPos> streamRing(BlockPos center, int radius) {
+        return CircularGridUtils.streamRing(center.getX(), center.getY(), center.getZ(), radius)
+                .map(p -> new BlockPos(p.x, p.y, p.z));
+    }
+
+
 }

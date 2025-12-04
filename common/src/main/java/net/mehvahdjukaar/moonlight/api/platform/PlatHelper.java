@@ -330,12 +330,16 @@ public class PlatHelper {
     }
 
     @ExpectPlatform
-    public static SimpleParticleType newParticle() {
+    public static SimpleParticleType newSimpleParticle() {
         throw new AssertionError();
     }
 
+    public static <T extends ParticleOptions> ParticleType<T> newParticle(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec, boolean overrideLimiter) {
+        return newParticle(c -> codec, c -> streamCodec, overrideLimiter);
+    }
+
     @ExpectPlatform
-    public static <T extends ParticleOptions> ParticleType<T> newParticle(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+    public static <T extends ParticleOptions> ParticleType<T> newParticle(Function<ParticleType<T>, MapCodec<T>> codec, Function<ParticleType<T>, StreamCodec<? super RegistryFriendlyByteBuf, T>> streamCodec, boolean overrideLimiter) {
         throw new AssertionError();
     }
 
