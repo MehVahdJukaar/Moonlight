@@ -16,20 +16,17 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Vector2i;
 
-import java.awt.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class MthUtils {
 
@@ -540,14 +537,32 @@ public class MthUtils {
         }
     }
 
-    public static Stream<BlockPos> streamSpiralCircle(BlockPos center, int radius) {
+    public static Iterator<BlockPos> iterateCylinderFromCenter(BlockPos center, int radius, int height) {
+        Iterator<Vec2i> spiral = CircularGridUtils.iterateInRing(0, 0, radius, 1);
+
+        return new Iterator<>() {
+            private Vec2i currentOffset = null;
+            private int currentY = 0;
+
+            @Override
+            public boolean hasNext() {
+                return (currentOffset != null && currentY < height) || spiral.hasNext();
+            }
+
+            @Override
+            public BlockPos next() {
+                if (currentOffset == null || currentY >= height) {
+                    currentOffset = spiral.next();
+                    currentY = 0;
+                }
+                BlockPos pos = center.offset(currentOffset.x(), currentY, currentOffset.y());
+                currentY++;
+                return pos;
+            }
+        };
 
     }
 
-    public static Stream<BlockPos> streamRing(BlockPos center, int radius) {
-        return CircularGridUtils.streamRing(center.getX(), center.getY(), center.getZ(), radius)
-                .map(p -> new BlockPos(p.x, p.y, p.z));
-    }
 
 
 }
