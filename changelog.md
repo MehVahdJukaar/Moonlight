@@ -1,2 +1,4 @@
-- fabric configs now can save comments in the json file
-- fixed an issue with neoforge fluid types
+- added more math utilities
+- improved optional holders
+- added openable container class
+- fabric configs support comments

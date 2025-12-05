@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -21,9 +22,15 @@ public class SoftFluidColorsImpl {
         if (dyeColor != null) {
             return dyeColor.rgb();
         }
+
         PotionContents potionContents = stack.get(DataComponents.POTION_CONTENTS);
         if (potionContents != null) {
             return potionContents.getColor();
+        }
+
+        DyeColor discreteDyeColor =  stack.get(DataComponents.BASE_COLOR);
+        if (discreteDyeColor != null){
+            return discreteDyeColor.getTextureDiffuseColor();
         }
         //at least this works for any fluid
         int specialColor = 0;
