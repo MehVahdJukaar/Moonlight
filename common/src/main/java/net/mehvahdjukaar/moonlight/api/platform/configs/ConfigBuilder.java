@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -51,6 +52,7 @@ public abstract class ConfigBuilder {
             if (e.isDefault()) translations.forEach(e::addEntry);
         };
         MoonlightEventsHelper.addListener(consumer, AfterLanguageLoadEvent.class);
+        Moonlight.addDependent(name.getNamespace()); //add config mod id
     }
 
     public abstract ModConfigHolder build();

@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.map;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
-import net.mehvahdjukaar.moonlight.api.misc.HolderRef;
+import net.mehvahdjukaar.moonlight.api.misc.HolderReference;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.Holder;
@@ -32,7 +32,7 @@ public class MapDataRegistry {
     public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.MAP_DECORATION_REGISTRY_KEY ;
     public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> MAP_DECORATION_REGISTRY_KEY = MapDataInternal.MAP_DECORATION_REGISTRY_KEY ;
 
-    public static final HolderRef<MLMapDecorationType<?, ?>> GENERIC_STRUCTURE_MARKER = HolderRef.of(MapDataInternal.GENERIC_STRUCTURE_ID,
+    public static final HolderReference<MLMapDecorationType<?, ?>> GENERIC_STRUCTURE_MARKER = HolderReference.of(MapDataInternal.GENERIC_STRUCTURE_ID,
             MAP_DECORATION_REGISTRY_KEY);
 
     /**

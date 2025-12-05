@@ -73,6 +73,8 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
@@ -187,6 +189,10 @@ public class RegHelper {
 
     public static RegSupplier<StructurePieceType> registerStructurePiece(ResourceLocation name, StructurePieceType pieceType) {
         return register(name, () -> pieceType, Registries.STRUCTURE_PIECE);
+    }
+
+    public static <T extends StructurePlacement> RegSupplier<StructurePlacementType<T>> registerStructurePlacementType(ResourceLocation name, MapCodec<T> codec) {
+        return register(name, ()-> () -> codec, Registries.STRUCTURE_PLACEMENT);
     }
 
     public static RegSupplier<StructurePieceType> register(ResourceLocation name, StructurePieceType pieceType) {

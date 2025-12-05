@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.HolderRef;
+import net.mehvahdjukaar.moonlight.api.misc.HolderReference;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -190,6 +191,10 @@ public class SoftFluidStack implements DataComponentHolder {
     }
 
     public boolean is(HolderRef<SoftFluid> fluid) {
+        return fluid.is(this.fluidHolder);
+    }
+
+    public boolean is(HolderReference<SoftFluid> fluid) {
         return fluid.is(this.fluidHolder);
     }
 
