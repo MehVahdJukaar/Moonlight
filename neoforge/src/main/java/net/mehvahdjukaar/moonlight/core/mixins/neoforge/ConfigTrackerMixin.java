@@ -14,7 +14,7 @@ public class ConfigTrackerMixin {
 
 
     @WrapWithCondition(method = "openConfig",
-            require = 0,
+            require = 1,
             at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
     private static boolean ml$ignoreConfigWarning(Logger instance, String s, Object a, Object b,
                                                   @Local(argsOnly = true) ModConfig config) {

@@ -17,14 +17,22 @@ public class FireConsumeBlockEvent implements IFireConsumeBlockEvent {
     private final int chance;
     private final int age;
     private final Direction face;
+    private final boolean wasTurnedToFire;
 
-    public FireConsumeBlockEvent(Level world, BlockPos pos, BlockState state, int chance, int age, Direction face) {
+    public FireConsumeBlockEvent(Level world, BlockPos pos, BlockState state, int chance, int age,
+                                 Direction face, boolean wasTurnedToFire) {
         this.level = world;
         this.pos = pos;
         this.state = state;
         this.age = age;
         this.chance = chance;
         this.face = face;
+        this.wasTurnedToFire = wasTurnedToFire;
+    }
+
+    @Override
+    public boolean wasReplacedByFire() {
+        return wasTurnedToFire;
     }
 
     @Override

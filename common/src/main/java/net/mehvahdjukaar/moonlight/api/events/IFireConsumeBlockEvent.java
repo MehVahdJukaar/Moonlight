@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 public interface IFireConsumeBlockEvent extends SimpleEvent {
 
     @ExpectPlatform
-    static IFireConsumeBlockEvent create(BlockPos pos, Level level, BlockState state, int chance, int age, Direction face ) {
+    static IFireConsumeBlockEvent create(BlockPos pos, Level level, BlockState state, int chance, int age, Direction face, boolean wasReplacedByFire) {
         throw new AssertionError();
     }
 
@@ -26,6 +26,11 @@ public interface IFireConsumeBlockEvent extends SimpleEvent {
     int getAge();
 
     int getChance();
+
+    /**
+     * If a fire block will replace this block
+     */
+    boolean wasReplacedByFire();
 
     void setFinalState(BlockState state);
 

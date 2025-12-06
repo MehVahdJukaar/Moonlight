@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs;
 
+import net.mehvahdjukaar.moonlight.api.events.IFireConsumeBlockEvent;
+
 public enum ConfigType {
     COMMON, COMMON_SYNCED, CLIENT;
 

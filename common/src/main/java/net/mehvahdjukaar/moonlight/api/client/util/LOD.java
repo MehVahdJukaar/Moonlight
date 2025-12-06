@@ -25,8 +25,6 @@ public final class LOD {
     private final Vec3 objCenter;
     private final double distSq; // computed once
 
-    // ---- BACKWARD-COMP: MAX sentinel (as in old API) ----
-    @Deprecated(forRemoval = true)
     public static final LOD MAX = new LOD(0.0);
 
     // ---- New factories ----

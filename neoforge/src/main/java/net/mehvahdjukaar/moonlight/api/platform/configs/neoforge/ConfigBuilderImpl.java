@@ -11,6 +11,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
+import net.mehvahdjukaar.moonlight.neoforge.ConfigHacks;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -37,6 +38,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);
         this.builder = new ModConfigSpec.Builder();
+        ConfigHacks.init();
     }
 
     @Override
