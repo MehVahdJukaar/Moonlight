@@ -1,4 +1,2 @@
-- added more math utilities
-- improved optional holders
-- added openable container class
-- fabric configs support comments
+- fixed an isuse with fire event
+- added height_range_filter

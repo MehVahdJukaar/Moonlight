@@ -70,12 +70,16 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
@@ -132,8 +136,13 @@ public class RegHelper {
         return register(name, instance, Registries.TRIGGER_TYPE);
     }
 
+    @Deprecated(forRemoval = true)
     public static <T extends PlacementModifierType<?>> RegSupplier<T> registerPlacementModifier(ResourceLocation name, Supplier<T> instance) {
         return register(name, instance, Registries.PLACEMENT_MODIFIER_TYPE);
+    }
+
+    public static <T extends PlacementModifier> RegSupplier<PlacementModifierType<T>> registerPlacementModifier(ResourceLocation name, MapCodec<T> codec) {
+        return register(name, () -> () -> codec, Registries.PLACEMENT_MODIFIER_TYPE);
     }
 
     public static <T extends LootPoolEntryContainer> RegSupplier<LootPoolEntryType> registerLootPoolEntry(ResourceLocation name,
@@ -183,7 +192,7 @@ public class RegHelper {
     }
 
 
-    public static Supplier<StructurePoolElementType<SpawnBoxPoolElement>> registerStructurePoolElement(ResourceLocation id, MapCodec<SpawnBoxPoolElement> codec) {
+    public static <T extends StructurePoolElement> Supplier<StructurePoolElementType<T>> registerStructurePoolElement(ResourceLocation id, MapCodec<T> codec) {
         return register(id, () -> () -> codec, Registries.STRUCTURE_POOL_ELEMENT);
     }
 
@@ -191,8 +200,12 @@ public class RegHelper {
         return register(name, () -> pieceType, Registries.STRUCTURE_PIECE);
     }
 
+    public static <T extends StructureProcessor> RegSupplier<StructureProcessorType<T>> registerStructurePiece(ResourceLocation name, MapCodec<T> codec) {
+        return register(name, () -> ()->codec, Registries.STRUCTURE_PROCESSOR);
+    }
+
     public static <T extends StructurePlacement> RegSupplier<StructurePlacementType<T>> registerStructurePlacementType(ResourceLocation name, MapCodec<T> codec) {
-        return register(name, ()-> () -> codec, Registries.STRUCTURE_PLACEMENT);
+        return register(name, () -> () -> codec, Registries.STRUCTURE_PLACEMENT);
     }
 
     public static RegSupplier<StructurePieceType> register(ResourceLocation name, StructurePieceType pieceType) {
@@ -403,6 +416,7 @@ public class RegHelper {
         register(key, () -> instance, MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.key());
         return instance;
     }
+
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
         return register(name, PlatHelper::newSimpleParticle, Registries.PARTICLE_TYPE);
     }
@@ -412,7 +426,7 @@ public class RegHelper {
         return register(name, () -> PlatHelper.newParticle(codec, streamCodec, false), Registries.PARTICLE_TYPE);
     }
 
-    public static  <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
+    public static <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
             ResourceLocation name,
             boolean overrideLimiter,
             Function<ParticleType<T>, MapCodec<T>> codecGetter,

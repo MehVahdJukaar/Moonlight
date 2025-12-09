@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class IFireConsumeBlockEventImpl {
 
-    public static IFireConsumeBlockEvent create(BlockPos pos, Level level, BlockState state, int chance, int age, Direction face){
-        return new FireConsumeBlockEvent(level, pos, state, chance, age, face);
+    public static IFireConsumeBlockEvent create(BlockPos pos, Level level, BlockState state, int chance, int age, Direction face, boolean wasReplacedWithFire){
+        return new FireConsumeBlockEvent(level, pos, state, chance, age, face, wasReplacedWithFire);
     }
 
 

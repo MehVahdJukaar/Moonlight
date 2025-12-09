@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.misc;
+package net.mehvahdjukaar.moonlight.core.worldgen;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -14,6 +14,7 @@ import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 
 import java.util.List;
 
+@Deprecated(forRemoval = true)
 public class CaveFilter extends PlacementFilter {
 
     public static final MapCodec<CaveFilter> CODEC =

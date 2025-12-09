@@ -8,11 +8,7 @@ import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.GrindItemTrigger;
 import net.mehvahdjukaar.moonlight.core.loot.*;
-import net.mehvahdjukaar.moonlight.core.misc.CaveFilter;
-import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxPoolElement;
-import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxBlock;
-import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxBlockEntity;
-import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxStructurePiece;
+import net.mehvahdjukaar.moonlight.core.worldgen.*;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.entity.schedule.Schedule;
@@ -42,7 +38,10 @@ public class MoonlightRegistry {
             RegHelper.registerRegistry(res("world_saved_data_type"), true);
 
     public static final Supplier<PlacementModifierType<CaveFilter>> CAVE_MODIFIER = RegHelper.registerPlacementModifier(
-            res("below_heightmaps"), CaveFilter.Type::new);
+            res("below_heightmaps"), CaveFilter.CODEC);
+
+    public static final Supplier<PlacementModifierType<HeightRangeFilter>> HEIGHT_RANGE = RegHelper.registerPlacementModifier(
+            res("height_range_filter"), HeightRangeFilter.CODEC);
 
     public static final Supplier<BlockPlacerItem> BLOCK_PLACER = RegHelper.registerItem(
             res("placeable_item"), () -> new BlockPlacerItem(

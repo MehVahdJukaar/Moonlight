@@ -312,9 +312,9 @@ public class ResourceSink {
     }
 
     public <T extends BlockType> void addBlockTypeSwapRecipe(ResourceManager manager, ResourceLocation originalRecipeId,
-                                                                               T originalMat, T destinationMat, ResourceLocation baseID) {
+                                                             T originalMat, T destinationMat, ResourceLocation baseID) {
         StaticResource originalResource = StaticResource.getOrThrow(manager,
-               ResType.RECIPES.getPath(originalRecipeId));
+                ResType.RECIPES.getPath(originalRecipeId));
         JsonObject originalJson = originalResource.toJson();
         Recipe<?> originalRecipe = RPUtils.readRecipe(originalJson);
         RecipeHolder<?> newRecipe = RecipeTemplate.makeSimilarRecipe(originalRecipe, originalMat, destinationMat, baseID);
@@ -328,7 +328,7 @@ public class ResourceSink {
                 }
             }
         }
-        this.addJson(newRecipe.id(), newJson, ResType.RECIPES);
+        if (!alreadyHasAssetAtLocation(manager, newRecipe.id())) this.addJson(newRecipe.id(), newJson, ResType.RECIPES);
     }
 
     /**

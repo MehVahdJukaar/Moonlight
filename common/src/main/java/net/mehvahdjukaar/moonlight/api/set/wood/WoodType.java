@@ -132,6 +132,9 @@ public class WoodType extends BlockType {
     public Boat.Type toVanillaBoatOrOak() {
         var v = toVanillaBoat();
         if (v != null) return v;
+        if (this.id.getPath().contains("bamboo")) {
+            return Boat.Type.BAMBOO;
+        }
         return Boat.Type.OAK;
     }
 

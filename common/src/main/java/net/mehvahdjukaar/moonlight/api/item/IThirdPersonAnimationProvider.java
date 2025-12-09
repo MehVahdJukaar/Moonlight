@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.item;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
 import net.minecraft.client.model.HumanoidModel;
@@ -8,6 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+//TODO: turn these into attachment based system so to avoid client-server class issues
 /**
  * Implement in an item to allow it to be displayed with a custom animation using provided method callback
  * Will be called before the item actually gets rendered
@@ -25,6 +28,7 @@ public interface IThirdPersonAnimationProvider {
      * @param mainHand hand side
      * @return True if default animation should be skipped
      */
+    @Environment(value = EnvType.CLIENT)
     <T extends LivingEntity> boolean poseRightArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand);
 
 
@@ -37,12 +41,14 @@ public interface IThirdPersonAnimationProvider {
      * @param mainHand hand side
      * @return True if default animation should be skipped
      */
+    @Environment(value = EnvType.CLIENT)
     <T extends LivingEntity> boolean poseLeftArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand);
 
 
     /**
      * Controls weather the other hand item renders or not
      */
+    @Environment(value = EnvType.CLIENT)
     default boolean isTwoHanded() {
         return false;
     }
