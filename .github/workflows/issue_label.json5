@@ -1,0 +1,23 @@
+{
+  labelsSynonyms: {
+    "1.21.1": ["1.21.1"],
+    "1.21": ["1.21", "1.21.0"],
+    "1.20.4": ["1.20.4"],
+    "1.20.1": ["1.20.1"],
+    "1.19.2": ["1.19.2"],
+    "FABRIC": ["FABRIC"],
+    "FORGE": ["FORGE"],
+    "NEOFORGE": ["NEOFORGE"],
+    "server": ["server", "Server"],
+    "not related": ["not my issue", "report there"]
+  },
+  labelsNotAllowed: [
+    'duplicate',
+    'help wanted',
+    'invalid',
+    'details',
+    'Supplementaries',
+    'EveryCompat'
+  ]
+  //defaultLabels: ['bug']
+}
