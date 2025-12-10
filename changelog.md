@@ -1,2 +1,1 @@
-- backported recent fixes..
-- ..and some new changes like the global datapack folder
+- fixed an issue with fabric post shaders registration

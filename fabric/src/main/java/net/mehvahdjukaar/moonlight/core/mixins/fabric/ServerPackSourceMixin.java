@@ -16,21 +16,9 @@ import java.util.HashSet;
 @Mixin(ServerPacksSource.class)
 public abstract class ServerPackSourceMixin {
 
-    @ModifyReturnValue(method = "createVanillaTrustedRepository",
+    @ModifyReturnValue(method = "createPackRepository(Ljava/nio/file/Path;)Lnet/minecraft/server/packs/repository/PackRepository;",
             at = @At(value = "RETURN"))
     private static PackRepository ml$addExtraDatapacks(PackRepository original) {
-
-        if (original instanceof PackRepositoryAccessor pa) {
-            HashSet<RepositorySource> sources = new HashSet<>(pa.getSources());
-            sources.addAll(MoonlightFabric.EXTRA_DATA_PACK_SOURCES);
-            pa.setSources(sources);
-        }
-        return original;
-    }
-
-    @ModifyReturnValue(method = "createPackRepository(Ljava/nio/file/Path;Lnet/minecraft/world/level/validation/DirectoryValidator;)Lnet/minecraft/server/packs/repository/PackRepository;",
-            at = @At(value = "RETURN"))
-    private static PackRepository ml$addExtraDatapacks2(PackRepository original) {
 
         if (original instanceof PackRepositoryAccessor pa) {
             HashSet<RepositorySource> sources = new HashSet<>(pa.getSources());

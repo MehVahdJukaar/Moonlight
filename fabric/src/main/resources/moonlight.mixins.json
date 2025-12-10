@@ -31,6 +31,7 @@
     "MappedRegistryAccessor",
     "MenuTypeAccessor",
     "MinecraftServerMixin",
+    "NonsenseMixin",
     "PackRepositoryAccessor",
     "PoiTypeAccessor",
     "ServerPackSourceMixin",

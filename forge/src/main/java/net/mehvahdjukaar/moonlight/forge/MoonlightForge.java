@@ -13,6 +13,7 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
@@ -54,7 +55,6 @@ public class MoonlightForge {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init();
         }
-
         PlatHelper.addCommonSetup(() -> {
             if (ModList.get().isLoaded("fabric_api")) {
                 List<IModInfo> modsThatHaveFabric = new ArrayList<>();
