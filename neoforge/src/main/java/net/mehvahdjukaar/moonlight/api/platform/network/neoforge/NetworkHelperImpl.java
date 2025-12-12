@@ -1,11 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.platform.network.neoforge;
 
-import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketFlow;
@@ -14,11 +12,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.HandlerThread;
-import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
 import java.util.function.Consumer;
 
@@ -103,6 +101,10 @@ public class NetworkHelperImpl {
 
     public static void sendToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
         PacketDistributor.sendToPlayersTrackingEntity(target, message);
+    }
+
+    public static void sendToAllClientPlayersTrackingChunk(ServerLevel level, ChunkPos pos, CustomPacketPayload message) {
+        PacketDistributor.sendToPlayersTrackingChunk(level, pos, message);
     }
 
     public static void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {

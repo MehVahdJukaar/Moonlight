@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
@@ -71,6 +72,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -465,6 +467,12 @@ public class Utils {
                     Vec3.CODEC.fieldOf("to").forGetter(AABB::getMaxPosition)
             ).apply(i, AABB::new)
     );
+
+
+    public static <A> Codec<List<A>> lenientListOrSingleCodec(final Codec<A> elementCodec) {
+        return Codec.either(Utils.lenientListCodec(elementCodec), elementCodec)
+                .xmap(either -> either.map(Function.identity(), List::of), Either::left);
+    }
 
     /**
      * Like listOf but won't fail for missing entries.

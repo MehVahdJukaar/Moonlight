@@ -411,8 +411,15 @@ public class RegHelper {
 
     public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
             ResourceLocation key, Function<ServerLevel, A> constructor,
-            Codec<A> codec, @Nullable StreamCodec<RegistryFriendlyByteBuf, A> networkCodec) {
-        WorldSavedDataType<A> instance = new WorldSavedDataType<>(key, constructor, codec, networkCodec);
+            Codec<A> codec, @Nullable StreamCodec<? super RegistryFriendlyByteBuf, A> networkCodec) {
+        return registerWorldSavedData(key, constructor, codec, networkCodec, false);
+    }
+
+    public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
+            ResourceLocation key, Function<ServerLevel, A> constructor,
+            Codec<A> codec, @Nullable StreamCodec<? super RegistryFriendlyByteBuf, A> networkCodec,  boolean perLevel) {
+        WorldSavedDataType<A> instance = new WorldSavedDataType<>(key, constructor, codec, networkCodec,
+                perLevel ? WorldSavedDataType.Scope.PER_LEVEL : WorldSavedDataType.Scope.SINGLE_OVERWORLD);
         register(key, () -> instance, MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.key());
         return instance;
     }

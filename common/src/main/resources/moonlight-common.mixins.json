@@ -23,6 +23,7 @@
     "DebugPacketsMixin",
     "EntityMixin",
     "FixBlockPlaceContextMixin",
+    "GrindstoneMenuMixin",
     "GrindstoneMenuSlotMixin",
     "HoldingPlayerMixin",
     "InventoryMixin",

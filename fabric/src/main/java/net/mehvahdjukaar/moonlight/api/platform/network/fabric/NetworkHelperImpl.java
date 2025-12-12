@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.network.fabric;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.mehvahdjukaar.moonlight.api.misc.WorldSavedData;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
@@ -16,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -129,5 +131,13 @@ public class NetworkHelperImpl {
 
     public static void sendToServer(CustomPacketPayload message) {
         ClientPlayNetworking.send(message);
+    }
+
+    public static void sendToAllClientPlayersTrackingChunk(ServerLevel level, ChunkPos pos, CustomPacketPayload message) {
+        for (Player player : level.getChunkSource().chunkMap.getPlayers(pos, false)) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                sendToClientPlayer(serverPlayer, message);
+            }
+        }
     }
 }

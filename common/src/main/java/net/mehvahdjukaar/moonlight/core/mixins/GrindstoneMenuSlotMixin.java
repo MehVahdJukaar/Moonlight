@@ -13,9 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = {"net.minecraft.world.inventory.GrindstoneMenu$4"})
 public abstract class GrindstoneMenuSlotMixin {
 
-    @Inject(method = {"onTake"}, at = @At("RETURN"))
+    @Inject(method = {"onTake"}, at = @At("HEAD"))
     private void onTake(Player player, ItemStack stack, CallbackInfo ci) {
-        if(player instanceof ServerPlayer serverPlayer)
+        if (player instanceof ServerPlayer serverPlayer)
             MoonlightRegistry.GRIND_TRIGGER.get().trigger(serverPlayer, stack.copy());
     }
 

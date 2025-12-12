@@ -6,11 +6,13 @@ import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
+import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.pack.*;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
+import net.mehvahdjukaar.moonlight.core.client.SimpleSpecialModelsLoader;
 import net.mehvahdjukaar.moonlight.core.client.SpawnBoxBlockEntityRenderer;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
@@ -54,6 +56,12 @@ public class MoonlightClient {
         ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluid"));
         ClientHelper.addBlockEntityRenderersRegistration(event -> {
             event.register(MoonlightRegistry.SPAWN_BOX_BLOCK_ENTITY.get(), SpawnBoxBlockEntityRenderer::new);
+        });
+
+        var specialModels = new SimpleSpecialModelsLoader();
+        ClientHelper.addClientReloadListener(() -> specialModels, Moonlight.res("special_models_loader"));
+        ClientHelper.addSpecialModelRegistration(specialModelEvent -> {
+            specialModels.getSpecialModels().forEach(specialModelEvent::register);
         });
 
         RegHelper.registerDynamicResourceProvider(new MLDynamicClientResources());

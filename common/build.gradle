@@ -15,6 +15,18 @@ sourceSets.create("example"){
     runtimeClasspath += main.runtimeClasspath + main.output
 }
 
+publishing {
+    publications {
+        mavenCommon(MavenPublication) {
+            artifactId = rootProject.mod_id
+            from components.java
+        }
+    }
+
+    repositories {
+        // Add repositories to publish to here.
+    }
+}
 
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
@@ -34,15 +46,3 @@ dependencies {
 
 }
 
-publishing {
-    publications {
-        mavenCommon(MavenPublication) {
-            artifactId = rootProject.mod_id
-            from components.java
-        }
-    }
-
-    repositories {
-        // Add repositories to publish to here.
-    }
-}

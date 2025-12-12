@@ -32,7 +32,7 @@ public class ClientBoundSyncWorldDataMessage<D extends WorldSavedData> implement
     public void write(RegistryFriendlyByteBuf buf) {
         WorldSavedDataType<WorldSavedData> type = (WorldSavedDataType<WorldSavedData>) this.data.getType();
         WorldSavedDataType.STREAM_CODEC.encode(buf, type);
-        Preconditions.checkNotNull(type.getStreamCodec()).encode(buf, this.data);
+        Preconditions.checkNotNull(type.getStreamCodec(), "tried to encode a non serializable saved data").encode(buf, this.data);
     }
 
     @Override

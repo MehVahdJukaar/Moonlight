@@ -1,0 +1,7 @@
+{
+  "id": "minecraft:stained_glass_pane",
+  "colors": {
+    "default": "minecraft:glass_pane"
+  },
+  "replace": false
+}

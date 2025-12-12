@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.mehvahdjukaar.moonlight.core.criteria_triggers.GrindItemTrigger;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.ArmedModel;

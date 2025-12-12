@@ -210,6 +210,8 @@ public class ClientHelper {
         void register(ResourceLocation id);
     }
 
+    //Use the "special_models" folder instead since that's auto loaded
+    @Deprecated
     @ExpectPlatform
     public static void addSpecialModelRegistration(Consumer<SpecialModelEvent> eventListener) {
         throw new AssertionError();

@@ -102,15 +102,15 @@ public class Moonlight {
             MoonlightClient.initClient();
         }
 
-        RegHelper.addItemsToTabsRegistration(event -> {
-            if (event.getTab().hasAnyItems()) {
-                event.add(CreativeModeTabs.OP_BLOCKS, MoonlightRegistry.SPAWN_BOX_BLOCK.get());
-            }
-        });
-
         //dumb. ensure stuff registered
         BlockSetAPI.addDynamicRegistration(Moonlight.MOD_ID, r -> {
         }, BuiltInRegistries.BLOCK);
+
+        RegHelper.addItemsToTabsRegistration(event -> {
+            if (event.getTab().hasAnyItems()) {
+                event.addAfter(CreativeModeTabs.OP_BLOCKS,  i -> i.is(Items.JIGSAW), MoonlightRegistry.SPAWN_BOX_BLOCK.get());
+            }
+        });
     }
 
     private static void addGlobalDatapackLoader() {
@@ -132,7 +132,7 @@ public class Moonlight {
 
     private static void commonSetup() {
 
-        BlocksColorInternal.setup();
+        BlocksColorInternal.INSTANCE.setup();
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.setupClient();
         }
@@ -172,7 +172,9 @@ public class Moonlight {
         Level world = player.level();
         for (var type : MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY) {
             WorldSavedData data = type.getData(world);
-            NetworkHelper.sendToClientPlayer(player, new ClientBoundSyncWorldDataMessage<>(data));
+            if (data.getType().isSyncable()) {
+                NetworkHelper.sendToClientPlayer(player, new ClientBoundSyncWorldDataMessage<>(data));
+            }
         }
     }
 

@@ -1,2 +1,4 @@
 - fixed an isuse with fire event
 - added height_range_filter
+- color api is now data driven
+- added a models/special_models folder that will automatically load all models thown in it
