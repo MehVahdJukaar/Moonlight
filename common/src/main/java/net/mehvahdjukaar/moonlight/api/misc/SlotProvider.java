@@ -50,6 +50,9 @@ public interface SlotProvider {
                 @Override
                 public boolean add(ItemStack toAdd, Inventory inv, Player player) {
                     ItemStack current = getStack();
+                    if (current.isEmpty()){
+                        inv.setItem(slot, toAdd);
+                    }
                     //vanilla doesn't do this for some reason... calling add alone will just incrememnt the count of an existing item
                     if (!current.isEmpty() && !inv.hasRemainingSpaceForItem(current, toAdd)) return false;
 
@@ -89,29 +92,31 @@ public interface SlotProvider {
 
                 //copied from Inventory.addResource but for offhand
                 @Override
-                public boolean add(ItemStack stack, Inventory inv, Player player) {
-                    if (stack.isEmpty()) {
+                public boolean add(ItemStack toAdd, Inventory inv, Player player) {
+                    ItemStack stackInSlot = getStack();
+                    if (stackInSlot.isEmpty()) {
+                        inv.offhand.set(offHandSlot, toAdd);
+                        return true;
+                    }
+                    //vanilla doesn't do this for some reason... calling add alone will just incrememnt the count of an existing item
+                    if (!stackInSlot.isEmpty() && !inv.hasRemainingSpaceForItem(stackInSlot, toAdd)) return false;
+                    if (toAdd.isEmpty()) {
                         return false;
                     } else {
                         try {
                             int originalCount;
                             do {
-                                originalCount = stack.getCount();
-                                addResourceOffHand(stack, inv);
-                            } while (!stack.isEmpty() && stack.getCount() < originalCount);
+                                originalCount = toAdd.getCount();
+                                addResourceOffHand(toAdd, inv);
+                            } while (!toAdd.isEmpty() && toAdd.getCount() < originalCount);
 
-                            if (stack.getCount() == originalCount && player.getAbilities().instabuild) {
-                                stack.setCount(0);
-                                return true;
-                            } else {
-                                return stack.getCount() < originalCount;
-                            }
+                            return toAdd.getCount() < originalCount;
                         } catch (Throwable var6) {
                             CrashReport crashReport = CrashReport.forThrowable(var6, "Adding item to inventory");
                             CrashReportCategory crashReportCategory = crashReport.addCategory("Item being added");
-                            crashReportCategory.setDetail("Item ID", Item.getId(stack.getItem()));
-                            crashReportCategory.setDetail("Item data", stack.getDamageValue());
-                            crashReportCategory.setDetail("Item name", () -> stack.getHoverName().getString());
+                            crashReportCategory.setDetail("Item ID", Item.getId(toAdd.getItem()));
+                            crashReportCategory.setDetail("Item data", toAdd.getDamageValue());
+                            crashReportCategory.setDetail("Item name", () -> toAdd.getHoverName().getString());
                             throw new ReportedException(crashReport);
                         }
                     }

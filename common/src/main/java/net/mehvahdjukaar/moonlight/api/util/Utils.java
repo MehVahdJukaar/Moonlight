@@ -78,8 +78,13 @@ import java.util.function.Supplier;
 
 public class Utils {
 
-    // orchestrator for opening block entity GUIs with claim checks
+    @Deprecated(forRemoval = true)
     public static boolean openGuiIfPossible(BlockEntity be, ServerPlayer player, ItemStack stack, Direction hitFace) {
+        return openGuiIfPossible(be, player, stack, hitFace, new Vec3(0.5, 0.5, 0.5));
+    }
+
+    // orchestrator for opening block entity GUIs with claim checks
+    public static boolean openGuiIfPossible(BlockEntity be, ServerPlayer player, ItemStack stack, Direction hitFace, Vec3 hitPos) {
         //this is likely not needed
         BlockPos pos = be.getBlockPos();
         if (!Utils.mayPerformBlockAction(player, pos, stack)) {
@@ -92,7 +97,7 @@ public class Utils {
             if (be instanceof IOneUserInteractable ci) {
                 ci.setCurrentUser(player.getUUID());
             }
-            sp.sendOpenGuiPacket(player, hitFace);
+            sp.sendOpenGuiPacket(player, hitFace, hitPos);
             return false;
         }
         if (be instanceof MenuProvider mp) {

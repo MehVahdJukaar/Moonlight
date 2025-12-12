@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public class SpawnBoxBlockEntity extends BlockEntity implements IScreenProvider {
     private BlockPos boxOffset = new BlockPos(0, 1, 0);
@@ -119,7 +120,7 @@ public class SpawnBoxBlockEntity extends BlockEntity implements IScreenProvider 
     }
 
     @Override
-    public void openScreen(Level level, Player player, Direction direction) {
+    public void openScreen(Level level, Player player, Direction direction, Vec3 hitPos) {
         SpawnBoxScreen.open(this);
     }
 

@@ -9,6 +9,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -19,21 +20,25 @@ public class ClientBoundOpenScreenMessage implements Message {
 
     public final TileOrEntityTarget target;
     private final Direction dir;
+    private final Vec3 hit;
 
     public ClientBoundOpenScreenMessage(RegistryFriendlyByteBuf buffer) {
         this.target = TileOrEntityTarget.read(buffer);
         this.dir = Direction.from3DDataValue(buffer.readVarInt());
+        this.hit = buffer.readVec3();
     }
 
-    public ClientBoundOpenScreenMessage(TileOrEntityTarget target, @Nullable Direction hitFace) {
+    public ClientBoundOpenScreenMessage(TileOrEntityTarget target, @Nullable Direction hitFace, Vec3 hitPos) {
         this.target = target;
         this.dir = hitFace == null ? Direction.UP : hitFace;
+        this.hit = hitPos;
     }
 
     @Override
     public void write(RegistryFriendlyByteBuf buffer) {
         this.target.write(buffer);
         buffer.writeVarInt(this.dir.get3DDataValue());
+        buffer.writeVec3(this.hit);
     }
 
     @Override
@@ -42,7 +47,7 @@ public class ClientBoundOpenScreenMessage implements Message {
         Level level = player.level();
 
         if (this.target.getTarget(level) instanceof IScreenProvider tile) {
-            tile.openScreen(level, player, this.dir);
+            tile.openScreen(level, player, this.dir, this.hit);
         }
     }
 

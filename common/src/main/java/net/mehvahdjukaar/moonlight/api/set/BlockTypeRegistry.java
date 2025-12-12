@@ -103,6 +103,13 @@ public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T>
         return valuesReg.getValue(res);
     }
 
+    public T getOrDefault(ResourceLocation res) {
+        if (!frozen && (!isBeingFrozenHack || PlatHelper.isDev())) {
+            throw new AssertionError("Tried to get an object from block set registry before the registry was finalized.");
+        }
+        return valuesReg.getValueOrDefault(res, this.getDefaultType());
+    }
+
     public ResourceLocation getKey(T input) {
         return valuesReg.getKey(input);
     }

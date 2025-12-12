@@ -134,7 +134,11 @@ public final class LOD {
 
     public boolean isPlaneCulled(Direction facing, float offset, float cosTolerance) {
         Vector3f normal = facing.step();
-        return isPlaneCulled(new Vec3(normal), new Vec3(normal.mul(offset)), cosTolerance);
+        return isPlaneCulled(new Vec3(normal), offset, cosTolerance);
+    }
+
+    public boolean isPlaneCulled(Vec3 planeNormal, float offset, float cosTolerance) {
+        return isPlaneCulled(planeNormal, planeNormal.scale(offset), cosTolerance);
     }
 
     public boolean isPlaneCulled(Direction facing, float offset) {

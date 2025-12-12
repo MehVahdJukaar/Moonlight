@@ -31,7 +31,7 @@ public class SpawnBoxBlock extends Block implements EntityBlock, GameMasterBlock
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof SpawnBoxBlockEntity be && player.canUseGameMasterBlocks()) {
             if (player instanceof ServerPlayer serverPlayer) {
-                be.sendOpenGuiPacket(serverPlayer, hitResult.getDirection());
+                be.sendOpenGuiPacket(serverPlayer, hitResult.getDirection(), hitResult.getLocation());
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         } else {

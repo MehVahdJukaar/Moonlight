@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -60,14 +61,19 @@ public interface IOnePlayerInteractable {
         return player.canInteractWithBlock(myPos, 8);
     }
 
+    @Deprecated(forRemoval = true)
     default boolean tryOpeningEditGui(ServerPlayer player, BlockPos pos, ItemStack stack, Direction hitFace) {
+        return tryOpeningEditGui(player, pos, stack, hitFace, new Vec3(0.5, 0.5, 0.5));
+    }
+
+    default boolean tryOpeningEditGui(ServerPlayer player, BlockPos pos, ItemStack stack, Direction hitFace, Vec3 hitPos) {
         //this is likely not needed
         if (Utils.mayPerformBlockAction(player, pos, stack) && !this.isOtherPlayerEditing(pos, player)) {
             // open gui (edit sign with empty hand)
             this.setPlayerWhoMayEdit(player.getUUID());
 
             if (this instanceof IScreenProvider sp) {
-                sp.sendOpenGuiPacket(player, hitFace);
+                sp.sendOpenGuiPacket(player, hitFace, hitPos);
                 return false;
             }
             if (this instanceof MenuProvider mp && this instanceof BlockEntity be) {

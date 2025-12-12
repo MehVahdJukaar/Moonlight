@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -10,6 +8,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -75,78 +74,85 @@ public class TextUtil {
     }
 
 
+    @Deprecated(forRemoval = true)
+    public static void renderGuiLine(RenderProperties properties, String string, Font font, GuiGraphics graphics,
+                                     MultiBufferSource.BufferSource buffer,
+                                     int cursorPos, int selectionPos, boolean isSelected, boolean blink, int yOffset) {
+        renderGuiLine(properties, string, font, graphics, cursorPos, selectionPos,
+                isSelected, blink, yOffset, font.lineHeight);
+    }
+
+
     /**
      * Render a line in a GUI
      */
     public static void renderGuiLine(RenderProperties properties, String string, Font font, GuiGraphics graphics,
-                                     MultiBufferSource.BufferSource buffer,
-                                     int cursorPos, int selectionPos, boolean isSelected, boolean blink, int yOffset) {
+                                     int cursorPos, int selectionPos, boolean isSelected, boolean blink, int yOffset,
+                                     int textLineHeight) {
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
-        Matrix4f matrix4f = poseStack.last().pose();
+
+        int textColor = properties.textColor;
+        int twoTextLineHeight = 2 * textLineHeight;
+
 
         if (string != null) {
+            int strWidth = font.width(string);
+            int centerStr = strWidth - strWidth / 2;
+
             if (font.isBidirectional()) {
                 string = font.bidirectionalShaping(string);
             }
-            //int centerX = (-font.width(string) / 2);
 
-            FormattedCharSequence charSequence = FormattedCharSequence.forward(string, properties.style);
-            float centerX = -font.width(charSequence) / 2f;
-            renderLineInternal(charSequence, font, centerX, yOffset, matrix4f, buffer, properties);
+            float centerX = -font.width(string) / 2f;
+            graphics.drawString(font, string, (int) centerX, yOffset, textColor, false);
 
-            String substring = string.substring(0, Math.min(cursorPos, string.length()));
             if (isSelected) {
-
-                int pX = (int) (font.width(FormattedCharSequence.forward(substring, properties.style)) + centerX);
-
                 if (blink) {
                     if (cursorPos >= string.length()) {
-                        renderLineInternal(CURSOR_MARKER, font, pX, yOffset, matrix4f, buffer, properties);
+                        graphics.drawString(font, "_", centerStr, yOffset, textColor, false);
                     }
-                    buffer.endBatch();
                 }
+
 
                 //highlight
                 if (blink && cursorPos < string.length()) {
-                    graphics.fill(pX, yOffset - 1, pX + 1, yOffset + 9, -16777216 | properties.textColor);
+                    graphics.fill(centerStr, yOffset - 1, centerStr + 1, yOffset + textLineHeight, 0xFF000000 | textColor);
                 }
 
                 if (selectionPos != cursorPos) {
-                    int l3 = Math.min(cursorPos, selectionPos);
-                    int l1 = Math.max(cursorPos, selectionPos);
-                    int i2 = font.width(string.substring(0, l3)) - font.width(string) / 2;
-                    int j2 = font.width(string.substring(0, l1)) - font.width(string) / 2;
-                    int startX = Math.min(i2, j2);
-                    int startY = Math.max(i2, j2);
-
-
-                    RenderSystem.enableColorLogicOp();
-                    RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-                    graphics.fill(startX, startY, yOffset, (yOffset + 9), -16776961);
-                    RenderSystem.disableColorLogicOp();
-
+                    int minC = Math.min(cursorPos, selectionPos);
+                    int maxC = Math.max(cursorPos, selectionPos);
+                    int s = font.width(string.substring(0, minC)) - strWidth / 2;
+                    int t = font.width(string.substring(0, maxC)) - strWidth / 2;
+                    int startX = Math.min(s, t);
+                    int v = Math.max(s, t);
+                    graphics.fill(RenderType.guiTextHighlight(), startX, yOffset, v, yOffset + textLineHeight, -16776961);
                 }
             }
-            if (!(isSelected && blink)) {
-                buffer.endBatch();
-            }
         }
+    }
+
+    @Deprecated(forRemoval = true)
+    public static void renderGuiText(RenderProperties properties, String[] guiLines, Font font, GuiGraphics graphics,
+                                     MultiBufferSource.BufferSource buffer,
+                                     int cursorPos, int selectionPos, int currentLine, boolean blink, int lineSpacing) {
+        renderGuiText(properties, guiLines, font, graphics,
+                cursorPos, selectionPos, currentLine, blink, lineSpacing);
     }
 
     /**
      * Renders multiple lines in a GUI
      */
     public static void renderGuiText(RenderProperties properties, String[] guiLines, Font font, GuiGraphics graphics,
-                                     MultiBufferSource.BufferSource buffer,
                                      int cursorPos, int selectionPos, int currentLine, boolean blink, int lineSpacing) {
 
         int nOfLines = guiLines.length;
 
         for (int line = 0; line < nOfLines; ++line) {
             int yOffset = line * lineSpacing - nOfLines * 5;
-            renderGuiLine(properties, guiLines[line], font, graphics, buffer, cursorPos, selectionPos,
-                    line == currentLine, blink, yOffset);
+            renderGuiLine(properties, guiLines[line], font, graphics, cursorPos, selectionPos,
+                    line == currentLine, blink, yOffset, lineSpacing);
         }
     }
 
@@ -170,6 +176,7 @@ public class TextUtil {
         }
     }
 
+    @Deprecated(forRemoval = true)
     private static void renderLineInternal(FormattedCharSequence formattedCharSequences, Font font, float xOffset, float yOffset,
                                            Matrix4f matrix4f, MultiBufferSource buffer, RenderProperties properties) {
         if (properties.outline) {
