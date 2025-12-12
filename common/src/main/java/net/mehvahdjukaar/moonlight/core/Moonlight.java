@@ -100,6 +100,16 @@ public class Moonlight {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.initClient();
         }
+
+        //dumb. ensure stuff registered
+        BlockSetAPI.addDynamicRegistration(Moonlight.MOD_ID, r -> {
+        }, BuiltInRegistries.BLOCK);
+
+        RegHelper.addItemsToTabsRegistration(event -> {
+            if (event.getTab().hasAnyItems()) {
+                event.addAfter(CreativeModeTabs.OP_BLOCKS,  i -> i.is(Items.JIGSAW), MoonlightRegistry.SPAWN_BOX_BLOCK.get());
+            }
+        });
     }
 
     private static void addGlobalDatapackLoader() {
@@ -119,7 +129,7 @@ public class Moonlight {
     }
 
     private static void commonSetup() {
-        BlocksColorInternal.setup();
+        BlocksColorInternal.INSTANCE.setup();
 
         if (PlatHelper.isDev()) {
             //MixinEnvironment.getCurrentEnvironment().audit();
@@ -148,6 +158,14 @@ public class Moonlight {
                 }
                 i++;
             }
+        }
+    }
+
+    @EventCalled
+    public static void onDataSyncToPlayer(ServerPlayer player, boolean joined) {
+        //send syncing packets just on login. datapack registries don't change on reload
+        if (joined) {
+            SoftFluidInternal.onDataSyncToPlayer(player, true);
         }
     }
 

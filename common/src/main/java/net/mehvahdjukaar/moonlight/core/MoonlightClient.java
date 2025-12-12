@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientManager;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
+import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
@@ -14,6 +15,11 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
+import net.mehvahdjukaar.moonlight.core.client.SimpleSpecialModelsLoader;
+import net.mehvahdjukaar.moonlight.core.client.SpawnBoxBlockEntityRenderer;
+import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
+import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -33,12 +39,21 @@ public class MoonlightClient {
     private static MergedDynamicTexturePack mergedDynamicPack;
 
     public static void initClient() {
+        ClientConfigs.init();
         ClientHelper.addShaderRegistration(MoonlightClient::registerShaders);
         ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluids"));
         ClientHelper.addClientReloadListener(MapDecorationClientManager::new, Moonlight.res("map_markers"));
-        ClientConfigs.init();
-        var gen = new Gen();
-        gen.register();
+       // var gen = new Gen();
+      //  gen.register();
+
+        var specialModels = new SimpleSpecialModelsLoader();
+        ClientHelper.addClientReloadListener(() -> specialModels, Moonlight.res("special_models_loader"));
+        ClientHelper.addSpecialModelRegistration(specialModelEvent -> {
+            specialModels.getSpecialModels().forEach(specialModelEvent::register);
+        });
+
+        RegHelper.registerDynamicResourceProvider(new MLDynamicClientResources());
+
     }
 
 

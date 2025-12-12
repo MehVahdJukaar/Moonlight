@@ -21,6 +21,7 @@
     "BlockItemMixin",
     "EntityMixin",
     "FixBlockPlaceContextMixin",
+    "GrindstoneMenuMixin",
     "GrindstoneMenuSlotMixin",
     "HoldingPlayerMixin",
     "InventoryMixin",

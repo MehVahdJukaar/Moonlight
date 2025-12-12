@@ -1,0 +1,7 @@
+{
+  "id": "suppsquared:sack",
+  "colors": {
+    "default": "supplementaries:sack"
+  },
+  "replace": false
+}

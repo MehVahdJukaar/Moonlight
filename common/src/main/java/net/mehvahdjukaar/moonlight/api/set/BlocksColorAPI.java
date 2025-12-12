@@ -17,22 +17,22 @@ public class BlocksColorAPI {
 
     @Nullable
     public static DyeColor getColor(Block block) {
-        return BlocksColorInternal.getColor(block);
+        return BlocksColorInternal.INSTANCE.getColor(block);
     }
 
     @Nullable
     public static DyeColor getColor(Item item) {
-        return BlocksColorInternal.getColor(item);
+        return BlocksColorInternal.INSTANCE.getColor(item);
     }
 
     @Nullable
     public static Item getColoredItem(String key, @Nullable DyeColor color) {
-        return BlocksColorInternal.getColoredItem(key, color);
+        return BlocksColorInternal.INSTANCE.getColoredItem(key, color);
     }
 
     @Nullable
     public static Block getColoredBlock(String key, @Nullable DyeColor color) {
-        return BlocksColorInternal.getColoredBlock(key, color);
+        return BlocksColorInternal.INSTANCE.getColoredBlock(key, color);
     }
 
     public static boolean isDefaultColor(Block block) {
@@ -54,7 +54,7 @@ public class BlocksColorAPI {
      */
     @Nullable
     public static Block changeColor(Block old, @Nullable DyeColor newColor) {
-        return BlocksColorInternal.changeColor(old, newColor);
+        return BlocksColorInternal.INSTANCE.changeColor(old, newColor);
     }
 
     /**
@@ -64,31 +64,31 @@ public class BlocksColorAPI {
      */
     @Nullable
     public static Item changeColor(Item old, @Nullable DyeColor newColor) {
-        return BlocksColorInternal.changeColor(old, newColor);
+        return BlocksColorInternal.INSTANCE.changeColor(old, newColor);
     }
 
     @Nullable
     public static String getKey(Block block) {
-        return BlocksColorInternal.getKey(block);
+        return BlocksColorInternal.INSTANCE.getKey(block);
     }
 
     @Nullable
     public static String getKey(Item item) {
-        return BlocksColorInternal.getKey(item);
+        return BlocksColorInternal.INSTANCE.getKey(item);
     }
 
     /**
      * @return all the possible keys which can be used to access the colored block groups
      */
     public static Set<String> getBlockKeys() {
-        return BlocksColorInternal.getBlockKeys();
+        return BlocksColorInternal.INSTANCE.getBlockKeys();
     }
 
     /**
      * @return all the possible keys which can be used to access the colored item groups
      */
     public static Set<String> getItemKeys() {
-        return BlocksColorInternal.getItemKeys();
+        return BlocksColorInternal.INSTANCE.getItemKeys();
     }
 
     /**
@@ -100,7 +100,7 @@ public class BlocksColorAPI {
      */
     @Nullable
     public static HolderSet<Block> getBlockHolderSet(String key) {
-        return BlocksColorInternal.getBlockHolderSet(key);
+        return BlocksColorInternal.INSTANCE.getBlockHolderSet(key);
     }
 
     /**
@@ -112,19 +112,19 @@ public class BlocksColorAPI {
      */
     @Nullable
     public static HolderSet<Item> getItemHolderSet(String key) {
-        return BlocksColorInternal.getItemHolderSet(key);
+        return BlocksColorInternal.INSTANCE.getItemHolderSet(key);
     }
 
 
     /**
      * Registers or override a color set if not already detected
      */
+    @Deprecated(forRemoval = true)
     public static void registerBlockColorSet(ResourceLocation key, EnumMap<DyeColor, Block> blocks, @Nullable Block defaultBlock) {
-        BlocksColorInternal.registerBlockColorSet(key, blocks, defaultBlock);
     }
 
+    @Deprecated(forRemoval = true)
     public static void registerItemColorSet(ResourceLocation key, EnumMap<DyeColor, Item> items, @Nullable Item defaultItem) {
-        BlocksColorInternal.registerItemColorSet(key, items, defaultItem);
     }
 
     public static final List<DyeColor> SORTED_COLORS = Util.make(() -> {

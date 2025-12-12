@@ -1,0 +1,7 @@
+{
+  "id": "quark:rune",
+  "colors": {
+    "default": "quark:blank_rune"
+  },
+  "replace": false
+}

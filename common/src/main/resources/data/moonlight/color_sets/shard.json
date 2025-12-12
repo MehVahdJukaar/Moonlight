@@ -1,0 +1,7 @@
+{
+  "id": "quark:shard",
+  "colors": {
+    "default": "quark:clear_shard"
+  },
+  "replace": false
+}
