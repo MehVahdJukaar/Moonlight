@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+//TODO: finish these in 1.22
 public interface ItemRenderExtension {
 
     @Nullable
@@ -52,8 +53,6 @@ public interface ItemRenderExtension {
                                           MultiBufferSource buffer, int light, ItemInHandRenderer renderer) {
         return false;
     }
-
-    ;
 
     /**
      * animate right hand

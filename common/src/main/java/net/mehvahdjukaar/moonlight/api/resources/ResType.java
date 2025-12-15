@@ -10,6 +10,7 @@ public enum ResType {
     LOOT_TABLES("loot_table/%s.json"),
     BLOCK_LOOT_TABLES("loot_table/blocks/%s.json"),
     RECIPES("recipe/%s.json"),
+    ENCHANTMENTS("enchantment/%s.json"),
     ADVANCEMENTS("advancement/%s.json"),
     CONFIGURED_FEATURES("worldgen/configured_feature/%s.json"),
     STRUCTURE("worldgen/structure/%s.json"),

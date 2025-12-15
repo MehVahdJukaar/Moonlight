@@ -29,6 +29,10 @@ public class SimpleTagBuilder extends TagBuilder {
         return id;
     }
 
+    public String getTagString() {
+        return "#" + id.toString();
+    }
+
     public static SimpleTagBuilder of(ResourceLocation location) {
         return new SimpleTagBuilder(location);
     }
@@ -52,6 +56,14 @@ public class SimpleTagBuilder extends TagBuilder {
             return super.add(entry);
         }
         return this;
+    }
+
+    public SimpleTagBuilder add(String str) {
+        if (str.startsWith("#")) {
+            return this.addTag(ResourceLocation.parse(str.substring(1)));
+        } else {
+            return this.add(ResourceLocation.parse(str));
+        }
     }
 
     public SimpleTagBuilder add(ResourceLocation entry) {
@@ -111,6 +123,10 @@ public class SimpleTagBuilder extends TagBuilder {
     }
 
     public SimpleTagBuilder addEntry(Object entry) {
+        if (entry instanceof ResourceLocation rl) {
+            this.add(rl);
+            return this;
+        }
         this.add(Utils.getID(entry));
         return this;
     }

@@ -436,6 +436,8 @@ public class Utils {
         return null;
     }
 
+    public static final Codec<Boolean> MOD_LOADED_CODEC = Codec.STRING.xmap(PlatHelper::isModLoaded, b -> "");
+
     public static <A> MapCodec<A> safeOptFieldOf(Codec<A> c, String name, Supplier<A> defaultValue) {
         return Codec.optionalField(name, c, false).xmap(
                 (o) -> o.orElse(defaultValue.get()),

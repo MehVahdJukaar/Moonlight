@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
-import dev.architectury.injectables.annotations.PlatformOnly;
+import net.mehvahdjukaar.moonlight.api.misc.ForgeOverride;
 import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.minecraft.SharedConstants;
@@ -46,8 +46,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
 
     }
 
-
-    @PlatformOnly(PlatformOnly.FORGE)
+    @ForgeOverride
     public boolean isHidden() {
         return this.hidden;
     }
@@ -82,7 +81,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
         if (packType == this.packType) {
             //idk why but somebody had an issue with concurrency here during world load
             synchronized (this) {
-                this.searchTrie .search(namespace + "/" + id)
+                this.searchTrie.search(namespace + "/" + id)
                         .forEach(r -> {
                             byte[] buf = resources.get(r);
                             output.accept(r, () -> {

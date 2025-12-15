@@ -4,6 +4,7 @@ package net.mehvahdjukaar.moonlight.api.block;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import dev.architectury.injectables.annotations.PlatformOnly;
+import net.mehvahdjukaar.moonlight.api.misc.ForgeOverride;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,7 +54,7 @@ public abstract class MimicBlock extends Block {
 
     //might cause lag when breaking?
 //@Override
-    @PlatformOnly(PlatformOnly.FORGE)
+    @ForgeOverride
     public SoundType getSoundType(BlockState state, LevelReader world, BlockPos pos, Entity entity) {
         if (world.getBlockEntity(pos) instanceof IBlockHolder tile) {
             BlockState mimicState = tile.getHeldBlock();
@@ -81,7 +82,7 @@ public abstract class MimicBlock extends Block {
     }
 
     //@Override
-    @PlatformOnly(PlatformOnly.FORGE)
+    @ForgeOverride
     public float getExplosionResistance(BlockState state, BlockGetter world, BlockPos pos, Explosion explosion) {
         if (world.getBlockEntity(pos) instanceof IBlockHolder tile) {
             BlockState mimicState = tile.getHeldBlock();

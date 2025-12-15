@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
@@ -13,12 +14,15 @@ import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootDataType;
@@ -372,6 +376,33 @@ public class ResourceSink {
             }
         }
         dummy.resources.forEach(pack::addResource);
+    }
+
+    public void appendItemToEnchantment(ResourceManager manager, ResourceKey<Enchantment> ench, Item... items) {
+        ResourceLocation id = ench.location();
+        try (var model = manager.getResourceOrThrow(ResType.ENCHANTMENTS.getPath(id)).open()) {
+            JsonObject json = RPUtils.deserializeJson(model);
+            JsonElement supportedItems = json.get("supported_items");
+            SimpleTagBuilder tb = SimpleTagBuilder.of(id.withSuffix("_enchantable"));
+            if (supportedItems instanceof JsonArray arr) {
+                for (var a : arr) {
+                    if (a.isJsonPrimitive()) {
+                        tb.add(a.getAsString());
+                    }
+                }
+            } else if (supportedItems.isJsonPrimitive()) {
+                tb.add(supportedItems.getAsString());
+            }
+            for (Item item : items) {
+                tb.addEntry(item);
+            }
+            json.addProperty("supported_items", tb.getTagString());
+
+            this.addJson(id, json, ResType.ENCHANTMENTS);
+            this.addTag(tb, Registries.ITEM);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
