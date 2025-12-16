@@ -1,1 +1,1 @@
-- fixed a but with text rendering
+- Added SmeltingRecipe to RecipeTemplate
