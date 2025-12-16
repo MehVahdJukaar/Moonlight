@@ -75,6 +75,13 @@ public class RecipeTemplate {
         registerSimple(ShapelessRecipe.class, ShapelessRecipe::new);
         registerSimple(StonecutterRecipe.class, (group, category, result, ingredients) ->
                 new StonecutterRecipe(group, ingredients.getFirst(), result));
+        register(SmeltingRecipe.class, (recipe, oldType, newType) ->
+                createSimple(recipe,
+                        (group, category, result, ingredients) ->
+                        new SmeltingRecipe(group, recipe.category(), ingredients.getFirst(), result, recipe.getExperience(), recipe.getCookingTime()),
+                        oldType, newType
+                )
+        );
     }
 
 
