@@ -357,32 +357,34 @@ public class RegHelperImpl {
     }
 
     public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener) {
-        eventListener.accept(new RegHelper.ExtraPOIStatesEvent() {
-            @Override
-            public void addBlock(ResourceKey<PoiType> poi, Block block) {
-                var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
-                //add vanilla states if they are mutable
-                Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
-                matchingStates.addAll(block.getStateDefinition().getPossibleStates());
-                Set<BlockState> newStates = new HashSet<>(block.getStateDefinition().getPossibleStates());
-                ((PoiTypeAccessor) (Object) beehivePOI.value())
-                        .setMatchingStates(matchingStates);
+        PlatHelper.addCommonSetup(() -> {
+            eventListener.accept(new RegHelper.ExtraPOIStatesEvent() {
+                @Override
+                public void addBlock(ResourceKey<PoiType> poi, Block block) {
+                    var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+                    //add vanilla states if they are mutable
+                    Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
+                    matchingStates.addAll(block.getStateDefinition().getPossibleStates());
+                    Set<BlockState> newStates = new HashSet<>(block.getStateDefinition().getPossibleStates());
+                    ((PoiTypeAccessor) (Object) beehivePOI.value())
+                            .setMatchingStates(matchingStates);
 
-                PoiTypes.registerBlockStates(beehivePOI, newStates);
-            }
+                    PoiTypes.registerBlockStates(beehivePOI, newStates);
+                }
 
-            @Override
-            public void addStates(ResourceKey<PoiType> poi, Set<BlockState> states) {
-                var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
-                //add vanilla states if they are mutable
-                Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
-                Set<BlockState> newStates = new HashSet<>();
-                matchingStates.addAll(states);
-                newStates.addAll(states);
-                ((PoiTypeAccessor) (Object) beehivePOI.value())
-                        .setMatchingStates(matchingStates);
-                PoiTypes.registerBlockStates(beehivePOI, newStates);
-            }
+                @Override
+                public void addStates(ResourceKey<PoiType> poi, Set<BlockState> states) {
+                    var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+                    //add vanilla states if they are mutable
+                    Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
+                    Set<BlockState> newStates = new HashSet<>();
+                    matchingStates.addAll(states);
+                    newStates.addAll(states);
+                    ((PoiTypeAccessor) (Object) beehivePOI.value())
+                            .setMatchingStates(matchingStates);
+                    PoiTypes.registerBlockStates(beehivePOI, newStates);
+                }
+            });
         });
     }
 

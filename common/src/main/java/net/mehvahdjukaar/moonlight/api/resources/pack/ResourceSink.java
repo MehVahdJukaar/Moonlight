@@ -383,20 +383,23 @@ public class ResourceSink {
         try (var model = manager.getResourceOrThrow(ResType.ENCHANTMENTS.getPath(id)).open()) {
             JsonObject json = RPUtils.deserializeJson(model);
             JsonElement supportedItems = json.get("supported_items");
-            SimpleTagBuilder tb = SimpleTagBuilder.of(id.withSuffix("_enchantable"));
+            SimpleTagBuilder tb = SimpleTagBuilder.of(id.withPrefix("enchantable/"));
+            String tagName = tb.getTagString();
             if (supportedItems instanceof JsonArray arr) {
                 for (var a : arr) {
                     if (a.isJsonPrimitive()) {
-                        tb.add(a.getAsString());
+                        String asString = a.getAsString();
+                        if (!tagName.equals(asString)) tb.add(asString);
                     }
                 }
             } else if (supportedItems.isJsonPrimitive()) {
-                tb.add(supportedItems.getAsString());
+                String asString = supportedItems.getAsString();
+                if (!tagName.equals(asString)) tb.add(asString);
             }
             for (Item item : items) {
                 tb.addEntry(item);
             }
-            json.addProperty("supported_items", tb.getTagString());
+            json.addProperty("supported_items", tagName);
 
             this.addJson(id, json, ResType.ENCHANTMENTS);
             this.addTag(tb, Registries.ITEM);

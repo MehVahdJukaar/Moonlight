@@ -10,7 +10,7 @@ import org.joml.Vector3f;
 
 import java.util.Locale;
 
-public class ColorUtils {
+public final class ColorUtils {
 
     //utility codec that serializes either a string or an integer
     public static final Codec<Integer> CODEC = Codec.either(Codec.INT,

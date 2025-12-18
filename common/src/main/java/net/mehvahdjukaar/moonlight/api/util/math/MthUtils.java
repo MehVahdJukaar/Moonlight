@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class MthUtils {
+public final class MthUtils {
 
     public static float[] polarToCartesian(float a, float r) {
         float x = r * Mth.cos(a);

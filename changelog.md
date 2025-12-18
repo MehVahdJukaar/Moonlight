@@ -1,1 +1,1 @@
-- fixed a but with text rendering
+fixed an issue on fabric
