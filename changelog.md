@@ -1,1 +1,1 @@
-fixed an issue on fabric
+- Added SmeltingRecipe to RecipeTemplate

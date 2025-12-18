@@ -143,13 +143,15 @@ public class HardcodedBlockTypes {
                 .childBlock(STRIPPED_WOOD, "stripped_chestnut_noxcap_hyphae");
 
         // Ars Nouveau - REASON: PLANKS-NAME
-        woodReg.addSimpleFinder("ars_nouveau", "archwood")
-                .log("blue_archwood_log")
-                .childBlock(STRIPPED_LOG, "stripped_blue_archwood_log")
-                .childBlock(WOOD, "blue_archwood_wood")
-                .childBlock(STRIPPED_WOOD, "stripped_blue_archwood_wood")
-                .childBlock(LEAVES, "blue_archwood_leaves")
-                .childBlock(SAPLING, "blue_archwood_sapling");
+        if (!PlatHelper.isModLoaded("archwood_good")) { // skip if mod is loaded
+            woodReg.addSimpleFinder("ars_nouveau", "archwood")
+                    .log("blue_archwood_log")
+                    .childBlock(STRIPPED_LOG, "stripped_blue_archwood_log")
+                    .childBlock(WOOD, "blue_archwood_wood")
+                    .childBlock(STRIPPED_WOOD, "stripped_blue_archwood_wood")
+                    .childBlock(LEAVES, "blue_archwood_leaves")
+                    .childBlock(SAPLING, "blue_archwood_sapling");
+        }
 
     /// Do not add other WoodTypes blc it would create too many block variants using archwood_planks
     /// The WoodTypes below all are using the same planks. There is no solutions
