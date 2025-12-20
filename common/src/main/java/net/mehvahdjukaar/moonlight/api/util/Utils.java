@@ -14,6 +14,8 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.InvPlacer;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
+import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
@@ -71,6 +73,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -537,6 +540,23 @@ public class Utils {
             if (optional.isPresent()) return optional.get();
         }
         return null;
+    }
+
+    public static <T, U, D, R> TriFunction<T, U, D, R> memoize(final TriFunction<T, U,D, R> memoBiFunction) {
+        return new TriFunction<>() {
+            private final Map<Triplet<T, U, D>, R> cache = new ConcurrentHashMap<>();
+
+            public R apply(T object, U object2, D object3) {
+                return this.cache.computeIfAbsent(Triplet.of(object, object2, object3), (pair) ->
+                        memoBiFunction.apply(pair.left(), pair.middle(), pair.right()));
+            }
+
+            @Override
+            public String toString() {
+                String var10000 = String.valueOf(memoBiFunction);
+                return "memoize/3[function=" + var10000 + ", size=" + this.cache.size() + "]";
+            }
+        };
     }
 
 

@@ -2,7 +2,9 @@ package net.mehvahdjukaar.moonlight.api.fluids.neoforge;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
@@ -17,8 +19,13 @@ public class SoftFluidStackImpl extends SoftFluidStack {
         return new SoftFluidStackImpl(fluid, count, components);
     }
 
+    public boolean isFluidEqual(FluidStack fluidStack, HolderLookup.Provider ra) {
+        return this.isSameFluidSameComponents(SoftFluidStackImpl.fromForgeFluid(fluidStack, ra));
+    }
+
+    @Deprecated(forRemoval = true)
     public boolean isFluidEqual(FluidStack fluidStack) {
-        return this.isSameFluidSameComponents(SoftFluidStackImpl.fromForgeFluid(fluidStack));
+        return this.isSameFluidSameComponents(SoftFluidStackImpl.fromForgeFluid(fluidStack, Utils.hackyGetRegistryAccess()));
     }
 
     public static FluidStack toForgeFluid(SoftFluidStack softFluid) {
@@ -38,9 +45,14 @@ public class SoftFluidStackImpl extends SoftFluidStack {
         return toForgeFluid(this);
     }
 
+    @Deprecated(forRemoval = true)
     public static SoftFluidStack fromForgeFluid(FluidStack fluidStack) {
+        return fromForgeFluid(fluidStack, Utils.hackyGetRegistryAccess());
+    }
+
+    public static SoftFluidStack fromForgeFluid(FluidStack fluidStack, HolderLookup.Provider ra) {
         int amount = MBtoBottles(fluidStack.getAmount());
-        SoftFluidStack sf = SoftFluidStack.fromFluid(fluidStack.getFluid(), amount);
+        SoftFluidStack sf = SoftFluidStack.fromFluid(fluidStack.getFluid(), amount, ra);
         SoftFluidStack.copyComponentsTo(fluidStack, sf, sf.fluid().getPreservedComponents());
         return sf;
     }

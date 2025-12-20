@@ -26,6 +26,7 @@ public final class LOD {
     private final double distSq; // computed once
 
     public static final LOD MAX = new LOD(0.0);
+    private static float DEFAULT_RADIUS = 1.45f;
 
     // ---- New factories ----
     public static LOD at(BlockEntity be) {
@@ -132,41 +133,89 @@ public final class LOD {
         return isPlaneCulled(normalVec, offset, 0.0f);
     }
 
-    public boolean isPlaneCulled(Direction facing, float offset, float cosTolerance) {
+
+    public boolean isPlaneCulled(Direction facing, float offset, float radius, float cosTolerance) {
         Vector3f normal = facing.step();
-        return isPlaneCulled(new Vec3(normal), offset, cosTolerance);
+        return this.isPlaneCulled(new Vec3(normal), offset, radius, cosTolerance);
+    }
+
+    public boolean isPlaneCulled(Direction facing, float offset, float cosTolerance) {
+        return isPlaneCulled(facing, offset, DEFAULT_RADIUS, cosTolerance);
     }
 
     public boolean isPlaneCulled(Vec3 planeNormal, float offset, float cosTolerance) {
-        return isPlaneCulled(planeNormal, planeNormal.scale(offset), cosTolerance);
+        return isPlaneCulled(planeNormal, offset, DEFAULT_RADIUS, cosTolerance);
+    }
+
+    public boolean isPlaneCulled(Vec3 planeNormal, float offset, float radius, float cosTolerance) {
+        return isPlaneCulled(planeNormal, planeNormal.scale(offset), radius, cosTolerance);
     }
 
     public boolean isPlaneCulled(Direction facing, float offset) {
         return isPlaneCulled(facing, offset, 0.0f);
     }
 
+    public boolean isPlaneCulled(Vec3 planeNormal, @Nullable Vec3 offset, float cosTolerance) {
+        //assumes a plane of length 1
+        return isPlaneCulled(planeNormal, offset, DEFAULT_RADIUS, cosTolerance);
+    }
+
     /**
      * @param planeNormal  unit-length normal (outward from the visible face)
      * @param offset       optional offset from object center (null for none)
      * @param cosTolerance require normal·toCam > cosTolerance (0 = any front-facing)
+     * @param planeRadius  radius of the plane (for disk-aware culling; 0 = point)
      * @return true if culled (behind camera or backfacing beyond tolerance)
      */
-    public boolean isPlaneCulled(Vec3 planeNormal, @Nullable Vec3 offset, float cosTolerance) {
-        // Plane point (object center + optional offset)
-        Vec3 planePoint = (offset == null) ? this.objCenter : this.objCenter.add(offset);
+    public boolean isPlaneCulled(
+            Vec3 planeNormal,
+            @Nullable Vec3 offset,
+            float planeRadius,
+            float cosTolerance
+    ) {
+        // Point on plane
+        Vec3 planePoint = (offset == null)
+                ? this.objCenter
+                : this.objCenter.add(offset);
 
-        // Vector from camera to plane
+        // Camera → plane center
         Vec3 camToPlane = planePoint.subtract(this.camPos);
+        double dist = camToPlane.length();
 
-        // If plane is behind the camera (opposite of view direction), cull
-        double dirDot = camToPlane.normalize().dot(this.camDir);
-        if (dirDot <= 0.0) return true;
+        // Safety: camera is on or extremely near the plane
+        if (dist < 1e-6) {
+            return false;
+        }
 
-        // Check if plane normal faces the camera
-        double facing = planeNormal.normalize().dot(camToPlane.normalize());
+        Vec3 dirToPlane = camToPlane.scale(1.0 / dist);
 
-        // Cull if backfacing beyond tolerance (normal points outward from visible face)
-        return facing >= -cosTolerance;
+        // -------- Front / behind test (disk-aware) --------
+        // Project center onto camera forward direction
+        double forwardDist = camToPlane.dot(this.camDir);
+
+        // If the entire disk is behind the camera plane → cull
+        if (forwardDist <= -planeRadius) {
+            return true;
+        }
+
+        // -------- Facing test with angular extent --------
+        Vec3 n = planeNormal.normalize();
+
+        // How much the disk can "lean" into view
+        // sin(theta) = R / dist  →  cos(theta) = sqrt(1 - sin²)
+        double sinTheta = planeRadius / dist;
+        if (sinTheta >= 1.0) {
+            // Disk fully surrounds camera direction; always potentially visible
+            return false;
+        }
+
+        double cosTheta = Math.sqrt(1.0 - sinTheta * sinTheta);
+
+        // Center-facing cosine
+        double facing = n.dot(dirToPlane);
+
+        // Cull only if *entire disk* faces away beyond tolerance
+        return facing >= (-cosTolerance + cosTheta);
     }
 
     // ---- BACKWARD-COMP: old angle/focus helpers ----

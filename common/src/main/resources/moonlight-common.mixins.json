@@ -18,7 +18,9 @@
   ],
   "mixins": [
     "BeeGoalMixin",
+    "BlockBehaviorMixin",
     "BlockItemMixin",
+    "BlockStateBaseMixin",
     "ChunkGeneratorMixin",
     "DebugPacketsMixin",
     "EntityMixin",

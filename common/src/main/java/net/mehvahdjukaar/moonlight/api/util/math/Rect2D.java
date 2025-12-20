@@ -1,12 +1,22 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.minecraft.world.phys.Vec2;
 
 import java.util.*;
 
 // Simple rectangle representation
 public record Rect2D(int x, int y, int width, int height) {
+
+    public static final Codec<Rect2D> CODEC = Codec.INT.listOf().comapFlatMap(
+            list -> {
+                if (list.size() != 4) return DataResult.error(() -> "Expected list of size 4 for Rect2D");
+                return DataResult.success(new Rect2D(list.get(0), list.get(1), list.get(2), list.get(3)));
+            },
+            rect -> List.of(rect.x, rect.y, rect.width, rect.height)
+    );
 
     public Rect2D(int x, int y, int width, int height) {
         //validate width and height. if negative normalize
@@ -39,19 +49,19 @@ public record Rect2D(int x, int y, int width, int height) {
     }
 
     public Vec2i topLeft() {
-        return new Vec2i(left(), top());
+        return new Vec2i(x, y + height - 1);
     }
 
     public Vec2i topRight() {
-        return new Vec2i(right(), top());
+        return new Vec2i(x + width - 1, y + height - 1);
     }
 
     public Vec2i bottomLeft() {
-        return new Vec2i(left(), bottom());
+        return new Vec2i(x, y);
     }
 
     public Vec2i bottomRight() {
-        return new Vec2i(right(), bottom());
+        return new Vec2i(x + width - 1, y);
     }
 
     public int left() {
@@ -154,6 +164,10 @@ public record Rect2D(int x, int y, int width, int height) {
         int newWidth = Math.max(this.x + this.width, other.x + other.width) - newX;
         int newHeight = Math.max(this.y + this.height, other.y + other.height) - newY;
         return new Rect2D(newX, newY, newWidth, newHeight);
+    }
+
+    public Rect2D moveBy(int dx, int dy) {
+        return new Rect2D(x + dx, y + dy, width, height);
     }
 
     public Rect2D moveBy(Vec2i delta) {

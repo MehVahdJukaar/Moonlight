@@ -38,7 +38,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      */
     @Deprecated(forRemoval = true)
     public boolean addVanillaFluid(FluidStack fluidStack) {
-        var s = SoftFluidStackImpl.fromForgeFluid(fluidStack);
+        var s = SoftFluidStackImpl.fromForgeFluid(fluidStack, Utils.hackyGetRegistryAccess());
         if (s.isEmpty()) return false;
         return addFluid(s, false) == s.getCount();
     }
@@ -69,17 +69,22 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         return this.transferToFluidTank(fluidDestination, BOTTLE_COUNT);
     }
 
-    //drains said fluid tank of 250mb (1 bottle) of fluid
+    @Deprecated(forRemoval = true)
     public boolean drainFluidTank(IFluidHandler fluidSource, int bottles) {
+        return drainFluidTank(fluidSource,bottles, Utils.hackyGetRegistryAccess());
+    }
+
+    //drains said fluid tank of 250mb (1 bottle) of fluid
+    public boolean drainFluidTank(IFluidHandler fluidSource, int bottles, HolderLookup.Provider ra  ) {
         if (this.getSpace() < bottles) return false;
         int milliBuckets = bottlesToMB(bottles);
         FluidStack drainable = fluidSource.drain(milliBuckets, IFluidHandler.FluidAction.SIMULATE);
         if (!drainable.isEmpty() && drainable.getAmount() == milliBuckets) {
             boolean transfer = false;
             if (this.fluidStack.isEmpty()) {
-                this.setFluid(drainable);
+                this.setFluid(drainable, ra);
                 transfer = true;
-            } else if (((SoftFluidStackImpl) fluidStack).isFluidEqual(drainable)) {
+            } else if (((SoftFluidStackImpl) fluidStack).isFluidEqual(drainable, ra)) {
                 transfer = true;
             }
             if (transfer) {
@@ -90,8 +95,13 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         return false;
     }
 
+    public boolean drainFluidTank(IFluidHandler fluidSource, HolderLookup.Provider ra) {
+        return this.drainFluidTank(fluidSource, BOTTLE_COUNT, ra);
+    }
+
+    @Deprecated(forRemoval = true)
     public boolean drainFluidTank(IFluidHandler fluidSource) {
-        return this.drainFluidTank(fluidSource, BOTTLE_COUNT);
+        return this.drainFluidTank(fluidSource, BOTTLE_COUNT, Utils.hackyGetRegistryAccess());
     }
 
     /**
@@ -99,10 +109,21 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      *
      * @param other forge fluid tank
      */
-    public void copy(IFluidHandler other) {
+    public void copy(IFluidHandler other, HolderLookup.Provider ra) {
         FluidStack forgeFluid = other.getFluidInTank(0).copy();// 250, IFluidHandler.FluidAction.SIMULATE);
-        this.setFluid(forgeFluid);
+        this.setFluid(forgeFluid, ra);
         this.capCapacity();
+    }
+
+    @Deprecated(forRemoval = true)
+    public void copy(IFluidHandler other) {
+        this.copy(other, Utils.hackyGetRegistryAccess());
+    }
+
+
+    @Deprecated(forRemoval = true)
+    public void setFluid(FluidStack fluidStack) {
+        this.setFluid(SoftFluidStackImpl.fromForgeFluid(fluidStack, Utils.hackyGetRegistryAccess()));
     }
 
     /**
@@ -110,9 +131,10 @@ public class SoftFluidTankImpl extends SoftFluidTank {
      *
      * @param fluidStack forge fluid
      */
-    public void setFluid(FluidStack fluidStack) {
-        this.setFluid(SoftFluidStackImpl.fromForgeFluid(fluidStack));
+    public void setFluid(FluidStack fluidStack, HolderLookup.Provider ra) {
+        this.setFluid(SoftFluidStackImpl.fromForgeFluid(fluidStack, ra));
     }
+
 
 
 }
