@@ -1,1 +1,2 @@
 - fixed an issue with fabric post shaders registration
+- HardcodedBlockTypes: Added the missing stripped_log to My-Nether-Delight's powdery (v2.16.17)
