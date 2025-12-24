@@ -305,6 +305,8 @@ public class RegHelperImpl {
                         if (after && lastValid != null && !isValid) {
                             var rev = Lists.reverse(new ArrayList<>(items));
                             for (var ni : rev) {
+                                if (lastValid.is(ni.getItem()))
+                                    continue;
                                 entries.putAfter(lastValid, ni, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                             }
                             return;
