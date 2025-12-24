@@ -1,1 +1,1 @@
-- Added SmeltingRecipe to RecipeTemplate
+made regSupplier class a holder type
