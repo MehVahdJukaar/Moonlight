@@ -8,12 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
-import org.valkyrienskies.mod.mixin.server.MixinMinecraftServer;
-import org.valkyrienskies.mod.mixin.server.world.MixinChunkMap;
-import org.valkyrienskies.mod.mixin.server.world.MixinServerLevel;
 
 /**
  * This exception here is thrown by VS when it detects a ServerLevel initialized in a phase it doesn't like.
@@ -23,7 +18,6 @@ import org.valkyrienskies.mod.mixin.server.world.MixinServerLevel;
  * I have reported this thousand of times and they have refused to even acknowledge the issue...
  * Still we cant just "fix" this for them for free, why is my time less precious than theirs after all? This is why a log line redirecting to the issue page is created
  * About the injection point, this is hacky, injecting where the issue is thrown is a lot trickier so we prevent the level from being tarcked in the first place
-
  */
 @OptionalMixin(value = "org.valkyrienskies.mod.mixin.server.world.MixinServerLevel")
 @Mixin(value = ServerLevel.class, priority = 1500)
@@ -39,9 +33,9 @@ public class VSYeetArbitraryCrash {
             at = @At(value = "HEAD"),
             cancellable = true)
     private void ml$cockBlockArbitraryCrash(CallbackInfo originalCi, CallbackInfo ci) {
-        if((Object) this instanceof FakeServerLevel){
+        if ((Object) this instanceof FakeServerLevel) {
 
-            Moonlight.LOGGER.error("Moonlight Lib applied some ungodly hacks to prevent a forced arbitrary crash from the mod Valkyrien Skies! \n"+
+            Moonlight.LOGGER.error("Moonlight Lib applied some ungodly hacks to prevent a forced arbitrary crash from the mod Valkyrien Skies! \n" +
                     "See https://github.com/ValkyrienSkies/Valkyrien-Skies-2/issues/1488 for more info.");
             ci.cancel();
         }
