@@ -20,12 +20,15 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     // Remove the next line if you don't want to depend on the API
     //modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+    implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:${mixin_squared_version}"))
+    implementation("com.github.bawnorton.mixinsquared:mixinsquared-forge:${mixin_squared_version}")
 
     modCompileOnly("curse.maven:yacl-667299:4523734")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly ("curse.maven:map-atlases-forge-519759:5018175")
     modImplementation ("curse.maven:configured-457570:5096828")
     modCompileOnly("curse.maven:quark-243121:5344451")
+    modCompileOnly("curse.maven:valkyrien-skies-258371:7377431")
 
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")

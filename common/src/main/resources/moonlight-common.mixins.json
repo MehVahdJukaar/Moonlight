@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "net.mehvahdjukaar.moonlight.core.mixins.MixinPlugin",
   "client": [
-
     "ClientLanguagesMixin",
     "ClientPacketListenerMixin",
     "DynamicTextureMixin",
@@ -45,7 +44,8 @@
     "accessor.BrainAccessor",
     "accessor.DispenserBlockAccessor",
     "accessor.DispenserBlockEntityAccessor",
-    "compat.PistonReactQuarkMixin"
+    "compat.PistonReactQuarkMixin",
+    "compat.VSYeetArbitraryCrash"
   ],
   "injectors": {
     "defaultRequire": 1

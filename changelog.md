@@ -1,1 +1,1 @@
-- fixed an issue with fabric post shaders registration
+fixed an issue with creative tabs adding items
