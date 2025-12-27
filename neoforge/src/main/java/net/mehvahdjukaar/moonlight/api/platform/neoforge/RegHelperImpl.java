@@ -83,6 +83,11 @@ public class RegHelperImpl {
         }
 
         @Override
+        public @Nullable ResourceKey<T> getKey() {
+            return registryObject.getKey();
+        }
+
+        @Override
         public T value() {
             return registryObject.get();
         }

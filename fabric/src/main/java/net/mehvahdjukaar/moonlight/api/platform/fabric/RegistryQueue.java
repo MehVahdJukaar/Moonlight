@@ -12,10 +12,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -46,7 +46,7 @@ public class RegistryQueue<T> {
     }
 
     void initializeEntries() {
-            entries.forEach(e -> e.initialize(true));
+        entries.forEach(e -> e.initialize(true));
         batchRegistration.forEach(e -> e.accept((n, s) -> RegHelper.registerAsync(n, () -> s, registry)));
     }
 
@@ -122,8 +122,8 @@ public class RegistryQueue<T> {
 
         @Override
         public boolean is(ResourceLocation location) {
-return this.id.location().equals(location);
-                    }
+            return this.id.location().equals(location);
+        }
 
         @Override
         public boolean is(ResourceKey<T> resourceKey) {
@@ -160,7 +160,7 @@ return this.id.location().equals(location);
 
         @Override
         public Optional<ResourceKey<T>> unwrapKey() {
-            return Optional.of( (ResourceKey<T>) this.id);
+            return Optional.of((ResourceKey<T>) this.id);
         }
 
         @Override
@@ -172,6 +172,22 @@ return this.id.location().equals(location);
         public boolean canSerializeIn(HolderOwner<T> owner) {
             initialize(false);
             return this.holder != null && this.holder.canSerializeIn(owner);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            return obj instanceof Holder<?> h && h.kind() == Kind.REFERENCE && h.is((ResourceKey) this.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.id.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return String.format(Locale.ENGLISH, "RegistryHolderSupplier{%s}", this.id);
         }
     }
 }
