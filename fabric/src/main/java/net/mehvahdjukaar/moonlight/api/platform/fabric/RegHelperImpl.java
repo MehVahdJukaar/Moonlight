@@ -165,7 +165,7 @@ public class RegHelperImpl {
 
     public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
         RegistryQueue.EntryWrapper<E, T> entry = new RegistryQueue.EntryWrapper<>(name, supplier, reg);
-        entry.initialize();
+        entry.initialize(true);
         return entry;
     }
 

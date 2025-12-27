@@ -12,7 +12,7 @@ import java.util.function.Supplier;
  * Supplier of a builtin registry. for the others use HolderRef or OptHolderRef
  */
 // maybe implement holder here
-public interface RegSupplier<T> extends Supplier<T> {
+public interface RegSupplier<T> extends Supplier<T>, Holder<T> {
 
     @Override
     T get();
@@ -21,13 +21,9 @@ public interface RegSupplier<T> extends Supplier<T> {
 
     ResourceKey<? super T> getKey();
 
-    Holder<T> getHolder();
-
-    default boolean is(TagKey<T> tag) {
-        return this.getHolder().is(tag);
+    @Deprecated(forRemoval = true)
+    default Holder<T> getHolder() {
+        return this;
     }
 
-    default boolean is(T other) {
-        return this.get() == other;
-    }
 }

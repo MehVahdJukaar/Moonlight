@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
 import com.google.common.base.Suppliers;
+import com.mojang.datafixers.util.Either;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderOwner;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -12,7 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 //optional supplier of a builtin registry
 public class OptRegSupplier<A> implements RegSupplier<A> {
@@ -48,13 +52,82 @@ public class OptRegSupplier<A> implements RegSupplier<A> {
     }
 
     public Optional<Holder<A>> asOptionalHolder() {
-        return Optional.empty();
+        return Optional.ofNullable(holderSupplier.get());
+    }
+
+    @Override
+    public A value() {
+        return this.get();
+    }
+
+    @Override
+    public boolean isBound() {
+        if (isPresent()) {
+            return holderSupplier.get().isBound();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean is(ResourceLocation location) {
+        return this.id.equals(location);
+    }
+
+    @Override
+    public boolean is(ResourceKey<A> resourceKey) {
+        return this.key.equals(resourceKey);
+    }
+
+    @Override
+    public boolean is(Predicate<ResourceKey<A>> predicate) {
+        return predicate.test(this.key);
     }
 
     @Override
     public boolean is(TagKey<A> tag) {
-        Holder<A> h = this.getHolder();
+        Holder<A> h = holderSupplier.get();
         return h != null && h.is(tag);
+    }
+
+    @Override
+    public boolean is(Holder<A> holder) {
+        Holder<A> h = holderSupplier.get();
+        return h != null && h.equals(holder);
+    }
+
+    @Override
+    public Stream<TagKey<A>> tags() {
+        Holder<A> h = holderSupplier.get();
+        if (h != null) {
+            return h.tags();
+        }
+        return Stream.empty();
+    }
+
+    @Override
+    public Either<ResourceKey<A>, A> unwrap() {
+        return Either.right(this.get());
+    }
+
+    @Override
+    public Optional<ResourceKey<A>> unwrapKey() {
+        return Optional.ofNullable(this.key);
+    }
+
+    @Override
+    public Kind kind() {
+        if (isPresent()) {
+            return holderSupplier.get().kind();
+        }
+        return Kind.DIRECT;
+    }
+
+    @Override
+    public boolean canSerializeIn(HolderOwner<A> owner) {
+        if (isPresent()) {
+            return holderSupplier.get().canSerializeIn(owner);
+        }
+        return false;
     }
 
     public boolean isPresent() {

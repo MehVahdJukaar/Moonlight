@@ -1,26 +1,26 @@
 package net.mehvahdjukaar.moonlight.api.platform.fabric;
 
-import com.google.common.base.Preconditions;
-import com.mojang.serialization.Lifecycle;
+import com.mojang.datafixers.util.Either;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.mehvahdjukaar.moonlight.api.client.ICustomItemRendererProvider;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
-import net.minecraft.core.Holder;
-import net.minecraft.core.RegistrationInfo;
-import net.minecraft.core.Registry;
-import net.minecraft.core.WritableRegistry;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.tags.TagKey;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class RegistryQueue<T> {
     private final ResourceKey<? extends Registry<T>> registry;
@@ -46,17 +46,17 @@ public class RegistryQueue<T> {
     }
 
     void initializeEntries() {
-        entries.forEach(EntryWrapper::initialize);
+            entries.forEach(e -> e.initialize(true));
         batchRegistration.forEach(e -> e.accept((n, s) -> RegHelper.registerAsync(n, () -> s, registry)));
     }
 
 
     static class EntryWrapper<T extends R, R> implements RegSupplier<T> {
-        private final ResourceKey<R> id;
         private ResourceKey<? extends Registry<R>> registryKey;
         private Supplier<T> regSupplier;
-        private T entry;
-        private Holder<T> holder;
+
+        private final ResourceKey<R> id;
+        private Holder<T> holder = null;
 
 
         public EntryWrapper(ResourceLocation id, Supplier<T> factory, ResourceKey<? extends Registry<R>> registry) {
@@ -68,7 +68,7 @@ public class RegistryQueue<T> {
 
         @Override
         public T get() {
-            return entry;
+            return value();
         }
 
         @Override
@@ -81,23 +81,22 @@ public class RegistryQueue<T> {
             return id;
         }
 
-        @Override
-        public Holder<T> getHolder() {
-            return Preconditions.checkNotNull(holder, "Registry entry not initialized yet: " + id);
-        }
-
-        void initialize() {
+        void initialize(boolean throwMissingReg) {
+            if (this.holder != null) return;
             WritableRegistry writableRegistry = (WritableRegistry) BuiltInRegistries.REGISTRY.get(registryKey.location());
-            if(writableRegistry == null) throw new IllegalStateException("Registry not found: " + registryKey.location());
+            if (writableRegistry == null) {
+                if (throwMissingReg)
+                    throw new IllegalStateException("Registry not found: " + registryKey.location());
+                return;
+            }
             this.holder = writableRegistry.register(id, regSupplier.get(), RegistrationInfo.BUILT_IN);
-            this.entry = this.holder.value();
             regSupplier = null;
             registryKey = null;
 
+            R entry = this.holder.value();
             if (PlatHelper.getPhysicalSide().isClient() && entry instanceof ICustomItemRendererProvider pr) {
-                ItemLike il = (ItemLike) entry;
-                if (BuiltinItemRendererRegistry.INSTANCE.get(il) == null) {
-                    BuiltinItemRendererRegistry.INSTANCE.register(il,
+                if (BuiltinItemRendererRegistry.INSTANCE.get(pr) == null) {
+                    BuiltinItemRendererRegistry.INSTANCE.register(pr,
                             (BuiltinItemRendererRegistry.DynamicItemRenderer) pr.getRendererFactory().get());
                 } else {
                     if (PlatHelper.isDev()) throw new AssertionError();
@@ -105,6 +104,75 @@ public class RegistryQueue<T> {
             }
         }
 
+        @Override
+        public T value() {
+            initialize(true);
+            if (this.holder == null) {
+                throw new NullPointerException("Trying to access unbound value: " + this.id);
+            }
+
+            return (T) this.holder.value();
+        }
+
+        @Override
+        public boolean isBound() {
+            initialize(false);
+            return this.holder != null && this.holder.isBound();
+        }
+
+        @Override
+        public boolean is(ResourceLocation location) {
+return this.id.location().equals(location);
+                    }
+
+        @Override
+        public boolean is(ResourceKey<T> resourceKey) {
+            return resourceKey == this.id;
+        }
+
+        @Override
+        public boolean is(Predicate<ResourceKey<T>> predicate) {
+            return predicate.test((ResourceKey<T>) this.id);
+        }
+
+        @Override
+        public boolean is(TagKey<T> tagKey) {
+            initialize(false);
+            return this.holder != null && this.holder.is(tagKey);
+        }
+
+        @Override
+        public boolean is(Holder<T> holder) {
+            initialize(false);
+            return this.holder != null && this.holder.is(holder);
+        }
+
+        @Override
+        public Stream<TagKey<T>> tags() {
+            initialize(false);
+            return this.holder != null ? this.holder.tags() : Stream.empty();
+        }
+
+        @Override
+        public Either<ResourceKey<T>, T> unwrap() {
+            return Either.left((ResourceKey<T>) this.id);
+        }
+
+        @Override
+        public Optional<ResourceKey<T>> unwrapKey() {
+            return Optional.of( (ResourceKey<T>) this.id);
+        }
+
+        @Override
+        public Kind kind() {
+            return Kind.REFERENCE;
+        }
+
+        @Override
+        public boolean canSerializeIn(HolderOwner<T> owner) {
+            initialize(false);
+            return this.holder != null && this.holder.canSerializeIn(owner);
+        }
     }
 }
 

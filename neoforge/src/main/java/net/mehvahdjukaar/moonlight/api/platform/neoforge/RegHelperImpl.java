@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.neoforge;
 
 import com.google.common.base.Preconditions;
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
@@ -14,6 +15,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderOwner;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -22,13 +24,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.RepositorySource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.FireworkExplosion;
@@ -55,6 +57,7 @@ import net.neoforged.neoforge.event.*;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.registries.*;
+import net.neoforged.neoforge.registries.datamaps.DataMapType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -62,11 +65,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 
 public class RegHelperImpl {
 
-    public record EntryWrapper<T>(DeferredHolder<T, ? extends T> registryObject) implements RegSupplier<T> {
+    public record Wrapper<T>(DeferredHolder<T, ? extends T> registryObject) implements RegSupplier<T> {
+
         @Override
         public T get() {
             return registryObject.get();
@@ -78,13 +83,88 @@ public class RegHelperImpl {
         }
 
         @Override
-        public ResourceKey<T> getKey() {
-            return registryObject.getKey();
+        public T value() {
+            return registryObject.get();
         }
 
         @Override
-        public Holder<T> getHolder() {
-            return registryObject;
+        public boolean isBound() {
+            return registryObject.isBound();
+        }
+
+        @Override
+        public boolean is(ResourceLocation location) {
+            return registryObject.is(location);
+        }
+
+        @Override
+        public boolean is(ResourceKey<T> resourceKey) {
+            return registryObject.is(resourceKey);
+        }
+
+        @Override
+        public boolean is(Predicate<ResourceKey<T>> predicate) {
+            return registryObject.is(predicate);
+        }
+
+        @Override
+        public boolean is(TagKey<T> tagKey) {
+            return registryObject.is(tagKey);
+        }
+
+        @Override
+        public boolean is(Holder<T> holder) {
+            return registryObject.is(holder);
+        }
+
+        @Override
+        public Stream<TagKey<T>> tags() {
+            return registryObject.tags();
+        }
+
+        @Override
+        public Either<ResourceKey<T>, T> unwrap() {
+            return registryObject.unwrap();
+        }
+
+        @Override
+        public Optional<ResourceKey<T>> unwrapKey() {
+            return registryObject.unwrapKey();
+        }
+
+        @Override
+        public Kind kind() {
+            return registryObject.kind();
+        }
+
+        @Override
+        public boolean canSerializeIn(HolderOwner<T> owner) {
+            return registryObject.canSerializeIn(owner);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return registryObject.equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            return registryObject.hashCode();
+        }
+
+        @Override
+        public Holder<T> getDelegate() {
+            return  registryObject.getDelegate();
+        }
+
+        @Override
+        public String toString() {
+            return registryObject.toString();
+        }
+
+        @Override
+        public <T1> @Nullable T1 getData(DataMapType<T, T1> type) {
+            return registryObject.getData(type);
         }
     }
 
@@ -124,7 +204,7 @@ public class RegHelperImpl {
             }
             return obj;
         });
-        return (RegSupplier<E>) new EntryWrapper<>(register);
+        return (RegSupplier<E>) new Wrapper<>(register);
     }
 
     private static final List<Pair<String, Consumer<IEventBus>>> RUN_LATER = new ArrayList<>();
@@ -301,7 +381,7 @@ public class RegHelperImpl {
             return event.getParameters();
         }
 
-        public CreativeModeTab getTab(){
+        public CreativeModeTab getTab() {
             return event.getTab();
         }
 
