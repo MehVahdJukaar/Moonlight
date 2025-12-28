@@ -5,7 +5,6 @@ import com.electronwill.nightconfig.core.InMemoryCommentedFormat;
 import com.electronwill.nightconfig.core.concurrent.SynchronizedConfig;
 import com.electronwill.nightconfig.core.io.ParsingMode;
 import com.electronwill.nightconfig.toml.TomlFormat;
-import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -32,7 +31,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -151,9 +153,11 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     @EventCalled
     public void onConfigChange(ModConfigEvent event) {
         if (event.getConfig().getSpec() == this.getSpec()) {
-            Moonlight.LOGGER.info("Detected config change in {}, from neoforge config event", this.getFileName());
+            if (PlatHelper.isDev()) {
+                Moonlight.LOGGER.info("Detected config change in {}, from neoforge config event", this.getFileName());
+            }
             //send this configuration to connected clients if on server
-            if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()){
+            if (this.isSynced() && PlatHelper.getPhysicalSide().isServer()) {
                 Moonlight.LOGGER.info("Sending changed configs to client", this.getFileName());
                 sendSyncedConfigsToAllPlayers();
             }
@@ -180,7 +184,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
         //read only is when we are on the logical client
         //ignore read only on integrated server. no need here. technically not needed but still
         //if (readOnly && PlatHelper.isIntegratedServer()) return;
-        if(PlatHelper.isIntegratedServer()){
+        if (PlatHelper.isIntegratedServer()) {
             readOnly = false;
         }
         try {
@@ -204,7 +208,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
 
     //same as accepts synced configs but also sets the path, allowing them to saved
     public void acceptEditableConfigs(ModConfig modConfig, byte[] bytes) {
-        Moonlight.LOGGER.info("Overriding configs {} with synced configs (editable)",  modConfig.getFileName());
+        Moonlight.LOGGER.info("Overriding configs {} with synced configs (editable)", modConfig.getFileName());
         var newConfig = new SynchronizedConfig(InMemoryCommentedFormat.defaultInstance(), LinkedHashMap::new);
         newConfig.bulkCommentedUpdate(view -> {
             TomlFormat.instance().createParser().parse(new ByteArrayInputStream(bytes), view, ParsingMode.REPLACE);

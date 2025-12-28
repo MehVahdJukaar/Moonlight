@@ -16,7 +16,6 @@ import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
-import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxPoolElement;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -201,7 +200,7 @@ public class RegHelper {
     }
 
     public static <T extends StructureProcessor> RegSupplier<StructureProcessorType<T>> registerStructurePiece(ResourceLocation name, MapCodec<T> codec) {
-        return register(name, () -> ()->codec, Registries.STRUCTURE_PROCESSOR);
+        return register(name, () -> () -> codec, Registries.STRUCTURE_PROCESSOR);
     }
 
     public static <T extends StructurePlacement> RegSupplier<StructurePlacementType<T>> registerStructurePlacementType(ResourceLocation name, MapCodec<T> codec) {
@@ -417,7 +416,7 @@ public class RegHelper {
 
     public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
             ResourceLocation key, Function<ServerLevel, A> constructor,
-            Codec<A> codec, @Nullable StreamCodec<? super RegistryFriendlyByteBuf, A> networkCodec,  boolean perLevel) {
+            Codec<A> codec, @Nullable StreamCodec<? super RegistryFriendlyByteBuf, A> networkCodec, boolean perLevel) {
         WorldSavedDataType<A> instance = new WorldSavedDataType<>(key, constructor, codec, networkCodec,
                 perLevel ? WorldSavedDataType.Scope.PER_LEVEL : WorldSavedDataType.Scope.SINGLE_OVERWORLD);
         register(key, () -> instance, MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.key());
@@ -630,6 +629,31 @@ public class RegHelper {
             addItems(tab, target, false, java.util.List.of(items));
         }
 
+        default void remove(ResourceKey<CreativeModeTab> tab, ItemLike... items) {
+            remove(tab, stack -> {
+                for (ItemLike i : items) {
+                    if (stack.is(i.asItem())) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+
+        default void remove(ResourceKey<CreativeModeTab> tab, ItemStack... items) {
+            remove(tab, stack -> {
+                for (ItemStack i : items) {
+                    if (ItemStack.isSameItemSameComponents(stack, i)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+
+        ;
+
+        void remove(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> condition);
     }
 
     @FunctionalInterface

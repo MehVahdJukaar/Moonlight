@@ -1,1 +1,2 @@
-made regSupplier class a holder type
+added tab removal
+removed some annoying logging

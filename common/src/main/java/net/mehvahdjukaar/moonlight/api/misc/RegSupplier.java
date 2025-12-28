@@ -26,4 +26,7 @@ public interface RegSupplier<T> extends Supplier<T>, Holder<T> {
         return this;
     }
 
+    default boolean is(T other) {
+        return this.get() == other;
+    }
 }

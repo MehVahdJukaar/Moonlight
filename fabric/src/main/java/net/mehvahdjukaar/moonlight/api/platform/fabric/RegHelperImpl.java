@@ -57,6 +57,7 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -265,6 +266,13 @@ public class RegHelperImpl {
                 @Override
                 public CreativeModeTab getTab() {
                     return creativeModeTab;
+                }
+
+                @Override
+                public void remove(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> condition) {
+                    if (tab != tabKey) return;
+                    entries.getDisplayStacks().removeIf(condition);
+                    entries.getSearchTabStacks().removeIf(condition);
                 }
 
                 @Override

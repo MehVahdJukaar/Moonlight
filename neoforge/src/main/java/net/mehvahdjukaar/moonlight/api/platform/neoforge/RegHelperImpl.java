@@ -390,10 +390,10 @@ public class RegHelperImpl {
             return event.getTab();
         }
 
-        public void removeItems(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target) {
-
-            event.getParentEntries().removeIf(target);
-            event.getSearchEntries().removeIf(target);
+        public void remove(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target) {
+            if (event.getTabKey() != tab) return;
+            //TODO: add when neo updates
+            //event.remove(target, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
         }
 
         @Override

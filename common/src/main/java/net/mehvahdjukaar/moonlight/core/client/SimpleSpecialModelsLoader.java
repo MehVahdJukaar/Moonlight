@@ -30,23 +30,23 @@ public class SimpleSpecialModelsLoader extends SimplePreparableReloadListener<Vo
         String name = "models/special_models";
         FileToIdConverter fileToIdConverter = FileToIdConverter.json(name);
         Map<ResourceLocation, Resource> resourceLocationResourceMap = fileToIdConverter.listMatchingResources(resourceManager);
-        List<ResourceLocation> toRemove = new ArrayList<>();
+        List<ResourceLocation> models = new ArrayList<>();
         for (Map.Entry<ResourceLocation, Resource> entry : resourceLocationResourceMap.entrySet()) {
             try {
                 Reader reader = entry.getValue().openAsReader();
                 JsonElement jsonelement = GsonHelper.fromJson(gson, reader, JsonElement.class);
                 if (jsonelement instanceof JsonObject jo) {
-                    String mod = GsonHelper.getAsString(jo, "required_mod", null);
-                    if (mod != null && PlatHelper.isModLoaded(mod)) {
+                    String mod = GsonHelper.getAsString(jo, "required_mod", "");
+                    if (!mod.isEmpty() && !PlatHelper.isModLoaded(mod)) {
                         continue;
                     }
                 }
             } catch (Exception e) {
                 Moonlight.LOGGER.error("Couldn't parse special model file {}:", entry.getKey(), e);
             }
-            toRemove.add(entry.getKey());
+            models.add(entry.getKey());
         }
-        specialModels.addAll(toRemove.stream().map(s -> s.withPath(s.getPath().substring(7, s.getPath().length() - 5))).toList());
+        specialModels.addAll(models.stream().map(s -> s.withPath(s.getPath().substring(7, s.getPath().length() - 5))).toList());
         return null;
     }
 
