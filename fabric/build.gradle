@@ -28,6 +28,12 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
+
+    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.3.6")))
+    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:${mixin_squared_version}")))
+    annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
+
+
     //implementation fg.deobf("curse.maven:cloth-config-348521:3782775")
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
         exclude group: 'net.fabricmc.fabric-api'
@@ -60,9 +66,6 @@ dependencies {
    // modImplementation("curse.maven:midnightlib-488090:4576371")
    // modImplementation("curse.maven:athena-841890:4764358")
 
-
-    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.3.6")))
-    annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
 
 
 }
