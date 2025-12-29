@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
+import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -14,6 +15,8 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class ModLootModifiers {
 
@@ -74,23 +77,36 @@ public class ModLootModifiers {
 
     public static class ReplaceItemModifier extends LootModifier {
 
-        public static final MapCodec<ReplaceItemModifier> CODEC = RecordCodecBuilder.mapCodec(inst -> codecStart(inst).and(
-                        ItemStack.CODEC.fieldOf("item").forGetter(m -> m.itemStack)
+        public static final MapCodec<ReplaceItemModifier> CODEC = RecordCodecBuilder.mapCodec(inst -> codecStart(inst)
+                .and(
+                        inst.group(
+                                ItemStack.CODEC.fieldOf("item").forGetter(m -> m.itemStack),
+                                ItemPredicate.CODEC.optionalFieldOf("target").forGetter(m -> m.itemPredicate)
+                        )
+
                 ).apply(inst, ReplaceItemModifier::new)
         );
 
         private final ItemStack itemStack;
+        private final Optional<ItemPredicate> itemPredicate;
 
-        protected ReplaceItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
+        protected ReplaceItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack, Optional<ItemPredicate> itemPredicate) {
             super(conditionsIn);
             this.itemStack = addedItemStack;
+            this.itemPredicate = itemPredicate;
         }
 
         @NotNull
         @Override
         protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
             if (!generatedLoot.isEmpty()) {
-                generatedLoot.set(0, itemStack.copy());
+                for (int i = 0; i < generatedLoot.size(); i++) {
+                    ItemStack stack = generatedLoot.get(i);
+                    if (itemPredicate.isEmpty() || itemPredicate.get().test(stack)) {
+                        generatedLoot.set(i, itemStack.copy());
+                        break;
+                    }
+                }
             }
             return generatedLoot;
         }
