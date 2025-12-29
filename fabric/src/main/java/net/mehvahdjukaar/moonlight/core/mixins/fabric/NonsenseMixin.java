@@ -13,17 +13,20 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(targets = "net.minecraft.client.renderer.ShaderInstance$1")
 public class NonsenseMixin {
 
-    @Shadow @Final
+    @Shadow
+    @Final
     String val$relativePath;
 
     @WrapOperation(method = "applyImport", at = @At(value = "INVOKE", target = "Lnet/minecraft/FileUtil;normalizeResourcePath(Ljava/lang/String;)Ljava/lang/String;"))
     private String moonlight$identity(String path, Operation<String> original, @Local(argsOnly = true) boolean isRelative,
                                       @Local(ordinal = 0, argsOnly = true) String directory) {
-        if(directory.contains(":")) {
-            ResourceLocation loc = new ResourceLocation(directory);
-            String normalised = FileUtil.normalizeResourcePath((isRelative ? this.val$relativePath : "shaders/include/") + loc.getPath());
-            return new ResourceLocation(loc.getNamespace(), normalised).toString();
+        if (directory.contains(":")) {
+            ResourceLocation loc = ResourceLocation.tryParse(directory);
+            if (loc != null) {
+                String normalised = FileUtil.normalizeResourcePath((isRelative ? this.val$relativePath : "shaders/include/") + loc.getPath());
+                return new ResourceLocation(loc.getNamespace(), normalised).toString();
+            }
         }
-        else return original.call(path);
+        return original.call(path);
     }
 }
