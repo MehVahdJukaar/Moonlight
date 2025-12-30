@@ -1,2 +1,1 @@
-added tab removal
-removed some annoying logging
+fixed an issue with POI

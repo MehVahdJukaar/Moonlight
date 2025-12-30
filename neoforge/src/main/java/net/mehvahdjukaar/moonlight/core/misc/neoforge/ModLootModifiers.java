@@ -7,6 +7,9 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.neoforge.MoonlightForge;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.AmbientParticleSettings;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
@@ -92,6 +95,7 @@ public class ModLootModifiers {
 
         protected ReplaceItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack, Optional<ItemPredicate> itemPredicate) {
             super(conditionsIn);
+            Biome
             this.itemStack = addedItemStack;
             this.itemPredicate = itemPredicate;
         }
