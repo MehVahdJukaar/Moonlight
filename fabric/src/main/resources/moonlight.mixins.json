@@ -33,6 +33,7 @@
     "MinecraftServerMixin",
     "PackRepositoryAccessor",
     "PoiTypeAccessor",
+    "RegistryMixin",
     "ServerPackSourceMixin",
     "ServerPlayerAccessor"
   ],

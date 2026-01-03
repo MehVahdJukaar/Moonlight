@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 public class RegistryQueue<T> {
     private final ResourceKey<? extends Registry<T>> registry;
-    private final List<EntryWrapper<? extends T, T>> entries = new ArrayList<>();
+    private final List<RegEntryHolder<? extends T, T>> entries = new ArrayList<>();
     private final List<Consumer<Registrator<T>>> batchRegistration = new ArrayList<>();
 
     public RegistryQueue(ResourceKey<? extends Registry<T>> registry) {
@@ -35,8 +35,8 @@ public class RegistryQueue<T> {
         return registry;
     }
 
-    public <A extends T> EntryWrapper<A, T> add(Supplier<A> factory, ResourceLocation name) {
-        EntryWrapper<A, T> wrapper = new EntryWrapper<>(name, factory, registry);
+    public <A extends T> RegEntryHolder<A, T> add(Supplier<A> factory, ResourceLocation name) {
+        RegEntryHolder<A, T> wrapper = new RegEntryHolder<>(name, factory, registry);
         entries.add(wrapper);
         return wrapper;
     }
@@ -51,7 +51,7 @@ public class RegistryQueue<T> {
     }
 
 
-    static class EntryWrapper<T extends R, R> implements RegSupplier<T> {
+    public static class RegEntryHolder<T extends R, R> implements RegSupplier<T> {
         private ResourceKey<? extends Registry<R>> registryKey;
         private Supplier<T> regSupplier;
 
@@ -59,7 +59,7 @@ public class RegistryQueue<T> {
         private Holder<T> holder = null;
 
 
-        public EntryWrapper(ResourceLocation id, Supplier<T> factory, ResourceKey<? extends Registry<R>> registry) {
+        public RegEntryHolder(ResourceLocation id, Supplier<T> factory, ResourceKey<? extends Registry<R>> registry) {
             this.regSupplier = factory;
             this.id = ResourceKey.create(registry, id);
             this.registryKey = registry;
@@ -188,6 +188,17 @@ public class RegistryQueue<T> {
         @Override
         public String toString() {
             return String.format(Locale.ENGLISH, "RegistryHolderSupplier{%s}", this.id);
+        }
+
+        public Holder<T> getDelegate() {
+            initialize(false);
+            var h = this.holder;
+            if (h instanceof RegistryQueue.RegEntryHolder<?, ?> ro) {
+                return (Holder<T>) ro.getDelegate();
+            } else if (h != null) {
+                return h;
+            }
+            return this;
         }
     }
 }

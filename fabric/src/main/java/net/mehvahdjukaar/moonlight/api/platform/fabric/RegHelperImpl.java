@@ -57,7 +57,6 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -165,7 +164,7 @@ public class RegHelperImpl {
     }
 
     public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
-        RegistryQueue.EntryWrapper<E, T> entry = new RegistryQueue.EntryWrapper<>(name, supplier, reg);
+        RegistryQueue.RegEntryHolder<E, T> entry = new RegistryQueue.RegEntryHolder<>(name, supplier, reg);
         entry.initialize(true);
         return entry;
     }

@@ -1,1 +1,1 @@
-fixed an issue with POI
+fixed an issue on fabric due to holders

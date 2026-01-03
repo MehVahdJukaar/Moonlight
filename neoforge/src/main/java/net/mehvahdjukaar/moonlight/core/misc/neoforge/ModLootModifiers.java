@@ -95,7 +95,6 @@ public class ModLootModifiers {
 
         protected ReplaceItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack, Optional<ItemPredicate> itemPredicate) {
             super(conditionsIn);
-            Biome
             this.itemStack = addedItemStack;
             this.itemPredicate = itemPredicate;
         }

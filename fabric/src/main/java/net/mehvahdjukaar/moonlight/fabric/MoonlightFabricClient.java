@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ParticleEngineAccessor;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.core.Registry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,6 @@ public class MoonlightFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         //dont remove
         MoonlightFabric.commonSetup();
-
         ItemTooltipCallback.EVENT.register(MoonlightClient::onItemTooltip);
 
         PRE_CLIENT_SETUP_WORK.forEach(Runnable::run);
