@@ -6,20 +6,14 @@ import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientManager;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
-import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
-import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.mehvahdjukaar.moonlight.core.client.SimpleSpecialModelsLoader;
-import net.mehvahdjukaar.moonlight.core.client.SpawnBoxBlockEntityRenderer;
-import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
-import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +22,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector3f;
 
-import java.io.IOException;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -43,8 +36,7 @@ public class MoonlightClient {
         ClientHelper.addShaderRegistration(MoonlightClient::registerShaders);
         ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluids"));
         ClientHelper.addClientReloadListener(MapDecorationClientManager::new, Moonlight.res("map_markers"));
-       // var gen = new Gen();
-      //  gen.register();
+
 
         var specialModels = new SimpleSpecialModelsLoader();
         ClientHelper.addClientReloadListener(() -> specialModels, Moonlight.res("special_models_loader"));
@@ -52,7 +44,8 @@ public class MoonlightClient {
             specialModels.getSpecialModels().forEach(specialModelEvent::register);
         });
 
-        RegHelper.registerDynamicResourceProvider(new MLDynamicClientResources());
+        var gen = new MLDynamicClientResources();
+        gen.register();
 
     }
 
@@ -118,8 +111,8 @@ public class MoonlightClient {
     }
 
 
-    private static class Gen extends DynClientResourcesGenerator {
-        public Gen() {
+    private static class MLDynamicClientResources extends DynClientResourcesGenerator {
+        public MLDynamicClientResources() {
             super(new DynamicTexturePack(Moonlight.res("generated_pack")));
             this.dynamicPack.addNamespaces("minecraft");
         }

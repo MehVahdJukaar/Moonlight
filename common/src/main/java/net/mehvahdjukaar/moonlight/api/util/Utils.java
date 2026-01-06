@@ -1,12 +1,18 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.map.type.MapDecorationType;
 import net.mehvahdjukaar.moonlight.api.misc.InvPlacer;
+import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
+import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -19,6 +25,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
@@ -54,6 +62,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -62,8 +71,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -348,6 +358,67 @@ public class Utils {
         return null;
     }
 
+    public static final Codec<Boolean> MOD_LOADED_CODEC = Codec.STRING.xmap(PlatHelper::isModLoaded, b -> "");
+
+    public static <A> MapCodec<A> safeOptFieldOf(Codec<A> c, String name, Supplier<A> defaultValue) {
+        return Codec.optionalField(name, c).xmap(
+                (o) -> o.orElse(defaultValue.get()),
+                (a) -> Objects.equals(a, defaultValue.get()) ? Optional.empty() : Optional.of(a));
+    }
+
+    public static <T> Codec<T> optionalRegistryCodec(Registry<T> reg, T defaultValue) {
+        return ResourceLocation.CODEC.xmap(
+                rl -> {
+                    T value = reg.get(rl);
+                    return value == null ? defaultValue : value;
+                },
+                reg::getKey);
+    }
+
+
+    /**
+     * Like Registry::byNameCodec::listOf but won't fail for missing entries.
+     * No reason to use this really, use HolderSet codec instead
+     */
+    public static <T> Codec<List<T>> optionalRegistryListCodec(Registry<T> reg) {
+        return ResourceLocation.CODEC.listOf().xmap(
+                l -> l.stream().filter(reg::containsKey).map(reg::get).toList(),
+                a -> a.stream().map(reg::getKey).toList());
+    }
+
+
+   public static <T> Codec<T> withAlternativeCodec(final Codec<T> primary, final Codec<? extends T> alternative) {
+       return Codec.either(
+               primary,
+               alternative
+       ).xmap(
+               tEither -> tEither.map(Function.identity(), Function.identity()),
+               Either::left
+       );
+    }
+
+    public static <A> Codec<List<A>> lenientListOrSingleCodec(final Codec<A> elementCodec) {
+        return Codec.either(Utils.lenientListCodec(elementCodec), elementCodec)
+                .xmap(either -> either.map(Function.identity(), List::of), Either::left);
+    }
+
+    /**
+     * Like listOf but won't fail for missing entries.
+     */
+    public static <A> LenientListCodec<A> lenientListCodec(final Codec<A> elementCodec) {
+        return new LenientListCodec<>(elementCodec);
+    }
+
+    /**
+     * Lenient holder set
+     */
+    public static <E> Codec<HolderSet<E>> lenientHomogeneousList(ResourceKey<? extends Registry<E>> registryKey) {
+        return LenientHolderSetCodec.create(registryKey, RegistryFixedCodec.create(registryKey), false);
+    }
+
+    public static <A> Codec<A> validateCodec(Codec<A> c, final Function<A, DataResult<A>> checker) {
+        return c.flatXmap(checker, checker);
+    }
 
     @ExpectPlatform
     public static <K, V, C extends BaseMapCodec<K, V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec) {
@@ -380,5 +451,21 @@ public class Utils {
         return null;
     }
 
+    public static <T, U, D, R> TriFunction<T, U, D, R> memoize(final TriFunction<T, U,D, R> memoBiFunction) {
+        return new TriFunction<>() {
+            private final Map<Triplet<T, U, D>, R> cache = new ConcurrentHashMap<>();
+
+            public R apply(T object, U object2, D object3) {
+                return this.cache.computeIfAbsent(Triplet.of(object, object2, object3), (pair) ->
+                        memoBiFunction.apply(pair.left(), pair.middle(), pair.right()));
+            }
+
+            @Override
+            public String toString() {
+                String var10000 = String.valueOf(memoBiFunction);
+                return "memoize/3[function=" + var10000 + ", size=" + this.cache.size() + "]";
+            }
+        };
+    }
 
 }
