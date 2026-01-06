@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.item.additional_placements.BlockPlacerIte
 import net.mehvahdjukaar.moonlight.api.map.MLMapDecorationsComponent;
 import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.criteria_triggers.GrindItemTrigger;
@@ -33,6 +34,9 @@ public class MoonlightRegistry {
     @ApiStatus.Internal
     public static void init() {
     }
+
+    public static final Registry<ModItemListing> VILLAGER_TRADES_REGISTRY =
+            RegHelper.registerRegistry(res("villager_trades"), false);
 
     public static final Registry<WorldSavedDataType<?>> WORLD_SAVED_DATA_TYPE_REGISTRY =
             RegHelper.registerRegistry(res("world_saved_data_type"), true);

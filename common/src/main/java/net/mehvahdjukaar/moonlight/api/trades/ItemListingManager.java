@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.misc.CodecMapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.HolderLookup;
@@ -35,7 +36,7 @@ import java.util.*;
 public class ItemListingManager extends SimpleJsonResourceReloadListener {
 
     private static final SidedInstance<ItemListingManager> INSTANCE = SidedInstance.of(ItemListingManager::new);
-    protected static final CodecMapRegistry<ModItemListing> LISTING_TYPES = MapRegistry.ofCodec();
+    protected static final CodecMapRegistry<ModItemListing> LISTING_TYPES = RegHelper.ofCodec();
 
     @ApiStatus.Internal
     public static void init() {
