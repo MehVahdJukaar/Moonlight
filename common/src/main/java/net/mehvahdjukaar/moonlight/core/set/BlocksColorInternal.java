@@ -92,7 +92,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
         for (var json : object) {
             try {
                 ColorSetModification cs = ColorSetModification.CODEC.decode(JsonOps.INSTANCE, json)
-                        .getOrThrow().getFirst();
+                        .getOrThrow(false, a->{}).getFirst();
                 colorSets.add(cs);
             } catch (Exception ex) {
                 //we fail like this for mod compat stuff. TODO: make these support conditions
@@ -173,7 +173,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
 
             for (var mod : KNOWN_COLOR_MODS) {
                 for (var s : new String[]{namespace + ":" + path + "_%s", namespace + ":%s_" + path, mod + ":" + path + "_%s", mod + ":%s_" + path}) {
-                    var o = registry.getOptional(ResourceLocation.parse(String.format(s, c.getName())));
+                    var o = registry.getOptional(new ResourceLocation(String.format(s, c.getName())));
                     if (o.isPresent()) {
                         colorsToObj.setColor(c, o.get());
                         continue colors;
@@ -184,7 +184,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
 
         //fill default
         var o = registry.getOptional(id);
-        T def = o.orElseGet(() -> registry.getOptional(ResourceLocation.parse(id.getPath()))
+        T def = o.orElseGet(() -> registry.getOptional(new ResourceLocation(id.getPath()))
                 .orElseGet(() -> colorsToObj.getColor(DyeColor.WHITE)));
         colorsToObj.setColor(null, def);
     }

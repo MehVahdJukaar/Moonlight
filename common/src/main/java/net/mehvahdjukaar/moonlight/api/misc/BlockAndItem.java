@@ -33,9 +33,9 @@ public record BlockAndItem(@Nullable Block block, @Nullable Item item) {
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(BlockAndItem::item)
     ).apply(i, BlockAndItem::new));
 
-    public static final Codec<BlockAndItem> CODEC = Utils.withAlternative(Codec.withAlternative(DIRECT_CODEC,
+
+    public static final Codec<BlockAndItem> CODEC = Utils.withAlternativeCodec(Utils.withAlternativeCodec(DIRECT_CODEC,
                     BuiltInRegistries.BLOCK.byNameCodec().xmap(BlockAndItem::forBlock, BlockAndItem::block)),
             BuiltInRegistries.ITEM.byNameCodec().xmap(BlockAndItem::forItem, BlockAndItem::item));
-
 
 }
