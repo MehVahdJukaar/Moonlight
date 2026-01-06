@@ -241,11 +241,10 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
-        throw new AssertionError();
+        RegHelper.registerResourcePack(packType, packSupplier);
     }
-
 
     @Contract
     @ExpectPlatform

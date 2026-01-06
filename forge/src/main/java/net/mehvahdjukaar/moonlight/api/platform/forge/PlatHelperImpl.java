@@ -251,10 +251,6 @@ public class PlatHelperImpl {
         MinecraftForge.EVENT_BUS.addListener(eventConsumer);
     }
 
-    public static void registerResourcePack(PackType packType, @Nullable Supplier<Pack> packSupplier) {
-        RegHelper.registerResourcePack(packType, packSupplier);
-    }
-
     public static String getModVersion(String modId) {
         return ModList.get().getModContainerById(modId).map(v -> v.getModInfo().getVersion().toString()).orElse(null);
     }

@@ -7,6 +7,7 @@ import dev.architectury.injectables.annotations.PlatformOnly;
 import net.mehvahdjukaar.moonlight.api.integration.ModernFixCompat;
 import net.mehvahdjukaar.moonlight.api.misc.PathTrie;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
@@ -148,7 +149,7 @@ public abstract class DynamicResourcePack implements PackResources {
         } else {
             wasRegistered = true;
         }
-        PlatHelper.registerResourcePack(this.packType, () ->
+        RegHelper.registerResourcePack(this.packType, () ->
                 Pack.create(
                         this.packId(),    // id
                         this.getTitle(), // title
