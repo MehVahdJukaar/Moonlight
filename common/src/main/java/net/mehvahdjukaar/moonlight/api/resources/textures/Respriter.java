@@ -199,7 +199,7 @@ public class Respriter {
             boolean invalidSize = targetFrameCount > targetPalettes.size();
             if (originalFrameCount != 1 || invalidSize) {
                 if (invalidSize) {
-                    Moonlight.crashIfInDev("Respriter was given less palettes than needed!");
+                    Moonlight.logIfInDev("Respriter was given less palettes than needed!");
                 }
                 //it means original image is animated. Just use first palette given
                 Color2ColorMap singleColorMap = Color2ColorMap.create(originalPalette, targetPalettes.get(0));
