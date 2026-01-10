@@ -8,8 +8,7 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.mehvahdjukaar.moonlight.api.misc.CodecMapRegistry;
-import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
+import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
@@ -36,15 +35,15 @@ import java.util.*;
 public class ItemListingManager extends SimpleJsonResourceReloadListener {
 
     private static final SidedInstance<ItemListingManager> INSTANCE = SidedInstance.of(ItemListingManager::new);
-    protected static final CodecMapRegistry<ModItemListing> LISTING_TYPES = RegHelper.ofCodec();
 
     @ApiStatus.Internal
     public static void init() {
-        LISTING_TYPES.register(ResourceLocation.parse("simple"), SimpleItemListing.CODEC);
-        LISTING_TYPES.register(ResourceLocation.parse("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
-        LISTING_TYPES.register(ResourceLocation.parse("no_op"), NoOpListing.CODEC);
-        LISTING_TYPES.register(ResourceLocation.parse("villager_type_variant"), BiomeVariantItemListing.CODEC);
+        registerSerializer(ResourceLocation.parse("simple"), SimpleItemListing.CODEC);
+        registerSerializer(ResourceLocation.parse("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
+        registerSerializer(ResourceLocation.parse("no_op"), NoOpListing.CODEC);
+        registerSerializer(ResourceLocation.parse("villager_type_variant"), BiomeVariantItemListing.CODEC);
     }
+
 
     private final Map<EntityType<?>, Set<ModItemListing>> specialTradesAdded = new HashMap<>();
     private final Map<VillagerProfession, Set<ModItemListing>> tradesAdded = new HashMap<>();
@@ -141,8 +140,8 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
             ModItemListing listing = pair.getFirst();
             VillagerProfession profession = pair.getSecond();
             Int2ObjectMap<VillagerTrades.ItemListing[]> tradeMap = getTradeMapForProfession(profession);
-                addTrade(tradeMap, listing, true);
-                tradesAdded.computeIfAbsent(profession, k -> new HashSet<>()).add(listing);
+            addTrade(tradeMap, listing, true);
+            tradesAdded.computeIfAbsent(profession, k -> new HashSet<>()).add(listing);
         }
 
         // Apply entity-based additions
@@ -297,7 +296,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
     }
 
 
-    private static Optional<ModItemListing> parseOrThrow(JsonElement j, ResourceLocation id, DynamicOps<JsonElement> ops) {
+    private static Optional<? extends ModItemListing> parseOrThrow(JsonElement j, ResourceLocation id, DynamicOps<JsonElement> ops) {
         return ForgeHelper.conditionalCodec(ModItemListing.CODEC)
                 .parse(ops, j)
                 .getOrThrow();
@@ -336,7 +335,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
      * Call on mod setup. Register a new serializer for your trade
      */
     public static void registerSerializer(ResourceLocation id, MapCodec<? extends ModItemListing> trade) {
-        LISTING_TYPES.register(id, trade);
+        RegHelper.register(id, () -> SimpleItemListing.CODEC, MoonlightRegistry.VILLAGER_TRADES_REGISTRY.key());
     }
 
     /**

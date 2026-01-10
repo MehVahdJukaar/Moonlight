@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
@@ -17,6 +16,8 @@ import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
+import net.mehvahdjukaar.moonlight.api.util.codec.LenientListCodec;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
@@ -30,7 +31,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
@@ -72,10 +72,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -439,26 +440,22 @@ public class Utils {
         return null;
     }
 
+    @Deprecated(forRemoval = true)
     public static final Codec<Boolean> MOD_LOADED_CODEC = Codec.STRING.xmap(PlatHelper::isModLoaded, b -> "");
 
+    @Deprecated(forRemoval = true)
     public static <A> MapCodec<A> safeOptFieldOf(Codec<A> c, String name, Supplier<A> defaultValue) {
-        return Codec.optionalField(name, c, false).xmap(
-                (o) -> o.orElse(defaultValue.get()),
-                (a) -> Objects.equals(a, defaultValue.get()) ? Optional.empty() : Optional.of(a));
+        return CodecUtils.safeOptFieldOf(c, name, defaultValue);
     }
 
     @ExpectPlatform
     public static <K, V, C extends BaseMapCodec<K, V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec) {
-        throw new AssertionError();
+        return CodecUtils.optionalMapCodec(keyCodec, elementCodec);
     }
 
+    @Deprecated(forRemoval = true)
     public static <T> Codec<T> optionalRegistryCodec(Registry<T> reg, T defaultValue) {
-        return ResourceLocation.CODEC.xmap(
-                rl -> {
-                    T value = reg.get(rl);
-                    return value == null ? defaultValue : value;
-                },
-                reg::getKey);
+        return CodecUtils.optionalRegistryCodec(reg, defaultValue);
     }
 
 
@@ -466,12 +463,12 @@ public class Utils {
      * Like Registry::byNameCodec::listOf but won't fail for missing entries.
      * No reason to use this really, use HolderSet codec instead
      */
+    @Deprecated(forRemoval = true)
     public static <T> Codec<List<T>> optionalRegistryListCodec(Registry<T> reg) {
-        return ResourceLocation.CODEC.listOf().xmap(
-                l -> l.stream().filter(reg::containsKey).map(reg::get).toList(),
-                a -> a.stream().map(reg::getKey).toList());
+        return CodecUtils.optionalRegistryListCodec(reg);
     }
 
+    @Deprecated(forRemoval = true)
     public static final Codec<AABB> AABB_CODEC = RecordCodecBuilder.create(i -> i.group(
                     Vec3.CODEC.fieldOf("from").forGetter(AABB::getMinPosition),
                     Vec3.CODEC.fieldOf("to").forGetter(AABB::getMaxPosition)
@@ -479,42 +476,31 @@ public class Utils {
     );
 
 
+    @Deprecated(forRemoval = true)
     public static <A> Codec<List<A>> lenientListOrSingleCodec(final Codec<A> elementCodec) {
-        return Codec.either(Utils.lenientListCodec(elementCodec), elementCodec)
-                .xmap(either -> either.map(Function.identity(), List::of), Either::left);
+        return CodecUtils.lenientListOrSingleCodec(elementCodec);
     }
 
     /**
      * Like listOf but won't fail for missing entries.
      */
+    @Deprecated(forRemoval = true)
     public static <A> LenientListCodec<A> lenientListCodec(final Codec<A> elementCodec) {
-        return new LenientListCodec<>(elementCodec);
+        return CodecUtils.lenientListCodec(elementCodec);
     }
 
     /**
      * Lenient holder set
      */
+    @Deprecated(forRemoval = true)
     public static <E> Codec<HolderSet<E>> lenientHomogeneousList(ResourceKey<? extends Registry<E>> registryKey) {
-        return LenientHolderSetCodec.create(registryKey, RegistryFixedCodec.create(registryKey), false);
+        return CodecUtils.lenientHomogeneousList(registryKey);
     }
 
+    @Deprecated(forRemoval = true)
     public static <T extends Enum<T>> StreamCodec<FriendlyByteBuf, T> enumStreamCodec(Class<T> enumClass) {
-        return new EnumStreamCodec<>(enumClass);
+        return CodecUtils.enumStreamCodec(enumClass);
     }
-
-    private record EnumStreamCodec<T extends Enum<T>>(Class<T> enumClass) implements StreamCodec<FriendlyByteBuf, T> {
-
-        @Override
-        public T decode(FriendlyByteBuf buf) {
-            return buf.readEnum(this.enumClass);
-        }
-
-        @Override
-        public void encode(FriendlyByteBuf buf, T e) {
-            buf.writeEnum(e);
-        }
-    }
-
 
     public static ResourceLocation idWithOptionalNamespace(String id, String namespace) {
         if (id.contains(":")) {
@@ -542,7 +528,7 @@ public class Utils {
         return null;
     }
 
-    public static <T, U, D, R> TriFunction<T, U, D, R> memoize(final TriFunction<T, U,D, R> memoBiFunction) {
+    public static <T, U, D, R> TriFunction<T, U, D, R> memoize(final TriFunction<T, U, D, R> memoBiFunction) {
         return new TriFunction<>() {
             private final Map<Triplet<T, U, D>, R> cache = new ConcurrentHashMap<>();
 

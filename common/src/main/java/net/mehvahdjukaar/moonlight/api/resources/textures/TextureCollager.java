@@ -15,7 +15,6 @@ public class TextureCollager {
 
     public void apply(TextureImage source, TextureImage destination) {
 
-
         float scaleSourceX = source.frameWidth() / (float) originFrameW;
         float scaleSourceY = source.frameHeight() / (float) originFrameH;
         float scaleTargetX = destination.frameWidth() / (float) targetFrameW;
@@ -25,45 +24,58 @@ public class TextureCollager {
         int targetFrames = destination.frameCount();
         int maxFrames = Math.max(sourceFrames, targetFrames);
 
-
         for (int i = 0; i < maxFrames; i++) {
             int cappedSourceFrame = Math.min(i, sourceFrames - 1);
             int cappedTargetFrame = Math.min(i, targetFrames - 1);
 
             Sampler2D sourceFrameSampler = source.frameSampler(cappedSourceFrame);
             sourceFrameSampler = Sampler2D.scale(sourceFrameSampler, scaleSourceX, scaleSourceY);
+
             for (Operation op : operations) {
 
                 Sampler2D sampler = op.makeSampler(sourceFrameSampler);
 
+                int scaledW = Math.round(op.targetW * scaleTargetX);
+                int scaledH = Math.round(op.targetH * scaleTargetY);
 
-                //we sample in target space now since original scaling sampler takes care of it
-                for (int ty = 0; ty < op.targetH; ty++) {
-                    for (int tx = 0; tx < op.targetW; tx++) {
-                        int color = sampler.sample(tx, ty);
+                int dstBaseX = Math.round(op.targetX * scaleTargetX);
+                int dstBaseY = Math.round(op.targetY * scaleTargetY);
+
+                for (int ty = 0; ty < scaledH; ty++) {
+                    for (int tx = 0; tx < scaledW; tx++) {
+
+                        float srcX = tx / scaleTargetX;
+                        float srcY = ty / scaleTargetY;
+
+                        int color = sampler.sample(srcX, srcY);
+
                         if (op.palettes != null) {
-                            int maxPaletteIndex = Math.min(source.frameCount(), op.palettes.size());
+                            int maxPaletteIndex = Math.min(source.frameCount(), op.palettes.size() - 1);
                             color = op.palettes.get(maxPaletteIndex)
                                     .getColorClosestTo(new PaletteColor(color))
                                     .value();
                         }
+
                         if (op.blended) {
-                            destination.blendFramePixel(cappedTargetFrame,
-                                    (int) ((op.targetX + tx) * scaleTargetX),
-                                    (int) ((op.targetY + ty) * scaleTargetY),
-                                    color);
+                            destination.blendFramePixel(
+                                    cappedTargetFrame,
+                                    dstBaseX + tx,
+                                    dstBaseY + ty,
+                                    color
+                            );
                         } else {
-                            destination.setFramePixel(cappedTargetFrame,
-                                    (int) ((op.targetX + tx) * scaleTargetX),
-                                    (int) ((op.targetY + ty) * scaleTargetY),
-                                    color);
+                            destination.setFramePixel(
+                                    cappedTargetFrame,
+                                    dstBaseX + tx,
+                                    dstBaseY + ty,
+                                    color
+                            );
                         }
                     }
                 }
             }
         }
     }
-
 
     private TextureCollager(int originalW, int originalH, int targetW, int targetH, List<Operation> list) {
         this.originFrameW = originalW;

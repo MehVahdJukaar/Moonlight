@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api;
 
+import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.BlockPlacerItem;
 import net.mehvahdjukaar.moonlight.api.map.MLMapDecorationsComponent;
 import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
@@ -35,7 +36,7 @@ public class MoonlightRegistry {
     public static void init() {
     }
 
-    public static final Registry<ModItemListing> VILLAGER_TRADES_REGISTRY =
+    public static final Registry<MapCodec<? extends ModItemListing>> VILLAGER_TRADES_REGISTRY =
             RegHelper.registerRegistry(res("villager_trades"), false);
 
     public static final Registry<WorldSavedDataType<?>> WORLD_SAVED_DATA_TYPE_REGISTRY =

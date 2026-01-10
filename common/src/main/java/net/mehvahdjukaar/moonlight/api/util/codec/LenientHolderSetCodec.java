@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.util;
+package net.mehvahdjukaar.moonlight.api.util.codec;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
