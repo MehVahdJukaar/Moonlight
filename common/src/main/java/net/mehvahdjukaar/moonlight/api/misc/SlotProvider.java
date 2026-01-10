@@ -50,8 +50,12 @@ public interface SlotProvider {
                 @Override
                 public boolean add(ItemStack toAdd, Inventory inv, Player player) {
                     ItemStack current = getStack();
+                    if (current.isEmpty()){
+                        inv.setItem(slot, toAdd);
+                        return true;
+                    }
                     //vanilla doesn't do this for some reason... calling add alone will just incrememnt the count of an existing item
-                    if (!current.isEmpty() && !inv.hasRemainingSpaceForItem(current, toAdd)) return false;
+                    if (!inv.hasRemainingSpaceForItem(current, toAdd)) return false;
 
                     //same as vanilla .add but no damageable and creative bs logic
                     if (toAdd.isEmpty()) {
