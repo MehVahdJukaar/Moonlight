@@ -1,5 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
+import net.mehvahdjukaar.moonlight.api.resources.textures.Palette;
+import net.mehvahdjukaar.moonlight.api.resources.textures.PaletteColor;
+import net.mehvahdjukaar.moonlight.api.resources.textures.Sampler2D;
+import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.minecraft.world.level.block.Rotation;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,29 +33,94 @@ public class TextureCollager {
             int cappedTargetFrame = Math.min(i, targetFrames - 1);
 
             Sampler2D sourceFrameSampler = source.frameSampler(cappedSourceFrame);
-            sourceFrameSampler = Sampler2D.scale(sourceFrameSampler, scaleSourceX, scaleSourceY);
 
             for (Operation op : operations) {
 
-                Sampler2D sampler = op.makeSampler(sourceFrameSampler);
+                int scaledSourceX = Math.round(op.sourceX * scaleSourceX);
+                int scaledSourceY = Math.round(op.sourceY * scaleSourceY);
+                int scaledSourceW = Math.round(op.sourceW * scaleSourceX);
+                int scaledSourceH = Math.round(op.sourceH * scaleSourceY);
 
-                int scaledW = Math.round(op.targetW * scaleTargetX);
-                int scaledH = Math.round(op.targetH * scaleTargetY);
+                int scaledTargetX = Math.round(op.targetX * scaleTargetX);
+                int scaledTargetY = Math.round(op.targetY * scaleTargetY);
+                int scaledTargetW = Math.round(op.targetW * scaleTargetX);
+                int scaledTargetH = Math.round(op.targetH * scaleTargetY);
 
-                int dstBaseX = Math.round(op.targetX * scaleTargetX);
-                int dstBaseY = Math.round(op.targetY * scaleTargetY);
+                Sampler2D sampler = Sampler2D.offset(
+                        sourceFrameSampler,
+                        scaledSourceX,
+                        scaledSourceY
+                );
 
-                for (int ty = 0; ty < scaledH; ty++) {
-                    for (int tx = 0; tx < scaledW; tx++) {
+                sampler = Sampler2D.clamp(sampler, scaledSourceW, scaledSourceH);
 
-                        float srcX = tx / scaleTargetX;
-                        float srcY = ty / scaleTargetY;
+                if (op.bilinear) {
+                    sampler = Sampler2D.bilinear(sampler);
+                }
+
+                // ----- FLIP IN PIXEL SPACE -----
+                int flipW = scaledSourceW;
+                int flipH = scaledSourceH;
+                if (op.rotation == Rotation.CLOCKWISE_90
+                        || op.rotation == Rotation.COUNTERCLOCKWISE_90) {
+                    flipW = scaledSourceH;
+                    flipH = scaledSourceW;
+                }
+
+                if (op.flipX) {
+                    sampler = Sampler2D.flippedX(sampler, flipW);
+                }
+                if (op.flipY) {
+                    sampler = Sampler2D.flippedY(sampler, flipH);
+                }
+
+                // ----- ROTATION -----
+                if (op.rotation != Rotation.NONE) {
+                    sampler = Sampler2D.rotate(
+                            sampler,
+                            op.rotation,
+                            scaledSourceW,
+                            scaledSourceH
+                    );
+                }
+
+                // ----- MOVE TO PIXEL CENTERS -----
+                sampler = Sampler2D.offset(sampler, -0.5f, -0.5f);
+
+                float opScaleX = scaledSourceW / (float) scaledTargetW;
+                float opScaleY = scaledSourceH / (float) scaledTargetH;
+
+                if (opScaleX != 1.0f || opScaleY != 1.0f) {
+                    sampler = Sampler2D.scale(sampler, opScaleX, opScaleY);
+                }
+
+                sampler = Sampler2D.offset(sampler, 0.5f, 0.5f);
+
+                int actualW = Math.min(
+                        scaledTargetW,
+                        destination.frameWidth() - scaledTargetX
+                );
+                int actualH = Math.min(
+                        scaledTargetH,
+                        destination.frameHeight() - scaledTargetY
+                );
+
+                for (int ty = 0; ty < actualH; ty++) {
+                    for (int tx = 0; tx < actualW; tx++) {
+
+                        float srcX = (tx + 0.5f) * opScaleX;
+                        float srcY = (ty + 0.5f) * opScaleY;
+
+                        srcX = Math.min(srcX, scaledSourceW - 0.5f);
+                        srcY = Math.min(srcY, scaledSourceH - 0.5f);
 
                         int color = sampler.sample(srcX, srcY);
 
                         if (op.palettes != null) {
-                            int maxPaletteIndex = Math.min(source.frameCount(), op.palettes.size() - 1);
-                            color = op.palettes.get(maxPaletteIndex)
+                            int maxPaletteIndex =
+                                    Math.min(source.frameCount(), op.palettes.size() - 1);
+                            color = op.palettes
+                                    .get(maxPaletteIndex)
                                     .getColorClosestTo(new PaletteColor(color))
                                     .value();
                         }
@@ -59,15 +128,15 @@ public class TextureCollager {
                         if (op.blended) {
                             destination.blendFramePixel(
                                     cappedTargetFrame,
-                                    dstBaseX + tx,
-                                    dstBaseY + ty,
+                                    scaledTargetX + tx,
+                                    scaledTargetY + ty,
                                     color
                             );
                         } else {
                             destination.setFramePixel(
                                     cappedTargetFrame,
-                                    dstBaseX + tx,
-                                    dstBaseY + ty,
+                                    scaledTargetX + tx,
+                                    scaledTargetY + ty,
                                     color
                             );
                         }
@@ -76,6 +145,7 @@ public class TextureCollager {
             }
         }
     }
+
 
     private TextureCollager(int originalW, int originalH, int targetW, int targetH, List<Operation> list) {
         this.originFrameW = originalW;
@@ -94,47 +164,6 @@ public class TextureCollager {
                              int targetX, int targetY, int targetW, int targetH,
                              boolean flipX, boolean flipY, Rotation rotation, boolean bilinear,
                              boolean blended, @Nullable List<Palette> palettes) {
-
-
-        private Sampler2D makeSampler(Sampler2D sampler) {
-
-            sampler = Sampler2D.offset(sampler, sourceX, sourceY);
-            //   sampler = Sampler2D.clamp(sampler, 0, 0, sourceW, sourceH);
-
-            if (bilinear) {
-                sampler = Sampler2D.bilinear(sampler);
-            }
-
-            sampler = Sampler2D.offset(sampler, -0.5f, -0.5f);
-
-            if (flipX) {
-                // Width & sourceH may swap after rotation
-                int w = (rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90) ? sourceH : sourceW;
-                sampler = Sampler2D.flippedX(sampler, w);
-            }
-
-            // Add flip Y support - you might want a new boolean flag, e.g. flippedY
-            if (flipY) {  // <-- You’ll need to add this boolean to your Operation class
-                int h = (rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90) ? sourceW : sourceH;
-                sampler = Sampler2D.flippedY(sampler, h);
-            }
-
-            if (rotation != Rotation.NONE) {
-                sampler = Sampler2D.rotate(sampler, rotation, sourceW, sourceH);
-            }
-
-            sampler = Sampler2D.offset(sampler, 0.5f, 0.5f);
-
-            float opScaleW = sourceW / (float) targetW;
-            float opScaleH = sourceH / (float) targetH;
-
-            if (opScaleW != 1 || opScaleH != 1) {
-                sampler = Sampler2D.scale(sampler, opScaleW, opScaleH);
-            }
-
-
-            return sampler;
-        }
     }
 
     public static class Builder {
@@ -159,7 +188,7 @@ public class TextureCollager {
 
         public TextureCollager build() {
             addLast();
-            return new TextureCollager(originalFrameW, originalFrameH, targetFrameW, targetFrameH, java.util.List.copyOf(operations));
+            return new TextureCollager(originalFrameW, originalFrameH, targetFrameW, targetFrameH, List.copyOf(operations));
         }
 
         public Builder copyFrom(int x, int y, int w, int h) {
@@ -220,9 +249,20 @@ public class TextureCollager {
         private void addLast() {
             if (targetX == null) return;
             validate();
-            // Default target size
-            if (targetW == null) targetW = fromW;
-            if (targetH == null) targetH = fromH;
+
+            // Handle automatic dimension adjustment for rotations
+            if (targetW == null || targetH == null) {
+                // Check if rotation swaps dimensions
+                boolean dimensionsSwapped = rotation == Rotation.CLOCKWISE_90 ||
+                        rotation == Rotation.COUNTERCLOCKWISE_90;
+
+                if (targetW == null) {
+                    targetW = dimensionsSwapped ? fromH : fromW;
+                }
+                if (targetH == null) {
+                    targetH = dimensionsSwapped ? fromW : fromH;
+                }
+            }
 
             // Add operation to parent builder list
             operations.add(new Operation(
@@ -231,8 +271,15 @@ public class TextureCollager {
                     flipX, flipY, rotation,
                     bilinear, blended, palettes));
 
-            //clear
+            // Clear operation state for next operation
             fromX = fromY = fromW = fromH = null;
+            targetX = targetY = null;
+            targetW = targetH = null;
+            flipX = flipY = false;
+            rotation = Rotation.NONE;
+            bilinear = false;
+            blended = false;
+            palettes = null;
         }
 
         private void validate() {

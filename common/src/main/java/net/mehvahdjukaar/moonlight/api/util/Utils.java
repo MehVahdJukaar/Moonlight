@@ -448,7 +448,7 @@ public class Utils {
         return CodecUtils.safeOptFieldOf(c, name, defaultValue);
     }
 
-    @ExpectPlatform
+    @Deprecated(forRemoval = true)
     public static <K, V, C extends BaseMapCodec<K, V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec) {
         return CodecUtils.optionalMapCodec(keyCodec, elementCodec);
     }

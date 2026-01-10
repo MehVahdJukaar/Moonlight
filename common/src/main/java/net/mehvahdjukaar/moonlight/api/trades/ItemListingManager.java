@@ -38,10 +38,10 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
 
     @ApiStatus.Internal
     public static void init() {
-        registerSerializer(ResourceLocation.parse("simple"), SimpleItemListing.CODEC);
-        registerSerializer(ResourceLocation.parse("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
-        registerSerializer(ResourceLocation.parse("no_op"), NoOpListing.CODEC);
-        registerSerializer(ResourceLocation.parse("villager_type_variant"), BiomeVariantItemListing.CODEC);
+        registerSerializer(Moonlight.res("simple"), SimpleItemListing.CODEC);
+        registerSerializer(Moonlight.res("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
+        registerSerializer(Moonlight.res("no_op"), NoOpListing.CODEC);
+        registerSerializer(Moonlight.res("villager_type_variant"), BiomeVariantItemListing.CODEC);
     }
 
 

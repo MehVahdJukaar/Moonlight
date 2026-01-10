@@ -12,8 +12,7 @@ public interface ModItemListing extends VillagerTrades.ItemListing {
 
     Codec<ModItemListing> CODEC = CodecUtils.remapNamespaceCodec(
                     MoonlightRegistry.VILLAGER_TRADES_REGISTRY, "minecraft", Moonlight.MOD_ID)
-            .dispatch(
-                    ModItemListing::getCodec, mapCodec -> mapCodec);
+            .dispatch(ModItemListing::getCodec, mapCodec -> mapCodec);
 
     default int getLevel() {
         return 1;
