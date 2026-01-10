@@ -78,7 +78,10 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
         for (var e : jsons.entrySet()) {
             JsonElement json = e.getValue();
             ResourceLocation id = e.getKey();
-            if (!id.getPath().contains("/")) continue;
+            if (!id.getPath().contains("/")){
+                Moonlight.LOGGER.error("Invalid villager trade id: {}. Must be in format <profession>/<trade>", id);
+                continue;
+            }
             ResourceLocation targetId = id.withPath(p -> p.substring(0, p.lastIndexOf('/')));
             var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(targetId);
             if (profession.isPresent()) {
@@ -335,7 +338,7 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
      * Call on mod setup. Register a new serializer for your trade
      */
     public static void registerSerializer(ResourceLocation id, MapCodec<? extends ModItemListing> trade) {
-        RegHelper.register(id, () -> SimpleItemListing.CODEC, MoonlightRegistry.VILLAGER_TRADES_REGISTRY.key());
+        RegHelper.register(id, () -> trade, MoonlightRegistry.VILLAGER_TRADES_REGISTRY.key());
     }
 
     /**
