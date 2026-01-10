@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.util.codec;
 
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.OptionalFieldCodec;
-import net.mehvahdjukaar.polytone.Polytone;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -36,7 +36,7 @@ public class LenientCodecWithLog<A> extends OptionalFieldCodec<A> {
         }
         final DataResult<A> parsed = elementCodec.parse(ops, value);
         if (parsed.isError()) {
-            Polytone.LOGGER.error("Failed to parse {}: {}. Skipping", name, parsed.error());
+            Moonlight.LOGGER.error("Failed to parse {}: {}. Skipping", name, parsed.error());
             return DataResult.success(Optional.empty());
         }
         return parsed.map(Optional::of).setPartial(parsed.resultOrPartial());

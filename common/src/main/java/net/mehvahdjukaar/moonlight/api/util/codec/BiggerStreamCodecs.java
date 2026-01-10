@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.misc;
+package net.mehvahdjukaar.moonlight.api.util.codec;
 
 import com.mojang.datafixers.util.Function7;
 import com.mojang.datafixers.util.Function8;
@@ -7,7 +7,6 @@ import net.minecraft.network.codec.StreamCodec;
 
 import java.util.function.Function;
 
-@Deprecated(forRemoval = true)
 public class BiggerStreamCodecs {
 
     //T7
