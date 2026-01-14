@@ -100,7 +100,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
             }
         }
 
-        this.state = this.state.cloneModified(colorSets);
+        this.state = this.defaultState.cloneModified(colorSets);
     }
 
 

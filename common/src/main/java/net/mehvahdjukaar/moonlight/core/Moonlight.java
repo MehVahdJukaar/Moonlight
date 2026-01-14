@@ -103,6 +103,9 @@ public class Moonlight {
                 WoodType.class, BuiltInRegistries.BLOCK_ENTITY_TYPE);
 
         addGlobalDatapackLoader();
+        PlatHelper.addServerReloadListener(BlocksColorInternal.INSTANCE,
+                Moonlight.res("blocks_color_data"));
+
 
         //client init
         if (PlatHelper.getPhysicalSide().isClient()) {

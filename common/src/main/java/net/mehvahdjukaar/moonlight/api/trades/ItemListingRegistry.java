@@ -52,7 +52,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
 
     public ItemListingRegistry() {
-        super(new Gson(), "moonlight/villager_trade");
+        super(new Gson(), "moonlight/villager_trades");
     }
 
     @Override
