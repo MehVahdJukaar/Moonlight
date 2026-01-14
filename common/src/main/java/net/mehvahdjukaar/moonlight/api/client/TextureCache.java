@@ -1,14 +1,16 @@
 package net.mehvahdjukaar.moonlight.api.client;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
+import net.mehvahdjukaar.moonlight.api.misc.TriResult;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
+import pepjebs.mapatlases.utils.TriState;
 
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 //used for quick access when recoloring textures
@@ -34,25 +36,35 @@ public class TextureCache {
         CACHED_TEXTURES.clear();
     }
 
+    @Deprecated(forRemoval = true)
     @Nullable
     public static String getCached(ItemLike block, Predicate<String> texturePredicate) {
+        return getCachedTexture(block, texturePredicate).getObject();
+    }
+
+    public static TriResult<String> getCachedTexture(ItemLike block, Predicate<String> texturePredicate) {
         var special = SPECIAL_TEXTURES.get(block);
         if (special != null) {
             for (var e : special) {
-                if (texturePredicate.test(e.getFirst())) return e.getSecond();
+                if (texturePredicate.test(e.getFirst())){
+                    return TriResult.success(e.getSecond());
+                }
             }
         }
         var list = CACHED_TEXTURES.get(block);
         if (list != null) {
             for (var e : list) {
-                if (texturePredicate.test(e)) return e;
+                if (texturePredicate.test(e)) return TriResult.success(e);
             }
+            return TriResult.fail();
         }
-        return null;
+        return TriResult.pass();
     }
 
     public static void add(ItemLike block, String t) {
         CACHED_TEXTURES.computeIfAbsent(block, b -> new HashSet<>()).add(t);
     }
+
+
 
 }

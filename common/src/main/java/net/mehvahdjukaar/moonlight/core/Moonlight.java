@@ -94,7 +94,7 @@ public class Moonlight {
         PlatHelper.addReloadableCommonSetup(Moonlight::afterDataReloadOrDataSync);
 
         PlatHelper.addServerReloadListener(ItemListingManager::new, Moonlight.res("villager_trade"));
-
+        PlatHelper.addServerReloadListener((e)->BlocksColorInternal.INSTANCE, Moonlight.res("blocks_color"));
         addGlobalDatapackLoader();
 
         //client init

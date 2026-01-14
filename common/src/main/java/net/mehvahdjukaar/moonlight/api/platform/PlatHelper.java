@@ -360,6 +360,7 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    //TODO: move to reg
     @Deprecated(forRemoval = true)
     public static void addServerReloadListener(PreparableReloadListener listener, ResourceLocation location) {
         addServerReloadListener(provider -> listener, location);

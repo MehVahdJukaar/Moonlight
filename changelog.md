@@ -1,1 +1,1 @@
-fixed an upsie with villager trades
+fixed an issue with block colors
