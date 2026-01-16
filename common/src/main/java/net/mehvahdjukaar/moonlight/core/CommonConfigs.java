@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
@@ -26,6 +27,20 @@ public class CommonConfigs {
                 .define("faster_cache_search", true);
         GLOBAL_DATAPACKS_DIR = builder.comment("Global datapack folder. A folder where you can store and load datapacks for all your worlds automatically. Set to empty string to disable")
                 .define("global_datapacks_folder", "moonlight-global-datapacks");
+
+
+        if(PlatHelper.isDev()){
+            builder.comment("category comment");
+
+            builder
+                    .comment("test comment 1")
+                    .define("test", false);
+            builder
+                    .comment("test comment 2 ")
+                    .define("test", 2.0, 0, 22);
+            builder.pop();
+        }
+
         builder.pop();
 
         CONFIG = builder.build();

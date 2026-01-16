@@ -122,7 +122,7 @@ public class YACLCompat {
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         } else if (entry instanceof StringConfigValue sc) {
-            var e = Option.createBuilder(String.class)
+            var e = Option.<String>createBuilder()
                     .name(sc.getTranslation())
                     .binding(sc.getDefaultValue(), sc, sc::set)
                     .controller(StringControllerBuilder::create);
@@ -167,7 +167,7 @@ public class YACLCompat {
     private static final ValueFormatter<Float> FLOAT_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
 
     private static <T extends Enum<T>> Option<T> addEnum(EnumConfigValue<T> ec) {
-        var e = Option.createBuilder(ec.getEnumClass())
+        var e = Option.<T>createBuilder()
                 .name(ec.getTranslation())
                 .binding(ec.getDefaultValue(), ec, ec::set)
                 .controller(EnumControllerBuilder::create);

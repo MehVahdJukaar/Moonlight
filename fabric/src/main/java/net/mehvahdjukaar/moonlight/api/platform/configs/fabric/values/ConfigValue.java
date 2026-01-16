@@ -62,7 +62,7 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T> 
         return rawComment;
     }
 
-    public void getRawComment(String rawDescription) {
+    public void setRawComment(String rawDescription) {
         this.rawComment = rawDescription;
     }
 

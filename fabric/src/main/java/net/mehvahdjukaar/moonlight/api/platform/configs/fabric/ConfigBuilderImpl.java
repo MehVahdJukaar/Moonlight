@@ -68,7 +68,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var tooltipKey = this.tooltipKey(name);
         if (this.translations.containsKey(tooltipKey)) {
             config.setCommentKey(tooltipKey);
-            config.getRawComment(this.translations.get(tooltipKey));
+            config.setRawComment(this.translations.get(tooltipKey));
         }
 
         this.categoryStack.peek().addEntry(config);
