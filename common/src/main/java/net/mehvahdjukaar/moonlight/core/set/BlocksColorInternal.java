@@ -21,6 +21,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
@@ -96,7 +97,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
                 colorSets.add(cs);
             } catch (Exception ex) {
                 //we fail like this for mod compat stuff. TODO: make these support conditions
-                Moonlight.LOGGER.info("Failed to load custom color set definition {}. Ignoring", json, ex);
+                Moonlight.LOGGER.info("Failed to load a custom color set definition. Ignoring");
             }
         }
 

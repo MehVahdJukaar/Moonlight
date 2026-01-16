@@ -1,0 +1,13 @@
+{
+  "type": "simple",
+  "max_trades": 16,
+  "offer": {
+    "id": "minecraft:emerald",
+    "Count": 1
+  },
+  "price": {
+    "id": "minecraft:cobblestone",
+    "Count": 22
+  },
+  "level": 1
+}

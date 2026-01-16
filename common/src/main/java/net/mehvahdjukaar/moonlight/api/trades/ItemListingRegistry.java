@@ -73,7 +73,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
             ResourceLocation targetId = id.withPath(p -> p.substring(0, p.lastIndexOf('/')));
             var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(targetId);
             if (profession.isPresent()) {
-                ModItemListing trade = parseOrThrow(json, id, ops).orElse(null);
+                ModItemListing trade = parseOrThrow(json, id, ops);
                 if (trade == null || (trade instanceof NoOpListing)) {
                     continue;
                 } else if (trade instanceof RemoveNonDataListingListing rl) {
@@ -85,7 +85,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
             }
             var entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(targetId);
             if (entityType.isPresent()) {
-                ModItemListing trade = parseOrThrow(json, id, ops).orElse(null);
+                ModItemListing trade = parseOrThrow(json, id, ops);
                 if (trade == null || (trade instanceof NoOpListing)) {
                     continue;
                 } else if (trade instanceof RemoveNonDataListingListing rl) {
@@ -287,9 +287,10 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
     }
 
 
-    private static Optional<ModItemListing> parseOrThrow(JsonElement j, ResourceLocation id, DynamicOps<JsonElement> ops) {
-        return ModItemListing.CODEC
-                .parse(ops, j).result();
+    private static ModItemListing parseOrThrow(JsonElement j, ResourceLocation id, DynamicOps<JsonElement> ops) {
+        return ModItemListing.CODEC.parse(ops, j).getOrThrow(
+                false, s ->  Moonlight.LOGGER.error("Failed to parse villager trade {}: {}", id, s)
+        );
     }
 
     public static List<? extends VillagerTrades.ItemListing> getVillagerListings(VillagerProfession profession, int level) {

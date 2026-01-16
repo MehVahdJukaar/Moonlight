@@ -1,1 +1,1 @@
-fixed some stuff related to backports
+fixed an issue with trades
