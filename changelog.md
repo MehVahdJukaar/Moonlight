@@ -1,1 +1,1 @@
-fixed an issue with block colors
+fixed an issue with optional registry suppliers

@@ -27,7 +27,7 @@ public class OptRegSupplier<A> implements RegSupplier<A> {
     private final ResourceKey<A> key;
 
     protected OptRegSupplier(Registry<A> reg, ResourceLocation loc) {
-        this.supp = Suppliers.memoize(() -> reg.get(loc));
+        this.supp = Suppliers.memoize(() -> reg.getOptional(loc).orElse(null));
         this.holderSupplier = Suppliers.memoize(() -> reg.getHolder(loc).orElse(null));
         this.id = loc;
         this.key = ResourceKey.create(reg.key(), loc);
@@ -55,6 +55,7 @@ public class OptRegSupplier<A> implements RegSupplier<A> {
         return Optional.ofNullable(holderSupplier.get());
     }
 
+    @Nullable
     @Override
     public A value() {
         return this.get();

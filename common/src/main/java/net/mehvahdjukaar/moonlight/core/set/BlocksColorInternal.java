@@ -95,7 +95,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
                 colorSets.add(cs);
             } catch (Exception ex) {
                 //we fail like this for mod compat stuff. TODO: make these support conditions
-                Moonlight.LOGGER.info("Failed to load custom color set definition {}. Ignoring", json, ex);
+                Moonlight.LOGGER.info("Failed to load custom color set definition {}. Ignoring", json);
             }
         }
 

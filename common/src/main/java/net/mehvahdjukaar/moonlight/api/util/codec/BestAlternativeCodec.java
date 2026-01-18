@@ -7,13 +7,13 @@ import com.mojang.serialization.DynamicOps;
 
 import java.util.function.BiPredicate;
 
-public class BestAlternativeCodec<A,B extends A,C extends A> implements Codec<A> {
+public class BestAlternativeCodec<A, B extends A, C extends A> implements Codec<A> {
 
     private final Codec<B> first;
     private final Codec<C> second;
-    private final BiPredicate<B,C> chooseFirst;
+    private final BiPredicate<B, C> chooseFirst;
 
-    public BestAlternativeCodec(Codec<B> first, Codec<C> second, BiPredicate<B,C> chooseFirst) {
+    public BestAlternativeCodec(Codec<B> first, Codec<C> second, BiPredicate<B, C> chooseFirst) {
         this.first = first;
         this.second = second;
         this.chooseFirst = chooseFirst;
@@ -23,7 +23,7 @@ public class BestAlternativeCodec<A,B extends A,C extends A> implements Codec<A>
     public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> ops, T input) {
         DataResult<Pair<B, T>> firstRead = first.decode(ops, input);
         DataResult<Pair<C, T>> secondRead = second.decode(ops, input);
-        if(firstRead.isSuccess() && secondRead.isSuccess()) {
+        if (firstRead.isSuccess() && secondRead.isSuccess()) {
             B b = firstRead.result().orElseThrow().getFirst();
             C c = secondRead.result().orElseThrow().getFirst();
             if (chooseFirst.test(b, c)) {
@@ -44,12 +44,17 @@ public class BestAlternativeCodec<A,B extends A,C extends A> implements Codec<A>
 
     @Override
     public <T> DataResult<T> encode(A input, DynamicOps<T> ops, T prefix) {
-        try{
+        try {
             B b = (B) input;
             return first.encode(b, ops, prefix);
-        }catch (Exception e){
+        } catch (Exception e) {
             C c = (C) input;
             return second.encode(c, ops, prefix);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "BestAlternativeCodec[" + first + ", " + second + "]";
     }
 }

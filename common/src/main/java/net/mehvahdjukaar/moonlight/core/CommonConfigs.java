@@ -30,6 +30,7 @@ public class CommonConfigs {
 
 
         if(PlatHelper.isDev()){
+            builder.push("test_category");
             builder.comment("category comment");
 
             builder

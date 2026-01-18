@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util.codec;
 
+import com.mojang.datafixers.util.Function10;
 import com.mojang.datafixers.util.Function7;
 import com.mojang.datafixers.util.Function8;
 import com.mojang.datafixers.util.Function9;
@@ -166,7 +167,7 @@ public class BiggerStreamCodecs {
             final Function<C, T9> getter9,
             final StreamCodec<? super B, T10> codec10,
             final Function<C, T10> getter10,
-            final Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, C> factory) {
+            final Function10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, C> factory) {
         return new StreamCodec<>() {
             public C decode(B object) {
                 T1 object2 = codec1.decode(object);
@@ -179,7 +180,7 @@ public class BiggerStreamCodecs {
                 T8 object9 = codec8.decode(object);
                 T9 object10 = codec9.decode(object);
                 T10 object11 = codec10.decode(object);
-                return factory.apply(object2, object3, object4, object5, object6, object7, object8, object9, object10);
+                return factory.apply(object2, object3, object4, object5, object6, object7, object8, object9, object10, object11);
             }
 
             public void encode(B object, C object2) {

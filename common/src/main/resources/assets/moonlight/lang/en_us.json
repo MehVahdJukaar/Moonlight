@@ -14,6 +14,7 @@
   "tooltip.moonlight.block_tags": "Block Tags:",
   "tooltip.moonlight.item_tags": "Item Tags:",
   "block.moonlight.spawn_box": "Spawn Box Block",
+  "commands.moonlight.blockstate_stats": "Total blocks: %1$s, total BlockStates: %2$s. Additional info saved at %3$s",
   "commands.moonlight.dice": "Rolled D%1$d: %2$d",
   "commands.moonlight.navigation.add": "Enabled Pathfinding Debug Renderers for %s",
   "commands.moonlight.navigation.remove": "Disabled Pathfinding Debug Renderers for %s",

@@ -1,6 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.util.codec;
 
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Function3;
+import com.mojang.datafixers.util.Function4;
+import com.mojang.datafixers.util.Function5;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -168,5 +172,37 @@ public class CodecUtils {
 
     public static <A> Codec<List<A>> singleOrList(Codec<A> elementCodec) {
         return Codec.withAlternative(elementCodec.listOf(), elementCodec, List::of);
+    }
+
+    public static <A, B> Codec<A> union(Codec<A> codec, Codec<B> otherType, BiFunction<A, B, A> applyFunc) {
+        return new UnionCodec<>(codec, otherType, applyFunc);
+    }
+
+    public static <A, B> Codec<A> postProcess(Codec<A> codec, MapCodec<B> c1, BiFunction<A, B, A> applyFunc) {
+        return PostProcessCodecs.of(codec, c1, applyFunc);
+    }
+
+    public static <A, B, C> Codec<A> postProcess(Codec<A> codec, MapCodec<B> c1,
+                                                 MapCodec<C> c2,
+                                                 Function3<A, B, C, A> f) {
+
+        return PostProcessCodecs.of(codec, c1, c2, f);
+    }
+
+    public static <A, B, C, D> Codec<A> postProcess(Codec<A> codec,
+                                                    MapCodec<B> c1,
+                                                    MapCodec<C> c2,
+                                                    MapCodec<D> c3,
+                                                    Function4<A, B, C, D, A> f) {
+        return PostProcessCodecs.of(codec, c1, c2, c3, f);
+    }
+
+    public static <A , B, C, D, E> Codec<A> postProcess(Codec<A> codec,
+                                                        MapCodec<B> c1,
+                                                        MapCodec<C> c2,
+                                                        MapCodec<D> c3,
+                                                        MapCodec<E> c4,
+                                                        Function5<A, B, C, D, E, A> f) {
+        return PostProcessCodecs.of(codec, c1, c2, c3, c4, f);
     }
 }

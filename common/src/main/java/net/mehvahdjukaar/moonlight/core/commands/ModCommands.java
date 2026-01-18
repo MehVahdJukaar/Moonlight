@@ -18,6 +18,7 @@ public class ModCommands {
         var node = dispatcher.register(
                 Commands.literal(Moonlight.MOD_ID)
                         .then(RegistryCommand.register())
+                        .then(BlockStateStatsCommand.register(context))
                         .then(IUsedToRollTheDice.register(context))
                         .then(DebugRenderersCommand.register(context))
                         .then(RandomTeleportCommand.register(context))
