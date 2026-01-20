@@ -8,7 +8,6 @@
     "BlockModelDeserializerMixin",
     "BlockModelMixin",
     "ClientPacketListenerMixin",
-    "GameRendererMixin",
     "ItemRendererAccessor",
     "ItemRendererMixin",
     "LocalPlayerMixin",
@@ -20,7 +19,6 @@
     "SelfItemStackRenderer",
     "SelfModFlowingFluidMixin",
     "SelfModFluidRendererPropertiesMixin",
-    "ShaderInstanceMixin",
     "TextureAtlasMixin",
     "TextureAtlasSpriteMixin"
   ],
@@ -31,7 +29,6 @@
     "MappedRegistryAccessor",
     "MenuTypeAccessor",
     "MinecraftServerMixin",
-    "NonsenseMixin",
     "PackRepositoryAccessor",
     "PoiTypeAccessor",
     "ServerPackSourceMixin",
