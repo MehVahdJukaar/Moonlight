@@ -1,1 +1,1 @@
-fixed an issue with trades
+updated fabric shader regisration to use new fabric event for it.
