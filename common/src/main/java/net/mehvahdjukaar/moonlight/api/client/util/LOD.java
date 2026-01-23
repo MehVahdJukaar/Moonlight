@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -20,8 +21,8 @@ public final class LOD {
     public static final int FAR_DIST = sq(96);
 
     // ---- New class state ----
-    private final Vec3 camPos;
-    private final Vec3 camDir;
+    private final Vec3 cameraPosition;
+    private final Vec3 cameraDirection;
     private final Vec3 objCenter;
     private final double distSq; // computed once
 
@@ -47,16 +48,16 @@ public final class LOD {
     }
 
     private LOD(Camera camera, Vec3 objCenter) {
-        this.camPos = camera.getPosition();
-        this.camDir = new Vec3(camera.getLookVector()).normalize();
+        this.cameraPosition = camera.getPosition();
+        this.cameraDirection = new Vec3(camera.getLookVector()).normalize();
         this.objCenter = objCenter;
-        this.distSq = isScoping() ? 1 : camPos.distanceToSqr(objCenter);
+        this.distSq = isScoping() ? 1 : cameraPosition.distanceToSqr(objCenter);
     }
 
     // Private ctor for MAX and legacy paths that only care about distance
     private LOD(double distSq) {
-        this.camPos = Vec3.ZERO;
-        this.camDir = Vec3.ZERO;
+        this.cameraPosition = Vec3.ZERO;
+        this.cameraDirection = Vec3.ZERO;
         this.objCenter = Vec3.ZERO;
         this.distSq = distSq;
     }
@@ -75,10 +76,10 @@ public final class LOD {
      */
     @Deprecated(forRemoval = true)
     public LOD(Camera camera, BlockPos pos) {
-        this.camPos = camera.getPosition();
-        this.camDir = new Vec3(camera.getLookVector()).normalize();
+        this.cameraPosition = camera.getPosition();
+        this.cameraDirection = new Vec3(camera.getLookVector()).normalize();
         this.objCenter = pos.getCenter();
-        this.distSq = isScoping() ? 1 : this.camPos.distanceToSqr(this.objCenter);
+        this.distSq = isScoping() ? 1 : this.cameraPosition.distanceToSqr(this.objCenter);
     }
 
     /**
@@ -86,10 +87,10 @@ public final class LOD {
      */
     @Deprecated(forRemoval = true)
     public LOD(Vec3 cameraPos, BlockPos pos) {
-        this.camPos = cameraPos;
-        this.camDir = Vec3.ZERO; // unknown without a Camera; unused by distance checks
+        this.cameraPosition = cameraPos;
+        this.cameraDirection = Vec3.ZERO; // unknown without a Camera; unused by distance checks
         this.objCenter = pos.getCenter();
-        this.distSq = isScoping() ? 1 : this.camPos.distanceToSqr(this.objCenter);
+        this.distSq = isScoping() ? 1 : this.cameraPosition.distanceToSqr(this.objCenter);
     }
 
     // ---- distance helpers (use precomputed distSq) ----
@@ -164,58 +165,44 @@ public final class LOD {
      * @param planeNormal  unit-length normal (outward from the visible face)
      * @param offset       optional offset from object center (null for none)
      * @param cosTolerance require normal·toCam > cosTolerance (0 = any front-facing)
-     * @param planeRadius  radius of the plane (for disk-aware culling; 0 = point)
+     * @param discRadius  radius of the plane (for disk-aware culling; 0 = point)
      * @return true if culled (behind camera or backfacing beyond tolerance)
      */
     public boolean isPlaneCulled(
             Vec3 planeNormal,
             @Nullable Vec3 offset,
-            float planeRadius,
+            float discRadius,
             float cosTolerance
     ) {
-        // Point on plane
-        Vec3 planePoint = (offset == null)
-                ? this.objCenter
-                : this.objCenter.add(offset);
+        Vec3 planePoint = (offset == null) ? this.objCenter : this.objCenter.add(offset);
+        Vec3 camToPlane = planePoint.subtract(this.cameraPosition);
+        double forwardDist = camToPlane.dot(this.cameraDirection);
 
-        // Camera → plane center
-        Vec3 camToPlane = planePoint.subtract(this.camPos);
-        double dist = camToPlane.length();
-
-        // Safety: camera is on or extremely near the plane
-        if (dist < 1e-6) {
-            return false;
-        }
-
-        Vec3 dirToPlane = camToPlane.scale(1.0 / dist);
-
-        // -------- Front / behind test (disk-aware) --------
-        // Project center onto camera forward direction
-        double forwardDist = camToPlane.dot(this.camDir);
-
-        // If the entire disk is behind the camera plane → cull
-        if (forwardDist <= -planeRadius) {
+        if (forwardDist <= -discRadius) {
             return true;
         }
 
-        // -------- Facing test with angular extent --------
-        Vec3 n = planeNormal.normalize();
+        Vec3 toCam = this.cameraPosition.subtract(planePoint);
+        double len2 = toCam.lengthSqr();
 
-        // How much the disk can "lean" into view
-        // sin(theta) = R / dist  →  cos(theta) = sqrt(1 - sin²)
-        double sinTheta = planeRadius / dist;
-        if (sinTheta >= 1.0) {
-            // Disk fully surrounds camera direction; always potentially visible
+        if (len2 <= 1e-12) {
             return false;
         }
 
-        double cosTheta = Math.sqrt(1.0 - sinTheta * sinTheta);
+        // Normalize vector without sqrt if only dot product is needed
+        double cosFacing = planeNormal.dot(toCam) / Math.sqrt(len2);
+        if (cosFacing <= cosTolerance) {
+            return true;
+        }
 
-        // Center-facing cosine
-        double facing = n.dot(dirToPlane);
+        // Avoid sqrt for angular disk test using squared values
+        double discRadius2 = discRadius * discRadius;
+        if (discRadius2 >= len2) {
+            return false;
+        }
 
-        // Cull only if *entire disk* faces away beyond tolerance
-        return facing >= (-cosTolerance + cosTheta);
+        double cosTheta = Math.sqrt(1.0 - discRadius2 / len2);
+        return cosFacing <= cosTolerance - cosTheta;
     }
 
     // ---- BACKWARD-COMP: old angle/focus helpers ----

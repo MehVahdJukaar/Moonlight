@@ -178,3 +178,5 @@ transitive-accessible method net/minecraft/world/entity/ai/sensing/SensorType <i
 #fabric custom model loader
 accessible field net/minecraft/client/renderer/block/model/BlockModel parent Lnet/minecraft/client/renderer/block/model/BlockModel;
 
+
+

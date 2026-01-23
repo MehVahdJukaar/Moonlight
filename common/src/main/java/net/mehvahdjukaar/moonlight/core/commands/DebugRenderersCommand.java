@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.commands;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -59,7 +60,85 @@ public class DebugRenderersCommand {
                                         .executes(DebugRenderersCommand::structures)
                                 )
                         )
-                );
+                )
+
+        .then(Commands.literal("section_path")
+                .executes(DebugRenderersCommand::sectionPath))
+
+                .then(Commands.literal("smart_cull")
+                        .executes(DebugRenderersCommand::smartCull))
+
+                .then(Commands.literal("frustum")
+                        .then(Commands.literal("capture")
+                                .executes(DebugRenderersCommand::captureFrustum))
+                        .then(Commands.literal("kill")
+                                .executes(DebugRenderersCommand::killFrustum))
+                )
+
+                .then(Commands.literal("section_visibility")
+                        .executes(DebugRenderersCommand::sectionVisibility))
+
+                .then(Commands.literal("wireframe")
+                        .executes(DebugRenderersCommand::wireframe));
+    }
+    private static int sectionPath(CommandContext<CommandSourceStack> ctx) {
+        var mc = Minecraft.getInstance();
+        mc.sectionPath = !mc.sectionPath;
+        ctx.getSource().sendSuccess(() ->
+                Component.translatable(
+                        mc.sectionPath
+                                ? "commands.moonlight.section_path.shown"
+                                : "commands.moonlight.section_path.hidden"
+                ), false);
+        return 1;
+    }
+
+    private static int smartCull(CommandContext<CommandSourceStack> ctx) {
+        var mc = Minecraft.getInstance();
+        mc.smartCull = !mc.smartCull;
+        ctx.getSource().sendSuccess(() ->
+                Component.translatable(
+                        mc.smartCull
+                                ? "commands.moonlight.smart_cull.enabled"
+                                : "commands.moonlight.smart_cull.disabled"
+                ), false);
+        return 1;
+    }
+
+    private static int captureFrustum(CommandContext<CommandSourceStack> ctx) {
+        var mc = Minecraft.getInstance();
+        mc.levelRenderer.captureFrustum();
+        ctx.getSource().sendSuccess(() ->
+                Component.translatable("commands.moonlight.frustum.captured"), false);
+        return 1;
+    }
+
+    private static int killFrustum(CommandContext<CommandSourceStack> ctx) {
+        var mc = Minecraft.getInstance();
+        mc.levelRenderer.killFrustum();
+        ctx.getSource().sendSuccess(() ->
+                Component.translatable("commands.moonlight.frustum.killed"), false);
+        return 1;
+    }
+
+    private static int sectionVisibility(CommandContext<CommandSourceStack> ctx) {
+        var mc = Minecraft.getInstance();
+        mc.sectionVisibility = !mc.sectionVisibility;
+        ctx.getSource().sendSuccess(() ->
+                Component.literal("SectionVisibility: " + (mc.sectionVisibility ? "enabled" : "disabled")), false);
+        return 1;
+    }
+
+    private static int wireframe(CommandContext<CommandSourceStack> ctx) {
+        var mc = Minecraft.getInstance();
+        mc.wireframe = !mc.wireframe;
+        ctx.getSource().sendSuccess(() ->
+                Component.translatable(
+                        mc.wireframe
+                                ? "commands.moonlight.wireframe.enabled"
+                                : "commands.moonlight.wireframe.disabled"
+                ), false);
+        return 1;
     }
 
     private static int navigation(CommandContext<CommandSourceStack> context) {

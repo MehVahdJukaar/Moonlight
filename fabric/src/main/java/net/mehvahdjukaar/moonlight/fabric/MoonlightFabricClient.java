@@ -1,12 +1,15 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ParticleEngineAccessor;
+import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.core.Registry;
+import net.minecraft.server.commands.DebugCommand;
 
 import java.util.ArrayList;
 import java.util.List;
