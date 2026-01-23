@@ -3,9 +3,12 @@ package net.mehvahdjukaar.moonlight.api.resources.textures;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.NativeImage;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
@@ -90,23 +93,74 @@ public class TextureImage implements AutoCloseable, Sampler2D {
     //All frames. Includes unused ones
     private final int frameCount;
     private final int frameScale;
+    private final int[] frameIndices; // maps logical frame → grid index
 
     String path = "none";
 
     private TextureImage(NativeImage image, @Nullable McMetaFile metadata) {
         this.image = image;
         this.metadata = metadata;
-        int imgWidth = this.imageWidth(); // 16
-        int imgHeight = this.imageHeight(); // 48
+
+        int imgWidth = this.imageWidth();
+        int imgHeight = this.imageHeight();
+
+        // --- Frame size resolution ---
         if (metadata == null) {
             this.frameSize = new FrameSize(imgWidth, imgHeight);
         } else {
             this.frameSize = metadata.animation().calculateFrameSize(imgWidth, imgHeight);
         }
-        this.frameScale = imgWidth / frameSize.width(); // 1
-        int frameScaleHeight = imgHeight / frameSize.height(); // 2
-        this.frameCount = frameScale * frameScaleHeight; // 2
-        //frame count won't be 0
+
+        int fw = frameSize.width();
+        int fh = frameSize.height();
+
+        if (fw <= 0 || fh <= 0) {
+            throw new IllegalArgumentException("Invalid frame size " + fw + "x" + fh);
+        }
+
+        if (imgWidth % fw != 0 || imgHeight % fh != 0) {
+            throw new IllegalArgumentException(
+                    "Frame size " + fw + "x" + fh +
+                            " does not divide image " + imgWidth + "x" + imgHeight
+            );
+        }
+
+        // --- Grid capacity ---
+        int gridW = imgWidth / fw;
+        int gridH = imgHeight / fh;
+        int gridFrames = gridW * gridH;
+
+        this.frameScale = gridW; // used for X offset math
+
+        // --- Metadata frame validation (vanilla behavior) ---
+        if (metadata == null || metadata.animation().frames.isEmpty()) {
+            // default: sequential frames
+            this.frameIndices = new int[gridFrames];
+            for (int i = 0; i < gridFrames; i++) {
+                frameIndices[i] = i;
+            }
+        } else {
+            List<AnimationFrame> metaFrames = metadata.animation().frames;
+            IntArrayList valid = new IntArrayList();
+
+            for (var f : metaFrames) {
+                int idx = f.getIndex();
+                if (idx >= 0 && idx < gridFrames) {
+                    valid.add(idx);
+                } else {
+                    Moonlight.LOGGER.warn("Ignoring invalid frame index {} for texture {}", idx, path);
+                }
+            }
+
+            // If all frames invalid, fall back to first frame only
+            if (valid.isEmpty()) {
+                valid.add(0);
+            }
+
+            this.frameIndices = valid.toIntArray();
+        }
+
+        this.frameCount = frameIndices.length;
     }
 
     public int imageWidth() {
@@ -140,11 +194,17 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
     //local frame coord from global
     public int getFrameStartX(int frameIndex) {
-        return (frameIndex % frameScale) * frameWidth(); //(2 % 1) * 16
+        int gridIndex = toGridIndex(frameIndex);
+        return (gridIndex % frameScale) * frameWidth(); //(2 % 1) * 16
     }
 
     public int getFrameStartY(int frameIndex) {
-        return (frameIndex / frameScale) * frameHeight(); // (2/1) * 32
+         int gridIndex = toGridIndex(frameIndex);
+        return (gridIndex / frameScale) * frameHeight(); // (2/1) * 32
+    }
+
+    private int toGridIndex(int frameIndex) {
+        return frameIndices[frameIndex];
     }
 
     public int getFramePixel(int frameIndex, int x, int y) {
@@ -169,6 +229,8 @@ public class TextureImage implements AutoCloseable, Sampler2D {
             return getFramePixel(frameIndex, ix, iy);
         };
     }
+
+
 
     public void setFramePixel(int frameIndex, int x, int y, int color) {
         image.setPixelRGBA(getFrameStartX(frameIndex) + x, getFrameStartY(frameIndex) + y, color);
