@@ -1,1 +1,1 @@
-fixed an issue with optional registry suppliers
+fixed a rare issue with texture genration due to misbehaving when animation strip medatada was invalid or had missing frames

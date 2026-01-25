@@ -62,8 +62,8 @@ public class DebugRenderersCommand {
                         )
                 )
 
-        .then(Commands.literal("section_path")
-                .executes(DebugRenderersCommand::sectionPath))
+                .then(Commands.literal("section_path")
+                        .executes(DebugRenderersCommand::sectionPath))
 
                 .then(Commands.literal("smart_cull")
                         .executes(DebugRenderersCommand::smartCull))
@@ -79,29 +79,107 @@ public class DebugRenderersCommand {
                         .executes(DebugRenderersCommand::sectionVisibility))
 
                 .then(Commands.literal("wireframe")
-                        .executes(DebugRenderersCommand::wireframe));
+                        .executes(DebugRenderersCommand::wireframe))
+
+                .then(Commands.literal("water")
+                        .executes(DebugRenderersCommand::water))
+                .then(Commands.literal("heightmap")
+                        .executes(DebugRenderersCommand::heightmap))
+                .then(Commands.literal("collision")
+                        .executes(DebugRenderersCommand::collision))
+                .then(Commands.literal("support")
+                        .executes(DebugRenderersCommand::support))
+                .then(Commands.literal("light")
+                        .executes(DebugRenderersCommand::light))
+                .then(Commands.literal("world_gen_attempts")
+                        .executes(DebugRenderersCommand::worldGen))
+                .then(Commands.literal("solid_faces")
+                        .executes(DebugRenderersCommand::solidFaces))
+                .then(Commands.literal("game_events")
+                        .executes(DebugRenderersCommand::gameEvents))
+                .then(Commands.literal("sky_light_sections")
+                        .executes(DebugRenderersCommand::skyLightSections))
+                .then(Commands.literal("breeze")
+                        .executes(DebugRenderersCommand::breeze));
     }
+
+    private static void sendSuccess(CommandContext<CommandSourceStack> ctx, boolean value, String name) {
+        ctx.getSource().sendSuccess(() -> Component.translatable(
+                value ? "commands.moonlight." + name + ".on" : "commands.moonlight." + name + ".off"
+        ), false);
+    }
+
+    private static int water(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_WATER = !DEBUG_WATER;
+        sendSuccess(ctx, DEBUG_WATER, "debug_water");
+        return 1;
+    }
+
+    private static int heightmap(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_HEIGHTMAP = !DEBUG_HEIGHTMAP;
+        sendSuccess(ctx, DEBUG_HEIGHTMAP, "debug_heightmap");
+        return 1;
+    }
+
     private static int sectionPath(CommandContext<CommandSourceStack> ctx) {
         var mc = Minecraft.getInstance();
         mc.sectionPath = !mc.sectionPath;
-        ctx.getSource().sendSuccess(() ->
-                Component.translatable(
-                        mc.sectionPath
-                                ? "commands.moonlight.section_path.shown"
-                                : "commands.moonlight.section_path.hidden"
-                ), false);
+        sendSuccess(ctx, mc.sectionPath, "section_path");
+        return 1;
+    }
+
+    private static int collision(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_COLLISION = !DEBUG_COLLISION;
+        sendSuccess(ctx, DEBUG_COLLISION, "collision");
+        return 1;
+    }
+
+    private static int support(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_SUPPORT = !DEBUG_SUPPORT;
+        sendSuccess(ctx, DEBUG_SUPPORT, "support");
+        return 1;
+    }
+
+    private static int light(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_LIGHT = !DEBUG_LIGHT;
+        sendSuccess(ctx, DEBUG_LIGHT, "light");
+        return 1;
+    }
+
+    private static int worldGen(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_WORLD_GEN_ATTEMPTS = !DEBUG_WORLD_GEN_ATTEMPTS;
+        sendSuccess(ctx, DEBUG_WORLD_GEN_ATTEMPTS, "world_gen_attempts");
+        return 1;
+    }
+
+    private static int solidFaces(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_SOLID_FACES = !DEBUG_SOLID_FACES;
+        sendSuccess(ctx, DEBUG_SOLID_FACES, "solid_faces");
+        return 1;
+    }
+
+    private static int gameEvents(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_GAME_EVENTS = !DEBUG_GAME_EVENTS;
+        sendSuccess(ctx, DEBUG_GAME_EVENTS, "game_events");
+        return 1;
+    }
+
+    private static int skyLightSections(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_SKY_LIGHT_SECTIONS = !DEBUG_SKY_LIGHT_SECTIONS;
+        sendSuccess(ctx, DEBUG_SKY_LIGHT_SECTIONS, "sky_light_sections");
+        return 1;
+    }
+
+    private static int breeze(CommandContext<CommandSourceStack> ctx) {
+        DEBUG_BREEZE = !DEBUG_BREEZE;
+        sendSuccess(ctx, DEBUG_BREEZE, "breeze");
         return 1;
     }
 
     private static int smartCull(CommandContext<CommandSourceStack> ctx) {
         var mc = Minecraft.getInstance();
         mc.smartCull = !mc.smartCull;
-        ctx.getSource().sendSuccess(() ->
-                Component.translatable(
-                        mc.smartCull
-                                ? "commands.moonlight.smart_cull.enabled"
-                                : "commands.moonlight.smart_cull.disabled"
-                ), false);
+        sendSuccess(ctx, mc.smartCull, "smart_cull");
         return 1;
     }
 
@@ -124,32 +202,25 @@ public class DebugRenderersCommand {
     private static int sectionVisibility(CommandContext<CommandSourceStack> ctx) {
         var mc = Minecraft.getInstance();
         mc.sectionVisibility = !mc.sectionVisibility;
-        ctx.getSource().sendSuccess(() ->
-                Component.literal("SectionVisibility: " + (mc.sectionVisibility ? "enabled" : "disabled")), false);
+        sendSuccess(ctx, mc.sectionVisibility, "section_visibility");
         return 1;
     }
 
     private static int wireframe(CommandContext<CommandSourceStack> ctx) {
         var mc = Minecraft.getInstance();
         mc.wireframe = !mc.wireframe;
-        ctx.getSource().sendSuccess(() ->
-                Component.translatable(
-                        mc.wireframe
-                                ? "commands.moonlight.wireframe.enabled"
-                                : "commands.moonlight.wireframe.disabled"
-                ), false);
+        sendSuccess(ctx, mc.wireframe, "wireframe");
         return 1;
+    }
+
+    private static int neighbors(CommandContext<CommandSourceStack> context) {
+        DEBUG_NEIGHBOR_UPDATES = !DEBUG_NEIGHBOR_UPDATES;
+        sendSuccess(context, DEBUG_NEIGHBOR_UPDATES, "neighbor_updates");
+        return 0;
     }
 
     private static int navigation(CommandContext<CommandSourceStack> context) {
         toggle(context, "entity", DEBUG_PATHFINDING, "navigation");
-        return 0;
-    }
-
-    private static int neighbors(CommandContext<CommandSourceStack> context) {
-        DEBUG_NEIGHBOR_UPDATES = BoolArgumentType.getBool(context, "active");
-        context.getSource().sendSuccess(() ->
-                Component.translatable("commands.moonlight.neighbor_updates", DEBUG_NEIGHBOR_UPDATES), false);
         return 0;
     }
 
@@ -170,7 +241,7 @@ public class DebugRenderersCommand {
         Boolean active = getOptArg(ctx, "active", Boolean.class);
 
         Component comp;
-       var key = getResourceKey(ctx, keyKey, config.registryKey);
+        var key = getResourceKey(ctx, keyKey, config.registryKey);
         if (key.isPresent()) {
             ResourceLocation location = key.get().location();
             active = active != null ? active : !config.keys.contains(location);
@@ -184,7 +255,6 @@ public class DebugRenderersCommand {
             active = !config.allActive;
             if (active) {
                 comp = Component.translatable("commands.moonlight." + translation + ".on");
-
             } else {
                 comp = Component.translatable("commands.moonlight." + translation + ".off");
             }
@@ -212,10 +282,22 @@ public class DebugRenderersCommand {
         }
     }
 
-    public static boolean DEBUG_NEIGHBOR_UPDATES = false;
     public static final DebugConfig<EntityType<?>> DEBUG_PATHFINDING = new DebugConfig<>(Registries.ENTITY_TYPE);
     public static final DebugConfig<EntityType<?>> DEBUG_GOAL_SELECTOR = new DebugConfig<>(Registries.ENTITY_TYPE);
     public static final DebugConfig<Structure> DEBUG_STRUCTURES_BB = new DebugConfig<>(Registries.STRUCTURE);
+    public static boolean DEBUG_NEIGHBOR_UPDATES = false;
+
+    //client only. won't work on servers
+    public static boolean DEBUG_WATER = false;
+    public static boolean DEBUG_HEIGHTMAP = false;
+    public static boolean DEBUG_COLLISION = false;
+    public static boolean DEBUG_SUPPORT = false;
+    public static boolean DEBUG_LIGHT = false;
+    public static boolean DEBUG_WORLD_GEN_ATTEMPTS = false;
+    public static boolean DEBUG_SOLID_FACES = false;
+    public static boolean DEBUG_GAME_EVENTS = false;
+    public static boolean DEBUG_SKY_LIGHT_SECTIONS = false;
+    public static boolean DEBUG_BREEZE = false;
 
 
     public static class DebugConfig<T> {

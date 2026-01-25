@@ -4,9 +4,11 @@ import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.mehvahdjukaar.moonlight.api.resources.pack.IDebugDumpable;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -25,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-//TODO: extend DynamicTexture and initialize instantly
-public class FrameBufferBackedDynamicTexture extends AbstractTexture {
+//TODO: extend DynamicTexture and initialize instantly. also merge with tickable one
+public class FrameBufferBackedDynamicTexture extends AbstractTexture implements Dumpable {
 
     //runs when texture is initialized and populates it. Runs each tick if its tickable
     @NotNull
@@ -233,5 +235,15 @@ public class FrameBufferBackedDynamicTexture extends AbstractTexture {
     public void markForUpdate() {
     }
     public void unMarkForUpdate() {
+    }
+
+    @Override
+    public void dumpContents(ResourceLocation resourceLocation, Path path) throws IOException {
+        if (this.cpuImage != null) {
+            String string = resourceLocation.toDebugFileName() + ".png";
+            Path path2 = path.resolve(string);
+            this.cpuImage.writeToFile(path2);
+        }
+
     }
 }

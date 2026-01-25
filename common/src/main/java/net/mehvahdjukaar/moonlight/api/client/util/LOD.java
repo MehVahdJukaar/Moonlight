@@ -36,7 +36,7 @@ public final class LOD {
 
     public static LOD at(BlockPos objPos) {
         Minecraft mc = Minecraft.getInstance();
-        return LOD.at(mc.gameRenderer.getMainCamera(), objPos.getCenter());
+        return LOD.at(mc.getBlockEntityRenderDispatcher().camera, objPos.getCenter());
     }
 
     public static LOD at(Camera camera, BlockPos objPos) {

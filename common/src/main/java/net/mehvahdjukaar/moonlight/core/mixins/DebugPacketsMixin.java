@@ -2,17 +2,23 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import net.mehvahdjukaar.moonlight.core.commands.DebugRenderersCommand;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.common.custom.*;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.monster.breeze.Breeze;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.Target;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -66,6 +72,33 @@ public abstract class DebugPacketsMixin {
     private static void ml$neighborUpdatesDebug(Level level, BlockPos pos, CallbackInfo ci) {
         if (DebugRenderersCommand.DEBUG_NEIGHBOR_UPDATES && level instanceof ServerLevel sl) {
             sendPacketToAllPlayers(sl, new NeighborUpdatesDebugPayload(level.getGameTime(), pos));
+        }
+    }
+
+    @Inject(method = "sendGameEventInfo", at = @At("HEAD"))
+    private static void ml$gameEvent(Level level, Holder<GameEvent> gameEvent, Vec3 pos, CallbackInfo ci) {
+        if (DebugRenderersCommand.DEBUG_GAME_EVENTS && level instanceof ServerLevel sl) {
+            sendPacketToAllPlayers(sl, new GameEventDebugPayload(gameEvent.unwrapKey().get(),
+                    pos));
+        }
+    }
+
+    @Inject(method = "sendGameEventListenerInfo", at = @At("HEAD"))
+    private static void ml$gameEventListener(Level level, GameEventListener gameEventListener, CallbackInfo ci) {
+        if (DebugRenderersCommand.DEBUG_GAME_EVENTS && level instanceof ServerLevel sl) {
+            sendPacketToAllPlayers(sl, new GameEventListenerDebugPayload(gameEventListener.getListenerSource(),
+                    gameEventListener.getListenerRadius()));
+        }
+    }
+
+    @Inject(method = "sendBreezeInfo", at = @At("HEAD"))
+    private static void ml$breeze(Breeze breeze, CallbackInfo ci) {
+        if (DebugRenderersCommand.DEBUG_BREEZE && breeze.level() instanceof ServerLevel sl) {
+            LivingEntity target = breeze.getTarget();
+            sendPacketToAllPlayers(sl, new BreezeDebugPayload(new BreezeDebugPayload.BreezeInfo(
+                    breeze.getUUID(), breeze.getId(), target == null ? null : target.getId(),
+                    null //idk
+            )));
         }
     }
 
