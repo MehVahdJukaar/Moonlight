@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
@@ -52,9 +53,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
                 }
             }
 
-            TextureImage image = of(i, metadata);
-            image.path = relativePath.toString();
-            return image;
+            return new TextureImage(i, metadata, relativePath.toString());
         } catch (Exception e) {
             throw new IOException("Failed to open texture at location " + relativePath + ": no such file");
         }
@@ -91,22 +90,63 @@ public class TextureImage implements AutoCloseable, Sampler2D {
     private final int frameCount;
     private final int frameScale;
 
-    String path = "none";
+    final String debugPath;
 
     private TextureImage(NativeImage image, @Nullable McMetaFile metadata) {
+        this(image, metadata, "unknown");
+    }
+
+    private TextureImage(NativeImage image, @Nullable McMetaFile metadata, String debugPath) {
         this.image = image;
         this.metadata = metadata;
-        int imgWidth = this.imageWidth(); // 16
-        int imgHeight = this.imageHeight(); // 48
-        if (metadata == null) {
-            this.frameSize = new FrameSize(imgWidth, imgHeight);
-        } else {
-            this.frameSize = metadata.animation().calculateFrameSize(imgWidth, imgHeight);
+        this.debugPath = debugPath;
+
+        int imgWidth = imageWidth();
+        int imgHeight = imageHeight();
+
+        FrameSize metaSize = (metadata == null)
+                ? new FrameSize(imgWidth, imgHeight)
+                : metadata.animation().calculateFrameSize(imgWidth, imgHeight);
+
+        int fw = metaSize.width();
+        int fh = metaSize.height();
+
+        // --- Hard sanity checks ---
+        if (fw <= 0 || fh <= 0) {
+            Moonlight.LOGGER.error(
+                    "Texture '{}' has invalid metadata frame size {}x{} — using full image size {}x{} instead",
+                    debugPath, fw, fh, imgWidth, imgHeight
+            );
+            fw = imgWidth;
+            fh = imgHeight;
         }
-        this.frameScale = imgWidth / frameSize.width(); // 1
-        int frameScaleHeight = imgHeight / frameSize.height(); // 2
-        this.frameCount = frameScale * frameScaleHeight; // 2
-        //frame count won't be 0
+
+        if (fw > imgWidth || fh > imgHeight) {
+            Moonlight.LOGGER.error(
+                    "Texture '{}' frame size {}x{} is larger than image {}x{} — using full image size instead",
+                    debugPath, fw, fh, imgWidth, imgHeight
+            );
+            fw = imgWidth;
+            fh = imgHeight;
+        }
+
+        this.frameSize = new FrameSize(fw, fh); // final, assigned once
+
+        // --- SAFE grid (floor division) ---
+        int gridW = imgWidth / fw;
+        int gridH = imgHeight / fh;
+
+        if (gridW == 0 || gridH == 0) {
+            Moonlight.LOGGER.error(
+                    "Texture '{}' frame size {}x{} cannot fit in image {}x{} — defaulting to 1x1 grid",
+                    debugPath, fw, fh, imgWidth, imgHeight
+            );
+            gridW = 1;
+            gridH = 1;
+        }
+
+        this.frameScale = gridW;
+        this.frameCount = gridW * gridH;
     }
 
     public int imageWidth() {
@@ -246,50 +286,63 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
     public ImmutableList<NativeImage> splitFrames() {
         var builder = ImmutableList.<NativeImage>builder();
-        if (metadata == null) {
+
+        int imgWidth = imageWidth();
+        int imgHeight = imageHeight();
+
+        int fw = frameWidth();
+        int fh = frameHeight();
+
+        int gridW = imgWidth / fw;
+        int gridH = imgHeight / fh;
+        int maxFrames = gridW * gridH;
+
+        // If there is no animation metadata, just return whole image
+        if (metadata == null || metadata.animation().frames.isEmpty()) {
             builder.add(image);
             return builder.build();
         }
-        int imgWidth = this.imageWidth(); // 16
-        int imgHeight = this.imageHeight(); // 48
-        var fs = metadata.animation().calculateFrameSize(imgWidth, imgHeight);
-
-
-        int frameScaleWidth = imgWidth / fs.width(); // 1
-        int frameScaleHeight = imgHeight / fs.height(); // 2
-        int maxFrames = frameScaleWidth * frameScaleHeight; // 2
 
         List<Integer> indexList = Lists.newArrayList();
-
         metadata.animation().forEachFrame((index, time) -> indexList.add(index));
+
         if (indexList.isEmpty()) {
-            for (int l = 0; l < maxFrames; ++l) {
-                indexList.add(l);
+            for (int i = 0; i < maxFrames; i++) {
+                indexList.add(i);
             }
         }
 
+        // If effectively single-frame, return original image
         if (indexList.size() <= 1) {
             builder.add(image);
-        } else {
-            for (int index : indexList) { // 2, 1
+            return builder.build();
+        }
 
-                int xOffset = (index % frameScaleWidth) * frameWidth(); //(2 % 1) * 16
-                int yOffset = (index / frameScaleWidth) * frameHeight(); // (2/1) * 32 =
+        for (int index : indexList) {
 
-                if (index >= 0 && xOffset + frameWidth() < imgWidth && yOffset + frameHeight() < imgHeight) {
-                    NativeImage f = new NativeImage(frameWidth(), frameHeight(), false);
-                    for (int x = 0; x < frameWidth(); x++) {
-                        for (int y = 0; y < frameHeight(); y++) {
-                            f.setPixelRGBA(x, y, this.image.getPixelRGBA(x + xOffset, y + yOffset));
-                        }
+            if (index < 0 || index >= maxFrames) {
+                continue; // ignore invalid metadata safely
+            }
+
+            int xOffset = (index % gridW) * fw;
+            int yOffset = (index / gridW) * fh;
+
+            // Hard bounds guarantee (should always pass now)
+            if (xOffset + fw <= imgWidth && yOffset + fh <= imgHeight) {
+                NativeImage frame = new NativeImage(fw, fh, false);
+
+                for (int x = 0; x < fw; x++) {
+                    for (int y = 0; y < fh; y++) {
+                        frame.setPixelRGBA(x, y, image.getPixelRGBA(x + xOffset, y + yOffset));
                     }
-                    builder.add(f);
                 }
+
+                builder.add(frame);
             }
         }
+
         return builder.build();
     }
-
 
     //deprecated stuff
 

@@ -1,1 +1,2 @@
-fixed a rare issue with texture genration due to misbehaving when animation strip medatada was invalid or had missing frames
+- fixed another issue with texture images when being fed invalid animation metadatas by texture packs
+- added a lot more debug renderers. try /moonlight debug_renderers command
