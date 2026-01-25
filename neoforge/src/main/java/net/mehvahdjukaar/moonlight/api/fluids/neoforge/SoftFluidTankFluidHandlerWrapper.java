@@ -30,15 +30,15 @@ public record SoftFluidTankFluidHandlerWrapper(SoftFluidTank tank, BlockEntity b
 
     @Override
     public boolean isFluidValid(int i, @NotNull FluidStack fluidStack) {
-        return tank.isFluidCompatible(SoftFluidStackImpl.fromForgeFluid(fluidStack));
+        return tank.isFluidCompatible(SoftFluidStackImpl.fromForgeFluid(fluidStack, be.getLevel().registryAccess()));
     }
 
     @Override
     public int fill(FluidStack fluidStack, FluidAction fluidAction) {
-        var original = SoftFluidStackImpl.fromForgeFluid(fluidStack);
+        var original = SoftFluidStackImpl.fromForgeFluid(fluidStack, be.getLevel().registryAccess());
         int filled = tank.addFluid(original, fluidAction.simulate());
         if(!fluidAction.simulate()) {
-            int bottlesRemoved = SoftFluidStackImpl.fromForgeFluid(fluidStack).getCount() - original.getCount();
+            int bottlesRemoved = SoftFluidStackImpl.fromForgeFluid(fluidStack, be.getLevel().registryAccess()).getCount() - original.getCount();
             fluidStack.shrink(SoftFluidStackImpl.bottlesToMB(bottlesRemoved));
             be.setChanged();
         }

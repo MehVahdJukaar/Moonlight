@@ -19,7 +19,7 @@ public abstract class ItemMixin {
     //TODO:change since initialize cliet is deprecated
     @Inject(remap = false, method = "initializeClient", at = @At("HEAD"))
     public void initializeClient(Consumer<IClientItemExtensions> consumer, CallbackInfo ci) {
-        if(this instanceof ICustomItemRendererProvider provider) {
+        if (this instanceof ICustomItemRendererProvider provider) {
             consumer.accept(new IClientItemExtensions() {
                 final Supplier<BlockEntityWithoutLevelRenderer> renderer = Suppliers.memoize(provider.getRendererFactory()::get);
 

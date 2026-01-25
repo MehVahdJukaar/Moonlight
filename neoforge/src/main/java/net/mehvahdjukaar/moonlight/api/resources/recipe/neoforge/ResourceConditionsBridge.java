@@ -10,7 +10,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.conditions.AndCondition;
@@ -27,7 +27,7 @@ public class ResourceConditionsBridge {
                     .dispatch("type", ICondition::codec, Function.identity());
     //we must use "type" key instead of "condition" that fabric uses as compound conditions do expect that
 
-    public static final Codec<List<ICondition>> LIST_CODEC = Utils.lenientListCodec(REMAPPING_CODEC);
+    public static final Codec<List<ICondition>> LIST_CODEC = CodecUtils.lenientListCodec(REMAPPING_CODEC);
     public static final Codec<ICondition> SINGLE_OR_LIST = Codec.withAlternative(REMAPPING_CODEC, LIST_CODEC,
             AndCondition::new);
 

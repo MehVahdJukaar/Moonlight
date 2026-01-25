@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -193,7 +194,10 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
 
     protected Executor getExecutorService() {
-        return EXECUTOR_SERVICE;
+        if (CommonConfigs.MULTI_THREADED_GENERATION.get()) {
+            return EXECUTOR_SERVICE;
+        }
+        return Runnable::run;
     }
 
 

@@ -13,12 +13,15 @@ public class CommonConfigs {
     public static final Supplier<Boolean> EXTRA_CHILDREN_DEBUG;
     public static final Supplier<String> GLOBAL_DATAPACKS_DIR;
     public static final Supplier<Boolean> FASTER_CACHE_SEARCH;
+    public static final Supplier<Boolean> MULTI_THREADED_GENERATION;
 
     public static final ModConfigHolder CONFIG;
 
     static {
         ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.COMMON_SYNCED);
         builder.push("general");
+        MULTI_THREADED_GENERATION = builder.comment("Enables multi-threaded generation for dynamic assets (if supported). This could improve performance on systems with more cores available.")
+                .define("multi_threaded_generation", true);
         EXTRA_DEBUG = builder.comment("ONLY for debugging purpose. Turns one some debug functionality like more logging or blocktypes_debug.txt, the file can be found in ~/.minecraft/debug/dynamic_registry_dump...")
                 .define("extra_debug", false);
         EXTRA_CHILDREN_DEBUG = builder.comment("Enable this will list each BlockTypes' Children. The List of BlockTypes' children will be also in the same file via EXTRA_DEBUG. NOTE: To enable this, EXTRA_DEBUG must be enabled, too.")

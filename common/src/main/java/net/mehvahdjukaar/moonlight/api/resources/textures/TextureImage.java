@@ -178,6 +178,17 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         return image;
     }
 
+    @Override
+    public String toString() {
+        return "TextureImage{" +
+                debugPath + ", allocated = " + isAllocated() +
+                '}';
+    }
+
+    public boolean isAllocated() {
+        return image.pixels != 0;
+    }
+
     //local frame coord from global
     public int getFrameStartX(int frameIndex) {
         return (frameIndex % frameScale) * frameWidth(); //(2 % 1) * 16
@@ -258,7 +269,6 @@ public class TextureImage implements AutoCloseable, Sampler2D {
     public void close() {
         this.image.close();
     }
-
 
 
     @FunctionalInterface
