@@ -720,9 +720,9 @@ public class Palette implements Set<PaletteColor> {
                 (textureImage.frameCount() != textureMask.frameCount() ||
                         textureMask.frameWidth() < textureImage.frameWidth() ||
                         textureMask.frameHeight() < textureImage.frameHeight())) {
-            Moonlight.LOGGER.error("Palette mask {} needs to be at least as large as the target image {} and have the same frame count. You must alter the mask to match the texture size", textureImage.path, textureMask.path);
+            Moonlight.LOGGER.error("Palette mask {} needs to be at least as large as the target image {} and have the same frame count. You must alter the mask to match the texture size", textureImage.debugPath, textureMask.debugPath);
             if (PlatHelper.isDev()) {
-                throw new IllegalArgumentException("Palette mask " + textureMask.path + " has invalid size or frame count");
+                throw new IllegalArgumentException("Palette mask " + textureMask.debugPath + " has invalid size or frame count");
             }
         }
 

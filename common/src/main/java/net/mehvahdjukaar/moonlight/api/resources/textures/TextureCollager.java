@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.resources.textures.Palette;
 import net.mehvahdjukaar.moonlight.api.resources.textures.PaletteColor;
 import net.mehvahdjukaar.moonlight.api.resources.textures.Sampler2D;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.world.level.block.Rotation;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +18,33 @@ public class TextureCollager {
     protected final int targetFrameH;
     private final List<Operation> operations;
 
+    private TextureCollager(int originalW, int originalH, int targetW, int targetH, List<Operation> list) {
+        this.originFrameW = originalW;
+        this.originFrameH = originalH;
+        this.targetFrameW = targetW;
+        this.targetFrameH = targetH;
+        this.operations = list;
+    }
+
     public void apply(TextureImage source, TextureImage destination) {
+
+        String debugInfo = "Source='" + source.debugPath + "', Dest='" + destination.debugPath + "'";
+
+        // --- Fail fast sanity checks ---
+        if (source.frameCount() <= 0) {
+            throw new IllegalStateException("Source TextureImage has no frames: " + debugInfo);
+        }
+        if (destination.frameCount() <= 0) {
+            throw new IllegalStateException("Destination TextureImage has no frames: " + debugInfo);
+        }
+        if (originFrameW <= 0 || originFrameH <= 0) {
+            throw new IllegalStateException("TextureCollager origin frame dimensions invalid: "
+                    + originFrameW + "x" + originFrameH + " — " + debugInfo);
+        }
+        if (targetFrameW <= 0 || targetFrameH <= 0) {
+            throw new IllegalStateException("TextureCollager target frame dimensions invalid: "
+                    + targetFrameW + "x" + targetFrameH + " — " + debugInfo);
+        }
 
         float scaleSourceX = source.frameWidth() / (float) originFrameW;
         float scaleSourceY = source.frameHeight() / (float) originFrameH;
@@ -46,68 +73,65 @@ public class TextureCollager {
                 int scaledTargetW = Math.round(op.targetW * scaleTargetX);
                 int scaledTargetH = Math.round(op.targetH * scaleTargetY);
 
-                Sampler2D sampler = Sampler2D.offset(
-                        sourceFrameSampler,
-                        scaledSourceX,
-                        scaledSourceY
-                );
-
-                sampler = Sampler2D.clamp(sampler, scaledSourceW, scaledSourceH);
-
-                if (op.bilinear) {
-                    sampler = Sampler2D.bilinear(sampler);
+                // --- Validate bounds with debug logging ---
+                if (scaledSourceW <= 0 || scaledSourceH <= 0) {
+                    throw new IllegalStateException("Scaled source rectangle invalid: " +
+                            scaledSourceW + "x" + scaledSourceH + " — " + debugInfo + ", op=" + op);
+                }
+                if (scaledTargetW <= 0 || scaledTargetH <= 0) {
+                    throw new IllegalStateException("Scaled target rectangle invalid: " +
+                            scaledTargetW + "x" + scaledTargetH + " — " + debugInfo + ", op=" + op);
                 }
 
-                // ----- FLIP IN PIXEL SPACE -----
+                if (scaledSourceX < 0 || scaledSourceY < 0
+                        || scaledSourceX + scaledSourceW > source.frameWidth()
+                        || scaledSourceY + scaledSourceH > source.frameHeight()) {
+                    throw new IllegalStateException("Source operation rectangle out of bounds: " +
+                            scaledSourceX + "," + scaledSourceY + "," + scaledSourceW + "," + scaledSourceH +
+                            " — " + debugInfo + ", op=" + op);
+                }
+
+                if (scaledTargetX < 0 || scaledTargetY < 0
+                        || scaledTargetX + scaledTargetW > destination.frameWidth()
+                        || scaledTargetY + scaledTargetH > destination.frameHeight()) {
+                    throw new IllegalStateException("Target operation rectangle out of bounds: " +
+                            scaledTargetX + "," + scaledTargetY + "," + scaledTargetW + "," + scaledTargetH +
+                            " — " + debugInfo + ", op=" + op);
+                }
+
+                Sampler2D sampler = Sampler2D.offset(sourceFrameSampler, scaledSourceX, scaledSourceY);
+                sampler = Sampler2D.clamp(sampler, scaledSourceW, scaledSourceH);
+                if (op.bilinear) sampler = Sampler2D.bilinear(sampler);
+
                 int flipW = scaledSourceW;
                 int flipH = scaledSourceH;
-                if (op.rotation == Rotation.CLOCKWISE_90
-                        || op.rotation == Rotation.COUNTERCLOCKWISE_90) {
+                if (op.rotation == Rotation.CLOCKWISE_90 || op.rotation == Rotation.COUNTERCLOCKWISE_90) {
                     flipW = scaledSourceH;
                     flipH = scaledSourceW;
                 }
 
-                if (op.flipX) {
-                    sampler = Sampler2D.flippedX(sampler, flipW);
-                }
-                if (op.flipY) {
-                    sampler = Sampler2D.flippedY(sampler, flipH);
-                }
+                if (op.flipX) sampler = Sampler2D.flippedX(sampler, flipW);
+                if (op.flipY) sampler = Sampler2D.flippedY(sampler, flipH);
+                if (op.rotation != Rotation.NONE) sampler = Sampler2D.rotate(sampler, op.rotation, scaledSourceW, scaledSourceH);
 
-                // ----- ROTATION -----
-                if (op.rotation != Rotation.NONE) {
-                    sampler = Sampler2D.rotate(
-                            sampler,
-                            op.rotation,
-                            scaledSourceW,
-                            scaledSourceH
-                    );
-                }
-
-                // ----- MOVE TO PIXEL CENTERS -----
                 sampler = Sampler2D.offset(sampler, -0.5f, -0.5f);
 
                 float opScaleX = scaledSourceW / (float) scaledTargetW;
                 float opScaleY = scaledSourceH / (float) scaledTargetH;
 
-                if (opScaleX != 1.0f || opScaleY != 1.0f) {
-                    sampler = Sampler2D.scale(sampler, opScaleX, opScaleY);
-                }
-
+                if (opScaleX != 1.0f || opScaleY != 1.0f) sampler = Sampler2D.scale(sampler, opScaleX, opScaleY);
                 sampler = Sampler2D.offset(sampler, 0.5f, 0.5f);
 
-                int actualW = Math.min(
-                        scaledTargetW,
-                        destination.frameWidth() - scaledTargetX
-                );
-                int actualH = Math.min(
-                        scaledTargetH,
-                        destination.frameHeight() - scaledTargetY
-                );
+                int actualW = Math.min(scaledTargetW, destination.frameWidth() - scaledTargetX);
+                int actualH = Math.min(scaledTargetH, destination.frameHeight() - scaledTargetY);
+
+                if (actualW <= 0 || actualH <= 0) {
+                    throw new IllegalStateException("Operation would write zero or negative pixel area: " +
+                            "actualW=" + actualW + ", actualH=" + actualH + " — " + debugInfo + ", op=" + op);
+                }
 
                 for (int ty = 0; ty < actualH; ty++) {
                     for (int tx = 0; tx < actualW; tx++) {
-
                         float srcX = (tx + 0.5f) * opScaleX;
                         float srcY = (ty + 0.5f) * opScaleY;
 
@@ -117,42 +141,19 @@ public class TextureCollager {
                         int color = sampler.sample(srcX, srcY);
 
                         if (op.palettes != null) {
-                            int maxPaletteIndex =
-                                    Math.min(source.frameCount(), op.palettes.size() - 1);
-                            color = op.palettes
-                                    .get(maxPaletteIndex)
-                                    .getColorClosestTo(new PaletteColor(color))
-                                    .value();
+                            int maxPaletteIndex = Math.min(source.frameCount(), op.palettes.size() - 1);
+                            color = op.palettes.get(maxPaletteIndex).getColorClosestTo(new PaletteColor(color)).value();
                         }
 
                         if (op.blended) {
-                            destination.blendFramePixel(
-                                    cappedTargetFrame,
-                                    scaledTargetX + tx,
-                                    scaledTargetY + ty,
-                                    color
-                            );
+                            destination.blendFramePixel(cappedTargetFrame, scaledTargetX + tx, scaledTargetY + ty, color);
                         } else {
-                            destination.setFramePixel(
-                                    cappedTargetFrame,
-                                    scaledTargetX + tx,
-                                    scaledTargetY + ty,
-                                    color
-                            );
+                            destination.setFramePixel(cappedTargetFrame, scaledTargetX + tx, scaledTargetY + ty, color);
                         }
                     }
                 }
             }
         }
-    }
-
-
-    private TextureCollager(int originalW, int originalH, int targetW, int targetH, List<Operation> list) {
-        this.originFrameW = originalW;
-        this.originFrameH = originalH;
-        this.targetFrameW = targetW;
-        this.targetFrameH = targetH;
-        this.operations = list;
     }
 
     //needed to support packs of different resolutions
@@ -298,7 +299,10 @@ public class TextureCollager {
                 throw new IllegalArgumentException("Target rectangle out of bounds: targetX");
             if (targetY < 0 || targetY + targetH > targetFrameH)
                 throw new IllegalArgumentException("Target rectangle out of bounds: targetY");
-
+            if (fromW <= 0 || fromH <= 0)
+                throw new IllegalArgumentException("Source width/height must be > 0");
+            if (targetW <= 0 || targetH <= 0)
+                throw new IllegalArgumentException("Target width/height must be > 0");
         }
     }
 }

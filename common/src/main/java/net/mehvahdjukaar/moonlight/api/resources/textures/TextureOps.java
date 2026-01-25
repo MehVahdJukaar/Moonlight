@@ -94,9 +94,9 @@ public final class TextureOps {
 
     private static void applyMask(TextureImage img, TextureImage mask, boolean discardOpaque) {
         if (mask.imageWidth() < img.imageWidth() || mask.imageHeight() < img.imageHeight()) {
-            Moonlight.LOGGER.error("Palette mask {} needs to be at least as large as the target image {} and have the same frame count. You must alter the mask to match the texture size", img.path, mask.path);
+            Moonlight.LOGGER.error("Palette mask {} needs to be at least as large as the target image {} and have the same frame count. You must alter the mask to match the texture size", img.debugPath, mask.debugPath);
             if (PlatHelper.isDev()) {
-                throw new IllegalArgumentException("Palette mask " + mask.path + " has invalid size or frame count");
+                throw new IllegalArgumentException("Palette mask " + mask.debugPath + " has invalid size or frame count");
             }
             return;
         }

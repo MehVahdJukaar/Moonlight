@@ -22,7 +22,8 @@ public class HardcodedBlockTypes {
 
     public static final INamedSupplier<WoodType> BURNT;
 
-    public static void init() {}
+    public static void init() {
+    }
 
     /* Defintion of REASONS:
      *
@@ -146,8 +147,8 @@ public class HardcodedBlockTypes {
                 .childBlock(LEAVES, "blue_archwood_leaves")
                 .childBlock(SAPLING, "blue_archwood_sapling");
 
-    /// Do not add other WoodTypes blc it would create too many block variants using archwood_planks
-    /// The WoodTypes below all are using the same planks. There is no solutions
+        /// Do not add other WoodTypes blc it would create too many block variants using archwood_planks
+        /// The WoodTypes below all are using the same planks. There is no solutions
 //        BlockSetAPI.addBlockTypeFinder(WoodType.class,
 //                generalWoodFinder(false, "ars_nouveau", "red_archwood", "archwood_planks", true));
 //
@@ -220,6 +221,10 @@ public class HardcodedBlockTypes {
                 .log("whistlecane_block")
                 .childItem(STICK, "whistlecane");
 
+        woodReg.addSimpleFinder("blazingbamboo", "blazing_bamboo")
+                .planks("blazingbamboo:blazing_bamboo_planks")
+                .log("blazingbamboo:blazing_bamboo_bundle");
+
         // Luminous Nether - REASON: Associated WoodType, Naming-Convention, Spelling Convention
         woodReg.addSimpleFinder("luminous_nether", "mushroom")
                 .planks("mushroom_planks")
@@ -265,7 +270,7 @@ public class HardcodedBlockTypes {
                 .childBlock(LOG,"avocado_log");
 
         // Oh The Biomes We've Gone - REASON: Associated WoodType
-        leafReg.addSimpleFinder("biomeswevegone","flowering_palo_verde")
+        leafReg.addSimpleFinder("biomeswevegone", "flowering_palo_verde")
                 .childBlock(LOG, "palo_verde_log");
 
         leafReg.addLeavesToWoodMapping("biomeswevegone", "araucaria", "pine");
@@ -430,8 +435,6 @@ public class HardcodedBlockTypes {
         // ALEX'S CAVES - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("alexscaves:ancient", "minecraft:jungle");
     }
-
-
 
 
 }
