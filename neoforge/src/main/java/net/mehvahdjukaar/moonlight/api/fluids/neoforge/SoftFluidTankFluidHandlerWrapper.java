@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.fluids.neoforge;
 
 import net.mehvahdjukaar.moonlight.api.block.ISoftFluidTankProvider;
+import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record SoftFluidTankFluidHandlerWrapper(SoftFluidTank tank, BlockEntity be) implements IFluidHandler {
 
-    public static  <T extends BlockEntity & ISoftFluidTankProvider> SoftFluidTankFluidHandlerWrapper wrap(T be) {
+    public static <T extends BlockEntity & ISoftFluidTankProvider> SoftFluidTankFluidHandlerWrapper wrap(T be) {
         return new SoftFluidTankFluidHandlerWrapper(be.getSoftFluidTank(), be);
     }
 
@@ -35,9 +36,9 @@ public record SoftFluidTankFluidHandlerWrapper(SoftFluidTank tank, BlockEntity b
 
     @Override
     public int fill(FluidStack fluidStack, FluidAction fluidAction) {
-        var original = SoftFluidStackImpl.fromForgeFluid(fluidStack, be.getLevel().registryAccess());
+        SoftFluidStack original = SoftFluidStackImpl.fromForgeFluid(fluidStack, be.getLevel().registryAccess());
         int filled = tank.addFluid(original, fluidAction.simulate());
-        if(!fluidAction.simulate()) {
+        if (!fluidAction.simulate()) {
             int bottlesRemoved = SoftFluidStackImpl.fromForgeFluid(fluidStack, be.getLevel().registryAccess()).getCount() - original.getCount();
             fluidStack.shrink(SoftFluidStackImpl.bottlesToMB(bottlesRemoved));
             be.setChanged();
