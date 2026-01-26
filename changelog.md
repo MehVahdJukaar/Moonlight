@@ -1,2 +1,1 @@
 - fixed another issue with texture images when being fed invalid animation metadatas by texture packs
-- added a lot more debug renderers. try /moonlight debug_renderers command
