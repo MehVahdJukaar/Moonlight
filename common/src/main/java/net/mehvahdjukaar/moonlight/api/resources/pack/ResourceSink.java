@@ -6,6 +6,11 @@ import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
+import com.google.gson.JsonObject;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.serialization.JsonOps;
+import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
+import net.mehvahdjukaar.moonlight.api.resources.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -97,16 +102,21 @@ public class ResourceSink {
      * Use it for textures such as entity textures of GUI.
      * You must close the texture yourself now
      */
-    public void addTexture(ResourceLocation path, TextureImage image) {
+    public void addTexture(ResourceLocation path, TextureImage texture) {
         addTexture(path, image, true);
     }
 
-    public void addTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
+    public void addTexture(ResourceLocation path, TextureImage texture, boolean isOnAtlas) {
         try {
-            this.addBytes(path, image.getImage().asByteArray(), ResType.TEXTURES);
+            NativeImage image = texture.getImage();
+            if (!texture.isAllocated()) {
+                Moonlight.crashIfInDev("Tried to save a non allocated texture image at " + path+" \nDid you close it too early?");
+                return;
+            }
+            this.addBytes(path, image.asByteArray(), ResType.TEXTURES);
             if (!isOnAtlas) this.markNotClearable(ResType.TEXTURES.getPath(path));
-            if (image.getMcMeta() != null) {
-                this.addJson(path, image.getMcMeta().toJson(), ResType.MCMETA);
+            if (texture.getMcMeta() != null) {
+                this.addJson(path, texture.getMcMeta().toJson(), ResType.MCMETA);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
