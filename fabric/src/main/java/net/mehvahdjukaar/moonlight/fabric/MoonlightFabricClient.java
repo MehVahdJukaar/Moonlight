@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.moonlight.fabric;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
+import net.mehvahdjukaar.moonlight.core.misc.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.core.mixins.fabric.ParticleEngineAccessor;
 import net.minecraft.client.particle.ParticleRenderType;
 
@@ -19,6 +21,10 @@ public class MoonlightFabricClient implements ClientModInitializer {
         MoonlightFabric.commonSetup();
         MLFabricSetupCallbacks.CLIENT_SETUP.forEach(Runnable::run);
         MLFabricSetupCallbacks.CLIENT_SETUP.clear();
+
+        ClientPlayConnectionEvents.DISCONNECT.register((clientPacketListener, minecraft) -> {
+            FakeLevelManager.invalidateAll();
+        });
 
         PRE_CLIENT_SETUP_WORK.forEach(Runnable::run);
         CLIENT_SETUP_WORK.forEach(Runnable::run);

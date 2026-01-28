@@ -13,9 +13,7 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootConditions;
 import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -109,10 +107,6 @@ public class MoonlightForge {
         FakeLevelManager.invalidateAll();
     }
 
-    @SubscribeEvent
-    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
-        FakeLevelManager.invalidateAll();
-    }
 
     @SubscribeEvent
     public static void onDataSync(OnDatapackSyncEvent event) {
@@ -155,7 +149,6 @@ public class MoonlightForge {
     public static void onLevelLoaded(LevelEvent.Unload event) {
         DynamicHolder.clearCache();
     }
-
 
 
     public static IEventBus getCurrentBus() {
