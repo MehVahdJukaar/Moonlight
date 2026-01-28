@@ -59,9 +59,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
             currentServer = null;
             FakeLevelManager.invalidateAll();
         });
-        ClientPlayConnectionEvents.DISCONNECT.register((clientPacketListener, minecraft) -> {
-            FakeLevelManager.invalidateAll();
-        });
+
         ServerWorldEvents.UNLOAD.register((server, world) -> {
             try {
                 FakeGenericPlayer.unloadLevel(world);

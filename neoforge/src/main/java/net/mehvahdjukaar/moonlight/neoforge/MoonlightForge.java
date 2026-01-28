@@ -153,11 +153,6 @@ public class MoonlightForge {
     }
 
     @SubscribeEvent
-    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
-        FakeLevelManager.invalidateAll();
-    }
-
-    @SubscribeEvent
     public static void onDataSync(OnDatapackSyncEvent event) {
         if (event.getPlayer() != null) {
             Moonlight.onDataSyncToPlayer(event.getPlayer(), true);

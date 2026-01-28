@@ -23,8 +23,13 @@ public class MoonlightForgeClient {
     public static void init(IEventBus modEventBus) {
         modEventBus.addListener(MoonlightForgeClient::afterLoad);
         modEventBus.addListener(EventPriority.LOWEST, MoonlightForgeClient::onTextureStitch);
+        NeoForge.EVENT_BUS.addListener(MoonlightForgeClient::onPlayerLoggedOut);
         NeoForge.EVENT_BUS.addListener(MoonlightForgeClient::onInputUpdate);
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, MoonlightForgeClient::itemTooltipEvent);
+    }
+
+    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        FakeLevelManager.invalidateAll();
     }
 
     public static void itemTooltipEvent(ItemTooltipEvent event) {
