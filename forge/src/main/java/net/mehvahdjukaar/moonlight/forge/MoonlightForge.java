@@ -15,6 +15,7 @@ import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -105,6 +106,11 @@ public class MoonlightForge {
 
     @SubscribeEvent
     public static void onServerShuttingDown(ServerStoppingEvent event) {
+        FakeLevelManager.invalidateAll();
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
         FakeLevelManager.invalidateAll();
     }
 

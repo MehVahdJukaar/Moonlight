@@ -1,7 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.trades;
 
 import com.mojang.serialization.Codec;
+import net.mehvahdjukaar.moonlight.api.misc.CodecMapRegistry;
 import net.minecraft.world.entity.npc.VillagerTrades;
+
+import java.util.function.Function;
 
 
 public interface ModItemListing extends VillagerTrades.ItemListing {

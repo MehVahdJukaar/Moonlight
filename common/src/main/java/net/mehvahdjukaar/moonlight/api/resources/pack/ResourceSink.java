@@ -8,8 +8,6 @@ import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.serialization.JsonOps;
-import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
 import net.mehvahdjukaar.moonlight.api.resources.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
@@ -102,7 +100,7 @@ public class ResourceSink {
      * Use it for textures such as entity textures of GUI.
      * You must close the texture yourself now
      */
-    public void addTexture(ResourceLocation path, TextureImage texture) {
+    public void addTexture(ResourceLocation path, TextureImage image) {
         addTexture(path, image, true);
     }
 

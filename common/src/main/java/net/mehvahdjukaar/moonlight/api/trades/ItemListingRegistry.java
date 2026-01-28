@@ -9,7 +9,6 @@ import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.mehvahdjukaar.moonlight.api.misc.CodecMapRegistry;
-import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.RegistryAccessJsonReloadListener;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -34,13 +33,13 @@ import java.util.*;
 public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
     private static final ItemListingRegistry INSTANCE = new ItemListingRegistry();
-    protected static final CodecMapRegistry<ModItemListing> REGISTRY = MapRegistry.ofCodec();
+    protected static final CodecMapRegistry<ModItemListing> REGISTRY = new CodecMapRegistry<>(); //no hassle
 
     @ApiStatus.Internal
     public static void init() {
-        REGISTRY.register(new ResourceLocation("simple"), SimpleItemListing.CODEC);
-        REGISTRY.register(new ResourceLocation("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
-        REGISTRY.register(new ResourceLocation("no_op"), NoOpListing.CODEC);
+        registerSerializer(new ResourceLocation("simple"), SimpleItemListing.CODEC);
+        registerSerializer(new ResourceLocation("remove_all_non_data"), RemoveNonDataListingListing.CODEC);
+        registerSerializer(new ResourceLocation("no_op"), NoOpListing.CODEC);
     }
 
     private final Map<EntityType<?>, Set<ModItemListing>> specialTradesAdded = new HashMap<>();
@@ -289,7 +288,7 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
     private static ModItemListing parseOrThrow(JsonElement j, ResourceLocation id, DynamicOps<JsonElement> ops) {
         return ModItemListing.CODEC.parse(ops, j).getOrThrow(
-                false, s ->  Moonlight.LOGGER.error("Failed to parse villager trade {}: {}", id, s)
+                false, s -> Moonlight.LOGGER.error("Failed to parse villager trade {}: {}", id, s)
         );
     }
 
@@ -325,14 +324,14 @@ public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
     /**
      * Call on mod setup. Register a new serializer for your trade
      */
-    public static void registerSerializer(ResourceLocation id, Codec<? extends ModItemListing> trade) {
+    public synchronized static void registerSerializer(ResourceLocation id, Codec<? extends ModItemListing> trade) {
         REGISTRY.register(id, trade);
     }
 
     /**
      * Registers a simple special trade
      */
-    public static void registerSimple(ResourceLocation id, VillagerTrades.ItemListing instance, int level) {
+    public synchronized static void registerSimple(ResourceLocation id, VillagerTrades.ItemListing instance, int level) {
         SpecialListing specialListing = new SpecialListing(instance, level);
         registerSerializer(id, specialListing.getCodec());
     }

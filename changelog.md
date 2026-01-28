@@ -1,1 +1,1 @@
-- fixed another issue with texture images when being fed invalid animation metadatas by texture packs
+- minor fixes
