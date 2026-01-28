@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.fabric;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
@@ -56,6 +57,9 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         });
         ServerLifecycleEvents.SERVER_STOPPING.register(s -> {
             currentServer = null;
+            FakeLevelManager.invalidateAll();
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((clientPacketListener, minecraft) -> {
             FakeLevelManager.invalidateAll();
         });
         ServerWorldEvents.UNLOAD.register((server, world) -> {
