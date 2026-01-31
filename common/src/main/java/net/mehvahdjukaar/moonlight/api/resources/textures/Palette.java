@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HCLColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.LABColor;
+import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
@@ -92,6 +93,7 @@ public class Palette implements Set<PaletteColor> {
     }
 
     private void addUnchecked(PaletteColor color) {
+        if (wasColorClipped(color)) return;
         if (color.rgb().alpha() == 0) return;
         internal.add(color);
         this.sort();
@@ -569,7 +571,7 @@ public class Palette implements Set<PaletteColor> {
 
         int newSize = this.size() + 1;
         float firstLum = this.get(0).luminance();
-        float lastLum  = this.get(this.size() - 1).luminance();
+        float lastLum = this.get(this.size() - 1).luminance();
         float span = lastLum - firstLum;
 
         // Ideal step size in luminance
@@ -640,6 +642,21 @@ public class Palette implements Set<PaletteColor> {
         PaletteColor pl = new PaletteColor(cc);
         this.addUnchecked(pl);
         return pl;
+    }
+
+    private static boolean wasColorClipped(PaletteColor col) {
+        RGBColor rgb = col.rgb();
+        HCLColor hcl = col.hcl();
+        int intValue = rgb.toInt();
+
+        // Mask out alpha (keep B,G,R)
+        int rgbOnly = intValue & 0x00FFFFFF;
+
+        boolean isWhite = (rgbOnly == 0x00FFFFFF);
+        boolean isBlack = (rgbOnly == 0x000000);
+
+        // Only consider clipped if chroma > 0
+        return (hcl.chroma() > 0f) && (isWhite || isBlack);
     }
 
     private HCLColor getNextColor(float lumIncrease, HCLColor source, HCLColor previous) {
@@ -758,7 +775,7 @@ public class Palette implements Set<PaletteColor> {
         if (textureMask != null &&
                 (
                         textureMask.frameWidth() < textureImage.frameWidth() ||
-                        textureMask.frameHeight() < textureImage.frameHeight())) {
+                                textureMask.frameHeight() < textureImage.frameHeight())) {
             Moonlight.LOGGER.error("Palette mask {} needs to be at least as large as the target image {} and have the same frame count. You must alter the mask to match the texture size", textureImage.debugPath, textureMask.debugPath);
             if (PlatHelper.isDev()) {
                 throw new IllegalArgumentException("Palette mask " + textureMask.debugPath + " has invalid size or frame count");

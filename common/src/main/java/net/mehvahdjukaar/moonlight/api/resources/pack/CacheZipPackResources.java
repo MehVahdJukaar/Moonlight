@@ -129,46 +129,24 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
     // ---- Zip writing helpers ----
 
     public void writeZipPreferStored(Map<ResourceLocation, byte[]> files, Path outputZip) throws IOException {
-        Path parent = outputZip.getParent();
-        if (parent == null) {
-            parent = Paths.get(System.getProperty("java.io.tmpdir"));
-        } else {
-            Files.createDirectories(parent);
-        }
 
-        Path tmp = Files.createTempFile(parent, "dynpack-", ".zip");
-        boolean moved = false;
         try {
-            // Try STORED first (requires size & CRC)
-            try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(tmp, StandardOpenOption.TRUNCATE_EXISTING));
-                 ZipOutputStream zos = new ZipOutputStream(os)) {
-                writeEntriesStored(zos, files);
-            }
-            moveIntoPlace(tmp, outputZip);
-            moved = true;
+            // Try STORED first
+            FilesHelper.writeAtomically(outputZip, out -> {
+                try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(out))) {
+                    writeEntriesStored(zos, files);
+                }
+            });
+
         } catch (Exception storedEx) {
             Moonlight.LOGGER.warn("Could not write zip using STORED; falling back to DEFLATED: {}", String.valueOf(storedEx));
-            try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(tmp, StandardOpenOption.TRUNCATE_EXISTING));
-                 ZipOutputStream zos = new ZipOutputStream(os)) {
-                writeEntriesDeflated(zos, files, Deflater.NO_COMPRESSION);
-            }
-            moveIntoPlace(tmp, outputZip);
-            moved = true;
-        } finally {
-            if (!moved) {
-                try {
-                    Files.deleteIfExists(tmp);
-                } catch (IOException ignored) {
-                }
-            }
-        }
-    }
 
-    private void moveIntoPlace(Path tmp, Path target) throws IOException {
-        try {
-            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        } catch (AtomicMoveNotSupportedException ex) {
-            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
+            // Fallback to DEFLATED (no compression)
+            FilesHelper.writeAtomically(outputZip, out -> {
+                try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(out))) {
+                    writeEntriesDeflated(zos, files, Deflater.NO_COMPRESSION);
+                }
+            });
         }
     }
 
