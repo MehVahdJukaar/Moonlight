@@ -49,6 +49,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -83,14 +85,14 @@ public class MoonlightForge {
         PlatHelper.addCommonSetup(() -> {
             //stop bundling fabric api into shit!
             if (ModList.get().isLoaded("fabric_api")) {
-                List<IModInfo> modsThatHaveFabric = new ArrayList<>();
+                Set<String> modsThatHaveFabric = new HashSet<>();
                 for (var modInfo : ModList.get().getMods()) {
                     var jij = modInfo.getOwningFile().getMods();
                     if (jij.stream().anyMatch(m -> m.getModId().equals("fabric_api"))) {
-                        modsThatHaveFabric.add(modInfo);
+                        modsThatHaveFabric.add(modInfo.getOwningFile().getFile().getFileName());
                     }
                 }
-                Moonlight.LOGGER.error("Fabric API detected! This is not a Fabric mod, so please dont report related issues to MoonlightLib or its dependant. This can usually happen with connector or when having a mod that does NOT have a proper native Neoforge implementation as they SHOULD. This can easily lead to poor compatibility and issues. Proceed ar your own risk. \n Mods that bundled Fabric API: {}", modsThatHaveFabric);
+                Moonlight.LOGGER.error("Fabric API detected! This is not a Fabric mod, so please don't report related issues to MoonlightLib or its dependent(s). This can usually happen when using Connector, or when using a mod that does NOT have a native Neoforge implementation. This can easily lead to poor compatibility and other bizarre issues. Proceed at your own risk. \n Mods that bundle Fabric API: {}", modsThatHaveFabric);
             }
         });
     }

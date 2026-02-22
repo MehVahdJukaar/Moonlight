@@ -116,7 +116,7 @@ public class ResourceSink {
         try {
             NativeImage image = texture.getImage();
             if (!texture.isAllocated()) {
-                Moonlight.crashIfInDev("Tried to save a non allocated texture image at " + path+" \nDid you close it too early?");
+                Moonlight.crashIfInDev("Tried to save a non allocated texture image at " + path + " \nDid you close it too early?");
                 return;
             }
             this.addBytes(path, image.asByteArray(), ResType.TEXTURES);
@@ -249,10 +249,14 @@ public class ResourceSink {
 
     public void addTextureUnlessPresent(ResourceManager manager, ResourceLocation res, ThrowingSupplier<TextureImage> textureSupplier) {
         if (!alreadyHasTextureAtLocation(manager, res)) {
-            try (TextureImage textureImage = textureSupplier.get()) {
+            TextureImage textureImage = null;
+            try {
+                textureImage = textureSupplier.get();
                 this.addTexture(res, textureImage);
             } catch (Exception e) {
                 Moonlight.LOGGER.error("Failed to generate texture {}: {}", res, e);
+            } finally {
+                if (textureImage != null) textureImage.close();
             }
         }
     }

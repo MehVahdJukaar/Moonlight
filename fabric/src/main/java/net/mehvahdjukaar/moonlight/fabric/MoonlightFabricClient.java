@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
@@ -29,6 +30,7 @@ public class MoonlightFabricClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((clientPacketListener, minecraft) -> {
             FakeLevelManager.invalidateAll();
             RenderedTexturesManager.clearCache();
+            DynamicTextureRenderer.clearCache();
         });
         PRE_CLIENT_SETUP_WORK.forEach(Runnable::run);
         CLIENT_SETUP_WORK.forEach(Runnable::run);
