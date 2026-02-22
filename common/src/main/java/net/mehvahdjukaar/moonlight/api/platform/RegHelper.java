@@ -190,7 +190,6 @@ public class RegHelper {
                 workSound);
     }
 
-
     public static <T extends StructurePoolElement> Supplier<StructurePoolElementType<T>> registerStructurePoolElement(ResourceLocation id, MapCodec<T> codec) {
         return register(id, () -> () -> codec, Registries.STRUCTURE_POOL_ELEMENT);
     }
@@ -199,6 +198,11 @@ public class RegHelper {
         return register(name, () -> pieceType, Registries.STRUCTURE_PIECE);
     }
 
+    public static <T extends StructureProcessor> RegSupplier<StructureProcessorType<T>> registerStructureProcessor(ResourceLocation name, MapCodec<T> codec) {
+        return register(name, () -> () -> codec, Registries.STRUCTURE_PROCESSOR);
+    }
+
+    @Deprecated(forRemoval = true)
     public static <T extends StructureProcessor> RegSupplier<StructureProcessorType<T>> registerStructurePiece(ResourceLocation name, MapCodec<T> codec) {
         return register(name, () -> () -> codec, Registries.STRUCTURE_PROCESSOR);
     }
@@ -207,6 +211,7 @@ public class RegHelper {
         return register(name, () -> () -> codec, Registries.STRUCTURE_PLACEMENT);
     }
 
+    @Deprecated(forRemoval = true)
     public static RegSupplier<StructurePieceType> register(ResourceLocation name, StructurePieceType pieceType) {
         return register(name, () -> pieceType, Registries.STRUCTURE_PIECE);
     }

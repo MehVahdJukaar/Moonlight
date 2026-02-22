@@ -1,7 +1,9 @@
 package net.mehvahdjukaar.moonlight.neoforge;
 
 
+import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
+import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
@@ -11,6 +13,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -30,6 +33,7 @@ public class MoonlightForgeClient {
 
     public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
         FakeLevelManager.invalidateAll();
+        RenderedTexturesManager.clearCache();
     }
 
     public static void itemTooltipEvent(ItemTooltipEvent event) {
