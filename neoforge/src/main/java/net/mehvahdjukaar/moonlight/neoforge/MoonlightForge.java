@@ -89,7 +89,7 @@ public class MoonlightForge {
                 for (var modInfo : ModList.get().getMods()) {
                     var jij = modInfo.getOwningFile().getMods();
                     if (jij.stream().anyMatch(m -> m.getModId().equals("fabric_api"))) {
-                        modsThatHaveFabric.add(modInfo.getOwningFile().getFileName());
+                        modsThatHaveFabric.add(modInfo.getOwningFile().getFile().getFileName());
                     }
                 }
                 Moonlight.LOGGER.error("Fabric API detected! This is not a Fabric mod, so please don't report related issues to MoonlightLib or its dependent(s). This can usually happen when using Connector, or when using a mod that does NOT have a native Neoforge implementation. This can easily lead to poor compatibility and other bizarre issues. Proceed at your own risk. \n Mods that bundle Fabric API: {}", modsThatHaveFabric);

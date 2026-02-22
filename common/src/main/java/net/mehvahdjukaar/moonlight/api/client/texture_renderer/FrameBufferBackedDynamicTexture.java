@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-//TODO: extend DynamicTexture and initialize instantly. also merge with tickable one
+@Deprecated(forRemoval = true)
 public class FrameBufferBackedDynamicTexture extends AbstractTexture implements Dumpable {
 
     //runs when texture is initialized and populates it. Runs each tick if its tickable

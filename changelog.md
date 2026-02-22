@@ -1,2 +1,2 @@
-- added a lot more debug renderers. try /moonlight debug_renderers command
-- further improved error handling of images
+- minor error checking improvements
+- redid texture renderer classes

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
+import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -24,6 +25,7 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
     public void onResourceManagerReload(ResourceManager resourceManager) {
         //also using this to reset texture cache
         RenderedTexturesManager.clearCache();
+        DynamicTextureRenderer.clearCache();
 
         //also using for this
         TextureCache.clear();

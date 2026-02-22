@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
+@Deprecated(forRemoval = true)
 public class TickableFrameBufferBackedDynamicTexture extends FrameBufferBackedDynamicTexture implements Tickable {
 
     private boolean shouldTick = true;

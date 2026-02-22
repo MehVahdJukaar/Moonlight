@@ -93,6 +93,10 @@ public class Respriter {
      */
     // this should only be used when you go from non-animated to animated
     public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable McMetaFile targetAnimationData) {
+        if (!imageToRecolor.isAllocated()) {
+            Moonlight.crashIfInDev("Respriter was given a non allocated image!");
+        }
+
         if (targetPalettes.isEmpty()) {
             Moonlight.crashIfInDev("Respriter was given no palettes!");
             return imageToRecolor.makeCopy();
