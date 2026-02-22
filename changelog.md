@@ -1,1 +1,1 @@
-fixed an issue on servers
+fixed an issue with villager trades

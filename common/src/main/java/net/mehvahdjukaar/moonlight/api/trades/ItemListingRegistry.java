@@ -32,7 +32,7 @@ import java.util.*;
 
 public class ItemListingRegistry extends RegistryAccessJsonReloadListener {
 
-    private static final ItemListingRegistry INSTANCE = new ItemListingRegistry();
+    public static final ItemListingRegistry INSTANCE = new ItemListingRegistry();
     protected static final CodecMapRegistry<ModItemListing> REGISTRY = new CodecMapRegistry<>(); //no hassle
 
     @ApiStatus.Internal
