@@ -1,2 +1,1 @@
-- minor error checking improvements
-- redid texture renderer classes
+updated map atlases compat
