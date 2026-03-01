@@ -37,7 +37,7 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
         this.locationInfo = info;
     }
 
-    public void add(DynamicResourcesProvider provider) {
+    public synchronized void add(DynamicResourcesProvider provider) {
         if (provider.getPackType() != PackType.CLIENT_RESOURCES) {
             throw new IllegalArgumentException("Tried to merge a pack provider of type " + provider.getPackType() +
                     " to a merged provider of type " + PackType.CLIENT_RESOURCES);
@@ -49,7 +49,7 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
         }
     }
 
-    public void addLegacy(DynamicResourcePack dynPack) {
+    public synchronized void addLegacy(DynamicResourcePack dynPack) {
         this.packResourcesStack.add(dynPack);
         this.packResourcesStack.sort(Comparator.comparing(PackResources::packId));
         this.modNamespaces.add(dynPack.mainNamespace);

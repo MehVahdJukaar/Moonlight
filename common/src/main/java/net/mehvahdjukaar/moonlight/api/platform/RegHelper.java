@@ -829,6 +829,7 @@ public class RegHelper {
     /**
      * Very hack solution for forge. Call this as soon as your mod is created in its constructor, offering your mod bus
      */
+    @Deprecated(forRemoval = true)
     @ExpectPlatform
     public static void startRegisteringFor(Object bus) {
         throw new AssertionError();

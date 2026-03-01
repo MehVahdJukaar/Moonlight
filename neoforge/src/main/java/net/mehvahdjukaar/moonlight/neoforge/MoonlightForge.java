@@ -57,7 +57,6 @@ public class MoonlightForge {
     public static final String MOD_ID = Moonlight.MOD_ID;
 
     public MoonlightForge(IEventBus bus) {
-        RegHelper.startRegisteringFor(bus);
         RegHelperImpl.runTasksOnInit();
 
         Moonlight.commonInit();
