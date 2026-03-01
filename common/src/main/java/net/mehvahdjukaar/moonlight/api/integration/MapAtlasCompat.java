@@ -10,13 +10,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
+import pepjebs.mapatlases.MapAtlasesMod;
 import pepjebs.mapatlases.client.MapAtlasesClient;
 
 @Deprecated(forRemoval = true) //Make your own one!
 public class MapAtlasCompat {
 
     public static boolean isAtlas(Item item) {
-        return net.mehvahdjukaar.moonlight.core.integration.MapAtlasCompat.isAtlas(item);
+        return item == MapAtlasesMod.MAP_ATLAS.get();
     }
 
     @Nullable

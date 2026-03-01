@@ -34,8 +34,10 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
 
     modCompileOnly("curse.maven:modernfix-790626:4599353")
-//    modCompileOnly("pebjebs.mapatlases:map_atlases-fabric:1.21-6.1.0")
-    modCompileOnly ("curse.maven:map-atlases-forge-519759:6345967")
+    modCompileOnly("pebjebs.mapatlases:map_atlases-fabric:1.21-6.5.1"){
+        transitive = false
+    }
+ //   modCompileOnly ("curse.maven:map-atlases-forge-519759:6345967")
     modCompileOnly("curse.maven:quark-243121:7640331")
     //modCompileOnly("curse.maven:yacl-667299:4523734")
     modImplementation("curse.maven:yacl-667299:6662859")

@@ -60,14 +60,13 @@ public class RecipeTemplate {
         if (remapper == null) {
             throw new UnsupportedOperationException("Recipe class " + clazz + " not supported. You must register it using RecipeTemplate.register()");
         }
-        ResourceLocation newId = baseID.withPath(p -> p + "/" + destinationMat.getAppendableId());
 
-        Preconditions.checkNotNull(original, "Found null from block type for remapping for recipe " + originalMat + " with id " + newId);
-        Preconditions.checkNotNull(originalMat, "Found null from block type for remapping for recipe " + originalMat + " with id " + newId);
+        Preconditions.checkNotNull(original, "Found null from block type for remapping for recipe " + originalMat + " with id " + baseID);
+        Preconditions.checkNotNull(originalMat, "Found null from block type for remapping for recipe " + originalMat + " with id " + baseID);
 
         var remapped = remapper.apply(original, originalMat, destinationMat);
 
-        return new RecipeHolder<>(newId, remapped);
+        return new RecipeHolder<>(baseID, remapped);
     }
 
     static {

@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -14,23 +13,20 @@ import pepjebs.mapatlases.MapAtlasesMod;
 import pepjebs.mapatlases.client.MapAtlasesClient;
 import pepjebs.mapatlases.item.MapAtlasItem;
 import pepjebs.mapatlases.map_collection.MapCollection;
-import pepjebs.mapatlases.map_collection.MapSearchKey;
+import pepjebs.mapatlases.map_collection.MapGridKey;
 import pepjebs.mapatlases.utils.MapDataHolder;
 import pepjebs.mapatlases.utils.Slice;
 
 public class MapAtlasCompat {
 
-    public static boolean isAtlas(Item item) {
-        return item == MapAtlasesMod.MAP_ATLAS.get();
-    }
-
     @Nullable
     public static MapItemSavedData getSavedDataFromAtlas(ItemStack atlas, Level level, Player player) {
-        if(isAtlas(atlas.getItem())) {
+        //TODO: use MapAccessUtils.getSavedDataAt
+        if (atlas.getItem() == MapAtlasesMod.MAP_ATLAS.get()) {
             MapCollection maps = MapAtlasItem.getMaps(atlas, level);
             if (maps != null) {
                 Slice slice = MapAtlasItem.getSelectedSlice(atlas, level.dimension());
-                MapSearchKey key = MapSearchKey.at(maps.getScale(), player, slice);
+                MapGridKey key = MapGridKey.at(maps.getScale(), slice, player.getX(), player.getZ());
                 MapDataHolder select = maps.select(key);
                 if (select != null) {
                     return select.data;

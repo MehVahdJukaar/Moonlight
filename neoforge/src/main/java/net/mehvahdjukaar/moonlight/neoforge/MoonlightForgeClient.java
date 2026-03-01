@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.neoforge;
 
 
+import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
@@ -34,6 +35,7 @@ public class MoonlightForgeClient {
     public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
         FakeLevelManager.invalidateAll();
         DynamicTextureRenderer.clearCache();
+        RenderedTexturesManager.clearCache();
     }
 
     public static void itemTooltipEvent(ItemTooltipEvent event) {
