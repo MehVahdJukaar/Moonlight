@@ -478,6 +478,7 @@ public class RegHelperImpl {
                 Ingredient.of(ingredient));
     }
 
+    @Deprecated(forRemoval = true)
     public static void startRegisteringFor(Object bus) {
         if (bus instanceof IEventBus b) {
             MoonlightForge.startRegistering(b);

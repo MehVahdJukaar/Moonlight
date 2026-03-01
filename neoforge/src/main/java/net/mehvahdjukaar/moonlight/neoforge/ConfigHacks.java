@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.neoforge;
 
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.neoforged.fml.ModLoadingException;
 import net.neoforged.fml.config.ConfigTracker;
 import net.neoforged.fml.config.IConfigSpec;
 import net.neoforged.fml.config.ModConfig;

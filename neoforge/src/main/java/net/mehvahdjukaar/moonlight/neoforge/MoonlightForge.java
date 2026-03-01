@@ -26,10 +26,10 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.world.poi.ExtendPoiTypesEvent;
@@ -41,16 +41,12 @@ import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
-import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -192,16 +188,13 @@ public class MoonlightForge {
         Moonlight.onPlayerCloned(event.getOriginal(), event.getEntity(), event.isWasDeath());
     }
 
-    //this is shit
-
-    //hack
-    private static WeakReference<IEventBus> lastCurrentBus = null; //a bus. fallback. incase things go wrong works most of the time. mega ugly
-    //turbo mega hack
-    private static final ThreadLocal<WeakReference<IEventBus>> currentModBus = new ThreadLocal<>(); //ideally the bus of the mod we are constructing
-
-
-    //mega hack
     public static IEventBus getCurrentBus() {
+        var currentBus = ModLoadingContext.get().getActiveContainer().getEventBus();
+        if (currentBus != null) return currentBus;
+
+        //mega hack
+
+        //not needed anymore
         var threadLocalBus = currentModBus.get();
         if (threadLocalBus != null && threadLocalBus.get() != null) {
             return threadLocalBus.get();
@@ -212,9 +205,18 @@ public class MoonlightForge {
         throw new IllegalStateException("Bus is null. You must call RegHelper.startRegistering(IEventBus) before registering events");
     }
 
+    //this is shit
+
+    //hack
+    private static WeakReference<IEventBus> lastCurrentBus = null; //a bus. fallback. incase things go wrong works most of the time. mega ugly
+    //turbo mega hack
+    private static final ThreadLocal<WeakReference<IEventBus>> currentModBus = new ThreadLocal<>(); //ideally the bus of the mod we are constructing
+
+
     /**
      * Call this before registering events
      */
+    @Deprecated(forRemoval = true)
     public static void startRegistering(IEventBus bus) {
         lastCurrentBus = new WeakReference<>(bus);
         currentModBus.set(lastCurrentBus);

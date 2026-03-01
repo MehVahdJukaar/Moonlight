@@ -8,9 +8,7 @@
       "capacity": "BOTTLE"
     }
   ],
-  "equivalent_fluids": [
-    "cyclic:xpjuice"
-  ],
+  "equivalent_fluids": "#c:experience",
   "flowing_texture": "moonlight:block/soft_fluids/xp_flow",
   "food": {
     "divider": "BOTTLE",

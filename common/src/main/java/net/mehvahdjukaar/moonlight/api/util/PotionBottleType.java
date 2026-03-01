@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.util;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.*;
@@ -58,5 +59,21 @@ public enum PotionBottleType implements StringRepresentable {
     public static PotionBottleType getOrDefault(SoftFluidStack stack) {
         return stack.getOrDefault(MoonlightRegistry.BOTTLE_TYPE.get(), REGULAR);
     }
+
+    public static String truncateString(String str, int maxLength) {
+        if (str.length() <= maxLength) {
+            return str;
+        }
+        return str.substring(0, maxLength);
+    }
+
+    public static Component truncateComponent(Component component, int maxLength) {
+        String str = component.getString();
+        if (str.length() <= maxLength) {
+            return component;
+        }
+        return Component.literal(truncateString(str, maxLength)).withStyle(component.getStyle());
+    }
+
 
 }

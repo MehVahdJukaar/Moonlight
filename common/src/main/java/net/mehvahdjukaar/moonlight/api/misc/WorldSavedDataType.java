@@ -18,6 +18,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 //Basically a helper that manages syncing on world join and stores codecs cleanly
 //per world, automatically synced when stream codec is not null. not per game. saved onto overworld level
@@ -29,9 +30,9 @@ public final class WorldSavedDataType<D extends WorldSavedData> {
 
     //TODO: 1.22 make map codec here instead
 
-    private final Codec<D> codec;
+    private final Supplier<Codec<D>> codec;
     @Nullable
-    private final StreamCodec<? super RegistryFriendlyByteBuf, D> streamCodec;
+    private final Supplier<StreamCodec<? super RegistryFriendlyByteBuf, D>> streamCodec;
     private final SavedData.Factory<D> factory;
     private final String name;
     private final Scope scope;
@@ -54,13 +55,15 @@ public final class WorldSavedDataType<D extends WorldSavedData> {
         }
     }
 
-    public WorldSavedDataType(ResourceLocation id, Function<ServerLevel, D> overworldToDataConstructor, Codec<D> codec,
-                              @Nullable StreamCodec<? super RegistryFriendlyByteBuf, D> streamCodec) {
+    public WorldSavedDataType(ResourceLocation id, Function<ServerLevel, D> overworldToDataConstructor,
+                              Supplier<Codec<D>> codec,
+                              @Nullable Supplier<StreamCodec<? super RegistryFriendlyByteBuf, D>> streamCodec) {
         this(id, overworldToDataConstructor, codec, streamCodec, Scope.SINGLE_OVERWORLD);
     }
 
-    public WorldSavedDataType(ResourceLocation id, Function<ServerLevel, D> overworldToDataConstructor, Codec<D> codec,
-                              @Nullable StreamCodec<? super RegistryFriendlyByteBuf, D> streamCodec, Scope scope) {
+    public WorldSavedDataType(ResourceLocation id, Function<ServerLevel, D> overworldToDataConstructor,
+                              Supplier<Codec<D>> codec,
+                              @Nullable Supplier<StreamCodec<? super RegistryFriendlyByteBuf, D>> streamCodec, Scope scope) {
         this.codec = codec;
         this.streamCodec = streamCodec;
         this.name = id.toDebugFileName();
@@ -100,18 +103,18 @@ public final class WorldSavedDataType<D extends WorldSavedData> {
     private D load(CompoundTag tag, HolderLookup.Provider provider) {
         var t = tag.get(this.getName());
         var ops = provider.createSerializationContext(NbtOps.INSTANCE);
-        var dataResult = codec.decode(ops, t);
+        var dataResult = codec.get().decode(ops, t);
         return dataResult.getOrThrow().getFirst();
     }
 
     //TODO: make map codec
     public Codec<D> getCodec() {
-        return codec;
+        return codec.get();
     }
 
     @Nullable
     public StreamCodec<? super RegistryFriendlyByteBuf, D> getStreamCodec() {
-        return streamCodec;
+        return streamCodec == null ? null : streamCodec.get();
     }
 
     public boolean isSyncable() {

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.client;
 import com.google.common.base.Preconditions;
 import net.mehvahdjukaar.moonlight.core.integration.IrisCompat;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +23,7 @@ public class CoreShaderContainer implements Supplier<ShaderInstance> {
 
     @Override
     public ShaderInstance get() {
-        if (CompatHandler.IRIS && IrisCompat.isIrisShaderStuffActive()) {
+        if (CompatHandler.IRIS && !CompatHandler.MONOCLE && IrisCompat.isIrisShaderStuffActive()) {
             return vanillaFallback.get();
         }
         return Preconditions.checkNotNull(instance, "Shader {} was not assigned! How?!" + instance);

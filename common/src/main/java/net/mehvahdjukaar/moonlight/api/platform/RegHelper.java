@@ -407,21 +407,35 @@ public class RegHelper {
     }
 
     //give null network codec for no syncing
-
+    @Deprecated(forRemoval = true)
     public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
             ResourceLocation key, Function<ServerLevel, A> constructor,
             Codec<A> codec, @Nullable StreamCodec<? super RegistryFriendlyByteBuf, A> networkCodec) {
         return registerWorldSavedData(key, constructor, codec, networkCodec, false);
     }
 
+    @Deprecated(forRemoval = true)
     public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
             ResourceLocation key, Function<ServerLevel, A> constructor,
             Codec<A> codec, @Nullable StreamCodec<? super RegistryFriendlyByteBuf, A> networkCodec, boolean perLevel) {
-        WorldSavedDataType<A> instance = new WorldSavedDataType<>(key, constructor, codec, networkCodec,
+        return  registerWorldSavedData(key, constructor, () -> codec, networkCodec == null ? null : () -> networkCodec, perLevel);
+    }
+
+    public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
+            ResourceLocation key, Function<ServerLevel, A> constructor,
+            Supplier<Codec<A>> codec, @Nullable Supplier<StreamCodec<? super RegistryFriendlyByteBuf, A>> networkCodec) {
+        return registerWorldSavedData(key, constructor, codec, networkCodec, false);
+    }
+
+    public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
+            ResourceLocation key, Function<ServerLevel, A> constructor,
+            Supplier<Codec<A>> codec, @Nullable Supplier<StreamCodec<? super RegistryFriendlyByteBuf, A>> networkCodec, boolean perLevel) {
+        WorldSavedDataType<A> instance = new WorldSavedDataType<>(key, constructor,codec,networkCodec,
                 perLevel ? WorldSavedDataType.Scope.PER_LEVEL : WorldSavedDataType.Scope.SINGLE_OVERWORLD);
         register(key, () -> instance, MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.key());
         return instance;
     }
+
 
     public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
         return register(name, PlatHelper::newSimpleParticle, Registries.PARTICLE_TYPE);
