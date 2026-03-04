@@ -219,4 +219,12 @@ public class CodecUtils {
                 });
     }
 
+    static <A,B> StreamCodec<A,B> recursiveStreamCodec(final String name, final Function<StreamCodec<A,B>, StreamCodec<A,B>> wrapped) {
+        return new RecursiveStreamCodec<>(name, wrapped);
+    }
+
+    static <A,B> StreamCodec<A,B> lazyInitializedStreamCodec(final Supplier<StreamCodec<A,B>> delegate) {
+        return new RecursiveStreamCodec<>(delegate.toString(), self -> delegate.get());
+    }
+
 }
