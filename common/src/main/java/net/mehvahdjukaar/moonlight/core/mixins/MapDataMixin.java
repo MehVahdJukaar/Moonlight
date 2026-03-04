@@ -283,13 +283,17 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Inject(method = "checkBanners", at = @At("TAIL"))
     public void checkCustomDeco(BlockGetter world, int x, int z, CallbackInfo ci) {
+        if(!(world instanceof LevelAccessor la)){
+            return;
+        }
         List<String> toRemove = new ArrayList<>();
         List<MLMapMarker<?>> toAdd = new ArrayList<>();
         for (var e : this.moonlight$customMapMarkers.entrySet()) {
             var marker = e.getValue();
             if (marker.getPos().getX() == x && marker.getPos().getZ() == z) {
                 if (marker.shouldRefreshFromWorld()) {
-                    MLMapMarker<?> newMarker = marker.getType().value().createMarkerFromWorld(world, marker.getPos());
+                    MLMapMarker<?> newMarker = marker.getType().value()
+                            .createMarkerFromWorld(la, marker.getPos());
                     String id = e.getKey();
                     if (newMarker == null) {
                         toRemove.add(id);

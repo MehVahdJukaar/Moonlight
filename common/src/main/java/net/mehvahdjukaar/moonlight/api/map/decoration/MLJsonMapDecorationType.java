@@ -18,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
@@ -102,7 +104,7 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
 
     @Nullable
     @Override
-    public SimpleMapMarker createMarkerFromWorld(BlockGetter reader, BlockPos pos) {
+    public SimpleMapMarker createMarkerFromWorld(LevelAccessor reader, BlockPos pos) {
         if (this.target.isPresent()) {
             if (target.get().test(reader.getBlockState(pos), RandomSource.create())) {
                 Optional<Component> name = this.getDisplayName();
@@ -114,7 +116,7 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
                     }
                 }
                 return new SimpleMapMarker(
-                        this.wrapAsHolder(),
+                        this.wrapAsHolder(reader.registryAccess()),
                         pos, defaultRotation, name);
             }
         }

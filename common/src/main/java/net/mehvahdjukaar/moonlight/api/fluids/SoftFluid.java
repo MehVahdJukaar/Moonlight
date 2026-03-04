@@ -8,6 +8,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -335,11 +336,11 @@ public class SoftFluid {
             ColorUtils.CODEC.optionalFieldOf("color", -1).forGetter(SoftFluid::getTintColor),
             TintMethod.CODEC.optionalFieldOf("tint_method", TintMethod.STILL_AND_FLOWING).forGetter(SoftFluid::getTintMethod),
             FoodProvider.CODEC.optionalFieldOf("food", FoodProvider.EMPTY).forGetter(SoftFluid::getFoodProvider),
-            Utils.lenientHomogeneousList(Registries.DATA_COMPONENT_TYPE)
+            CodecUtils.lenientHomogeneousList(Registries.DATA_COMPONENT_TYPE)
                     .optionalFieldOf("preserved_components_from_item", HolderSet.empty())
                     .forGetter(SoftFluid::getPreservedComponents),
             FluidContainerList.CODEC.optionalFieldOf("containers", new FluidContainerList()).forGetter(SoftFluid::getContainerList),
-            Utils.lenientHomogeneousList(Registries.FLUID).optionalFieldOf("equivalent_fluids", HolderSet.empty())
+            CodecUtils.lenientHomogeneousList(Registries.FLUID).optionalFieldOf("equivalent_fluids", HolderSet.empty())
                     .forGetter(s -> s.equivalentFluids),
             ResourceLocation.CODEC.optionalFieldOf("use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
     ).apply(instance, SoftFluid::new));

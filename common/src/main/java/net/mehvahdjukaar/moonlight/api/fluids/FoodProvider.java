@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvents;
@@ -24,11 +25,11 @@ import java.util.function.Consumer;
 public class FoodProvider {
 
     private static final Codec<FoodProvider> CODEC_FULL = RecordCodecBuilder.create((instance) -> instance.group(
-            Utils.optionalRegistryCodec(BuiltInRegistries.ITEM, Items.AIR).fieldOf("item").forGetter(f -> f.foodItem),
+            CodecUtils.optionalRegistryCodec(BuiltInRegistries.ITEM, Items.AIR).fieldOf("item").forGetter(f -> f.foodItem),
             SoftFluid.Capacity.INT_CODEC.optionalFieldOf("divider", 1).forGetter(f -> f.divider)
     ).apply(instance, FoodProvider::create));
 
-    private static final Codec<FoodProvider> CODEC_SIMPLE = Utils.optionalRegistryCodec(BuiltInRegistries.ITEM, Items.AIR)
+    private static final Codec<FoodProvider> CODEC_SIMPLE = CodecUtils.optionalRegistryCodec(BuiltInRegistries.ITEM, Items.AIR)
             .xmap(a -> new FoodProvider(a, 1), FoodProvider::getFoodItem);
 
     public static final Codec<FoodProvider> CODEC = Codec.withAlternative(CODEC_FULL, CODEC_SIMPLE);

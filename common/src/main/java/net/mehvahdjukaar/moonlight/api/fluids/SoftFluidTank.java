@@ -200,7 +200,7 @@ public class SoftFluidTank {
      * @return empty container item, PASS if it failed
      */
     public InteractionResultHolder<ItemStack> drainItem(ItemStack filledContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
-        var extracted = SoftFluidStack.fromItem(filledContainer);
+        var extracted = SoftFluidStack.fromItem(filledContainer, level.registryAccess());
         if (extracted == null) return InteractionResultHolder.pass(ItemStack.EMPTY);
         SoftFluidStack fluidStack = extracted.getFirst();
 
