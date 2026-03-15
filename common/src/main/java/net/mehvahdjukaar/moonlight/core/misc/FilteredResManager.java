@@ -70,7 +70,7 @@ public class FilteredResManager extends MultiPackResourceManager {
     }
 
     public static boolean isDynamicPackResource(PackResources p) {
-        return p instanceof IEditablePackResources ||
-                p instanceof MergedDynamicClientResourcesProvider;
+        return p instanceof IEditablePackResources || (PlatHelper.getPhysicalSide().isClient() &&
+                p instanceof MergedDynamicClientResourcesProvider);
     }
 }
