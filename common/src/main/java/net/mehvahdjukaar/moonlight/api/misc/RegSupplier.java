@@ -19,7 +19,7 @@ public interface RegSupplier<T> extends Supplier<T>, Holder<T> {
 
     ResourceLocation getId();
 
-    ResourceKey<? super T> getKey();
+    ResourceKey<T> getKey();
 
     @Deprecated(forRemoval = true)
     default Holder<T> getHolder() {
