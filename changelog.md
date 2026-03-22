@@ -1,3 +1,1 @@
-**# v2.29.21
-
-HardcodedlockTypes - Removed Mystic's Biomes (The DEV of said mod will add it)**
+- fixed an issue where adding items to tabs would fail when parent and search entries were different. no idea why a mod would just add stuff to one tho.

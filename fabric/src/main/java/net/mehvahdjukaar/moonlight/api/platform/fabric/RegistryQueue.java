@@ -23,20 +23,20 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class RegistryQueue<T> {
-    private final ResourceKey<? extends Registry<T>> registry;
-    private final List<RegEntryHolder<? extends T, T>> entries = new ArrayList<>();
+    private final ResourceKey<Registry<T>> registry;
+    private final List<RegEntryHolder<T>> entries = new ArrayList<>();
     private final List<Consumer<Registrator<T>>> batchRegistration = new ArrayList<>();
 
     public RegistryQueue(ResourceKey<? extends Registry<T>> registry) {
-        this.registry = registry;
+        this.registry = (ResourceKey<Registry<T>>) registry;
     }
 
     public ResourceKey<? extends Registry<T>> getRegistry() {
         return registry;
     }
 
-    public <A extends T> RegEntryHolder<A, T> add(Supplier<A> factory, ResourceLocation name) {
-        RegEntryHolder<A, T> wrapper = new RegEntryHolder<>(name, factory, registry);
+    public RegEntryHolder<T> add(Supplier<T> factory, ResourceLocation name) {
+        RegEntryHolder<T> wrapper = new RegEntryHolder<>(name, factory, registry);
         entries.add(wrapper);
         return wrapper;
     }
@@ -51,15 +51,15 @@ public class RegistryQueue<T> {
     }
 
 
-    public static class RegEntryHolder<T extends R, R> implements RegSupplier<T> {
-        private ResourceKey<? extends Registry<R>> registryKey;
+    public static class RegEntryHolder<T> implements RegSupplier<T> {
+        private ResourceKey<Registry<T>> registryKey;
         private Supplier<T> regSupplier;
 
-        private final ResourceKey<R> id;
+        private final ResourceKey<T> id;
         private Holder<T> holder = null;
 
 
-        public RegEntryHolder(ResourceLocation id, Supplier<T> factory, ResourceKey<? extends Registry<R>> registry) {
+        public RegEntryHolder(ResourceLocation id, Supplier<T> factory, ResourceKey<Registry<T>> registry) {
             this.regSupplier = factory;
             this.id = ResourceKey.create(registry, id);
             this.registryKey = registry;
@@ -77,7 +77,7 @@ public class RegistryQueue<T> {
         }
 
         @Override
-        public ResourceKey<R> getKey() {
+        public ResourceKey<T> getKey() {
             return id;
         }
 
@@ -93,7 +93,7 @@ public class RegistryQueue<T> {
             regSupplier = null;
             registryKey = null;
 
-            R entry = this.holder.value();
+            var entry = this.holder.value();
             if (PlatHelper.getPhysicalSide().isClient() && entry instanceof ICustomItemRendererProvider pr) {
                 if (BuiltinItemRendererRegistry.INSTANCE.get(pr) == null) {
                     BuiltinItemRendererRegistry.INSTANCE.register(pr,
@@ -193,7 +193,7 @@ public class RegistryQueue<T> {
         public Holder<T> getDelegate() {
             initialize(false);
             var h = this.holder;
-            if (h instanceof RegistryQueue.RegEntryHolder<?, ?> ro) {
+            if (h instanceof RegistryQueue.RegEntryHolder< ?> ro) {
                 return (Holder<T>) ro.getDelegate();
             } else if (h != null) {
                 return h;

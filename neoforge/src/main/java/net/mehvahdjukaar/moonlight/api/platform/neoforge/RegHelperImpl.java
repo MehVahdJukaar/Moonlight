@@ -58,6 +58,7 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.registries.*;
 import net.neoforged.neoforge.registries.datamaps.DataMapType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -159,7 +160,7 @@ public class RegHelperImpl {
 
         @Override
         public Holder<T> getDelegate() {
-            return  registryObject.getDelegate();
+            return registryObject.getDelegate();
         }
 
         @Override
@@ -403,8 +404,9 @@ public class RegHelperImpl {
                 if (after) {
                     ItemStack last = findLast(event, target);
                     if (!last.isEmpty()) {
+                        CreativeModeTab.TabVisibility vis = getTabVisibility(last);
                         for (int j = items.size(); j > 0; j--) {
-                            event.insertAfter(last, items.get(j - 1), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                            event.insertAfter(last, items.get(j - 1), vis);
                         }
                         return;
                     } else {
@@ -413,8 +415,9 @@ public class RegHelperImpl {
                 } else {
                     ItemStack first = findFirst(event, target);
                     if (!first.isEmpty()) {
+                        CreativeModeTab.TabVisibility vis = getTabVisibility(first);
                         for (var s : items) {
-                            event.insertBefore(first, s, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                            event.insertBefore(first, s, vis);
                         }
                         return;
                     } else {
@@ -423,6 +426,17 @@ public class RegHelperImpl {
                 }
             }
             event.acceptAll(items);
+        }
+
+        private CreativeModeTab.@NotNull TabVisibility getTabVisibility(ItemStack first) {
+            CreativeModeTab.TabVisibility vis;
+            if (event.getSearchEntries().contains(first)) {
+                vis = CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS;
+            } else {
+                vis = CreativeModeTab.TabVisibility.PARENT_TAB_ONLY;
+                Moonlight.LOGGER.warn("Found an item that was in parent tab but not in search tab. This might be a bug? {}", first);
+            }
+            return vis;
         }
 
         private ItemStack findFirst(BuildCreativeModeTabContentsEvent event, Predicate<ItemStack> target) {

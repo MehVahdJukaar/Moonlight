@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.IEditablePackResources;
 import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
 import net.minecraft.server.packs.PackResources;

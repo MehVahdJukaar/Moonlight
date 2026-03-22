@@ -138,7 +138,7 @@ public class RegHelperImpl {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
+    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, ResourceKey<Registry<T>> reg) {
         if (supplier == null) {
             throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
         }
@@ -160,13 +160,13 @@ public class RegHelperImpl {
                 PoiTypes.registerBlockStates(holder, holder.value().matchingStates());
             });
         }
-        return registry.add(supplier, name);
+        return (RegSupplier<E>) registry.add((Supplier<T>) supplier, name);
     }
 
-    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
-        RegistryQueue.RegEntryHolder<E, T> entry = new RegistryQueue.RegEntryHolder<>(name, supplier, reg);
+    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<Registry<T>> reg) {
+        RegistryQueue.RegEntryHolder<T> entry = new RegistryQueue.RegEntryHolder<>(name,(Supplier<T>) supplier, reg);
         entry.initialize(true);
-        return entry;
+        return (RegSupplier<E>) entry;
     }
 
     public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {

@@ -18,7 +18,7 @@ public interface RegistryMixin {
     default <T> void ml$addHolderDelegate(Holder<T> value,
                                                  CallbackInfoReturnable<DataResult<Holder.Reference<T>>> cir,
                                                  @Local(argsOnly = true) LocalRef<Holder<T>> holderRef) {
-        if (value instanceof RegistryQueue.RegEntryHolder<?, ?> ro) {
+        if (value instanceof RegistryQueue.RegEntryHolder<?> ro) {
             holderRef.set((Holder<T>) ro.getDelegate());
         }
     }
