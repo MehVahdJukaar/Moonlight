@@ -1,2 +1,3 @@
-bumped version number since it failed last time
-added new recursive and lazy stream codecs 
+**# v2.29.21
+
+HardcodedlockTypes - Removed Mystic's Biomes (The DEV of said mod will add it)**

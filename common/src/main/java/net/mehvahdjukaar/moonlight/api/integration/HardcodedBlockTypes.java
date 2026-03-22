@@ -300,27 +300,6 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("fruitfulfun", "pomelo", "citrus");
         leafReg.addLeavesToWoodMapping("fruitfulfun", "orange", "citrus");
 
-        // Mystic's Biomes - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("mysticsbiomes", "yellow_maple", "white_maple");
-
-        //REASON: Naming-Convention
-        leafReg.addSimpleFinder("mysticsbiomes", "pink_cherry")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "white_cherry")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "strawberry")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "peach")
-                .leavesSuffix("_blossoms");
-        leafReg.addSimpleFinder("mysticsbiomes", "jacaranda")
-                .leavesSuffix("_blossoms");
-        leafReg.addLeavesToWoodMapping("mysticsbiomes", "sea_shrub", "sea_foam");
-
-        //TODO: are these correct? oak? shouldnt it be left empty? - need to check
-        leafReg.addLeavesToWoodMapping("mysticsbiomes:peony", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("mysticsbiomes:hydrangea", "minecraft:oak");
-        leafReg.addLeavesToWoodMapping("mysticsbiomes:budding_peony", "minecraft:oak");
-
         // Environmental - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("environmental", "pink_wisteria", "wisteria");
         leafReg.addLeavesToWoodMapping("environmental", "blue_wisteria", "wisteria");
