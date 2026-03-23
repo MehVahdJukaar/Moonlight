@@ -11,7 +11,6 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCond
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.PoiTypeAccessor;
-import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -372,7 +371,7 @@ public class RegHelperImpl {
         Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
         Set<BlockState> newStates = new HashSet<>();
         for (Block block : blocks) {
-            for(var b : block.getStateDefinition().getPossibleStates()) {
+            for (var b : block.getStateDefinition().getPossibleStates()) {
                 matchingStates.add(b);
                 newStates.add(b);
             }
@@ -382,10 +381,7 @@ public class RegHelperImpl {
 
         Map<BlockState, PoiType> map = ForgeRegistries.POI_TYPES.getSlaveMap(BLOCKSTATE_TO_POINT_OF_INTEREST_TYPE, Map.class);
         newStates.forEach((blockState) -> {
-            PoiType holder2 = map.put(blockState, beehivePOI.value());
-            if (holder2 != null) {
-                throw Util.pauseInIde(new IllegalStateException(String.format(Locale.ROOT, "%s is defined in more than one PoI type", blockState)));
-            }
+            map.put(blockState, beehivePOI.value());
         });
         //PoiTypes.registerBlockStates(beehivePOI, newStates);
     }

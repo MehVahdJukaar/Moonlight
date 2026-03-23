@@ -59,7 +59,6 @@ public class MoonlightForge {
             MoonlightForgeClient.init();
         }
         PlatHelper.addCommonSetup(() -> {
-            RegHelper.addBlocksToPOI(PoiTypes.BEEHIVE, List.of(Blocks.DIAMOND_BLOCK));
             if (ModList.get().isLoaded("fabric_api")) {
                 List<IModInfo> modsThatHaveFabric = new ArrayList<>();
                 for (IModInfo modInfo : ModList.get().getMods()) {
