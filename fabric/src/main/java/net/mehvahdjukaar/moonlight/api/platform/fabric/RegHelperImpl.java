@@ -16,8 +16,8 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
-import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.PoiTypeAccessor;
+import net.mehvahdjukaar.moonlight.core.mixins.fabric.PackRepositoryAccessor;
 import net.mehvahdjukaar.moonlight.core.set.fabric.BlockSetInternalImpl;
 import net.mehvahdjukaar.moonlight.fabric.MoonlightFabric;
 import net.mehvahdjukaar.moonlight.fabric.ResourceConditionsBridge;
@@ -286,7 +286,7 @@ public class RegHelperImpl {
     public static <T> Supplier<EntityDataSerializer<T>> regEntityDataSerializer(ResourceLocation name, Supplier<EntityDataSerializer<T>> serializer) {
         var value = serializer.get();
         EntityDataSerializers.registerSerializer(value);
-        return ()->value;
+        return () -> value;
     }
 
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
@@ -295,8 +295,10 @@ public class RegHelperImpl {
         Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
         Set<BlockState> newStates = new HashSet<>();
         for (Block block : blocks) {
-            matchingStates.add(block.defaultBlockState());
-            newStates.add(block.defaultBlockState());
+            for (var b : block.getStateDefinition().getPossibleStates()) {
+                matchingStates.add(b);
+                newStates.add(b);
+            }
         }
         ((PoiTypeAccessor) (Object) beehivePOI.value())
                 .setMatchingStates(matchingStates);

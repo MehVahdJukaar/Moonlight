@@ -60,10 +60,11 @@ import net.minecraftforge.event.village.WandererTradesEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
-import net.minecraftforge.registries.*;
-import org.checkerframework.checker.units.qual.A;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -368,19 +369,16 @@ public class RegHelperImpl {
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
         var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
         //add vanilla states if they are mutable
-        Set<BlockState> matchingStates = new HashSet<>( beehivePOI.value().matchingStates());
+        Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
         Set<BlockState> newStates = new HashSet<>();
-        try {
-            for (Block block : blocks) {
-                matchingStates.add(block.defaultBlockState());
-                newStates.add(block.defaultBlockState());
+        for (Block block : blocks) {
+            for(var b : block.getStateDefinition().getPossibleStates()) {
+                matchingStates.add(b);
+                newStates.add(b);
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to add blocks to POI " + poi.location() + ". Somehow the set was not mutable?", e);
         }
 
-        ((PoiTypeAccessor) (Object) beehivePOI.value())
-                .setMatchingStates(matchingStates);
+        ((PoiTypeAccessor) (Object) beehivePOI.value()).setMatchingStates(matchingStates);
 
         Map<BlockState, PoiType> map = ForgeRegistries.POI_TYPES.getSlaveMap(BLOCKSTATE_TO_POINT_OF_INTEREST_TYPE, Map.class);
         newStates.forEach((blockState) -> {

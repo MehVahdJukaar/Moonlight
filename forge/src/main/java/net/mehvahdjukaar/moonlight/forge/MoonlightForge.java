@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.forge;
 
 import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.forge.ConfigSpecWrapper;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -14,6 +15,8 @@ import net.mehvahdjukaar.moonlight.core.misc.forge.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginPacket;
 import net.mehvahdjukaar.moonlight.core.network.ModMessages;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -56,6 +59,7 @@ public class MoonlightForge {
             MoonlightForgeClient.init();
         }
         PlatHelper.addCommonSetup(() -> {
+            RegHelper.addBlocksToPOI(PoiTypes.BEEHIVE, List.of(Blocks.DIAMOND_BLOCK));
             if (ModList.get().isLoaded("fabric_api")) {
                 List<IModInfo> modsThatHaveFabric = new ArrayList<>();
                 for (IModInfo modInfo : ModList.get().getMods()) {
