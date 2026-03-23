@@ -290,9 +290,9 @@ public class RegHelperImpl {
     }
 
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
-        var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+        var poiTypeReference = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
         //add vanilla states if they are mutable
-        Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
+        Set<BlockState> matchingStates = new HashSet<>(poiTypeReference.value().matchingStates());
         Set<BlockState> newStates = new HashSet<>();
         for (Block block : blocks) {
             for (var b : block.getStateDefinition().getPossibleStates()) {
@@ -300,10 +300,10 @@ public class RegHelperImpl {
                 newStates.add(b);
             }
         }
-        ((PoiTypeAccessor) (Object) beehivePOI.value())
+        ((PoiTypeAccessor) (Object) poiTypeReference.value())
                 .setMatchingStates(matchingStates);
 
-        PoiTypes.registerBlockStates(beehivePOI, newStates);
+        PoiTypes.registerBlockStates(poiTypeReference, newStates);
     }
 
     public static void registerResourcePackSource(PackType packType, RepositorySource packSource) {
