@@ -30,7 +30,6 @@
     "MenuTypeAccessor",
     "MinecraftServerMixin",
     "PackRepositoryAccessor",
-    "PoiTypeAccessor",
     "ServerPackSourceMixin",
     "ServerPlayerAccessor"
   ],

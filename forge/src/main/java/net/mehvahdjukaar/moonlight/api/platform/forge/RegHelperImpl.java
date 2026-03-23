@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.forge.OptionalRecipeCondition;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.AntiRepostWarning;
+import net.mehvahdjukaar.moonlight.core.mixins.accessor.PoiTypeAccessor;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -367,7 +368,7 @@ public class RegHelperImpl {
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
         var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
         //add vanilla states if they are mutable
-        Set<BlockState> matchingStates = beehivePOI.value().matchingStates();
+        Set<BlockState> matchingStates = new HashSet<>( beehivePOI.value().matchingStates());
         Set<BlockState> newStates = new HashSet<>();
         try {
             for (Block block : blocks) {
@@ -377,6 +378,10 @@ public class RegHelperImpl {
         } catch (Exception e) {
             throw new RuntimeException("Failed to add blocks to POI " + poi.location() + ". Somehow the set was not mutable?", e);
         }
+
+        ((PoiTypeAccessor) (Object) beehivePOI.value())
+                .setMatchingStates(matchingStates);
+
         Map<BlockState, PoiType> map = ForgeRegistries.POI_TYPES.getSlaveMap(BLOCKSTATE_TO_POINT_OF_INTEREST_TYPE, Map.class);
         newStates.forEach((blockState) -> {
             PoiType holder2 = map.put(blockState, beehivePOI.value());

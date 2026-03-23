@@ -17,6 +17,7 @@
     "ThirdPersonRendererMixin"
   ],
   "mixins": [
+    "accessor.PoiTypeAccessor",
     "BeeGoalMixin",
     "BlockItemMixin",
     "EntityMixin",
