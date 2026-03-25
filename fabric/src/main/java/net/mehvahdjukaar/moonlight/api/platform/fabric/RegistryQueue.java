@@ -13,10 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -182,7 +179,8 @@ public class RegistryQueue<T> {
 
         @Override
         public int hashCode() {
-            return this.id.hashCode();
+            if (this.holder == null) return Objects.hashCode(this);
+            return this.holder.hashCode();
         }
 
         @Override
@@ -193,7 +191,7 @@ public class RegistryQueue<T> {
         public Holder<T> getDelegate() {
             initialize(false);
             var h = this.holder;
-            if (h instanceof RegistryQueue.RegEntryHolder< ?> ro) {
+            if (h instanceof RegistryQueue.RegEntryHolder<?> ro) {
                 return (Holder<T>) ro.getDelegate();
             } else if (h != null) {
                 return h;
