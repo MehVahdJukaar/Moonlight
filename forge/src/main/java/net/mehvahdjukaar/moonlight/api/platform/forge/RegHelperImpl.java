@@ -369,22 +369,15 @@ public class RegHelperImpl {
      //not supported. forge bullshit i cant get this to work. merely adding to the map makes some null appear in the registry snapshots, whatever those are...
         if(true)return;
         var poiTypeReference = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
-        //add vanilla states if they are mutable
         Set<BlockState> matchingStates = new HashSet<>(poiTypeReference.value().matchingStates());
-        Set<BlockState> newStates = new HashSet<>();
+        Map<BlockState, PoiType> map = ForgeRegistries.POI_TYPES.getSlaveMap(BLOCKSTATE_TO_POINT_OF_INTEREST_TYPE, Map.class);
         for (Block block : blocks) {
             for (var b : block.getStateDefinition().getPossibleStates()) {
                 matchingStates.add(b);
-                newStates.add(b);
+                map.put(b, poiTypeReference.value());
             }
         }
-
         ((PoiTypeAccessor) (Object) poiTypeReference.value()).setMatchingStates(matchingStates);
-
-        Map<BlockState, PoiType> map = ForgeRegistries.POI_TYPES.getSlaveMap(BLOCKSTATE_TO_POINT_OF_INTEREST_TYPE, Map.class);
-        newStates.forEach((blockState) -> {
-            map.put(blockState, poiTypeReference.value());
-        });
         //PoiTypes.registerBlockStates(beehivePOI, newStates);
     }
 
