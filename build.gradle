@@ -181,8 +181,12 @@ static def listGameVersions(String minVersion, String maxVersion) {
     return versions
 }
 
-tasks.register('buildAndpublishAll') {
+
+tasks.register('buildAndPublishAll') {
     dependsOn ':clean'
+    dependsOn ':common:clean'
+    dependsOn ':fabric:clean'
+    dependsOn ':neoforge:clean'
     dependsOn ':build'
     dependsOn ':neoforge:curseforge'
     dependsOn ':neoforge:modrinth'

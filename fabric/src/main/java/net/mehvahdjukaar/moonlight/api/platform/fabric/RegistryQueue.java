@@ -179,7 +179,10 @@ public class RegistryQueue<T> {
 
         @Override
         public int hashCode() {
-            if (this.holder == null) return Objects.hashCode(this);
+            //very hacky could cause issues
+            if (this.holder == null) {
+                return this.id.hashCode();
+            }
             return this.holder.hashCode();
         }
 
