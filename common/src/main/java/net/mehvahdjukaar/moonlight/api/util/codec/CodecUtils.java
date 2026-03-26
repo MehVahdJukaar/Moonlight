@@ -11,6 +11,7 @@ import com.mojang.serialization.codecs.BaseMapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -27,6 +28,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector2f;
 
 import java.util.List;
 import java.util.Map;
@@ -141,6 +143,9 @@ public class CodecUtils {
     public static <A, B> Codec<Either<A, B>> eitherLeft(Codec<A> leftCodec) {
         return new EitherLeftCodec<>(leftCodec);
     }
+
+    public static final Codec<Vector2f> VEC2F = Codec.FLOAT.listOf()
+            .comapFlatMap((list) -> Util.fixedSize(list, 2).map((listx) -> new Vector2f(listx.get(0), listx.get(1))), (vector3f) -> List.of(vector3f.x(), vector3f.y()));
 
     public static final Codec<ItemStack> ITEM_OR_STACK = Codec.withAlternative(ItemStack.SINGLE_ITEM_CODEC, BuiltInRegistries.ITEM.byNameCodec(),
             Item::getDefaultInstance);

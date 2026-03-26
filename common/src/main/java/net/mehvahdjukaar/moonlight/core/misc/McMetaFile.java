@@ -61,6 +61,15 @@ public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject
         return mostImportant;
     }
 
+    //Note that these can be different from TextureImage.frameWidth
+    public int getAnimationFrameWidth(){
+        return this.animation.frameWidth;
+    }
+
+    public int getAnimationFrameHeight(){
+        return this.animation.frameHeight;
+    }
+
     public JsonObject toJson() {
         JsonObject obj = moddedStuff.deepCopy();
 
