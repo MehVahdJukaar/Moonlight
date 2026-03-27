@@ -293,6 +293,7 @@ public class WoodType extends BlockType {
 
         List<ResourceLocation> targets = new ArrayList<>();
         targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, myPath + _infix + _suffix));
+        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, myPath + _suffix + _infix));
         targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath + _suffix));
         if (alternateNamespace != null)
             targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, alternateNamespace + _infix + _suffix));
