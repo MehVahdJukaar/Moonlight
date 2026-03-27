@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
 import com.mojang.serialization.Codec;
-import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.minecraft.Util;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -27,7 +26,6 @@ public record EntityAngles(float pitch, float yaw) {
      * Create angles from radians
      */
     public static EntityAngles fromRadians(float pitchRad, float yawRad) {
-        TextureImage
         return new EntityAngles(
                 (float) Math.toDegrees(pitchRad),
                 (float) Math.toDegrees(yawRad)
