@@ -1,1 +1,1 @@
-fixed an issue with regsuppliers holders implementation
+- Improved WoodType's detection for an unconventional ID, "rubber_log_stripped" - [#1197](https://github.com/MehVahdJukaar/WoodGood/issues/1197) (v2.29.24)
