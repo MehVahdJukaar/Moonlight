@@ -1,10 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
 import com.mojang.serialization.Codec;
-import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.minecraft.Util;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -27,25 +25,10 @@ public record EntityAngles(float pitch, float yaw) {
      * Create angles from radians
      */
     public static EntityAngles fromRadians(float pitchRad, float yawRad) {
-        TextureImage
         return new EntityAngles(
                 (float) Math.toDegrees(pitchRad),
                 (float) Math.toDegrees(yawRad)
         );
-    }
-
-    public static EntityAngles fromViewVector(Vec3 vec) {
-        // Normalize to be safe
-        double x = vec.x;
-        double y = vec.y;
-        double z = vec.z;
-
-        double horizontalLen = Math.sqrt(x * x + z * z);
-
-        float yawRad = (float) -Mth.atan2(x, z);
-        float pitchRad = (float) -Mth.atan2(y, horizontalLen);
-
-        return fromRadians(pitchRad, yawRad);
     }
 
     /**
@@ -89,8 +72,8 @@ public record EntityAngles(float pitch, float yaw) {
     /**
      * Apply pitch/yaw clamping
      */
-    public EntityAngles clamp(float minPitch, float maxPitch) {
-        return new EntityAngles(Math.max(minPitch, Math.min(maxPitch, pitch)), yaw);
+    public EntityAngles clamped(float minPitch, float maxPitch, float minYaw, float maxYaw) {
+        return EntityAngles.of(Mth.clamp(pitch, minPitch, maxPitch), Mth.clamp(yaw, minYaw, maxYaw));
     }
 
     @Override

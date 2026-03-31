@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
 import com.mojang.datafixers.util.Either;
+import net.mehvahdjukaar.moonlight.api.block.IEntityCarry;
+import net.mehvahdjukaar.moonlight.api.entity.ITileEntityCarry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
@@ -77,6 +79,16 @@ public class TileOrEntityTarget {
             }
         }
         throw new IllegalStateException("No BlockEntity found at " + this.posOrEntityId.left().orElse(null));
+    }
+
+    public BlockEntity findTileOrContainedTile(Level level) {
+        return this.map(level, be -> be, e ->
+                e instanceof ITileEntityCarry tc ? tc.getCarriedTileEntity() : null);
+    }
+
+    public Entity findEntityOrContainedEntity(Level level) {
+        return this.map(level, be -> be instanceof IEntityCarry ec ? ec.getCarriedEntity() : null,
+                e -> e);
     }
 
     public <T extends Entity> T getEntityOrThrow(Level level, EntityType<T> type) {

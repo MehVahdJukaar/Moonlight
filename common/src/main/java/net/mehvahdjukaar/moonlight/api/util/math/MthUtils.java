@@ -265,6 +265,22 @@ public final class MthUtils {
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 
+    public static EnumMap<Direction, VoxelShape> getAllRotatedVoxelShapes(VoxelShape northShape){
+        EnumMap<Direction, VoxelShape> result = new EnumMap<>(Direction.class);
+        for (Direction direction : Direction.values()) {
+            result.put(direction, rotateVoxelShape(northShape, direction));
+        }
+        return result;
+    }
+
+    public static EnumMap<Direction, VoxelShape> getAllRotatedVoxelShapesHorizontal(VoxelShape northShape){
+        EnumMap<Direction, VoxelShape> result = new EnumMap<>(Direction.class);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            result.put(direction, rotateVoxelShape(northShape, direction));
+        }
+        return result;
+    }
+
     public static VoxelShape rotateVoxelShape(VoxelShape source, Direction direction) {
         if (direction == Direction.NORTH) return source;
         AtomicReference<VoxelShape> newShape = new AtomicReference<>(Shapes.empty());

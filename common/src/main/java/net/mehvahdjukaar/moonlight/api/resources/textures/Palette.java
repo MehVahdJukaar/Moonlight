@@ -270,7 +270,8 @@ public class Palette implements Set<PaletteColor> {
             this.internal.clear();
             this.internal.addAll(other.getValues());
         }
-        while (this.size() > targetSize) {
+        int maxTries = targetSize * 2;
+        while (this.size() > targetSize && maxTries-- > 0) {
             if (this.size() > 14) {
                 //too many color, we remove the least used
                 removeLeastUsed();
@@ -283,7 +284,8 @@ public class Palette implements Set<PaletteColor> {
         boolean canIncreaseDown = true;
         boolean canIncreaseUp = true;
         int currentSize;
-        while ((currentSize = this.size()) < targetSize) {
+        maxTries = targetSize * 2;
+        while ((currentSize = this.size()) < targetSize && maxTries-- > 0) {
             //safety check if palette is full
             //increase inner if it shouldn't increase outer or if it can't increase outer
             if ((!canIncreaseDown && !canIncreaseUp) ||

@@ -188,6 +188,8 @@ public class Respriter {
 
     }
 
+    private static final int MAX_RECOLOR_SIZE = 50;
+
     @FunctionalInterface
     private interface FrameColorRemapper {
 
@@ -198,23 +200,26 @@ public class Respriter {
             boolean invalidSize = targetFrameCount > targetPalettes.size();
             if (originalFrameCount != 1 || invalidSize) {
                 //it means original image is animated. Just use first palette given
-                Color2ColorMap singleColorMap = Color2ColorMap.create(originalPalette, targetPalettes.getFirst());
+                Palette firstPalette = targetPalettes.getFirst();
+                if (originalPalette.size() < MAX_RECOLOR_SIZE && firstPalette.size() < MAX_RECOLOR_SIZE) {
+                    Color2ColorMap singleColorMap = Color2ColorMap.create(originalPalette, firstPalette);
 
-                return (frameIndex, color) -> singleColorMap.mapColor(color);
+                    return (frameIndex, color) -> singleColorMap.mapColor(color);
+                }
+                else return (frameIndex, color) -> null;
             } else {
                 List<Color2ColorMap> mappingPerFrame = new ArrayList<>();
                 for (int i = 0; i < targetFrameCount; i++) {
                     Palette toPalette = targetPalettes.get(i);
-                    mappingPerFrame.add(Color2ColorMap.create(originalPalette, toPalette));
+                    if (originalPalette.size() < MAX_RECOLOR_SIZE && toPalette.size() < MAX_RECOLOR_SIZE) {
+                        mappingPerFrame.add(Color2ColorMap.create(originalPalette, toPalette));
+                    }
                 }
 
-                return new FrameColorRemapper() {
-                    @Override
-                    public @Nullable Integer remapColor(int frameIndex, int color) {
-                        Color2ColorMap colorMap = mappingPerFrame.get(frameIndex);
-                        if (colorMap != null) return colorMap.mapColor(color);
-                        return null;
-                    }
+                return (frameIndex, color) -> {
+                    Color2ColorMap colorMap = mappingPerFrame.get(frameIndex);
+                    if (colorMap != null) return colorMap.mapColor(color);
+                    return null;
                 };
             }
         }

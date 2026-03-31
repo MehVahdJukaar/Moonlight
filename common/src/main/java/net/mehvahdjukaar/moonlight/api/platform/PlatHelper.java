@@ -391,6 +391,7 @@ public class PlatHelper {
         openCustomMenu(player, menuProvider, target::write);
     }
 
+
     @ExpectPlatform
     public static Player getFakeServerPlayer(GameProfile id, ServerLevel level) {
         throw new AssertionError();
