@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-public class GlobalCachedStrategy implements PackGenerationStrategy {
+public abstract class GlobalCachedStrategy implements PackGenerationStrategy {
 
     private static final Map<PackType, Boolean> NEEDS_REGEN = new HashMap<>();
 

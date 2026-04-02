@@ -50,22 +50,9 @@ public interface PackGenerationStrategy {
         }
     };
 
-    PackGenerationStrategy CACHED = new GlobalCachedStrategy();
+    PackGenerationStrategy CACHED = new GlobalCachedFolderStrategy();
 
-    PackGenerationStrategy CACHED_ZIPPED = new GlobalCachedStrategy() {
-
-        @Override
-        public IEditablePackResources createPackResources(PackLocationInfo info, PackType type) {
-            return new CacheZipPackResources(info, type,
-                    getPath(type).resolve(info.id().replace(":", "-")));
-
-        }
-
-        @Override
-        public String toString() {
-            return "CACHED_ZIPPED";
-        }
-    };
+    PackGenerationStrategy CACHED_ZIPPED = new GlobalCachedZipStrategy();
 
     static PackGenerationStrategy runOnce() {
         return new PackGenerationStrategy() {

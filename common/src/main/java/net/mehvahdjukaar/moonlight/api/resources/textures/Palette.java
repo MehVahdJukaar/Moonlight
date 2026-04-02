@@ -289,7 +289,7 @@ public class Palette implements Set<PaletteColor> {
         int currentSize;
         maxTries = targetSize * 2;
         while ((currentSize = this.size()) < targetSize && maxTries-- > 0) {
-            //safety check if palette is full
+            //safeguard if palette is full
             //increase inner if it shouldn't increase outer or if it can't increase outer
             if ((!canIncreaseDown && !canIncreaseUp) ||
                     (!this.shouldExpandRange(targetSize, targetLumStep))) { //&& this.hasLuminanceGap()
