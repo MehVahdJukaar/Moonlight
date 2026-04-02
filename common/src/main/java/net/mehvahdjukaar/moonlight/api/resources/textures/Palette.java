@@ -279,6 +279,9 @@ public class Palette implements Set<PaletteColor> {
                 //we remove and merge the one close to eachother. we could do some smarter check here...
                 reduceAndAverage();
             } //TODO: add this.shouldChangeRange(targetSize, targetLuminanceStep) and decrease outer. maybe not that needed since reduce does merge and remove outer colors too
+            if (maxTries == 1) {
+                Moonlight.LOGGER.warn("Something went wrong while recoloring. Max iteration step reached.");
+            }
         }
         boolean down = true;
         boolean canIncreaseDown = true;
@@ -305,7 +308,9 @@ public class Palette implements Set<PaletteColor> {
                 if (canIncreaseDown && canIncreaseUp)
                     down = !down;
             }
-
+            if (maxTries == 1) {
+                Moonlight.LOGGER.warn("Something went wrong while recoloring. Max iteration steps reached.");
+            }
         }
     }
 
