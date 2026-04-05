@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
+import net.minecraft.core.Holder;
+
 public record FluidOffer(SoftFluidStack fluid, int minAmount) {
     //min amount is minimum amount that offer will consume regardless of what happens if successful of course
 
