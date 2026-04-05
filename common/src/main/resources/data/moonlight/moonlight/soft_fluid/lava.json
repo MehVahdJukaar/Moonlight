@@ -18,7 +18,7 @@
       ],
       "fill_sound": "minecraft:item.bucket.fill_lava",
       "empty_sound": "minecraft:item.bucket.empty_lava",
-      "empty": "minecraft:bottle",
+      "empty": "minecraft:glass_bottle",
       "capacity": "BOTTLE"
     }
   ],
