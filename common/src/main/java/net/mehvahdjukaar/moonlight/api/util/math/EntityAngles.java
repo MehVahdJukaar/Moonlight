@@ -69,6 +69,14 @@ public record EntityAngles(float pitch, float yaw) {
         return (float) Math.toRadians(pitch);
     }
 
+    public EntityAngles withYaw(float yaw) {
+        return new EntityAngles(pitchRad(), yaw);
+    }
+
+    public  EntityAngles withPitch(float pitch) {
+        return new EntityAngles(pitchRad(), yawRad());
+    }
+
     /**
      * Apply pitch/yaw clamping
      */

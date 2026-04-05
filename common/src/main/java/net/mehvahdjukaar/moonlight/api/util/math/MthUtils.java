@@ -110,6 +110,21 @@ public final class MthUtils {
         return V3itoV3(Direction.from3DDataValue(direction).getNormal());
     }
 
+    public static float asymmetricTriangleWave(float t, float mid, float end) {
+        if (t <= mid) {
+            float slope = 1 / mid;
+            return slope * t;
+        }
+        else if (t <= end) {
+            float slope = -1 / (end - mid);
+            return slope * (t - mid) + 1;
+        }
+        else {
+            return 0;
+        }
+    }
+
+
     public static Vec3 V3itoV3(Vec3i v) {
         return new Vec3(v.getX(), v.getY(), v.getZ());
     }

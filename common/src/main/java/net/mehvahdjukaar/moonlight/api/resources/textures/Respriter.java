@@ -170,7 +170,7 @@ public class Respriter {
             toPalette = toPalette.copy();
             toPalette.matchSize(originalPalette.size(), originalPalette.getAverageLuminanceStep());
             if (toPalette.size() != originalPalette.size()) {
-                Moonlight.LOGGER.error("Failed to create Color2ColorMap. Too few colors in toPalette");
+                Moonlight.LOGGER.error("Failed to create Color2ColorMap. Too few colors in toPalette: {} vs required {}", toPalette.size(), originalPalette.size());
                 //provided swap palette had too little colors
                 return EMPTY;
             }

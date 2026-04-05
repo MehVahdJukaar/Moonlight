@@ -250,6 +250,7 @@ public class Palette implements Set<PaletteColor> {
 
     //TODO: make this depend on interger palette luminance step too
     public void matchSize(int targetSize, @Nullable Float targetLumStep) {
+        int sizeDiff = Mth.abs(targetSize - this.size());
         if (targetLumStep != null && (targetSize - 1) * targetLumStep > 1)
             throw new UnsupportedOperationException("Palette (size-1) * luminance step must be less than 1");
         if (targetLumStep != null && targetLumStep < 0)
@@ -270,7 +271,7 @@ public class Palette implements Set<PaletteColor> {
             this.internal.clear();
             this.internal.addAll(other.getValues());
         }
-        int maxTries = targetSize * 2;
+        int maxTries = sizeDiff * 2;
         while (this.size() > targetSize && maxTries-- > 0) {
             if (this.size() > 14) {
                 //too many color, we remove the least used
@@ -287,7 +288,7 @@ public class Palette implements Set<PaletteColor> {
         boolean canIncreaseDown = true;
         boolean canIncreaseUp = true;
         int currentSize;
-        maxTries = targetSize * 2;
+        maxTries = sizeDiff * 2;
         while ((currentSize = this.size()) < targetSize && maxTries-- > 0) {
             //safeguard if palette is full
             //increase inner if it shouldn't increase outer or if it can't increase outer

@@ -1,1 +1,3 @@
-- added some sanity check in recoloring code. recoloring won't be attempted for textures that have too many colors (more than 50)
+- improved logging and logic in recoloring process further
+- added fluidsHelper utils
+- added EntityAngles class
