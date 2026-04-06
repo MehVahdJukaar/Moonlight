@@ -7,7 +7,11 @@ import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
@@ -70,7 +74,7 @@ public class DispenserHelper {
                 originals.put(item, null);
             } else {
                 failed.add(item);
-                Moonlight.LOGGER.error("Failed to restore original behavior for item: {}, {}", item, current);
+               // Moonlight.LOGGER.error("Failed to restore original behavior for item: {}, {}", item, current);
             }
         }
         //restore vanilla state
