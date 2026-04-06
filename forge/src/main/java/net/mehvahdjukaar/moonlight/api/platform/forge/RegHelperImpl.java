@@ -378,6 +378,10 @@ public class RegHelperImpl {
             }
         }
         ((PoiTypeAccessor) (Object) poiTypeReference.value()).setMatchingStates(matchingStates);
+
+        Map<BlockState, PoiType> map = ForgeRegistries.POI_TYPES.getSlaveMap(BLOCKSTATE_TO_POINT_OF_INTEREST_TYPE, Map.class);
+        newStates.forEach((blockState) -> map.putIfAbsent(blockState, poiTypeReference.value()));
+
         //PoiTypes.registerBlockStates(beehivePOI, newStates);
     }
 
