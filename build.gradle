@@ -1,4 +1,3 @@
-
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT" apply false
     id "dev.architectury.loom" version "1.11-SNAPSHOT" apply false
@@ -17,25 +16,42 @@ allprojects {
     archivesBaseName = mod_id
 
     repositories {
-        mavenCentral()
+        // Standard repositories
         mavenLocal()
+        mavenCentral()
 
+        // Flat directory for local mods
         flatDir { dirs "mods" }
 
         // Our publishing repo
-        maven { url "https://registry.somethingcatchy.net/repository/maven-releases/" }
+        maven { url = "https://registry.somethingcatchy.net/repository/maven-releases/" }
 
-        maven { url "https://maven.parchmentmc.org" }
-        maven { url "https://www.cursemaven.com" }
-        maven { url "https://maven.firstdarkdev.xyz/snapshots" }
-        maven { url "https://maven.ladysnake.org/releases" }
-        maven { url "https://jitpack.io" }
-        maven { url "https://maven.neoforged.net" }
-        maven { url "https://api.modrinth.com/maven" }
-        maven { url "https://maven.blamejared.com/" }
-        maven { url "https://maven.su5ed.dev/releases" }
-        maven { url "https://maven.shedaniel.me/" }
-        maven { url "https://maven.terraformersmc.com/releases" }
+        maven { url = "https://api.modrinth.com/maven" }
+        maven { url = "https://www.cursemaven.com" }
+        maven { url = "https://jitpack.io" }
+
+        maven { url = "https://maven.neoforged.net/releases" }
+        maven { url = "https://maven.architectury.dev" }
+        maven { url = "https://maven.parchmentmc.org" }
+
+        maven { url = "https://maven.createmod.net" } // Create Mod, Ponder, Flywheel
+        maven { url = "https://maven.blamejared.com" } // JEI, Vazkii's Mods
+        maven { url = "https://maven.ladysnake.org/releases" } // Ladysnake mods
+        maven { url = "https://maven.tterrag.com/" } // Flywheel, EnderIO
+        maven { url = "https://mvn.devos.one/releases/" } // Registrate, Porting Lib (releases)
+        maven { url = "https://mvn.devos.one/snapshots/" } // Registrate, Porting Lib (snapshots)
+        maven { url = "https://maven.terraformersmc.com/" } // TerraformersMC mods
+        maven { url = "https://maven.saps.dev/releases" } // FTB Mods
+        maven { url = "https://dl.cloudsmith.io/public/tslat/sbl/maven/"}
+
+        maven { url = "https://maven.theillusivec4.top/" } // Curios API
+        maven { url = "https://maven.squiddev.cc" } // CC: Tweaked
+        maven { url = "https://maven.su5ed.dev/releases" } // SU5ED mods
+        maven { url = "https://harleyoconnor.com/maven" } // Dynamic Trees
+        maven { url = "https://maven.misterpemodder.com/libs-release/" } // ShulkerBoxTooltip
+        maven { url = "https://maven.firstdarkdev.xyz/snapshots" } // FirstDarkDev (snapshots)
+        maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven" } // NeoForge config API port
+        maven { url = "https://maven.jamieswhiteshirt.com/libs-release"} // Reach Entity Attributes
     }
 
     java {
@@ -92,7 +108,7 @@ subprojects {
     def modLoader = project.name
     def changelogFile = rootProject.file("changelog.md")
     def changelogText = changelogFile.exists() ? changelogFile.text : ""
-    def mcVersions = listGameVersions(minecraft_min_version, minecraft_version)
+    def mcVersions = listGameVersions(minecraft_min_version, minecraft_max_version)
     def cfToken = providers.environmentVariable("CURSEFORGE_TOKEN")
     def mrToken = providers.environmentVariable("MODRINTH_TOKEN")
 
@@ -191,7 +207,7 @@ static List<String> listGameVersions(String minInclusive, String maxExclusive) {
     }
 
     int startPatch = minNums[2]
-    int endPatch   = maxNums[2]
+    int endPatch = maxNums[2]
 
     def versions = []
 
@@ -203,6 +219,7 @@ static List<String> listGameVersions(String minInclusive, String maxExclusive) {
         }
     }
 
+    if (versions.isEmpty()) throw new IllegalAccessException("Versions can't be empty!")
     return versions
 }
 
@@ -213,18 +230,45 @@ tasks.register('buildAndPublishAll') {
     dependsOn ':fabric:clean'
     dependsOn ':neoforge:clean'
     dependsOn ':build'
+    dependsOn ':neoforge:build'
+    dependsOn ':fabric:build'
     dependsOn ':neoforge:curseforge'
     dependsOn ':neoforge:modrinth'
     dependsOn ':fabric:curseforge'
     dependsOn ':fabric:modrinth'
-    dependsOn ':publish'
     dependsOn ':publishToMavenLocal'
+    dependsOn ':neoforge:publishToMavenLocal'
+    dependsOn ':fabric:publishToMavenLocal'
+    dependsOn ':publish'
+    dependsOn ':neoforge:publish'
+    dependsOn ':fabric:publish'
     finalizedBy ':gitTag'
 
     group = 'build'
     description = 'Runs clean, build, and publish neoforge and fabric'
 }
 
+
+
+tasks.register('buildToMavenLocal') {
+    dependsOn ':clean'
+    dependsOn ':common:clean'
+    dependsOn ':fabric:clean'
+    dependsOn ':neoforge:clean'
+    dependsOn ':build'
+    dependsOn ':neoforge:build'
+    dependsOn ':fabric:build'
+    dependsOn ':neoforge:curseforge'
+    dependsOn ':neoforge:modrinth'
+    dependsOn ':fabric:curseforge'
+    dependsOn ':fabric:modrinth'
+    dependsOn ':publishToMavenLocal'
+    dependsOn ':neoforge:publishToMavenLocal'
+    dependsOn ':fabric:publishToMavenLocal'
+
+    group = 'build'
+    description = 'Runs clean, build, and publish to maven local'
+}
 
 tasks.register('gitTag') {
     group = 'build'
