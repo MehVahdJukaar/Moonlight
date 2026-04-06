@@ -79,13 +79,14 @@ subprojects {
 
     var changelogFile = rootProject.file("changelog.md")
     var changelogText = changelogFile.exists() ? changelogFile.text : ""
+    def mcVersions = listGameVersions(minecraft_min_version, minecraft_max_version)
 
     if (env.MODRINTH_TOKEN) {
         modrinth {
             projectId = mod_id
             uploadFile = tasks.remapJar
             additionalFiles.add(tasks.remapSourcesJar)
-            gameVersions = [minecraft_version]
+            gameVersions = mcVersions
             if (modLoader == "forge") {
                 loaders = [modLoader, "neoforge"]
             } else {
@@ -111,7 +112,9 @@ subprojects {
                 changelog = changelogText
                 changelogType = 'markdown'
                 releaseType = 'release'
-                addGameVersion rootProject.minecraft_version
+                for (var ver : mcVersions) {
+                    addGameVersion ver
+                }
                 addGameVersion modLoader.capitalize()
                 if (modLoader == "forge") {
                     addGameVersion "NeoForge"
@@ -132,7 +135,7 @@ subprojects {
         repositories {
             mavenLocal()
 
-            def nexusToken = System.getenv("NEXUS_TOKEN")
+            def nexusToken = System.getenv('NEXUS_TOKEN')
             def nexusUser = System.getenv("NEXUS_USER")
             if (nexusToken != null && nexusUser != null) {
                 maven {
@@ -142,6 +145,103 @@ subprojects {
                         password = nexusToken
                     }
                 }
+            }
+        }
+    }
+}
+
+
+
+
+// --- Utils
+static List<String> listGameVersions(String minInclusive, String maxExclusive) {
+
+    def minParts = minInclusive.split('\\.')
+    def maxParts = maxExclusive.split('\\.')
+
+    if (minParts.size() < 2 || minParts.size() > 3 ||
+            maxParts.size() < 2 || maxParts.size() > 3) {
+        throw new IllegalArgumentException("Version must be MAJOR.MINOR or MAJOR.MINOR.PATCH")
+    }
+
+    def minNums = minParts.collect { it as int }
+    def maxNums = maxParts.collect { it as int }
+
+    while (minNums.size() < 3) minNums << 0
+    while (maxNums.size() < 3) maxNums << 0
+
+    if (minNums[0] != maxNums[0] || minNums[1] != maxNums[1]) {
+        throw new IllegalArgumentException("Major and minor versions must match")
+    }
+
+    int startPatch = minNums[2]
+    int endPatch   = maxNums[2]
+
+    def versions = []
+
+    for (int i = startPatch; i < endPatch; i++) {
+        if (i == 0) {
+            versions << "${minNums[0]}.${minNums[1]}"
+        } else {
+            versions << "${minNums[0]}.${minNums[1]}.${i}"
+        }
+    }
+
+    return versions
+}
+
+
+tasks.register('buildAndPublishAll') {
+    dependsOn ':clean'
+    dependsOn ':common:clean'
+    dependsOn ':fabric:clean'
+    dependsOn ':forge:clean'
+    dependsOn ':build'
+    dependsOn ':forge:build'
+    dependsOn ':fabric:build'
+    dependsOn ':forge:curseforge'
+    dependsOn ':forge:modrinth'
+    dependsOn ':fabric:curseforge'
+    dependsOn ':fabric:modrinth'
+    dependsOn ':publishToMavenLocal'
+    dependsOn ':forge:publishToMavenLocal'
+    dependsOn ':fabric:publishToMavenLocal'
+    dependsOn ':publish'
+    dependsOn ':forge:publish'
+    dependsOn ':fabric:publish'
+    finalizedBy ':gitTag'
+
+    group = 'build'
+    description = 'Runs clean, build, and publish neoforge and fabric'
+}
+
+
+tasks.register('gitTag') {
+    group = 'build'
+    description = 'Create and push git tag from project version'
+
+    doLast {
+        def tag = project.version.toString()
+
+        // check if tag already exists
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'tag', '-l', tag
+            standardOutput = stdout
+        }
+
+        if (!stdout.toString().trim().isEmpty()) {
+            logger.warn("Git tag '${tag}' already exists")
+        } else {
+
+            // create annotated tag
+            exec {
+                commandLine 'git', 'tag', '-a', tag, '-m', "Release ${tag}"
+            }
+
+            // push tag
+            exec {
+                commandLine 'git', 'push', 'origin', tag
             }
         }
     }
