@@ -171,7 +171,7 @@ public class Respriter {
             toPalette = toPalette.copy();
             toPalette.matchSize(originalPalette.size(), originalPalette.getAverageLuminanceStep());
             if (toPalette.size() != originalPalette.size()) {
-                Moonlight.LOGGER.error("Failed to create Color2ColorMap. Too few colors in toPalette");
+                Moonlight.LOGGER.error("Failed to create Color2ColorMap. Too few colors in toPalette: {} vs required {}", toPalette.size(), originalPalette.size());
                 //provided swap palette had too little colors
                 return EMPTY;
             }
@@ -189,6 +189,8 @@ public class Respriter {
 
     }
 
+    private static final int MAX_RECOLOR_SIZE = 50;
+
     @FunctionalInterface
     private interface FrameColorRemapper {
 
@@ -202,23 +204,26 @@ public class Respriter {
                     Moonlight.logIfInDev("Respriter was given less palettes than needed!");
                 }
                 //it means original image is animated. Just use first palette given
-                Color2ColorMap singleColorMap = Color2ColorMap.create(originalPalette, targetPalettes.get(0));
+                Palette firstPalette = targetPalettes.getFirst();
+                if (originalPalette.size() < MAX_RECOLOR_SIZE && firstPalette.size() < MAX_RECOLOR_SIZE) {
+                    Color2ColorMap singleColorMap = Color2ColorMap.create(originalPalette, firstPalette);
 
-                return (frameIndex, color) -> singleColorMap.mapColor(color);
+                    return (frameIndex, color) -> singleColorMap.mapColor(color);
+                }
+                else return (frameIndex, color) -> null;
             } else {
                 List<Color2ColorMap> mappingPerFrame = new ArrayList<>();
                 for (int i = 0; i < targetFrameCount; i++) {
                     Palette toPalette = targetPalettes.get(i);
-                    mappingPerFrame.add(Color2ColorMap.create(originalPalette, toPalette));
+                    if (originalPalette.size() < MAX_RECOLOR_SIZE && toPalette.size() < MAX_RECOLOR_SIZE) {
+                        mappingPerFrame.add(Color2ColorMap.create(originalPalette, toPalette));
+                    }
                 }
 
-                return new FrameColorRemapper() {
-                    @Override
-                    public @Nullable Integer remapColor(int frameIndex, int color) {
-                        Color2ColorMap colorMap = mappingPerFrame.get(frameIndex);
-                        if (colorMap != null) return colorMap.mapColor(color);
-                        return null;
-                    }
+                return (frameIndex, color) -> {
+                    Color2ColorMap colorMap = mappingPerFrame.get(frameIndex);
+                    if (colorMap != null) return colorMap.mapColor(color);
+                    return null;
                 };
             }
         }
