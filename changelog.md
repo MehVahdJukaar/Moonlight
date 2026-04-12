@@ -1,4 +1,1 @@
-- improved logging and logic in recoloring process further
-- added fluidsHelper utils
-- added EntityAngles class
-- re publishing due to invalid version range in metadata
+changes to recoloring logic
