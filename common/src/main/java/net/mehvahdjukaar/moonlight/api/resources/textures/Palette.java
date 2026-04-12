@@ -251,6 +251,7 @@ public class Palette implements Set<PaletteColor> {
     //TODO: make this depend on interger palette luminance step too
     public void matchSize(int targetSize, @Nullable Float targetLumStep) {
         int sizeDiff = Mth.abs(targetSize - this.size());
+        sizeDiff = Math.max(6, sizeDiff);
         if (targetLumStep != null && (targetSize - 1) * targetLumStep > 1)
             throw new UnsupportedOperationException("Palette (size-1) * luminance step must be less than 1");
         if (targetLumStep != null && targetLumStep < 0)
@@ -281,14 +282,14 @@ public class Palette implements Set<PaletteColor> {
                 reduceAndAverage();
             } //TODO: add this.shouldChangeRange(targetSize, targetLuminanceStep) and decrease outer. maybe not that needed since reduce does merge and remove outer colors too
             if (maxTries == 1) {
-                Moonlight.LOGGER.warn("Something went wrong while recoloring. Max iteration step reached.");
+                Moonlight.LOGGER.warn("Something went wrong while reducing colors. Max iteration step reached.");
             }
         }
         boolean down = true;
         boolean canIncreaseDown = true;
         boolean canIncreaseUp = true;
         int currentSize;
-        maxTries = sizeDiff * 2;
+        maxTries = sizeDiff * 3;
         while ((currentSize = this.size()) < targetSize && maxTries-- > 0) {
             //safety check if palette is full
             //increase inner if it shouldn't increase outer or if it can't increase outer
@@ -310,7 +311,7 @@ public class Palette implements Set<PaletteColor> {
                     down = !down;
             }
             if (maxTries == 1) {
-                Moonlight.LOGGER.warn("Something went wrong while recoloring. Max iteration steps reached.");
+                Moonlight.LOGGER.warn("Something went wrong while increasing colors. Max iteration steps reached.");
             }
         }
     }
