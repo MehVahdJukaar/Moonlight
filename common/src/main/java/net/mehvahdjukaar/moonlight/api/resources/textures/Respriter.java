@@ -188,7 +188,7 @@ public class Respriter {
 
     }
 
-    private static final int MAX_RECOLOR_SIZE = 50;
+    private static final int MAX_RECOLOR_SIZE = 70;
 
     @FunctionalInterface
     private interface FrameColorRemapper {
