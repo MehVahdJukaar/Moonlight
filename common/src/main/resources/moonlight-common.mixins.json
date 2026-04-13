@@ -46,8 +46,7 @@
     "accessor.BrainAccessor",
     "accessor.DispenserBlockAccessor",
     "accessor.DispenserBlockEntityAccessor",
-    "compat.PistonReactQuarkMixin",
-    "compat.VSYeetArbitraryCrash"
+    "compat.PistonReactQuarkMixin"
   ],
   "injectors": {
     "defaultRequire": 1

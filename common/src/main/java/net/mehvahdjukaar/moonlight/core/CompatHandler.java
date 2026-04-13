@@ -13,6 +13,7 @@ public class CompatHandler {
     public static final boolean CLOTH_CONFIG = PlatHelper.isModLoaded("cloth-config");
     public static final boolean IRIS = PlatHelper.isModLoaded("iris") || PlatHelper.isModLoaded("oculus");
     public static final boolean DIAGONALFENCES = PlatHelper.isModLoaded("diagonalfences");
+    public static final boolean VALKYRIEN_SKIES = PlatHelper.isModLoaded("valkyrienskies");
 
     private static int compareVersions(String version1, String version2) {
         if (version2.contains("-")) {
