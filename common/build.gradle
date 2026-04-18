@@ -13,6 +13,17 @@ sourceSets.create("example"){
     runtimeClasspath += main.runtimeClasspath + main.output
 }
 
+repositories {
+    // For some reason, this maven only works here, not in the root build.gradle
+    maven {
+        name = "Valkyrien Skies Internal"
+        url = 'https://maven.valkyrienskies.org'
+        // I wish I could make this repo exclusiveContent for VS,
+        // but for some reason then it tries to get VS from jitpack,
+        // and refuses to import (even if you exclude VS from jitpack, it still fails to get VS from... jitpack!)
+        // so... blame gradle :(
+    }
+}
 
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
@@ -28,14 +39,24 @@ dependencies {
     modCompileOnly ("curse.maven:map-atlases-forge-519759:5018175")
     modImplementation ("curse.maven:configured-457570:5096828")
     modCompileOnly("curse.maven:quark-243121:5344451")
-    modCompileOnly("curse.maven:valkyrien-skies-258371:7377431")
+
+    // VS2
+    modApi("org.valkyrienskies:valkyrienskies-120-common:${rootProject.vs2_version}") {
+        // Exclude create for speed
+        exclude group: "com.simibubi"
+        // Exclude moonlight because we ARE moonlight
+        exclude group: "maven.modrinth", module: "moonlight"
+    }
+    implementation("org.valkyrienskies.core:api:${rootProject.vs_core_version}")
+    implementation("org.valkyrienskies.core:impl:${rootProject.vs_core_version}")
+    implementation("org.valkyrienskies.core:internal:${rootProject.vs_core_version}")
 
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
 
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.3.6"))
 
-        annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
+    annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
 
 }
 
