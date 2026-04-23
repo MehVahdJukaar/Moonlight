@@ -24,7 +24,7 @@ public abstract class BlockItemMixin extends Item implements IExtendedItem {
         AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
             BlockState overrideBlockState = behavior.overrideGetPlacementState(pContext);
-            if (overrideBlockState != null ) {
+            if (overrideBlockState != null) {
                 cir.setReturnValue(overrideBlockState);
             }
         }
@@ -46,7 +46,7 @@ public abstract class BlockItemMixin extends Item implements IExtendedItem {
         AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
             var result = behavior.overrideUpdatePlacementContext(pContext);
-            if(result != null){
+            if (result != null) {
                 cir.setReturnValue(result);
             }
         }

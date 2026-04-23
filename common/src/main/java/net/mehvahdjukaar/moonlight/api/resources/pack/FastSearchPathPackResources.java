@@ -5,7 +5,6 @@
 
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.mojang.logging.LogUtils;
 import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
@@ -31,7 +30,6 @@ import java.util.stream.Stream;
 
 public class FastSearchPathPackResources extends AbstractPackResources {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Joiner PATH_JOINER = Joiner.on("/");
     private final Path root;
 
     private final ResourceLocationSearchTrie searchTrie = new ResourceLocationSearchTrie();
@@ -106,12 +104,15 @@ public class FastSearchPathPackResources extends AbstractPackResources {
     @Nullable
     public IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
         if (this.packType != packType) return null;
+        if(this.searchTrie.search( location.getNamespace() + "/" + location.getPath()).isEmpty()){
+            return null;
+        }
         Path path = this.root.resolve(packType.getDirectory()).resolve(location.getNamespace());
         return getResource(location, path);
     }
 
     @Nullable
-    public static IoSupplier<InputStream> getResource(ResourceLocation location, Path path) {
+    private static IoSupplier<InputStream> getResource(ResourceLocation location, Path path) {
         return FileUtil.decomposePath(location.getPath()).mapOrElse((list) -> {
             Path path2 = FileUtil.resolvePath(path, list);
             return returnFileIfExists(path2);
