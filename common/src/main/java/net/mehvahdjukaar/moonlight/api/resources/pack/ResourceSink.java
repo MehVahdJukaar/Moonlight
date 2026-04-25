@@ -2,13 +2,11 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
+import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
-import com.google.gson.JsonObject;
-import com.mojang.blaze3d.platform.NativeImage;
-import net.mehvahdjukaar.moonlight.api.resources.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -212,7 +210,7 @@ public class ResourceSink {
             try (TextureImage textureImage = textureSupplier.get()){
                 this.addTexture(res, textureImage, isOnAtlas);
             } catch (Exception e) {
-                Moonlight.LOGGER.error("Failed to generate texture {}: {}", res, e);
+                Moonlight.LOGGER.error("addTextureIfNotPresent <- Failed to generate texture {}: {}", res, e);
             }
         }
     }

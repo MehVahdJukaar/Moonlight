@@ -62,7 +62,7 @@ public abstract class DynClientResourcesGenerator extends DynResourceGenerator<D
             try {
                 textureImage = textureSupplier.get();
             } catch (Exception e) {
-                getLogger().error("Failed to generate texture {}: {}", res, e);
+                getLogger().error("addTextureIfNotPresent[OLD] <- Failed to generate texture {}: {}", res, e);
             }
             if (textureImage == null) {
                 getLogger().warn("Could not generate texture {}", res);
