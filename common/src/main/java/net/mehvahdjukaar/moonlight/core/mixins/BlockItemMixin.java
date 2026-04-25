@@ -20,10 +20,10 @@ public abstract class BlockItemMixin extends Item implements IExtendedItem {
     }
 
     @Inject(method = "getPlacementState", at = @At("HEAD"), cancellable = true)
-    private void moonlight$getPlacementState(BlockPlaceContext pContext, CallbackInfoReturnable<BlockState> cir) {
+    private void moonlight$getPlacementState(BlockPlaceContext context, CallbackInfoReturnable<BlockState> cir) {
         AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
-            BlockState overrideBlockState = behavior.overrideGetPlacementState(pContext);
+            BlockState overrideBlockState = behavior.overrideGetPlacementState(context);
             if (overrideBlockState != null) {
                 cir.setReturnValue(overrideBlockState);
             }
@@ -31,10 +31,10 @@ public abstract class BlockItemMixin extends Item implements IExtendedItem {
     }
 
     @Inject(method = "place", at = @At("HEAD"), cancellable = true)
-    private void moonlight$place(BlockPlaceContext pContext, CallbackInfoReturnable<InteractionResult> cir) {
+    private void moonlight$place(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
         AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
-            var result = behavior.overridePlace(pContext);
+            var result = behavior.overridePlace(context);
             if (result.consumesAction()) {
                 cir.setReturnValue(result);
             }
@@ -42,10 +42,10 @@ public abstract class BlockItemMixin extends Item implements IExtendedItem {
     }
 
     @Inject(method = "updatePlacementContext", at = @At("HEAD"), cancellable = true)
-    private void moonlight$updatePlacementContext(BlockPlaceContext pContext, CallbackInfoReturnable<BlockPlaceContext> cir) {
+    private void moonlight$updatePlacementContext(BlockPlaceContext context, CallbackInfoReturnable<BlockPlaceContext> cir) {
         AdditionalItemPlacement behavior = this.moonlight$getAdditionalBehavior();
         if (behavior != null) {
-            var result = behavior.overrideUpdatePlacementContext(pContext);
+            var result = behavior.overrideUpdatePlacementContext(context);
             if (result != null) {
                 cir.setReturnValue(result);
             }
