@@ -1,85 +1,68 @@
 name: Report Bug
 description: Found a bug? Report it.
 title: "[🐞]: "
-labels: "bug"
+labels: ["bug"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        BUG
-
   - type: checkboxes
-    id: pre-checklist
+    id: checklist
     attributes:
-      label: "BEFORE CONTINUING:"
+      label: Mandatory Troubleshooting
+      description: Please complete these steps before submitting.
       options:
-        - label: "Always check you are using the latest version of these mods and its dependencies"
+        - label: "Use the LATEST version of the mod and ALL its dependencies (or ideally all your mods). Pro tip: don't install mods manually, use a launcher."
           required: true
-        - label: "Remove known problematic rendering mods such as Optifine, Sodium and others"
+        - label: "Don't use Optifine or hybrid servers (Mohist/Velocity/etc) and have tried without big game altering mods (Sodium/Lithium/etc)."
           required: true
+        - label: "Check that this bug hasn't been reported already."
+          required: true
+        - label: "Try with the mod alone. If issue does not persist then try removing half of your mods at the time to find the conflicting mod."
+          required: false
 
   - type: dropdown
-    id: version
+    id: mc-version
     attributes:
-      label: Version-Loader
-      description: Which loader is Minecraft running on?
+      label: Minecraft Version & Loader
+      description: Select your game version and the loader you are using.
       options:
-        - 1.21-neoforge
-        - 1.20.4-forge
-        - 1.20.1-forge
-        - 1.19.2-forge
-        - 1.18.2-forge
-        - 1.21-fabric
-        - 1.20.4-fabric
-        - 1.20.1-fabric
-        - 1.19.2-fabric
-      default: 0
-    validations:
-      required: true
-
-  - type: input
-    id: moonlight
-    attributes:
-      label: Moonlight Lib Version
-      description: The current version of Moonlight Lib
-      placeholder: ex. moonlight-1.20-2.8.48
+        - 1.21.11-NEOFORGE
+        - 1.21.11-FABRIC
+        - 1.21.5-NEOFORGE
+        - 1.21.5-FABRIC
+        - 1.21.1-NEOFORGE
+        - 1.21.1-FABRIC
+        - 1.20.1-FORGE
+        - 1.20.1-FABRIC
+        - 1.19.2-FORGE
+        - 1.18.2-FORGE
+        - OTHER-SPECIFY
+      default: 4
     validations:
       required: true
 
   - type: textarea
-    id: issue-details
+    id: description
     attributes:
-      label: "Issue Detail"
-      description: "A clear and concise description of what the bug is"
-      placeholder: The more details, the better. (REQUIRED)
+      label: Issue Details
+      description: Provide a clear description of what happened and how to reproduce it.
+      placeholder: |
+        What happened:
+        
+        Steps to reproduce:
+        1. 
+        2. 
     validations:
       required: true
 
   - type: textarea
+    id: logs
     attributes:
-      label: Log Attachment
+      label: Logs & Media
       description: |
-        If your Minecraft crashes, it creates a crash-report file which is located in ~/.minecraft/crash-report/
-        Tip: You can attach images, too
-      placeholder: Attach log files (latest.log or crash-report) by clicking this area to highlight it and then dragging files in. (REQUIRED)
+        Drag and drop your **latest.log** or **crash-report** here. 
+        
+        These are found in: `.minecraft/logs/` or `.minecraft/crash-reports/`
+        
+        Include additional screenshot if needed.
+      placeholder: "Drop files or paste logs here..."
     validations:
       required: true
-
-  - type: textarea
-    id: to-reproduce
-    attributes:
-      label: "OPTIONAL: To Produce"
-      description: "Steps to reproduce the behaviour"
-      placeholder: "1) First Step\n2)Second Step\n3)There's the bug"
-    validations:
-      required: false
-
-  - type: textarea
-    id: issue-with-mods
-    attributes:
-      label: "OPTIONAL: Which mods are affected?"
-      description: "Which mods does Moonlight Lib affect"
-      placeholder: "ex. - Supplementaries"
-    validations:
-      required: false
-
