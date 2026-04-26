@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.fluid;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.fluids.MLBuiltinSoftFluids;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
@@ -136,7 +136,7 @@ public class SoftFluidInternal {
         }
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     private static void registerExistingVanillaFluids(RegistryAccess ra, Map<Fluid, Holder<SoftFluid>> fluidMap, Map<Item, Holder<SoftFluid>> itemMap) {
         throw new AssertionError();
     }

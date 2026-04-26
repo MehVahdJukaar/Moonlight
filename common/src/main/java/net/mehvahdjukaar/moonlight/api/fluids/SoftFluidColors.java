@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
@@ -98,7 +98,7 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
     }
 
 
-    @ExpectPlatform
+    @PlatformImpl
     public static int getSpecialColor(SoftFluidStack softFluidStack, BlockAndTintGetter world, BlockPos pos) {
         throw new AssertionError();
     }

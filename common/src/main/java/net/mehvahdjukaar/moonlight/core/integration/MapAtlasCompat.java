@@ -2,8 +2,7 @@ package net.mehvahdjukaar.moonlight.core.integration;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -36,12 +35,12 @@ public class MapAtlasCompat {
         return null;
     }
 
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     public static void scaleDecoration(PoseStack poseStack) {
         MapAtlasesClient.modifyDecorationTransform(poseStack);
     }
 
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     public static void scaleDecorationText(PoseStack poseStack, float textWidth, float textScale) {
         MapAtlasesClient.modifyTextDecorationTransform(poseStack, textWidth, textScale);
     }

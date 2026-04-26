@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.events;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 
 import java.util.function.Consumer;
 
@@ -9,12 +9,12 @@ import java.util.function.Consumer;
  */
 public class MoonlightEventsHelper {
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends SimpleEvent> void addListener(Consumer<T> listener, Class<T> eventClass){
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends SimpleEvent> void postEvent(T event, Class<T> eventClass){
         throw new AssertionError();
     }

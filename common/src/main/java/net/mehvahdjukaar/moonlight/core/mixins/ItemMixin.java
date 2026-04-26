@@ -1,18 +1,14 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacement;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,9 +22,10 @@ public abstract class ItemMixin implements IExtendedItem {
     @Nullable
     private AdditionalItemPlacement moonlight$additionalBehavior;
 
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     @Nullable
-    @Unique Object moonlight$clientAnimationProvider;
+    @Unique
+    Object moonlight$clientAnimationProvider;
 
     //delegates stuff to internal blockItem
     @Inject(method = "useOn", at = @At("HEAD"), cancellable = true)

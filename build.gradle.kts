@@ -34,12 +34,13 @@ subprojects {
     apply(plugin = "dev.mixinmcp.decompile")
 
     dependencies {
-        compileOnly("net.mehvahdjukaar:candlelight:1.1.1")
+        compileOnly("net.mehvahdjukaar:candlelight:1.1.3")
     }
 
     repositories {
         nexus()
     }
+
 
     upload {
         maven {
@@ -58,13 +59,6 @@ subprojects {
         forEach {
             changelog = rootProject.file("changelog.md").readText()
             versionName = "${mod.id.get()}-${mod.version.get()}-${project.name}"
-        }
-    }
-
-    tasks.processResources {
-        from(rootDir) {
-            include("MVEL_LICENSE.md")
-            into("") // root of jar (or change path below)
         }
     }
 
@@ -87,6 +81,7 @@ subprojects {
         maven { url = uri("https://maven.neoforged.net/releases") }
         maven { url = uri("https://maven.architectury.dev") }
         maven { url = uri("https://maven.parchmentmc.org") }
+        maven { url = uri("https://maven.neoforged.net") }
 
         maven { url = uri("https://maven.createmod.net") } // Create Mod, Ponder, Flywheel
         maven { url = uri("https://maven.blamejared.com") } // JEI, Vazkii's Mods

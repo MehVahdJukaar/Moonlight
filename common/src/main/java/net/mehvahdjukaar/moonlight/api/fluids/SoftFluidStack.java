@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.HolderRef;
 import net.mehvahdjukaar.moonlight.api.misc.HolderReference;
@@ -92,7 +92,7 @@ public class SoftFluidStack implements DataComponentHolder {
         return MLBuiltinSoftFluids.EMPTY.lookup(ra);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static SoftFluidStack of(Holder<SoftFluid> fluid, int count, @NotNull DataComponentPatch tag) {
         throw new AssertionError();
     }

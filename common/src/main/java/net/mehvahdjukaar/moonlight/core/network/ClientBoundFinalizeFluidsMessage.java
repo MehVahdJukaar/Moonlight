@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
 import net.mehvahdjukaar.moonlight.api.misc.HolderRef;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
@@ -28,7 +27,7 @@ public class ClientBoundFinalizeFluidsMessage implements Message {
 
     }
 
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     @Override
     public void handle(Context context) {
         SoftFluidInternal.postInitClient(Minecraft.getInstance().level.registryAccess());

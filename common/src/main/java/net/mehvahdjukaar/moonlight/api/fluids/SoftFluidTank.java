@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderGetter;
@@ -117,7 +117,7 @@ public class SoftFluidTank {
         return create(capacity, registries.lookupOrThrow(SoftFluidRegistry.KEY));
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static SoftFluidTank create(int capacity, HolderGetter<SoftFluid> fluidReg) {
         throw new AssertionError();
     }

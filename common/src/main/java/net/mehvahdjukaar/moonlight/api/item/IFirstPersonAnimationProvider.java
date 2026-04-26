@@ -1,13 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.item;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
  */
 public interface IFirstPersonAnimationProvider {
 
-    @Environment(value = EnvType.CLIENT)
+    @ClientOnly
     void animateItemFirstPerson(final Player entity, final ItemStack stack, final InteractionHand hand, final HumanoidArm arm, final PoseStack poseStack,
                                         float partialTicks, float pitch, float attackAnim, float handHeight);
 

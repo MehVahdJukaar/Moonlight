@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.network;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 
 public class NetworkHelper {
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addNetworkRegistration(Consumer<RegisterMessagesEvent> eventListener, int version) {
         throw new AssertionError();
     }
@@ -27,17 +27,17 @@ public class NetworkHelper {
     }
 
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void sendToClientPlayer(ServerPlayer serverPlayer, CustomPacketPayload message) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void sendToAllClientPlayers(CustomPacketPayload message) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void sendToAllClientPlayersInRange(ServerLevel level, BlockPos pos, double radius, CustomPacketPayload message) {
         throw new AssertionError();
     }
@@ -55,12 +55,12 @@ public class NetworkHelper {
         sendToAllClientPlayersInRange(level, pos, 512, message);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void sendToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void sendToAllClientPlayersTrackingChunk(ServerLevel level, ChunkPos pos, CustomPacketPayload message) {
         throw new AssertionError();
     }
@@ -75,12 +75,12 @@ public class NetworkHelper {
         sendToAllClientPlayersTrackingEntityAndSelf(target, message);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void sendToServer(CustomPacketPayload message) {
         throw new AssertionError();
     }

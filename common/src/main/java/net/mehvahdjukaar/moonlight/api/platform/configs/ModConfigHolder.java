@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
@@ -105,13 +104,13 @@ public abstract class ModConfigHolder {
     public abstract void loadFromBytes(InputStream stream, boolean readOnly);
 
     @Nullable
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     public Screen makeScreen(Screen parent) {
         return makeScreen(parent, null);
     }
 
     @Nullable
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     public abstract Screen makeScreen(Screen parent, @Nullable ResourceLocation background);
 
     //serverside method

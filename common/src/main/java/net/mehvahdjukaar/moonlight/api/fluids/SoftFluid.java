@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -347,7 +347,7 @@ public class SoftFluid {
 
 
     @ApiStatus.Internal
-    @ExpectPlatform
+    @PlatformImpl
     public static Pair<Integer, Component> getFluidSpecificAttributes(Fluid fluid) {
         throw new AssertionError(); //fabric gets nothing here :/
     }
@@ -355,7 +355,7 @@ public class SoftFluid {
     //this is client only!
     @ApiStatus.Internal
     @Nullable
-    @ExpectPlatform
+    @PlatformImpl
     public static Triplet<ResourceLocation, ResourceLocation, Integer> getRenderingData(ResourceLocation useTexturesFrom) {
         throw new AssertionError();
     }

@@ -4,9 +4,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.client.CoreShaderContainer;
 import net.mehvahdjukaar.moonlight.api.client.ItemRenderExtension;
 import net.mehvahdjukaar.moonlight.api.client.ItemStackRenderer;
@@ -63,17 +62,17 @@ import java.util.function.Supplier;
  */
 public class ClientHelper {
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addClientSetup(Runnable clientSetup) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addClientSetupAsync(Runnable clientSetup) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void registerRenderType(Block block, RenderType... types) {
         throw new AssertionError();
     }
@@ -82,18 +81,18 @@ public class ClientHelper {
         registerRenderType(block, new RenderType[]{type});
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void registerFluidRenderType(Fluid fluid, RenderType type) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation location) {
         throw new AssertionError();
     }
 
     @FunctionalInterface
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     public interface ParticleFactory<T extends ParticleOptions> {
         @NotNull ParticleProvider<T> create(SpriteSet spriteSet);
     }
@@ -103,7 +102,7 @@ public class ClientHelper {
         <P extends ParticleType<T>, T extends ParticleOptions> void register(P particleType, ParticleFactory<T> factory);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addParticleRegistration(Consumer<ParticleEvent> eventListener) {
         throw new AssertionError();
     }
@@ -121,7 +120,7 @@ public class ClientHelper {
         }
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addShaderRegistration(Consumer<ShaderEvent> eventListener) {
         throw new AssertionError();
     }
@@ -140,12 +139,12 @@ public class ClientHelper {
         void register(ItemLike item, ItemRenderExtension extension);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addItemRenderersRegistration(Consumer<ItemRendererEvent> eventListener) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addItemDecoratorsRegistration(Consumer<ItemDecoratorEvent> eventListener) {
         throw new AssertionError();
     }
@@ -155,7 +154,7 @@ public class ClientHelper {
         <E extends Entity> void register(EntityType<? extends E> entity, EntityRendererProvider<E> renderer);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addEntityRenderersRegistration(Consumer<EntityRendererEvent> eventListener) {
         throw new AssertionError();
     }
@@ -165,7 +164,7 @@ public class ClientHelper {
         <E extends BlockEntity> void register(BlockEntityType<? extends E> blockEntity, BlockEntityRendererProvider<E> renderer);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addBlockEntityRenderersRegistration(Consumer<BlockEntityRendererEvent> eventListener) {
         throw new AssertionError();
     }
@@ -177,7 +176,7 @@ public class ClientHelper {
 
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addBlockColorsRegistration(Consumer<BlockColorEvent> eventListener) {
         throw new AssertionError();
     }
@@ -189,7 +188,7 @@ public class ClientHelper {
 
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addItemColorsRegistration(Consumer<ItemColorEvent> eventListener) {
         throw new AssertionError();
     }
@@ -199,7 +198,7 @@ public class ClientHelper {
         void register(ModelLayerLocation modelLayer, Supplier<LayerDefinition> provider);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addModelLayerRegistration(Consumer<ModelLayerEvent> eventListener) {
         throw new AssertionError();
     }
@@ -212,7 +211,7 @@ public class ClientHelper {
 
     //Use the "special_models" folder instead since that's auto loaded
     @Deprecated
-    @ExpectPlatform
+    @PlatformImpl
     public static void addSpecialModelRegistration(Consumer<SpecialModelEvent> eventListener) {
         throw new AssertionError();
     }
@@ -230,12 +229,12 @@ public class ClientHelper {
         }
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addModelLoaderRegistration(Consumer<ModelLoaderEvent> eventListener) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static BakedModel getModel(ModelManager modelManager, ModelResourceLocation modelLocation) {
         throw new AssertionError();
     }
@@ -246,7 +245,7 @@ public class ClientHelper {
         <T extends TooltipComponent> void register(Class<T> type, Function<? super T, ? extends ClientTooltipComponent> factory);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addTooltipComponentRegistration(Consumer<TooltipComponentEvent> eventListener) {
         throw new AssertionError();
     }
@@ -256,22 +255,22 @@ public class ClientHelper {
         void register(KeyMapping keyMapping);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addKeyBindRegistration(Consumer<KeyBindEvent> eventListener) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static BlockModel parseBlockModel(JsonElement json) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static Path getModIcon(String modId) {
         throw new AssertionError();
     }
@@ -279,7 +278,7 @@ public class ClientHelper {
     /**
      * Pack in /resources/resourcepacks
      */
-    @ExpectPlatform
+    @PlatformImpl
     public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
         throw new AssertionError();
     }

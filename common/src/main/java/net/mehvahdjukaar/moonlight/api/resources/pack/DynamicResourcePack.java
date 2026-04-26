@@ -236,7 +236,7 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
 
     @Deprecated(forRemoval = true)
     public void addLootTable(ResourceLocation id, LootTable table) {
-        this.addJson(id, LootDataType.TABLE.codec.encodeStart(JsonOps.INSTANCE, table).getOrThrow(), ResType.LOOT_TABLES);
+        this.addJson(id, LootDataType.TABLE.codec().encodeStart(JsonOps.INSTANCE, table).getOrThrow(), ResType.LOOT_TABLES);
     }
 
     protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {

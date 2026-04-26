@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.set;
 
 import com.google.common.base.Stopwatch;
 import com.mojang.serialization.Codec;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import io.netty.buffer.ByteBuf;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
@@ -52,7 +52,7 @@ public class BlockSetInternal {
         Moonlight.LOGGER.info("Initialized block sets in {}ms", sw.elapsed().toMillis());
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     protected static boolean hasFilledBlockSets() {
         throw new AssertionError();
     }
@@ -100,14 +100,14 @@ public class BlockSetInternal {
         BlockSetAPI.getRegistries().forEach(r -> r.addTypeTranslations(event));
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends BlockType, E> void addDynamicRegistration(
             BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType,
             Registry<E> registry) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T> void  addDynamicRegistration(String modId,
             Consumer<Registrator<T>> registrationFunction,
             Registry<T> registry) {

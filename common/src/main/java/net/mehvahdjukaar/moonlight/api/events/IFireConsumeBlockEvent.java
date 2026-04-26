@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.events;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface IFireConsumeBlockEvent extends SimpleEvent {
 
-    @ExpectPlatform
+    @PlatformImpl
     static IFireConsumeBlockEvent create(BlockPos pos, Level level, BlockState state, int chance, int age, Direction face, boolean wasReplacedByFire) {
         throw new AssertionError();
     }

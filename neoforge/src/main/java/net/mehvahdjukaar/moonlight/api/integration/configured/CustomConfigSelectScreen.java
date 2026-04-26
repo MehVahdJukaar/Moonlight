@@ -3,13 +3,11 @@ package net.mehvahdjukaar.moonlight.api.integration.configured;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mrcrayfish.configured.api.ConfigType;
-import com.mrcrayfish.configured.api.IConfigEntry;
-import com.mrcrayfish.configured.api.IConfigValue;
 import com.mrcrayfish.configured.client.screen.ModConfigSelectionScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.impl.neoforge.NeoForgeConfig;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
-import net.mehvahdjukaar.moonlight.api.platform.configs.neoforge.ForgeConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ForgeConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;

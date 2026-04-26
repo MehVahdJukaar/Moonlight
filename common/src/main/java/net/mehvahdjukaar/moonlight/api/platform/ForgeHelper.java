@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -56,7 +56,7 @@ import java.util.function.Consumer;
 public class ForgeHelper {
 
     @Deprecated(forRemoval = true)
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends RecipeInput> Recipe<T> copyRecipeConditions(Recipe<T> originalRecipe, Recipe<?> otherRecipe) {
         throw new AssertionError();
     }
@@ -67,12 +67,12 @@ public class ForgeHelper {
         return ops;
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T> RegistryOps<T> conditionalOps(DynamicOps<T> ops, HolderLookup.Provider provider, SimplePreparableReloadListener<?> reloader) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T> Codec<Optional<T>> conditionalCodec(Codec<T> codec) {
         throw new AssertionError();
     }
@@ -83,35 +83,35 @@ public class ForgeHelper {
     }
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean fireOnProjectileImpact(Projectile projectile, HitResult blockHitResult) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean canHarvestBlock(BlockState state, ServerLevel level, BlockPos pos, ServerPlayer player) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static float getFriction(BlockState state, LevelReader level, BlockPos pos, @Nullable Entity entity) {
         throw new AssertionError();
     }
 
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean canEquipItem(LivingEntity entity, ItemStack stack, EquipmentSlot slot) {
         throw new AssertionError();
     }
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean canEntityDestroy(Level level, BlockPos blockPos, Animal animal) {
         throw new AssertionError();
     }
@@ -121,7 +121,7 @@ public class ForgeHelper {
         return fireOnExplosionStart(level, explosion);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean fireOnExplosionStart(Level level, Explosion explosion) {
         throw new AssertionError();
     }
@@ -131,12 +131,12 @@ public class ForgeHelper {
         fireOnLivingConvert(skellyHorseMixin, newHorse);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void fireOnLivingConvert(LivingEntity frFom, LivingEntity to) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean canLivingConvert(LivingEntity entity, EntityType<? extends LivingEntity> outcome, Consumer<Integer> timer) {
         throw new AssertionError();
     }
@@ -146,12 +146,12 @@ public class ForgeHelper {
         fireOnExplosionDetonate(level, explosion, entities, diameter);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static float getExplosionResistance(BlockState state, Level level, BlockPos pos, Explosion explosion) {
         throw new AssertionError();
     }
@@ -161,56 +161,56 @@ public class ForgeHelper {
         fireOnBlockExploded(blockstate, level, blockpos, explosion);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void fireOnBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean canDropFromExplosion(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         throw new AssertionError();
     }
 
     @Deprecated(forRemoval = true)
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isDye(ItemStack itemstack) {
         throw new AssertionError();
     }
 
     @org.jetbrains.annotations.Nullable
-    @ExpectPlatform
+    @PlatformImpl
     public static DyeColor getColor(ItemStack stack) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static BlockState rotateBlock(BlockState state, Level world, BlockPos targetPos, Rotation rot) {
         throw new AssertionError();
     }
 
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isMultipartEntity(Entity e) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void setPoolName(LootPool.Builder pool, String name) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, @org.jetbrains.annotations.Nullable AbstractMinecart o) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static Optional<ItemStack> getCraftingRemainingItem(ItemStack itemstack) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void reviveEntity(Entity entity) {
         throw new AssertionError();
     }
@@ -220,7 +220,7 @@ public class ForgeHelper {
         return fireOnCropsGrowPre(level, pos, state, b);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean fireOnCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
         throw new AssertionError();
 
@@ -231,7 +231,7 @@ public class ForgeHelper {
         fireOnCropsGrowPost(level, pos, state);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void fireOnCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
         throw new AssertionError();
     }
@@ -240,7 +240,7 @@ public class ForgeHelper {
         fireOnEquipmentChange(entity, slot, from, to);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void fireOnEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
         throw new AssertionError();
     }
@@ -250,36 +250,36 @@ public class ForgeHelper {
         return fireOnRightClickBlock(player, hand, below, rayTraceResult);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     @Nullable
     public static InteractionResult fireOnRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
         throw new AssertionError();
     }
 
 
-    @ExpectPlatform
+    @PlatformImpl
     public static int getLightEmission(BlockState state, Level level, BlockPos pos) {
         throw new ArrayStoreException();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static Map<Block, Item> getBlockItemMap() {
         throw new AssertionError();
     }
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isInFluidThatCanExtinguish(Entity entity) {
         throw new AssertionError();
     }
 
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void registerDefaultContainerCap(BlockEntityType<? extends Container> container) {
 
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static ResourceLocation getQueriedLootTableId(LootContext lootContext) {
         throw new AssertionError();
     }

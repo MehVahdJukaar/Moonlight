@@ -1,8 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
 import com.google.common.base.Preconditions;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.misc.WorldSavedData;
 import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
@@ -45,7 +44,7 @@ public class ClientBoundSyncWorldDataMessage<D extends WorldSavedData> implement
         return TYPE.type();
     }
 
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     private static void handleSyncWorldData(ClientBoundSyncWorldDataMessage<?> message) {
         var l = Minecraft.getInstance().level;
         //assigns data to client

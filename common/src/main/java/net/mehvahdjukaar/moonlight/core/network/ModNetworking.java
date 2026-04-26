@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 
 
@@ -24,7 +24,7 @@ public class ModNetworking {
         ModNetworking.loaderDependent(event);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void loaderDependent(NetworkHelper.RegisterMessagesEvent event) {
         throw new AssertionError();
     }

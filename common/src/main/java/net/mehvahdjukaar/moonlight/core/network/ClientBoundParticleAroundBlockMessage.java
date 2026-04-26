@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -51,7 +50,7 @@ public class ClientBoundParticleAroundBlockMessage implements Message {
         GLOW_ON
     }
 
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     private static void handleSpawnBlockParticlePacket(ClientBoundParticleAroundBlockMessage message) {
         var l = Minecraft.getInstance().level;
 

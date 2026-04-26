@@ -1,14 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.client;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
 import net.mehvahdjukaar.moonlight.api.misc.TriResult;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
-import pepjebs.mapatlases.utils.TriState;
 
 import java.util.*;
 import java.util.function.Predicate;

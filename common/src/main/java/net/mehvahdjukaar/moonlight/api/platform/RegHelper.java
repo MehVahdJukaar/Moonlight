@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.misc.*;
@@ -97,13 +97,13 @@ import java.util.function.*;
  */
 public class RegHelper {
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T, E extends T> RegSupplier<E> register(
             ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T> void registerInBatch(Registry<T> reg, Consumer<Registrator<T>> eventListener) {
         throw new AssertionError();
     }
@@ -111,7 +111,7 @@ public class RegHelper {
     /**
      * Registers stuff immediately on fabric. Normal behavior for forge
      */
-    @ExpectPlatform
+    @PlatformImpl
     public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
         throw new AssertionError();
     }
@@ -159,7 +159,7 @@ public class RegHelper {
         return register(name, component, Registries.DATA_COMPONENT_TYPE);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(ResourceLocation name, Supplier<EntityDataSerializer<T>> serializer) {
         throw new AssertionError();
     }
@@ -243,7 +243,7 @@ public class RegHelper {
 
     //call in init when you have blocks
     @Deprecated(forRemoval = true)
-    @ExpectPlatform
+    @PlatformImpl
     /// USE {@link RegHelper#addExtraPOIStatesRegistration(Consumer)} and it must be called in Init, not Setup
     public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
         throw new AssertionError();
@@ -273,7 +273,7 @@ public class RegHelper {
         }
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener) {
         throw new AssertionError();
     }
@@ -283,12 +283,12 @@ public class RegHelper {
         void addBlocks(BlockEntityType<?> typeKey, Block... block);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addExtraBEBlockStatesRegistration(Consumer<RegHelper.ExtraBEStatesEvent> eventListener) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
         throw new AssertionError();
     }
@@ -320,7 +320,7 @@ public class RegHelper {
         return registerSound(name, () -> SoundEvent.createFixedRangeEvent(name, fixedRange));
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
             ResourceLocation name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
@@ -367,7 +367,7 @@ public class RegHelper {
         return register(name, recipe, Registries.RECIPE_SERIALIZER);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
         throw new AssertionError();
     }
@@ -406,7 +406,7 @@ public class RegHelper {
         return registerRegistry(ResourceKey.createRegistryKey(key), synced);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean synced) {
         throw new AssertionError();
     }
@@ -493,7 +493,7 @@ public class RegHelper {
 
 
     @Deprecated(forRemoval = true)
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
                                                                                    MobCategory category, float width, float height,
                                                                                    int clientTrackingRange, int updateInterval) {
@@ -552,22 +552,22 @@ public class RegHelper {
     }
 
     @Deprecated(forRemoval = true)
-    @ExpectPlatform //fabric
+    @PlatformImpl //fabric
     public static void registerItemBurnTime(Item item, int burnTime) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void registerBlockFlammability(Block item, int igniteOdds, int burnOdds) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T> void registerDataPackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec, @Nullable Codec<T> networkCodec) {
         throw new AssertionError();
     }
@@ -578,7 +578,7 @@ public class RegHelper {
         return key;
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(
             ResourceLocation name,
             boolean searchBar,
@@ -597,7 +597,7 @@ public class RegHelper {
         return registerCreativeModeTab(name, searchBar, DEFAULT_AFTER_ENTRIES, List.of(), configurator);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addItemsToTabsRegistration(Consumer<ItemToTabEvent> event) {
         throw new AssertionError();
     }
@@ -680,7 +680,7 @@ public class RegHelper {
         void register(EntityType<? extends LivingEntity> type, AttributeSupplier.Builder builder);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addAttributeRegistration(Consumer<AttributeEvent> eventListener) {
         throw new AssertionError();
     }
@@ -691,7 +691,7 @@ public class RegHelper {
                                       Heightmap.Types heightMapType, SpawnPlacements.SpawnPredicate<T> decoratorPredicate);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addSpawnPlacementsRegistration(Consumer<SpawnPlacementEvent> eventListener) {
         throw new AssertionError();
     }
@@ -701,7 +701,7 @@ public class RegHelper {
         void accept(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context, Commands.CommandSelection selection);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addCommandRegistration(CommandRegistration eventListener) {
         throw new AssertionError();
     }
@@ -815,13 +815,13 @@ public class RegHelper {
      *
      * @param eventListener function that takes in the original table id and spits out the table reference id. Return null for no op
      */
-    @ExpectPlatform
+    @PlatformImpl
     public static void addLootTableInjects(Consumer<LootInjectEvent> eventListener) {
         throw new AssertionError();
     }
 
     // Only relevant on forge
-    @ExpectPlatform
+    @PlatformImpl
     public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {
         throw new AssertionError();
     }
@@ -830,7 +830,7 @@ public class RegHelper {
      * Very hack solution for forge. Call this as soon as your mod is created in its constructor, offering your mod bus
      */
     @Deprecated(forRemoval = true)
-    @ExpectPlatform
+    @PlatformImpl
     public static void startRegisteringFor(Object bus) {
         throw new AssertionError();
     }
@@ -857,7 +857,7 @@ public class RegHelper {
         ItemListingManager.registerSimple(id, instance, level);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void registerResourcePackSource(PackType packType, RepositorySource packSource) {
         throw new AssertionError();
     }
@@ -935,7 +935,7 @@ public class RegHelper {
         }
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <A, T> IAttachmentType<A, T> registerDataAttachment(ResourceLocation id,
                                                                       Supplier<AttachmentBuilder<A>> config,
                                                                       Class<T> targetClass) {

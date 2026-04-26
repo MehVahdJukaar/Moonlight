@@ -1,6 +1,5 @@
 
 modLoader = "javafml"
-loaderVersion = "${loader_version_range}"
 
 license = "${mod_license}"
 issueTrackerURL = "${mod_github}/issues"
@@ -15,25 +14,18 @@ config = "${mod_id}-common.mixins.json"
 modId = "${mod_id}"
 version = "${mod_version}"
 displayName = "${mod_name}"
-logoFile = "../../../../../.idea/icon.png"
+logoFile = "icon.png"
 authors = "${mod_authors}"
 credits = "${mod_credits}"
 description = '''${mod_description}'''
 modUrl = "${mod_homepage}"
 updateJSONURL = "https://api.modrinth.com/updates/${mod_id}/neoforge_updates.json"
-itemIcon = "minecraft:brush" #catalogue icon
 
-[[dependencies.${mod_id}]]
-    modId = "neoforge"
-    type = "required"
-    versionRange = "${neo_version_range}"
-    ordering = "NONE"
-    side = "BOTH"
 
 [[dependencies.${mod_id}]]
     modId = "minecraft"
     type = "required"
-    versionRange = "[${minecraft_min_version},${minecraft_max_version})"
+    versionRange = "[${minecraft_version}]"
     ordering = "NONE"
     side = "BOTH"
 

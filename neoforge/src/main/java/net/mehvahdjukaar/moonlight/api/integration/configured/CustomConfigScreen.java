@@ -18,9 +18,7 @@ import com.mrcrayfish.configured.impl.neoforge.NeoForgeValue;
 import com.mrcrayfish.configured.util.ConfigHelper;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.configs.neoforge.ForgeConfigHolder;
-import net.mehvahdjukaar.moonlight.core.ClientConfigs;
-import net.mehvahdjukaar.moonlight.core.CommonConfigs;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ForgeConfigHolder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -41,7 +39,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;

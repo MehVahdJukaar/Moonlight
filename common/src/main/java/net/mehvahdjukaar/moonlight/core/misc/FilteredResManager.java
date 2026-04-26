@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.pack.IEditablePackResources;
 import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
@@ -65,7 +65,7 @@ public class FilteredResManager extends MultiPackResourceManager {
         });
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isModResourcePack(PackResources pack) {
         throw new AssertionError();
     }

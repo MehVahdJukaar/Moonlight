@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.fluids;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.client.ModFluidRenderProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,6 +24,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 //I hate this class
+/// Use native forge and fabric impls themselves. they change too much for this to make any sense
+@Deprecated(forRemoval = true)
 public abstract class ModFlowingFluid extends FlowingFluid {
 
     @Nullable
@@ -79,7 +80,7 @@ public abstract class ModFlowingFluid extends FlowingFluid {
     @Override
     public abstract Fluid getFlowing();
 
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     public abstract ModFluidRenderProperties createRenderProperties();
 
     /**

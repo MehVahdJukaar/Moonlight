@@ -159,8 +159,6 @@ transitive-accessible field net/minecraft/world/level/Explosion damageSource Lne
 transitive-mutable field net/minecraft/world/level/Explosion damageSource Lnet/minecraft/world/damagesource/DamageSource;
 transitive-accessible field net/minecraft/world/level/Explosion blockInteraction Lnet/minecraft/world/level/Explosion$BlockInteraction;
 
-#loot
-transitive-accessible field net/minecraft/world/level/storage/loot/LootDataType codec Lcom/mojang/serialization/Codec;
 
 accessible field net/minecraft/world/item/AxeItem STRIPPABLES Ljava/util/Map;
 accessible method net/minecraft/world/level/block/FireBlock setFlammable (Lnet/minecraft/world/level/block/Block;II)V

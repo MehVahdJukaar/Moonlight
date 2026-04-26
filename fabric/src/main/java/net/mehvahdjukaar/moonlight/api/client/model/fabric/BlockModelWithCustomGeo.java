@@ -1,19 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.client.model.fabric;
 
 import net.mehvahdjukaar.moonlight.api.client.model.CustomGeometry;
-import net.mehvahdjukaar.moonlight.core.mixins.fabric.BlockModelAccessor;
+import net.mehvahdjukaar.moonlight.core.mixins.platform.BlockModelAccessor;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public class BlockModelWithCustomGeo extends BlockModel {
 

@@ -9,7 +9,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
@@ -47,7 +47,7 @@ public class CodecUtils {
                 (a) -> Objects.equals(a, defaultValue.get()) ? Optional.empty() : Optional.of(a));
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <K, V, C extends BaseMapCodec<K, V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec) {
         throw new AssertionError();
     }

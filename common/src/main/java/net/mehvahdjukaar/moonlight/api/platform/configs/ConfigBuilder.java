@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -33,7 +33,7 @@ public abstract class ConfigBuilder {
     //always on. can be called to disable
     protected boolean usesDataBuddy = true;
 
-    @ExpectPlatform
+    @PlatformImpl
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         throw new AssertionError();
     }

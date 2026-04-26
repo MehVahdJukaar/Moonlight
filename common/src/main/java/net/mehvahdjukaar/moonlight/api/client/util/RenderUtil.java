@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
@@ -36,7 +36,7 @@ import java.util.function.BiConsumer;
 public class RenderUtil {
 
     //TODO: fix shading so it can be rotated and have consistent shading and is also rendered like a block
-    @ExpectPlatform
+    @PlatformImpl
     public static void renderBlock(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
                                    Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
         throw new AssertionError();
@@ -111,7 +111,7 @@ public class RenderUtil {
         poseStack.popPose();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     private static BakedModel handleCameraTransforms(BakedModel model, PoseStack matrixStack, ItemDisplayContext pTransformType) {
         throw new ArrayStoreException();
     }

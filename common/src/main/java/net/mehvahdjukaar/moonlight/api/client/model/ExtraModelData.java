@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.model;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -14,7 +14,7 @@ public interface ExtraModelData {
 
     ExtraModelData EMPTY = ClassLoadingBs.getInstance();
 
-    @ExpectPlatform
+    @PlatformImpl
     static Builder builder() {
         throw new AssertionError();
     }

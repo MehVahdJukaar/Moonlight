@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundOpenScreenMessage;
@@ -19,11 +18,11 @@ import org.jetbrains.annotations.Nullable;
 public interface IScreenProvider {
 
     @Deprecated(forRemoval = true)
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     default void openScreen(Level level, Player player, Direction direction) {
     }
 
-    @Environment(EnvType.CLIENT)
+    @ClientOnly
     default void openScreen(Level level, Player player, Direction direction, Vec3 hitPos) {
         openScreen(level, player, direction);
     }

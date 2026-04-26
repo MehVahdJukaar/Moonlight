@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.*;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import io.netty.handler.codec.DecoderException;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
@@ -24,12 +24,12 @@ import java.util.stream.Stream;
 public abstract class BlockTypeSwapIngredient<T extends BlockType> {
 
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends BlockType> Ingredient create(Ingredient original, @NotNull T from, @NotNull T to) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends BlockType> BlockTypeSwapIngredient<T> create(Ingredient original, @NotNull T from, @NotNull T to, BlockTypeRegistry<T> reg) {
         throw new AssertionError();
     }

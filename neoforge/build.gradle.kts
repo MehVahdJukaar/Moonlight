@@ -8,6 +8,10 @@ neoforge {
 }
 
 dependencies {
+    modCompileOnly("curse.maven:irisshaders-455508:5789255")
+    modCompileOnly ("curse.maven:map-atlases-forge-519759:7659933")
+    modCompileOnly("curse.maven:modernfix-790626:4599353")
+    modCompileOnly("curse.maven:quark-243121:7640331")
 
     modCompileOnly("curse.maven:autoreglib-250363:3857246")
     modCompileOnly("curse.maven:quark-oddities-301051:3575623")

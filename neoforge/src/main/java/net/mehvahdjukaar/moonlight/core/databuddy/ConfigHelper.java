@@ -36,7 +36,6 @@ import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import vazkii.quark.base.client.config.ConfigObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

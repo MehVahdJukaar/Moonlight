@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
@@ -34,7 +34,7 @@ public class VillagerAIInternal {
         }
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static IVillagerBrainEvent createEvent(Brain<Villager> brain, Villager villager){
         throw new AssertionError();
     }

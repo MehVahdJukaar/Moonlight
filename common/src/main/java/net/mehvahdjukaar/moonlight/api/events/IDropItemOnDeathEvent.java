@@ -1,12 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.events;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public interface IDropItemOnDeathEvent extends SimpleEvent {
 
-    @ExpectPlatform
+    @PlatformImpl
     static IDropItemOnDeathEvent create(ItemStack itemStack, Player player, boolean beforeDrop) {
         throw new AssertionError();
     }

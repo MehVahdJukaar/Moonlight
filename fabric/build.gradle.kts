@@ -11,6 +11,11 @@ val cloth_version: String by extra
 val cca_version: String by extra
 dependencies {
 
+    modCompileOnly("curse.maven:irisshaders-455508:5789255")
+    modCompileOnly ("curse.maven:map-atlases-forge-519759:7659933")
+    modCompileOnly("curse.maven:modernfix-790626:4599353")
+    modCompileOnly("curse.maven:quark-243121:7640331")
+
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:${cloth_version}")
     modCompileOnly("curse.maven:yacl-667299:5424169")
     modCompileOnly("curse.maven:modmenu-308702:5810603")

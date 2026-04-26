@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeLocalPlayer;
@@ -65,12 +65,12 @@ import java.util.function.Supplier;
  */
 public class PlatHelper {
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addCommonSetup(Runnable commonSetup) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addCommonSetupAsync(Runnable commonSetup) {
         throw new AssertionError();
     }
@@ -79,18 +79,18 @@ public class PlatHelper {
      * A setup step that runs similar to resource reloads. RegistryAccess and tags are available here as this runs on tag load
      * Boolean given is if this is run on the client logical side
      */
-    @ExpectPlatform
+    @PlatformImpl
     public static void addReloadableCommonSetup(BiConsumer<RegistryAccess, Boolean> setup) {
         throw new AssertionError();
     }
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isDev() {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isModLoadingValid() {
         throw new AssertionError();
     }
@@ -98,29 +98,29 @@ public class PlatHelper {
     /**
      * If loaders are during standard mod init phase
      */
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isInitializing() {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <A> void setComponent(DataComponentHolder to, DataComponentType<A> type, A componentValue) {
         throw new AssertionError();
     }
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static void invokeLevelUnload(Level l) {
         throw new AssertionError();
     }
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isFakePlayer(ServerPlayer instance) {
         throw new AssertionError();
     }
@@ -132,7 +132,7 @@ public class PlatHelper {
         return false;
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static MapCodec<LoaderCondition> getConditionCodec() {
         throw new AssertionError();
     }
@@ -175,7 +175,7 @@ public class PlatHelper {
     }
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static Platform getPlatform() {
         throw new AssertionError();
     }
@@ -201,63 +201,63 @@ public class PlatHelper {
     }
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static Side getPhysicalSide() {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static Path getGamePath() {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static Path getModFilePath(String modId) {
         throw new AssertionError();
     }
 
     @Nullable
-    @ExpectPlatform
+    @PlatformImpl
     public static String getModPageUrl(String modId) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static String getModName(String modId) {
         throw new AssertionError();
     }
 
     @Nullable
-    @ExpectPlatform
+    @PlatformImpl
     public static <T> Field findField(Class<? super T> clazz, String fieldName) {
         throw new AssertionError();
     }
 
     @Nullable
-    @ExpectPlatform
+    @PlatformImpl
     public static Method findMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
         throw new AssertionError();
     }
 
     @Contract
     @Nullable
-    @ExpectPlatform
+    @PlatformImpl
     public static MinecraftServer getCurrentServer() {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isModLoaded(String modId) {
         throw new AssertionError();
     }
 
     @Nullable
-    @ExpectPlatform
+    @PlatformImpl
     public static String getModVersion(String modId) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static List<String> getInstalledMods() {
         throw new AssertionError();
     }
@@ -268,68 +268,68 @@ public class PlatHelper {
     }
 
     @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isMobGriefingOn(Level level, Entity entity) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isAreaLoaded(LevelReader level, BlockPos pos, int maxRange) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     @Nullable
     public static FoodProperties getFoodProperties(ItemStack stack, Player player) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static int getBurnTime(ItemStack stack) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void onCaughtFire(BlockState state, Level level, BlockPos pos, Direction direction, @Nullable LivingEntity igniter) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static SimpleParticleType newSimpleParticle() {
         throw new AssertionError();
     }
@@ -338,12 +338,12 @@ public class PlatHelper {
         return newParticle(c -> codec, c -> streamCodec, overrideLimiter);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends ParticleOptions> ParticleType<T> newParticle(Function<ParticleType<T>, MapCodec<T>> codec, Function<ParticleType<T>, StreamCodec<? super RegistryFriendlyByteBuf, T>> streamCodec, boolean overrideLimiter) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <T extends BlockEntity> BlockEntityType<T> newBlockEntityType(BlockEntitySupplier<T> blockEntitySupplier, Block... validBlocks) {
         throw new AssertionError();
     }
@@ -353,7 +353,7 @@ public class PlatHelper {
         @NotNull T create(BlockPos pos, BlockState state);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static <E extends Entity> EntityType<E> newEntityType(String name,
                                                                  EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
                                                                  int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
@@ -366,12 +366,12 @@ public class PlatHelper {
         addServerReloadListener(provider -> listener, location);
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void addServerReloadListener(Function<HolderLookup.Provider, PreparableReloadListener> listener, ResourceLocation location) {
         throw new AssertionError();
     }
 
-    @ExpectPlatform
+    @PlatformImpl
     public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataProvider) {
         throw new AssertionError();
     }
@@ -392,7 +392,7 @@ public class PlatHelper {
     }
 
 
-    @ExpectPlatform
+    @PlatformImpl
     public static Player getFakeServerPlayer(GameProfile id, ServerLevel level) {
         throw new AssertionError();
     }
