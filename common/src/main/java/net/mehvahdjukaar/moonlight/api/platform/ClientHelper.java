@@ -4,7 +4,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.client.CoreShaderContainer;
 import net.mehvahdjukaar.moonlight.api.client.ItemRenderExtension;
@@ -92,7 +91,6 @@ public class ClientHelper {
     }
 
     @FunctionalInterface
-    @ClientOnly
     public interface ParticleFactory<T extends ParticleOptions> {
         @NotNull ParticleProvider<T> create(SpriteSet spriteSet);
     }

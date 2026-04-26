@@ -3,7 +3,7 @@ modLoader = "javafml"
 
 license = "${mod_license}"
 issueTrackerURL = "${mod_github}/issues"
-
+loaderVersion = "*"
 
 [[mixins]]
 config = "${mod_id}.mixins.json"

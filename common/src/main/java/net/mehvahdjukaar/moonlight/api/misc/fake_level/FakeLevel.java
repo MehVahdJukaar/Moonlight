@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.misc.fake_level;
 
+import net.mehvahdjukaar.candlelight.api.VirtualOverride;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
@@ -88,6 +89,27 @@ public class FakeLevel extends Level {
                 0, 0);
         this.recipeManager = new RecipeManager(registryAccess);
     }
+
+    @VirtualOverride("neoforge")
+    public void setDayTimePerTick(float dayTimePerTick) {
+    }
+
+    @VirtualOverride("neoforge")
+    public float getDayTimePerTick() {
+        return -1;
+    }
+
+    @VirtualOverride("neoforge")
+    public void setDayTimeFraction(float dayTimeFraction) {
+    }
+
+
+    @VirtualOverride("neoforge")
+    public float getDayTimeFraction() {
+        return 0.0f;
+    }
+
+
 
     @Override
     public Scoreboard getScoreboard() {

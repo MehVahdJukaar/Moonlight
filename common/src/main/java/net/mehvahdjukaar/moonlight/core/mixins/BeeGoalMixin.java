@@ -20,7 +20,7 @@ public abstract class BeeGoalMixin {
 
     @Shadow
     @Final
-    Bee field_20373;
+    Bee this$0;
 
     @Inject(method = "tick",
             at = @At(value = "INVOKE",
@@ -28,9 +28,9 @@ public abstract class BeeGoalMixin {
                     shift = At.Shift.BY, by = -2), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     public void moonlight$tickBeeGrowable(CallbackInfo ci, int i, BlockPos blockPos, BlockState blockState, Block block, BlockState blockState2) {
         if (blockState2.getBlock() instanceof IBeeGrowable beeGrowable) {
-            beeGrowable.getPollinated(this.field_20373.level(), blockPos, blockState2);
-            field_20373.level().levelEvent(2005, blockPos, 0);
-            field_20373.incrementNumCropsGrownSincePollination();
+            beeGrowable.getPollinated(this.this$0.level(), blockPos, blockState2);
+            this.this$0.level().levelEvent(2005, blockPos, 0);
+            this.this$0.incrementNumCropsGrownSincePollination();
             ci.cancel();
         } //TODO: check
     }

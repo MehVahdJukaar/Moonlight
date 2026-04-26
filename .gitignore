@@ -22,3 +22,6 @@ classes/
 /.codex
 /.aiassistant/
 /.ai/
+/common/build/
+/fabric/build/
+/neoforge/build/

@@ -35,7 +35,7 @@
   ],
   "depends": {
     "fabric": ">=0.116.6+1.21.1",
-    "minecraft": "=${minecraft_version}",
+    "minecraft": "=${minecraft_version}"
   },
   "custom": {
     "modmenu": {

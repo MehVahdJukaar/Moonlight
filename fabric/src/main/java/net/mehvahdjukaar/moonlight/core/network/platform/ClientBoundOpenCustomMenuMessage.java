@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.network.platform;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.client.platform.IFabricMenuType;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;

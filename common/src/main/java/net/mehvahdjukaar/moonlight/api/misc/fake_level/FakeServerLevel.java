@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.misc.fake_level;
 
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Either;
+import net.mehvahdjukaar.candlelight.api.VirtualOverride;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -127,7 +128,7 @@ public class FakeServerLevel extends ServerLevel {
         return Collections.emptyList();
     }
 
-//we avoid all references to server.getPlayerList
+    //we avoid all references to server.getPlayerList
 
     @Override
     public void playSound(Player player, double x, double y, double z, SoundEvent soundIn, SoundSource category,
@@ -271,6 +272,27 @@ public class FakeServerLevel extends ServerLevel {
             this.name = name;
             this.wrapped = wrapped;
         }
+
+        @VirtualOverride("neoforge")
+        public void setDayTimePerTick(float dayTimePerTick) {
+        }
+
+        @VirtualOverride("neoforge")
+        public void setDayTimeFraction(float dayTimeFraction) {
+        }
+
+        @VirtualOverride("neoforge")
+        public float getDayTimeFraction() {
+            return 0.0f;
+        }
+
+        @VirtualOverride("neoforge")
+        public float getDayTimePerTick() {
+            return -1;
+        }
+
+
+
 
         @Override
         public String getLevelName() {

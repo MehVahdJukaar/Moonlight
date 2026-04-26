@@ -16,7 +16,7 @@ dependencies {
     modCompileOnly("curse.maven:autoreglib-250363:3857246")
     modCompileOnly("curse.maven:quark-oddities-301051:3575623")
     modCompileOnly("curse.maven:quark-243121:4463411")
-    modImplementation("curse.maven:the-twilight-forest-227639:7398100")
+    modCompileOnly("curse.maven:the-twilight-forest-227639:7398100")
 //    modImplementation("curse.maven:open-loader-354339:6546293")
     //modImplementation("curse.maven:prickle-1023259:6961457")
 
