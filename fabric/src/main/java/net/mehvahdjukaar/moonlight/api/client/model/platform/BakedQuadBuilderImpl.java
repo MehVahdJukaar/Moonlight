@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.model.fabric;
+package net.mehvahdjukaar.moonlight.api.client.model.platform;
 
 import com.google.common.base.Preconditions;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;

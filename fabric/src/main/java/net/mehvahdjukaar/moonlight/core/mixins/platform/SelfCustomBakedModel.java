@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.client.model.IExtraModelDataProvider;
-import net.mehvahdjukaar.moonlight.api.client.model.fabric.ModelWrapper;
+import net.mehvahdjukaar.moonlight.api.client.model.platform.ModelWrapper;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;

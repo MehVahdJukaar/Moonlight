@@ -12,6 +12,7 @@
     "SelfModFluidRendererPropertiesMixin"
   ],
   "mixins": [
+    "BeeGoalMixin",
     "ConditionHackMixin",
     "ConfigTrackerMixin",
     "ContextAwareReloadListenerAccessor",

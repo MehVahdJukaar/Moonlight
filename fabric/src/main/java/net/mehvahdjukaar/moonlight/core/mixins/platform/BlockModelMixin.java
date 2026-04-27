@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.mixins.platform;
 
 import net.mehvahdjukaar.moonlight.api.client.model.CustomGeometry;
-import net.mehvahdjukaar.moonlight.api.client.model.fabric.BlockModelWithCustomGeo;
+import net.mehvahdjukaar.moonlight.api.client.model.platform.BlockModelWithCustomGeo;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;

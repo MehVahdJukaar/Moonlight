@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import net.mehvahdjukaar.moonlight.api.client.model.fabric.MLFabricModelLoaderRegistry;
+import net.mehvahdjukaar.moonlight.api.client.model.platform.MLFabricModelLoaderRegistry;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;

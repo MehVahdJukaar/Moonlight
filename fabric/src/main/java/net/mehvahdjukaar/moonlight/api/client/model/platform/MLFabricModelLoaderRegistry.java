@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.model.fabric;
+package net.mehvahdjukaar.moonlight.api.client.model.platform;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;

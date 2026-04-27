@@ -15,6 +15,9 @@ import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.BoolConfigValue;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.ConfigValue;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +29,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.CLOTH_CONFIG;
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.YACL;
@@ -191,6 +195,14 @@ public final class FabricConfigHolder extends ModConfigHolder {
     @Override
     public boolean hasConfigScreen() {
         return CLOTH_CONFIG || YACL;
+    }
+
+    @Override
+    public <T> void manuallySetValue(Supplier<T> config, T value) {
+        if (config instanceof ConfigValue<T> b) {
+            b.set(value);
+        }
+        this.saveConfig();
     }
 
     @Override

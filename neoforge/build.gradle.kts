@@ -7,6 +7,12 @@ neoforge {
     accessWidener(project(":common"))
 }
 
+neoForge {
+    accessTransformers {
+        //publish(file("src/main/resources/META-INF/accesstransformer1.cfg"))
+    }
+}
+
 dependencies {
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
     modCompileOnly ("curse.maven:map-atlases-forge-519759:7659933")

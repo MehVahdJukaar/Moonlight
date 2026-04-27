@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.model.fabric;
+package net.mehvahdjukaar.moonlight.api.client.model.platform;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.mehvahdjukaar.moonlight.api.client.model.BakedQuadsTransformer;

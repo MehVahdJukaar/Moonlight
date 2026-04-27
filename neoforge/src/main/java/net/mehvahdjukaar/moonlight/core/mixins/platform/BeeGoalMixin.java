@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.mixins;
+package net.mehvahdjukaar.moonlight.core.mixins.platform;
 
 import net.mehvahdjukaar.moonlight.api.block.IBeeGrowable;
 import net.minecraft.core.BlockPos;

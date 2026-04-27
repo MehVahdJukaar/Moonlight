@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public abstract class ModConfigHolder {
 
@@ -129,7 +130,7 @@ public abstract class ModConfigHolder {
     }
 
     //send configs from client -> server
-    public void sendChangedConfigToServer(){
+    public void sendChangedConfigToServer() {
         if (this.isSynced()) {
             try {
                 final byte[] configData = getConfigFileData();
@@ -163,4 +164,6 @@ public abstract class ModConfigHolder {
             super("Failed to load config file " + config.getFileName() + " of type " + config.getConfigType() + " for mod " + config.getModId() + ". Try deleting it", cause);
         }
     }
+
+    public abstract <T> void manuallySetValue(Supplier<T> config, T value);
 }

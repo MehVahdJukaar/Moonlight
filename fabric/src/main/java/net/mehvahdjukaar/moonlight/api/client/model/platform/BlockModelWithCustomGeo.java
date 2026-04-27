@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.model.fabric;
+package net.mehvahdjukaar.moonlight.api.client.model.platform;
 
 import net.mehvahdjukaar.moonlight.api.client.model.CustomGeometry;
 import net.mehvahdjukaar.moonlight.core.mixins.platform.BlockModelAccessor;

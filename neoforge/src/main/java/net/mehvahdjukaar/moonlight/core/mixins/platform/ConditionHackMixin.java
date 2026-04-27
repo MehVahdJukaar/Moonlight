@@ -24,7 +24,7 @@ public abstract class ConditionHackMixin extends ContextAwareReloadListener {
 
     @Deprecated(forRemoval = true)
     //literally copies what fabric does
-    @Inject(at = @At("HEAD"), method = "method_18790")
+    @Inject(at = @At("HEAD"), method = {"method_18790", "lambda$reload$1"})
     private void applyResourceConditions(ResourceManager resourceManager, ProfilerFiller profiler, Object object, CallbackInfo ci) {
         if ((Object) this instanceof SimpleJsonResourceReloadListener) {
             Iterator<Map.Entry<ResourceLocation, JsonElement>> it = ((Map<ResourceLocation, JsonElement>) object).entrySet().iterator();
@@ -32,7 +32,7 @@ public abstract class ConditionHackMixin extends ContextAwareReloadListener {
             while (it.hasNext()) {
                 Map.Entry<ResourceLocation, JsonElement> entry = it.next();
                 JsonElement resourceData = entry.getValue();
-                if(resourceData == null){
+                if (resourceData == null) {
                     continue; //BS neoforge loot modifiers allowing null in their maps
                 }
                 if (resourceData.isJsonObject()) {

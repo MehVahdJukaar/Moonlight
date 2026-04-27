@@ -18,6 +18,7 @@ import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.api.util.codec.LenientListCodec;
+import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
@@ -63,6 +64,7 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.material.Fluid;
@@ -75,6 +77,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -423,6 +426,20 @@ public class Utils {
             }
         }
         return result;
+    }
+
+    public static Optional<BlockState> getRotatedDirectionalBlock(BlockState state, Direction axis, boolean ccw) {
+        Vec3 targetNormal = MthUtils.V3itoV3(state.getValue(BlockStateProperties.FACING).getNormal());
+        Vec3 myNormal = MthUtils.V3itoV3(axis.getNormal());
+        if (!ccw) targetNormal = targetNormal.scale(-1);
+
+        Vec3 rotated = myNormal.cross(targetNormal);
+        // not on same axis, can rotate
+        if (!rotated.equals(Vec3.ZERO)) {
+            Direction newDir = Direction.getNearest(rotated.x(), rotated.y(), rotated.z());
+            return Optional.of(state.setValue(BlockStateProperties.FACING, newDir));
+        }
+        return Optional.empty();
     }
 
     public static boolean isMethodImplemented(Class<?> original, Class<?> subclass, String name) {

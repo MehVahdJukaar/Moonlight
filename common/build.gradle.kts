@@ -1,3 +1,5 @@
+import okhttp3.internal.platform.android.AndroidLogHandler.publish
+
 plugins {
     id("com.possible-triangle.common")
 }
@@ -14,7 +16,7 @@ dependencies {
     modCompileOnly ("curse.maven:map-atlases-forge-519759:7659933")
     modCompileOnly("curse.maven:quark-243121:7640331")
     //modCompileOnly("curse.maven:yacl-667299:4523734")
-    modImplementation("curse.maven:yacl-667299:6662859")
+    modCompileOnly("curse.maven:yacl-667299:6662859")
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
 

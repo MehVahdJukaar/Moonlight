@@ -1,7 +1,6 @@
-package net.mehvahdjukaar.moonlight.api.client.model.fabric;
+package net.mehvahdjukaar.moonlight.api.client.model.platform;
 
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
-import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.minecraft.client.renderer.RenderType;
@@ -12,12 +11,10 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 //needed cause fabric
 public final class ModelWrapper implements BakedModel, FabricBakedModel {

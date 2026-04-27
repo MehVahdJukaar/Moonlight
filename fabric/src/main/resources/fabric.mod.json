@@ -17,13 +17,13 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.mehvahdjukaar.moonlight.fabric.MoonlightFabric"
+      "net.mehvahdjukaar.moonlight.platform.MoonlightFabric"
     ],
     "client": [
-      "net.mehvahdjukaar.moonlight.fabric.MoonlightFabricClient"
+      "net.mehvahdjukaar.moonlight.platform.MoonlightFabricClient"
     ],
     "server": [
-      "net.mehvahdjukaar.moonlight.fabric.MoonlightFabric"
+      "net.mehvahdjukaar.moonlight.platform.MoonlightFabric"
     ],
     "modmenu": [
       "net.mehvahdjukaar.moonlight.api.integration.mod_menu.ModMenuCompat"
