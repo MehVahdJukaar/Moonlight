@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins.platform;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.api.block.IBeeGrowable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.animal.Bee;
@@ -25,8 +26,8 @@ public abstract class BeeGoalMixin {
     @Inject(method = "tick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/Level;levelEvent(ILnet/minecraft/core/BlockPos;I)V",
-                    shift = At.Shift.BY, by = -2), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    public void moonlight$tickBeeGrowable(CallbackInfo ci, int i, BlockPos blockPos, BlockState blockState, Block block, BlockState blockState2) {
+                    shift = At.Shift.BY, by = -2), cancellable = true)
+    public void moonlight$tickBeeGrowable(CallbackInfo ci, @Local BlockPos blockPos, @Local(ordinal = 1) BlockState blockState2) {
         if (blockState2.getBlock() instanceof IBeeGrowable beeGrowable) {
             beeGrowable.getPollinated(this.this$0.level(), blockPos, blockState2);
             this.this$0.level().levelEvent(2005, blockPos, 0);

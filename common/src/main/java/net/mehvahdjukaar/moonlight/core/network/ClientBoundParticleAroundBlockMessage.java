@@ -55,16 +55,12 @@ public class ClientBoundParticleAroundBlockMessage implements Message {
         var l = Minecraft.getInstance().level;
 
         switch (message.type) {
-            case WAX_ON -> {
-                ParticleUtil.spawnParticleOnBlockShape(l, message.pos,
-                        ParticleTypes.WAX_ON,
-                        UniformInt.of(3, 5), 0.01f);
-            }
-            case GLOW_ON -> {
-                ParticleUtil.spawnParticleOnBlockShape(l, message.pos,
-                        ParticleTypes.GLOW,
-                        UniformInt.of(3, 5), 0);
-            }
+            case WAX_ON -> ParticleUtil.spawnParticleOnBlockShape(l, message.pos,
+                    ParticleTypes.WAX_ON,
+                    UniformInt.of(3, 5), 0.01f);
+            case GLOW_ON -> ParticleUtil.spawnParticleOnBlockShape(l, message.pos,
+                    ParticleTypes.GLOW,
+                    UniformInt.of(3, 5), 0);
         }
     }
 

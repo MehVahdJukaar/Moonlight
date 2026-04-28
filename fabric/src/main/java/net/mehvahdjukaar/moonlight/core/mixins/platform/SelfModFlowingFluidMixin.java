@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 public abstract class SelfModFlowingFluidMixin extends FlowingFluid {
 
     /**
-     * @author
-     * @reason
+     * @author me
+     * @reason no idea
      */
     @Overwrite(remap = false)
     private void afterInit(ModFlowingFluid.Properties properties) {

@@ -204,12 +204,7 @@ public class ClientHelperImpl {
 
         Consumer<RegisterItemDecorationsEvent> eventConsumer = event -> {
             eventListener.accept((i, l) -> {
-                IItemDecorator deco = new IItemDecorator() {
-                    @Override
-                    public boolean render(GuiGraphics graphics, Font font, ItemStack stack, int xOffset, int yOffset) {
-                        return l.render(graphics, font, stack, xOffset, yOffset);
-                    }
-                };
+                IItemDecorator deco = l::render;
                 event.register(i, deco);
             });
         };
@@ -306,7 +301,9 @@ public class ClientHelperImpl {
                                         false
                                 ));
                     } catch (Exception ee) {
-                        if (!DatagenModLoader.isRunningDataGen()) ee.printStackTrace();
+                        if (!DatagenModLoader.isRunningDataGen()){
+                            Moonlight.LOGGER.error("Failed to load optional texture pack: {}", folderName, ee);
+                        }
                     }
                     return null;
                 }

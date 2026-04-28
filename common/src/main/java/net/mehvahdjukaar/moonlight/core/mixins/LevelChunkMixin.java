@@ -22,7 +22,7 @@ public abstract class LevelChunkMixin {
     private boolean moonlight$stopDumbWarning(Logger instance, String s, Object b, Object p) {
         if (b instanceof BlockState state && p instanceof BlockPos pos) {
             if (state.getBlock() instanceof EntityBlock block) {
-                if (block.newBlockEntity(pos, state) == null) return false;
+                return block.newBlockEntity(pos, state) != null;
             }
         }
         return true;

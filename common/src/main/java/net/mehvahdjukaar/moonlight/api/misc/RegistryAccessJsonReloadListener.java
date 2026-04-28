@@ -21,7 +21,7 @@ import java.util.Map;
 @Deprecated(forRemoval = true)
 public abstract class RegistryAccessJsonReloadListener extends SimpleJsonResourceReloadListener {
 
-    private static final List<RegistryAccessJsonReloadListener> INSTANCES = Collections.synchronizedList(new ArrayList<>());;
+    private static final List<RegistryAccessJsonReloadListener> INSTANCES = Collections.synchronizedList(new ArrayList<>());
 
     @ApiStatus.Internal
     public static void runReloads(RegistryAccess access){

@@ -3,9 +3,7 @@ package net.mehvahdjukaar.moonlight.api.client.model;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Just wraps forge and fabric ones

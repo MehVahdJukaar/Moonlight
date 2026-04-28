@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
-import net.mehvahdjukaar.moonlight.api.misc.ForgeOverride;
+import net.mehvahdjukaar.candlelight.api.VirtualOverride;
 import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.minecraft.SharedConstants;
@@ -46,7 +46,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
 
     }
 
-    @ForgeOverride
+    @VirtualOverride("neoforge")
     public boolean isHidden() {
         return this.hidden;
     }

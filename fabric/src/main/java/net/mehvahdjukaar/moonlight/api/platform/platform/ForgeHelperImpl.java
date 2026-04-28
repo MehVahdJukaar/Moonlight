@@ -134,9 +134,6 @@ public class ForgeHelperImpl {
         return e instanceof EnderDragon;
     }
 
-    public static void setPoolName(LootPool.Builder pool, String name) {
-    }
-
     public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, AbstractMinecart o) {
         return blockstate.getValue(railBlock.getShapeProperty());
     }

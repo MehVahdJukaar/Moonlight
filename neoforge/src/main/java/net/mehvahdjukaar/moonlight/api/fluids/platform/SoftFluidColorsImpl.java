@@ -35,7 +35,7 @@ public class SoftFluidColorsImpl {
         //at least this works for any fluid
         int specialColor = 0;
         Holder<Fluid> f = stack.getVanillaFluid();
-        if (f != Fluids.EMPTY) {
+        if (!Fluids.EMPTY.isSame(f.value())) {
             var prop = IClientFluidTypeExtensions.of(f.value());
             if (prop != IClientFluidTypeExtensions.DEFAULT) {
                 //world accessor

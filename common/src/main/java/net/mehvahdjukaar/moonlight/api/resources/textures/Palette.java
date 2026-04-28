@@ -334,7 +334,7 @@ public class Palette implements Set<PaletteColor> {
      */
     public PaletteColor removeLeastUsed() {
         //remove the one with the least occurrence
-        PaletteColor toRemove = internal.get(0);
+        PaletteColor toRemove = internal.getFirst();
         for (var p : internal) {
             if (p.getOccurrence() < toRemove.getOccurrence()) {
                 toRemove = p;
@@ -701,7 +701,7 @@ public class Palette implements Set<PaletteColor> {
                 } else map.put(color, c);
             }
         }
-        if (map.values().size() == 0) return new Palette(new ArrayList<>());
+        if (map.isEmpty()) return new Palette(new ArrayList<>());
         return new Palette(map.values());
     }
 

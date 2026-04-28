@@ -118,14 +118,15 @@ public interface InvPlacer {
         }
 
         //decouples slot providing from slot filling so we can filter them here
-        interface Stage {
+        public interface Stage {
             SlotProvider slotProvider();
 
             Predicate<ItemStack> predicate();
         }
     }
 
-    record SimplePlacer(SlotProvider slotProvider, Predicate<ItemStack> predicate) implements InvPlacer, ExclusivePlacer.Stage {
+    record SimplePlacer(SlotProvider slotProvider,
+                        Predicate<ItemStack> predicate) implements InvPlacer, ExclusivePlacer.Stage {
 
         @Override
         public boolean place(ItemStack stack, Inventory inventory, Player player) {

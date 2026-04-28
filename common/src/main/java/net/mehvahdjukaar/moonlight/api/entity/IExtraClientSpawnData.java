@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.entity;
 
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 
 /**

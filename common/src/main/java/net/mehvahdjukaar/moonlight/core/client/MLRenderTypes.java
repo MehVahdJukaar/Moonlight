@@ -13,21 +13,19 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.opengl.GL13;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import static com.mojang.blaze3d.vertex.DefaultVertexFormat.PARTICLE;
 
 public class MLRenderTypes extends RenderType {
 
-    public static CoreShaderContainer TEXT_COLOR_SHADER = new CoreShaderContainer(GameRenderer::getPositionTexColorShader);
-    public static CoreShaderContainer PARTICLE_TRANSLUCENT_SHADER = new CoreShaderContainer(GameRenderer::getParticleShader);
+    public static final CoreShaderContainer TEXT_COLOR_SHADER = new CoreShaderContainer(GameRenderer::getPositionTexColorShader);
+    public static final CoreShaderContainer PARTICLE_TRANSLUCENT_SHADER = new CoreShaderContainer(GameRenderer::getParticleShader);
 
 
     public static final Function<ResourceLocation, RenderType> COLOR_TEXT = Util.memoize((p) ->
@@ -96,7 +94,7 @@ public class MLRenderTypes extends RenderType {
             RenderSystem.activeTexture(GL13.GL_TEXTURE0);
             //because of custom render type fuckery...
 
-            RenderSystem.setShader(PARTICLE_TRANSLUCENT_SHADER::get);
+            RenderSystem.setShader(PARTICLE_TRANSLUCENT_SHADER);
             RenderSystem.depthMask(false);
             RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
             RenderSystem.enableBlend();

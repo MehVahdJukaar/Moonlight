@@ -32,7 +32,7 @@ public class FilteredResManager extends MultiPackResourceManager {
     }
 
     public static FilteredResManager excluding(ResourceManager original, PackType packType, String... packs) {
-        return excluding(original, packType, p -> Set.of(packs).contains(p));
+        return excluding(original, packType, p -> Set.of(packs).contains(p.packId()));
     }
 
     public static FilteredResManager excluding(ResourceManager original, PackType packType, Predicate<PackResources> predicate) {

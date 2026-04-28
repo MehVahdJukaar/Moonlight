@@ -138,7 +138,7 @@ public class VillagerBrainEventInternal {
                 memories.put(memoryModuleType, Optional.empty());
             }
         } catch (Exception e) {
-            Moonlight.LOGGER.warn("failed to register pumpkin sensor type for villagers: " + e);
+            Moonlight.LOGGER.warn("failed to register pumpkin sensor type for villagers: {}", String.valueOf(e));
         }
     }
 

@@ -4,8 +4,6 @@ package net.mehvahdjukaar.moonlight.api.misc;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
-import net.minecraft.client.Camera;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;

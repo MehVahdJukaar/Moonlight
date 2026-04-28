@@ -35,8 +35,8 @@ public interface SelfExtraModelDataProvider extends IBlockEntityExtension, IExtr
 
     @Override
     default ModelData getModelData() {
-        if (this.getExtraModelData() instanceof ExtraModelDataImpl data) {
-            return data.data();
+        if (this.getExtraModelData() instanceof ExtraModelDataImpl(ModelData data1)) {
+            return data1;
         }
         return ModelData.EMPTY;
     }

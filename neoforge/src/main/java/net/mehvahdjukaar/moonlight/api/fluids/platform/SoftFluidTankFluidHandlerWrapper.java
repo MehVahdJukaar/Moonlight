@@ -3,10 +3,13 @@ package net.mehvahdjukaar.moonlight.api.fluids.platform;
 import net.mehvahdjukaar.moonlight.api.block.ISoftFluidTankProvider;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public record SoftFluidTankFluidHandlerWrapper(SoftFluidTank tank, BlockEntity be) implements IFluidHandler {
 
@@ -31,15 +34,16 @@ public record SoftFluidTankFluidHandlerWrapper(SoftFluidTank tank, BlockEntity b
 
     @Override
     public boolean isFluidValid(int i, @NotNull FluidStack fluidStack) {
-        return tank.isFluidCompatible(SoftFluidStackImpl.fromForgeFluid(fluidStack, be.getLevel().registryAccess()));
+        return tank.isFluidCompatible(SoftFluidStackImpl.fromForgeFluid(fluidStack, Objects.requireNonNull(be.getLevel()).registryAccess()));
     }
 
     @Override
     public int fill(FluidStack fluidStack, FluidAction fluidAction) {
-        SoftFluidStack original = SoftFluidStackImpl.fromForgeFluid(fluidStack, be.getLevel().registryAccess());
+        RegistryAccess ra = Objects.requireNonNull(be.getLevel()).registryAccess();
+        SoftFluidStack original = SoftFluidStackImpl.fromForgeFluid(fluidStack, ra);
         int filled = tank.addFluid(original, fluidAction.simulate());
         if (!fluidAction.simulate()) {
-            int bottlesRemoved = SoftFluidStackImpl.fromForgeFluid(fluidStack, be.getLevel().registryAccess()).getCount() - original.getCount();
+            int bottlesRemoved = SoftFluidStackImpl.fromForgeFluid(fluidStack, ra).getCount() - original.getCount();
             fluidStack.shrink(SoftFluidStackImpl.bottlesToMB(bottlesRemoved));
             be.setChanged();
         }

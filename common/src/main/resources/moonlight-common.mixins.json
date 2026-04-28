@@ -17,7 +17,6 @@
     "ThirdPersonRendererMixin"
   ],
   "mixins": [
-    "platform.BeeGoalMixin",
     "BlockBehaviorMixin",
     "BlockItemMixin",
     "BlockStateBaseMixin",
@@ -52,7 +51,8 @@
     "accessor.BrainAccessor",
     "accessor.DispenserBlockAccessor",
     "accessor.DispenserBlockEntityAccessor",
-    "compat.PistonReactQuarkMixin"
+    "compat.PistonReactQuarkMixin",
+    "platform.BeeGoalMixin"
   ],
   "injectors": {
     "defaultRequire": 1

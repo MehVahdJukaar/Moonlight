@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
 
-import net.mehvahdjukaar.moonlight.api.misc.ForgeOverride;
+import net.mehvahdjukaar.candlelight.api.VirtualOverride;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -49,8 +49,7 @@ public abstract class MimicBlock extends Block {
     }
 
     //might cause lag when breaking?
-//@Override
-    @ForgeOverride
+    @VirtualOverride("neoforge")
     public SoundType getSoundType(BlockState state, LevelReader world, BlockPos pos, Entity entity) {
         if (world.getBlockEntity(pos) instanceof IBlockHolder tile) {
             BlockState mimicState = tile.getHeldBlock();
@@ -77,8 +76,7 @@ public abstract class MimicBlock extends Block {
         return drops;
     }
 
-    //@Override
-    @ForgeOverride
+    @VirtualOverride("neoforge")
     public float getExplosionResistance(BlockState state, BlockGetter world, BlockPos pos, Explosion explosion) {
         if (world.getBlockEntity(pos) instanceof IBlockHolder tile) {
             BlockState mimicState = tile.getHeldBlock();

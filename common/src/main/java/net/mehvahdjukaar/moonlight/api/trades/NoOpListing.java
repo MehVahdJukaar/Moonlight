@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.trades;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;

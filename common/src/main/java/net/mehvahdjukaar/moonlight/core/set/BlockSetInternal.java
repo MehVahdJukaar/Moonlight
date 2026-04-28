@@ -2,8 +2,8 @@ package net.mehvahdjukaar.moonlight.core.set;
 
 import com.google.common.base.Stopwatch;
 import com.mojang.serialization.Codec;
-import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import io.netty.buffer.ByteBuf;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.misc.MapRegistry;

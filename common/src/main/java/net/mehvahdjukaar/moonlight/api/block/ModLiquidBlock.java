@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -60,7 +59,7 @@ public class ModLiquidBlock extends LiquidBlock {
                 FORGE_BLOCK_SUPPLIER.set(this, supplier);
                 INIT.set(this, false);
             } catch (Exception e) {
-                Moonlight.LOGGER.error("Failed to setup ModLiquidBlock class : " + e);
+                Moonlight.LOGGER.error("Failed to setup ModLiquidBlock class : {}", String.valueOf(e));
                 throw new RuntimeException(e);
             }
         }

@@ -20,7 +20,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -334,7 +337,7 @@ public final class MthUtils {
                 nLog = (x * Math.exp(-nLog0)) / (1 + nLog0);
             }
             // precision of the return value
-            return (Math.round(1000000 * nLog) / 1000000);
+            return ((double) Math.round(1000000 * nLog) / 1000000);
         } else {
             throw new IllegalArgumentException("Not in valid range for lambertW function. x has to be greater than or equal to -1/e.");
         }
@@ -354,7 +357,7 @@ public final class MthUtils {
                 nLog = (nLog0 * nLog0 + x / Math.exp(nLog0)) / (nLog0 + 1);
             }
             // precision of the return value
-            return (Math.round(1000000 * nLog) / 1000000);
+            return ((double) Math.round(1000000 * nLog) / 1000000);
         } else if (x == 0) {
             return 0;
         } else {
@@ -481,34 +484,40 @@ public final class MthUtils {
         double exitX, exitY, exitZ;
         Direction collisionDirection;
 
+        double entryX1 = (staticBox.minX - movingBox.maxX) / movement.x;
+        double exitX1 = (staticBox.maxX - movingBox.minX) / movement.x;
         if (movement.x > 0.0) {
-            entryX = (staticBox.minX - movingBox.maxX) / movement.x;
-            exitX = (staticBox.maxX - movingBox.minX) / movement.x;
+            entryX = entryX1;
+            exitX = exitX1;
         } else if (movement.x < 0.0) {
-            entryX = (staticBox.maxX - movingBox.minX) / movement.x;
-            exitX = (staticBox.minX - movingBox.maxX) / movement.x;
+            entryX = exitX1;
+            exitX = entryX1;
         } else {
             entryX = Double.NEGATIVE_INFINITY;
             exitX = Double.POSITIVE_INFINITY;
         }
 
+        double entryY1 = (staticBox.minY - movingBox.maxY) / movement.y;
+        double exitY1 = (staticBox.maxY - movingBox.minY) / movement.y;
         if (movement.y > 0.0) {
-            entryY = (staticBox.minY - movingBox.maxY) / movement.y;
-            exitY = (staticBox.maxY - movingBox.minY) / movement.y;
+            entryY = entryY1;
+            exitY = exitY1;
         } else if (movement.y < 0.0) {
-            entryY = (staticBox.maxY - movingBox.minY) / movement.y;
-            exitY = (staticBox.minY - movingBox.maxY) / movement.y;
+            entryY = exitY1;
+            exitY = entryY1;
         } else {
             entryY = Double.NEGATIVE_INFINITY;
             exitY = Double.POSITIVE_INFINITY;
         }
 
+        double entryZ1 = (staticBox.minZ - movingBox.maxZ) / movement.z;
+        double exitZ1 = (staticBox.maxZ - movingBox.minZ) / movement.z;
         if (movement.z > 0.0) {
-            entryZ = (staticBox.minZ - movingBox.maxZ) / movement.z;
-            exitZ = (staticBox.maxZ - movingBox.minZ) / movement.z;
+            entryZ = entryZ1;
+            exitZ = exitZ1;
         } else if (movement.z < 0.0) {
-            entryZ = (staticBox.maxZ - movingBox.minZ) / movement.z;
-            exitZ = (staticBox.minZ - movingBox.maxZ) / movement.z;
+            entryZ = exitZ1;
+            exitZ = entryZ1;
         } else {
             entryZ = Double.NEGATIVE_INFINITY;
             exitZ = Double.POSITIVE_INFINITY;

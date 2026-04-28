@@ -1,17 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.client.model;
 
 import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelState;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * Simple implementation of a dynamic model that accepts another model as a parameter

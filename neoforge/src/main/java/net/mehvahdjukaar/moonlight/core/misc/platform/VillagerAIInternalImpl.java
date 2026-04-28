@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.misc.neoforge;
+package net.mehvahdjukaar.moonlight.core.misc.platform;
 
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.events.platform.VillagerBrainEvent;

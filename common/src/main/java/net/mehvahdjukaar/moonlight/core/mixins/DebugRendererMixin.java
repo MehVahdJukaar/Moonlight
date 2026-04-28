@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.commands.DebugRenderersCommand;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.*;
 import org.spongepowered.asm.mixin.Final;

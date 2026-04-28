@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.core.pack;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 
 import java.util.List;
 

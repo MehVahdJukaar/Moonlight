@@ -60,7 +60,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         this.velX = (int) (d1 * 8000.0);
         this.velY = (int) (d2 * 8000.0);
         this.velZ = (int) (d3 * 8000.0);
-        RegistryAccess ra = PlatHelper.getCurrentServer().registryAccess();
+        RegistryAccess ra = Objects.requireNonNull(PlatHelper.getCurrentServer()).registryAccess();
         this.extraBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), ra);
         if (this.entity instanceof IExtraClientSpawnData spawnData) {
             spawnData.writeSpawnData(extraBuf);

@@ -219,7 +219,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return StringJsonConfigValue.define(this, path, defaultValue);
     }
 
-    private static class StringJsonConfigValue implements Supplier<JsonElement> {
+    public static class StringJsonConfigValue implements Supplier<JsonElement> {
 
         private static final Field cachedValue = ObfuscationReflectionHelper.findField(ModConfigSpec.ConfigValue.class, "cachedValue");
 

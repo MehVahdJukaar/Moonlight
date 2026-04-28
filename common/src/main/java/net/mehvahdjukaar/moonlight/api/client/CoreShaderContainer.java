@@ -1,13 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.client;
 
 import com.google.common.base.Preconditions;
-import net.mehvahdjukaar.moonlight.core.integration.IrisCompat;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
-import net.minecraft.client.renderer.RenderType;
+import net.mehvahdjukaar.moonlight.core.integration.IrisCompat;
 import net.minecraft.client.renderer.ShaderInstance;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
+
 public class CoreShaderContainer implements Supplier<ShaderInstance> {
 
     private final Supplier<ShaderInstance> vanillaFallback;

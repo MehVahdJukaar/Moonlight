@@ -375,7 +375,7 @@ public class RegHelper {
     public static <T extends Recipe<?>> Supplier<RecipeType<T>> registerRecipeType(ResourceLocation name) {
         return RegHelper.register(name, () -> {
             String id = name.toString();
-            return new RecipeType<T>() {
+            return new RecipeType<>() {
                 @Override
                 public String toString() {
                     return id;
@@ -670,8 +670,6 @@ public class RegHelper {
             });
         }
 
-        ;
-
         void remove(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> condition);
     }
 
@@ -906,20 +904,6 @@ public class RegHelper {
          * @return the builder
          */
         AttachmentBuilder<A> copyOnDeath();
-
-        /**
-         * Sets the default initializer for this attachment type.
-         *
-         * <p>It is <i>encouraged</i> for {@link A} to be an immutable data type, such as a primitive type
-         * or an immutable record.</p>
-         *
-         * <p>Otherwise, it is important to ensure that attachments <i>do not share any mutable state</i>.
-         * As an example, for a (mutable) list/array attachment type,
-         * the initializer should create a new independent instance each time it is called.</p>
-         *
-         * @param initializer the initializer
-         * @return the builder
-         */
 
         /**
          * Declares that this attachment type may be automatically synchronized with some clients, as determined by {@code syncPredicate}.

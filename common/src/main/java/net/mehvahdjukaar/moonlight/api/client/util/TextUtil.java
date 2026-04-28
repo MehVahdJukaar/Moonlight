@@ -59,9 +59,11 @@ public class TextUtil {
 
     public static FormattedText parseText(String s, @Nullable HolderLookup.Provider provider) {
         try {
-            FormattedText mutableComponent = Component.Serializer.fromJson(s, provider);
-            if (mutableComponent != null) {
-                return mutableComponent;
+            if(provider != null) {
+                FormattedText mutableComponent = Component.Serializer.fromJson(s, provider);
+                if (mutableComponent != null) {
+                    return mutableComponent;
+                }
             }
         } catch (Exception ignored) {
         }

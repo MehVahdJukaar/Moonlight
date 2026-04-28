@@ -11,6 +11,10 @@ import java.util.List;
 
 public record AlternativeCodec<A>(Codec<? extends A> ...codecs) implements Codec<A> {
 
+    @SafeVarargs
+    public AlternativeCodec {
+    }
+
     @Override
     public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> ops, T input) {
         List<String> errors = new ArrayList<>();

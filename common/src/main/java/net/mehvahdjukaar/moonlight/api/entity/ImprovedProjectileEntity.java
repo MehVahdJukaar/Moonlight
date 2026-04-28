@@ -11,16 +11,16 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
@@ -251,7 +251,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
             BlockPos hitPos = bi.getBlockPos();
             BlockState hitState = level.getBlockState(hitPos);
             //ThrowableProjectile
-            //TODO:!!!! fafactor this whole class!!
+            //TODO:!!!! refactor this whole class!!
             if (hitState.is(Blocks.NETHER_PORTAL)) {
                 //this.handleInsidePortal(hitPos);
               //  portalHit = true;

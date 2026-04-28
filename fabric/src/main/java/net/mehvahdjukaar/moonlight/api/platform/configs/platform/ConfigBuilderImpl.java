@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -43,13 +44,13 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public String currentCategory() {
-        return categoryStack.peek().getName();
+        return Objects.requireNonNull(categoryStack.peek()).getName();
     }
 
     @Override
     public ConfigBuilderImpl push(String translation) {
         var cat = new ConfigSubCategory(translation);
-        categoryStack.peek().addEntry(cat);
+        Objects.requireNonNull(categoryStack.peek()).addEntry(cat);
         categoryStack.push(cat);
         return this;
     }
@@ -71,7 +72,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
             config.setRawComment(this.translations.get(tooltipKey));
         }
 
-        this.categoryStack.peek().addEntry(config);
+        Objects.requireNonNull(this.categoryStack.peek()).addEntry(config);
         if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();
     }
 

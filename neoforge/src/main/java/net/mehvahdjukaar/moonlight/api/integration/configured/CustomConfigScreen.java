@@ -223,7 +223,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     private void trySyncToServer() {
         if (ConfigHelper.isPlayingGame()) {
             Player player = ConfigHelper.getClientPlayer();
-            if (player != null && ConfigHelper.isOperator(player)) {
+            if (ConfigHelper.isOperator(player)) {
                 this.mlConfig.sendChangedConfigToServer();
             }
         }
@@ -288,7 +288,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
 
         private final ItemStack icon;
         protected final Button button;
-        protected boolean light;
+        protected final boolean light;
 
         private int ticks = 0;
         private int lastTick = 1;

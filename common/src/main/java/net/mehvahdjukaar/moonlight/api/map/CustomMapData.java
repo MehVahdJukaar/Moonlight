@@ -1,14 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.map;
 
 import com.mojang.serialization.Codec;
-import io.netty.buffer.ByteBuf;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.IdMap;
-import net.minecraft.core.IdMapper;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;

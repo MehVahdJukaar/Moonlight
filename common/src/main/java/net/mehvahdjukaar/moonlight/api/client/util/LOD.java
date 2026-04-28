@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +26,7 @@ public final class LOD {
     private final double distSq; // computed once
 
     public static final LOD MAX = new LOD(0.0);
-    private static float DEFAULT_RADIUS = 1.45f;
+    private static final float DEFAULT_RADIUS = 1.45f;
 
     // ---- New factories ----
     public static LOD at(BlockEntity be) {

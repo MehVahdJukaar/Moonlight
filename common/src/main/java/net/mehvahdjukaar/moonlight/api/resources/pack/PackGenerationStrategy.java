@@ -1,10 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
-
-import java.util.Collection;
 
 //very ugly and confused class
 public interface PackGenerationStrategy {

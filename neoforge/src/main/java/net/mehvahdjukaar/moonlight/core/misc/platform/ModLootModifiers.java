@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.misc.neoforge;
+package net.mehvahdjukaar.moonlight.core.misc.platform;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

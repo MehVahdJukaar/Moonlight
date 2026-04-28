@@ -131,28 +131,21 @@ public class ClientHelperImpl {
                 new ReloadWrapper(listener, name));
     }
 
-    private static final class ReloadWrapper implements IdentifiableResourceReloadListener, PreparableReloadListener {
-        private final Supplier<PreparableReloadListener> inner;
-        private final ResourceLocation getFabricId;
+    private record ReloadWrapper(Supplier<PreparableReloadListener> inner,
+                                 ResourceLocation getFabricId) implements IdentifiableResourceReloadListener, PreparableReloadListener {
+            private ReloadWrapper(Supplier<PreparableReloadListener> inner,
+                                  ResourceLocation getFabricId) {
+                this.inner = Suppliers.memoize(inner::get);
+                this.getFabricId = getFabricId;
+            }
 
-        private ReloadWrapper(Supplier<PreparableReloadListener> listenerSupplier,
-                              ResourceLocation getFabricId) {
-            this.inner = Suppliers.memoize(listenerSupplier::get);
-            this.getFabricId = getFabricId;
+            @Override
+            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
+                                                  ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
+                                                  Executor backgroundExecutor, Executor gameExecutor) {
+                return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+            }
         }
-
-        @Override
-        public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
-                                              ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
-                                              Executor backgroundExecutor, Executor gameExecutor) {
-            return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
-        }
-
-        @Override
-        public ResourceLocation getFabricId() {
-            return getFabricId;
-        }
-    }
 
     public static final Map<ItemLike, IItemDecoratorRenderer> ITEM_DECORATORS = new IdentityHashMap<>();
 
@@ -230,7 +223,7 @@ public class ClientHelperImpl {
 
 
     public static Path getModIcon(String modId) {
-        var container = FabricLoader.getInstance().getModContainer(modId).get();
+        var container = FabricLoader.getInstance().getModContainer(modId).orElseThrow();
         return container.getMetadata().getIconPath(512).flatMap(container::findPath).orElse(null);
     }
 

@@ -70,7 +70,7 @@ public class DataSet<A> {
 
     public <T extends IDataEntry<A>> DataSet(List<T> colors) {
         this.colorPoints.addAll(colors);
-        this.random = new Random(Objects.hash(this.colorPoints.get(0).distTo(this.colorPoints.get(this.colorPoints.size() - 1))));
+        this.random = new Random(Objects.hash(this.colorPoints.getFirst().distTo(this.colorPoints.getLast())));
     }
 
     public static DataSet<ColorPoint> fromPalette(Palette palette) {
@@ -86,10 +86,10 @@ public class DataSet<A> {
                 colorsInCluster.add(colorPoint);
             }
         }
-        if (colorsInCluster.size() == 0) {
+        if (colorsInCluster.isEmpty()) {
             return (IDataEntry<A>) new ColorPoint(new PaletteColor(new RGBColor(0)));
         }
-        return colorsInCluster.get(0).average(colorsInCluster);
+        return colorsInCluster.getFirst().average(colorsInCluster);
     }
 
     public List<IDataEntry<A>> recomputeCentroids(int clusterSize) {
@@ -99,13 +99,6 @@ public class DataSet<A> {
         }
         return lastCentroids;
     }
-/*
-    public IDataEntry<A> randomDataPoint() {
-
-        Double min = minimums.get(name);
-        Double max = maximums.get(name);
-        res.put(name, min + (max - min) * random.nextDouble());
-    }*/
 
     public IDataEntry<A> randomFromDataSet() {
         int index = random.nextInt(colorPoints.size());

@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.set.wood;
 
-import net.mehvahdjukaar.moonlight.api.client.util.LOD;
-import net.mehvahdjukaar.moonlight.api.misc.InvPlacer;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -88,7 +86,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     }
 
     //- BLACKLISTED_MODS
-    public static Set<String> IGNORED_MODS = new HashSet<>(Set.of(
+    public static final Set<String> IGNORED_MODS = new HashSet<>(Set.of(
             "chipped", "compressedblocks", "securitycraft",
             "absentbydesign", "immersive_weathering", "dynamictrees", "dt"
     ));

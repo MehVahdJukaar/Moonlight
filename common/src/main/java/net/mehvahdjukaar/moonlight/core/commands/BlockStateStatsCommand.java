@@ -3,8 +3,8 @@ package net.mehvahdjukaar.moonlight.core.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -13,7 +13,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.Block;
 
@@ -32,7 +31,7 @@ public class BlockStateStatsCommand implements Command<CommandSourceStack> {
     }
 
     @Override
-    public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public int run(CommandContext<CommandSourceStack> context) {
         Registry<Block> registry = BuiltInRegistries.BLOCK;
 
         // Prepare statistics
@@ -101,7 +100,7 @@ public class BlockStateStatsCommand implements Command<CommandSourceStack> {
                     });
 
         } catch (IOException e) {
-            e.printStackTrace();
+            Moonlight.LOGGER.error("Failed to write blockstate statistics to file: {}", e.getMessage());
         }
 
 
@@ -112,7 +111,7 @@ public class BlockStateStatsCommand implements Command<CommandSourceStack> {
         context.getSource().sendSuccess(() -> {
 
             // Append clickable file path
-            MutableComponent clickablePath = Component.literal(" ["+outputPath.toString()+"]")
+            MutableComponent clickablePath = Component.literal(" [" + outputPath.toString() + "]")
                     .withStyle(style -> style
                             .withColor(ChatFormatting.AQUA) // optional color
                     );

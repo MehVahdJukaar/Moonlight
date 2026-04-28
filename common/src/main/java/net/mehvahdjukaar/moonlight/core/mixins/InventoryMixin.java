@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.world.entity.player.Inventory;
@@ -29,8 +30,8 @@ public abstract class InventoryMixin {
 
 
     @Inject(method = "dropAll", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;",
-            shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void ml$fireDropEvent(CallbackInfo ci, Iterator var1, List<ItemStack> list, int i) {
+            shift = At.Shift.BEFORE))
+    public void ml$fireDropEvent(CallbackInfo ci, @Local List<ItemStack> list, @Local int i) {
         if (this.player.isDeadOrDying() || this.player.dead) {
             ItemStack stack = list.get(i);
             IDropItemOnDeathEvent event = IDropItemOnDeathEvent.create(stack, player, true);
@@ -43,8 +44,8 @@ public abstract class InventoryMixin {
     }
 
     @Inject(method = "dropAll", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;",
-            shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void ml$restoreNotDropped(CallbackInfo ci, Iterator var1, List<ItemStack> list, int i) {
+            shift = At.Shift.AFTER))
+    public void ml$restoreNotDropped(CallbackInfo ci, @Local List<ItemStack> list, @Local int i) {
         if (moonlight$toRestore != null) {
             list.set(i, moonlight$toRestore);
             moonlight$toRestore = null;

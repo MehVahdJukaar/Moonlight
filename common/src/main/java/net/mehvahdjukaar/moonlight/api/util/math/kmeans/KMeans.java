@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Credit to https://stackabuse.com/guide-to-k-means-clustering-with-java/
+ * Credit to <a href="https://stackabuse.com/guide-to-k-means-clustering-with-java/">...</a>
  */
 public class KMeans {
 

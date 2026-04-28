@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.misc;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 
 import java.util.function.Supplier;
 

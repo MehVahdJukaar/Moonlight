@@ -35,7 +35,6 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -138,13 +137,11 @@ public class ConfigHelper {
      * A config-reload-sensitive wrapper around a config field for a complex object
      **/
     public static class ConfigObject<T> implements Supplier<T> {
-        private @Nonnull
-        final ConfigValue<Object> value;
-        private @Nonnull
-        final Codec<T> codec;
-        private @Nonnull Object cachedObject;
-        private @Nonnull T parsedObject;
-        private final @NotNull Supplier<T> defaultObject;
+        private final ConfigValue<Object> value;
+        private final Codec<T> codec;
+        private Object cachedObject;
+        private T parsedObject;
+        private final Supplier<T> defaultObject;
 
         private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
             this.value = value;
@@ -255,7 +252,7 @@ public class ConfigHelper {
 
         @Override
         public Object createBoolean(boolean value) {
-            return Boolean.valueOf(value);
+            return value;
         }
 
         @Override
@@ -331,10 +328,9 @@ public class ConfigHelper {
 
         @Override
         public DataResult<Stream<Pair<Object, Object>>> getMapValues(Object input) {
-            if (!(input instanceof Config)) {
+            if (!(input instanceof Config config)) {
                 return DataResult.error(() -> "Not a Config: " + input);
             }
-            final Config config = (Config) input;
             return DataResult.success(config.entrySet().stream().map(entry -> Pair.of(entry.getKey(), entry.getValue())));
         }
 

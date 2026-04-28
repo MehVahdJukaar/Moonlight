@@ -1,11 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.map.decoration;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
@@ -17,8 +13,6 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Nameable;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -108,7 +102,7 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
         if (this.target.isPresent()) {
             if (target.get().test(reader.getBlockState(pos), RandomSource.create())) {
                 Optional<Component> name = this.getDisplayName();
-                if (!name.isPresent()) {
+                if (name.isEmpty()) {
                     BlockEntity be = reader.getBlockEntity(pos);
                     if (be instanceof Nameable n) {
                         // auto names named stuff

@@ -181,27 +181,7 @@ public class PendulumAnimation extends SwingAnimation {
         } else entityForwardMotion = entityPlaneVector.x;
 
 
-        double v = magnitude;
-
-
-        double f = (eMass * eMass + eMass);
-        double g = 2 * eMass * (-v - eMass * eRelVel);
-        double h = (eMass * eMass * eRelVel * eRelVel - eMass * eRelVel * eRelVel + 2 * v * eMass * eRelVel);
-
-        float delta = Mth.sqrt((float) (g * g - 4 * f * h));
-        double y1 = (-g + delta) / (2 * f);
-
-        double y2 = (-g - delta) / (2 * f);
-
-        double x1 = v + eMass * eRelVel - eMass * y1;
-
-        double x2 = v + eMass * eRelVel - eMass * y2;
-
-        double x;
-        //chooses the right one. one is always the same vector
-        if (Mth.abs((float) (x2 - magnitude)) < 0.0001) {
-            x = x1;
-        } else x = x2;
+        double x = getX(eMass, magnitude, eRelVel);
 
         float dW = (float) (x / radius) - angularVel;
 
@@ -222,6 +202,30 @@ public class PendulumAnimation extends SwingAnimation {
 
         //play sound
         return true;
+    }
+
+    private static double getX(double eMass, double magnitude, double eRelVel) {
+
+
+        double f = (eMass * eMass + eMass);
+        double g = 2 * eMass * (-magnitude - eMass * eRelVel);
+        double h = (eMass * eMass * eRelVel * eRelVel - eMass * eRelVel * eRelVel + 2 * magnitude * eMass * eRelVel);
+
+        float delta = Mth.sqrt((float) (g * g - 4 * f * h));
+        double y1 = (-g + delta) / (2 * f);
+
+        double y2 = (-g - delta) / (2 * f);
+
+        double x1 = magnitude + eMass * eRelVel - eMass * y1;
+
+        double x2 = magnitude + eMass * eRelVel - eMass * y2;
+
+        double x;
+        //chooses the right one. one is always the same vector
+        if (Mth.abs((float) (x2 - magnitude)) < 0.0001) {
+            x = x1;
+        } else x = x2;
+        return x;
     }
 
     @Override

@@ -88,7 +88,7 @@ public final class ColorSpaces {
 
     /**
      * Converts an RGB color value to HSL. Conversion formula
-     * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+     * adapted from <a href="http://en.wikipedia.org/wiki/HSL_color_space">...</a>.
      */
     public static HSLColor RGBtoHSL(RGBColor color) {
         float r = color.red();
@@ -123,7 +123,7 @@ public final class ColorSpaces {
 
     /**
      * Converts an HSL color value to RGB. Conversion formula
-     * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+     * adapted from <a href="http://en.wikipedia.org/wiki/HSL_color_space">...</a>.
      * Assumes h, s, and l are contained in the set [0, 1] and
      * returns r, g, and b in the set [0, 255].
      */
@@ -163,7 +163,7 @@ public final class ColorSpaces {
     }
 
     /**
-     * getValues from https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
+     * getValues from <a href="https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29">...</a>
      */
     public static XYZColor RGBtoXYZ(RGBColor color) {
         float red = color.red();
@@ -234,7 +234,7 @@ public final class ColorSpaces {
     }
 
     /**
-     * https://en.wikipedia.org/wiki/CIELAB_color_space#Cylindrical_model
+     * <a href="https://en.wikipedia.org/wiki/CIELAB_color_space#Cylindrical_model">...</a>
      */
     public static HCLColor LABtoHCL(LABColor color) {
         float l = color.luminance();
@@ -272,7 +272,7 @@ public final class ColorSpaces {
     private static final float VN = 0.4610f;
 
     /**
-     * https://en.wikipedia.org/wiki/CIELUV
+     * <a href="https://en.wikipedia.org/wiki/CIELUV">...</a>
      */
     public static LUVColor XYZtoLUV(XYZColor color) {
         float X = color.x();

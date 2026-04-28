@@ -29,63 +29,69 @@ public class RecipeConverter {
     private <R, T extends BlockType> R convert(R recipe, T originalMat, T destinationMat, Item unlockedBy, String id) throws IllegalAccessException {
         for (var f : fieldToConvert) {
             Object value = f.get(recipe);
-            if (value instanceof List<?> list) {
-                boolean oneChanged = false;
-                ListIterator<Object> iterator = ((List<Object>) list).listIterator();
-                while (iterator.hasNext()) {
-                    Object currentValue = iterator.next();
-                    Object newValue = tryConverting(originalMat, destinationMat, currentValue);
-                    if (newValue != null) {
-                        oneChanged = true;
-                        iterator.set(newValue);
+            switch (value) {
+                case List<?> list -> {
+                    boolean oneChanged = false;
+                    ListIterator<Object> iterator = ((List<Object>) list).listIterator();
+                    while (iterator.hasNext()) {
+                        Object currentValue = iterator.next();
+                        Object newValue = tryConverting(originalMat, destinationMat, currentValue);
+                        if (newValue != null) {
+                            oneChanged = true;
+                            iterator.set(newValue);
+                        }
+                    }
+                    if (!oneChanged) {
+                        throw new RuntimeException(String.format("Failed to convert some fields for recipe %s from type %s to type %s", recipe, originalMat, destinationMat));
                     }
                 }
-                if (!oneChanged) {
-                    throw new RuntimeException(String.format("Failed to convert some fields for recipe %s from type %s to type %s", recipe, originalMat, destinationMat));
-                }
-            } else if (value instanceof Map<?, ?> map) {
-                Map<Object, Object> omap = (Map<Object, Object>) map;
-                boolean oneChanged = false;
-                for (Map.Entry<Object, Object> entry : new HashSet<>(omap.entrySet())) {
-                    Object currentKey = entry.getKey();
-                    Object currentValue = entry.getValue();
+                case Map<?, ?> map -> {
+                    Map<Object, Object> omap = (Map<Object, Object>) map;
+                    boolean oneChanged = false;
+                    for (Map.Entry<Object, Object> entry : new HashSet<>(omap.entrySet())) {
+                        Object currentKey = entry.getKey();
+                        Object currentValue = entry.getValue();
 
-                    Object newKey = tryConverting(originalMat, destinationMat, currentKey);
-                    Object newValue = tryConverting(originalMat, destinationMat, currentValue);
+                        Object newKey = tryConverting(originalMat, destinationMat, currentKey);
+                        Object newValue = tryConverting(originalMat, destinationMat, currentValue);
 
-                    if (newKey != null || newValue != null) {
-                        omap.remove(currentKey);
-                        oneChanged = true;
+                        if (newKey != null || newValue != null) {
+                            omap.remove(currentKey);
+                            oneChanged = true;
+                        }
+
+                        if (newKey != null) {
+                            omap.put(newKey, newValue != null ? newValue : currentValue);
+                        } else if (newValue != null) {
+                            entry.setValue(newValue);
+                        }
                     }
-
-                    if (newKey != null) {
-                        omap.put(newKey, newValue != null ? newValue : currentValue);
-                    } else if (newValue != null) {
-                        entry.setValue(newValue);
+                    if (!oneChanged) {
+                        throw new RuntimeException(String.format("Failed to convert some fields for recipe %s from type %s to type %s", recipe, originalMat, destinationMat));
                     }
                 }
-                if (!oneChanged) {
-                    throw new RuntimeException(String.format("Failed to convert some fields for recipe %s from type %s to type %s", recipe, originalMat, destinationMat));
-                }
-            } else if (value instanceof Record) {
-                var innerConv = getOrCreateConverter(value.getClass());
-                if (innerConv != null) {
-                    innerConv.convert(value, originalMat, destinationMat, unlockedBy, id);
-                }
-            } else if (value instanceof Optional<?> opt) {
-                if (opt.isPresent()) {
-                    value = opt.get();
+                case Record record -> {
                     var innerConv = getOrCreateConverter(value.getClass());
                     if (innerConv != null) {
-                        f.setAccessible(true);
-                        f.set(recipe, Optional.of(innerConv.convert(value, originalMat, destinationMat, unlockedBy, id)));
+                        innerConv.convert(value, originalMat, destinationMat, unlockedBy, id);
                     }
                 }
-            } else {
-                Object newValue = tryConverting(originalMat, destinationMat, value);
-                if (newValue == null)
-                    throw new RuntimeException(String.format("Failed to convert item %s for recipe %s from type %s to type %s", value, recipe, originalMat, destinationMat));
-                f.set(recipe, newValue);
+                case Optional<?> opt -> {
+                    if (opt.isPresent()) {
+                        value = opt.get();
+                        var innerConv = getOrCreateConverter(value.getClass());
+                        if (innerConv != null) {
+                            f.setAccessible(true);
+                            f.set(recipe, Optional.of(innerConv.convert(value, originalMat, destinationMat, unlockedBy, id)));
+                        }
+                    }
+                }
+                case null, default -> {
+                    Object newValue = tryConverting(originalMat, destinationMat, value);
+                    if (newValue == null)
+                        throw new RuntimeException(String.format("Failed to convert item %s for recipe %s from type %s to type %s", value, recipe, originalMat, destinationMat));
+                    f.set(recipe, newValue);
+                }
             }
         }
         return recipe;
@@ -130,7 +136,7 @@ public class RecipeConverter {
         try {
             return conv.convert(recipe, originalMat, destinationMat, unlockItem, id);
         } catch (Exception e) {
-            Moonlight.LOGGER.error("Recipe conversion error: " + e.getMessage());
+            Moonlight.LOGGER.error("Recipe conversion error: {}", e.getMessage());
         }
         return null;
     }

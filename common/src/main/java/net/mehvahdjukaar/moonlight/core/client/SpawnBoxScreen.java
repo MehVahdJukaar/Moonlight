@@ -2,8 +2,8 @@ package net.mehvahdjukaar.moonlight.core.client;
 
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
-import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxBlockEntity;
 import net.mehvahdjukaar.moonlight.core.network.ServerBoundUpdateBoxBlockTileMessage;
+import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;

@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.map.decoration;
 
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -35,10 +34,10 @@ public class MLMapDecoration {
     );
 
     private final Holder<MLMapDecorationType<?, ?>> type;
-    protected Component displayName;
-    protected byte x;
-    protected byte y;
-    protected byte rot;
+    protected final Component displayName;
+    protected final byte x;
+    protected final byte y;
+    protected final byte rot;
 
     public MLMapDecoration(Holder<MLMapDecorationType<?, ?>> type,
                            byte x, byte y, byte rot, Optional<Component> displayName) {

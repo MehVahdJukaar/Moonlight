@@ -15,6 +15,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class BakedQuadBuilderImpl implements BakedQuadBuilder {
@@ -33,14 +34,14 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     private boolean autoDirection = false;
 
     private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transform, Consumer<BakedQuad> quadConsumer) {
-        MeshBuilder meshBuilder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
+        MeshBuilder meshBuilder = Objects.requireNonNull(RendererAccess.INSTANCE.getRenderer()).meshBuilder();
         this.inner = meshBuilder.getEmitter();
         this.globalTransform = transform; //new Matrix4f(new Matrix3f(transform));
         this.sprite = sprite;
         this.quadConsumer = quadConsumer;
         this.inner.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
         this.normalTransf = transform == null ? null :
-                new Matrix3f(transform).invert().transpose(); //forge uses this in quad transform. idk how it works
+                new Matrix3f(transform).invert().transpose(); //forge uses this in quad transform. IDK how it works
     }
 
     @Override
@@ -134,7 +135,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     @Override
     public BakedQuadBuilderImpl lightEmission(int lightLevel) {
-        inner.material(RendererAccess.INSTANCE.getRenderer().materialFinder().emissive(true).find());
+        inner.material(Objects.requireNonNull(RendererAccess.INSTANCE.getRenderer()).materialFinder().emissive(true).find());
         return this;
     }
 
@@ -152,7 +153,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     }
 
     public BakedQuadBuilder fromVanilla(BakedQuad quad) {
-        inner.fromVanilla(quad, RendererAccess.INSTANCE.getRenderer().materialFinder().find(), quad.getDirection());
+        inner.fromVanilla(quad, Objects.requireNonNull(RendererAccess.INSTANCE.getRenderer()).materialFinder().find(), quad.getDirection());
         vertexIndex = 3;
         return this;
     }

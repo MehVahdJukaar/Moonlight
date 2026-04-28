@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.util.math.colors;
 
-import com.mojang.serialization.Codec;
-import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.util.Mth;
 
 import java.util.List;
@@ -48,13 +46,14 @@ public abstract class BaseColor<T extends BaseColor<T>> {
      */
     public static <C extends BaseColor<C>> C mixColors(List<C> colors) {
         int size = colors.size();
-        C mixed = colors.get(0);
+        C mixed = colors.getFirst();
         for (int i = 1; i < size; i++) {
             mixed = mixed.mixWith(colors.get(i), 1 / (i + 1f));
         }
         return mixed;
     }
 
+    @SafeVarargs
     public static <C extends BaseColor<C>> C mixColors(C... colors) {
         return mixColors(List.of(colors));
     }
@@ -99,8 +98,8 @@ public abstract class BaseColor<T extends BaseColor<T>> {
         float y = 0;
         for (float a : angles) {
             assert a >= 0 && a <= 1;
-            x += Math.cos((float) (a * Math.PI * 2));
-            y += Math.sin((float) (a * Math.PI * 2));
+            x += Mth.cos((float) (a * Math.PI * 2));
+            y += Mth.sin((float) (a * Math.PI * 2));
         }
         double a = (Math.atan2(y, x) / (Math.PI * 2));
         return (float) a;

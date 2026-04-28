@@ -27,7 +27,7 @@ public class LenientHolderSetCodec<E> implements Codec<HolderSet<E>> {
         return disallowInline
                 ? codec
                 : Codec.either(codec, holderCodec)
-                .xmap(either -> either.map(list -> list, List::of), list -> list.size() == 1 ? Either.right(list.get(0)) : Either.left(list));
+                .xmap(either -> either.map(list -> list, List::of), list -> list.size() == 1 ? Either.right(list.getFirst()) : Either.left(list));
     }
 
     public static <E> Codec<HolderSet<E>> create(ResourceKey<? extends Registry<E>> registryKey, Codec<Holder<E>> holderCodec, boolean disallowInline) {

@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
-import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;

@@ -23,7 +23,6 @@
   "commands.moonlight.goal_selector.remove": "Renderizadores de Depuração do Seletor de Objetivos Desativados para %s",
   "commands.moonlight.goal_selector.on": "Renderizadores de Depuração do Seletor de Objetivos Ativados",
   "commands.moonlight.goal_selector.off": "Renderizadores de Depuração do Seletor de Objetivos Desativados",
-  "commands.moonlight.neighbor_updates": "Renderizadores de Depuração de Atualizações de Vizinhos: %s",
   "commands.moonlight.structures.add": "Renderizadores de Depuração de Limites de Estruturas Ativados para %s",
   "commands.moonlight.structures.remove": "Renderizadores de Depuração de Limites de Estruturas Desativados para %s",
   "commands.moonlight.structures.on": "Renderizadores de Depuração de Limites de Estruturas Ativados",

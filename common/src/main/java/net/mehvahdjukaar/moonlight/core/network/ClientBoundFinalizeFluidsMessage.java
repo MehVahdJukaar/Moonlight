@@ -10,6 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
+import java.util.Objects;
+
 //after data load
 public class ClientBoundFinalizeFluidsMessage implements Message {
 
@@ -30,7 +32,7 @@ public class ClientBoundFinalizeFluidsMessage implements Message {
     @ClientOnly
     @Override
     public void handle(Context context) {
-        SoftFluidInternal.postInitClient(Minecraft.getInstance().level.registryAccess());
+        SoftFluidInternal.postInitClient(Objects.requireNonNull(Minecraft.getInstance().level).registryAccess());
         //just incase
         DynamicHolder.clearCache();
         HolderRef.clearCache();

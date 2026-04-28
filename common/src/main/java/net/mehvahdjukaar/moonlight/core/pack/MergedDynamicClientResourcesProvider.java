@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.core.pack;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
-import net.mehvahdjukaar.moonlight.api.resources.pack.IEditablePackResources;
 import net.mehvahdjukaar.moonlight.api.resources.pack.SimplePackProvider;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.SharedConstants;
@@ -20,7 +19,6 @@ import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -106,7 +104,7 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
     }
 
     @Override
-    public @Nullable <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) throws IOException {
+    public @Nullable <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
         if (metadata == null) {
             this.metadata = new PackMetadataSection(Component
                     .translatable("message.moonlight.merged_pack.description", modNamespaces.size()),

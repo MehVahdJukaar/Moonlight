@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.misc.fake_level;
 
 import net.mehvahdjukaar.candlelight.api.VirtualOverride;
-import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -58,8 +57,6 @@ import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
-import static net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager.INSTANCES;
-
 // this is always considered to be client side... has to be because places like to hardcase ti ServerLevel
 public class FakeLevel extends Level {
 
@@ -80,7 +77,7 @@ public class FakeLevel extends Level {
 
     protected FakeLevel(boolean clientside, String id, RegistryAccess registryAccess) {
         super(new DummyData(),
-                ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(id)),
+                ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(id)),
                 registryAccess,
                 registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
                 () -> InactiveProfiler.INSTANCE,
@@ -224,7 +221,7 @@ public class FakeLevel extends Level {
 
     @Override
     public PotionBrewing potionBrewing() {
-        return null;
+        throw new UnsupportedOperationException("This level does not support potion brewing. Sorry...");
     }
 
     @Override
@@ -311,7 +308,7 @@ public class FakeLevel extends Level {
 
     protected static class DummyData implements WritableLevelData {
 
-        GameRules gameRules = new GameRules();
+        final GameRules gameRules = new GameRules();
 
         @Override
         public BlockPos getSpawnPos() {

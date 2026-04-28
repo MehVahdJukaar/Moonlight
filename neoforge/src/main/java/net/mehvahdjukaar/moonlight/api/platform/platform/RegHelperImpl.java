@@ -148,6 +148,9 @@ public class RegHelperImpl {
             return registryObject.canSerializeIn(owner);
         }
 
+
+
+        @SuppressWarnings("all")
         @Override
         public boolean equals(Object obj) {
             return registryObject.equals(obj);
@@ -393,7 +396,7 @@ public class RegHelperImpl {
 
         public void remove(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target) {
             if (event.getTabKey() != tab) return;
-            //TODO: add when neo updates
+            //TODO: add when neoforge updates
             //event.remove(target, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
         }
 

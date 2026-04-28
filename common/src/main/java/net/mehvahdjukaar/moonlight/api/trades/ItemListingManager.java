@@ -99,7 +99,6 @@ public class ItemListingManager extends SimpleJsonResourceReloadListener {
             if (entityType.isPresent()) {
                 ModItemListing trade = parseOrThrow(json, id, ops).orElse(null);
                 if (trade == null || (trade instanceof NoOpListing)) {
-                    continue;
                 } else if (trade instanceof RemoveNonDataListingListing rl) {
                     toRemoveSpecial.add(Pair.of(rl, entityType.get()));
                 } else {

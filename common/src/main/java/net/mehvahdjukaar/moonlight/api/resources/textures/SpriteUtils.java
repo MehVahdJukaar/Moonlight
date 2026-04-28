@@ -8,14 +8,11 @@ import net.mehvahdjukaar.moonlight.api.util.math.kmeans.KMeans;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.IntUnaryOperator;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 public final class SpriteUtils {
 
@@ -48,13 +45,13 @@ public final class SpriteUtils {
         // read data
         Palette p = Palette.fromImage(TextureImage.of(image), null, 0);
 
-        if (p.size() == 0) return new RGBColor(-1);
+        if (p.isEmpty()) return new RGBColor(-1);
         DataSet<DataSet.ColorPoint> data = DataSet.fromPalette(p);
 
         // cluster
         KMeans.kMeans(data, 1);
 
-        return data.getLastCentroids().get(0).cast().getColor().rgb();
+        return data.getLastCentroids().getFirst().cast().getColor().rgb();
     }
 
     //TODO: maybe use HCL here
@@ -105,7 +102,7 @@ public final class SpriteUtils {
      * @param planksTexture plank texture of the desired wood type
      */
     public static Palette extrapolateWoodItemPalette(TextureImage planksTexture) {
-        Palette palette = Palette.fromAnimatedImage(planksTexture, null).get(0);
+        Palette palette = Palette.fromAnimatedImage(planksTexture, null).getFirst();
         extrapolateWoodItemPalette(palette);
         return palette;
     }
@@ -145,7 +142,7 @@ public final class SpriteUtils {
         // read data
         Palette p = Palette.fromImage(TextureImage.of(image), null, 0);
 
-        if (p.size() == 0) return;
+        if (p.isEmpty()) return;
         DataSet<DataSet.ColorPoint> data = DataSet.fromPalette(p);
 
         int size = sizeFn.applyAsInt(p.size());

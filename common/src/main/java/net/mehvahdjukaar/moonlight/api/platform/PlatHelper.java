@@ -128,8 +128,7 @@ public class PlatHelper {
     public static boolean isAFakePlayer(Player player) {
         if (player instanceof FakeGenericPlayer) return true;
         if (PlatHelper.getPhysicalSide().isClient() && player instanceof FakeLocalPlayer) return true;
-        if (player instanceof ServerPlayer sp && isFakePlayer(sp)) return true;
-        return false;
+        return player instanceof ServerPlayer sp && isFakePlayer(sp);
     }
 
     @PlatformImpl

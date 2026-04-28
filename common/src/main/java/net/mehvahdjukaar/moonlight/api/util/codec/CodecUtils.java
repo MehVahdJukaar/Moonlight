@@ -19,7 +19,6 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
@@ -145,7 +144,7 @@ public class CodecUtils {
     }
 
     public static final Codec<Vector2f> VEC2F = Codec.FLOAT.listOf()
-            .comapFlatMap((list) -> Util.fixedSize(list, 2).map((listx) -> new Vector2f(listx.get(0), listx.get(1))), (vector3f) -> List.of(vector3f.x(), vector3f.y()));
+            .comapFlatMap((list) -> Util.fixedSize(list, 2).map((listx) -> new Vector2f(listx.getFirst(), listx.get(1))), (vector3f) -> List.of(vector3f.x(), vector3f.y()));
 
     public static final Codec<ItemStack> ITEM_OR_STACK = Codec.withAlternative(ItemStack.SINGLE_ITEM_CODEC, BuiltInRegistries.ITEM.byNameCodec(),
             Item::getDefaultInstance);

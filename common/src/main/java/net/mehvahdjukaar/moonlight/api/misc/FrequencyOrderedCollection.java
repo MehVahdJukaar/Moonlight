@@ -75,7 +75,7 @@ public class FrequencyOrderedCollection<T> implements Collection<T> {
     // Get the element with the highest frequency
     public T getFirst() {
         if (!sortedEntries.isEmpty()) {
-            return sortedEntries.get(0).getKey();
+            return sortedEntries.getFirst().getKey();
         }
         return null; // Return null if the collection is empty
     }
@@ -83,7 +83,7 @@ public class FrequencyOrderedCollection<T> implements Collection<T> {
     // Get the element with the lowest frequency
     public T getLast() {
         if (!sortedEntries.isEmpty()) {
-            return sortedEntries.get(sortedEntries.size() - 1).getKey();
+            return sortedEntries.getLast().getKey();
         }
         return null; // Return null if the collection is empty
     }

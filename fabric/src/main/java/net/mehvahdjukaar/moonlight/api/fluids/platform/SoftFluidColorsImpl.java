@@ -12,6 +12,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class SoftFluidColorsImpl {
 
     //grabs world/ fluid stack dependent tint color if fluid has associated forge fluid. overrides normal tint color
@@ -34,7 +36,7 @@ public class SoftFluidColorsImpl {
         Fluid f = stack.getVanillaFluid().value();
         if (f != Fluids.EMPTY) {
             var opt = FluidRenderHandlerRegistry.INSTANCE.get(f);
-            return opt.getFluidColor(world, pos, f.defaultFluidState());
+            return Objects.requireNonNull(opt).getFluidColor(world, pos, f.defaultFluidState());
         }
         return specialColor;
     }

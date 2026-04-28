@@ -6,11 +6,6 @@ public class ModelDataKey<T> {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj == this;
-    }
-
-    @Override
     public int hashCode() {
         return System.identityHashCode(this);
     }

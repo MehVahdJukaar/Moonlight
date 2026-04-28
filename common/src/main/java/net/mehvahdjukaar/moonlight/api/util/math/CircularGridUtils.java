@@ -1,14 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
-import net.mehvahdjukaar.moonlight.api.util.math.Vec2i;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Streaming ring generator: emits integer lattice points (x,y) for the annulus
@@ -40,7 +33,7 @@ public final class CircularGridUtils {
             return;
         }
 
-        final long Rl = (long) R;
+        final long Rl = R;
         final long outerBound = (Rl + 1L) * (Rl + 1L) - 1L; // inclusive upper squared-dist
         final long innerBound = Rl * Rl - 1L;              // squared-dist <= innerBound is strictly inside
 
@@ -139,7 +132,7 @@ public final class CircularGridUtils {
                 return;
             }
 
-            this.Rl = (long) R;
+            this.Rl = R;
             this.outerBound = (Rl + 1L) * (Rl + 1L) - 1L;
             this.innerBound = Rl * Rl - 1L;
 

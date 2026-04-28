@@ -164,15 +164,15 @@ public class PlatHelperImpl {
     }
 
     public static Path getModFilePath(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId).get().getRootPaths().get(0);
+        return FabricLoader.getInstance().getModContainer(modId).orElseThrow().getRootPaths().getFirst();
     }
 
     public static String getModPageUrl(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId).get().getMetadata().getContact().get("homepage").orElse(null);
+        return FabricLoader.getInstance().getModContainer(modId).orElseThrow().getMetadata().getContact().get("homepage").orElse(null);
     }
 
     public static String getModName(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId).get().getMetadata().getName();
+        return FabricLoader.getInstance().getModContainer(modId).orElseThrow().getMetadata().getName();
     }
 
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {

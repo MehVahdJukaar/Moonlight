@@ -52,9 +52,6 @@ public class SwayingAnimation extends SwingAnimation {
 
         this.angle = a * Mth.cos((float) ((timer / maxPeriod) - k));
         this.angle *= this.inv ? -1 : 1;
-        // this.angle = 90*(float)
-        // Math.cos((float)counter/40f)/((float)this.counter/20f);;
-
     }
 
     @Override

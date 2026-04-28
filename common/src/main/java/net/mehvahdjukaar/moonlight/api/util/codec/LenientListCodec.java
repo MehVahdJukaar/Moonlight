@@ -33,9 +33,6 @@ public record LenientListCodec<E>(Codec<E> elementCodec) implements Codec<List<E
 
                     listOps.accept(value -> {
                         DataResult<Pair<E, T>> elementResult = elementCodec.decode(ops, value);
-                        if (elementResult.isError() && PlatHelper.isDev()) {
-                            //Moonlight.LOGGER.warn("[LL] Failed to decode list element: {}", elementResult.error());
-                        }
                         elementResult.map(p -> elements.add(p.getFirst()));
                     });
                     return DataResult.success(Pair.of(List.copyOf(elements), input), Lifecycle.stable());

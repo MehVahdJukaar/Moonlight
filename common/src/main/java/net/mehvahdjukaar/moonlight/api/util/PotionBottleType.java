@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.util;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
-import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.*;

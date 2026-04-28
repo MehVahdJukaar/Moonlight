@@ -249,14 +249,10 @@ public class ResourceSink {
 
     public void addTextureUnlessPresent(ResourceManager manager, ResourceLocation res, ThrowingSupplier<TextureImage> textureSupplier) {
         if (!alreadyHasTextureAtLocation(manager, res)) {
-            TextureImage textureImage = null;
-            try {
-                textureImage = textureSupplier.get();
+            try (TextureImage textureImage = textureSupplier.get()) {
                 this.addTexture(res, textureImage);
             } catch (Exception e) {
                 Moonlight.LOGGER.error("Failed to generate texture {}: {}", res, e);
-            } finally {
-                if (textureImage != null) textureImage.close();
             }
         }
     }

@@ -54,7 +54,7 @@ public class ClientConfigs {
     public enum ShadeFix {
         FALSE,
         NO_GUI,
-        TRUE;
+        TRUE
     }
 
     public enum TooltipMode {

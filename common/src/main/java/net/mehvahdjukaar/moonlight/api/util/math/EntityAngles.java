@@ -15,7 +15,7 @@ import java.util.List;
 public record EntityAngles(float pitch, float yaw) {
 
     private static final Codec<Vector2f> VEC2 = Codec.FLOAT.listOf()
-            .comapFlatMap((list) -> Util.fixedSize(list, 2).map((listx) -> new Vector2f(listx.get(0), listx.get(1))), (vector3f) -> List.of(vector3f.x(), vector3f.y()));
+            .comapFlatMap((list) -> Util.fixedSize(list, 2).map((listx) -> new Vector2f(listx.getFirst(), listx.get(1))), (vector3f) -> List.of(vector3f.x(), vector3f.y()));
 
     private static final Codec<EntityAngles> CODEC = VEC2.xmap(
             vector2f -> new EntityAngles(vector2f.x, vector2f.y),

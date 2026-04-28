@@ -4,8 +4,6 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
-import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
-import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;

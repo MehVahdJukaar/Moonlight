@@ -46,7 +46,7 @@ public class RPUtils {
 
             return stringWriter.toString();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
     }
 
@@ -296,7 +296,6 @@ public class RPUtils {
                 JsonArray overrides;
                 if (json.has("overrides")) {
                     overrides = json.getAsJsonArray("overrides");
-                    ;
                 } else overrides = new JsonArray();
 
                 modelConsumer.accept(ov -> overrides.add(serializeModelOverride(ov)));

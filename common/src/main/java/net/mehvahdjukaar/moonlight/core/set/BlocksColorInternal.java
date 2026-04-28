@@ -309,7 +309,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
         private final Map<DyeColor, T> colorsToObj = new HashMap<>();
 
         private static <T> ColorSetBuilder<T> from(ColoredSet<T> other) {
-            ColorSetBuilder<T> b = new ColorSetBuilder<T>();
+            ColorSetBuilder<T> b = new ColorSetBuilder<>();
             b.colorsToObj.putAll(other.colorsToObj);
             return b;
         }

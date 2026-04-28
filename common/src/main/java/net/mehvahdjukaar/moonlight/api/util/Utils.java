@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.block.IOneUserInteractable;
 import net.mehvahdjukaar.moonlight.api.client.IScreenProvider;
@@ -97,23 +96,27 @@ public class Utils {
         if (!Utils.mayPerformBlockAction(player, pos, stack)) {
             return false;
         }
-        if (be instanceof IOneUserInteractable ci && !ci.canBeUsedBy(pos, player)) {
-            return false;
-        }
-        if (be instanceof IScreenProvider sp) {
-            if (be instanceof IOneUserInteractable ci) {
-                ci.setCurrentUser(player.getUUID());
+        switch (be) {
+            case IOneUserInteractable ci when !ci.canBeUsedBy(pos, player) -> {
+                return false;
             }
-            sp.sendOpenGuiPacket(player, hitFace, hitPos);
-            return false;
-        }
-        if (be instanceof MenuProvider mp) {
-            if (be instanceof IOneUserInteractable ci) {
-                ci.setCurrentUser(player.getUUID());
+            case IScreenProvider sp -> {
+                if (be instanceof IOneUserInteractable ci) {
+                    ci.setCurrentUser(player.getUUID());
+                }
+                sp.sendOpenGuiPacket(player, hitFace, hitPos);
+                return false;
             }
-            TileOrEntityTarget target = TileOrEntityTarget.of(be);
-            PlatHelper.openCustomMenu(player, mp, target::write);
-            return true;
+            case MenuProvider mp -> {
+                if (be instanceof IOneUserInteractable ci) {
+                    ci.setCurrentUser(player.getUUID());
+                }
+                TileOrEntityTarget target = TileOrEntityTarget.of(be);
+                PlatHelper.openCustomMenu(player, mp, target::write);
+                return true;
+            }
+            default -> {
+            }
         }
         return false;
     }
@@ -192,7 +195,7 @@ public class Utils {
     }
 
     public static ResourceLocation getId(Holder<?> object) {
-        return object.unwrapKey().get().location();
+        return object.unwrapKey().orElseThrow().location();
     }
 
     public static ResourceLocation getID(@NotNull Block object) {

@@ -4,6 +4,7 @@
   "package": "net.mehvahdjukaar.moonlight.core.mixins.platform",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "BeeGoalMixin",
     "BlockModelAccessor",
     "BlockModelDeserializerMixin",
     "BlockModelMixin",
@@ -25,7 +26,6 @@
     "TextureAtlasSpriteMixin"
   ],
   "mixins": [
-    "ConditionsHackMixin",
     "CreateWorldScreenMixin",
     "FireBlockMixin",
     "MappedRegistryAccessor",

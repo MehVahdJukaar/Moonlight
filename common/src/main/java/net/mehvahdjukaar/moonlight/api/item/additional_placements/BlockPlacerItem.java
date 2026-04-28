@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.item.additional_placements;
 
+import net.mehvahdjukaar.candlelight.api.VirtualOverride;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
-import net.mehvahdjukaar.moonlight.api.misc.ForgeOverride;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -71,7 +71,7 @@ public final class BlockPlacerItem extends BlockItem {
     }
 
     @Nullable
-    @ForgeOverride
+    @VirtualOverride("neoforge")
     public FoodProperties getFoodProperties(ItemStack stack, @Nullable LivingEntity entity) {
         return mimicFood;
     }

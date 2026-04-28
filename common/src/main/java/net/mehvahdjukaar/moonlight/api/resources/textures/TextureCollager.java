@@ -1,10 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
-import net.mehvahdjukaar.moonlight.api.resources.textures.Palette;
-import net.mehvahdjukaar.moonlight.api.resources.textures.PaletteColor;
-import net.mehvahdjukaar.moonlight.api.resources.textures.Sampler2D;
-import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.world.level.block.Rotation;
 import org.jetbrains.annotations.Nullable;
 

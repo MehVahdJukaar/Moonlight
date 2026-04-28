@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.MoonlightTags;
 import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.component.Tool;

@@ -280,8 +280,7 @@ public class DispenserHelper {
                 Direction direction = source.state().getValue(DispenserBlock.FACING);
                 BlockPos blockpos = source.pos().relative(direction);
                 // Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
-                Direction direction1 = direction;
-                InteractionResult result = bi.place(new DirectionalPlaceContext(source.level(), blockpos, direction, stack, direction1));
+                InteractionResult result = bi.place(new DirectionalPlaceContext(source.level(), blockpos, direction, stack, direction));
                 this.setSuccess(result.consumesAction());
             }
             return stack;

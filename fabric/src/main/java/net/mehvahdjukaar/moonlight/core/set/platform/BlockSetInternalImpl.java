@@ -22,8 +22,8 @@ public class BlockSetInternalImpl {
     private static final Map<Registry<?>, Map<Class<? extends BlockType>, LateBTRegQueue<?, ?>>> QUEUES_OLD = new HashMap<>();
     private static final Map<Registry<?>, LateRegQueue<?>> QUEUES = new HashMap<>();
 
-    public static <E> void addDynamicRegistration(String modId, Consumer<Registrator<E>> registrationFunction, Registry<E> registry) {
-        LateRegQueue<E> r = (LateRegQueue<E>) QUEUES.computeIfAbsent(registry, b -> new LateRegQueue<>(registry));
+    public static <T> void addDynamicRegistration(String modId, Consumer<Registrator<T>> registrationFunction, Registry<T> registry) {
+        LateRegQueue<T> r = (LateRegQueue<T>) QUEUES.computeIfAbsent(registry, b -> new LateRegQueue<>(registry));
         r.add(registrationFunction);
     }
 

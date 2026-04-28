@@ -33,7 +33,7 @@ public class SoftFluidImpl {
                 var tint = prop.getTintColor(s);
                 //accounts for some mods that don't respect getStillTexture contract
                 if (still == null || flowing == null) {
-                    Moonlight.LOGGER.warn("Fluid " + useTexturesFrom + " returned null on its textures. Its soft fluid might not render well");
+                    Moonlight.LOGGER.warn("Fluid {} returned null on its textures. Its soft fluid might not render well", useTexturesFrom);
                     return null;
                 }
                 return Triplet.of(still, flowing, tint);

@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.client.platform.IFabricMenuType;
 import net.mehvahdjukaar.moonlight.api.misc.IAttachmentType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
@@ -138,7 +139,8 @@ public class RegHelperImpl {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends T> RegSupplier<E> register(ResourceLocation name, Supplier<E> supplier, ResourceKey<Registry<T>> reg) {
+    public static <T, E extends T> RegSupplier<E> register(
+            ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
         if (supplier == null) {
             throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
         }
@@ -163,7 +165,7 @@ public class RegHelperImpl {
         return (RegSupplier<E>) registry.add((Supplier<T>) supplier, name);
     }
 
-    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<Registry<T>> reg) {
+    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<?  extends Registry<T>> reg) {
         RegistryQueue.RegEntryHolder<T> entry = new RegistryQueue.RegEntryHolder<>(name,(Supplier<T>) supplier, reg);
         entry.initialize(true);
         return (RegSupplier<E>) entry;
@@ -384,9 +386,8 @@ public class RegHelperImpl {
                     var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
                     //add vanilla states if they are mutable
                     Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
-                    Set<BlockState> newStates = new HashSet<>();
                     matchingStates.addAll(states);
-                    newStates.addAll(states);
+                    Set<BlockState> newStates = new HashSet<>(states);
                     ((PoiTypeAccessor) (Object) beehivePOI.value())
                             .setMatchingStates(matchingStates);
                     PoiTypes.registerBlockStates(beehivePOI, newStates);

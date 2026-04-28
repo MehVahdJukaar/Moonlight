@@ -1,8 +1,6 @@
 package net.mehvahdjukaar.moonlight.api;
 
-import net.mehvahdjukaar.moonlight.api.misc.SearchTrie;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

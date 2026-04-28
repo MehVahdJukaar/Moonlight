@@ -129,7 +129,7 @@ public class RegistryQueue<T> {
 
         @Override
         public boolean is(Predicate<ResourceKey<T>> predicate) {
-            return predicate.test((ResourceKey<T>) this.id);
+            return predicate.test(this.id);
         }
 
         @Override
@@ -152,12 +152,12 @@ public class RegistryQueue<T> {
 
         @Override
         public Either<ResourceKey<T>, T> unwrap() {
-            return Either.left((ResourceKey<T>) this.id);
+            return Either.left(this.id);
         }
 
         @Override
         public Optional<ResourceKey<T>> unwrapKey() {
-            return Optional.of((ResourceKey<T>) this.id);
+            return Optional.of(this.id);
         }
 
         @Override

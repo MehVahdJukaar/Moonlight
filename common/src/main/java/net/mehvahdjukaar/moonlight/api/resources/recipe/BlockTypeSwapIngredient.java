@@ -2,8 +2,8 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.*;
-import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import io.netty.handler.codec.DecoderException;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;

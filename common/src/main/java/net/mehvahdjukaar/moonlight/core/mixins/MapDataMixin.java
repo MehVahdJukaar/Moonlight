@@ -14,7 +14,6 @@ import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -67,7 +66,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     private List<MapItemSavedData.HoldingPlayer> carriedBy;
     //new decorations (stuff that gets rendered)
     @Unique
-    public Map<String, MLMapDecoration> moonlight$customDecorations = Maps.newLinkedHashMap();
+    public final Map<String, MLMapDecoration> moonlight$customDecorations = Maps.newLinkedHashMap();
 
     //world markers (stuff that gets saved)
     @Unique

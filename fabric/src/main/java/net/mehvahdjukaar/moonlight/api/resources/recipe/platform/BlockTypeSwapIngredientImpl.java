@@ -28,7 +28,7 @@ public class BlockTypeSwapIngredientImpl<T extends BlockType> extends BlockTypeS
     }
 
 
-    public static CustomIngredientSerializer<BlockTypeSwapIngredientImpl<?>> SERIALIZER =
+    public static final CustomIngredientSerializer<BlockTypeSwapIngredientImpl<?>> SERIALIZER =
             new CustomIngredientSerializer<>() {
 
                 @Override

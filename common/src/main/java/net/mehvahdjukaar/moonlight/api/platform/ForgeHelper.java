@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
-import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.RegistryOps;
@@ -37,9 +36,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
-import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Contract;
@@ -196,11 +193,6 @@ public class ForgeHelper {
     }
 
     @PlatformImpl
-    public static void setPoolName(LootPool.Builder pool, String name) {
-        throw new AssertionError();
-    }
-
-    @PlatformImpl
     public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, @org.jetbrains.annotations.Nullable AbstractMinecart o) {
         throw new AssertionError();
     }
@@ -259,7 +251,7 @@ public class ForgeHelper {
 
     @PlatformImpl
     public static int getLightEmission(BlockState state, Level level, BlockPos pos) {
-        throw new ArrayStoreException();
+        throw new AssertionError();
     }
 
     @PlatformImpl
@@ -276,7 +268,7 @@ public class ForgeHelper {
 
     @PlatformImpl
     public static void registerDefaultContainerCap(BlockEntityType<? extends Container> container) {
-
+        throw new AssertionError();
     }
 
     @PlatformImpl

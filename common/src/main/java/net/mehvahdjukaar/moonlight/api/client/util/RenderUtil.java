@@ -113,7 +113,7 @@ public class RenderUtil {
 
     @PlatformImpl
     private static BakedModel handleCameraTransforms(BakedModel model, PoseStack matrixStack, ItemDisplayContext pTransformType) {
-        throw new ArrayStoreException();
+        throw new AssertionError();
     }
 
     @Deprecated(forRemoval = true)

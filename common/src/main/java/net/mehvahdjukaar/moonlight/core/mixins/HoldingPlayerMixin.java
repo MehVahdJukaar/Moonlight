@@ -8,7 +8,6 @@ import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.mehvahdjukaar.moonlight.core.misc.IHoldingPlayerExtension;
 import net.mehvahdjukaar.moonlight.core.misc.IMapDataPacketExtension;
-import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.world.entity.player.Player;
@@ -53,16 +52,16 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     @Unique
     private int moonlight$volatileDecorationRefreshTicks = 0;
 
-    @Final
-    @Shadow
-    MapItemSavedData field_132;
-
     @Shadow
     @Final
     public Player player;
 
     @Shadow
     private boolean dirtyData;
+
+    @Shadow
+    @Final
+    MapItemSavedData this$0;
 
     @Inject(method = "nextUpdatePacket", at = @At("HEAD"), cancellable = true)
     public void checkLocked(MapId mapId, CallbackInfoReturnable<@Nullable Packet<?>> cir) {
@@ -72,7 +71,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
 
     @ModifyReturnValue(method = "nextUpdatePacket", at = @At("TAIL"))
     public Packet<?> addExtraPacketData(@Nullable Packet<?> packet, MapId mapId) {
-        MapItemSavedData data = field_132;
+        MapItemSavedData data = this$0;
         ExpandedMapData ed = ((ExpandedMapData) data);
 
         boolean updateData = false;
@@ -110,7 +109,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             // creates a new packet or modify existing one
             if (packet == null) {
                 packet = new ClientboundMapItemDataPacket(mapId,
-                        field_132.scale, field_132.locked, Optional.empty(), Optional.empty());
+                        this$0.scale, this$0.locked, Optional.empty(), Optional.empty());
             }
             IMapDataPacketExtension ep = ((IMapDataPacketExtension) packet);
 

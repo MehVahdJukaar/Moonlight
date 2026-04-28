@@ -1,11 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
-import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.Nullable;
 
 public class TriResult<T> {
     private final T object;
-    private boolean isPass;
+    private final boolean isPass;
 
     private TriResult(boolean isPass, T object) {
         this.isPass = isPass;

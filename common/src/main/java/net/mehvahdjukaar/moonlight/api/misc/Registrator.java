@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.misc;
 
-import net.mehvahdjukaar.moonlight.api.fluids.MLBuiltinSoftFluids;
 import net.minecraft.resources.ResourceLocation;
 
 @FunctionalInterface

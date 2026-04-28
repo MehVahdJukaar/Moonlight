@@ -43,7 +43,7 @@ public record LenientUnboundedMapCodec<K, V>(Codec<K> keyCodec,
 
     @Override
     public <T> DataResult<T> encode(Map<K, V> input, DynamicOps<T> ops, T prefix) {
-        return this.encode((Map) input, ops, (RecordBuilder) ops.mapBuilder()).build(prefix);
+        return this.encode( input, ops, ops.mapBuilder()).build(prefix);
     }
 
     @Override
@@ -60,12 +60,12 @@ public record LenientUnboundedMapCodec<K, V>(Codec<K> keyCodec,
 
     @Override
     public int hashCode() {
-        return Objects.hash(new Object[]{this.keyCodec, this.elementCodec});
+        return Objects.hash(this.keyCodec, this.elementCodec);
     }
 
     @Override
     public String toString() {
         String var10000 = String.valueOf(this.keyCodec);
-        return "LenientUnboundedMapCodec[" + var10000 + " -> " + String.valueOf(this.elementCodec) + "]";
+        return "LenientUnboundedMapCodec[" + var10000 + " -> " + this.elementCodec + "]";
     }
 }
