@@ -8,6 +8,7 @@
     "ClientPacketListenerMixin",
     "DebugRendererMixin",
     "DynamicTextureMixin",
+    "GameRendererMixin",
     "ItemInHandRendererMixin",
     "LightingMixin",
     "MapInstanceMixin",

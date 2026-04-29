@@ -177,3 +177,16 @@ transitive-accessible method net/minecraft/world/entity/ai/sensing/SensorType <i
 accessible field net/minecraft/client/renderer/block/model/BlockModel parent Lnet/minecraft/client/renderer/block/model/BlockModel;
 
 accessible field com/mojang/blaze3d/platform/NativeImage pixels J
+
+#post chain
+accessible field net/minecraft/client/renderer/GameRenderer postEffect Lnet/minecraft/client/renderer/PostChain;
+accessible field net/minecraft/client/renderer/PostChain screenTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+accessible field net/minecraft/client/renderer/PostChain time F
+accessible field net/minecraft/client/renderer/PostChain lastStamp F
+accessible field net/minecraft/client/renderer/PostChain customRenderTargets Ljava/util/Map;
+accessible field net/minecraft/client/renderer/PostChain fullSizedTargets Ljava/util/List;
+accessible method net/minecraft/client/renderer/PostChain load (Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/resources/ResourceLocation;)V
+extendable method net/minecraft/client/renderer/PostChain load (Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/resources/ResourceLocation;)V
+accessible field net/minecraft/client/renderer/PostChain passes Ljava/util/List;
+accessible field net/minecraft/client/renderer/PostChain shaderOrthoMatrix Lorg/joml/Matrix4f;
+accessible field net/minecraft/client/renderer/GameRenderer effectActive Z
