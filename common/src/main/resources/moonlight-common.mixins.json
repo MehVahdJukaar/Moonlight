@@ -51,8 +51,7 @@
     "accessor.BrainAccessor",
     "accessor.DispenserBlockAccessor",
     "accessor.DispenserBlockEntityAccessor",
-    "compat.PistonReactQuarkMixin",
-    "platform.BeeGoalMixin"
+    "compat.PistonReactQuarkMixin"
   ],
   "injectors": {
     "defaultRequire": 1

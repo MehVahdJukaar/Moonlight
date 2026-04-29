@@ -9,7 +9,6 @@ neoforge {
 
 neoForge {
     accessTransformers {
-        //publish(file("src/main/resources/META-INF/accesstransformer1.cfg"))
     }
 }
 

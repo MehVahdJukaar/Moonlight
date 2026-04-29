@@ -11,10 +11,8 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditi
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.integration.platform.ModConfigSelectScreen;
-import net.mehvahdjukaar.moonlight.core.misc.neoforge.ModLootModifiers;
+import net.mehvahdjukaar.moonlight.core.misc.platform.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginMessage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
