@@ -19,7 +19,6 @@ authors = "${mod_authors}"
 credits = "${mod_credits}"
 description = '''${mod_description}'''
 modUrl = "${mod_homepage}"
-updateJSONURL = "https://api.modrinth.com/updates/${mod_id}/neoforge_updates.json"
 
 
 [[dependencies.${mod_id}]]
