@@ -35,6 +35,7 @@ dependencies {
     //modImplementation ("curse.maven:supplementaries-412082:4995508")
     modImplementation ("curse.maven:configured-457570:7122915")
     modCompileOnly("curse.maven:yacl-667299:5424504")
+    modCompileOnly("curse.maven:alexs-caves-924854:4806837")
 
 
 }

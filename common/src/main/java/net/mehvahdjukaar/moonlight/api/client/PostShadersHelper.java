@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class PostShadersHelper {
 
-    public record Group(ResourceLocation id, int priority) {
+    public record Group(ResourceLocation id, float priority) {
         public static final Group DEFAULT = new Group(ResourceLocation.withDefaultNamespace("default"), 0);
         public static final Group SPECTATOR_SHADERS = new Group(ResourceLocation.withDefaultNamespace("spectator_shaders"), 1);
     }
@@ -38,7 +38,8 @@ public class PostShadersHelper {
     public static void toggleEffect(@Nullable ResourceLocation newPost, Group group) {
         GameRenderer gr = Minecraft.getInstance().gameRenderer;
         try {
-            gr.postEffect = refreshComposite(gr.postEffect, newPost, group);
+            RenderTarget target = gr.postEffect != null ? gr.postEffect.screenTarget : Minecraft.getInstance().getMainRenderTarget();
+            gr.postEffect = refreshComposite(gr.postEffect, newPost, group, target);
             gr.effectActive = gr.postEffect != null;
         } catch (IOException ioexception) {
             //  LOGGER.warn("Failed to load shader: {}", resourceLocation, ioexception);
@@ -49,11 +50,13 @@ public class PostShadersHelper {
         }
     }
 
-    public static @Nullable PostChain refreshComposite(@Nullable PostChain currentChain, @Nullable ResourceLocation newPost, Group group) throws IOException {
+    public static @Nullable PostChain refreshComposite(@Nullable PostChain currentChain,
+                                                       @Nullable ResourceLocation newPost,
+                                                       Group group, RenderTarget mainTarget) throws IOException {
         PostChain newChain;
         if (currentChain == null) {
             if (newPost == null) return null;
-            newChain = ComposedPostChain.create(newPost, group);
+            newChain = ComposedPostChain.create(newPost, group, mainTarget);
         } else if (currentChain instanceof ComposedPostChain cpc) {
             newChain = cpc.with(newPost, group);
         } else {
@@ -84,12 +87,13 @@ public class PostShadersHelper {
             return cc;
         }
 
-        private static ComposedPostChain create(ResourceLocation postEffect, Group group) throws IOException {
+        private static ComposedPostChain create(ResourceLocation postEffect, Group group, RenderTarget mainTarget) throws IOException {
             Minecraft mc = Minecraft.getInstance();
             TextureManager tm = mc.getTextureManager();
             ResourceManager rm = mc.getResourceManager();
-            PostChain vanillaChain = new PostChain(tm, rm, mc.getMainRenderTarget(), postEffect);
-            vanillaChain.resize(mc.getWindow().getWidth(), mc.getWindow().getHeight());
+            PostChain vanillaChain = new PostChain(tm, rm, mainTarget, postEffect);
+            vanillaChain.resize(mainTarget.width, mainTarget.height);
+
             return wrap(vanillaChain, group);
         }
 
@@ -116,14 +120,15 @@ public class PostShadersHelper {
                 }
             } else {
                 PostChain newChain = new PostChain(tm, rm, this.screenTarget, newEffect);
-                newChain.resize(mc.getWindow().getWidth(), mc.getWindow().getHeight());
+                newChain.resize(this.screenTarget.width, this.screenTarget.height);
+
                 newGroups.put(group, newChain);
             }
 
             // sort groups by priority
             List<Map.Entry<Group, PostChain>> ordered =
                     newGroups.entrySet().stream()
-                            .sorted((a, b) -> Integer.compare(a.getKey().priority(), b.getKey().priority()))
+                            .sorted((a, b) -> Float.compare(a.getKey().priority(), b.getKey().priority()))
                             .toList();
 
             ResourceLocation newName = ordered.size() == 1 ?
@@ -146,6 +151,8 @@ public class PostShadersHelper {
                 result.addSubChain(pc, entry.getKey());
             }
 
+            this.resize(this.screenTarget.width, this.screenTarget.height);
+
             return result;
 
         }
@@ -157,11 +164,10 @@ public class PostShadersHelper {
             this.customRenderTargets.putAll(chain.customRenderTargets);
             this.fullSizedTargets.addAll(chain.fullSizedTargets);
 
-            for (PostPass postPass : this.passes) {
-                postPass.setOrthoMatrix(this.shaderOrthoMatrix);
-            }
             this.time = chain.time;
             this.lastStamp = chain.lastStamp;
+
+
         }
     }
 

@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -23,7 +24,7 @@ import java.util.function.Supplier;
 //per world, automatically synced when stream codec is not null. not per game. saved onto overworld level
 public final class WorldSavedDataType<D extends WorldSavedData> {
     public static final StreamCodec<RegistryFriendlyByteBuf, WorldSavedDataType<? extends WorldSavedData>> STREAM_CODEC =
-            ByteBufCodecs.registry(MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.key());
+            ByteBufCodecs.registry((ResourceKey) MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.key());
     public static final Codec<WorldSavedDataType<? extends WorldSavedData>> CODEC =
             MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.byNameCodec();
 

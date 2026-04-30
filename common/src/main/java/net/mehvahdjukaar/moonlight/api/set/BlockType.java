@@ -240,7 +240,7 @@ public abstract class BlockType {
                     registry.mapObjectToType(obj, this);
                 }
             } catch (Exception e) {
-                Moonlight.LOGGER.error("Failed to add block type child. Key: {}, Object: {}, BlockType: {}", genericName, obj, this, e);
+                Moonlight.LOGGER.warn("Failed to add block type child. Key: {}, Object: {}, BlockType: {}. Ignoring", genericName, obj, this);
             }
         }
     }
