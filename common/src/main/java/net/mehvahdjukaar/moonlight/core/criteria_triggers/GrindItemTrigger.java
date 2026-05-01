@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.criteria_triggers;
 
+import com.mojang.blaze3d.shaders.Shader;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;

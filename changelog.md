@@ -1,1 +1,3 @@
-more changes to recoloring logic 2
+- big internal changes into how the project is built, there might be issues or discrepancy between this and previous arch loom versions
+- mod can be imported in forgegradle and mod dev gradle setups more easily as it doesnt use arch loom anymore
+- added some utility, PostShaderHelper class that allows to chain and compose post passes in an easy and non destructive way.

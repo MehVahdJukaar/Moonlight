@@ -15,6 +15,9 @@ import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -36,6 +39,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -60,6 +65,18 @@ import java.util.function.Supplier;
  * Helper class dedicated to platform independent client utility methods
  */
 public class ClientHelper {
+
+    @FunctionalInterface
+    public interface MenuScreenEvent {
+
+        <M extends AbstractContainerMenu, U extends Screen & MenuAccess<M>> void register(
+                MenuType<? extends M> type, MenuScreens.ScreenConstructor<M, U> factory);
+    }
+
+    @PlatformImpl
+    public static void addMenuScreensRegistration(Consumer<MenuScreenEvent> eventListener) {
+        throw new AssertionError();
+    }
 
     @PlatformImpl
     public static void addClientSetup(Runnable clientSetup) {

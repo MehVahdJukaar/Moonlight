@@ -9,6 +9,9 @@ import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -28,6 +31,8 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
@@ -265,7 +270,6 @@ public class ClientHelperImpl {
         getCurrentBus().addListener(eventConsumer);
     }
 
-
     public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
         Moonlight.assertInitPhase();
 
@@ -275,7 +279,7 @@ public class ClientHelperImpl {
                     PackLocationInfo locationInfo = new PackLocationInfo(
                             folderName.toString(),
                             displayName,
-                            PackSource.BUILT_IN,
+                            defaultEnabled ? PackSource.BUILT_IN : PackSource.FEATURE,
                             Optional.empty()
                     );
                     try (PathPackResources pack = new PathPackResources(
@@ -296,7 +300,7 @@ public class ClientHelperImpl {
                                 },
                                 PackType.CLIENT_RESOURCES,
                                 new PackSelectionConfig(
-                                        defaultEnabled,
+                                        false,
                                         Pack.Position.TOP,
                                         false
                                 ));
@@ -346,6 +350,14 @@ public class ClientHelperImpl {
 
                 }, item.asItem());
             });
+        };
+        getCurrentBus().addListener(eventConsumer);
+    }
+
+    public static void addMenuScreensRegistration(Consumer<ClientHelper.MenuScreenEvent> eventListener) {
+        Moonlight.assertInitPhase();
+        Consumer<RegisterMenuScreensEvent> eventConsumer = event -> {
+            eventListener.accept(event::register);
         };
         getCurrentBus().addListener(eventConsumer);
     }

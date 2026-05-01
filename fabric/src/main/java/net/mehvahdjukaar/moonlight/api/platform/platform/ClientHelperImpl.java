@@ -20,6 +20,9 @@ import net.mehvahdjukaar.moonlight.core.misc.platform.ITextureAtlasSpriteExtensi
 import net.mehvahdjukaar.moonlight.platform.MoonlightFabricClient;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -37,6 +40,8 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -133,19 +138,19 @@ public class ClientHelperImpl {
 
     private record ReloadWrapper(Supplier<PreparableReloadListener> inner,
                                  ResourceLocation getFabricId) implements IdentifiableResourceReloadListener, PreparableReloadListener {
-            private ReloadWrapper(Supplier<PreparableReloadListener> inner,
-                                  ResourceLocation getFabricId) {
-                this.inner = Suppliers.memoize(inner::get);
-                this.getFabricId = getFabricId;
-            }
-
-            @Override
-            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
-                                                  ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
-                                                  Executor backgroundExecutor, Executor gameExecutor) {
-                return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
-            }
+        private ReloadWrapper(Supplier<PreparableReloadListener> inner,
+                              ResourceLocation getFabricId) {
+            this.inner = Suppliers.memoize(inner::get);
+            this.getFabricId = getFabricId;
         }
+
+        @Override
+        public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
+                                              ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
+                                              Executor backgroundExecutor, Executor gameExecutor) {
+            return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+        }
+    }
 
     public static final Map<ItemLike, IItemDecoratorRenderer> ITEM_DECORATORS = new IdentityHashMap<>();
 
@@ -278,6 +283,12 @@ public class ClientHelperImpl {
                     BuiltinItemRendererRegistry.INSTANCE.register(item, br);
                 }
             });
+        });
+    }
+
+    public static void addMenuScreensRegistration(Consumer<ClientHelper.MenuScreenEvent> eventListener) {
+        MoonlightFabricClient.addClientTask(() -> {
+            eventListener.accept(MenuScreens::register);
         });
     }
 

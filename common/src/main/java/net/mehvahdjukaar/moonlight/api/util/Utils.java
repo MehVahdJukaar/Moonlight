@@ -42,6 +42,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -91,27 +92,32 @@ public class Utils {
 
     // orchestrator for opening block entity GUIs with claim checks
     public static boolean openGuiIfPossible(BlockEntity be, ServerPlayer player, ItemStack stack, Direction hitFace, Vec3 hitPos) {
+        return openGuiIfPossible(TileOrEntityTarget.of(be), player, stack, hitFace, hitPos);
+    }
+
+    /// Prefer using this over the above one.
+    public static boolean openGuiIfPossible(TileOrEntityTarget target, ServerPlayer player, ItemStack stack, Direction hitFace, Vec3 hitPos) {
         //this is likely not needed
-        BlockPos pos = be.getBlockPos();
-        if (!Utils.mayPerformBlockAction(player, pos, stack)) {
+        Object targetObj = target.getTargetOrThrow(player.level());
+        BlockPos targetPos = targetObj instanceof Entity e ? e.blockPosition() : ((BlockEntity) targetObj).getBlockPos();
+        if (!Utils.mayPerformBlockAction(player, targetPos, stack)) {
             return false;
         }
-        switch (be) {
-            case IOneUserInteractable ci when !ci.canBeUsedBy(pos, player) -> {
+        switch (targetObj) {
+            case IOneUserInteractable ci when !ci.canBeUsedBy(targetPos, player) -> {
                 return false;
             }
             case IScreenProvider sp -> {
-                if (be instanceof IOneUserInteractable ci) {
+                if (targetObj instanceof IOneUserInteractable ci) {
                     ci.setCurrentUser(player.getUUID());
                 }
                 sp.sendOpenGuiPacket(player, hitFace, hitPos);
                 return false;
             }
             case MenuProvider mp -> {
-                if (be instanceof IOneUserInteractable ci) {
+                if (targetObj instanceof IOneUserInteractable ci) {
                     ci.setCurrentUser(player.getUUID());
                 }
-                TileOrEntityTarget target = TileOrEntityTarget.of(be);
                 PlatHelper.openCustomMenu(player, mp, target::write);
                 return true;
             }

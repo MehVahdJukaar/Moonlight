@@ -71,6 +71,12 @@ public class TileOrEntityTarget {
         }
     }
 
+    public Object getTargetOrThrow(Level level) {
+        var target = getTarget(level);
+        if (target == null) throw new IllegalStateException("No object found from target " + this);
+        return target;
+    }
+
     public <T extends BlockEntity> T getBlockEntityOrThrow(Level level, BlockEntityType<T> type) {
         if (this.posOrEntityId.left().isPresent()) {
             var be = type.getBlockEntity(level, this.posOrEntityId.left().get());
@@ -114,11 +120,13 @@ public class TileOrEntityTarget {
     }
 
 
+    @Deprecated(forRemoval = true)
     @Nullable
     public BlockPos getPos() {
         return this.posOrEntityId.left().orElse(null);
     }
 
+    @Deprecated(forRemoval = true)
     @Nullable
     public Integer getEntityId() {
         return this.posOrEntityId.right().orElse(null);
