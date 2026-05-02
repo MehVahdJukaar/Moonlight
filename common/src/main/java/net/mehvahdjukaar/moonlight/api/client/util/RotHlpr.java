@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+//TODO: turn to quaternionc
 public class RotHlpr {
     //dont modify these pls. these are mutable unforunately posestack doesnt accept Quaternionfc
     public static final Quaternionf Y180 = Axis.YP.rotationDegrees(180);

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.util.math;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.Util;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
@@ -29,6 +30,31 @@ public record EntityAngles(float pitch, float yaw) {
                 (float) Math.toDegrees(pitchRad),
                 (float) Math.toDegrees(yawRad)
         );
+    }
+
+    public static EntityAngles fromDirection(Direction dir){
+        return switch (dir) {
+            case SOUTH -> new EntityAngles(0, 0);
+            case WEST -> new EntityAngles(0, 90);
+            case NORTH -> new EntityAngles(0, 180);
+            case EAST -> new EntityAngles(0, -90);
+            case UP -> new EntityAngles(-90, 0);
+            case DOWN -> new EntityAngles(90, 0);
+        };
+    }
+
+    public Direction closestDirection(){
+        // Vertical dominates if pitch is steep enough
+        if (pitch <= -45) return Direction.UP;
+        if (pitch >= 45) return Direction.DOWN;
+
+        // Normalize yaw to [-180, 180)
+        float y = Mth.wrapDegrees(yaw);
+
+        if (y >= -45 && y < 45) return Direction.SOUTH;
+        if (y >= 45 && y < 135) return Direction.WEST;
+        if (y >= -135 && y < -45) return Direction.EAST;
+        return Direction.NORTH;
     }
 
     /**
