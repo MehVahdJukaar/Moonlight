@@ -1,1 +1,1 @@
-- fixed an classload issue on servers
+- added back some deprecated classes for backward compat
