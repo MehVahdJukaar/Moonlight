@@ -69,11 +69,11 @@ import java.util.function.Supplier;
  */
 public class ClientHelper {
 
-    public Player getLocalPlayer() {
+    public static Player getLocalPlayer() {
         return Minecraft.getInstance().player;
     }
 
-    public Level getLocalLevel() {
+    public static Level getLocalLevel() {
         return Minecraft.getInstance().level;
     }
 

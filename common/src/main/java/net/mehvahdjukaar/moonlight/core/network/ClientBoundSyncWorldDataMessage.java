@@ -1,14 +1,13 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
 import com.google.common.base.Preconditions;
-import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.misc.WorldSavedData;
 import net.mehvahdjukaar.moonlight.api.misc.WorldSavedDataType;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.level.Level;
 
 @SuppressWarnings("unchecked")
 public class ClientBoundSyncWorldDataMessage<D extends WorldSavedData> implements Message {
@@ -35,21 +34,16 @@ public class ClientBoundSyncWorldDataMessage<D extends WorldSavedData> implement
     }
 
     @Override
-    public void handle(Context context) {
-        handleSyncWorldData(this);
-    }
-
-    @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE.type();
     }
 
-    @ClientOnly
-    private static void handleSyncWorldData(ClientBoundSyncWorldDataMessage<?> message) {
-        var l = Minecraft.getInstance().level;
+    @Override
+    public void handle(Context context) {
+        Level l = context.getPlayer().level();
         //assigns data to client
-        WorldSavedDataType<WorldSavedData> type = (WorldSavedDataType<WorldSavedData>) message.data.getType();
-        type.setData(l, message.data);
+        WorldSavedDataType<WorldSavedData> type = (WorldSavedDataType<WorldSavedData>) this.data.getType();
+        type.setData(l, this.data);
         Moonlight.LOGGER.info("Synced Custom World Data [{}]", type.getName());
     }
 }

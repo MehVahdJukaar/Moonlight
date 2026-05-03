@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.network;
 import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
 import net.mehvahdjukaar.moonlight.api.misc.HolderRef;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
@@ -32,7 +33,7 @@ public class ClientBoundFinalizeFluidsMessage implements Message {
     @ClientOnly
     @Override
     public void handle(Context context) {
-        SoftFluidInternal.postInitClient(Objects.requireNonNull(Minecraft.getInstance().level).registryAccess());
+        SoftFluidInternal.postInitClient(Objects.requireNonNull(context.getPlayer().level()).registryAccess());
         //just incase
         DynamicHolder.clearCache();
         HolderRef.clearCache();

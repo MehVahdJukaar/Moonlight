@@ -14,6 +14,7 @@ import net.mehvahdjukaar.moonlight.api.misc.InvPlacer;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.misc.Triplet;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.api.util.codec.LenientListCodec;
@@ -304,7 +305,7 @@ public class Utils {
             }
         }
         if (PlatHelper.getPhysicalSide().isClient()) {
-            var level = Minecraft.getInstance().level;
+            var level = ClientHelper.getLocalLevel();
             if (level != null) {
                 var clientRa = level.registryAccess();
                 Registry<T> r = clientRa.registryOrThrow(registryKey);
@@ -331,7 +332,7 @@ public class Utils {
         var s = PlatHelper.getCurrentServer();
         if (PlatHelper.getPhysicalSide().isClient()) {
             if (s != null && (s.isSameThread() || !MoonlightClient.isClientThread())) return s.registryAccess();
-            var level = Minecraft.getInstance().level;
+            var level = ClientHelper.getLocalLevel();
             if (level != null) return level.registryAccess();
             var hack2 = Moonlight.EARLY_REGISTRY_ACCESS.get();
             if (hack2 != null) return hack2.get();

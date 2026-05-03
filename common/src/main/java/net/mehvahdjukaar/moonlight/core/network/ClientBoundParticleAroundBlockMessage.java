@@ -1,15 +1,14 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
-import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.client.util.ParticleUtil;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.level.Level;
 
 public class ClientBoundParticleAroundBlockMessage implements Message {
 
@@ -36,33 +35,27 @@ public class ClientBoundParticleAroundBlockMessage implements Message {
     }
 
     @Override
-    public void handle(Context context) {
-        handleSpawnBlockParticlePacket(this);
-    }
-
-    @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE.type();
     }
 
+
     public enum Kind {
         WAX_ON,
-        GLOW_ON
+        GLOW_ON;
     }
 
-    @ClientOnly
-    private static void handleSpawnBlockParticlePacket(ClientBoundParticleAroundBlockMessage message) {
-        var l = Minecraft.getInstance().level;
-
-        switch (message.type) {
-            case WAX_ON -> ParticleUtil.spawnParticleOnBlockShape(l, message.pos,
+    @Override
+    public void handle(Context context) {
+        Level l = context.getPlayer().level();
+        switch (this.type) {
+            case WAX_ON -> ParticleUtil.spawnParticleOnBlockShape(l, this.pos,
                     ParticleTypes.WAX_ON,
                     UniformInt.of(3, 5), 0.01f);
-            case GLOW_ON -> ParticleUtil.spawnParticleOnBlockShape(l, message.pos,
+            case GLOW_ON -> ParticleUtil.spawnParticleOnBlockShape(l, this.pos,
                     ParticleTypes.GLOW,
                     UniformInt.of(3, 5), 0);
         }
     }
-
 
 }
