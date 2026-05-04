@@ -42,7 +42,7 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: Issue Details
+      label: Issue
       description: Provide a clear description of what happened and how to reproduce it.
       placeholder: |
         What happened:
