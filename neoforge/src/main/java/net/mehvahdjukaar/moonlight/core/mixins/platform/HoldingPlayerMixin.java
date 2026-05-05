@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.mixins;
+package net.mehvahdjukaar.moonlight.core.mixins.platform;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;

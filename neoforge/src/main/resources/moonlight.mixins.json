@@ -18,6 +18,7 @@
     "ConfigTrackerMixin",
     "ContextAwareReloadListenerAccessor",
     "FireBlockMixin",
+    "HoldingPlayerMixin",
     "MinecraftServerMixin",
     "SelfEntitySpawnDataMixin",
     "SelfModFlowingFluidMixin"

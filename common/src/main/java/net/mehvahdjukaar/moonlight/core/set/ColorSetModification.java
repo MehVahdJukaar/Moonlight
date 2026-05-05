@@ -40,7 +40,7 @@ public class ColorSetModification {
     private final ResourceLocation id;
     private final boolean replace;
 
-    private ColorSetModification(Map<String, BlockAndItem> colorsMap, boolean replace, ResourceLocation id) {
+    public ColorSetModification(Map<String, BlockAndItem> colorsMap, boolean replace, ResourceLocation id) {
         this.replace = replace;
         this.id = id;
         for (Map.Entry<String, BlockAndItem> entry : colorsMap.entrySet()) {

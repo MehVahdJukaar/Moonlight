@@ -8,4 +8,5 @@ public class IDropItemOnDeathEventImpl {
     public static IDropItemOnDeathEvent create(ItemStack itemStack, Player player, boolean beforeDrop) {
         return new DropItemOnDeathEvent(itemStack, player, beforeDrop);
     }
+
 }

@@ -34,10 +34,10 @@ public class MLMapDecoration {
     );
 
     private final Holder<MLMapDecorationType<?, ?>> type;
-    protected final Component displayName;
-    protected final byte x;
-    protected final byte y;
-    protected final byte rot;
+    protected Component displayName;
+    protected byte x;
+    protected byte y;
+    protected byte rot;
 
     public MLMapDecoration(Holder<MLMapDecorationType<?, ?>> type,
                            byte x, byte y, byte rot, Optional<Component> displayName) {

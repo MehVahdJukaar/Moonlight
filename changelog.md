@@ -1,1 +1,1 @@
-- added back some deprecated classes for backward compat
+- fixed an issue with a mixin of map data

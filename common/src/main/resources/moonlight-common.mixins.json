@@ -27,7 +27,6 @@
     "FixBlockPlaceContextMixin",
     "GrindstoneMenuMixin",
     "GrindstoneMenuSlotMixin",
-    "HoldingPlayerMixin",
     "InventoryMixin",
     "ItemMixin",
     "JigsawPlacementMixin",

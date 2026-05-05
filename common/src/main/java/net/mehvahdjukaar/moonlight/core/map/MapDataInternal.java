@@ -56,7 +56,7 @@ public class MapDataInternal {
     }
 
     /**
-     * Call before mod setup. Register a code defined map marker type. You will still need to add a related json file
+     * Call before mod setup. Register a code-defined map marker type. You will still need to add a related json file
      */
     public static void registerCustomType(ResourceLocation id, Supplier<MLSpecialMapDecorationType<?, ?>> decorationType) {
         CODE_TYPES_FACTORIES.register(id, decorationType);
