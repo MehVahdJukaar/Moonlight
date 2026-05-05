@@ -189,8 +189,6 @@ public class Respriter {
 
     }
 
-    //higher this is higher are the changes of recoloring proess hanging forever
-    private static final int MAX_RECOLOR_SIZE = 90;
 
     @FunctionalInterface
     private interface FrameColorRemapper {
@@ -206,19 +204,14 @@ public class Respriter {
                 }
                 //it means original image is animated. Just use first palette given
                 Palette firstPalette = targetPalettes.get(0);
-                if ( firstPalette.size() < MAX_RECOLOR_SIZE) {
-                    Color2ColorMap singleColorMap = Color2ColorMap.create(originalPalette, firstPalette);
+                Color2ColorMap singleColorMap = Color2ColorMap.create(originalPalette, firstPalette);
 
-                    return (frameIndex, color) -> singleColorMap.mapColor(color);
-                }
-                else return (frameIndex, color) -> null;
+                return (frameIndex, color) -> singleColorMap.mapColor(color);
             } else {
                 List<Color2ColorMap> mappingPerFrame = new ArrayList<>();
                 for (int i = 0; i < targetFrameCount; i++) {
                     Palette toPalette = targetPalettes.get(i);
-                    if ( toPalette.size() < MAX_RECOLOR_SIZE) {
-                        mappingPerFrame.add(Color2ColorMap.create(originalPalette, toPalette));
-                    }
+                    mappingPerFrame.add(Color2ColorMap.create(originalPalette, toPalette));
                 }
 
                 return (frameIndex, color) -> {
