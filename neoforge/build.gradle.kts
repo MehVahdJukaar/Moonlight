@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.utils.extendsFrom
+
 plugins {
     id("com.possible-triangle.neoforge")
 }
@@ -14,7 +16,7 @@ neoForge {
 
 dependencies {
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
-    modCompileOnly ("curse.maven:map-atlases-forge-519759:7659933")
+    modCompileOnly("curse.maven:map-atlases-forge-519759:7659933")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:7640331")
 
@@ -31,12 +33,44 @@ dependencies {
 
     // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
     // modRuntimeOnly("net.mehvahdjukaar:supplementaries-neoforge:1.21-3.5.18"){
-    modCompileOnly ("curse.maven:map-atlases-forge-519759:4990003")
+    modCompileOnly("curse.maven:map-atlases-forge-519759:4990003")
     //modImplementation ("curse.maven:supplementaries-412082:4995508")
-    modImplementation ("curse.maven:configured-457570:7122915")
+    modImplementation("curse.maven:configured-457570:7122915")
     modCompileOnly("curse.maven:yacl-667299:5424504")
     modCompileOnly("curse.maven:alexs-caves-924854:4806837")
-
-
 }
 
+// Testing setup, will move this to GradleHelper too on v1.4
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("net.neoforged:testframework:${neoforge.neoforgeVersion.get()}")
+    testImplementation("org.skyscreamer:jsonassert:2.0-rc1")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    enabled = true
+    // mixins are not allowed to be loaded by anything else, not even the test runner
+    exclude("**/mixins/**")
+}
+
+// this is required because I currently disable it in GradleHelper due to weird bugs
+// I will also try to remove it in v1.4, since it's a hack solution for a problem I don't quite understand
+tasks.named<JavaCompile>("compileTestJava") {
+    enabled = true
+}
+
+// this is probably a better solution to the root cause for the weird issue I had above
+configurations {
+    testCompileOnly.extendsFrom(compileOnly)
+}
+
+afterEvaluate {
+    neoForge {
+        unitTest {
+            enable()
+            testedMod = mods[mod.id.get()]
+        }
+    }
+}
