@@ -42,6 +42,7 @@
     "item": "minecraft:potion"
   },
   "preserved_components_from_item": [
+    "minecraft:item_name",
     "minecraft:potion_contents",
     "moonlight:bottle_type",
     "origins:is_extended_by_cleric"

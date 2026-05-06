@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.misc;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -30,8 +31,8 @@ public record BlockAndItem(@Nullable Block block, @Nullable Item item) {
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(BlockAndItem::item)
     ).apply(i, BlockAndItem::new));
 
-    public static final Codec<BlockAndItem> CODEC = Codec.withAlternative(Codec.withAlternative(DIRECT_CODEC,
-                    BuiltInRegistries.BLOCK.byNameCodec().xmap(BlockAndItem::forBlock, BlockAndItem::block)),
+    public static final Codec<BlockAndItem> CODEC = CodecUtils.alternatives(DIRECT_CODEC,
+                    BuiltInRegistries.BLOCK.byNameCodec().xmap(BlockAndItem::forBlock, BlockAndItem::block),
             BuiltInRegistries.ITEM.byNameCodec().xmap(BlockAndItem::forItem, BlockAndItem::item));
 
 
