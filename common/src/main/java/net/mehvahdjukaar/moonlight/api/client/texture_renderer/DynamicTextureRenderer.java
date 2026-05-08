@@ -46,7 +46,7 @@ public class DynamicTextureRenderer {
                         }
                     });
 
-    //clears the texture cache and forge all to be re-rendered
+    //clears the texture cache and force all to be re-rendered
     public static void clearCache() {
         TEXTURE_CACHE.invalidateAll();
     }

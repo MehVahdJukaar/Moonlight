@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
+import net.mehvahdjukaar.moonlight.api.util.math.Rect2D;
 import net.minecraft.world.level.block.Rotation;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,7 +108,8 @@ public class TextureCollager {
 
                 if (op.flipX) sampler = Sampler2D.flippedX(sampler, flipW);
                 if (op.flipY) sampler = Sampler2D.flippedY(sampler, flipH);
-                if (op.rotation != Rotation.NONE) sampler = Sampler2D.rotate(sampler, op.rotation, scaledSourceW, scaledSourceH);
+                if (op.rotation != Rotation.NONE)
+                    sampler = Sampler2D.rotate(sampler, op.rotation, scaledSourceW, scaledSourceH);
 
                 sampler = Sampler2D.offset(sampler, -0.5f, -0.5f);
 
@@ -127,11 +129,8 @@ public class TextureCollager {
 
                 for (int ty = 0; ty < actualH; ty++) {
                     for (int tx = 0; tx < actualW; tx++) {
-                        float srcX = (tx + 0.5f) * opScaleX;
-                        float srcY = (ty + 0.5f) * opScaleY;
-
-                        srcX = Math.min(srcX, scaledSourceW - 0.5f);
-                        srcY = Math.min(srcY, scaledSourceH - 0.5f);
+                        float srcX = (tx + 0.5f);
+                        float srcY = (ty + 0.5f);
 
                         int color = sampler.sample(srcX, srcY);
 
@@ -187,6 +186,10 @@ public class TextureCollager {
             return new TextureCollager(originalFrameW, originalFrameH, targetFrameW, targetFrameH, List.copyOf(operations));
         }
 
+        public Builder copyFrom(Rect2D rect) {
+            return copyFrom(rect.x(), rect.y(), rect.width(), rect.height());
+        }
+
         public Builder copyFrom(int x, int y, int w, int h) {
             addLast();
             this.fromX = x;
@@ -196,6 +199,10 @@ public class TextureCollager {
             this.targetH = fromH;
             this.targetW = fromW;
             return this;
+        }
+
+        public Builder to(Rect2D rect) {
+            return to(rect.x(), rect.y(), rect.width(), rect.height());
         }
 
         public Builder to(int x, int y, int w, int h) {
