@@ -104,7 +104,7 @@ public class FastSearchPathPackResources extends AbstractPackResources {
     @Nullable
     public IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
         if (this.packType != packType) return null;
-        if(this.searchTrie.search( location.getNamespace() + "/" + location.getPath()).isEmpty()){
+        if(this.searchTrie.search(ResourceLocationSearchTrie.getResPath(location)).isEmpty()){
             return null;
         }
         Path path = this.root.resolve(packType.getDirectory()).resolve(location.getNamespace());
