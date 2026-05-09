@@ -26,7 +26,7 @@ public final class WorldSavedDataType<D extends WorldSavedData> {
     public static final StreamCodec<RegistryFriendlyByteBuf, WorldSavedDataType<? extends WorldSavedData>> STREAM_CODEC =
             ByteBufCodecs.registry((ResourceKey) MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.key());
     public static final Codec<WorldSavedDataType<? extends WorldSavedData>> CODEC =
-            MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.byNameCodec();
+            (Codec)      MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.byNameCodec();
 
     //TODO: 1.22 make map codec here instead
 

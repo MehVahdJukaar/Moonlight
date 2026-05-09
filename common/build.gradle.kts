@@ -24,3 +24,6 @@ dependencies {
     modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:1.6.0")
 
 }
+tasks.named("copyAccessTransformersPublications") {
+    dependsOn(":common:transformAccessWidener")
+}

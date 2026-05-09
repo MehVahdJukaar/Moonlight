@@ -40,37 +40,3 @@ dependencies {
     modCompileOnly("curse.maven:alexs-caves-924854:4806837")
 }
 
-// Testing setup, will move this to GradleHelper too on v1.4
-dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("net.neoforged:testframework:${neoforge.neoforgeVersion.get()}")
-    testImplementation("org.skyscreamer:jsonassert:2.0-rc1")
-}
-
-tasks.test {
-    useJUnitPlatform()
-    enabled = true
-    // mixins are not allowed to be loaded by anything else, not even the test runner
-    exclude("**/mixins/**")
-}
-
-// this is required because I currently disable it in GradleHelper due to weird bugs
-// I will also try to remove it in v1.4, since it's a hack solution for a problem I don't quite understand
-tasks.named<JavaCompile>("compileTestJava") {
-    enabled = true
-}
-
-// this is probably a better solution to the root cause for the weird issue I had above
-configurations {
-    testCompileOnly.extendsFrom(compileOnly)
-}
-
-afterEvaluate {
-    neoForge {
-        unitTest {
-            enable()
-            testedMod = mods[mod.id.get()]
-        }
-    }
-}

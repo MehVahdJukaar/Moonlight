@@ -100,7 +100,7 @@ public record EntityAngles(float pitch, float yaw) {
     }
 
     public  EntityAngles withPitch(float pitch) {
-        return new EntityAngles(pitchRad(), yawRad());
+        return new EntityAngles(pitch, yawRad());
     }
 
     /**
