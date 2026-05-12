@@ -46,7 +46,8 @@
     "Bottle",
     "CustomPotionEffects",
     "CustomPotionColor",
-    "IsExtendedByCleric"
+    "IsExtendedByCleric",
+    "item_name"
   ],
   "emissivity": 5,
   "still_texture": "moonlight:block/soft_fluids/potion_still",

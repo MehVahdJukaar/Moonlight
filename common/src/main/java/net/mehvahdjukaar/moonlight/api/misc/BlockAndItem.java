@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.codec.AlternativeCodec;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -34,8 +35,8 @@ public record BlockAndItem(@Nullable Block block, @Nullable Item item) {
     ).apply(i, BlockAndItem::new));
 
 
-    public static final Codec<BlockAndItem> CODEC = Utils.withAlternativeCodec(Utils.withAlternativeCodec(DIRECT_CODEC,
-                    BuiltInRegistries.BLOCK.byNameCodec().xmap(BlockAndItem::forBlock, BlockAndItem::block)),
+    public static final Codec<BlockAndItem> CODEC = new AlternativeCodec<>(DIRECT_CODEC,
+            BuiltInRegistries.BLOCK.byNameCodec().xmap(BlockAndItem::forBlock, BlockAndItem::block),
             BuiltInRegistries.ITEM.byNameCodec().xmap(BlockAndItem::forItem, BlockAndItem::item));
 
 }

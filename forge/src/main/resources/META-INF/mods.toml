@@ -9,7 +9,6 @@ issueTrackerURL = "https://github.com/MehVahdJukaar/Moonlight/issues" #optional
     displayName = "Moonlight Library"
     authors = "MehVahdJukaar"
     modUrl = "https://www.curseforge.com/minecraft/mc-mods/selene" #optional
-    updateJSONURL = "https://api.modrinth.com/updates/moonlight/forge_updates.json"
 
     logoFile="icon.png" #optional
     description = '''
