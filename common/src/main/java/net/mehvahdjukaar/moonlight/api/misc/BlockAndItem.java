@@ -15,13 +15,13 @@ import org.jetbrains.annotations.Nullable;
 
 public record BlockAndItem(@Nullable Block block, @Nullable Item item) {
 
-    private static BlockAndItem forBlock(Block block) {
+    public static BlockAndItem forBlock(Block block) {
         Item i = block.asItem();
         if (i == Items.AIR) i = null;
         return new BlockAndItem(block, i);
     }
 
-    private static BlockAndItem forItem(Item item) {
+    public static BlockAndItem forItem(Item item) {
         Block block = null;
         if (item instanceof BlockItem b) {
             block = b.getBlock();

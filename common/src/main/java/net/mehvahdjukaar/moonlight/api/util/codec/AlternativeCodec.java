@@ -24,13 +24,13 @@ public record AlternativeCodec<A>(Codec<? extends A> ...codecs) implements Codec
             Codec<? extends A> codec = codecs[i];
           var result = codec.decode(ops, input);
 
-            if (result.isSuccess()) {
+            if (result.result().isPresent()) {
                 // Success: cast to A safely and return
                 return result.map(vo -> Pair.of(vo.getFirst(), vo.getSecond()));
             }
 
             // Keep partial for fallback
-            if (result.hasResultOrPartial()) {
+            if (result.result().isPresent()) {
                 lastPartial = result.map(vo -> Pair.of(vo.getFirst(), vo.getSecond()));
             }
 
@@ -54,7 +54,7 @@ public record AlternativeCodec<A>(Codec<? extends A> ...codecs) implements Codec
         for (Codec<? extends A> codec : codecs) {
             try {
                 DataResult<T> encoded = ((Codec<A>) codec).encode(input, ops, prefix);
-                if (encoded.isSuccess()) {
+                if (encoded.result().isPresent()) {
                     return encoded;
                 }
             } catch (ClassCastException ignored) {
