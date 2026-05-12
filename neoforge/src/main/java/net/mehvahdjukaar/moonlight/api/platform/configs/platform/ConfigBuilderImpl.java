@@ -16,9 +16,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.http.annotation.Experimental;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -46,6 +50,16 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return cat.peekFirst();
     }
 
+    @Nullable
+    @Override
+    public String parentCategory() {
+        if (cat.size() < 2) {
+            return null;
+        }
+        var it = cat.descendingIterator();
+        it.next(); // current category
+        return it.next(); // parent category
+    }
 
     @Override
     public ForgeConfigHolder build() {
@@ -304,7 +318,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     // wrapper class for special configs. ugly and hacky just to allow cachind as defualt config entries arent extendable
-   abstract static class ValueWrapper<T, C> implements Supplier<T> {
+    abstract static class ValueWrapper<T, C> implements Supplier<T> {
         private final ModConfigSpec.ConfigValue<C> original;
         private T cachedValue = null;
 

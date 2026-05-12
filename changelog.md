@@ -1,2 +1,1 @@
-- fixed a rare issue with dynamic packs. Thanks to embeddedt for figuring this out
-- fixed a scaling issue with texture collager class
+- restored some deleted classes preventing issues with some mods
