@@ -91,6 +91,8 @@ public abstract class ConfigBuilder {
 
     public abstract String currentCategory();
 
+    public abstract String parentCategory();
+
     public abstract <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate);
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);

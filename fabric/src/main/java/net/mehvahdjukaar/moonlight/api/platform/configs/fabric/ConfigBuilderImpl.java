@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.fabric.values.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -45,6 +46,17 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public String currentCategory() {
         return categoryStack.peek().getName();
+    }
+
+    @Nullable
+    @Override
+    public String parentCategory() {
+        if (categoryStack.size() < 2) {
+            return null;
+        }
+        var it = categoryStack.descendingIterator();
+        it.next(); // current category
+        return it.next().getName(); // parent category
     }
 
     @Override
