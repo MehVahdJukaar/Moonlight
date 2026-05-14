@@ -5,12 +5,10 @@ transitive-accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenC
 transitive-accessible method net/minecraft/client/gui/screens/MenuScreens register (Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V
 
 transitive-accessible class net/minecraft/world/inventory/MenuType$MenuSupplier
-transitive-accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
 
 transitive-accessible field net/minecraft/world/entity/LivingEntity dead Z
 accessible field net/minecraft/client/renderer/RenderStateShard setupState Ljava/lang/Runnable;
 mutable field net/minecraft/client/renderer/RenderStateShard setupState Ljava/lang/Runnable;
-
 
 accessible method net/minecraft/world/entity/player/Inventory hasRemainingSpaceForItem (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
 accessible method net/minecraft/world/entity/player/Inventory addResource (ILnet/minecraft/world/item/ItemStack;)I

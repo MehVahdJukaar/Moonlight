@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.platform.platform.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ModIngredientTypes;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditionsBridge;
+import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.integration.platform.ModConfigSelectScreen;
@@ -68,8 +69,8 @@ public class MoonlightForge {
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init(bus);
 
-            if (PlatHelper.isModLoaded("configured")) {
-                ModConfigSelectScreen.registerConfigScreen(MOD_ID, ModConfigSelectScreen::new);
+            if (CompatHandler.CONFIGURED) {
+               ModConfigSelectScreen.registerConfigScreen(MOD_ID, ModConfigSelectScreen::new);
             }
         }
 

@@ -115,9 +115,9 @@ public abstract class CustomConfigScreen extends ConfigScreen {
     @Override
     protected void constructEntries(List<Item> entries) {
         super.constructEntries(entries);
-        List<Item> copy = new ArrayList<>(entries);
+        List<Item> entriesCopy = new ArrayList<>(entries);
+        ListIterator<Item> iter = entriesCopy.listIterator();
         entries.clear();
-        ListIterator<Item> iter = copy.listIterator();
         while (iter.hasNext()) {
             var e = iter.next();
             if (e.getLabel().toLowerCase(Locale.ROOT).equals(getEnabledKeyword())) {
@@ -125,7 +125,7 @@ public abstract class CustomConfigScreen extends ConfigScreen {
                 entries.add(e);
             }
         }
-        entries.addAll(copy);
+        entries.addAll(entriesCopy);
     }
 
     public ItemStack getIcon(String... path) {

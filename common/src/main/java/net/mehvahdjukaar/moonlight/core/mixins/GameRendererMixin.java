@@ -13,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
 
+    //problematic, possibly breaking with other mods. better left off, doesnt make sense to have multiple anyways
+    /*
     @WrapOperation(method = "checkEntityPostEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;loadEffect(Lnet/minecraft/resources/ResourceLocation;)V"))
     public void ml$setCorrectGroup(GameRenderer instance, ResourceLocation resourceLocation, Operation<Void> original) {
         PostShadersHelper.toggleEffect(resourceLocation, PostShadersHelper.Group.SPECTATOR_SHADERS);
@@ -28,5 +30,5 @@ public class GameRendererMixin {
     )
     private void ml$preventClearingPost(GameRenderer instance, PostChain value, Operation<Void> original) {
         PostShadersHelper.toggleEffect(null, PostShadersHelper.Group.SPECTATOR_SHADERS);
-    }
+    }*/
 }

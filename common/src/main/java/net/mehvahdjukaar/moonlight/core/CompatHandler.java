@@ -15,6 +15,7 @@ public class CompatHandler {
     public static final boolean MONOCLE = PlatHelper.isModLoaded("monocle");
     public static final boolean DIAGONALFENCES = PlatHelper.isModLoaded("diagonalfences");
     public static final boolean POLYMER = PlatHelper.isModLoaded("polymer-core");
+    public static final boolean CONFIGURED = PlatHelper.isModLoaded("configured");
 
     private static int compareVersions(String version1, String version2) {
         if (version2.contains("-")) {

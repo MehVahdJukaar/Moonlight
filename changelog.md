@@ -1,1 +1,1 @@
-- restored some deleted classes preventing issues with some mods
+- fixed a compat issue with post shaders

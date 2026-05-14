@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
+import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
 import net.mehvahdjukaar.moonlight.platform.ConfigHacks;
 import net.minecraft.resources.ResourceLocation;
@@ -300,7 +301,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigBuilder worldReload() {
-        builder.worldRestart();
+        //configured has issues with these... Or Maybe its deliberate, makes configs with these not actually apply until world is restarted. def not what we want here.. just configus and alos this is possible a cause of configs not saving
+        if (!CompatHandler.CONFIGURED) {
+            builder.worldRestart();
+        }
         return this;
     }
 

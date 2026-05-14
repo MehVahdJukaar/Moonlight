@@ -5,7 +5,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
-import net.minecraft.client.renderer.PostPass;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -60,7 +59,18 @@ public class PostShadersHelper {
         } else if (currentChain instanceof ComposedPostChain cpc) {
             newChain = cpc.with(newPost, group);
         } else {
-            newChain = ComposedPostChain.wrap(currentChain, Group.DEFAULT);
+            // Another mod set gr.postEffect directly to a non-ComposedPostChain.
+            // If passes are empty the chain was already closed (e.g. by checkEntityPostEffect before the mixin
+            // intercepted the null assignment) — treat it the same as a null chain so we don't wrap dead GL state.
+            if (currentChain.passes.isEmpty()) {
+                if (newPost == null) return null;
+                newChain = ComposedPostChain.create(newPost, group, mainTarget);
+            } else {
+                // Actively rendering external chain: absorb it as DEFAULT and apply our change on top.
+                ComposedPostChain wrapped = ComposedPostChain.wrap(currentChain, Group.DEFAULT);
+                newChain = (newPost == null) ? wrapped : wrapped.with(newPost, group);
+                if (newChain == null) newChain = wrapped;
+            }
         }
         return newChain;
     }
@@ -73,6 +83,19 @@ public class PostShadersHelper {
                                   RenderTarget screenTarget, ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
             super(textureManager, resourceProvider, screenTarget, resourceLocation);
         }
+
+
+        @Override
+        public void close() {
+            for (PostChain sub : chainsPerGroup.values()) {
+                sub.close();
+            }
+            chainsPerGroup.clear();
+            passes.clear();             // references are now dead; clear so nothing else touches them
+            customRenderTargets.clear();
+            fullSizedTargets.clear();
+        }
+
 
         //prevent it from loading normally
         public void load(@NotNull TextureManager textureManager, @NotNull ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
@@ -121,8 +144,9 @@ public class PostShadersHelper {
             } else {
                 PostChain newChain = new PostChain(tm, rm, this.screenTarget, newEffect);
                 newChain.resize(this.screenTarget.width, this.screenTarget.height);
-
-                newGroups.put(group, newChain);
+                // Close the old sub-chain for this group if one existed, so its GL programs are freed.
+                PostChain old = newGroups.put(group, newChain);
+                if (old != null) old.close();
             }
 
             // sort groups by priority
@@ -151,7 +175,7 @@ public class PostShadersHelper {
                 result.addSubChain(pc, entry.getKey());
             }
 
-            this.resize(this.screenTarget.width, this.screenTarget.height);
+            result.resize(this.screenTarget.width, this.screenTarget.height);
 
             return result;
 

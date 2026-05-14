@@ -32,10 +32,11 @@ dependencies {
     //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
 
     // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
-    // modRuntimeOnly("net.mehvahdjukaar:supplementaries-neoforge:1.21-3.5.18"){
+    modRuntimeOnly("curse.maven:supplementaries-412082:8051628")
+
     modCompileOnly("curse.maven:map-atlases-forge-519759:4990003")
     //modImplementation ("curse.maven:supplementaries-412082:4995508")
-    modImplementation("curse.maven:configured-457570:7122915")
+    modImplementation("curse.maven:configured-457570:7276577")
     modCompileOnly("curse.maven:yacl-667299:5424504")
     modCompileOnly("curse.maven:alexs-caves-924854:4806837")
 }

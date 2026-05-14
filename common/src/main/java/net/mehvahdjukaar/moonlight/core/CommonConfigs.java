@@ -29,6 +29,7 @@ public class CommonConfigs {
         FASTER_CACHE_SEARCH = builder.comment("Makes the dynamic assets cache use a tree structure for indexing, drastically speeds up query time but could cost some ram.")
                 .define("faster_cache_search", true);
         GLOBAL_DATAPACKS_DIR = builder.comment("Global datapack folder. A folder where you can store and load datapacks for all your worlds automatically. Set to empty string to disable")
+                .worldReload()
                 .define("global_datapacks_folder", "moonlight-global-datapacks");
 
 
