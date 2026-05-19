@@ -65,7 +65,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public ForgeConfigHolder build() {
         return new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
-                this.changeCallback, specialValues);
+                this.buildChangeCallback(), specialValues);
     }
 
     @Override

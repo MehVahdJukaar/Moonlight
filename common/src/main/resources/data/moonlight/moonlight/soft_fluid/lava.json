@@ -14,6 +14,24 @@
     },
     {
       "filled": [
+        "caverns_and_chasms:golden_lava_bucket"
+      ],
+      "fill_sound": "minecraft:item.bucket.fill_lava",
+      "empty_sound": "minecraft:item.bucket.empty_lava",
+      "empty": "caverns_and_chasms:golden_bucket",
+      "capacity": "BUCKET"
+    },
+    {
+      "filled": [
+        "windswept:wooden_lava_bucket"
+      ],
+      "fill_sound": "minecraft:item.bucket.fill_lava",
+      "empty_sound": "minecraft:item.bucket.empty_lava",
+      "empty": "windswept:wooden_bucket",
+      "capacity": "BUCKET"
+    },
+    {
+      "filled": [
         "alexsmobs:lava_bottle"
       ],
       "fill_sound": "minecraft:item.bucket.fill_lava",

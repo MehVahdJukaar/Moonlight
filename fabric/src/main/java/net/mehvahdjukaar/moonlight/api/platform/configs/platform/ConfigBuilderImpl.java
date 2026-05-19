@@ -40,7 +40,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @NotNull
     public FabricConfigHolder build() {
         assert categoryStack.size() == 1;
-        return new FabricConfigHolder(this.getName(), mainCategory, this.type, this.changeCallback);
+        return new FabricConfigHolder(this.getName(), mainCategory, this.type, this.buildChangeCallback());
     }
 
     @Override

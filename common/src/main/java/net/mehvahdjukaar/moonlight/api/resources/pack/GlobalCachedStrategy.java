@@ -22,6 +22,17 @@ public abstract class GlobalCachedStrategy implements PackGenerationStrategy {
 
     private static final Map<PackType, String> LAST_KNOWN_HASH = new HashMap<>();
 
+    public static void invalidateState(PackType packType) {
+        Path file = getCacheHashPath(packType);
+        try {
+            Files.deleteIfExists(file);
+        } catch (Exception e) {
+            Moonlight.LOGGER.debug("Failed deleting cache fingerprint for {}: {}", packType, e.toString());
+        }
+        NEEDS_REGEN.put(packType, true);
+        LAST_KNOWN_HASH.remove(packType);
+    }
+
     public static void refreshState(PackType packType, Collection<PackResources> loadedPacks) {
         String oldHash = readFingerprint(packType);
         String newHash = computeCurrentFingerprint(loadedPacks);
@@ -85,8 +96,8 @@ public abstract class GlobalCachedStrategy implements PackGenerationStrategy {
         int i = 0;
         for (PackResources p : packs) {
             String id = p.packId();
-            if(FilteredResManager.isDynamicPackResource(p)) continue;
-            if(FilteredResManager.isModResourcePack(p)) continue;
+            if (FilteredResManager.isDynamicPackResource(p)) continue;
+            if (FilteredResManager.isModResourcePack(p)) continue;
 
             String description = "";
             try {

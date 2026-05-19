@@ -11,4 +11,8 @@ public enum ConfigType {
         if (this == CLIENT) return "client";
         else return "common";
     }
+
+    boolean isClient() {
+        return this == CLIENT;
+    }
 }

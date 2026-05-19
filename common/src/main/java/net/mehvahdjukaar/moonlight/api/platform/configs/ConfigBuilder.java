@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +30,7 @@ public abstract class ConfigBuilder {
     protected String currentComment;
     protected String currentKey;
     protected Runnable changeCallback;
+    protected boolean affectsDynamicPacks;
 
     //always on. can be called to disable
     protected boolean usesDataBuddy = true;
@@ -67,6 +69,11 @@ public abstract class ConfigBuilder {
 
     public <T extends ConfigBuilder> T setWriteJsons() {
         this.usesDataBuddy = false;
+        return (T) this;
+    }
+
+    public <T extends ConfigBuilder> T affectsDynamicPacks() {
+        this.affectsDynamicPacks = true;
         return (T) this;
     }
 
@@ -177,6 +184,19 @@ public abstract class ConfigBuilder {
     public ConfigBuilder onChange(Runnable callback) {
         this.changeCallback = callback;
         return this;
+    }
+
+    protected Runnable buildChangeCallback() {
+        if (!this.affectsDynamicPacks) {
+            return this.changeCallback;
+        }
+        return () -> {
+            //TODO: change this was extremely naiive since the changecallback is called every time the config loads, specially when synced and doesnt care about if that particular config entry was changed or not
+            GlobalCachedStrategy.invalidateState(this.type.isClient() ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA);
+            if (this.changeCallback != null) {
+                this.changeCallback.run();
+            }
+        };
     }
 
     public abstract ConfigBuilder worldReload();
