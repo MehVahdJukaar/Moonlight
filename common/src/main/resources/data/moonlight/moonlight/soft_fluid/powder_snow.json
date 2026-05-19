@@ -2,13 +2,29 @@
   "containers": [
     {
       "filled": [
-        "minecraft:powder_snow_bucket",
-        "caverns_and_chasms:golden_powder_snow_bucket",
-        "windswept:wooden_powder_snow_bucket"
+        "minecraft:powder_snow_bucket"
       ],
       "fill_sound": "minecraft:item.bucket.fill_powder_snow",
       "empty_sound": "minecraft:item.bucket.empty_powder_snow",
       "empty": "minecraft:bucket",
+      "capacity": 3
+    },
+    {
+      "filled": [
+        "caverns_and_chasms:golden_powder_snow_bucket"
+      ],
+      "fill_sound": "minecraft:item.bucket.fill_powder_snow",
+      "empty_sound": "minecraft:item.bucket.empty_powder_snow",
+      "empty": "caverns_and_chasms:golden_bucket",
+      "capacity": 3
+    },
+    {
+      "filled": [
+        "windswept:wooden_powder_snow_bucket"
+      ],
+      "fill_sound": "minecraft:item.bucket.fill_powder_snow",
+      "empty_sound": "minecraft:item.bucket.empty_powder_snow",
+      "empty": "windswept:wooden_bucket",
       "capacity": 3
     }
   ],
