@@ -25,7 +25,7 @@ public class ObjectConfigValue<T> extends ConfigValue<T> {
     }
 
     @Override
-    public void loadFromJson(JsonObject element) {
+    public boolean loadFromJson(JsonObject element) {
         if (element.has(this.name)) {
             try {
                 JsonElement j = element.get(this.name);
@@ -33,19 +33,24 @@ public class ObjectConfigValue<T> extends ConfigValue<T> {
                 var json = e.resultOrPartial(s -> {
                     Moonlight.LOGGER.warn("Failed to parse config {}: {}", name, s);
                 });
+                T newValue = getDefaultValue();
                 if (json.isPresent()) {
-                    this.value = json.get().getFirst();
-                    return;
+                    newValue = json.get().getFirst();
                 }
-                Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting ", name);
-                //if not valid it defaults
-                this.value = defaultValue;
+                if (json.isEmpty()) {
+                    Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting ", name);
+                }
+                boolean changed = this.setAndTrack(newValue);
+                this.markLoaded();
+                return this.affectsDynamicPacks() && changed;
             } catch (Exception ignored) {
             }
             Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
         } else {
             Moonlight.LOGGER.warn("Config file had missing entry {}", this.name);
         }
+        this.markLoaded();
+        return false;
     }
 
     @Override

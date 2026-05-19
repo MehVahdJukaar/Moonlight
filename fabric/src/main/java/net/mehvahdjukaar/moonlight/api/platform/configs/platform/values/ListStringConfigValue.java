@@ -22,26 +22,28 @@ public class ListStringConfigValue<T extends String>  extends ConfigValue<List<S
     }
 
     @Override
-    public void loadFromJson(JsonObject element) {
+    public boolean loadFromJson(JsonObject element) {
         if (element.has(this.name)) {
             try {
                 var array = element.get(this.name);
                 if(array instanceof JsonArray ja){
-                    this.value = new ArrayList<>();
+                    List<String> newValue = new ArrayList<>();
                     for(var v : ja){
                         T s = (T) v.getAsString();
-                        if(this.predicate.test( s)) this.value.add(s);
+                        if(this.predicate.test(s)) newValue.add(s);
                     }
+                    boolean changed = this.setAndTrack(newValue);
+                    this.markLoaded();
+                    return this.affectsDynamicPacks() && changed;
                 }
-                if (this.isValid(value)) return;
-                //if not valid it defaults
-                this.value = defaultValue;
             } catch (Exception ignored) {
             }
             Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
         } else {
             Moonlight.LOGGER.warn("Config file had missing entry {}", this.name);
         }
+        this.markLoaded();
+        return false;
     }
 
     @Override

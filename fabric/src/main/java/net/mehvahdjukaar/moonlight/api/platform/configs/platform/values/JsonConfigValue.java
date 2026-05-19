@@ -22,19 +22,25 @@ public class JsonConfigValue extends ConfigValue<JsonElement> {
     }
 
     @Override
-    public void loadFromJson(JsonObject element) {
+    public boolean loadFromJson(JsonObject element) {
         if (element.has(this.name)) {
             try {
-                this.value = element.get(this.name);
-                if (this.isValid(value)) return;
-                //if not valid it defaults
-                this.value = getDefaultValue();
+                JsonElement newValue = element.get(this.name);
+                if (!this.isValid(newValue)) {
+                    //if not valid it defaults
+                    newValue = getDefaultValue();
+                }
+                boolean changed = this.setAndTrack(newValue);
+                this.markLoaded();
+                return this.affectsDynamicPacks() && changed;
             } catch (Exception ignored) {
             }
             Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
         } else {
             Moonlight.LOGGER.warn("Config file had missing entry {}", this.name);
         }
+        this.markLoaded();
+        return false;
     }
 
     @Override

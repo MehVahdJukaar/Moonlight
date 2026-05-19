@@ -24,19 +24,25 @@ public class IntConfigValue extends ConfigValue<Integer> {
     }
 
     @Override
-    public void loadFromJson(JsonObject element) {
+    public boolean loadFromJson(JsonObject element) {
         if (element.has(this.name)) {
             try {
-                this.value = element.get(this.name).getAsInt();
-                if (this.isValid(value)) return;
-                //if not valid it defaults
-                this.value = defaultValue;
+                Integer newValue = element.get(this.name).getAsInt();
+                if (!this.isValid(newValue)) {
+                    //if not valid it defaults
+                    newValue = defaultValue;
+                }
+                boolean changed = this.setAndTrack(newValue);
+                this.markLoaded();
+                return this.affectsDynamicPacks() && changed;
             } catch (Exception ignored) {
             }
             Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
         } else {
             Moonlight.LOGGER.warn("Config file had missing entry {}", this.name);
         }
+        this.markLoaded();
+        return false;
     }
 
     @Override

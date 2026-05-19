@@ -22,7 +22,8 @@ public abstract class GlobalCachedStrategy implements PackGenerationStrategy {
 
     private static final Map<PackType, String> LAST_KNOWN_HASH = new HashMap<>();
 
-    public static void invalidateState(PackType packType) {
+    public static void forceInvalidateState(PackType packType) {
+        Moonlight.LOGGER.info("Invalidating resource cache for {} due to config change", packType);
         Path file = getCacheHashPath(packType);
         try {
             Files.deleteIfExists(file);

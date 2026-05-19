@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -15,9 +13,8 @@ import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.BoolConfigValue;
+import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.ConfigValue;
-import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+
+import net.minecraft.server.packs.PackType;
 
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.CLOTH_CONFIG;
 import static net.mehvahdjukaar.moonlight.core.CompatHandler.YACL;
@@ -84,8 +83,7 @@ public final class FabricConfigHolder extends ModConfigHolder {
             }
 
             if (config instanceof JsonObject jo) {
-                //don't call a load directly, so we skip the main category name
-                mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
+                loadFromJson(jo);
             }
             if (!initialized) {
                 this.initialized = true;
@@ -94,6 +92,17 @@ public final class FabricConfigHolder extends ModConfigHolder {
             }
         } catch (Exception e) {
             throw new ConfigLoadingException(this, e);
+        }
+    }
+
+    private void loadFromJson(JsonObject jo) {
+        //don't call a load directly, so we skip the main category name
+        boolean invalidateDynamicPacks = false;
+        for (var entry : mainEntry.getEntries()) {
+            invalidateDynamicPacks |= entry.loadFromJson(jo);
+        }
+        if (invalidateDynamicPacks) {
+            GlobalCachedStrategy.forceInvalidateState(getPackType());
         }
     }
 
@@ -200,7 +209,10 @@ public final class FabricConfigHolder extends ModConfigHolder {
     @Override
     public <T> void manuallySetValue(Supplier<T> config, T value) {
         if (config instanceof ConfigValue<T> b) {
-            b.set(value);
+            boolean changed = b.setAndTrack(value);
+            if (changed && b.affectsDynamicPacks()) {
+                GlobalCachedStrategy.forceInvalidateState(getPackType());
+            }
         }
         this.saveConfig();
     }
@@ -213,9 +225,13 @@ public final class FabricConfigHolder extends ModConfigHolder {
         JsonElement config = GSON.fromJson(bufferedReader, JsonElement.class);
         if (config instanceof JsonObject jo) {
             //don't call load directly, so we skip the main category name
-            mainEntry.getEntries().forEach(e -> e.loadFromJson(jo));
+            loadFromJson(jo);
         }
         this.onRefresh();
+    }
+
+    private PackType getPackType() {
+        return this.getConfigType() == ConfigType.CLIENT ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA;
     }
 
     @EventCalled

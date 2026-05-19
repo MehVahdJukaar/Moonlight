@@ -10,7 +10,7 @@ public abstract class ConfigEntry{
         this.name = name;
     }
 
-    public abstract void loadFromJson(JsonObject object);
+    public abstract boolean loadFromJson(JsonObject object);
 
     public abstract void saveToJson(JsonObject object);
 

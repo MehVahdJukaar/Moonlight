@@ -33,11 +33,12 @@ public class CommonConfigs {
                 .define("global_datapacks_folder", "moonlight-global-datapacks");
 
 
-        if(PlatHelper.isDev()){
+        if (PlatHelper.isDev()) {
             builder.push("test_category");
             builder.comment("category comment");
 
             builder
+                    .affectsDynamicPacks()
                     .comment("test comment 1")
                     .define("test", false);
             builder

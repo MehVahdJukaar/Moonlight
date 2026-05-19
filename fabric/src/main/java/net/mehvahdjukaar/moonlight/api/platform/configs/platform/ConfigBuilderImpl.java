@@ -30,6 +30,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private final ConfigSubCategory mainCategory = new ConfigSubCategory(this.getName().getNamespace());
 
     private final Deque<ConfigSubCategory> categoryStack = new ArrayDeque<>();
+    private boolean pendingGameRestart;
+    private boolean pendingWorldReload;
 
     public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);
@@ -84,6 +86,12 @@ public class ConfigBuilderImpl extends ConfigBuilder {
             config.setRawComment(this.translations.get(tooltipKey));
         }
 
+        config.setAffectsDynamicPacks(config.affectsDynamicPacks() || this.pendingDynamicPacks);
+        config.setGameRestart(config.isGameRestart() || this.pendingGameRestart);
+        config.setWorldReload(config.isWorldReload() || this.pendingWorldReload);
+        this.pendingDynamicPacks = false;
+        this.pendingGameRestart = false;
+        this.pendingWorldReload = false;
         Objects.requireNonNull(this.categoryStack.peek()).addEntry(config);
         if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();
     }
@@ -167,14 +175,15 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return config;
     }
 
-    //NYI
     @Override
     public ConfigBuilder gameRestart() {
+        this.pendingGameRestart = true;
         return this;
     }
 
     @Override
     public ConfigBuilder worldReload() {
+        this.pendingWorldReload = true;
         return this;
     }
 

@@ -1,11 +1,12 @@
 package net.mehvahdjukaar.moonlight.platform;
 
 
-import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
+import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
@@ -43,6 +44,7 @@ public class MoonlightForgeClient {
     }
 
     public static void afterLoad(FMLLoadCompleteEvent event) {
+        if (CompatHandler.CONFIGURED) return;
         for (var config : ModConfigHolder.getTrackedSpecs()) {
             if (!config.hasConfigScreen()) {
                 ModList.get().getModContainerById(config.getModId()).ifPresent(c ->

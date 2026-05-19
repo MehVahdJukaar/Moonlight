@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
-import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +29,7 @@ public abstract class ConfigBuilder {
     protected String currentComment;
     protected String currentKey;
     protected Runnable changeCallback;
-    protected boolean affectsDynamicPacks;
+    protected boolean pendingDynamicPacks;
 
     //always on. can be called to disable
     protected boolean usesDataBuddy = true;
@@ -73,8 +72,15 @@ public abstract class ConfigBuilder {
     }
 
     public <T extends ConfigBuilder> T affectsDynamicPacks() {
-        this.affectsDynamicPacks = true;
+        this.pendingDynamicPacks = true;
         return (T) this;
+    }
+
+    public <T> T affectsDynamicPacks(T config) {
+        if (config instanceof IConfigWrapper dynamicPackAffecting) {
+            dynamicPackAffecting.setAffectsDynamicPacks(true);
+        }
+        return config;
     }
 
     public abstract Supplier<Boolean> define(String name, boolean defaultValue);
@@ -126,17 +132,30 @@ public abstract class ConfigBuilder {
 
 
     public Supplier<ResourceLocation> define(String name, ResourceLocation defaultValue) {
-        return new ResourceLocationConfigValue(this, name, defaultValue);
+        var value = new ResourceLocationConfigValue(this, name, defaultValue);
+        return applyPendingDynamicPacks(value);
     }
 
-    private static class ResourceLocationConfigValue implements Supplier<ResourceLocation> {
+    protected <T> T applyPendingDynamicPacks(T value) {
+        if (this.pendingDynamicPacks && value instanceof IConfigWrapper dynamicPackAffecting) {
+            dynamicPackAffecting.setAffectsDynamicPacks(true);
+        }
+        this.pendingDynamicPacks = false;
+        return value;
+    }
+
+    private static class ResourceLocationConfigValue implements Supplier<ResourceLocation>, IConfigWrapper {
 
         private final Supplier<String> inner;
         private ResourceLocation cache;
         private String oldString;
+        private boolean affectsDynamicPacks;
 
         public ResourceLocationConfigValue(ConfigBuilder builder, String path, ResourceLocation defaultValue) {
             this.inner = builder.define(path, defaultValue.toString(), s -> s != null && ResourceLocation.tryParse((String) s) != null);
+            if (this.inner instanceof IConfigWrapper dynamicPackAffecting) {
+                this.affectsDynamicPacks = dynamicPackAffecting.affectsDynamicPacks();
+            }
         }
 
         @Override
@@ -146,6 +165,19 @@ public abstract class ConfigBuilder {
             oldString = s;
             if (cache == null) cache = ResourceLocation.parse(s);
             return cache;
+        }
+
+        @Override
+        public boolean affectsDynamicPacks() {
+            return affectsDynamicPacks;
+        }
+
+        @Override
+        public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
+            this.affectsDynamicPacks = affectsDynamicPacks;
+            if (inner instanceof IConfigWrapper dynamicPackAffecting) {
+                dynamicPackAffecting.setAffectsDynamicPacks(affectsDynamicPacks);
+            }
         }
     }
 
@@ -187,16 +219,7 @@ public abstract class ConfigBuilder {
     }
 
     protected Runnable buildChangeCallback() {
-        if (!this.affectsDynamicPacks) {
-            return this.changeCallback;
-        }
-        return () -> {
-            //TODO: change this was extremely naiive since the changecallback is called every time the config loads, specially when synced and doesnt care about if that particular config entry was changed or not
-            GlobalCachedStrategy.invalidateState(this.type.isClient() ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA);
-            if (this.changeCallback != null) {
-                this.changeCallback.run();
-            }
-        };
+        return this.changeCallback;
     }
 
     public abstract ConfigBuilder worldReload();

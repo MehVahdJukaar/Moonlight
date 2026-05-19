@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.Screen;
@@ -45,6 +46,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import net.minecraft.server.packs.PackType;
+
 @SuppressWarnings("all")
 public final class ForgeConfigHolder extends ModConfigHolder {
 
@@ -58,14 +61,14 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     private final ModConfigSpec spec;
     private final ModConfig modConfig;
 
-    private final List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues;
+    private final List<TrackedConfigValue<?>> trackedValues;
 
     ForgeConfigHolder(ResourceLocation name, ModConfigSpec spec, ConfigType type,
                       @Nullable Runnable onChange,
-                      List<ConfigBuilderImpl.ValueWrapper<?, ?>> specialValues) {
+                      List<TrackedConfigValue<?>> trackedValues) {
         super(name, "toml", FMLPaths.CONFIGDIR.get(), type, onChange);
         this.spec = spec;
-        this.specialValues = specialValues;
+        this.trackedValues = trackedValues;
 
         ModConfig.Type forgeType = this.getConfigType() == ConfigType.CLIENT ? ModConfig.Type.CLIENT : ModConfig.Type.COMMON;
 
@@ -74,7 +77,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
         this.modConfig = ConfigTracker.INSTANCE.registerConfig(forgeType, spec, modContainer, this.getFileName());
 
         var bus = modContainer.getEventBus();
-        if (onChange != null || this.isSynced() || !specialValues.isEmpty()) bus.addListener(this::onConfigChange);
+        if (onChange != null || this.isSynced() || !trackedValues.isEmpty()) bus.addListener(this::onConfigChange);
         if (this.isSynced()) {
             NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
             NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
@@ -118,7 +121,12 @@ public final class ForgeConfigHolder extends ModConfigHolder {
 
     @Override
     public <T> void manuallySetValue(Supplier<T> config, T value) {
-        if (config instanceof ModConfigSpec.ConfigValue<T> cv) {
+        if (config instanceof TrackedConfigValue<T> tracked) {
+            boolean changed = tracked.setValue(value);
+            if (changed && tracked.affectsDynamicPacks()) {
+                GlobalCachedStrategy.forceInvalidateState(this.getPackType());
+            }
+        } else if (config instanceof ModConfigSpec.ConfigValue<T> cv) {
             cv.set(value);
         } else throw new IllegalArgumentException("Unsupported config value type: " + config.getClass());
         spec.save();
@@ -170,8 +178,14 @@ public final class ForgeConfigHolder extends ModConfigHolder {
                 Moonlight.LOGGER.info("Sending changed configs to client", this.getFileName());
                 sendSyncedConfigsToAllPlayers();
             }
+            boolean invalidateDynamicPacks = false;
+            for (TrackedConfigValue<?> trackedValue : trackedValues) {
+                invalidateDynamicPacks |= trackedValue.pollChanged() && trackedValue.affectsDynamicPacks();
+            }
+            if (invalidateDynamicPacks) {
+                GlobalCachedStrategy.forceInvalidateState(this.getPackType());
+            }
             onRefresh();
-            specialValues.forEach(ConfigBuilderImpl.ValueWrapper::clearCache);
         }
     }
 
@@ -257,6 +271,10 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     private static final Method LOAD_CONFIG = ObfuscationReflectionHelper.findMethod(
             ConfigTracker.class, "loadConfig",
             ModConfig.class, Path.class, Function.class);
+
+    private PackType getPackType() {
+        return this.getConfigType() == ConfigType.CLIENT ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA;
+    }
 
 
 }

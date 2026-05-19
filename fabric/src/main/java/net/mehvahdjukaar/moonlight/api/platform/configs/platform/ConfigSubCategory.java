@@ -38,15 +38,20 @@ public class ConfigSubCategory extends ConfigEntry {
     }
 
     @Override
-    public void loadFromJson(JsonObject object) {
+    public boolean loadFromJson(JsonObject object) {
         if (object.has(this.name)) {
             JsonElement o = object.get(this.name);
             if (o instanceof JsonObject jo) {
-                entries.forEach(l -> l.loadFromJson(jo));
+                boolean changed = false;
+                for (ConfigEntry entry : entries) {
+                    changed |= entry.loadFromJson(jo);
+                }
+                return changed;
             }
-            return;
+            return false;
         }
         Moonlight.LOGGER.warn("Config file had missing category {}", this.name);
+        return false;
     }
 
     @Override

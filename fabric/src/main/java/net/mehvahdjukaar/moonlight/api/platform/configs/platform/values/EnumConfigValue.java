@@ -22,25 +22,32 @@ public class EnumConfigValue<T extends Enum<T>> extends ConfigValue<T> {
     }
 
     @Override
-    public void loadFromJson(JsonObject element) {
+    public boolean loadFromJson(JsonObject element) {
         if (element.has(this.name)) {
             try {
                 String s = element.get(this.name).getAsString();
+                T newValue = null;
                 for(var v : acceptedValues){
                     if(v.name().equals(s)){
-                        this.value = v;
-                        return;
+                        newValue = v;
+                        break;
                     }
                 }
-                if (this.isValid(value)) return;
-                //if not valid it defaults
-                this.value = defaultValue;
+                if (newValue == null) {
+                    //if not valid it defaults
+                    newValue = defaultValue;
+                }
+                boolean changed = this.setAndTrack(newValue);
+                this.markLoaded();
+                return this.affectsDynamicPacks() && changed;
             } catch (Exception ignored) {
             }
             Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
         } else {
             Moonlight.LOGGER.warn("Config file had missing entry {}", this.name);
         }
+        this.markLoaded();
+        return false;
     }
 
     @Override

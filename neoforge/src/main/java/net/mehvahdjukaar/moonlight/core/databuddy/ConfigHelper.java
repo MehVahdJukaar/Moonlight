@@ -29,6 +29,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.TrackedConfigValue;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -136,12 +137,14 @@ public class ConfigHelper {
     /**
      * A config-reload-sensitive wrapper around a config field for a complex object
      **/
-    public static class ConfigObject<T> implements Supplier<T> {
+    public static class ConfigObject<T> implements TrackedConfigValue<T> {
         private final ConfigValue<Object> value;
         private final Codec<T> codec;
         private Object cachedObject;
         private T parsedObject;
         private final Supplier<T> defaultObject;
+        private boolean initialized;
+        private boolean affectsDynamicPacks;
 
         private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
             this.value = value;
@@ -152,11 +155,7 @@ public class ConfigHelper {
         @Override
         @Nonnull
         public T get() {
-            Object freshObject = this.value.get();
-            if (!Objects.equals(this.cachedObject, freshObject)) {
-                this.cachedObject = freshObject;
-                this.parsedObject = this.getReparsedObject(freshObject);
-            }
+            pollChanged();
             return this.parsedObject;
         }
 
@@ -166,14 +165,23 @@ public class ConfigHelper {
          * @param value Value to serialize to the config. If object cannot be serialized, an error will be logged and no change will occur.
          */
         public void set(T value) {
+            setValue(value);
+        }
+
+        @Override
+        public boolean setValue(T value) {
+            final boolean[] changed = {false};
             this.codec.encodeStart(TomlConfigOps.INSTANCE, value)
                     .resultOrPartial(e -> LOGGER.error("Config failure: Could not save value {} due to encoding error: {}", value, e))
                     .ifPresent(serializedObject -> {
+                        changed[0] = !Objects.equals(this.cachedObject, serializedObject);
                         this.value.set(serializedObject);
                         this.value.save();
                         this.parsedObject = value;
                         this.cachedObject = serializedObject;
+                        this.initialized = true;
                     });
+            return changed[0];
         }
 
         private T getReparsedObject(Object obj) {
@@ -185,6 +193,33 @@ public class ConfigHelper {
                         LOGGER.error("Config failure: Using default config value due to parsing error: {}", failure.message());
                         return this.defaultObject.get();
                     });
+        }
+
+        @Override
+        public boolean pollChanged() {
+            Object freshObject = this.value.get();
+            if (!this.initialized) {
+                this.cachedObject = freshObject;
+                this.parsedObject = this.getReparsedObject(freshObject);
+                this.initialized = true;
+                return false;
+            }
+            if (!Objects.equals(this.cachedObject, freshObject)) {
+                this.cachedObject = freshObject;
+                this.parsedObject = this.getReparsedObject(freshObject);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean affectsDynamicPacks() {
+            return affectsDynamicPacks;
+        }
+
+        @Override
+        public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
+            this.affectsDynamicPacks = affectsDynamicPacks;
         }
     }
 

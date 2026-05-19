@@ -14,36 +14,41 @@ import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
 import net.mehvahdjukaar.moonlight.platform.ConfigHacks;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.http.annotation.Experimental;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ConfigBuilderImpl extends ConfigBuilder {
 
-    private ModConfigSpec.ConfigValue<?> currentValue;
-    private final List<ValueWrapper<?, ?>> specialValues = new ArrayList<>();
+    private final List<TrackedConfigValue<?>> trackedValues = new ArrayList<>();
 
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         return new ConfigBuilderImpl(name, type);
     }
 
     private final ModConfigSpec.Builder builder;
-
     private final Deque<String> cat = new ArrayDeque<>();
 
     public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);
         this.builder = new ModConfigSpec.Builder();
         ConfigHacks.init();
+    }
+
+    private <T> T track(T value) {
+        value = applyPendingDynamicPacks(value);
+        if (value instanceof TrackedConfigValue<?> trackedValue) {
+            this.trackedValues.add(trackedValue);
+        }
+        return value;
     }
 
     @Override
@@ -58,14 +63,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
             return null;
         }
         var it = cat.descendingIterator();
-        it.next(); // current category
-        return it.next(); // parent category
+        it.next();
+        return it.next();
     }
 
     @Override
     public ForgeConfigHolder build() {
         return new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
-                this.buildChangeCallback(), specialValues);
+                this.buildChangeCallback(), trackedValues);
     }
 
     @Override
@@ -87,45 +92,38 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<Boolean> define(String name, boolean defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue);
-        this.currentValue = value;
-        return value;
+        return track(ValueWrapper.simple(value));
     }
 
     @Override
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
         addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
-        this.currentValue = value;
-        return value;
+        return track(ValueWrapper.simple(value));
     }
 
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
         addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
-        this.currentValue = value;
-        return value;
+        return track(ValueWrapper.simple(value));
     }
-
 
     @Experimental
     @Override
     public Supplier<Float> define(String name, float defaultValue, float min, float max) {
         addTranslationsAndComments(name);
-
         var value = builder.defineInRange(name, defaultValue, min, max);
-
-        this.currentValue = value;
-
-        var wrapper = new ValueWrapper<Float, Double>(value) {
+        return track(new ValueWrapper<Float, Double>(value) {
             @Override
             Float map(Double value) {
                 return value.floatValue();
             }
-        };
-        specialValues.add(wrapper);
-
-        return wrapper;
+            @Override
+            Double unmap(Float value) {
+                return (double) value;
+            }
+        });
     }
 
     @Override
@@ -134,47 +132,49 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         String def = (String) ColorUtils.CODEC.encodeStart(JavaOps.INSTANCE, defaultValue).getOrThrow();
         var value = builder.define(name, def,
                 o -> o instanceof String s && ColorUtils.isValidString(s));
-
-        this.currentValue = value;
-
-        var wrapper = new ValueWrapper<Integer, String>(value) {
-            @Override
-            Integer map(String value) {
-                return ColorUtils.CODEC.parse(JavaOps.INSTANCE, value).getOrThrow();
-            }
-        };
-        specialValues.add(wrapper);
-        return wrapper;
+        return track(ValueWrapper.fromString(value, ColorUtils.CODEC));
     }
-
 
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
-        this.currentValue = value;
-        return value;
+        return track(ValueWrapper.simple(value));
     }
 
     public <T> Supplier<T> define(String name, Supplier<T> defaultValue, Predicate<Object> validator) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
-        this.currentValue = value;
-        return value;
+        return track(ValueWrapper.simple(value));
     }
 
     @Override
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
         addTranslationsAndComments(name);
         var value = builder.defineList(name, defaultValue, predicate);
-        this.currentValue = value;
-        return () -> (List<String>) value.get();
+        @SuppressWarnings("unchecked")
+        ModConfigSpec.ConfigValue<List<String>> listValue = (ModConfigSpec.ConfigValue<List<String>>) (ModConfigSpec.ConfigValue<?>) value;
+        return track(ValueWrapper.simple(listValue));
     }
 
     @Override
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
-        if (usesDataBuddy) return ConfigHelper.defineObject(builder, name, codec, defaultSupplier); //actual toml parse
-        return StringCodecConfigValue.define(this, name, defaultSupplier, codec); //string-based config
+        if (usesDataBuddy) return track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier));
+
+        com.google.common.base.Supplier<JsonElement> jsonSupplier = () -> {
+            var e = codec.encodeStart(JsonOps.INSTANCE, defaultSupplier.get());
+            var json = e.resultOrPartial(s -> {
+                throw new RuntimeException("Invalid default value for config " + name + ": " + s);
+            });
+            if (json.isEmpty()) throw new RuntimeException("Invalid default value for config " + name);
+            return json.get();
+        };
+        return track(ValueWrapper.codec(
+                builder.define(name,
+                        () -> jsonSupplier.get().toString().replace(" ", "").replace("\"", "'"),
+                        o -> o != null && jsonSupplier.get().getClass().isAssignableFrom(o.getClass())),
+                codec
+        ));
     }
 
     @Override
@@ -183,114 +183,25 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return super.defineObjectList(name, defaultSupplier, codec);
     }
 
-    private static class StringCodecConfigValue<T> implements Supplier<T> {
-
-        private final StringJsonConfigValue inner;
-        private final Codec<T> codec;
-        private T cache;
-
-        public static <T> StringCodecConfigValue<T> define(ConfigBuilderImpl cfg, String name, Supplier<T> defaultValueSupplier, Codec<T> codec) {
-            Supplier<JsonElement> jsonSupplier = () -> {
-                var e = codec.encodeStart(JsonOps.INSTANCE, defaultValueSupplier.get());
-                var json = e.resultOrPartial(s -> {
-                    throw new RuntimeException("Invalid default value for config " + name + ": " + s);
-                });
-                if (json.isEmpty()) throw new RuntimeException("Invalid default value for config " + name);
-                return json.get();
-            };
-
-            var jsonConfig = cfg.defineJson(name, jsonSupplier);
-            return new StringCodecConfigValue<>(jsonConfig, codec);
-        }
-
-        public StringCodecConfigValue(StringJsonConfigValue jsonConfig, Codec<T> codec) {
-            this.inner = jsonConfig;
-            this.codec = codec;
-        }
-
-        @Override
-        public T get() {
-            if (inner.hasBeenReset()) this.cache = null;
-            if (cache == null) {
-                var j = inner.get();
-                var d = codec.decode(JsonOps.INSTANCE, j);
-                var o = d.resultOrPartial(s -> {
-                    throw new RuntimeException("Failed to decode config: " + s);
-                });
-                if (o.isEmpty()) throw new RuntimeException("Failed to parse decode with value" + j);
-                return o.get().getFirst();
-            }
-            return null;
-        }
+    @Override
+    public Supplier<JsonElement> defineJson(String path, JsonElement defaultValue) {
+        return track(ValueWrapper.json(builder.define(path,
+                defaultValue.toString().replace(" ", "").replace("\"", "'"))));
     }
 
     @Override
-    public StringJsonConfigValue defineJson(String path, JsonElement defaultValue) {
-        return StringJsonConfigValue.define(this, path, defaultValue);
-    }
-
-    @Override
-    public StringJsonConfigValue defineJson(String path, Supplier<JsonElement> defaultValue) {
-        return StringJsonConfigValue.define(this, path, defaultValue);
-    }
-
-    public static class StringJsonConfigValue implements Supplier<JsonElement> {
-
-        private static final Field cachedValue = ObfuscationReflectionHelper.findField(ModConfigSpec.ConfigValue.class, "cachedValue");
-
-        static {
-            cachedValue.setAccessible(true);
-        }
-
-        private final ModConfigSpec.ConfigValue<String> inner;
-        private JsonElement cache = null;
-
-        public static StringJsonConfigValue define(ConfigBuilderImpl cfg, String path, Supplier<JsonElement> defaultValueSupplier) {
-            com.google.common.base.Supplier<JsonElement> lazyDefaultValue = Suppliers.memoize(defaultValueSupplier::get);
-            return new StringJsonConfigValue(cfg.define(path, () -> lazyDefaultValue.get().toString().replace(" ", "")
-                    .replace("\"", "'"), o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass())));
-        }
-
-        public static StringJsonConfigValue define(ConfigBuilderImpl cfg, String path, JsonElement defaultValue) {
-            return new StringJsonConfigValue(cfg.define(path, defaultValue.toString().replace(" ", "")
-                    .replace("\"", "'")));
-        }
-
-        StringJsonConfigValue(Supplier<String> innerConfig) {
-            this.inner = (ModConfigSpec.ConfigValue<String>) innerConfig;
-        }
-
-        @Override
-        public JsonElement get() {
-            if (hasBeenReset()) {
-                this.cache = null;
-            }
-            if (cache == null) {
-                String s = inner.get().replace("'", "\"");
-                try {
-                    this.cache = JsonParser.parseString(s);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to parse json config: ", e);
-                }
-            }
-            return cache;
-        }
-
-        public boolean hasBeenReset() {
-            try {
-                return cachedValue.get(inner) == null;
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    public Supplier<JsonElement> defineJson(String path, Supplier<JsonElement> defaultValue) {
+        com.google.common.base.Supplier<JsonElement> lazyDefaultValue = Suppliers.memoize(defaultValue::get);
+        return track(ValueWrapper.json(builder.define(path,
+                () -> lazyDefaultValue.get().toString().replace(" ", "").replace("\"", "'"),
+                o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass()))));
     }
 
     @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.defineEnum(name, defaultValue);
-        this.currentValue = value;
-        return value;
+        return track(ValueWrapper.simple(value));
     }
 
     @Override
@@ -301,7 +212,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigBuilder worldReload() {
-        //configured has issues with these... Or Maybe its deliberate, makes configs with these not actually apply until world is restarted. def not what we want here.. just configus and alos this is possible a cause of configs not saving
         if (!CompatHandler.CONFIGURED) {
             builder.worldRestart();
         }
@@ -316,31 +226,133 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigBuilder comment(String comment) {
-        builder.comment(comment); //.translationKey(getTranslationName());
-        //TODO: choose. either add a translation or a comment literal not both
+        builder.comment(comment);
         return super.comment(comment);
     }
 
-    // wrapper class for special configs. ugly and hacky just to allow cachind as defualt config entries arent extendable
-    abstract static class ValueWrapper<T, C> implements Supplier<T> {
+    abstract static class ValueWrapper<T, C> implements TrackedConfigValue<T> {
         private final ModConfigSpec.ConfigValue<C> original;
         private T cachedValue = null;
+        private C cachedRaw = null;
+        private boolean initialized = false;
+        private boolean affectsDynamicPacks;
 
         ValueWrapper(ModConfigSpec.ConfigValue<C> original) {
             this.original = original;
         }
 
-        abstract T map(C value);
-
-        public void clearCache() {
-            cachedValue = null;
+        // simple pass‑through wrapper
+        public static <T> ValueWrapper<T, T> simple(ModConfigSpec.ConfigValue<T> original) {
+            return new ValueWrapper<>(original) {
+                @Override
+                T map(T value) { return value; }
+                @Override
+                T unmap(T value) { return value; }
+            };
         }
 
+        // wrapper that uses a Codec to convert between String and T (e.g. for colours)
+        public static <T> ValueWrapper<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec) {
+            return new ValueWrapper<>(original) {
+                @Override
+                T map(String value) {
+                    return codec.parse(JavaOps.INSTANCE, value).getOrThrow();
+                }
+                @Override
+                String unmap(T value) {
+                    return codec.encodeStart(JavaOps.INSTANCE, value).getOrThrow().toString();
+                }
+            };
+        }
+
+        // wrapper that handles JSON config values (stored as String, exposed as JsonElement)
+        public static ValueWrapper<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original) {
+            return new ValueWrapper<>(original) {
+                @Override
+                JsonElement map(String value) {
+                    try {
+                        // stored string uses single quotes to avoid escaping issues, revert to double quotes for parsing
+                        return JsonParser.parseString(value.replace("'", "\""));
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to parse JSON config value: " + value, e);
+                    }
+                }
+                @Override
+                String unmap(JsonElement value) {
+                    // store as compact string with single quotes
+                    return value.toString().replace(" ", "").replace("\"", "'");
+                }
+            };
+        }
+
+        public static <T> ValueWrapper<T, String> codec(ModConfigSpec.ConfigValue<String> original, Codec<T> codec) {
+            return new ValueWrapper<>(original) {
+                @Override
+                T map(String raw) {
+                    // raw is stored with single quotes, restore double quotes and parse
+                    JsonElement json = JsonParser.parseString(raw.replace("'", "\""));
+                    return codec.decode(JsonOps.INSTANCE, json)
+                            .getOrThrow()
+                            .getFirst();
+                }
+
+                @Override
+                String unmap(T value) {
+                    JsonElement json = codec.encodeStart(JsonOps.INSTANCE, value).getOrThrow();
+                    // store with single quotes to avoid escaping issues
+                    return json.toString().replace(" ", "").replace("\"", "'");
+                }
+            };
+        }
+
+        abstract T map(C value);
+        abstract C unmap(T value);
+
+        @Override
         public T get() {
-            if (cachedValue == null) {
-                cachedValue = map(original.get());
+            pollChanged();
+            if (cachedValue == null && initialized) {
+                cachedValue = map(cachedRaw);
             }
             return cachedValue;
+        }
+
+        @Override
+        public boolean pollChanged() {
+            C current = original.get();
+            if (!initialized) {
+                cachedRaw = current;
+                cachedValue = map(current);
+                initialized = true;
+                return false;
+            }
+            if (!Objects.equals(cachedRaw, current)) {
+                cachedRaw = current;
+                cachedValue = map(current);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean setValue(T value) {
+            C raw = unmap(value);
+            boolean changed = !initialized || !Objects.equals(cachedRaw, raw);
+            original.set(raw);
+            cachedRaw = raw;
+            cachedValue = value;
+            initialized = true;
+            return changed;
+        }
+
+        @Override
+        public boolean affectsDynamicPacks() {
+            return affectsDynamicPacks;
+        }
+
+        @Override
+        public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
+            this.affectsDynamicPacks = affectsDynamicPacks;
         }
     }
 }
