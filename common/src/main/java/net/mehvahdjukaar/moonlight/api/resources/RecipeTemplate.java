@@ -48,19 +48,23 @@ public class RecipeTemplate {
     @Deprecated(forRemoval = true)
     public static <T extends BlockType, R extends Recipe<?>> RecipeHolder<?> makeSimilarRecipe(R original, T originalMat,
                                                                                                T destinationMat,
-                                                                                               String baseID) {
-        return makeSimilarRecipe(original, originalMat, destinationMat, ResourceLocation.parse(baseID));
+                                                                                               String newId) {
+        return makeSimilarRecipe(original, originalMat, destinationMat, ResourceLocation.parse(newId));
     }
 
     public static <T extends BlockType, R extends Recipe<?>> RecipeHolder<?> makeSimilarRecipe(
             R original, @NotNull T originalMat, @NotNull T destinationMat,
-            ResourceLocation baseID) {
+            ResourceLocation newId) {
         var clazz = original.getClass();
         var remapper = REMAPPERS.get(clazz);
         if (remapper == null) {
             throw new UnsupportedOperationException("Recipe class " + clazz + " not supported. You must register it using RecipeTemplate.register()");
         }
-        ResourceLocation newId = baseID.withPath(p -> p + "/" + destinationMat.getAppendableId());
+
+        //backward compat hack
+        if (newId.getPath().endsWith("_oak")) {
+            newId = newId.withPath(p -> p + "/" + destinationMat.getAppendableId());
+        }
 
         Preconditions.checkNotNull(original, "Found null from block type for remapping for recipe " + originalMat + " with id " + newId);
         Preconditions.checkNotNull(originalMat, "Found null from block type for remapping for recipe " + originalMat + " with id " + newId);
