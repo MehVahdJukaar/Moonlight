@@ -69,12 +69,17 @@ import java.util.function.Supplier;
  */
 public class ClientHelper {
 
+    @SuppressWarnings("all")
     public static Player getLocalPlayer() {
-        return Minecraft.getInstance().player;
+        //dont inline otherwise verified will shit itself
+        var player = Minecraft.getInstance().player;
+        return (Player) (Object) player;
     }
 
+    @SuppressWarnings("all")
     public static Level getLocalLevel() {
-        return Minecraft.getInstance().level;
+        var level = Minecraft.getInstance().level;
+        return (Level) (Object) level;
     }
 
     @FunctionalInterface

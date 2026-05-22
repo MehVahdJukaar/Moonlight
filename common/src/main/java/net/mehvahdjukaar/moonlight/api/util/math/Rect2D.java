@@ -48,6 +48,8 @@ public record Rect2D(int x, int y, int width, int height) {
         return points;
     }
 
+
+
     public Vec2i topLeft() {
         return new Vec2i(x, y + height - 1);
     }
@@ -82,6 +84,10 @@ public record Rect2D(int x, int y, int width, int height) {
 
     public Vec2 getCenter() {
         return new Vec2(x + width / 2.0f, y + height / 2.0f);
+    }
+
+    public Vec2i getSize() {
+        return new Vec2i(width, height);
     }
 
     public Collection<Vec2i> toPoints() {
