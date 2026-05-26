@@ -33,9 +33,11 @@ public abstract class MLMapMarker<D extends MLMapDecoration> {
     protected final boolean shouldRefresh;
     protected final boolean shouldSave;
 
-    public static final Codec<MLMapMarker<?>> REFERENCE_CODEC =
+    public static final Codec<MLMapMarker<?>> CODEC =
             MLMapDecorationType.CODEC.dispatch("type", MLMapMarker::getType,
                     mapWorldMarker -> mapWorldMarker.value().getMarkerCodec());
+    @Deprecated(forRemoval = true)
+    public static final Codec<MLMapMarker<?>> REFERENCE_CODEC =CODEC;
 
     public static <T extends MLMapMarker<?>> Products.P7<RecordCodecBuilder.Mu<T>, Holder<MLMapDecorationType<?, ?>>, BlockPos, Float, Optional<Component>, Optional<Boolean>, Optional<Boolean>, Boolean> baseCodecGroup(
             RecordCodecBuilder.Instance<T> instance) {

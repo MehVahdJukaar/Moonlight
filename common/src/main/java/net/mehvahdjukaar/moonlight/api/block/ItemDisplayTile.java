@@ -49,19 +49,12 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     @Override
     public void setChanged() {
         if (this.level == null || level.isClientSide) return;
-        this.updateTileOnInventoryChanged();
+        this.serverSideUpdateWhenChanged(this.level.registryAccess());
         if (this.needsToUpdateClientWhenChanged()) {
             //this saves and sends a packet to update the client tile
             this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_CLIENTS);
         }
         super.setChanged();
-    }
-
-    /**
-     * called every time the tile is marked dirty or loaded. Server side method.
-     * Put here common logic for things that needs to react to inventory changes like updating blockState or logic
-     */
-    public void updateTileOnInventoryChanged() {
     }
 
     /**
@@ -74,11 +67,29 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     /**
-     * Called after the tile is loaded from packet. Client side.
+     * Called every time the tile is marked dirty or loaded. Server side method.
+     * Put here common logic for things that needs to react to inventory changes like updating blockState or logic
+     */
+    @Deprecated(forRemoval = true)
+    public void updateTileOnInventoryChanged() {
+    }
+
+    /**
+     * Called after the tile is loaded from the packet. Client side.
      * Put here client only visual logic that needs to react to inventory changes
      */
+    @Deprecated(forRemoval = true)
     public void updateClientVisualsOnLoad() {
     }
+
+    public void clientSideUpdateWhenChanged(HolderLookup.Provider registries){
+        updateClientVisualsOnLoad();
+    }
+
+    public void serverSideUpdateWhenChanged(HolderLookup.Provider registries){
+        updateTileOnInventoryChanged();
+    };
+
 
     public ItemStack getDisplayedItem() {
         return this.getItem(0);
@@ -104,7 +115,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                         this.setChanged();
                     } else {
                         //also update visuals on client. will get overwritten by packet tho
-                        this.updateClientVisualsOnLoad();
+                        this.clientSideUpdateWhenChanged(this.level.registryAccess());
                     }
                     return ItemInteractionResult.sidedSuccess(this.level.isClientSide);
                 }
@@ -121,7 +132,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                     //this.setChanged();
                 } else {
                     //also update visuals on client. will get overwritten by packet tho
-                    this.updateClientVisualsOnLoad();
+                    this.clientSideUpdateWhenChanged(this.level.registryAccess());
                 }
                 return ItemInteractionResult.sidedSuccess(this.level.isClientSide);
             }
@@ -155,9 +166,9 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         }
         ContainerHelper.loadAllItems(tag, this.stacks, registries);
         if (this.level != null) {
-            if (this.level.isClientSide) this.updateClientVisualsOnLoad();
+            if (this.level.isClientSide) this.clientSideUpdateWhenChanged(registries);
                 //this doesn't work on first load cause world is null on server. You need to save stuff on nbt
-            else this.updateTileOnInventoryChanged();
+            else this.serverSideUpdateWhenChanged(registries);
         }
     }
 

@@ -7,7 +7,7 @@ plugins {
     id("com.possible-triangle.common") apply false
     id("com.possible-triangle.fabric") apply false
     id("com.possible-triangle.neoforge") apply false
-    id("net.mehvahdjukaar.candlelight") version "1.1.8" apply false
+    id("net.mehvahdjukaar.candlelight") version "1.1.11" apply false
     id("dev.mixinmcp.decompile") version "0.9.0" apply false
 }
 
@@ -29,7 +29,7 @@ subprojects {
     apply(plugin = "maven-publish")
 
     dependencies {
-        compileOnly("net.mehvahdjukaar:candlelight:1.1.8")
+        compileOnly("net.mehvahdjukaar:candlelight:1.1.11")
     }
 
 
@@ -114,7 +114,7 @@ tasks.register("buildAndPublishAll") {
 
     dependsOn(subprojects.map { it.tasks.named("clean") })
     dependsOn(subprojects.map { it.tasks.named("build") })
-    dependsOn(subprojects.map { it.tasks.named("publish") })
+    dependsOn(subprojects.map { it.tasks.named("upload") })
 
     finalizedBy("gitTag")
 }

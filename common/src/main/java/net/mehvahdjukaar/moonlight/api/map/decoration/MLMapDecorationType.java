@@ -43,7 +43,7 @@ public sealed abstract class MLMapDecorationType<D extends MLMapDecoration, M ex
 
 
     // registry reference codec
-    public static final Codec<Holder<MLMapDecorationType<?, ?>>> CODEC = RegistryFileCodec.create(MapDataRegistry.MAP_DECORATION_REGISTRY_KEY, DIRECT_CODEC);
+    public static final Codec<Holder<MLMapDecorationType<?, ?>>> CODEC = RegistryFileCodec.create(MapDataRegistry.MAP_DECORATION_REGISTRY_KEY, DIRECT_CODEC, false);
     // registry reference network codec
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<MLMapDecorationType<?, ?>>> STREAM_CODEC =
             ByteBufCodecs.holderRegistry(MapDataRegistry.MAP_DECORATION_REGISTRY_KEY);
