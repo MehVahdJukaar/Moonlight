@@ -1,11 +1,9 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
-import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
@@ -58,9 +56,9 @@ public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject
      **/
     public static @Nullable McMetaFile merge(@Nullable McMetaFile mostImportant, @Nullable McMetaFile leastImportant) {
         if (mostImportant == null && leastImportant == null) return null;
-        if (leastImportant == null) return mostImportant;
-        if (mostImportant == null) return leastImportant;
-        if (mostImportant.animation == AnimationMetadataSection.EMPTY) {
+        else if (leastImportant == null) return mostImportant;
+        else if (mostImportant == null) return leastImportant;
+        else if (mostImportant.animation == AnimationMetadataSection.EMPTY) {
             return of(leastImportant.animation, mostImportant.moddedStuff);
         }
         return mostImportant;
