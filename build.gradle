@@ -206,7 +206,7 @@ tasks.register('buildAndPublishAll') {
     dependsOn ':publishToMavenLocal'
     dependsOn ':forge:publishToMavenLocal'
     dependsOn ':fabric:publishToMavenLocal'
-    dependsOn ':publish'
+    dependsOn ':common:publish'
     dependsOn ':forge:publish'
     dependsOn ':fabric:publish'
     finalizedBy ':gitTag'
