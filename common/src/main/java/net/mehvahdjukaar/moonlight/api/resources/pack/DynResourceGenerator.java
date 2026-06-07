@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -278,7 +279,8 @@ public abstract class DynResourceGenerator<T extends DynamicResourcePack> implem
     }
 
 
-    private static final Set<DynResourceGenerator<?>> GENERATORS = new HashSet<>();
+    // concurrent set: generators can be constructed off-thread while a reload listener iterates this (#crash: "End size X is less than fixed size Y")
+    private static final Set<DynResourceGenerator<?>> GENERATORS = ConcurrentHashMap.newKeySet();
 
     static {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
