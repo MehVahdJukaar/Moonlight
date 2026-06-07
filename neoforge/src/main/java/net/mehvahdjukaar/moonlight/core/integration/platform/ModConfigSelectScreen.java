@@ -32,17 +32,11 @@ public class ModConfigSelectScreen extends CustomConfigSelectScreen {
 
         int y = this.height - 29;
         int centerX = this.width / 2;
-        int spacing = 22;
 
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, (button) -> this.minecraft.setScreen(this.parent))
-                .bounds(centerX - 45, y, 90, 20).build());
-
-        MediaButton.addAuthorMediaButtonsLeft(this, this::addRenderableWidget,
-                centerX - 45 - spacing, y, spacing, Moonlight.MOD_ID,
+        MediaButton.addAuthorMediaButtons(this, this::addRenderableWidget,
+                centerX, y, 22, Moonlight.MOD_ID,
                 "https://www.curseforge.com/minecraft/mc-mods/moonlight-lib",
-                "https://modrinth.com/mod/moonlight");
-
-        MediaButton.addAuthorMediaButtonsRight(this, this::addRenderableWidget,
-                centerX + 45 + 2, y, spacing);
+                "https://modrinth.com/mod/moonlight",
+                () -> this.minecraft.setScreen(this.parent));
     }
 }

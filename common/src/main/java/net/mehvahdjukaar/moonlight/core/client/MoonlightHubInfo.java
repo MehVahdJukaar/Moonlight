@@ -47,7 +47,7 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
     );
 
     private static final String FETCH_URL =
-            "https://raw.githubusercontent.com/MehVahdJukaar/Moonlight/master/hub.json";
+            "https://raw.githubusercontent.com/MehVahdJukaar/Moonlight/1.21/supplementaries_team_info.json";
 
     public record PartnerServerProvider(MediaButton.MediaIcon icon, String providerName, String url) {
         public static final Codec<PartnerServerProvider> CODEC = RecordCodecBuilder.create(i -> i.group(

@@ -211,115 +211,68 @@ public class MediaButton {
     }
 
     /**
-     * Adds the author's standard media buttons in a single row: patreon, ko-fi,
-     * youtube, twitter, discord, current partner-server, plus the per-mod
-     * curseforge, modrinth and mod page (github wiki) buttons. Author-wide urls
-     * come from the fetched hub config; per-mod urls fall back to whatever is
-     * declared in the loader metadata ({@code fabric.mod.json} or
-     * {@code neoforge.mods.toml}) when {@code null} is passed.
-     * <p>Buttons for urls that remain unresolved (null in args and not declared
-     * in metadata) are silently skipped.
+     * Adds a centered Back button at {@code centerX, y} flanked by the author's
+     * media buttons (patreon/ko-fi/curseforge/modrinth/github on the LEFT going
+     * leftward; discord/youtube/twitter/partner-server on the RIGHT going
+     * rightward). Replicates the classic Moonlight screen bottom bar.
+     * <p>Per-mod urls (CF, MR, mod page) fall back to loader metadata
+     * ({@code fabric.mod.json} / {@code neoforge.mods.toml}) when {@code null};
+     * buttons that stay unresolved are silently skipped. The partner-server
+     * slot is skipped when no partner is currently configured in the hub.
      *
-     * @param adder        typically {@code screen::addRenderableWidget}
-     * @param modId        mod id used to resolve metadata fallbacks
-     * @param curseforgeUrl explicit CurseForge page, or {@code null} to look up via metadata
-     * @param modrinthUrl   explicit Modrinth page, or {@code null} to look up via metadata
-     * @param modSourceUrl    explicit mod home/wiki url, or {@code null} to look up via metadata
-     * @return the next x position after the last placed button
+     * @param adder         typically {@code screen::addRenderableWidget}
+     * @param modId         mod id used to resolve metadata fallbacks
+     * @param curseforgeUrl explicit CF page, or {@code null} to use metadata
+     * @param modrinthUrl   explicit Modrinth page, or {@code null} to use metadata
+     * @param modSourceUrl  explicit mod home/wiki url, or {@code null} to use metadata
+     * @param onBack        runnable invoked when the Back button is pressed
      */
-    public static int addAuthorMediaRow(Screen parent, Consumer<Button> adder, int x, int y, int spacing,
-                                        String modId,
-                                        @Nullable String curseforgeUrl,
-                                        @Nullable String modrinthUrl,
-                                        @Nullable String modSourceUrl) {
-        if (curseforgeUrl == null) curseforgeUrl = PlatHelper.getModCurseforgeUrl(modId);
-        if (modrinthUrl == null)   modrinthUrl   = PlatHelper.getModModrinthUrl(modId);
-        if (modSourceUrl == null)    modSourceUrl    = PlatHelper.getModSourcesUrl(modId);
-        MoonlightHubInfo hub = MoonlightHubInfo.INSTANCE;
-        int cur = x;
-        adder.accept(patreon(parent, cur, y, hub.patreon()));   cur += spacing;
-        adder.accept(koFi(parent, cur, y, hub.koFi()));         cur += spacing;
-        if (curseforgeUrl != null) { adder.accept(curseForge(parent, cur, y, curseforgeUrl)); cur += spacing; }
-        if (modrinthUrl != null)   { adder.accept(modrinth(parent, cur, y, modrinthUrl));     cur += spacing; }
-        if (modSourceUrl != null)    { adder.accept(github(parent, cur, y, modSourceUrl));        cur += spacing; }
-        adder.accept(youtube(parent, cur, y, hub.youtube()));   cur += spacing;
-        adder.accept(twitter(parent, cur, y, hub.twitter()));   cur += spacing;
-        adder.accept(discord(parent, cur, y, hub.discord()));   cur += spacing;
-        Button sp = serverProvider(parent, cur, y);
-        if (sp != null) { adder.accept(sp); cur += spacing; }
-        return cur;
-    }
-
-    /** Auto-resolves all per-mod urls from loader metadata. */
-    public static int addAuthorMediaRow(Screen parent, Consumer<Button> adder, int x, int y, int spacing,
-                                        String modId) {
-        return addAuthorMediaRow(parent, adder, x, y, spacing, modId, null, null, null);
-    }
-
-    /**
-     * Explicit CurseForge + Modrinth urls; the mod-page (github) url is inferred
-     * from loader metadata.
-     */
-    public static int addAuthorMediaRow(Screen parent, Consumer<Button> adder, int x, int y, int spacing,
-                                        String modId,
-                                        @Nullable String curseforgeUrl,
-                                        @Nullable String modrinthUrl) {
-        return addAuthorMediaRow(parent, adder, x, y, spacing, modId, curseforgeUrl, modrinthUrl, null);
-    }
-
-    /**
-     * Places the per-mod and support buttons RIGHT-to-LEFT starting at {@code x}:
-     * patreon (at x), ko-fi, curseforge, modrinth, mod page. Designed to sit on
-     * the LEFT of a centered widget (e.g. a Back button).
-     * <p>Per-mod urls fall back to loader metadata when {@code null}; buttons
-     * whose url is unresolved are skipped (no slot consumed).
-     */
-    public static int addAuthorMediaButtonsLeft(Screen parent, Consumer<Button> adder, int x, int y, int spacing,
-                                                String modId,
-                                                @Nullable String curseforgeUrl,
-                                                @Nullable String modrinthUrl,
-                                                @Nullable String modSourceUrl) {
+    public static void addAuthorMediaButtons(Screen parent, Consumer<Button> adder,
+                                             int centerX, int y, int spacing,
+                                             String modId,
+                                             @Nullable String curseforgeUrl,
+                                             @Nullable String modrinthUrl,
+                                             @Nullable String modSourceUrl,
+                                             Runnable onBack) {
         if (curseforgeUrl == null) curseforgeUrl = PlatHelper.getModCurseforgeUrl(modId);
         if (modrinthUrl == null)   modrinthUrl   = PlatHelper.getModModrinthUrl(modId);
         if (modSourceUrl == null)  modSourceUrl  = PlatHelper.getModSourcesUrl(modId);
         MoonlightHubInfo hub = MoonlightHubInfo.INSTANCE;
-        int cur = x;
-        adder.accept(patreon(parent, cur, y, hub.patreon())); cur -= spacing;
-        adder.accept(koFi(parent, cur, y, hub.koFi()));       cur -= spacing;
-        if (curseforgeUrl != null) { adder.accept(curseForge(parent, cur, y, curseforgeUrl)); cur -= spacing; }
-        if (modrinthUrl != null)   { adder.accept(modrinth(parent, cur, y, modrinthUrl));     cur -= spacing; }
-        if (modSourceUrl != null)  { adder.accept(github(parent, cur, y, modSourceUrl));      cur -= spacing; }
-        return cur;
+
+        adder.accept(Button.builder(CommonComponents.GUI_BACK, b -> onBack.run())
+                .bounds(centerX - 45, y, 90, 20).build());
+
+        // Left side (going leftward from the back button)
+        int left = centerX - 45 - spacing;
+        adder.accept(patreon(parent, left, y, hub.patreon())); left -= spacing;
+        adder.accept(koFi(parent, left, y, hub.koFi()));       left -= spacing;
+        if (curseforgeUrl != null) { adder.accept(curseForge(parent, left, y, curseforgeUrl)); left -= spacing; }
+        if (modrinthUrl != null)   { adder.accept(modrinth(parent, left, y, modrinthUrl));     left -= spacing; }
+        if (modSourceUrl != null)  { adder.accept(github(parent, left, y, modSourceUrl));      left -= spacing; }
+
+        // Right side (going rightward from the back button)
+        int right = centerX + 45 + 2;
+        adder.accept(discord(parent, right, y, hub.discord())); right += spacing;
+        adder.accept(youtube(parent, right, y, hub.youtube())); right += spacing;
+        adder.accept(twitter(parent, right, y, hub.twitter())); right += spacing;
+        Button sp = serverProvider(parent, right, y);
+        if (sp != null) { adder.accept(sp); }
     }
 
     /** Auto-resolves all per-mod urls from loader metadata. */
-    public static int addAuthorMediaButtonsLeft(Screen parent, Consumer<Button> adder, int x, int y, int spacing,
-                                                String modId) {
-        return addAuthorMediaButtonsLeft(parent, adder, x, y, spacing, modId, null, null, null);
+    public static void addAuthorMediaButtons(Screen parent, Consumer<Button> adder,
+                                             int centerX, int y, int spacing,
+                                             String modId, Runnable onBack) {
+        addAuthorMediaButtons(parent, adder, centerX, y, spacing, modId, null, null, null, onBack);
     }
 
     /** Explicit CF + MR urls; the mod-page url is inferred from loader metadata. */
-    public static int addAuthorMediaButtonsLeft(Screen parent, Consumer<Button> adder, int x, int y, int spacing,
-                                                String modId,
-                                                @Nullable String curseforgeUrl,
-                                                @Nullable String modrinthUrl) {
-        return addAuthorMediaButtonsLeft(parent, adder, x, y, spacing, modId, curseforgeUrl, modrinthUrl, null);
-    }
-
-    /**
-     * Places the social + partner-server buttons LEFT-to-RIGHT starting at
-     * {@code x}: discord (at x), youtube, twitter, partner-server. Designed to
-     * sit on the RIGHT of a centered widget. The partner-server slot is skipped
-     * when no partner is configured in the hub.
-     */
-    public static int addAuthorMediaButtonsRight(Screen parent, Consumer<Button> adder, int x, int y, int spacing) {
-        MoonlightHubInfo hub = MoonlightHubInfo.INSTANCE;
-        int cur = x;
-        adder.accept(discord(parent, cur, y, hub.discord())); cur += spacing;
-        adder.accept(youtube(parent, cur, y, hub.youtube())); cur += spacing;
-        adder.accept(twitter(parent, cur, y, hub.twitter())); cur += spacing;
-        Button sp = serverProvider(parent, cur, y);
-        if (sp != null) { adder.accept(sp); cur += spacing; }
-        return cur;
+    public static void addAuthorMediaButtons(Screen parent, Consumer<Button> adder,
+                                             int centerX, int y, int spacing,
+                                             String modId,
+                                             @Nullable String curseforgeUrl,
+                                             @Nullable String modrinthUrl,
+                                             Runnable onBack) {
+        addAuthorMediaButtons(parent, adder, centerX, y, spacing, modId, curseforgeUrl, modrinthUrl, null, onBack);
     }
 }
