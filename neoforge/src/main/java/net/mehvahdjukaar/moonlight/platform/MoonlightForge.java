@@ -3,8 +3,9 @@ package net.mehvahdjukaar.moonlight.platform;
 import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.platform.platform.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
+import net.mehvahdjukaar.moonlight.api.platform.platform.ForgeHelperImpl;
+import net.mehvahdjukaar.moonlight.api.platform.platform.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ModIngredientTypes;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
@@ -14,6 +15,7 @@ import net.mehvahdjukaar.moonlight.core.integration.platform.ModConfigSelectScre
 import net.mehvahdjukaar.moonlight.core.misc.platform.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginMessage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,8 +41,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -70,7 +74,7 @@ public class MoonlightForge {
             MoonlightForgeClient.init(bus);
 
             if (CompatHandler.CONFIGURED) {
-               ModConfigSelectScreen.registerConfigScreen(MOD_ID, ModConfigSelectScreen::new);
+                ModConfigSelectScreen.registerConfigScreen(MOD_ID, ModConfigSelectScreen::new);
             }
         }
 
@@ -113,7 +117,8 @@ public class MoonlightForge {
                 var beType = e.getValue();
                 var instance = beType.create(BlockPos.ZERO, beType.getValidBlocks().stream().findFirst().get().defaultBlockState());
                 if (instance instanceof ItemDisplayTile) {
-                    registerDefaultItemCap(event, beType);
+                    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, beType,
+                            (sidedContainer, side) -> ForgeHelperImpl.makeDefaultInvHandler((Container) sidedContainer, side));
                 }
             } catch (Exception ignored) {
             }
@@ -121,8 +126,6 @@ public class MoonlightForge {
     }
 
     private static void registerDefaultItemCap(RegisterCapabilitiesEvent event, BlockEntityType<?> beType) {
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, beType,
-                (sidedContainer, side) -> side == null ? new InvWrapper((Container) sidedContainer) : new SidedInvWrapper((WorldlyContainer) sidedContainer, side));
     }
 
     @Nullable

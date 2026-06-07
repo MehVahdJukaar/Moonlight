@@ -166,6 +166,39 @@ public class PlatHelperImpl {
         return ModList.get().getModContainerById(modId).get().getModInfo().getModURL().map(URL::toString).orElse(null);
     }
 
+    public static String getModCurseforgeUrl(String modId) {
+        String custom = readModString(modId, "curseforge");
+        if (custom != null) return custom;
+        // fall back to standard modUrl (modders typically point it at CurseForge)
+        return getModPageUrl(modId);
+    }
+
+    public static String getModModrinthUrl(String modId) {
+        return readModString(modId, "modrinth");
+    }
+
+    public static String getModSourcesUrl(String modId) {
+        String custom = readModString(modId, "sources");
+        if (custom != null) return custom;
+        // fall back: read the file-level issueTrackerURL from the raw config
+        // and strip a trailing /issues to recover the repo root
+        String issues = ModList.get().getModContainerById(modId)
+                .map(c -> c.getModInfo().getOwningFile().getConfig())
+                .flatMap(cfg -> cfg.<String>getConfigElement("issueTrackerURL"))
+                .orElse(null);
+        if (issues != null && issues.endsWith("/issues")) {
+            return issues.substring(0, issues.length() - "/issues".length());
+        }
+        return issues;
+    }
+
+    @Nullable
+    private static String readModString(String modId, String key) {
+        return ModList.get().getModContainerById(modId)
+                .flatMap(c -> c.getModInfo().getConfig().<String>getConfigElement(key))
+                .orElse(null);
+    }
+
     public static String getModName(String modId) {
         return ModList.get().getModContainerById(modId).get().getModInfo().getDisplayName();
     }

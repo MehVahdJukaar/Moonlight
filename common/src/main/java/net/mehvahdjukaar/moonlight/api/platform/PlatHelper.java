@@ -217,7 +217,35 @@ public class PlatHelper {
 
     @Nullable
     @PlatformImpl
+    @Contract
     public static String getModPageUrl(String modId) {
+        throw new AssertionError();
+    }
+
+    /** Mod's CurseForge page url, declared in {@code fabric.mod.json#contact.curseforge}
+     *  or {@code neoforge.mods.toml [[mods]] curseforge}. {@code null} when unset. */
+    @Nullable
+    @PlatformImpl
+    @Contract
+    public static String getModCurseforgeUrl(String modId) {
+        throw new AssertionError();
+    }
+
+    /** Mod's Modrinth page url, declared in {@code fabric.mod.json#contact.modrinth}
+     *  or {@code neoforge.mods.toml [[mods]] modrinth}. {@code null} when unset. */
+    @Nullable
+    @PlatformImpl
+    @Contract
+    public static String getModModrinthUrl(String modId) {
+        throw new AssertionError();
+    }
+
+    /** Mod's source-code url, declared in {@code fabric.mod.json#contact.sources}
+     *  or {@code neoforge.mods.toml [[mods]] sources}. {@code null} when unset. */
+    @Nullable
+    @PlatformImpl
+    @Contract
+    public static String getModSourcesUrl(String modId) {
         throw new AssertionError();
     }
 

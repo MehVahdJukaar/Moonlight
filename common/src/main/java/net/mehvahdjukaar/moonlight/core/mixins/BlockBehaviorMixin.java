@@ -16,7 +16,7 @@ public class BlockBehaviorMixin {
     @Inject(method = "onRemove", at = @At("TAIL"))
     private void moonlight$cleanupOptional(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston, CallbackInfo ci) {
         //handles same block case
-        //needed because vanila while allowing it nicely, doesnt totally work well with states that have optional BE
+        //needed because vanilla while allowing it nicely, doesnt totally work well with states that have optional BE
         if (state.is(newState.getBlock()) && !newState.hasBlockEntity() && state.hasBlockEntity()) {
             level.removeBlockEntity(pos); //also needed here because previous check doesn't clear if its the same block
         }

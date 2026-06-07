@@ -171,6 +171,35 @@ public class PlatHelperImpl {
         return FabricLoader.getInstance().getModContainer(modId).orElseThrow().getMetadata().getContact().get("homepage").orElse(null);
     }
 
+    public static String getModCurseforgeUrl(String modId) {
+        // explicit curseforge key first; fall back to homepage (modders typically
+        // point it at the CurseForge page by convention)
+        return contact(modId, "curseforge", "homepage");
+    }
+
+    public static String getModModrinthUrl(String modId) {
+        // no conventional fallback for modrinth — only return if explicitly set
+        return contact(modId, "modrinth");
+    }
+
+    public static String getModSourcesUrl(String modId) {
+        // sources is standard; fall back to homepage as a last resort
+        return contact(modId, "sources", "homepage");
+    }
+
+    /** Returns the first non-null contact value for the given keys, or null. */
+    @Nullable
+    private static String contact(String modId, String... keys) {
+        var container = FabricLoader.getInstance().getModContainer(modId);
+        if (container.isEmpty()) return null;
+        var ci = container.get().getMetadata().getContact();
+        for (String key : keys) {
+            String v = ci.get(key).orElse(null);
+            if (v != null && !v.isBlank()) return v;
+        }
+        return null;
+    }
+
     public static String getModName(String modId) {
         return FabricLoader.getInstance().getModContainer(modId).orElseThrow().getMetadata().getName();
     }

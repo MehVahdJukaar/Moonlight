@@ -16,6 +16,7 @@ import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -46,8 +47,11 @@ import net.neoforged.neoforge.common.*;
 import net.neoforged.neoforge.common.conditions.ConditionalOps;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import net.neoforged.neoforge.registries.GameData;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -210,11 +214,19 @@ public class ForgeHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<RegisterCapabilitiesEvent> eventConsumer = event -> {
-            event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, type, (container, side) -> new InvWrapper(container));
-
+            event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, type, ForgeHelperImpl::makeDefaultInvHandler);
         };
         MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
+
+    public static @NotNull IItemHandlerModifiable makeDefaultInvHandler(Container container, Direction side) {
+        if (container instanceof WorldlyContainer wc) {
+            return new SidedInvWrapper(wc, side == null ? Direction.UP : side);
+        } else {
+            return new InvWrapper(container);
+        }
+    }
+
 
     public static boolean isInFluidThatCanExtinguish(Entity entity) {
         return entity.isInFluidType((a, b) -> a.canExtinguish(entity));
