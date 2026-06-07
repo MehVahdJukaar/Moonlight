@@ -38,11 +38,11 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
 
     //default one
     public static MoonlightHubInfo OLD_SIGNATURE = new MoonlightHubInfo(
-            new PartnerServerProvider(MediaButton.MediaIcon.AKLIZ, "Akliz", "https://www.akliz.net/mehvahdjukaar"),
+            new PartnerServerProvider(MediaButton.MediaIcon.AKLIZ, "Akliz", "https://www.akliz.net/supplementaries"),
             "https://www.patreon.com/user?u=53696377",
             "https://ko-fi.com/mehvahdjukaar",
-            "https://www.youtube.com/@MehVahdJukaar",
-            "https://twitter.com/Supplementariez",
+            "https://www.youtube.com/watch?v=LSPNAtAEn28&t=1s",
+            "https://twitter.com/Supplementariez?s=09",
             "https://discord.com/invite/qdKRTDf8Cv"
     );
 
