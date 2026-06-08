@@ -22,12 +22,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ApiStatus.Internal
 public class DynamicResourcesInternals {
 
     @Deprecated(forRemoval = true)
-    private static final Set<DynResourceGenerator<?>> GENERATORS = new HashSet<>();
+    private static final Set<DynResourceGenerator<?>> GENERATORS = ConcurrentHashMap.newKeySet();
 
     private static final Multimap<PackType, DynamicResourcesProvider> PROVIDERS = HashMultimap.create();
 
