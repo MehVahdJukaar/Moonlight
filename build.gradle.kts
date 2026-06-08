@@ -27,7 +27,7 @@ subprojects {
     apply(plugin = "maven-publish")
 
     dependencies {
-        compileOnly("net.mehvahdjukaar:candlelight:1.2.11")
+        compileOnly("net.mehvahdjukaar:candlelight:1.2.1")
     }
 
 
