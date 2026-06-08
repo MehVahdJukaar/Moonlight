@@ -1,1 +1,1 @@
-some backports
+- a few new methods for WoodType's boat - Backported from 1.21

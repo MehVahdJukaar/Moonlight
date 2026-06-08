@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
@@ -60,6 +62,26 @@ public class WoodType extends BlockType {
     //mega ugly. i cant initialize it immediately as mods might have not run setup yet
     private final Supplier<net.minecraft.world.level.block.state.properties.WoodType> vanillaType = Suppliers.memoize(this::detectVanillaWood);
 
+    private final Supplier<Boat.Type> boatType = Suppliers.memoize(this::detectVanillaBoat);
+
+    @Nullable
+    private Boat.Type detectVanillaBoat() {
+        if (this == VanillaWoodTypes.OAK) return Boat.Type.OAK;
+        var id = this.getId();
+        var conventions = Set.of(id.getPath(),
+                id.getNamespace() + id.getPath(),
+                id.getNamespace() + "_" + id.getPath(),
+                id.getNamespace() + "/" + id.getPath(),
+                id.toString());
+        for (var s : conventions) {
+            var type = Boat.Type.byName(s);
+            if (type != Boat.Type.OAK) {
+                return type;
+            }
+        }
+        return null;
+    }
+
     @Nullable
     private net.minecraft.world.level.block.state.properties.WoodType detectVanillaWood() {
         if (getChild("hanging_sign") instanceof CeilingHangingSignBlock c) {
@@ -90,11 +112,26 @@ public class WoodType extends BlockType {
         return this.vanillaType.get();
     }
 
+    @Nullable
+    public Boat.Type toVanillaBoat() {
+        return this.boatType.get();
+    }
+
     @NotNull
     public net.minecraft.world.level.block.state.properties.WoodType toVanillaOrOak() {
         var v = toVanilla();
         if (v != null) return v;
         return net.minecraft.world.level.block.state.properties.WoodType.OAK;
+    }
+
+    @NotNull
+    public Boat.Type toVanillaBoatOrOak() {
+        var v = toVanillaBoat();
+        if (v != null) return v;
+        if (this.id.getPath().contains("bamboo")) {
+            return Boat.Type.BAMBOO;
+        }
+        return Boat.Type.OAK;
     }
 
     /**
