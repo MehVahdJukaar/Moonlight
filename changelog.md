@@ -1,1 +1,2 @@
-- bandaid for a issue veil mod has
+- improved referreal links logic
+- fixed a concurrency issue
