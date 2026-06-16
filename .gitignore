@@ -36,3 +36,9 @@ logs/
 .claude/skills/mixin-writing/references/expressions-language.md
 .claude/skills/mixinmcp-tools/SKILL.md
 .claude/skills/mixinmcp-tools/references/toolchains.md
+
+# AI agent / assistant config (local only, not on GitHub)
+.claude/
+.cursor/
+.junie/
+CLAUDE.md
