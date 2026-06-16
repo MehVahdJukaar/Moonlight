@@ -15,18 +15,27 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 public class LinkButton {
 
     public static final ResourceLocation MISC_ICONS = Moonlight.res("textures/gui/misc_icons.png");
 
+    @Nullable
     public static TextAndImageButton create(
                                     Screen parent, int x, int y, int uInd, int vInd, String url, String tooltip) {
         return create(MISC_ICONS, 64, 64, 14, 14, parent, x, y, uInd, vInd, url, tooltip);
     }
 
+    @Nullable
     public static TextAndImageButton create(ResourceLocation texture, int textureW, int textureH, int iconW, int iconH,
                               Screen parent, int x, int y, int uInd, int vInd, String url, String tooltip) {
+
+        // Remote allow-list: if the hub config disabled this media, don't show its button at all.
+        MediaIcon detected = detectIcon(url);
+        if (detected != null && !MoonlightHubInfo.INSTANCE.isButtonEnabled(detected)) {
+            return null;
+        }
 
         // Hijack: if the mod hardcoded one of the canonical legacy urls, redirect to
         // whatever the hub config currently says and swap the icon to our own sprite
@@ -40,6 +49,25 @@ public class LinkButton {
 
         return buildButton(texture, textureW, textureH, iconW, iconH,
                 parent, x, y, uInd, vInd, url, Component.literal(tooltip));
+    }
+
+    // Maps a url to the media it belongs to, so the remote allow-list can hide it.
+    // Covers both the social links handled by the hijack and the store/repo links
+    // (curseforge, modrinth, github...) that mods hardcode with their own uvs.
+    @Nullable
+    private static MediaIcon detectIcon(String url) {
+        String u = url.toLowerCase(Locale.ROOT);
+        if (u.contains("patreon.com")) return MediaIcon.PATREON;
+        if (u.contains("ko-fi.com")) return MediaIcon.KO_FI;
+        if (u.contains("youtube.com") || u.contains("youtu.be")) return MediaIcon.YOUTUBE;
+        if (u.contains("twitter.com") || u.contains("x.com")) return MediaIcon.TWITTER;
+        if (u.contains("discord.com") || u.contains("discord.gg")) return MediaIcon.DISCORD;
+        if (u.contains("curseforge.com")) return MediaIcon.CURSEFORGE;
+        if (u.contains("modrinth.com")) return MediaIcon.MODRINTH;
+        if (u.contains("github.com")) return MediaIcon.GITHUB;
+        if (u.contains("akliz.net")) return MediaIcon.AKLIZ;
+        if (u.contains("bisecthosting.com") || u.contains("bisect")) return MediaIcon.BISECT;
+        return null;
     }
 
     @Nullable
