@@ -32,8 +32,8 @@ public class LinkButton {
     public static TextAndImageButton create(ResourceLocation texture, int textureW, int textureH, int iconW, int iconH,
                               Screen parent, int x, int y, int uInd, int vInd, String url, String tooltip) {
 
-        // Remote allow-list: if the hub config disabled this media, don't show its button at all.
-        MediaIcon detected = detectIcon(url);
+        // Remote allow-list: if the hub config disabled this button type, don't show it at all.
+        ButtonType detected = detectButton(url);
         if (detected != null && !MoonlightHubInfo.INSTANCE.isButtonEnabled(detected)) {
             return null;
         }
@@ -52,20 +52,21 @@ public class LinkButton {
                 parent, x, y, uInd, vInd, url, Component.literal(tooltip));
     }
 
-    // Maps a url to the media it belongs to, so the remote allow-list can hide it. Covers the social
-    // links handled by the hijack plus the store/repo links (curseforge, modrinth, github...) that mods
-    // hardcode with their own uvs. Server hosts are not here: they're a single un-listed button slot.
+    // Maps a url to the button type it belongs to, so the remote allow-list can hide it. Covers the social
+    // links handled by the hijack, the store/repo links (curseforge, modrinth, github...) that mods hardcode
+    // with their own uvs, and any server host url which all collapse onto the single SERVER slot.
     @Nullable
-    private static MediaIcon detectIcon(String url) {
+    private static ButtonType detectButton(String url) {
         String u = url.toLowerCase(Locale.ROOT);
-        if (u.contains("patreon.com")) return MediaIcon.PATREON;
-        if (u.contains("ko-fi.com")) return MediaIcon.KO_FI;
-        if (u.contains("youtube.com") || u.contains("youtu.be")) return MediaIcon.YOUTUBE;
-        if (u.contains("twitter.com") || u.contains("x.com")) return MediaIcon.TWITTER;
-        if (u.contains("discord.com") || u.contains("discord.gg")) return MediaIcon.DISCORD;
-        if (u.contains("curseforge.com")) return MediaIcon.CURSEFORGE;
-        if (u.contains("modrinth.com")) return MediaIcon.MODRINTH;
-        if (u.contains("github.com")) return MediaIcon.GITHUB;
+        if (u.contains("patreon.com")) return ButtonType.PATREON;
+        if (u.contains("ko-fi.com")) return ButtonType.KO_FI;
+        if (u.contains("youtube.com") || u.contains("youtu.be")) return ButtonType.YOUTUBE;
+        if (u.contains("twitter.com") || u.contains("x.com")) return ButtonType.TWITTER;
+        if (u.contains("discord.com") || u.contains("discord.gg")) return ButtonType.DISCORD;
+        if (u.contains("curseforge.com")) return ButtonType.CURSEFORGE;
+        if (u.contains("modrinth.com")) return ButtonType.MODRINTH;
+        if (u.contains("github.com")) return ButtonType.GITHUB;
+        if (u.contains("akliz.net") || u.contains("bisecthosting.com") || u.contains("bisect")) return ButtonType.SERVER;
         return null;
     }
 
