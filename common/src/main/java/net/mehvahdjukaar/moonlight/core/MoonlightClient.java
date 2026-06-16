@@ -13,6 +13,7 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
+import net.mehvahdjukaar.moonlight.core.client.MoonlightHubInfo;
 import net.mehvahdjukaar.moonlight.core.client.SimpleSpecialModelsLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -33,6 +34,7 @@ public class MoonlightClient {
 
     public static void initClient() {
         ClientConfigs.init();
+        MoonlightHubInfo.fetchFromServer();
         ClientHelper.addShaderRegistration(MoonlightClient::registerShaders);
         ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluids"));
         ClientHelper.addClientReloadListener(MapDecorationClientManager::new, Moonlight.res("map_markers"));
