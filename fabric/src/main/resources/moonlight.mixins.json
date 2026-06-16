@@ -14,7 +14,6 @@
     "ItemRendererAccessor",
     "ItemRendererMixin",
     "LocalPlayerMixin",
-    "MenuScreensAccessor",
     "ModelManagerAccessor",
     "ParticleEngineAccessor",
     "SelfCustomBakedModel",
@@ -30,13 +29,11 @@
     "CreateWorldScreenMixin",
     "FireBlockMixin",
     "MappedRegistryAccessor",
-    "MenuTypeAccessor",
     "MinecraftServerMixin",
     "PackRepositoryAccessor",
     "PoiTypeAccessor",
     "RegistryMixin",
-    "ServerPackSourceMixin",
-    "ServerPlayerAccessor"
+    "ServerPackSourceMixin"
   ],
   "injectors": {
     "defaultRequire": 1

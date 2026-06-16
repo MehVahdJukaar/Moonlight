@@ -13,11 +13,7 @@ public class NetworkHelperImplClient {
     public static <M extends Message> void register(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
 
         ClientPlayNetworking.registerGlobalReceiver(messageType.type(),
-                (message, context) -> {
-                    context.client().execute(() -> {
-                        message.handle(new ContextWrapper(context));
-                    });
-                });
+                (message, context) -> message.handle(new ContextWrapper(context)));
     }
 
     public record ContextWrapper(ClientPlayNetworking.Context c) implements Message.Context {

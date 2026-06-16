@@ -21,8 +21,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
-import net.mehvahdjukaar.moonlight.core.network.platform.ClientBoundOpenCustomMenuMessage;
 import net.mehvahdjukaar.moonlight.core.network.platform.ClientBoundSpawnCustomEntityMessage;
+import net.mehvahdjukaar.moonlight.core.network.platform.ExtraDataMenuProvider;
 import net.mehvahdjukaar.moonlight.platform.MoonlightFabric;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -252,7 +252,10 @@ public class PlatHelperImpl {
     }
 
     public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataProvider) {
-        ClientBoundOpenCustomMenuMessage.openMenu(player, menuProvider, extraDataProvider);
+        // Opens through vanilla's flow via Fabric's extended screen handler API. Menus registered via
+        // RegHelper.registerMenuType are ExtendedScreenHandlerType, so the extra data is synced and the
+        // open/content packets stay correctly ordered.
+        player.openMenu(new ExtraDataMenuProvider(menuProvider, extraDataProvider));
     }
 
     public static boolean isModLoadingValid() {
