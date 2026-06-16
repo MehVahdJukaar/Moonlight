@@ -11,7 +11,9 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -24,7 +26,16 @@ import java.util.function.Function;
 
 @ApiStatus.Internal
 public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, String patreon, String koFi,
-                               String youtube, String twitter, String discord) {
+                               String youtube, String twitter, String discord,
+                               Set<MediaButton.ButtonType> buttons) {
+
+    /** @return true if this button should be shown (i.e. it's in the remote allow-list) */
+    public boolean isButtonEnabled(MediaButton.ButtonType type) {
+        return buttons.contains(type);
+    }
+
+    // by default every button is allowed; the remote config can narrow this down
+    public static final Set<MediaButton.ButtonType> ALL_BUTTONS = Set.of(MediaButton.ButtonType.values());
 
     //default offline safe instance
     public static MoonlightHubInfo INSTANCE = new MoonlightHubInfo(
@@ -33,7 +44,8 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
             "https://ko-fi.com/mehvahdjukaar",
             "https://www.youtube.com/@MehVahdJukaar",
             "https://twitter.com/Supplementariez",
-            "https://discord.com/invite/qdKRTDf8Cv"
+            "https://discord.com/invite/qdKRTDf8Cv",
+            ALL_BUTTONS
     );
 
     //default one
@@ -43,7 +55,8 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
             "https://ko-fi.com/mehvahdjukaar",
             "https://www.youtube.com/watch?v=LSPNAtAEn28&t=1s",
             "https://twitter.com/Supplementariez?s=09",
-            "https://discord.com/invite/qdKRTDf8Cv"
+            "https://discord.com/invite/qdKRTDf8Cv",
+            ALL_BUTTONS
     );
 
     private static final String FETCH_URL =
@@ -63,8 +76,11 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
             Codec.STRING.fieldOf("ko_fi").forGetter(p -> p.koFi),
             Codec.STRING.fieldOf("youtube").forGetter(p -> p.youtube),
             Codec.STRING.fieldOf("twitter").forGetter(p -> p.twitter),
-            Codec.STRING.fieldOf("discord").forGetter(p -> p.discord)
-    ).apply(i, (ps, pat, kf, yt, tw, dc) -> new MoonlightHubInfo(ps.orElse(null), pat, kf, yt, tw, dc)));
+            Codec.STRING.fieldOf("discord").forGetter(p -> p.discord),
+            MediaButton.ButtonType.CODEC.listOf().optionalFieldOf("buttons", List.of(MediaButton.ButtonType.values()))
+                    .forGetter(p -> List.copyOf(p.buttons))
+    ).apply(i, (ps, pat, kf, yt, tw, dc, btns) ->
+            new MoonlightHubInfo(ps.orElse(null), pat, kf, yt, tw, dc, Set.copyOf(btns))));
 
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping()
             .registerTypeAdapter(MoonlightHubInfo.class, (JsonDeserializer<MoonlightHubInfo>)

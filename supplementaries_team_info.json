@@ -2,11 +2,22 @@
   "partner_server": {
     "icon": "akliz",
     "provider_name": "Akliz",
-    "url": "https://www.akliz.net/mehvahdjukaar"
+    "url": "https://www.akliz.net/supplementaries"
   },
   "patreon": "https://www.patreon.com/user?u=53696377",
   "ko_fi": "https://ko-fi.com/mehvahdjukaar",
   "youtube": "https://www.youtube.com/@MehVahdJukaar",
   "twitter": "https://twitter.com/Supplementariez",
-  "discord": "https://discord.com/invite/qdKRTDf8Cv"
+  "discord": "https://discord.com/invite/qdKRTDf8Cv",
+  "buttons": [
+    "patreon",
+    "ko_fi",
+    "youtube",
+    "twitter",
+    "discord",
+    "curseforge",
+    "modrinth",
+    "github",
+    "server"
+  ]
 }

@@ -53,6 +53,35 @@ public class MediaButton {
         public String getSerializedName() { return name; }
     }
 
+    /**
+     * A logical button slot the remote allow-list can toggle. Mostly 1:1 with a {@link MediaIcon}, except
+     * {@link #SERVER}, which is a single slot whose icon is chosen per host (akliz, bisect, generic...).
+     * If a {@code ButtonType} is missing from the hub config's allow-list, that button isn't shown.
+     */
+    public enum ButtonType implements StringRepresentable {
+        YOUTUBE,
+        TWITTER,
+        DISCORD,
+        PATREON,
+        KO_FI,
+        CURSEFORGE,
+        MODRINTH,
+        GITHUB,
+        SERVER;
+
+        public static final Codec<ButtonType> CODEC = StringRepresentable.fromValues(ButtonType::values);
+
+        private final String name = this.toString().toLowerCase(Locale.ROOT);
+
+        @Override
+        public String getSerializedName() { return name; }
+    }
+
+    /** @return true if the hub allow-list currently permits this button type. */
+    private static boolean enabled(ButtonType type) {
+        return MoonlightHubInfo.INSTANCE.isButtonEnabled(type);
+    }
+
     public static final ResourceLocation YOUTUBE = MediaIcon.YOUTUBE.sprite();
     public static final ResourceLocation TWITTER = MediaIcon.TWITTER.sprite();
     public static final ResourceLocation DISCORD = MediaIcon.DISCORD.sprite();
@@ -119,46 +148,54 @@ public class MediaButton {
     }
 
     public static Button youtube(Screen parent, int x, int y, String url) {
+        if (!enabled(ButtonType.YOUTUBE)) return placeholderButton(x, y);
         String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.youtube(), MoonlightHubInfo.INSTANCE.youtube());
         return create(parent, x, y, YOUTUBE, redirected,
                 Component.translatable("tooltip.moonlight.media.youtube"));
     }
 
     public static Button twitter(Screen parent, int x, int y, String url) {
+        if (!enabled(ButtonType.TWITTER)) return placeholderButton(x, y);
         String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.twitter(), MoonlightHubInfo.INSTANCE.twitter());
         return create(parent, x, y, TWITTER, redirected,
                 Component.translatable("tooltip.moonlight.media.twitter"));
     }
 
     public static Button discord(Screen parent, int x, int y, String url) {
+        if (!enabled(ButtonType.DISCORD)) return placeholderButton(x, y);
         String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.discord(), MoonlightHubInfo.INSTANCE.discord());
         return create(parent, x, y, DISCORD, redirected,
                 Component.translatable("tooltip.moonlight.media.discord"));
     }
 
     public static Button patreon(Screen parent, int x, int y, String url) {
+        if (!enabled(ButtonType.PATREON)) return placeholderButton(x, y);
         String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.patreon(), MoonlightHubInfo.INSTANCE.patreon());
         return create(parent, x, y, PATREON, redirected,
                 Component.translatable("tooltip.moonlight.media.patreon"));
     }
 
     public static Button koFi(Screen parent, int x, int y, String url) {
+        if (!enabled(ButtonType.KO_FI)) return placeholderButton(x, y);
         String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.koFi(), MoonlightHubInfo.INSTANCE.koFi());
         return create(parent, x, y, KO_FI, redirected,
                 Component.translatable("tooltip.moonlight.media.ko_fi"));
     }
 
     public static Button curseForge(Screen parent, int x, int y, String url) {
+        if (!enabled(ButtonType.CURSEFORGE)) return placeholderButton(x, y);
         return create(parent, x, y, CURSEFORGE, url,
                 Component.translatable("tooltip.moonlight.media.curseforge"));
     }
 
     public static Button modrinth(Screen parent, int x, int y, String url) {
+        if (!enabled(ButtonType.MODRINTH)) return placeholderButton(x, y);
         return create(parent, x, y, MODRINTH, url,
                 Component.translatable("tooltip.moonlight.media.modrinth"));
     }
 
     public static Button github(Screen parent, int x, int y, String url) {
+        if (!enabled(ButtonType.GITHUB)) return placeholderButton(x, y);
         return create(parent, x, y, GITHUB, url,
                 Component.translatable("tooltip.moonlight.media.github"));
     }
@@ -182,6 +219,8 @@ public class MediaButton {
             Button sp = serverProvider(parent, x, y);
             return sp != null ? sp : placeholderButton(x, y);
         }
+        // plain akliz-branded button still belongs to the single SERVER slot
+        if (!enabled(ButtonType.SERVER)) return placeholderButton(x, y);
         return create(parent, x, y, AKLIZ, url,
                 Component.translatable("tooltip.moonlight.media.akliz"));
     }
@@ -203,6 +242,7 @@ public class MediaButton {
      */
     @Nullable
     public static Button serverProvider(Screen parent, int x, int y) {
+        if (!enabled(ButtonType.SERVER)) return null;
         MoonlightHubInfo.PartnerServerProvider info = MoonlightHubInfo.INSTANCE.partnerServer();
         if (info == null) return null;
         Component tooltip = Component.translatable("tooltip.moonlight.media.partner_server",
