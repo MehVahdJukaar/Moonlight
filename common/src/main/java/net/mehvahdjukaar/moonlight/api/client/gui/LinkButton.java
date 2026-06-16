@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.MoonlightHubInfo;
+import net.mehvahdjukaar.moonlight.core.client.MoonlightHubInfo.ButtonType;
 import net.mehvahdjukaar.moonlight.core.client.MoonlightHubInfo.MediaIcon;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.TextAndImageButton;
@@ -43,7 +44,7 @@ public class LinkButton {
         // partner-server slot can switch hosts without the caller updating anything).
         Hijack h = detectHijack(url);
         if (h != null) {
-            return buildButton(h.icon.texture(), iconW, iconH, iconW, iconH,
+            return buildButton(h.icon, iconW, iconH, iconW, iconH,
                     parent, x, y, 0, 0, h.url, h.tooltip != null ? h.tooltip : Component.literal(tooltip));
         }
 
@@ -51,9 +52,9 @@ public class LinkButton {
                 parent, x, y, uInd, vInd, url, Component.literal(tooltip));
     }
 
-    // Maps a url to the media it belongs to, so the remote allow-list can hide it.
-    // Covers both the social links handled by the hijack and the store/repo links
-    // (curseforge, modrinth, github...) that mods hardcode with their own uvs.
+    // Maps a url to the media it belongs to, so the remote allow-list can hide it. Covers the social
+    // links handled by the hijack plus the store/repo links (curseforge, modrinth, github...) that mods
+    // hardcode with their own uvs. Server hosts are not here: they're a single un-listed button slot.
     @Nullable
     private static MediaIcon detectIcon(String url) {
         String u = url.toLowerCase(Locale.ROOT);
@@ -65,8 +66,6 @@ public class LinkButton {
         if (u.contains("curseforge.com")) return MediaIcon.CURSEFORGE;
         if (u.contains("modrinth.com")) return MediaIcon.MODRINTH;
         if (u.contains("github.com")) return MediaIcon.GITHUB;
-        if (u.contains("akliz.net")) return MediaIcon.AKLIZ;
-        if (u.contains("bisecthosting.com") || u.contains("bisect")) return MediaIcon.BISECT;
         return null;
     }
 
@@ -79,18 +78,18 @@ public class LinkButton {
         if (oldPartner != null && oldPartner.url().equals(url)) {
             MoonlightHubInfo.PartnerServerProvider curPartner = cur.partnerServer();
             if (curPartner == null) return null;
-            return new Hijack(curPartner.url(), curPartner.icon(),
+            return new Hijack(curPartner.url(), curPartner.icon().texture(),
                     Component.translatable("tooltip.moonlight.media.partner_server", curPartner.providerName()));
         }
-        if (old.youtube().equals(url)) return new Hijack(cur.youtube(), MediaIcon.YOUTUBE, null);
-        if (old.twitter().equals(url)) return new Hijack(cur.twitter(), MediaIcon.TWITTER, null);
-        if (old.discord().equals(url)) return new Hijack(cur.discord(), MediaIcon.DISCORD, null);
-        if (old.patreon().equals(url)) return new Hijack(cur.patreon(), MediaIcon.PATREON, null);
-        if (old.koFi().equals(url))    return new Hijack(cur.koFi(),    MediaIcon.KO_FI,   null);
+        if (old.youtube().equals(url)) return new Hijack(cur.youtube(), MediaIcon.YOUTUBE.texture(), null);
+        if (old.twitter().equals(url)) return new Hijack(cur.twitter(), MediaIcon.TWITTER.texture(), null);
+        if (old.discord().equals(url)) return new Hijack(cur.discord(), MediaIcon.DISCORD.texture(), null);
+        if (old.patreon().equals(url)) return new Hijack(cur.patreon(), MediaIcon.PATREON.texture(), null);
+        if (old.koFi().equals(url))    return new Hijack(cur.koFi(),    MediaIcon.KO_FI.texture(),   null);
         return null;
     }
 
-    private record Hijack(String url, MediaIcon icon, @Nullable Component tooltip) {}
+    private record Hijack(String url, ResourceLocation icon, @Nullable Component tooltip) {}
 
     private static TextAndImageButton buildButton(ResourceLocation texture, int textureW, int textureH,
                                                   int iconW, int iconH, Screen parent, int x, int y,

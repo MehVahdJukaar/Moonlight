@@ -27,18 +27,14 @@ import java.util.function.Function;
 
 @ApiStatus.Internal
 public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, String patreon, String koFi,
-                               String youtube, String twitter, String discord, Set<MediaIcon> buttons,
-                               boolean serverButton) {
+                               String youtube, String twitter, String discord, Set<ButtonType> buttons) {
 
-    /**
-     * @return true if a button for this media should be shown.
-     * Server hosts (akliz, bisect...) all share the single partner-server slot, so they're gated by one
-     * boolean instead of being listed individually; every other media is gated by the {@link #buttons} allow-list.
-     */
-    public boolean isButtonEnabled(MediaIcon icon) {
-        return icon.isServer() ? serverButton : buttons.contains(icon);
+    /** @return true if this button should be shown (i.e. it's in the remote allow-list) */
+    public boolean isButtonEnabled(ButtonType type) {
+        return buttons.contains(type);
     }
 
+    /** A visual icon (sprite). Several icons (akliz, bisect, generic_server) can back the same {@link ButtonType}. */
     public enum MediaIcon implements StringRepresentable {
         YOUTUBE,
         TWITTER,
@@ -48,37 +44,51 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
         CURSEFORGE,
         MODRINTH,
         GITHUB,
-        AKLIZ(true),
-        BISECT(true),
-        GENERIC_SERVER(true);
+        AKLIZ,
+        BISECT,
+        GENERIC_SERVER;
 
         public static final Codec<MediaIcon> CODEC = StringRepresentable.fromEnum(MediaIcon::values);
 
         private final String name;
         private final ResourceLocation texture;
-        private final boolean server;
 
         MediaIcon() {
-            this(false);
-        }
-
-        MediaIcon(boolean server) {
-            this.server = server;
             this.name = this.toString().toLowerCase(Locale.ROOT);
             this.texture = Moonlight.res("textures/gui/sprites/media/" + name + ".png");
         }
 
         public ResourceLocation texture() { return texture; }
 
-        /** @return true if this icon represents a (partner) server host, which all share one button slot */
-        public boolean isServer() { return server; }
+        @Override
+        public String getSerializedName() { return name; }
+    }
+
+    /**
+     * A logical button slot the remote allow-list can toggle. Mostly 1:1 with a {@link MediaIcon}, except
+     * {@link #SERVER}, which is a single slot whose icon is chosen per host (akliz, bisect, generic...).
+     */
+    public enum ButtonType implements StringRepresentable {
+        YOUTUBE,
+        TWITTER,
+        DISCORD,
+        PATREON,
+        KO_FI,
+        CURSEFORGE,
+        MODRINTH,
+        GITHUB,
+        SERVER;
+
+        public static final Codec<ButtonType> CODEC = StringRepresentable.fromEnum(ButtonType::values);
+
+        private final String name = this.toString().toLowerCase(Locale.ROOT);
 
         @Override
         public String getSerializedName() { return name; }
     }
 
-    // by default every known button is allowed; the remote config can narrow this down
-    public static final Set<MediaIcon> ALL_BUTTONS = Set.of(MediaIcon.values());
+    // by default every button is allowed; the remote config can narrow this down
+    public static final Set<ButtonType> ALL_BUTTONS = Set.of(ButtonType.values());
 
     public static MoonlightHubInfo INSTANCE = new MoonlightHubInfo(
             null,
@@ -87,8 +97,7 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
             "https://www.youtube.com/@MehVahdJukaar",
             "https://twitter.com/Supplementariez",
             "https://discord.com/invite/qdKRTDf8Cv",
-            ALL_BUTTONS,
-            true
+            ALL_BUTTONS
     );
 
     public static MoonlightHubInfo OLD_SIGNATURE = new MoonlightHubInfo(
@@ -106,7 +115,7 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
 
     public record PartnerServerProvider(MediaIcon icon, String providerName, String url) {
         public static final Codec<PartnerServerProvider> CODEC = RecordCodecBuilder.create(i -> i.group(
-                MediaIcon.CODEC.optionalFieldOf("icon", MediaIcon.GENERIC_SERVER).forGetter(PartnerServerProvider::icon),
+                MediaIcon.CODEC.optionalFieldOf("server_provider", MediaIcon.GENERIC_SERVER).forGetter(PartnerServerProvider::icon),
                 Codec.STRING.fieldOf("provider_name").forGetter(PartnerServerProvider::providerName),
                 Codec.STRING.fieldOf("url").forGetter(PartnerServerProvider::url)
         ).apply(i, PartnerServerProvider::new));
@@ -119,7 +128,7 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
             Codec.STRING.fieldOf("youtube").forGetter(p -> p.youtube),
             Codec.STRING.fieldOf("twitter").forGetter(p -> p.twitter),
             Codec.STRING.fieldOf("discord").forGetter(p -> p.discord),
-            MediaIcon.CODEC.listOf().optionalFieldOf("buttons", List.of(MediaIcon.values()))
+            ButtonType.CODEC.listOf().optionalFieldOf("buttons", List.of(ButtonType.values()))
                     .forGetter(p -> List.copyOf(p.buttons))
     ).apply(i, (ps, pat, kf, yt, tw, dc, btns) ->
             new MoonlightHubInfo(ps.orElse(null), pat, kf, yt, tw, dc, Set.copyOf(btns))));

@@ -1,1 +1,2 @@
-- a few new methods for WoodType's boat - Backported from 1.21
+- minor fixes
+- minor changes to media buttons
