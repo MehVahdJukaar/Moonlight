@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
+import net.mehvahdjukaar.moonlight.api.misc.InvPlacer;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -111,7 +113,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                 if (!it.isEmpty()) {
                     onItemRemoved(player, it, slot);
                     if (!this.level.isClientSide()) {
-                        player.setItemInHand(handIn, it);
+                        Utils.addItemOrDrop(player, it);
                         this.setChanged();
                     } else {
                         //also update visuals on client. will get overwritten by packet tho
