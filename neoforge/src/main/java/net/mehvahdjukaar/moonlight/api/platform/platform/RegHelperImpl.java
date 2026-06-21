@@ -29,6 +29,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -265,6 +266,12 @@ public class RegHelperImpl {
             ResourceLocation name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
         return register(name, () -> IMenuTypeExtension.create(containerFactory::apply), Registries.MENU);
+    }
+
+    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
+            ResourceLocation name,
+            MenuType.MenuSupplier<C> containerFactory) {
+        return register(name, () -> new MenuType<>(containerFactory, FeatureFlags.DEFAULT_FLAGS), Registries.MENU);
     }
 
     public static <T extends

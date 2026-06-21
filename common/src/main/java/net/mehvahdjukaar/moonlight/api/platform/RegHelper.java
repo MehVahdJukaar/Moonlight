@@ -327,6 +327,20 @@ public class RegHelper {
         throw new AssertionError();
     }
 
+    /**
+     * Registers a menu type that doesn't need any extra data synced when opened. This registers a
+     * plain vanilla {@link MenuType} instead of a platform extended/networked menu type, so menus
+     * can simply be opened with {@code player.openMenu(provider)}. Use the
+     * {@link #registerMenuType(ResourceLocation, TriFunction)} overload when you need to send extra
+     * data to the client (open these with {@link PlatHelper#openCustomMenu}).
+     */
+    @PlatformImpl
+    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
+            ResourceLocation name,
+            MenuType.MenuSupplier<C> containerFactory) {
+        throw new AssertionError();
+    }
+
     public static <T extends MobEffect> RegSupplier<T> registerEffect(ResourceLocation name, Supplier<T> effect) {
         return register(name, effect, Registries.MOB_EFFECT);
     }

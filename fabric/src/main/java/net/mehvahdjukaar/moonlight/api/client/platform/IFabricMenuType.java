@@ -6,6 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 
@@ -33,6 +34,12 @@ public interface IFabricMenuType<T> {
         return new ExtendedScreenHandlerType<T, FriendlyByteBuf>(
                 (syncId, inventory, data) -> factory.create(syncId, inventory, data),
                 EXTRA_DATA_CODEC);
+    }
+
+    // For menus that don't sync any extra data: a plain vanilla MenuType is enough, so menus open
+    // straight through player.openMenu(provider) without going through the extended handler flow.
+    static <T extends AbstractContainerMenu> MenuType<T> createSimple(MenuType.MenuSupplier<T> factory) {
+        return new MenuType<>(factory, FeatureFlags.DEFAULT_FLAGS);
     }
 
 

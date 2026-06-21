@@ -192,6 +192,12 @@ public class RegHelperImpl {
         return register(name, () -> IFabricMenuType.create(containerFactory::apply), Registries.MENU);
     }
 
+    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
+            ResourceLocation name,
+            MenuType.MenuSupplier<C> containerFactory) {
+        return register(name, () -> IFabricMenuType.createSimple(containerFactory), Registries.MENU);
+    }
+
     public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {
         Supplier<EntityType<T>> s = () -> EntityType.Builder.of(factory, category).sized(width, height).build(name.toString());
         return register(name, s, Registries.ENTITY_TYPE);

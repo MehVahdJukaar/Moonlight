@@ -1,2 +1,1 @@
-- improved referreal links logic
-- fixed a concurrency issue
+fixed an issue with menus and packets
