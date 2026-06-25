@@ -231,8 +231,7 @@ public class HardcodedBlockTypes {
                 .log("goldenstem")
                 .childBlock(STRIPPED_LOG, "shredded_stem")
                 .childBlock(WOOD, "goldmushroom")
-                .childBlock(SAPLING, "golden_mushroom")
-                .childItem(STICK, "whistlecane");
+                .childBlock(SAPLING, "golden_mushroom");
 
         // Desolation - REASON: Spelling Convention
         woodReg.addSimpleFinder("desolation", "charred")
