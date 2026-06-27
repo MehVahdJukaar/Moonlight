@@ -1,4 +1,5 @@
 {
   "item.minecraft.potion_lingering": "Poción persistente",
-  "item.minecraft.potion_splash": "Poción arrojadiza"
+  "item.minecraft.potion_splash": "Poción arrojadiza",
+  "tag.item.moonlight.non_recolorable": "Non Recolorable"
 }

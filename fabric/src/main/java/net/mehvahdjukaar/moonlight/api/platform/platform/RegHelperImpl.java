@@ -192,7 +192,7 @@ public class RegHelperImpl {
         return register(name, () -> IFabricMenuType.create(containerFactory::apply), Registries.MENU);
     }
 
-    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
+    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerSimpleMenuType(
             ResourceLocation name,
             MenuType.MenuSupplier<C> containerFactory) {
         return register(name, () -> IFabricMenuType.createSimple(containerFactory), Registries.MENU);

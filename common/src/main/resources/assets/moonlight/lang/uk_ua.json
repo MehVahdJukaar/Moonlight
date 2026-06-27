@@ -5,8 +5,8 @@
   "gui.moonlight.open_mod_page": "Відкрити сторінку CurseForge %s",
   "message.moonlight.anti_repost": "Здається, ви завантажили %1$s зі шкідливого сайту :( Завантажити справжню версію можна %2$s.",
   "message.moonlight.anti_repost_link": "тут",
-
   "wood_type.twilightforest.dark": "Темне дерево",
   "leaves_type.twilightforest.dark": "Темне дерево",
-  "leaves_type.ulterlands.souldrained": "Скам’яніле"
+  "leaves_type.ulterlands.souldrained": "Скам’яніле",
+  "tag.item.moonlight.non_recolorable": "Non Recolorable"
 }

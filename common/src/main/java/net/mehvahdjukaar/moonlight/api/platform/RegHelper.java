@@ -335,7 +335,7 @@ public class RegHelper {
      * data to the client (open these with {@link PlatHelper#openCustomMenu}).
      */
     @PlatformImpl
-    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
+    public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerSimpleMenuType(
             ResourceLocation name,
             MenuType.MenuSupplier<C> containerFactory) {
         throw new AssertionError();
