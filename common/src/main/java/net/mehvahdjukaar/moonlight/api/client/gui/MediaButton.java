@@ -31,6 +31,7 @@ public class MediaButton {
         KO_FI(),
         CURSEFORGE(),
         MODRINTH(),
+        MARKETPLACE(),
         GITHUB(),
         // server-host partners
         AKLIZ(),
@@ -66,6 +67,7 @@ public class MediaButton {
         KO_FI,
         CURSEFORGE,
         MODRINTH,
+        MARKETPLACE,
         GITHUB,
         SERVER;
 
@@ -89,6 +91,7 @@ public class MediaButton {
     public static final ResourceLocation KO_FI = MediaIcon.KO_FI.sprite();
     public static final ResourceLocation CURSEFORGE = MediaIcon.CURSEFORGE.sprite();
     public static final ResourceLocation MODRINTH = MediaIcon.MODRINTH.sprite();
+    public static final ResourceLocation MARKETPLACE = MediaIcon.MARKETPLACE.sprite();
     public static final ResourceLocation GITHUB = MediaIcon.GITHUB.sprite();
     public static final ResourceLocation AKLIZ = MediaIcon.AKLIZ.sprite();
     public static final ResourceLocation BISECT = MediaIcon.BISECT.sprite();
@@ -200,6 +203,12 @@ public class MediaButton {
                 Component.translatable("tooltip.moonlight.media.github"));
     }
 
+    public static Button marketplace(Screen parent, int x, int y, String url) {
+        if (!enabled(ButtonType.MARKETPLACE)) return placeholderButton(x, y);
+        return create(parent, x, y, MARKETPLACE, url,
+                Component.translatable("tooltip.moonlight.media.marketplace"));
+    }
+
     @Deprecated(forRemoval = true)
     public static Button akliz(Screen parent, int x, int y, String url, String tooltip) {
         return akliz(parent, x, y, url);
@@ -253,8 +262,8 @@ public class MediaButton {
     /**
      * Adds a centered Back button at {@code centerX, y} flanked by the author's
      * media buttons (patreon/ko-fi/curseforge/modrinth/github on the LEFT going
-     * leftward; discord/youtube/twitter/partner-server on the RIGHT going
-     * rightward). Replicates the classic Moonlight screen bottom bar.
+     * leftward; discord/youtube/twitter/marketplace/partner-server on the RIGHT
+     * going rightward). Replicates the classic Moonlight screen bottom bar.
      * <p>Per-mod urls (CF, MR, mod page) fall back to loader metadata
      * ({@code fabric.mod.json} / {@code neoforge.mods.toml}) when {@code null};
      * buttons that stay unresolved are silently skipped. The partner-server
@@ -292,9 +301,10 @@ public class MediaButton {
 
         // Right side (going rightward from the back button)
         int right = centerX + 45 + 2;
-        adder.accept(discord(parent, right, y, hub.discord())); right += spacing;
-        adder.accept(youtube(parent, right, y, hub.youtube())); right += spacing;
-        adder.accept(twitter(parent, right, y, hub.twitter())); right += spacing;
+        adder.accept(discord(parent, right, y, hub.discord()));         right += spacing;
+        adder.accept(youtube(parent, right, y, hub.youtube()));         right += spacing;
+        adder.accept(twitter(parent, right, y, hub.twitter()));         right += spacing;
+        adder.accept(marketplace(parent, right, y, hub.marketplace())); right += spacing;
         Button sp = serverProvider(parent, right, y);
         if (sp != null) { adder.accept(sp); }
     }

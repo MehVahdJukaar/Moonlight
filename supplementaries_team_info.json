@@ -9,6 +9,7 @@
   "youtube": "https://www.youtube.com/@MehVahdJukaar",
   "twitter": "https://twitter.com/Supplementariez",
   "discord": "https://discord.com/invite/qdKRTDf8Cv",
+  "marketplace": "https://www.minecraft.net/en-us/marketplace/pdp/razzleberries/supplementaries/c18ca233-28af-416b-9618-c0c59b64569d",
   "buttons": [
     "patreon",
     "ko_fi",
@@ -17,6 +18,7 @@
     "discord",
     "curseforge",
     "modrinth",
+    "marketplace",
     "github",
     "server"
   ]

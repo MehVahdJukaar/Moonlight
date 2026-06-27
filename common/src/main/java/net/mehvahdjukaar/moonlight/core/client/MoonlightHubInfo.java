@@ -11,6 +11,8 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,7 +28,7 @@ import java.util.function.Function;
 
 @ApiStatus.Internal
 public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, String patreon, String koFi,
-                               String youtube, String twitter, String discord,
+                               String youtube, String twitter, String discord, String marketplace,
                                Set<MediaButton.ButtonType> buttons) {
 
     /** @return true if this button should be shown (i.e. it's in the remote allow-list) */
@@ -37,6 +39,9 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
     // by default every button is allowed; the remote config can narrow this down
     public static final Set<MediaButton.ButtonType> ALL_BUTTONS = Set.of(MediaButton.ButtonType.values());
 
+    private static final String MARKETPLACE_URL =
+            "https://www.minecraft.net/en-us/marketplace/pdp/razzleberries/supplementaries/c18ca233-28af-416b-9618-c0c59b64569d";
+
     //default offline safe instance
     public static MoonlightHubInfo INSTANCE = new MoonlightHubInfo(
             null,
@@ -45,6 +50,7 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
             "https://www.youtube.com/@MehVahdJukaar",
             "https://twitter.com/Supplementariez",
             "https://discord.com/invite/qdKRTDf8Cv",
+            MARKETPLACE_URL,
             ALL_BUTTONS
     );
 
@@ -56,6 +62,7 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
             "https://www.youtube.com/watch?v=LSPNAtAEn28&t=1s",
             "https://twitter.com/Supplementariez?s=09",
             "https://discord.com/invite/qdKRTDf8Cv",
+            "", // marketplace is a new button, not part of the legacy redirect signature
             ALL_BUTTONS
     );
 
@@ -64,10 +71,28 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
 
     public record PartnerServerProvider(MediaButton.MediaIcon icon, String providerName, String url) {
         public static final Codec<PartnerServerProvider> CODEC = RecordCodecBuilder.create(i -> i.group(
-                MediaButton.MediaIcon.CODEC.optionalFieldOf("icon", MediaButton.MediaIcon.GENERIC_SERVER).forGetter(PartnerServerProvider::icon),
+                // lenient so an unknown/future icon id falls back to the generic one instead of failing the whole config
+                MediaButton.MediaIcon.CODEC.lenientOptionalFieldOf("icon", MediaButton.MediaIcon.GENERIC_SERVER).forGetter(PartnerServerProvider::icon),
                 Codec.STRING.fieldOf("provider_name").forGetter(PartnerServerProvider::providerName),
                 Codec.STRING.fieldOf("url").forGetter(PartnerServerProvider::url)
         ).apply(i, PartnerServerProvider::new));
+    }
+
+    private static final List<String> DEFAULT_BUTTON_NAMES = Arrays.stream(MediaButton.ButtonType.values())
+            .map(MediaButton.ButtonType::getSerializedName).toList();
+
+    /** Resolves button ids, silently dropping any this (possibly older) client doesn't recognise. */
+    private static Set<MediaButton.ButtonType> toButtons(List<String> names) {
+        EnumSet<MediaButton.ButtonType> set = EnumSet.noneOf(MediaButton.ButtonType.class);
+        for (String n : names) {
+            for (MediaButton.ButtonType b : MediaButton.ButtonType.values()) {
+                if (b.getSerializedName().equals(n)) {
+                    set.add(b);
+                    break;
+                }
+            }
+        }
+        return set;
     }
 
     public static final Codec<MoonlightHubInfo> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -77,10 +102,12 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
             Codec.STRING.fieldOf("youtube").forGetter(p -> p.youtube),
             Codec.STRING.fieldOf("twitter").forGetter(p -> p.twitter),
             Codec.STRING.fieldOf("discord").forGetter(p -> p.discord),
-            MediaButton.ButtonType.CODEC.listOf().optionalFieldOf("buttons", List.of(MediaButton.ButtonType.values()))
-                    .forGetter(p -> List.copyOf(p.buttons))
-    ).apply(i, (ps, pat, kf, yt, tw, dc, btns) ->
-            new MoonlightHubInfo(ps.orElse(null), pat, kf, yt, tw, dc, Set.copyOf(btns))));
+            Codec.STRING.optionalFieldOf("marketplace", MARKETPLACE_URL).forGetter(p -> p.marketplace),
+            // parsed as raw strings, not an enum codec, so an unknown/future button id can't fail the whole config
+            Codec.STRING.listOf().optionalFieldOf("buttons", DEFAULT_BUTTON_NAMES)
+                    .forGetter(p -> p.buttons.stream().map(MediaButton.ButtonType::getSerializedName).toList())
+    ).apply(i, (ps, pat, kf, yt, tw, dc, mk, btnNames) ->
+            new MoonlightHubInfo(ps.orElse(null), pat, kf, yt, tw, dc, mk, toButtons(btnNames))));
 
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping()
             .registerTypeAdapter(MoonlightHubInfo.class, (JsonDeserializer<MoonlightHubInfo>)
