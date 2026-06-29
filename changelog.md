@@ -1,1 +1,1 @@
-- wood systme improvements and added some utilities to deal with archive files
+- fixed an issue with resource gen fialing to find some textures

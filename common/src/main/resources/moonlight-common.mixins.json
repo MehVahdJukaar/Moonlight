@@ -14,8 +14,11 @@
     "MapInstanceMixin",
     "MapRendererMixin",
     "MinecraftMixin",
+    "ModelPartMixin",
+    "PartDefinitionMixin",
     "PlayerItemInHandLayerMixin",
-    "ThirdPersonRendererMixin"
+    "ThirdPersonRendererMixin",
+    "accessor.AgeableListModelAccessor"
   ],
   "mixins": [
     "BlockBehaviorMixin",
