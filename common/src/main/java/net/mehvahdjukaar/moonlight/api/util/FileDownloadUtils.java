@@ -24,27 +24,54 @@ public final class FileDownloadUtils {
     private static final int READ_TIMEOUT = 30000;
     private static final int MAX_ATTEMPTS = 8;
 
-    /**
-     * Optional callback to receive download progress (0‑100).
-     */
     @FunctionalInterface
     public interface ProgressCallback {
         void onProgress(int percent);
     }
 
+    @FunctionalInterface
+    public interface RetryCallback {
+        void onRetry(int failedAttempt, int maxAttempts, IOException cause);
+    }
+
+    public static class HttpStatusException extends IOException {
+        public final int statusCode;
+
+        public HttpStatusException(int statusCode, String url) {
+            super(String.format("HTTP %d for URL: %s", statusCode, url));
+            this.statusCode = statusCode;
+        }
+
+        public boolean isRetryable() {
+            // Client errors are deterministic and won't change on retry -- except request timeout
+            // (408) and rate limiting (429), which may succeed after backoff.
+            if (statusCode >= 400 && statusCode < 500) {
+                return statusCode == 408 || statusCode == 429;
+            }
+            return true;
+        }
+    }
+
     // Public API -------------------------------------------------------------
 
     public static void download(String urlStr, Path target) throws IOException {
-        download(urlStr, target, null, null);
+        download(urlStr, target, null, null, null);
     }
 
     public static void download(String urlStr, Path target, @Nullable String userAgent) throws IOException {
-        download(urlStr, target, userAgent, null);
+        download(urlStr, target, userAgent, null, null);
     }
 
     public static void download(String urlStr, Path target,
                                 @Nullable String userAgent,
                                 @Nullable ProgressCallback progressCallback) throws IOException {
+        download(urlStr, target, userAgent, progressCallback, null);
+    }
+
+    public static void download(String urlStr, Path target,
+                                @Nullable String userAgent,
+                                @Nullable ProgressCallback progressCallback,
+                                @Nullable RetryCallback retryCallback) throws IOException {
 
         validateUrl(urlStr);
 
@@ -59,12 +86,20 @@ public final class FileDownloadUtils {
                 downloadAttempt(urlStr, tmp, downloadedBytes, userAgent, progressCallback);
                 break; // success
             } catch (IOException e) {
+                // Deterministic failures (e.g. HTTP 403/404) can never succeed; don't waste retries.
+                if (e instanceof HttpStatusException hse && !hse.isRetryable()) {
+                    Files.deleteIfExists(tmp);
+                    throw e;
+                }
                 attempt++;
                 if (attempt >= MAX_ATTEMPTS) {
                     Files.deleteIfExists(tmp);
                     throw new IOException("Failed to download after " + MAX_ATTEMPTS + " attempts: " + urlStr, e);
                 }
                 Moonlight.LOGGER.warn("Download attempt {} failed: {}. Retrying...", attempt, e.getMessage());
+                if (retryCallback != null) {
+                    retryCallback.onRetry(attempt, MAX_ATTEMPTS, e);
+                }
                 try {
                     Thread.sleep(1000L * attempt); // progressive backoff
                 } catch (InterruptedException ie) {
@@ -149,7 +184,7 @@ public final class FileDownloadUtils {
             }
 
             if (responseCode < 200 || responseCode >= 300) {
-                throw new IOException(String.format("HTTP %d for URL: %s", responseCode, urlStr));
+                throw new HttpStatusException(responseCode, urlStr);
             }
 
             // Determine expected total size
