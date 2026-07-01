@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.api.client.config;
+package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
@@ -7,17 +7,14 @@ import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.components.MultilineTextField;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
-
-import java.util.function.Function;
 
 /**
- * A {@link MultiLineEditBox} that renders its text through a per-line syntax highlighter. Vanilla draws every line
- * as a flat-colored plain string, so we override {@link #renderContents} and re-render each display line as a
- * highlighted {@link FormattedCharSequence}; the actual text model, cursor, selection and scrolling all stay in the
+ * A {@link MultiLineEditBox} that renders its text through a per-line {@link SyntaxHighlighter} (vanilla only draws
+ * each line as a flat-colored plain string). Supply any highlighter — e.g. {@link JsonHighlighter#INSTANCE} — and
+ * this re-renders each display line highlighted; the text model, cursor, selection and scrolling all stay in the
  * inherited {@link MultilineTextField} (reached via the {@code textField} access widener). Only rendering changes.
  */
-class JsonEditBox extends MultiLineEditBox {
+public class SyntaxEditBox extends MultiLineEditBox {
 
     private static final int TEXT_COLOR = 0xFFD4D4D4;
     private static final int PLACEHOLDER_COLOR = 0xFF808080;
@@ -26,11 +23,11 @@ class JsonEditBox extends MultiLineEditBox {
 
     private final Font font;
     private final Component placeholder;
-    private final Function<String, FormattedCharSequence> highlighter;
+    private final SyntaxHighlighter highlighter;
     private long focusedTime = Util.getMillis();
 
-    JsonEditBox(Font font, int x, int y, int width, int height, Component placeholder,
-                Function<String, FormattedCharSequence> highlighter) {
+    public SyntaxEditBox(Font font, int x, int y, int width, int height, Component placeholder,
+                         SyntaxHighlighter highlighter) {
         super(font, x, y, width, height, placeholder, placeholder);
         this.font = font;
         this.placeholder = placeholder;
@@ -67,7 +64,7 @@ class JsonEditBox extends MultiLineEditBox {
         for (MultilineTextField.StringView line : this.textField.iterateLines()) {
             if (this.withinContentAreaTopBottom(y, y + lineHeight)) {
                 String lineText = value.substring(line.beginIndex(), line.endIndex());
-                graphics.drawString(this.font, this.highlighter.apply(lineText), textX, y, TEXT_COLOR);
+                graphics.drawString(this.font, this.highlighter.highlightLine(lineText), textX, y, TEXT_COLOR);
             }
             if (!placedCursor && cursor >= line.beginIndex() && cursor <= line.endIndex()) {
                 cursorX = textX + this.font.width(value.substring(line.beginIndex(), cursor));

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +25,9 @@ public class ColorSwatchWidget extends AbstractWidget {
         this.color = color;
         this.onPress = onPress;
         this.active = onPress != null;
+        if (onPress != null) {
+            this.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.color_pick")));
+        }
     }
 
     public void setColor(int color) {

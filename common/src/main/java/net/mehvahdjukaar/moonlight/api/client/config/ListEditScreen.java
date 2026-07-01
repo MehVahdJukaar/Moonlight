@@ -1,5 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.ColorPickerScreen;
+import net.mehvahdjukaar.moonlight.api.client.gui.DropdownWidget;
+import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
+import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,9 +28,9 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * A dedicated page for editing a string list: one editor per entry (a free text field, or a dropdown picker when
  * the list is option-backed) with a remove button, plus an add button. Follows the same "edit on a sub page, hand
  * the result back on Done" shape as {@link ColorPickerScreen}. Hosts dropdown popups the same way the main config
- * screen does (see {@link DropdownPopup}).
+ * screen does (see {@link OverlayLayer}).
  */
-class ListEditScreen extends Screen implements DropdownWidget.Host {
+class ListEditScreen extends Screen implements PopupHost {
 
     private final Screen parent;
     private final Consumer<List<String>> onApply;
@@ -34,7 +38,7 @@ class ListEditScreen extends Screen implements DropdownWidget.Host {
     private final List<String> working;
     @Nullable
     private final List<String> options; // non-null -> entries are picked with a dropdown
-    private final DropdownPopup dropdown = new DropdownPopup();
+    private final OverlayLayer overlay = new OverlayLayer();
 
     private EntryList list;
 
@@ -48,13 +52,13 @@ class ListEditScreen extends Screen implements DropdownWidget.Host {
     }
 
     @Override
-    public void setOpenDropdown(@Nullable DropdownWidget widget) {
-        this.dropdown.set(widget);
+    public OverlayLayer getOverlayLayer() {
+        return this.overlay;
     }
 
     @Override
     protected void init() {
-        this.dropdown.reset();
+        this.overlay.clear();
         this.list = new EntryList(this.minecraft, this.width, this.height - HEADER - 58, HEADER, 24);
         rebuildRows();
         this.addRenderableWidget(this.list);
@@ -75,7 +79,7 @@ class ListEditScreen extends Screen implements DropdownWidget.Host {
     }
 
     private void rebuildRows() {
-        this.dropdown.reset(); // rows (and their dropdowns) are recreated here
+        this.overlay.clear(); // rows (and their dropdowns) are recreated here
         List<EntryRow> rows = new ArrayList<>();
         for (int i = 0; i < working.size(); i++) {
             rows.add(new EntryRow(i));
@@ -90,25 +94,25 @@ class ListEditScreen extends Screen implements DropdownWidget.Host {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (dropdown.mouseClicked(mouseX, mouseY, button)) return true;
+        if (overlay.mouseClicked(mouseX, mouseY, button)) return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (dropdown.mouseScrolled(mouseX, mouseY, scrollY)) return true;
+        if (overlay.mouseScrolled(mouseX, mouseY, scrollY)) return true;
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        if (dropdown.keyPressed(key, scanCode, modifiers)) return true;
+        if (overlay.keyPressed(key, scanCode, modifiers)) return true;
         return super.keyPressed(key, scanCode, modifiers);
     }
 
     @Override
     public boolean charTyped(char c, int modifiers) {
-        if (dropdown.charTyped(c, modifiers)) return true;
+        if (overlay.charTyped(c, modifiers)) return true;
         return super.charTyped(c, modifiers);
     }
 
@@ -118,7 +122,7 @@ class ListEditScreen extends Screen implements DropdownWidget.Host {
         graphics.fill(0, 0, this.width, HEADER, ConfigScreenLayout.HEADER_BG);
         graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigScreenLayout.HEADER_SEPARATOR);
         graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, TITLE_COLOR);
-        this.dropdown.render(graphics, mouseX, mouseY);
+        this.overlay.render(graphics, mouseX, mouseY);
     }
 
     private class EntryList extends ContainerObjectSelectionList<EntryRow> {

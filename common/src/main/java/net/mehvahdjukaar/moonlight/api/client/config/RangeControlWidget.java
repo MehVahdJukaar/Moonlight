@@ -22,7 +22,8 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  */
 class RangeControlWidget extends AbstractContainerWidget {
 
-    private static final int INNER_GAP = 4;
+    private static final int INNER_GAP = 8;
+    private static final String SEPARATOR = "<";
 
     private final EditBox minBox;
     private final EditBox maxBox;
@@ -89,10 +90,11 @@ class RangeControlWidget extends AbstractContainerWidget {
         this.maxBox.setWidth(half);
         this.minBox.render(graphics, mouseX, mouseY, partialTick);
         this.maxBox.render(graphics, mouseX, mouseY, partialTick);
-        // a small dash between the two fields to read as a range
-        graphics.drawString(Minecraft.getInstance().font, "-",
-                getX() + half + (INNER_GAP - Minecraft.getInstance().font.width("-")) / 2 + 1,
-                getY() + (getHeight() - Minecraft.getInstance().font.lineHeight) / 2 + 1, LABEL_COLOR, false);
+        // a small "<" between the two fields to read as min-below-max
+        Font font = Minecraft.getInstance().font;
+        graphics.drawString(font, SEPARATOR,
+                getX() + half + (INNER_GAP - font.width(SEPARATOR)) / 2 + 1,
+                getY() + (getHeight() - font.lineHeight) / 2 + 1, LABEL_COLOR, false);
     }
 
     @Override

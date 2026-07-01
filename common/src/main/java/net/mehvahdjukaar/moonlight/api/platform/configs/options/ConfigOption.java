@@ -28,11 +28,21 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
     protected final Supplier<T> handle;
     protected final T defaultValue;
+    private ConfigReloadType reloadType = ConfigReloadType.NONE;
 
     protected ConfigOption(Component title, @Nullable Component description, Supplier<T> handle, T defaultValue) {
         super(title, description);
         this.handle = handle;
         this.defaultValue = defaultValue;
+    }
+
+    /** How a change to this value takes effect (drives the reload/restart icon on its screen row). */
+    public ConfigReloadType reloadType() {
+        return reloadType;
+    }
+
+    public void setReloadType(ConfigReloadType reloadType) {
+        this.reloadType = reloadType;
     }
 
     /**
@@ -268,9 +278,15 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         private final Supplier<JsonElement> json;
 
+        // handle/default stay lazy: on NeoForge the spec can't be read at define time, so never call json.get() here
         public JsonValue(Component title, @Nullable Component description, Supplier<JsonElement> json) {
-            super(title, description, () -> GSON.toJson(json.get()), GSON.toJson(json.get()));
+            super(title, description, () -> GSON.toJson(json.get()), null);
             this.json = json;
+        }
+
+        @Override
+        public String defaultValue() {
+            return GSON.toJson(json.get());
         }
 
         @Override

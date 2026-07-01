@@ -25,9 +25,22 @@ final class ConfigScreenLayout {
         GuiHelper.renderScrollingText(graphics, font, text, minX, maxX, rowTop, rowHeight, color);
     }
 
-    // gui sprites (assets/moonlight/textures/gui/sprites/{yes,no}.png)
+    // gui sprites (assets/moonlight/textures/gui/sprites/{yes,no,save}.png)
     static final ResourceLocation ON_ICON = Moonlight.res("yes");
     static final ResourceLocation OFF_ICON = Moonlight.res("no");
+    static final ResourceLocation SAVE_ICON = Moonlight.res("save");
+    static final ResourceLocation WORLD_RELOAD_ICON = Moonlight.res("world_reload");
+    static final ResourceLocation GAME_RESTART_ICON = Moonlight.res("game_restart");
+
+    /** The reload/restart hint sprite for a value, or null when it applies immediately. */
+    @org.jetbrains.annotations.Nullable
+    static ResourceLocation reloadIcon(net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType type) {
+        return switch (type) {
+            case WORLD_RELOAD -> WORLD_RELOAD_ICON;
+            case GAME_RESTART -> GAME_RESTART_ICON;
+            case NONE -> null;
+        };
+    }
 
     static final int HEADER = 44;
     static final int FOOTER = 36;

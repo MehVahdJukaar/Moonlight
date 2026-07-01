@@ -1,21 +1,19 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.util.FormattedCharSequence;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 /**
- * Lightweight regex syntax highlighter for an {@link EditBox}. Plug it in via {@link EditBox#setFormatter}: it
- * classifies each character of the pattern (escapes, character classes, groups, quantifiers, anchors) and colors
- * it. A pattern that doesn't compile is drawn entirely in red. This is a coloring scan, not a full parser.
+ * Lightweight regex syntax highlighter. Classifies each character of the pattern (escapes, character classes,
+ * groups, quantifiers, anchors) into a color; a pattern that doesn't compile is drawn entirely in red. This is a
+ * coloring scan, not a full parser. Typically bound to a single-line {@link EditBox} via
+ * {@code box.setFormatter(RegexHighlighter.INSTANCE.formatter(box))}.
  */
-public final class RegexHighlighter {
+public final class RegexHighlighter implements SyntaxHighlighter {
+
+    public static final RegexHighlighter INSTANCE = new RegexHighlighter();
 
     private RegexHighlighter() {
     }
@@ -28,32 +26,14 @@ public final class RegexHighlighter {
     private static final int ANCHOR = 0xFF9A6B;       // ^ $ | .
     private static final int ERROR = 0xFF5555;        // doesn't compile
 
-    /**
-     * Builds a formatter bound to the given box. Caches the color scan per source string so it isn't recomputed
-     * for every rendered chunk.
-     */
-    public static BiFunction<String, Integer, FormattedCharSequence> formatter(EditBox box) {
-        return new BiFunction<>() {
-            private String cachedSource;
-            private int[] cachedColors; // null while the current source doesn't compile
-
-            @Override
-            public FormattedCharSequence apply(String chunk, Integer displayPos) {
-                String source = box.getValue();
-                if (!source.equals(cachedSource)) {
-                    cachedSource = source;
-                    cachedColors = compilesOk(source) ? classify(source) : null;
-                }
-                List<FormattedCharSequence> parts = new ArrayList<>(chunk.length());
-                for (int i = 0; i < chunk.length(); i++) {
-                    int index = displayPos + i;
-                    int color = (cachedColors != null && index < cachedColors.length) ? cachedColors[index] : ERROR;
-                    parts.add(FormattedCharSequence.forward(String.valueOf(chunk.charAt(i)),
-                            Style.EMPTY.withColor(TextColor.fromRgb(color))));
-                }
-                return FormattedCharSequence.fromList(parts);
-            }
-        };
+    @Override
+    public int[] colors(String source) {
+        if (!compilesOk(source)) {
+            int[] all = new int[source.length()];
+            Arrays.fill(all, ERROR);
+            return all;
+        }
+        return classify(source);
     }
 
     private static boolean compilesOk(String source) {

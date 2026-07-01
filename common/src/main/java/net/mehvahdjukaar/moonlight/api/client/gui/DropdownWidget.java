@@ -25,20 +25,15 @@ import java.util.function.Function;
  * optional {@code icon} draws an item beside each option (item/block pickers).
  * <p>
  * Because a widget can live inside a scissored list (which clips by rectangle, not depth, so a Z offset alone can't
- * escape it), the expanded popup is drawn and click/scroll/key tested by the {@link Host} screen (which delegates
- * to a {@link DropdownPopup}) so it can float above everything. Any screen that hosts a dropdown must implement
- * {@link Host}, keep a {@link DropdownPopup}, forward its render/mouse/key events to it, and reset it in {@code init}.
+ * escape it), the expanded list is a {@link Popup} drawn and click/scroll/key tested by the {@link PopupHost} screen
+ * (through its {@link OverlayLayer}) so it can float above everything. Any screen that hosts a dropdown just has to
+ * be a {@link PopupHost}; the widget opens itself through the host's layer on click.
  */
-public class DropdownWidget extends AbstractWidget {
+public class DropdownWidget extends AbstractWidget implements Popup {
 
     private static final int TEXT_COLOR = 0xE0E0E0;
     private static final int DESCRIPTION_COLOR = 0xA0A0A0;
     private static final int SELECTED_COLOR = 0x9AD8FF;
-
-    /** A screen that can float an open dropdown's popup above its content (see {@link DropdownPopup}). */
-    public interface Host {
-        void setOpenDropdown(@Nullable DropdownWidget dropdown);
-    }
 
     private static final int MAX_VISIBLE = 8;
 
@@ -54,7 +49,7 @@ public class DropdownWidget extends AbstractWidget {
     private int scrollOffset;
     private List<String> filtered;
     @Nullable
-    private Host host;
+    private OverlayLayer layer;
     private final EditBox searchBox;
 
     public DropdownWidget(int width, int height, List<String> options, @Nullable Function<String, ItemStack> icon,
@@ -135,26 +130,32 @@ public class DropdownWidget extends AbstractWidget {
     public void onClick(double mouseX, double mouseY) {
         if (open) {
             close();
-        } else if (Minecraft.getInstance().screen instanceof Host h) {
-            this.host = h;
+        } else if (Minecraft.getInstance().screen instanceof PopupHost h) {
+            this.layer = h.getOverlayLayer();
             this.open = true;
             this.filtered = options;
             this.searchBox.setValue("");
             this.searchBox.setHint(Component.literal(value));
             this.searchBox.setFocused(true);
-            h.setOpenDropdown(this);
+            this.layer.open(this); // floats this popup, closing any other
             int selected = filtered.indexOf(value);
             scrollOffset = selected < 0 ? 0 : Mth.clamp(selected - visibleCount() + 1, 0, maxScroll());
         }
     }
 
     public void close() {
+        if (layer != null) {
+            layer.close(this); // triggers onPopupClosed()
+        } else {
+            onPopupClosed();
+        }
+    }
+
+    @Override
+    public void onPopupClosed() {
         this.open = false;
         this.searchBox.setFocused(false);
-        if (host != null) {
-            host.setOpenDropdown(null);
-            host = null;
-        }
+        this.layer = null;
     }
 
     private int visibleCount() {
@@ -189,7 +190,8 @@ public class DropdownWidget extends AbstractWidget {
 
     // ===== popup + input (driven by the host so it floats above the list) =====
 
-    void renderPopup(GuiGraphics graphics, int mouseX, int mouseY) {
+    @Override
+    public void renderPopup(GuiGraphics graphics, int mouseX, int mouseY) {
         if (!open) return;
         int[] r = popupRect();
         int x = r[0], y = r[1], w = r[2], h = r[3];
@@ -245,7 +247,8 @@ public class DropdownWidget extends AbstractWidget {
     }
 
     /** Called by the host on any click while open. Returns true (always consumes). */
-    boolean popupMouseClicked(double mouseX, double mouseY, int button) {
+    @Override
+    public boolean popupMouseClicked(double mouseX, double mouseY, int button) {
         if (!open) return false;
         // clicking in the value/search area just moves the caret, keep the popup open
         if (mouseX >= getX() && mouseX < getX() + valueAreaWidth() && mouseY >= getY() && mouseY < getY() + getHeight()) {
@@ -262,7 +265,8 @@ public class DropdownWidget extends AbstractWidget {
         return true;
     }
 
-    boolean popupMouseScrolled(double mouseX, double mouseY, double delta) {
+    @Override
+    public boolean popupMouseScrolled(double mouseX, double mouseY, double delta) {
         if (!open || filtered.size() <= visibleCount()) return false;
         int[] r = popupRect();
         if (mouseX < r[0] || mouseX >= r[0] + r[2] || mouseY < r[1] || mouseY >= r[1] + r[3]) return false;
@@ -270,7 +274,8 @@ public class DropdownWidget extends AbstractWidget {
         return true;
     }
 
-    boolean popupKeyPressed(int key, int scan, int mods) {
+    @Override
+    public boolean popupKeyPressed(int key, int scan, int mods) {
         if (!open) return false;
         if (key == 256) { // escape
             close();
@@ -284,7 +289,8 @@ public class DropdownWidget extends AbstractWidget {
         return this.searchBox.keyPressed(key, scan, mods);
     }
 
-    boolean popupCharTyped(char c, int mods) {
+    @Override
+    public boolean popupCharTyped(char c, int mods) {
         return open && this.searchBox.charTyped(c, mods);
     }
 

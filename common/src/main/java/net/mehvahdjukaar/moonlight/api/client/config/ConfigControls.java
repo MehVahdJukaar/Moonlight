@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.*;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.client.Minecraft;
@@ -51,12 +52,16 @@ public final class ConfigControls {
     // ===== built-in providers =====
 
     static {
+        // normal booleans use a plain ON/OFF text button; the yes/no (✓/✗) sprite toggle is reserved for category
+        // feature() switches (see CategoryRow)
         register(ConfigOption.BooleanValue.class, (o, s, onChange) -> {
-            BooleanToggleWidget w = new BooleanToggleWidget(CONTROL_WIDTH, CONTROL_HEIGHT, s.current(o), val -> {
-                s.put(o, val);
-                onChange.run();
-            });
-            return new Control(w, v -> w.set((Boolean) v));
+            CycleButton<Boolean> w = CycleButton.onOffBuilder(s.current(o))
+                    .displayOnlyValue()
+                    .create(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, Component.empty(), (btn, val) -> {
+                        s.put(o, val);
+                        onChange.run();
+                    });
+            return new Control(w, v -> w.setValue((Boolean) v));
         });
 
         registerEnumProvider();
@@ -75,12 +80,12 @@ public final class ConfigControls {
                 onChange.run();
             });
             EditBox box = (EditBox) control.widget();
-            box.setFormatter(RegexHighlighter.formatter(box)); // live regex syntax coloring
+            box.setFormatter(RegexHighlighter.INSTANCE.formatter(box)); // live regex syntax coloring
             return control;
         });
 
         register(ConfigOption.ColorValue.class, (o, s, onChange) -> {
-            ColorControlWidget w = new ColorControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, s.current(o),
+            ColorField w = new ColorField(CONTROL_WIDTH, CONTROL_HEIGHT, s.current(o),
                     c -> {
                         s.put(o, c);
                         onChange.run();
@@ -157,7 +162,7 @@ public final class ConfigControls {
 
         register(ConfigOption.JsonValue.class, (o, s, onChange) -> {
             Button button = Button.builder(Component.translatable("gui.moonlight.config.edit"), b ->
-                    Minecraft.getInstance().setScreen(new JsonEditScreen(o, s.current(o), Minecraft.getInstance().screen, edited -> {
+                    Minecraft.getInstance().setScreen(new JsonEditScreen(o.title(), s.current(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
                     }))).bounds(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT).build();
@@ -196,7 +201,7 @@ public final class ConfigControls {
 
     private static Control slider(double min, double max, double current, boolean integer, boolean percent,
                                   java.util.function.Consumer<Double> store, Runnable onChange) {
-        ConfigSlider slider = new ConfigSlider(CONTROL_WIDTH, CONTROL_HEIGHT, min, max, current, integer, percent, v -> {
+        RangedSlider slider = new RangedSlider(CONTROL_WIDTH, CONTROL_HEIGHT, min, max, current, integer, percent, v -> {
             store.accept(v);
             onChange.run();
         });
@@ -204,7 +209,7 @@ public final class ConfigControls {
     }
 
     private static Control textField(String initial, Function<Object, String> display, TextCommit commit) {
-        EditBox box = new EditBox(Minecraft.getInstance().font, 0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, Component.empty());
+        EditBox box = new PanningEditBox(Minecraft.getInstance().font, 0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, Component.empty());
         box.setMaxLength(Short.MAX_VALUE);
         box.setValue(initial);
         box.setResponder(str -> {

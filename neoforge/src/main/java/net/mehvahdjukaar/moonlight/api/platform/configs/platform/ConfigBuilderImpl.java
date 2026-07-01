@@ -9,6 +9,7 @@ import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.network.chat.Component;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
@@ -335,17 +336,13 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public ConfigBuilder gameRestart() {
-        builder.gameRestart();
-        return this;
-    }
-
-    @Override
-    public ConfigBuilder worldReload() {
-        if (!CompatHandler.CONFIGURED) {
+    protected void forwardReloadFlag(ConfigReloadType type) {
+        // Forge applies these to the NEXT defined value, so forward them here (right before that define runs)
+        if (type == ConfigReloadType.GAME_RESTART) {
+            builder.gameRestart();
+        } else if (type == ConfigReloadType.WORLD_RELOAD && !CompatHandler.CONFIGURED) {
             builder.worldRestart();
         }
-        return this;
     }
 
     @Override

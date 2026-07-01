@@ -35,7 +35,7 @@ dependencies {
     modCompileOnly("curse.maven:map-atlases-forge-519759:4990003")
     //modImplementation ("curse.maven:supplementaries-412082:4995508")
     modCompileOnly("curse.maven:configured-457570:7276577")
-    modCompileOnly("curse.maven:yacl-667299:5424504")
+    modImplementation("curse.maven:yacl-667299:5424504")
     modCompileOnly("curse.maven:alexs-caves-924854:4806837")
 }
 

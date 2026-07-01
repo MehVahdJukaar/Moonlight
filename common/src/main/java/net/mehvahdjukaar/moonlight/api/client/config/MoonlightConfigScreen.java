@@ -1,5 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.IconButton;
+import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
+import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
@@ -27,7 +30,7 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * {@link ConfigEditSession} shared across the navigation stack, so this class stays small and the system is open
  * for new control types without touching it.
  */
-public class MoonlightConfigScreen extends Screen implements ConfigScreenView, DropdownWidget.Host {
+public class MoonlightConfigScreen extends Screen implements ConfigScreenView, PopupHost {
 
     private final ConfigEditSession session;
     private final ConfigCategory category;
@@ -38,7 +41,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
     private Button saveButton;
     private ConfigHeader header;
     private String searchQuery = "";
-    private final DropdownPopup dropdown = new DropdownPopup(); // floats an open dropdown's popup above the list
+    private final OverlayLayer overlay = new OverlayLayer(); // floats an open dropdown/popup above the list
 
     /**
      * Root entry point: starts a fresh editing session for the whole config.
@@ -87,16 +90,24 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
         refreshSave();
     }
 
+    @Override
+    public boolean isCategoryEnabled(ConfigCategory cat) {
+        ConfigOption.BooleanValue gate = cat.gate();
+        boolean own = gate == null || Boolean.TRUE.equals(session.current(gate));
+        ConfigCategory parent = cat.parent();
+        return own && (parent == null || isCategoryEnabled(parent));
+    }
+
     // ===== screen =====
 
     @Override
-    public void setOpenDropdown(@Nullable DropdownWidget widget) {
-        this.dropdown.set(widget);
+    public OverlayLayer getOverlayLayer() {
+        return this.overlay;
     }
 
     @Override
     protected void init() {
-        this.dropdown.reset(); // widgets are rebuilt here, so drop any stale open popup
+        this.overlay.clear(); // widgets are rebuilt here, so drop any stale open popup
         this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, ITEM_HEIGHT);
 
         // top bar: title + breadcrumb trail (walk up the parent chain) + search box
@@ -118,8 +129,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
         // Save (with live unsaved counter) sits next to Back on every page; the session is shared across the
         // whole navigation stack so Save here persists edits made in any sub category too.
         int y = this.height - 28;
-        this.saveButton = Button.builder(Component.empty(), b -> doSave())
-                .bounds(this.width / 2 - 104, y, 100, 20).build();
+        this.saveButton = new IconButton(this.width / 2 - 104, y, 100, 20, Component.empty(), SAVE_ICON, 12, 12, b -> doSave());
         this.addRenderableWidget(this.saveButton);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
                 .bounds(this.width / 2 + 4, y, 100, 20).build());
@@ -135,6 +145,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
         String query = searchQuery == null ? "" : searchQuery.trim().toLowerCase(Locale.ROOT);
         if (query.isEmpty()) {
             for (ConfigNode e : category.entries()) {
+                if (e == category.gate()) continue; // shown as the category's inline toggle, not a duplicate row
                 if (e instanceof ConfigCategory cat) {
                     rows.add(new CategoryRow(this, cat));
                 } else if (e instanceof ConfigOption<?> v) {
@@ -166,6 +177,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
 
     private static void collectMatches(ConfigCategory category, String query, List<ConfigOption<?>> out) {
         for (ConfigNode e : category.entries()) {
+            if (e == category.gate()) continue; // gate is edited via its category's inline toggle
             if (e instanceof ConfigCategory cat) {
                 collectMatches(cat, query, out);
             } else if (e instanceof ConfigOption<?> v) {
@@ -197,7 +209,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         // an open dropdown popup floats above everything, so it gets first refusal on clicks
-        if (dropdown.mouseClicked(mouseX, mouseY, button)) {
+        if (overlay.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
         Screen target = header.breadcrumbTarget(mouseX, mouseY);
@@ -211,7 +223,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         // an open dropdown is modal: it scrolls its own popup and swallows the wheel so the row list stays put
-        if (dropdown.mouseScrolled(mouseX, mouseY, scrollY)) {
+        if (overlay.mouseScrolled(mouseX, mouseY, scrollY)) {
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
@@ -219,7 +231,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
 
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        if (dropdown.keyPressed(key, scanCode, modifiers)) {
+        if (overlay.keyPressed(key, scanCode, modifiers)) {
             return true;
         }
         return super.keyPressed(key, scanCode, modifiers);
@@ -227,7 +239,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
 
     @Override
     public boolean charTyped(char c, int modifiers) {
-        if (dropdown.charTyped(c, modifiers)) {
+        if (overlay.charTyped(c, modifiers)) {
             return true;
         }
         return super.charTyped(c, modifiers);
@@ -239,7 +251,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
         this.header.render(graphics, this.width, mouseX, mouseY, this.font);
 
         // no row tooltips while a dropdown is open (its popup covers the rows)
-        if (!dropdown.isOpen()) {
+        if (!overlay.isOpen()) {
             ConfigRow hovered = this.list.getHovered(mouseX, mouseY);
             if (hovered != null) {
                 Component tooltip = hovered.getTooltip(mouseX, mouseY);
@@ -248,7 +260,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, D
                 }
             }
         } else {
-            dropdown.render(graphics, mouseX, mouseY);
+            overlay.render(graphics, mouseX, mouseY);
         }
     }
 }

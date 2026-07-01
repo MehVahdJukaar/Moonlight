@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core;
 
+import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -44,6 +45,8 @@ public class CommonConfigs {
             builder.comment("A dev only section used to test the config screen. It doesn't ship to players.");
 
             builder.comment("A boolean toggle").define("test_bool", true);
+            builder.comment("A value that needs a world reload (shows a globe icon)").worldReload().define("test_world_reload", true);
+            builder.comment("A value that needs a game restart (shows a power icon)").gameRestart().define("test_game_restart", true);
             builder.comment("An integer, edited as a text field").define("test_int", 5, 0, 100);
             builder.comment("An integer, edited as a slider").defineSlider("test_int_slider", 50, 0, 100);
             builder.comment("A double, edited as a text field").define("test_double", 2.0, 0, 22);
@@ -75,9 +78,20 @@ public class CommonConfigs {
             json.addProperty("enabled", true);
             builder.comment("A raw JSON value, edited in a text box with syntax highlighting").defineJson("test_json", json);
             builder.comment("A plain Java bean (no codec needed), stored and edited as JSON").defineBean("test_bean", new TestBean());
+            builder.comment("A record bean, also round-tripped through Gson").defineBean("test_record_bean", new TestRecordBean("world", 7));
 
             builder.push("nested");
             builder.comment("A float value living in a nested sub category").define("nested_float", 0.5f, 0f, 1f);
+            builder.pop();
+
+            // Feature gating demo: a category with an enable toggle (shown inline on its row). Its children grey out
+            // when it's off, and the returned supplier reads false whenever an ancestor feature is off — via supplier
+            // composition, without ever rewriting the stored child values. (Suppliers unused here, just demonstrating.)
+            builder.pushFeature("test_feature", true);
+            builder.comment("Only meaningful while the feature is on").define("feature_speed", 1.0, 0, 10);
+            builder.pushFeature("test_sub_feature", true);
+            builder.comment("This feature reads false whenever the parent feature is off").define("sub_power", 3, 0, 9);
+            builder.pop();
             builder.pop();
 
             builder.pop();
@@ -90,5 +104,16 @@ public class CommonConfigs {
     }
 
     public static void init() {
+    }
+
+    /** Dev-only sample bean for {@code defineBean}: a plain POJO Gson can round-trip. */
+    public static class TestBean {
+        public String name = "hello";
+        public int count = 3;
+        public boolean flag = true;
+    }
+
+    /** Dev-only sample record bean: Gson (2.10+) round-trips records via their canonical constructor. */
+    public record TestRecordBean(String label, int amount) {
     }
 }

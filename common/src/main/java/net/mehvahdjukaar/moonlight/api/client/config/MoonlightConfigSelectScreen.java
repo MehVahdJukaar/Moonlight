@@ -1,11 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.MediaButton;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +22,7 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  */
 public class MoonlightConfigSelectScreen extends Screen {
 
+    private final String modId;
     private final Screen parent;
     @Nullable
     private final ResourceLocation background;
@@ -32,6 +32,7 @@ public class MoonlightConfigSelectScreen extends Screen {
 
     public MoonlightConfigSelectScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
         super(Component.literal(LangBuilder.getReadableName(modId)));
+        this.modId = modId;
         this.parent = parent;
         this.background = background;
         this.holders = configsOf(modId);
@@ -69,8 +70,9 @@ public class MoonlightConfigSelectScreen extends Screen {
         this.list.setRows(rows);
         this.addRenderableWidget(this.list);
 
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
-                .bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
+        // bottom bar: Back flanked by the author's media links (matches the Configured integration screen)
+        MediaButton.addAuthorMediaButtons(this, this::addRenderableWidget,
+                this.width / 2, this.height - 29, 22, modId, this::onClose);
     }
 
     @Override

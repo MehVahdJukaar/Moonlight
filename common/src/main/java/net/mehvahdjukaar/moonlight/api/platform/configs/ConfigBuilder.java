@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
@@ -10,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -60,12 +60,22 @@ public abstract class ConfigBuilder {
     // both loaders end up with the exact same tree regardless of how they store the actual config.
     private final ConfigCategory uiRoot = new ConfigCategory(Component.empty());
     private final Deque<ConfigCategory> uiStack = new ArrayDeque<>();
+    // Effective "enabled" supplier of the current category, kept parallel to uiStack. A feature() replaces the top
+    // with its own (ANDed with the ancestor beneath it) so nested feature() suppliers compose at read time without
+    // ever touching the stored child values.
+    private final Deque<Supplier<Boolean>> gateStack = new ArrayDeque<>();
     // while set, define(...)/push(...) skip UI emission: used by compound values (e.g. defineRange) that own
     // several backing values but want a single combined row instead of one row per backing value.
     protected boolean suppressUi = false;
 
+    /** Reserved child name for the boolean a {@link #feature} declares. */
+    public static final String FEATURE_TOGGLE_NAME = "enabled";
+
     //always on. can be called to disable
     protected boolean usesDataBuddy = true;
+
+    // set by worldReload()/gameRestart(), applied to (and cleared by) the next recorded option — see recordOption
+    protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
 
     /** How a pending/late comment is applied to the value it belongs to (its on-disk comment and screen row). */
     @FunctionalInterface
@@ -89,6 +99,7 @@ public abstract class ConfigBuilder {
         this.name = name;
         this.type = type;
         this.uiStack.push(this.uiRoot);
+        this.gateStack.push(() -> true); // root is always enabled
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
             if (e.isDefault()) translations.forEach(e::addEntry);
         };
@@ -291,19 +302,85 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<JsonElement> defineJson(String name, Supplier<JsonElement> defaultValue);
 
-    private static final Gson BEAN_GSON = new Gson();
-
     /**
-     * Defines a config value from a plain Java bean (POJO) — for when you'd rather not write a {@link Codec}. The
-     * bean is (de)serialized reflectively with Gson and stored as JSON, so it rides on {@link #defineJson} and is
-     * editable in the same JSON text box. The bean's runtime class must be reconstructible by Gson (a no-arg
-     * constructor / public fields, as usual for Gson).
+     * Defines a config value from a plain Java bean (POJO or record) — for when you'd rather not write a
+     * {@link Codec}. Instead of storing a JSON blob, each field is reflectively turned into its own native config
+     * value (a boolean toggle / string / number / enum widget) grouped under a sub-category named {@code name}, and
+     * the returned supplier reconstructs the bean from those live values. Supported field types: boolean, int,
+     * double, float, String and enums; the bean must be either a record or have a no-arg constructor.
      */
     public <T> Supplier<T> defineBean(String name, T defaultValue) {
         @SuppressWarnings("unchecked")
         Class<T> type = (Class<T>) defaultValue.getClass();
-        Supplier<JsonElement> handle = defineJson(name, () -> BEAN_GSON.toJsonTree(defaultValue));
-        return () -> BEAN_GSON.fromJson(handle.get(), type);
+        this.push(name);
+        try {
+            return type.isRecord() ? defineRecordBean(type, defaultValue) : definePojoBean(type, defaultValue);
+        } finally {
+            this.pop();
+        }
+    }
+
+    private <T> Supplier<T> definePojoBean(Class<T> type, T defaultValue) {
+        List<java.lang.reflect.Field> fields = new java.util.ArrayList<>();
+        List<Supplier<?>> readers = new java.util.ArrayList<>();
+        try {
+            for (java.lang.reflect.Field f : type.getDeclaredFields()) {
+                int mods = f.getModifiers();
+                if (java.lang.reflect.Modifier.isStatic(mods) || java.lang.reflect.Modifier.isTransient(mods)) continue;
+                f.setAccessible(true);
+                fields.add(f);
+                readers.add(defineBeanField(f.getName(), f.getType(), f.get(defaultValue)));
+            }
+            var ctor = type.getDeclaredConstructor();
+            ctor.setAccessible(true);
+            return () -> {
+                try {
+                    T instance = ctor.newInstance();
+                    for (int i = 0; i < fields.size(); i++) fields.get(i).set(instance, readers.get(i).get());
+                    return instance;
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException("Failed to build bean " + type.getName(), e);
+                }
+            };
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("defineBean: " + type.getName() + " needs a no-arg constructor and readable fields", e);
+        }
+    }
+
+    private <T> Supplier<T> defineRecordBean(Class<T> type, T defaultValue) {
+        java.lang.reflect.RecordComponent[] comps = type.getRecordComponents();
+        List<Supplier<?>> readers = new java.util.ArrayList<>();
+        Class<?>[] paramTypes = new Class<?>[comps.length];
+        try {
+            for (int i = 0; i < comps.length; i++) {
+                paramTypes[i] = comps[i].getType();
+                readers.add(defineBeanField(comps[i].getName(), comps[i].getType(), comps[i].getAccessor().invoke(defaultValue)));
+            }
+            var ctor = type.getDeclaredConstructor(paramTypes);
+            ctor.setAccessible(true);
+            return () -> {
+                try {
+                    Object[] args = new Object[readers.size()];
+                    for (int i = 0; i < args.length; i++) args[i] = readers.get(i).get();
+                    return ctor.newInstance(args);
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException("Failed to build record " + type.getName(), e);
+                }
+            };
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("defineBean: failed to read record " + type.getName(), e);
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private Supplier<?> defineBeanField(String name, Class<?> type, Object current) {
+        if (type == boolean.class || type == Boolean.class) return define(name, (Boolean) current);
+        if (type == int.class || type == Integer.class) return define(name, (Integer) current, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        if (type == double.class || type == Double.class) return define(name, (Double) current, -Double.MAX_VALUE, Double.MAX_VALUE);
+        if (type == float.class || type == Float.class) return define(name, (Float) current, -Float.MAX_VALUE, Float.MAX_VALUE);
+        if (type == String.class) return define(name, (String) current, o -> true);
+        if (type.isEnum()) return define(name, (Enum) current);
+        throw new IllegalArgumentException("defineBean: unsupported field type " + type.getName() + " for field '" + name + "'");
     }
 
 
@@ -413,7 +490,6 @@ public abstract class ConfigBuilder {
         return worldReload();
     }
 
-    /** Pops {@code count} categories at once, mirroring Forge's {@code pop(int)}. */
     public ConfigBuilder pop(int count) {
         for (int i = 0; i < count; i++) pop();
         return this;
@@ -462,17 +538,55 @@ public abstract class ConfigBuilder {
         ConfigCategory cat = new ConfigCategory(title);
         this.uiStack.peek().add(cat);
         this.uiStack.push(cat);
+        this.gateStack.push(this.gateStack.peek()); // inherit the parent's gate until a feature() narrows it
     }
 
     /** Pops the current UI sub category. No-op while UI emission is suppressed. */
     protected void uiPop() {
         if (this.suppressUi) return;
         this.uiStack.pop();
+        this.gateStack.pop();
     }
 
-    /** Adds a value row to the current UI category. No-op while UI emission is suppressed. */
+    /**
+     * Declares the current category's single "feature" boolean — the switch that enables the whole category — and
+     * returns its <em>effective</em> supplier: {@code ownValue && everyAncestorFeature}. The composition is
+     * read-time only, so a parent turning off makes this (and any nested feature) read {@code false} without ever
+     * rewriting the stored child values; turning the parent back on restores them. Only one feature per category.
+     */
+    public Supplier<Boolean> feature(boolean defaultEnabled) {
+        ConfigCategory cat = this.uiStack.peek();
+        if (cat == this.uiRoot) {
+            throw new IllegalStateException("feature() must be called inside a category (use push/pushFeature first), not at the config root");
+        }
+        if (cat.gate() != null) {
+            throw new IllegalStateException("category '" + currentCategory() + "' already has a feature() toggle");
+        }
+        Supplier<Boolean> raw = define(FEATURE_TOGGLE_NAME, defaultEnabled);
+        // define() just recorded the matching BooleanValue as this category's last entry; adopt it as the gate row
+        List<ConfigNode> entries = cat.entries();
+        if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
+            cat.setGate(bv);
+        }
+        Supplier<Boolean> ancestor = this.gateStack.peek();
+        Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
+        this.gateStack.pop();            // replace the inherited gate with this category's own effective gate
+        this.gateStack.push(effective);
+        return effective;
+    }
+
+    /** Sugar for {@code push(name)} followed by {@link #feature(boolean)}. Pop it like any other category. */
+    public Supplier<Boolean> pushFeature(String name, boolean defaultEnabled) {
+        push(name);
+        return feature(defaultEnabled);
+    }
+
+    /** Adds a value row to the current UI category, stamping (and clearing) any pending reload/restart flag onto it.
+     *  No-op while UI emission is suppressed, so a compound value's backing rows don't consume the flag before it. */
     protected void recordOption(ConfigOption<?> option) {
         if (this.suppressUi) return;
+        option.setReloadType(this.pendingReload);
+        this.pendingReload = ConfigReloadType.NONE;
         this.uiStack.peek().add(option);
     }
 
@@ -481,10 +595,6 @@ public abstract class ConfigBuilder {
         return this.uiRoot;
     }
 
-    /**
-     * Defines a {@link Range} value from a default {@code Range}. Sugar for
-     * {@link #defineRange(String, double, double, double, double)}.
-     */
     public Supplier<Range> defineRange(String name, Range defaultValue, double min, double max) {
         return defineRange(name, defaultValue.min(), defaultValue.max(), min, max);
     }
@@ -517,9 +627,25 @@ public abstract class ConfigBuilder {
         return this.changeCallback;
     }
 
-    public abstract ConfigBuilder worldReload();
+    public ConfigBuilder worldReload() {
+        this.pendingReload = ConfigReloadType.WORLD_RELOAD;
+        forwardReloadFlag(ConfigReloadType.WORLD_RELOAD);
+        return this;
+    }
 
-    public abstract ConfigBuilder gameRestart();
+    public ConfigBuilder gameRestart() {
+        this.pendingReload = ConfigReloadType.GAME_RESTART;
+        forwardReloadFlag(ConfigReloadType.GAME_RESTART);
+        return this;
+    }
+
+    /**
+     * Platform hook: forward the flag to a backing store that needs it set <em>before</em> the next define (Forge's
+     * {@code ModConfigSpec}). The screen-side enum is instead read from {@link #pendingReload} at record time, so
+     * loaders that keep the flag on their own value object (Fabric) don't need to override this.
+     */
+    protected void forwardReloadFlag(ConfigReloadType type) {
+    }
 
     protected void addTranslationsAndComments(String name) {
         //name translation (comments are wired separately, see noteDefined/comment, so they can come before or after)

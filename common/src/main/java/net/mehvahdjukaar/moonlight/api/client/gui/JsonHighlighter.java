@@ -1,15 +1,15 @@
-package net.mehvahdjukaar.moonlight.api.client.config;
+package net.mehvahdjukaar.moonlight.api.client.gui;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.FormattedCharSequence;
+import java.util.Arrays;
 
 /**
- * Very small, line-by-line JSON syntax colorer used by {@link JsonEditBox}. Pretty-printed JSON keeps each string
- * on its own line, so tokenizing per line (no cross-line state) is enough for a "basic" highlight: strings, numbers,
- * the {@code true/false/null} literals and the structural punctuation each get their own color.
+ * Very small, line-by-line JSON syntax colorer (pairs with {@link SyntaxEditBox}). Pretty-printed JSON keeps each
+ * string on its own line, so tokenizing per line (no cross-line state) is enough for a "basic" highlight: strings,
+ * numbers, the {@code true/false/null} literals and the structural punctuation each get their own color.
  */
-final class JsonHighlighter {
+public final class JsonHighlighter implements SyntaxHighlighter {
+
+    public static final JsonHighlighter INSTANCE = new JsonHighlighter();
 
     private JsonHighlighter() {
     }
@@ -21,10 +21,11 @@ final class JsonHighlighter {
     private static final int PUNCTUATION = 0x808080; // { } [ ] : ,
     private static final int DEFAULT = 0xD4D4D4;
 
-    static FormattedCharSequence highlightLine(String line) {
-        MutableComponent out = Component.empty();
-        int i = 0;
+    @Override
+    public int[] colors(String line) {
         int n = line.length();
+        int[] colors = new int[n];
+        int i = 0;
         while (i < n) {
             char c = line.charAt(i);
             if (c == '"') {
@@ -34,38 +35,31 @@ final class JsonHighlighter {
                     if (d == '\\' && i < n) i++; // skip escaped char
                     else if (d == '"') break;
                 }
-                String token = line.substring(start, i);
                 // a string immediately followed by a colon (ignoring spaces) is a key
                 int j = i;
                 while (j < n && line.charAt(j) == ' ') j++;
                 boolean isKey = j < n && line.charAt(j) == ':';
-                append(out, token, isKey ? KEY : STRING);
+                Arrays.fill(colors, start, i, isKey ? KEY : STRING);
             } else if (c == '-' || (c >= '0' && c <= '9')) {
                 int start = i++;
                 while (i < n && isNumberChar(line.charAt(i))) i++;
-                append(out, line.substring(start, i), NUMBER);
+                Arrays.fill(colors, start, i, NUMBER);
             } else if (Character.isLetter(c)) {
                 int start = i++;
                 while (i < n && Character.isLetter(line.charAt(i))) i++;
                 String word = line.substring(start, i);
                 boolean keyword = word.equals("true") || word.equals("false") || word.equals("null");
-                append(out, word, keyword ? KEYWORD : DEFAULT);
+                Arrays.fill(colors, start, i, keyword ? KEYWORD : DEFAULT);
             } else if (c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',') {
-                append(out, String.valueOf(c), PUNCTUATION);
-                i++;
+                colors[i++] = PUNCTUATION;
             } else {
-                append(out, String.valueOf(c), DEFAULT);
-                i++;
+                colors[i++] = DEFAULT;
             }
         }
-        return out.getVisualOrderText();
+        return colors;
     }
 
     private static boolean isNumberChar(char c) {
         return (c >= '0' && c <= '9') || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-';
-    }
-
-    private static void append(MutableComponent out, String text, int color) {
-        out.append(Component.literal(text).withStyle(s -> s.withColor(color)));
     }
 }

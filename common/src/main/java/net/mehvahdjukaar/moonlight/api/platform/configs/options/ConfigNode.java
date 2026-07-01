@@ -17,10 +17,24 @@ public abstract class ConfigNode {
     private final Component title;
     @Nullable
     private Component description;
+    @Nullable
+    private ConfigCategory parent;
 
     protected ConfigNode(Component title, @Nullable Component description) {
         this.title = title;
         this.description = description;
+    }
+
+    /** Set when this node is added to a category, so the screen can walk the category chain (e.g. for feature gating). */
+    @ApiStatus.Internal
+    public void setParent(ConfigCategory parent) {
+        this.parent = parent;
+    }
+
+    /** The category this node lives directly under, or null for the root. */
+    @Nullable
+    public ConfigCategory parent() {
+        return parent;
     }
 
     /**

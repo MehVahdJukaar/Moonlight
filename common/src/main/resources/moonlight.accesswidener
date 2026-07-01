@@ -194,3 +194,4 @@ accessible field net/minecraft/client/renderer/GameRenderer effectActive Z
 #native config screen: highlighted multiline json editor
 accessible field net/minecraft/client/gui/components/MultiLineEditBox textField Lnet/minecraft/client/gui/components/MultilineTextField;
 accessible class net/minecraft/client/gui/components/MultilineTextField$StringView
+accessible method net/minecraft/client/gui/components/MultilineTextField$StringView <init> (II)V

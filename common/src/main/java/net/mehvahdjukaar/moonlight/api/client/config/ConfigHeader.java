@@ -62,15 +62,27 @@ class ConfigHeader {
 
         graphics.drawCenteredString(font, title, width / 2, 7, TITLE_COLOR);
 
-        // breadcrumb trail
+        // breadcrumb trail: collapse the middle into "…" when it would overrun the search box
+        java.util.Arrays.fill(crumbX0, -1);
+        java.util.Arrays.fill(crumbX1, -1);
+        int trailRight = search.getX() - 10 - 6; // leave room for the magnifier glyph + a small gap
+        List<Integer> display = computeVisibleCrumbs(font, trailRight - SIDE_MARGIN);
         int x = SIDE_MARGIN;
-        for (int i = 0; i < crumbs.size(); i++) {
-            Crumb c = crumbs.get(i);
-            if (i > 0) {
+        boolean first = true;
+        for (int i : display) {
+            if (!first) {
                 String sep = " › "; // ›
                 graphics.drawString(font, sep, x, CRUMB_Y, CRUMB_SEPARATOR_COLOR);
                 x += font.width(sep);
             }
+            first = false;
+            if (i < 0) { // ellipsis placeholder for the collapsed middle
+                String ell = "…";
+                graphics.drawString(font, ell, x, CRUMB_Y, CRUMB_SEPARATOR_COLOR);
+                x += font.width(ell);
+                continue;
+            }
+            Crumb c = crumbs.get(i);
             int w = font.width(c.label());
             crumbX0[i] = x;
             crumbX1[i] = x + w;
@@ -90,13 +102,46 @@ class ConfigHeader {
     }
 
     /**
+     * Picks which crumbs to draw so the trail fits in {@code maxWidth}. If it all fits, returns every index;
+     * otherwise it keeps the root and as many trailing crumbs as fit, marking the collapsed middle with a
+     * {@code -1} ellipsis placeholder (root › … › parent › current).
+     */
+    private List<Integer> computeVisibleCrumbs(Font font, int maxWidth) {
+        int n = crumbs.size();
+        List<Integer> full = new java.util.ArrayList<>(n);
+        for (int i = 0; i < n; i++) full.add(i);
+        if (n <= 2 || trailWidth(font, full) <= maxWidth) return full;
+
+        // hide the fewest middle crumbs that make it fit: root + "…" + the deepest trailing crumbs
+        for (int tailCount = n - 2; tailCount >= 1; tailCount--) {
+            List<Integer> display = new java.util.ArrayList<>();
+            display.add(0);
+            display.add(-1);
+            for (int i = n - tailCount; i < n; i++) display.add(i);
+            if (trailWidth(font, display) <= maxWidth) return display;
+        }
+        return java.util.List.of(0, -1, n - 1);
+    }
+
+    private int trailWidth(Font font, List<Integer> display) {
+        int sep = font.width(" › ");
+        int total = 0;
+        for (int k = 0; k < display.size(); k++) {
+            if (k > 0) total += sep;
+            int i = display.get(k);
+            total += i < 0 ? font.width("…") : font.width(crumbs.get(i).label());
+        }
+        return total;
+    }
+
+    /**
      * If a clickable breadcrumb segment is under the cursor, returns its target screen; otherwise null.
      */
     @Nullable
     Screen breadcrumbTarget(double mouseX, double mouseY) {
         for (int i = 0; i < crumbs.size(); i++) {
             Crumb c = crumbs.get(i);
-            if (c.current()) continue;
+            if (c.current() || crumbX0[i] < 0) continue; // skip current + collapsed (off-screen) crumbs
             if (mouseX >= crumbX0[i] && mouseX <= crumbX1[i] && mouseY >= CRUMB_Y - 2 && mouseY <= CRUMB_Y + 9) {
                 return c.target();
             }

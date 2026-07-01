@@ -1,7 +1,6 @@
-package net.mehvahdjukaar.moonlight.api.client.config;
+package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import com.google.gson.JsonParser;
-import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -10,24 +9,29 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 
-import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
-
 /**
- * A page for editing a JSON-backed value ({@link ConfigOption.JsonValue}) as pretty-printed, syntax-highlighted
- * text in one big box. Same "edit on a sub page, hand the result back on Done" shape as {@link ColorPickerScreen}
- * and {@link ListEditScreen}. Done is disabled while the text isn't valid JSON, so nothing invalid is ever committed.
+ * A screen for editing a JSON string as pretty-printed, syntax-highlighted text in one big {@link SyntaxEditBox}.
+ * On Done it hands the edited text back through {@code onApply} and returns to {@code parent}; Done is disabled
+ * while the text isn't valid JSON, so nothing invalid is ever committed. Follows the same "edit on a sub page, hand
+ * the result back on Done" shape as {@link ColorPickerScreen}.
  */
-class JsonEditScreen extends Screen {
+public class JsonEditScreen extends Screen {
+
+    private static final int HEADER = 44;
+    private static final int HEADER_BG = 0x90000000;
+    private static final int HEADER_SEPARATOR = 0xFF101012;
+    private static final int TITLE_COLOR = 0xFFE0A0;
+    private static final int ERROR_COLOR = 0xFF5555;
 
     private final Screen parent;
     private final Consumer<String> onApply;
     private final String initial;
 
-    private JsonEditBox editor;
+    private SyntaxEditBox editor;
     private Button done;
 
-    JsonEditScreen(ConfigOption.JsonValue option, String initial, Screen parent, Consumer<String> onApply) {
-        super(option.title());
+    public JsonEditScreen(Component title, String initial, Screen parent, Consumer<String> onApply) {
+        super(title);
         this.initial = initial;
         this.parent = parent;
         this.onApply = onApply;
@@ -38,8 +42,8 @@ class JsonEditScreen extends Screen {
         int margin = 20;
         int top = HEADER + 6;
         int bottom = this.height - 36;
-        this.editor = new JsonEditBox(this.font, margin, top, this.width - 2 * margin, bottom - top,
-                Component.translatable("gui.moonlight.config.json_hint"), JsonHighlighter::highlightLine);
+        this.editor = new SyntaxEditBox(this.font, margin, top, this.width - 2 * margin, bottom - top,
+                Component.translatable("gui.moonlight.config.json_hint"), JsonHighlighter.INSTANCE);
         this.editor.setValue(this.initial);
         this.editor.setValueListener(s -> refreshValid());
         this.addRenderableWidget(this.editor);
@@ -78,8 +82,8 @@ class JsonEditScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.fill(0, 0, this.width, HEADER, ConfigScreenLayout.HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigScreenLayout.HEADER_SEPARATOR);
+        graphics.fill(0, 0, this.width, HEADER, HEADER_BG);
+        graphics.fill(0, HEADER - 1, this.width, HEADER, HEADER_SEPARATOR);
         graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, TITLE_COLOR);
         if (!this.done.active) {
             graphics.drawCenteredString(this.font, Component.translatable("gui.moonlight.config.json_invalid"),

@@ -16,8 +16,6 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T>,
     protected T value;
     private boolean loaded;
     private boolean affectsDynamicPacks;
-    private boolean gameRestart;
-    private boolean worldReload;
     private String translationKey = "";
     private String commentKey = "";
     private String rawComment = "";
@@ -117,21 +115,5 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T>,
     @Override
     public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
         this.affectsDynamicPacks = affectsDynamicPacks;
-    }
-
-    public boolean isGameRestart() {
-        return gameRestart;
-    }
-
-    public void setGameRestart(boolean gameRestart) {
-        this.gameRestart = gameRestart;
-    }
-
-    public boolean isWorldReload() {
-        return worldReload;
-    }
-
-    public void setWorldReload(boolean worldReload) {
-        this.worldReload = worldReload;
     }
 }

@@ -1,6 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -27,6 +30,8 @@ class OptionRow extends ConfigRow {
     private final ConfigScreenView view;
     private final ConfigEditSession session;
     private final ConfigOption<?> value;
+    @Nullable
+    private final ConfigCategory owner; // the category this value lives under, for feature-gating greyout
     private final Component title;
     @Nullable
     private final Component description;
@@ -39,11 +44,14 @@ class OptionRow extends ConfigRow {
 
     // hover region of the rendered label text, refreshed each frame (used for the precise hover tooltip)
     private int labelX0, labelX1, labelY0, labelY1;
+    // hover region of the reload/restart hint icon, if any
+    private int reloadIconX0 = -1, reloadIconX1 = -1;
 
     OptionRow(ConfigScreenView view, ConfigOption<?> value) {
         this.view = view;
         this.session = view.session();
         this.value = value;
+        this.owner = value.parent();
         this.title = value.title();
         this.description = value.description();
         this.editable = !(value instanceof ConfigOption.UnsupportedValue);
@@ -93,13 +101,17 @@ class OptionRow extends ConfigRow {
                        int mouseX, int mouseY, boolean hovering, float partialTick) {
         Font font = view.font();
         int cy = top + (height - CONTROL_HEIGHT) / 2;
+        // greyed while the owning category's feature toggle (or an ancestor's) is off
+        boolean contextEnabled = owner == null || view.isCategoryEnabled(owner);
 
         int resetX = left + width - resetButton.getWidth();
         resetButton.setX(resetX);
         resetButton.setY(cy);
+        resetButton.active = editable && contextEnabled && !Objects.equals(session.currentRaw(value), value.defaultValue());
         resetButton.render(graphics, mouseX, mouseY, partialTick);
 
         AbstractWidget w = control.widget();
+        w.active = editable && contextEnabled;
         int controlX = resetX - GAP - w.getWidth();
         w.setX(controlX);
         w.setY(top + (height - w.getHeight()) / 2);
@@ -113,9 +125,19 @@ class OptionRow extends ConfigRow {
             labelLeft = left + ARROW_WIDTH + 2;
         }
         int labelRight = controlX - GAP;
-        // amber label while this value has an unsaved edit
+        // reload/restart hint icon: pure decoration, appended in the left gutter so it never shifts the row content
+        this.reloadIconX0 = this.reloadIconX1 = -1;
+        ResourceLocation reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
+        if (reloadIcon != null) {
+            int iconSize = 9;
+            int iconX = left - iconSize - 3;
+            graphics.blitSprite(reloadIcon, iconX, top + (height - iconSize) / 2, iconSize, iconSize);
+            this.reloadIconX0 = iconX;
+            this.reloadIconX1 = iconX + iconSize;
+        }
+        // amber label while this value has an unsaved edit; dimmed when its category is switched off
         boolean modified = !java.util.Objects.equals(session.currentRaw(value), value.get());
-        int labelColor = modified ? MODIFIED_COLOR : LABEL_COLOR;
+        int labelColor = !contextEnabled ? DESCRIPTION_COLOR : modified ? MODIFIED_COLOR : LABEL_COLOR;
         renderScrollingText(graphics, font, title, labelLeft, labelRight, top, height, labelColor);
 
         this.labelX0 = labelLeft;
@@ -137,9 +159,18 @@ class OptionRow extends ConfigRow {
     @Nullable
     @Override
     Component getTooltip(int mouseX, int mouseY) {
+        // reload/restart icon explains itself on hover, regardless of expand state
+        if (reloadIconX0 >= 0 && mouseX >= reloadIconX0 && mouseX <= reloadIconX1 && mouseY >= labelY0 && mouseY <= labelY1) {
+            return reloadTooltip(value.reloadType());
+        }
         // only when collapsed and only over the label text itself (once expanded the inline description is the surface)
         if (description == null || session.isExpanded(value)) return null;
         boolean overLabel = mouseX >= labelX0 && mouseX <= labelX1 && mouseY >= labelY0 && mouseY <= labelY1;
         return overLabel ? description : null;
+    }
+
+    private static Component reloadTooltip(ConfigReloadType type) {
+        return Component.translatable(type == ConfigReloadType.GAME_RESTART
+                ? "gui.moonlight.config.reload.game" : "gui.moonlight.config.reload.world");
     }
 }
