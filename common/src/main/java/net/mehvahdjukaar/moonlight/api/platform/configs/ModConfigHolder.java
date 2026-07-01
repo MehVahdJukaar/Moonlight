@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 
 import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -114,8 +115,15 @@ public abstract class ModConfigHolder {
     @ClientOnly
     public abstract Screen makeScreen(Screen parent, @Nullable ResourceLocation background);
 
-    //serverside method
-    public abstract boolean hasConfigScreen();
+    /**
+     * Loader independent, server safe description of this config as a navigable tree. The client side
+     * {@code MoonlightConfigScreen} consumes it; this base class never references the screen so the holder stays
+     * server safe. Returns null if this holder doesn't expose one.
+     */
+    @Nullable
+    public ConfigCategory getConfigRoot() {
+        return null;
+    }
 
     //send configs from server -> client
     public void syncConfigsToPlayer(ServerPlayer player) {

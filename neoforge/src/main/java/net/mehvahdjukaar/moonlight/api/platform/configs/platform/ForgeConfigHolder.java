@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.Util;
@@ -62,13 +63,16 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     private final ModConfig modConfig;
 
     private final List<TrackedConfigValue<?>> trackedValues;
+    private final ConfigCategory configRoot;
 
     ForgeConfigHolder(ResourceLocation name, ModConfigSpec spec, ConfigType type,
                       @Nullable Runnable onChange,
-                      List<TrackedConfigValue<?>> trackedValues) {
+                      List<TrackedConfigValue<?>> trackedValues,
+                      net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory configRoot) {
         super(name, "toml", FMLPaths.CONFIGDIR.get(), type, onChange);
         this.spec = spec;
         this.trackedValues = trackedValues;
+        this.configRoot = configRoot;
 
         ModConfig.Type forgeType = this.getConfigType() == ConfigType.CLIENT ? ModConfig.Type.CLIENT : ModConfig.Type.COMMON;
 
@@ -132,21 +136,24 @@ public final class ForgeConfigHolder extends ModConfigHolder {
         spec.save();
     }
 
+    @Override
+    public ConfigCategory getConfigRoot() {
+        return configRoot;
+    }
+
     @Nullable
     @Override
     @OnlyIn(Dist.CLIENT)
     public Screen makeScreen(Screen parent, @Nullable ResourceLocation background) {
+        // TEST WIRING: use the native Moonlight screen. Original Forge/Configured delegation kept below for restore.
+        var root = getConfigRoot();
+        return root == null ? null : new net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigScreen(this, root, parent, background);
+        /*
         return ModList.get().getModContainerById(this.getModId())
                 .flatMap(container -> container.getCustomExtension(IConfigScreenFactory.class)
                         .map(factory -> factory.createScreen(container, parent)))
                 .orElse(null);
-    }
-
-    @Override
-    public boolean hasConfigScreen() {
-        return ModList.get().getModContainerById(this.getModId())
-                .map(container -> container.getCustomExtension(IConfigScreenFactory.class)
-                        .isPresent()).orElse(false);
+        */
     }
 
     @ApiStatus.Internal

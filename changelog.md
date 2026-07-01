@@ -1,1 +1,3 @@
-- fixed an issue with resource gen fialing to find some textures
+- improvements to archive utils
+- misc cleanups
+- new icons for media links

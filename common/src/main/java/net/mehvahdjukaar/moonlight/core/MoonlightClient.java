@@ -100,7 +100,7 @@ public class MoonlightClient {
 
     @EventCalled
     public static void onItemTooltip(ItemStack stack, Item.TooltipContext tooltipContext, TooltipFlag tooltipFlag, List<Component> list) {
-        if (ClientConfigs.TAGS_TOOLTIP.get().isOn(tooltipFlag)) {
+        if (ClientConfigs.TAGS_TOOLTIP.get().isOn(tooltipFlag) && tooltipFlag.isAdvanced()) {
             Item item = stack.getItem();
             // BLOCK TAGS
             if (item instanceof BlockItem bi) {

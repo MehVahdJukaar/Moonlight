@@ -18,11 +18,9 @@ dependencies {
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
     modCompileOnly("curse.maven:map-atlases-forge-519759:7659933")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
-    modCompileOnly("curse.maven:quark-243121:7640331")
+    modImplementation("curse.maven:quark-243121:8342602")
+    modImplementation("curse.maven:zeta-968868:7980010")
 
-    modCompileOnly("curse.maven:autoreglib-250363:3857246")
-    modCompileOnly("curse.maven:quark-oddities-301051:3575623")
-    modCompileOnly("curse.maven:quark-243121:4463411")
     modCompileOnly("curse.maven:the-twilight-forest-227639:7398100")
 //    modImplementation("curse.maven:open-loader-354339:6546293")
     //modImplementation("curse.maven:prickle-1023259:6961457")
@@ -36,7 +34,7 @@ dependencies {
 
     modCompileOnly("curse.maven:map-atlases-forge-519759:4990003")
     //modImplementation ("curse.maven:supplementaries-412082:4995508")
-    modImplementation("curse.maven:configured-457570:7276577")
+    modCompileOnly("curse.maven:configured-457570:7276577")
     modCompileOnly("curse.maven:yacl-667299:5424504")
     modCompileOnly("curse.maven:alexs-caves-924854:4806837")
 }

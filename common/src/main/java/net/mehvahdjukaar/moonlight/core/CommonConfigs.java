@@ -4,7 +4,11 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.util.math.Range;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public class CommonConfigs {
@@ -34,16 +38,48 @@ public class CommonConfigs {
 
 
         if (PlatHelper.isDev()) {
+            // Dev only playground for the native config screen: one of every control type, plus a check that
+            // comment(...) works both before and after its define(...). Only shows up in a dev environment.
             builder.push("test_category");
-            builder.comment("category comment");
+            builder.comment("A dev only section used to test the config screen. It doesn't ship to players.");
 
-            builder
-                    .affectsDynamicPacks()
-                    .comment("test comment 1")
-                    .define("test", false);
-            builder
-                    .comment("test comment 2 ")
-                    .define("test", 2.0, 0, 22);
+            builder.comment("A boolean toggle").define("test_bool", true);
+            builder.comment("An integer, edited as a text field").define("test_int", 5, 0, 100);
+            builder.comment("An integer, edited as a slider").defineSlider("test_int_slider", 50, 0, 100);
+            builder.comment("A double, edited as a text field").define("test_double", 2.0, 0, 22);
+            builder.comment("A double, edited as a slider").defineSlider("test_double_slider", 0.5, 0.0, 1.0);
+            builder.comment("A percentage, edited as a slider showing %").definePercentage("test_percent", 0.5);
+            builder.comment("An item picked from the registry, with icon").defineItem("test_item", ResourceLocation.parse("minecraft:diamond"));
+            builder.comment("A block picked from the registry, with icon").defineBlock("test_block", ResourceLocation.parse("minecraft:stone"));
+            builder.comment("A min/max range shown as two fields on one row").defineRange("test_range", Range.of(2, 8), 0, 10);
+            builder.comment("An enum, edited as a cycle button").define("test_enum", Direction.NORTH);
+            builder.comment("A value picked from a dropdown list")
+                    .defineDropdown("test_dropdown", "medium", List.of("potato", "low", "medium", "high", "ultra", "extreme", "overkill", "ludicrous", "maximum"));
+            builder.comment("A string field").define("test_string", "hello");
+            builder.comment("A regex pattern with live syntax highlighting").defineRegex("test_regex", "\\d+(foo|bar)?");
+            builder.comment("An ARGB color, edited as a hex field").defineColor("test_color", 0xFFFF5555);
+
+            // comment declared AFTER its define: still ends up on the row (lenient ordering)
+            builder.define("test_after_comment", false);
+            builder.comment("This comment was declared after its own define call");
+
+            builder.comment("A free-text string list, edited on a sub page").define("test_list", List.of("a", "b", "c"));
+            builder.comment("A string list whose entries are each picked from a dropdown")
+                    .defineList("test_dropdown_list", List.of("medium"), List.of("low", "medium", "high", "ultra"));
+            builder.comment("An item list, each entry picked from an item dropdown with icons")
+                    .defineItemList("test_item_list",
+                            List.of(ResourceLocation.parse("minecraft:diamond"), ResourceLocation.parse("minecraft:emerald")));
+
+            JsonObject json = new JsonObject();
+            json.addProperty("example", 42);
+            json.addProperty("enabled", true);
+            builder.comment("A raw JSON value, edited in a text box with syntax highlighting").defineJson("test_json", json);
+            builder.comment("A plain Java bean (no codec needed), stored and edited as JSON").defineBean("test_bean", new TestBean());
+
+            builder.push("nested");
+            builder.comment("A float value living in a nested sub category").define("nested_float", 0.5f, 0f, 1f);
+            builder.pop();
+
             builder.pop();
         }
 

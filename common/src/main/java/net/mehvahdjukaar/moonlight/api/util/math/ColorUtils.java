@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.util.math;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import net.mehvahdjukaar.moonlight.api.util.math.colors.HSVColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
@@ -47,6 +48,37 @@ public final class ColorUtils {
 
     public static boolean isValidString(String s) {
         return isValidStringOrError(s).result().isPresent();
+    }
+
+    /**
+     * Parses an ARGB color from a hex string (accepts {@code 0x}, {@code #} or no prefix). Throws if invalid.
+     */
+    public static int parseHex(String s) {
+        return Integer.parseUnsignedInt(isValidStringOrError(s).getOrThrow(), 16);
+    }
+
+    /**
+     * Formats an ARGB color as an {@code #AARRGGBB} hex string.
+     */
+    public static String toHexString(int argb) {
+        return "#" + String.format("%08X", argb);
+    }
+
+    /**
+     * Builds an ARGB color from HSV components (all {@code 0..1}) and an {@code 0..255} alpha, via {@link HSVColor}.
+     */
+    public static int hsvToArgb(float hue, float saturation, float value, int alpha) {
+        // HSVColor/RGBColor pack ABGR; our config colors are ARGB, so swap on the way out
+        return swapFormat(new HSVColor(hue, saturation, value, alpha / 255f).asRGB().toInt());
+    }
+
+    /**
+     * Extracts the HSV components ({@code {hue, saturation, value}}, all {@code 0..1}) of an ARGB color, via
+     * {@link HSVColor}. Alpha is ignored; read it separately (e.g. {@code FastColor.ARGB32.alpha}).
+     */
+    public static float[] argbToHsv(int argb) {
+        HSVColor hsv = new RGBColor(swapFormat(argb)).asHSV();
+        return new float[]{hsv.hue(), hsv.saturation(), hsv.value()};
     }
 
     private static final Vector3f DIFFUSE_LIGHT_0 = (new Vector3f(0.2F, 1.0F, -0.7F)).normalize();

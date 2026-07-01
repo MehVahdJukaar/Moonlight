@@ -1,0 +1,98 @@
+package net.mehvahdjukaar.moonlight.api.client.config;
+
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
+
+/**
+ * Entry point for a mod's configs: lists every config registered for the mod (common, client, ...) as a button
+ * that opens that config's {@link MoonlightConfigScreen}. When a mod only has a single config this is skipped and
+ * that config opens directly (see {@link #create}).
+ */
+public class MoonlightConfigSelectScreen extends Screen {
+
+    private final Screen parent;
+    @Nullable
+    private final ResourceLocation background;
+    private final List<ModConfigHolder> holders;
+
+    private ConfigOptionList list;
+
+    public MoonlightConfigSelectScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+        super(Component.literal(LangBuilder.getReadableName(modId)));
+        this.parent = parent;
+        this.background = background;
+        this.holders = configsOf(modId);
+    }
+
+    /** All configs registered for a mod that can show a screen, ordered common → client. */
+    private static List<ModConfigHolder> configsOf(String modId) {
+        return ModConfigHolder.getTrackedSpecs().stream()
+                .filter(h -> h.getModId().equals(modId))
+                .sorted(Comparator.comparingInt(h -> h.getConfigType().ordinal()))
+                .toList();
+    }
+
+    /**
+     * Builds the right screen for a mod's config button: the single config directly if there's only one, the
+     * select list if there are several, or null if the mod has none.
+     */
+    @Nullable
+    public static Screen create(String modId, Screen parent, @Nullable ResourceLocation background) {
+        List<ModConfigHolder> holders = configsOf(modId);
+        if (holders.isEmpty()) return null;
+        if (holders.size() == 1) return holders.getFirst().makeScreen(parent, background);
+        return new MoonlightConfigSelectScreen(modId, parent, background);
+    }
+
+    @Override
+    protected void init() {
+        this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, ITEM_HEIGHT);
+        List<ConfigRow> rows = new ArrayList<>();
+        for (ModConfigHolder h : holders) {
+            Component label = Component.literal(LangBuilder.getReadableName(h.getId().getPath()));
+            Component tooltip = Component.literal(h.getFileName());
+            rows.add(new ConfigHolderRow(label, tooltip, () -> this.minecraft.setScreen(h.makeScreen(this, background))));
+        }
+        this.list.setRows(rows);
+        this.addRenderableWidget(this.list);
+
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
+                .bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
+    }
+
+    @Override
+    public void onClose() {
+        this.minecraft.setScreen(parent);
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+
+        // qualified: Screen inherits its own HEADER_SEPARATOR (a texture), which would shadow the static import
+        graphics.fill(0, 0, this.width, HEADER, ConfigScreenLayout.HEADER_BG);
+        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigScreenLayout.HEADER_SEPARATOR);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, TITLE_COLOR);
+
+        ConfigRow hovered = this.list.getHovered(mouseX, mouseY);
+        if (hovered != null) {
+            Component tooltip = hovered.getTooltip(mouseX, mouseY);
+            if (tooltip != null) {
+                graphics.renderTooltip(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
+            }
+        }
+    }
+}

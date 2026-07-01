@@ -45,11 +45,19 @@ public class MoonlightForgeClient {
 
     public static void afterLoad(FMLLoadCompleteEvent event) {
         if (CompatHandler.CONFIGURED) return;
+        // TEST WIRING: route each mod's config button to the native Moonlight screen (one extension point
+        // per mod container; the vanilla ConfigurationScreen is kept as a fallback).
+        java.util.Set<String> registered = new java.util.HashSet<>();
         for (var config : ModConfigHolder.getTrackedSpecs()) {
-            if (!config.hasConfigScreen()) {
-                ModList.get().getModContainerById(config.getModId()).ifPresent(c ->
-                        c.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new));
-            }
+            String modId = config.getModId();
+            if (!registered.add(modId)) continue;
+            ModList.get().getModContainerById(modId).ifPresent(c ->
+                    c.registerExtensionPoint(IConfigScreenFactory.class, (container, parent) -> {
+                        // list every config registered for this mod (common, client, ...); opens the single one directly
+                        var screen = net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigSelectScreen
+                                .create(modId, parent, null);
+                        return screen != null ? screen : new ConfigurationScreen(container, parent);
+                    }));
         }
     }
 

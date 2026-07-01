@@ -190,3 +190,7 @@ extendable method net/minecraft/client/renderer/PostChain load (Lnet/minecraft/c
 accessible field net/minecraft/client/renderer/PostChain passes Ljava/util/List;
 accessible field net/minecraft/client/renderer/PostChain shaderOrthoMatrix Lorg/joml/Matrix4f;
 accessible field net/minecraft/client/renderer/GameRenderer effectActive Z
+
+#native config screen: highlighted multiline json editor
+accessible field net/minecraft/client/gui/components/MultiLineEditBox textField Lnet/minecraft/client/gui/components/MultilineTextField;
+accessible class net/minecraft/client/gui/components/MultilineTextField$StringView

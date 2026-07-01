@@ -1,23 +1,38 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 /**
  * A loader independent config builder
@@ -26,13 +41,37 @@ import java.util.function.Supplier;
 public abstract class ConfigBuilder {
 
     protected final Map<String, String> translations = new HashMap<>();
-    protected String currentComment;
-    protected String currentKey;
     protected Runnable changeCallback;
     protected boolean pendingDynamicPacks;
 
+    // ===== lenient comment wiring =====
+    // A comment(...) may come before or after its define(...). We remember a comment given before as
+    // pendingComment (consumed by the next define), and remember the last define's target so a comment given
+    // after can still attach to it. applyComment() writes the readable text into the lang map and lets the
+    // platform stamp it onto the on-disk value and the screen row.
+    @Nullable
+    private String pendingComment;
+    @Nullable
+    private CommentTarget lastCommentTarget;
+    @Nullable
+    private String lastCommentKey;
+
+    // parallel, loader independent UI tree consumed by the native config screen. Built as values are defined so
+    // both loaders end up with the exact same tree regardless of how they store the actual config.
+    private final ConfigCategory uiRoot = new ConfigCategory(Component.empty());
+    private final Deque<ConfigCategory> uiStack = new ArrayDeque<>();
+    // while set, define(...)/push(...) skip UI emission: used by compound values (e.g. defineRange) that own
+    // several backing values but want a single combined row instead of one row per backing value.
+    protected boolean suppressUi = false;
+
     //always on. can be called to disable
     protected boolean usesDataBuddy = true;
+
+    /** How a pending/late comment is applied to the value it belongs to (its on-disk comment and screen row). */
+    @FunctionalInterface
+    protected interface CommentTarget {
+        void applyComment(String rawComment);
+    }
 
     @PlatformImpl
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
@@ -49,6 +88,7 @@ public abstract class ConfigBuilder {
     protected ConfigBuilder(ResourceLocation name, ConfigType type) {
         this.name = name;
         this.type = type;
+        this.uiStack.push(this.uiRoot);
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
             if (e.isDefault()) translations.forEach(e::addEntry);
         };
@@ -93,10 +133,131 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<Integer> defineColor(String name, int defaultValue);
 
+    public abstract Supplier<Integer> defineSlider(String name, int defaultValue, int min, int max);
+
+    public abstract Supplier<Double> defineSlider(String name, double defaultValue, double min, double max);
+
+    public abstract Supplier<Float> defineSlider(String name, float defaultValue, float min, float max);
+
+    public abstract Supplier<Double> definePercentage(String name, double defaultValue);
+
     public abstract Supplier<String> define(String name, String defaultValue, Predicate<Object> validator);
 
     public Supplier<String> define(String name, String defaultValue) {
         return define(name, defaultValue, STRING_CHECK);
+    }
+
+    public Supplier<Pattern> defineRegex(String name, String defaultValue) {
+        return new RegexPatternValue(defineRegexSource(name, defaultValue));
+    }
+
+    /** Platform hook: stores the regex as a string and records the {@link ConfigOption.RegexValue} screen row. */
+    protected abstract Supplier<String> defineRegexSource(String name, String defaultValue);
+
+    /**
+     * Platform hook backing every dropdown/picker: stores a string (validated by {@code validator}) and records a
+     * {@link ConfigOption.DropdownValue} screen row with the given lazy {@code options} and optional {@code icon}.
+     */
+    protected abstract Supplier<String> defineChoiceSource(String name, String defaultValue, Predicate<Object> validator,
+                                                           Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon);
+
+    public Supplier<String> defineDropdown(String name, String defaultValue, List<String> options) {
+        List<String> copy = List.copyOf(options);
+        return defineChoiceSource(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
+    }
+
+    public Supplier<ResourceLocation> defineRegistry(String name, ResourceLocation defaultValue, Registry<?> registry) {
+        Supplier<String> handle = defineChoiceSource(name, defaultValue.toString(), REGISTRY_ID_CHECK,
+                () -> registryIds(registry), null);
+        return () -> ResourceLocation.parse(handle.get());
+    }
+
+    public Supplier<Item> defineItem(String name, ResourceLocation defaultValue) {
+        Supplier<String> handle = defineChoiceSource(name, defaultValue.toString(), REGISTRY_ID_CHECK,
+                () -> registryIds(BuiltInRegistries.ITEM),
+                id -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))));
+        return () -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(handle.get()));
+    }
+
+    public Supplier<Block> defineBlock(String name, ResourceLocation defaultValue) {
+        Supplier<String> handle = defineChoiceSource(name, defaultValue.toString(), REGISTRY_ID_CHECK,
+                () -> registryIds(BuiltInRegistries.BLOCK),
+                id -> new ItemStack(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id)).asItem()));
+        return () -> BuiltInRegistries.BLOCK.get(ResourceLocation.parse(handle.get()));
+    }
+
+    private static List<String> registryIds(Registry<?> registry) {
+        return registry.keySet().stream().map(ResourceLocation::toString).sorted().toList();
+    }
+
+    private static List<String> idStrings(List<ResourceLocation> ids) {
+        return ids.stream().map(ResourceLocation::toString).toList();
+    }
+
+    public static final Predicate<Object> REGISTRY_ID_CHECK = o -> o instanceof String s && ResourceLocation.tryParse(s) != null;
+
+    /**
+     * Platform hook backing the option-backed lists below: stores a string list (entries validated by
+     * {@code entryValidator}) and records a {@link ConfigOption.ListValue} whose editor rows are dropdowns fed by
+     * {@code options} (with an optional {@code icon}).
+     */
+    protected abstract Supplier<List<String>> defineListSource(String name, List<String> defaultValue,
+                                                               Predicate<Object> entryValidator,
+                                                               Supplier<List<String>> options,
+                                                               @Nullable Function<String, ItemStack> icon);
+
+    /** A string list whose entries are each picked from a fixed set of {@code options} via a dropdown. */
+    public Supplier<List<String>> defineList(String name, List<String> defaultValue, List<String> options) {
+        List<String> copy = List.copyOf(options);
+        return defineListSource(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
+    }
+
+    /** A list of registry ids, each picked from {@code registry} via a dropdown. Stored as resource location strings. */
+    public Supplier<List<ResourceLocation>> defineRegistryList(String name, List<ResourceLocation> defaultValue, Registry<?> registry) {
+        Supplier<List<String>> handle = defineListSource(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
+                () -> registryIds(registry), null);
+        return () -> handle.get().stream().map(ResourceLocation::parse).toList();
+    }
+
+    /** Like {@link #defineRegistryList} but preset to the item registry, previewing each item's icon. */
+    public Supplier<List<Item>> defineItemList(String name, List<ResourceLocation> defaultValue) {
+        Supplier<List<String>> handle = defineListSource(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
+                () -> registryIds(BuiltInRegistries.ITEM),
+                id -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))));
+        return () -> handle.get().stream().map(id -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))).toList();
+    }
+
+    /** Like {@link #defineRegistryList} but preset to the block registry, previewing each block's item icon. */
+    public Supplier<List<Block>> defineBlockList(String name, List<ResourceLocation> defaultValue) {
+        Supplier<List<String>> handle = defineListSource(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
+                () -> registryIds(BuiltInRegistries.BLOCK),
+                id -> new ItemStack(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id)).asItem()));
+        return () -> handle.get().stream().map(id -> BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id))).toList();
+    }
+
+    private static class RegexPatternValue implements Supplier<Pattern> {
+        private final Supplier<String> source;
+        private String cachedSource;
+        private Pattern cached;
+
+        RegexPatternValue(Supplier<String> source) {
+            this.source = source;
+        }
+
+        @Override
+        public Pattern get() {
+            String s = source.get();
+            if (cached == null || !s.equals(cachedSource)) {
+                cachedSource = s;
+                // validated on write, but a hand-edited file could still be invalid: fall back to a literal match
+                try {
+                    cached = Pattern.compile(s);
+                } catch (Exception e) {
+                    cached = Pattern.compile(Pattern.quote(s));
+                }
+            }
+            return cached;
+        }
     }
 
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue) {
@@ -129,6 +290,21 @@ public abstract class ConfigBuilder {
     public abstract Supplier<JsonElement> defineJson(String name, JsonElement defaultValue);
 
     public abstract Supplier<JsonElement> defineJson(String name, Supplier<JsonElement> defaultValue);
+
+    private static final Gson BEAN_GSON = new Gson();
+
+    /**
+     * Defines a config value from a plain Java bean (POJO) — for when you'd rather not write a {@link Codec}. The
+     * bean is (de)serialized reflectively with Gson and stored as JSON, so it rides on {@link #defineJson} and is
+     * editable in the same JSON text box. The bean's runtime class must be reconstructible by Gson (a no-arg
+     * constructor / public fields, as usual for Gson).
+     */
+    public <T> Supplier<T> defineBean(String name, T defaultValue) {
+        @SuppressWarnings("unchecked")
+        Class<T> type = (Class<T>) defaultValue.getClass();
+        Supplier<JsonElement> handle = defineJson(name, () -> BEAN_GSON.toJsonTree(defaultValue));
+        return () -> BEAN_GSON.fromJson(handle.get(), type);
+    }
 
 
     public Supplier<ResourceLocation> define(String name, ResourceLocation defaultValue) {
@@ -200,17 +376,136 @@ public abstract class ConfigBuilder {
 
 
     /**
-     * Try not to use this. Just here to make porting easier
-     * Will add entries manually to the english language file
+     * Adds a comment/description to a value. Lenient: it may be called either before or after that value's
+     * {@code define(...)}. A comment given before is held and attached to the next defined value; a comment
+     * given after attaches to the most recently defined value. Ends up in the english language file and as the
+     * hover description of the value's screen row.
      */
     public ConfigBuilder comment(String comment) {
-        this.currentComment = comment;
-        if (this.currentComment != null && this.currentKey != null) {
-            this.translations.put(currentKey, currentComment);
-            this.currentComment = null;
-            this.currentKey = null;
+        if (this.lastCommentTarget != null) {
+            // a value was just defined and is still waiting: this is an "after" comment for it
+            applyComment(comment);
+        } else {
+            // no value waiting: hold it for the next define ("before" comment)
+            this.pendingComment = comment;
         }
         return this;
+    }
+
+    /**
+     * Multi line comment, mirroring Forge's {@code ModConfigSpec.Builder.comment(String...)}. Like the single
+     * line version it may come before or after the value's {@code define(...)}.
+     */
+    public ConfigBuilder comment(String... comment) {
+        return comment(String.join("\n", comment));
+    }
+
+    /** Whether the last defined value is still waiting to (maybe) receive a comment that follows it. */
+    protected boolean isAwaitingAfterComment() {
+        return this.lastCommentTarget != null;
+    }
+
+    /**
+     * Forge parity alias for {@link #worldReload()} (Forge calls it {@code worldRestart()}), so configs can be
+     * ported over with fewer edits.
+     */
+    public ConfigBuilder worldRestart() {
+        return worldReload();
+    }
+
+    /** Pops {@code count} categories at once, mirroring Forge's {@code pop(int)}. */
+    public ConfigBuilder pop(int count) {
+        for (int i = 0; i < count; i++) pop();
+        return this;
+    }
+
+    /**
+     * Accepted for Forge parity ({@code ModConfigSpec.Builder.translation}), but a no-op: Moonlight derives the
+     * translation keys automatically from the category/value names, so an explicit key isn't needed.
+     */
+    public ConfigBuilder translation(String translationKey) {
+        return this;
+    }
+
+    private void applyComment(String rawComment) {
+        if (this.lastCommentKey != null) this.translations.put(this.lastCommentKey, rawComment);
+        if (this.lastCommentTarget != null) this.lastCommentTarget.applyComment(rawComment);
+        this.lastCommentTarget = null;
+        this.lastCommentKey = null;
+    }
+
+    /**
+     * Called by each define once its value and screen row exist. Wires the comment target so a comment given
+     * before (held as {@link #pendingComment}) or after (via the retained target) reaches this value. Skipped
+     * while {@link #suppressUi} is set, so the backing values of a compound value don't steal its comment.
+     */
+    protected void noteDefined(String name, @Nullable ConfigNode uiNode, @Nullable Consumer<String> rawCommentSink) {
+        if (this.suppressUi) return;
+        String key = this.tooltipKey(name);
+        Component description = Component.translatable(key);
+        this.lastCommentKey = key;
+        this.lastCommentTarget = raw -> {
+            if (uiNode != null) uiNode.setDescription(description);
+            if (rawCommentSink != null) rawCommentSink.accept(raw);
+        };
+        if (this.pendingComment != null) {
+            applyComment(this.pendingComment);
+            this.pendingComment = null;
+        }
+    }
+
+    // ===== loader independent UI tree (consumed by the native config screen) =====
+
+    /** Pushes a UI sub category mirroring a {@code push(...)}. No-op while UI emission is suppressed. */
+    protected void uiPush(Component title) {
+        if (this.suppressUi) return;
+        ConfigCategory cat = new ConfigCategory(title);
+        this.uiStack.peek().add(cat);
+        this.uiStack.push(cat);
+    }
+
+    /** Pops the current UI sub category. No-op while UI emission is suppressed. */
+    protected void uiPop() {
+        if (this.suppressUi) return;
+        this.uiStack.pop();
+    }
+
+    /** Adds a value row to the current UI category. No-op while UI emission is suppressed. */
+    protected void recordOption(ConfigOption<?> option) {
+        if (this.suppressUi) return;
+        this.uiStack.peek().add(option);
+    }
+
+    /** The root of the loader independent screen model, ready once {@link #build()} has run. */
+    public ConfigCategory getUiRoot() {
+        return this.uiRoot;
+    }
+
+    /**
+     * Defines a {@link Range} value from a default {@code Range}. Sugar for
+     * {@link #defineRange(String, double, double, double, double)}.
+     */
+    public Supplier<Range> defineRange(String name, Range defaultValue, double min, double max) {
+        return defineRange(name, defaultValue.min(), defaultValue.max(), min, max);
+    }
+
+    public Supplier<Range> defineRange(String name, double defaultMin, double defaultMax, double min, double max) {
+        // Storage: two doubles nested under a `name` section. Their individual rows are suppressed so the whole
+        // range shows as a single combined row instead.
+        this.suppressUi = true;
+        push(name);
+        Supplier<Double> minHandle = define("min", defaultMin, min, max);
+        Supplier<Double> maxHandle = define("max", defaultMax, min, max);
+        pop();
+        this.suppressUi = false;
+
+        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        ConfigOption.RangeValue node = new ConfigOption.RangeValue(
+                description(name), null, minHandle, maxHandle,
+                new Range(defaultMin, defaultMax), min, max);
+        recordOption(node);
+        noteDefined(name, node, null);
+        return () -> new Range(minHandle.get(), maxHandle.get());
     }
 
     public ConfigBuilder onChange(Runnable callback) {
@@ -227,20 +522,15 @@ public abstract class ConfigBuilder {
     public abstract ConfigBuilder gameRestart();
 
     protected void addTranslationsAndComments(String name) {
-        //name translation
+        //name translation (comments are wired separately, see noteDefined/comment, so they can come before or after)
         this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
-        //comment translation
-        this.currentKey = this.tooltipKey(name);
-        if (this.currentComment != null && this.currentKey != null) {
-            this.translations.put(currentKey, currentComment);
-            this.currentComment = null;
-            this.currentKey = null;
-        }
         if (this.currentCategory() == null && PlatHelper.isDev())
             throw new AssertionError("Current config category was null. How?");
     }
 
     public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;
+
+    public static final Predicate<Object> REGEX_CHECK = o -> o instanceof String s && ConfigOption.RegexValue.isValidRegex(s);
 
     public static final Predicate<Object> LIST_STRING_CHECK = (s) -> {
         if (s instanceof List<?>) {

@@ -13,8 +13,9 @@ import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.ConfigValue;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -30,9 +31,6 @@ import java.util.function.Supplier;
 
 import net.minecraft.server.packs.PackType;
 
-import static net.mehvahdjukaar.moonlight.core.CompatHandler.CLOTH_CONFIG;
-import static net.mehvahdjukaar.moonlight.core.CompatHandler.YACL;
-
 public final class FabricConfigHolder extends ModConfigHolder {
 
     @ApiStatus.Internal
@@ -47,11 +45,14 @@ public final class FabricConfigHolder extends ModConfigHolder {
     private final ConfigSubCategory mainEntry;
     private final File file;
     private boolean initialized = false;
+    private final ConfigCategory configRoot;
 
-    public FabricConfigHolder(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, Runnable changeCallback) {
+    public FabricConfigHolder(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, Runnable changeCallback,
+                              ConfigCategory configRoot) {
         super(name, "json", FabricLoader.getInstance().getConfigDir(), type, changeCallback);
         this.file = this.getFullPath().toFile();
         this.mainEntry = mainEntry;
+        this.configRoot = configRoot;
         if (this.isSynced()) {
             ServerPlayConnectionEvents.JOIN.register(this::onPlayerLoggedIn);
         }
@@ -191,19 +192,25 @@ public final class FabricConfigHolder extends ModConfigHolder {
 
 
     @Override
+    public ConfigCategory getConfigRoot() {
+        this.forceLoad();
+        return configRoot;
+    }
+
+    @Override
     @ClientOnly
     public Screen makeScreen(Screen parent, ResourceLocation background) {
+        // TEST WIRING: native Moonlight screen. YACL/Cloth delegation kept below for restore.
+        ConfigCategory root = getConfigRoot();
+        return root == null ? null : new net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigScreen(this, root, parent, background);
+        /*
         if (YACL) {
             return YACLCompat.makeScreen(parent, this, background);
         } else if (CLOTH_CONFIG) {
             return ClothConfigCompat.makeScreen(parent, this, background);
         }
         return null;
-    }
-
-    @Override
-    public boolean hasConfigScreen() {
-        return CLOTH_CONFIG || YACL;
+        */
     }
 
     @Override

@@ -21,6 +21,8 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T>,
     private String translationKey = "";
     private String commentKey = "";
     private String rawComment = "";
+    private boolean slider = false;
+    private boolean percent = false;
 
     protected ConfigValue(String name, T defaultValue) {
         super(name);
@@ -89,6 +91,22 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T>,
 
     public String getExtraInfo() {
         return "";
+    }
+
+    public boolean isSlider() {
+        return slider;
+    }
+
+    public void setSlider(boolean slider) {
+        this.slider = slider;
+    }
+
+    public boolean isPercent() {
+        return percent;
+    }
+
+    public void setPercent(boolean percent) {
+        this.percent = percent;
     }
 
     @Override
