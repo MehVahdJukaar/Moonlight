@@ -14,12 +14,14 @@ import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -616,6 +618,46 @@ public abstract class ConfigBuilder {
         recordOption(node);
         noteDefined(name, node, null);
         return () -> new Range(minHandle.get(), maxHandle.get());
+    }
+
+    /**
+     * A {@link Vec3} (three doubles) shown as one row of x/y/z number fields, each bounded by {@code [min, max]}.
+     * Stored as three doubles nested under a {@code name} section (their individual rows suppressed, like
+     * {@link #defineRange}), written back together.
+     */
+    public Supplier<Vec3> defineVec3(String name, Vec3 defaultValue, double min, double max) {
+        this.suppressUi = true;
+        push(name);
+        Supplier<Double> xHandle = define("x", defaultValue.x, min, max);
+        Supplier<Double> yHandle = define("y", defaultValue.y, min, max);
+        Supplier<Double> zHandle = define("z", defaultValue.z, min, max);
+        pop();
+        this.suppressUi = false;
+
+        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        ConfigOption.Vec3Value node = new ConfigOption.Vec3Value(
+                description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
+        recordOption(node);
+        noteDefined(name, node, null);
+        return () -> new Vec3(xHandle.get(), yHandle.get(), zHandle.get());
+    }
+
+    /** A {@link Vec3i} (three ints) shown as one row of x/y/z number fields, each bounded by {@code [min, max]}. */
+    public Supplier<Vec3i> defineVec3i(String name, Vec3i defaultValue, int min, int max) {
+        this.suppressUi = true;
+        push(name);
+        Supplier<Integer> xHandle = define("x", defaultValue.getX(), min, max);
+        Supplier<Integer> yHandle = define("y", defaultValue.getY(), min, max);
+        Supplier<Integer> zHandle = define("z", defaultValue.getZ(), min, max);
+        pop();
+        this.suppressUi = false;
+
+        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        ConfigOption.Vec3iValue node = new ConfigOption.Vec3iValue(
+                description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
+        recordOption(node);
+        noteDefined(name, node, null);
+        return () -> new Vec3i(xHandle.get(), yHandle.get(), zHandle.get());
     }
 
     public ConfigBuilder onChange(Runnable callback) {

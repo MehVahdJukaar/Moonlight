@@ -4,7 +4,6 @@ import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -20,11 +19,11 @@ import java.util.function.Consumer;
  * the new ARGB color through {@code onChange}; if an {@code onSwatchClick} action is given the swatch becomes a
  * button (typically opening a {@link ColorPickerScreen}), otherwise it is a passive preview. Colors are ARGB ints.
  */
-public class ColorField extends AbstractContainerWidget {
+public class ColorField extends CompositeWidget {
 
     private static final int GAP = 4;
-    private static final int TEXT_COLOR = 0xE0E0E0;
-    private static final int ERROR_COLOR = 0xFF5555;
+    private static final int TEXT_COLOR = ConfigGuiColors.TEXT;
+    private static final int ERROR_COLOR = ConfigGuiColors.ERROR;
 
     private final EditBox hexBox;
     private final ColorSwatchWidget swatch;

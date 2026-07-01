@@ -7,7 +7,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.List;
@@ -143,6 +145,32 @@ public final class ConfigControls {
             return new Control(w, v -> w.setRange((Range) v));
         });
 
+        register(ConfigOption.Vec3Value.class, (o, s, onChange) -> {
+            Vec3 c = s.current(o);
+            Vec3ControlWidget w = new Vec3ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.x, c.y, c.z, o.min, o.max, false,
+                    (x, y, z) -> {
+                        s.put(o, new Vec3(x, y, z));
+                        onChange.run();
+                    });
+            return new Control(w, v -> {
+                Vec3 vv = (Vec3) v;
+                w.setValues(vv.x, vv.y, vv.z);
+            });
+        });
+
+        register(ConfigOption.Vec3iValue.class, (o, s, onChange) -> {
+            Vec3i c = s.current(o);
+            Vec3ControlWidget w = new Vec3ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.getX(), c.getY(), c.getZ(), o.min, o.max, true,
+                    (x, y, z) -> {
+                        s.put(o, new Vec3i((int) Math.round(x), (int) Math.round(y), (int) Math.round(z)));
+                        onChange.run();
+                    });
+            return new Control(w, v -> {
+                Vec3i vv = (Vec3i) v;
+                w.setValues(vv.getX(), vv.getY(), vv.getZ());
+            });
+        });
+
         register(ConfigOption.DropdownValue.class, (o, s, onChange) -> {
             DropdownWidget w = new DropdownWidget(CONTROL_WIDTH, CONTROL_HEIGHT, o.options.get(), o.icon, s.current(o), val -> {
                 s.put(o, val);
@@ -162,7 +190,7 @@ public final class ConfigControls {
 
         register(ConfigOption.JsonValue.class, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
-                    Component.translatable("gui.moonlight.config.edit"), EDIT_ICON, 10, 10, b ->
+                    Component.translatable("gui.moonlight.config.edit"), EDIT_ICON, 12, 12, b ->
                     Minecraft.getInstance().setScreen(new JsonEditScreen(o.title(), s.current(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();

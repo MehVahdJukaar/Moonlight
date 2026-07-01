@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
@@ -29,18 +31,28 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
 public class ModsScreen extends Screen {
 
     private static final ResourceLocation GEAR_ICON = Moonlight.res("config");
+    // the same tiling list background the vanilla selection lists use (the field is private on AbstractSelectionList)
+    private static final ResourceLocation MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/menu_list_background.png");
+    private static final ResourceLocation INWORLD_MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/inworld_menu_list_background.png");
 
-    private static final int CARD_W = 104;
-    private static final int CARD_H = 112;
-    private static final int CARD_GAP = 8;
-    private static final int ICON_SIZE = 48;
+    private static final int GRID_PAD = 8; // inset for the first/last card row inside the scroll panel
+
+    private static final int CARD_W = 88;
+    private static final int CARD_PAD = 9;        // equal padding above the icon and below the last text line
+    private static final int ICON_TEXT_GAP = 6;   // icon → name
+    private static final int NAME_VER_GAP = 2;    // name → version
+    private static final int ICON_SIZE = 32;
+    private static final int LINE = 9;            // vanilla font line height
+    // top pad + icon + gap + name + gap + version + bottom pad — kept balanced (CARD_PAD on both ends)
+    private static final int CARD_H = CARD_PAD + ICON_SIZE + ICON_TEXT_GAP + LINE + NAME_VER_GAP + LINE + CARD_PAD;
+    private static final int CARD_GAP = 6;
     private static final int SIDE_MARGIN = 24;
 
     private static final int CARD_BG = 0xFF1B1B20;
     private static final int CARD_BG_HOVER = 0xFF2C2C34;
     private static final int CARD_OUTLINE = 0xFF000000;
-    private static final int CARD_OUTLINE_HOVER = 0xFF9AD8FF; // accent
-    private static final int VERSION_COLOR = 0x8A8A8A;
+    private static final int CARD_OUTLINE_HOVER = 0xFF000000 | CATEGORY_COLOR; // aqua accent (opaque)
+    private static final int VERSION_COLOR = DESCRIPTION_COLOR;
 
     private final Screen parent;
     @Nullable
@@ -84,11 +96,12 @@ public class ModsScreen extends Screen {
         this.cols = Math.max(1, (availWidth + CARD_GAP) / (CARD_W + CARD_GAP));
         int gridWidth = this.cols * (CARD_W + CARD_GAP) - CARD_GAP;
         this.startX = (this.width - gridWidth) / 2;
-        this.contentTop = HEADER + 10;
-        this.contentBottom = this.height - 40;
+        // the content panel spans header→footer, matching the config list screens (their list occupies the same band)
+        this.contentTop = HEADER;
+        this.contentBottom = this.height - FOOTER;
 
         int rows = (this.entries.size() + this.cols - 1) / this.cols;
-        int totalHeight = Math.max(0, rows * (CARD_H + CARD_GAP) - CARD_GAP);
+        int totalHeight = Math.max(0, rows * (CARD_H + CARD_GAP) - CARD_GAP) + 2 * GRID_PAD;
         this.maxScroll = Math.max(0, totalHeight - (this.contentBottom - this.contentTop));
         this.scroll = Mth.clamp(this.scroll, 0, this.maxScroll);
     }
@@ -98,13 +111,16 @@ public class ModsScreen extends Screen {
     }
 
     private int cardY(int i) {
-        return this.contentTop + (i / this.cols) * (CARD_H + CARD_GAP) - (int) this.scroll;
+        return this.contentTop + GRID_PAD + (i / this.cols) * (CARD_H + CARD_GAP) - (int) this.scroll;
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         computeLayout();
+
+        // the tiling list background behind the cards, matching the config list screens' scroll panel
+        renderListBackground(graphics);
 
         boolean inViewport = mouseY >= contentTop && mouseY < contentBottom;
         graphics.enableScissor(0, contentTop, this.width, contentBottom);
@@ -116,6 +132,8 @@ public class ModsScreen extends Screen {
         }
         graphics.disableScissor();
 
+        // top/bottom inner-shadow separators framing the panel (drawn over the card edges, like the vanilla list)
+        renderListSeparators(graphics);
         renderScrollbar(graphics);
 
         // header bar drawn last so cards scroll under it cleanly
@@ -124,12 +142,32 @@ public class ModsScreen extends Screen {
         graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, TITLE_COLOR);
     }
 
+    /** The 32×32 tiling list background over the scroll panel (mirrors {@code AbstractSelectionList#renderListBackground}). */
+    private void renderListBackground(GuiGraphics graphics) {
+        ResourceLocation bg = this.minecraft.level == null ? MENU_LIST_BACKGROUND : INWORLD_MENU_LIST_BACKGROUND;
+        RenderSystem.enableBlend();
+        graphics.blit(bg, 0, contentTop, (float) this.width, (float) (contentBottom + (int) this.scroll),
+                this.width, contentBottom - contentTop, 32, 32);
+        RenderSystem.disableBlend();
+    }
+
+    /** The top and bottom inner-shadow strips (mirrors {@code AbstractSelectionList#renderListSeparators}). */
+    private void renderListSeparators(GuiGraphics graphics) {
+        boolean inWorld = this.minecraft.level != null;
+        ResourceLocation header = inWorld ? Screen.INWORLD_HEADER_SEPARATOR : Screen.HEADER_SEPARATOR;
+        ResourceLocation footer = inWorld ? Screen.INWORLD_FOOTER_SEPARATOR : Screen.FOOTER_SEPARATOR;
+        RenderSystem.enableBlend();
+        graphics.blit(header, 0, contentTop - 2, 0f, 0f, this.width, 2, 32, 2);
+        graphics.blit(footer, 0, contentBottom, 0f, 0f, this.width, 2, 32, 2);
+        RenderSystem.disableBlend();
+    }
+
     private void renderCard(GuiGraphics graphics, Entry entry, int x, int y, boolean hover) {
         graphics.fill(x, y, x + CARD_W, y + CARD_H, hover ? CARD_BG_HOVER : CARD_BG);
         graphics.renderOutline(x, y, CARD_W, CARD_H, hover ? CARD_OUTLINE_HOVER : CARD_OUTLINE);
 
         int iconX = x + (CARD_W - ICON_SIZE) / 2;
-        int iconY = y + 12;
+        int iconY = y + CARD_PAD;
         ModIcons.Icon icon = ModIcons.get(entry.modId());
         if (icon != null) {
             graphics.blit(icon.texture(), iconX, iconY, ICON_SIZE, ICON_SIZE, 0f, 0f,
@@ -139,10 +177,11 @@ public class ModsScreen extends Screen {
         }
 
         int textCenter = x + CARD_W / 2;
-        int nameY = iconY + ICON_SIZE + 8;
-        drawClippedCentered(graphics, entry.name(), textCenter, nameY, x + 4, x + CARD_W - 4, LABEL_COLOR);
+        int nameY = iconY + ICON_SIZE + ICON_TEXT_GAP;
+        // name is centered but marquees when it's too long for the card
+        GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, LINE, LABEL_COLOR);
         if (entry.version() != null) {
-            drawClippedCentered(graphics, entry.version(), textCenter, nameY + 12, x + 4, x + CARD_W - 4, VERSION_COLOR);
+            drawClippedCentered(graphics, entry.version(), textCenter, nameY + LINE + NAME_VER_GAP, x + 4, x + CARD_W - 4, VERSION_COLOR);
         }
     }
 
@@ -159,15 +198,14 @@ public class ModsScreen extends Screen {
         graphics.renderOutline(iconX, iconY, ICON_SIZE, ICON_SIZE, 0xFF000000);
         String name = entry.name().getString().trim();
         if (name.isEmpty()) {
-            graphics.blitSprite(GEAR_ICON, iconX + (ICON_SIZE - 24) / 2, iconY + (ICON_SIZE - 24) / 2, 24, 24);
+            int g = ICON_SIZE - 10;
+            graphics.blitSprite(GEAR_ICON, iconX + (ICON_SIZE - g) / 2, iconY + (ICON_SIZE - g) / 2, g, g);
             return;
         }
         String initial = name.substring(0, 1).toUpperCase();
-        graphics.pose().pushPose();
-        graphics.pose().translate(iconX + ICON_SIZE / 2f, iconY + ICON_SIZE / 2f, 0);
-        graphics.pose().scale(2.5f, 2.5f, 1f);
-        graphics.drawString(this.font, initial, -this.font.width(initial) / 2, -this.font.lineHeight / 2, CATEGORY_COLOR, false);
-        graphics.pose().popPose();
+        int tx = iconX + (ICON_SIZE - this.font.width(initial)) / 2;
+        int ty = iconY + (ICON_SIZE - this.font.lineHeight) / 2;
+        graphics.drawString(this.font, initial, tx, ty, CATEGORY_COLOR, false);
     }
 
     private void renderScrollbar(GuiGraphics graphics) {

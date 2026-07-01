@@ -31,6 +31,10 @@ dependencies {
 
     // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
     modRuntimeOnly("curse.maven:supplementaries-412082:8051628")
+    modRuntimeOnly("curse.maven:amendments-896746:8345243")
+    modRuntimeOnly("curse.maven:snowy-spirit-566142:8195621")
+    modRuntimeOnly("curse.maven:haunted-harvest-541753:8332283")
+    modRuntimeOnly("curse.maven:vista-1368607:8348336")
 
     modCompileOnly("curse.maven:map-atlases-forge-519759:4990003")
     //modImplementation ("curse.maven:supplementaries-412082:4995508")

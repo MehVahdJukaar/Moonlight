@@ -17,7 +17,7 @@ public class PanningEditBox extends EditBox {
     private static final ResourceLocation TEXT_FIELD_SPRITE = ResourceLocation.withDefaultNamespace("widget/text_field");
 
     private final Font font;
-    private int textColor = 0xE0E0E0;
+    private int textColor = ConfigGuiColors.TEXT;
 
     public PanningEditBox(Font font, int x, int y, int width, int height, Component message) {
         super(font, x, y, width, height, message);

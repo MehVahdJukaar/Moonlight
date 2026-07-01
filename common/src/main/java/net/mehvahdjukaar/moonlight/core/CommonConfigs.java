@@ -7,6 +7,8 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -55,6 +57,8 @@ public class CommonConfigs {
             builder.comment("An item picked from the registry, with icon").defineItem("test_item", ResourceLocation.parse("minecraft:diamond"));
             builder.comment("A block picked from the registry, with icon").defineBlock("test_block", ResourceLocation.parse("minecraft:stone"));
             builder.comment("A min/max range shown as two fields on one row").defineRange("test_range", Range.of(2, 8), 0, 10);
+            builder.comment("A Vec3 shown as three x/y/z fields on one row").defineVec3("test_vec3", new Vec3(0.5, 1.0, -0.5), -10, 10);
+            builder.comment("A Vec3i shown as three x/y/z integer fields on one row").defineVec3i("test_vec3i", new Vec3i(1, 2, 3), -16, 16);
             builder.comment("An enum, edited as a cycle button").define("test_enum", Direction.NORTH);
             builder.comment("A value picked from a dropdown list")
                     .defineDropdown("test_dropdown", "medium", List.of("potato", "low", "medium", "high", "ultra", "extreme", "overkill", "ludicrous", "maximum"));

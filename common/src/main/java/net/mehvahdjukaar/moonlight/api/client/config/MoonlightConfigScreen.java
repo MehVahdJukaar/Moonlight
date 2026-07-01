@@ -14,6 +14,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
@@ -171,12 +172,11 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
 
     private void addOption(List<ConfigRow> rows, ConfigOption<?> v) {
         rows.add(new OptionRow(this, v));
-        Component desc = v.description();
-        if (desc != null && session.isExpanded(v)) {
-            List<FormattedCharSequence> lines = this.font.split(desc, ROW_WIDTH - ARROW_WIDTH - 4);
+        // when the row is expanded, drop its wrapped description beneath it as read-only rows
+        if (v.description() != null && session.isExpanded(v)) {
+            List<FormattedCharSequence> lines = this.font.split(v.description(), ROW_WIDTH - ARROW_WIDTH - GAP);
             for (int i = 0; i < lines.size(); i += DESC_LINES_PER_ROW) {
-                rows.add(new DescriptionRow(this.font,
-                        lines.subList(i, Math.min(i + DESC_LINES_PER_ROW, lines.size()))));
+                rows.add(new DescriptionRow(this.font, lines.subList(i, Math.min(i + DESC_LINES_PER_ROW, lines.size()))));
             }
         }
     }
@@ -201,8 +201,11 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
     private void refreshSave() {
         if (this.saveButton == null) return;
         int unsaved = session.unsavedCount();
+        // the "(N)" unsaved counter is tinted amber to draw the eye when there are pending edits
+        Component count = Component.literal("(" + unsaved + ")")
+                .withStyle(s -> s.withColor(TextColor.fromRgb(MODIFIED_COLOR)));
         this.saveButton.setMessage(unsaved > 0
-                ? Component.translatable("gui.moonlight.config.save_count", unsaved)
+                ? Component.translatable("gui.moonlight.config.save_count", count)
                 : Component.translatable("gui.moonlight.config.save"));
         this.saveButton.active = unsaved > 0;
     }

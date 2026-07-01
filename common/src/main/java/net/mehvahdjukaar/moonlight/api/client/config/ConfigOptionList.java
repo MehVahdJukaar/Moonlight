@@ -2,6 +2,8 @@ package net.mehvahdjukaar.moonlight.api.client.config;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -27,6 +29,17 @@ class ConfigOptionList extends ContainerObjectSelectionList<ConfigRow> {
     @Nullable
     ConfigRow getHovered(double mouseX, double mouseY) {
         return this.getEntryAtPosition(mouseX, mouseY);
+    }
+
+    @Override
+    public void setFocused(boolean focused) {
+        super.setFocused(focused);
+        // vanilla's boolean setFocused is a no-op on lists, so a focused row's inner field (an EditBox inside a
+        // composite control) would keep its caret when focus leaves the whole list for a screen-level widget.
+        // Propagate the unfocus down the focused row's child chain.
+        if (!focused && this.getFocused() instanceof ContainerEventHandler row) {
+            row.setFocused((GuiEventListener) null);
+        }
     }
 
     @Override

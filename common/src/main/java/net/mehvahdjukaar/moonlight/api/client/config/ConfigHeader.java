@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -47,7 +48,8 @@ class ConfigHeader {
 
         this.search = new EditBox(font, width - SIDE_MARGIN - SEARCH_WIDTH, CRUMB_Y - 3, SEARCH_WIDTH, SEARCH_HEIGHT,
                 Component.translatable("gui.moonlight.config.search"));
-        this.search.setHint(Component.translatable("gui.moonlight.config.search"));
+        this.search.setHint(Component.translatable("gui.moonlight.config.search")
+                .withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY));
         this.search.setValue(initialQuery);
         this.search.setResponder(onSearch);
     }

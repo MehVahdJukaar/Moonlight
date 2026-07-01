@@ -6,8 +6,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -232,6 +234,67 @@ public abstract class ConfigOption<T> extends ConfigNode {
             Range range = (Range) value;
             holder.manuallySetValue(minHandle, range.min());
             holder.manuallySetValue(maxHandle, range.max());
+        }
+    }
+
+    /**
+     * A {@link Vec3} value: three backing double config values ({@code x}/{@code y}/{@code z}) presented and edited
+     * as one row of number fields. {@code min}/{@code max} are the shared accepted bounds of each component.
+     * Like {@link RangeValue}, writing goes through all three handles at once.
+     */
+    public static class Vec3Value extends ConfigOption<Vec3> {
+        public final Supplier<Double> xHandle;
+        public final Supplier<Double> yHandle;
+        public final Supplier<Double> zHandle;
+        public final double min;
+        public final double max;
+
+        public Vec3Value(Component title, @Nullable Component description, Supplier<Double> xHandle,
+                         Supplier<Double> yHandle, Supplier<Double> zHandle, Vec3 defaultValue, double min, double max) {
+            super(title, description, () -> new Vec3(xHandle.get(), yHandle.get(), zHandle.get()), defaultValue);
+            this.xHandle = xHandle;
+            this.yHandle = yHandle;
+            this.zHandle = zHandle;
+            this.min = min;
+            this.max = max;
+        }
+
+        @Override
+        public void apply(ModConfigHolder holder, Object value) {
+            Vec3 v = (Vec3) value;
+            holder.manuallySetValue(xHandle, v.x);
+            holder.manuallySetValue(yHandle, v.y);
+            holder.manuallySetValue(zHandle, v.z);
+        }
+    }
+
+    /**
+     * A {@link Vec3i} value: three backing int config values ({@code x}/{@code y}/{@code z}) presented and edited as
+     * one row of number fields. The integer counterpart of {@link Vec3Value}.
+     */
+    public static class Vec3iValue extends ConfigOption<Vec3i> {
+        public final Supplier<Integer> xHandle;
+        public final Supplier<Integer> yHandle;
+        public final Supplier<Integer> zHandle;
+        public final int min;
+        public final int max;
+
+        public Vec3iValue(Component title, @Nullable Component description, Supplier<Integer> xHandle,
+                          Supplier<Integer> yHandle, Supplier<Integer> zHandle, Vec3i defaultValue, int min, int max) {
+            super(title, description, () -> new Vec3i(xHandle.get(), yHandle.get(), zHandle.get()), defaultValue);
+            this.xHandle = xHandle;
+            this.yHandle = yHandle;
+            this.zHandle = zHandle;
+            this.min = min;
+            this.max = max;
+        }
+
+        @Override
+        public void apply(ModConfigHolder holder, Object value) {
+            Vec3i v = (Vec3i) value;
+            holder.manuallySetValue(xHandle, v.getX());
+            holder.manuallySetValue(yHandle, v.getY());
+            holder.manuallySetValue(zHandle, v.getZ());
         }
     }
 

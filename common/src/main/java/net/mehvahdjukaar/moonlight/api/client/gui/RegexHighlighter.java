@@ -18,13 +18,13 @@ public final class RegexHighlighter implements SyntaxHighlighter {
     private RegexHighlighter() {
     }
 
-    private static final int LITERAL = 0xE0E0E0;      // plain text
-    private static final int ESCAPE = 0xFFD966;       // \d \w \. ...
-    private static final int CHAR_CLASS = 0x8CD9A0;   // [...]
-    private static final int GROUP = 0x9AD8FF;        // ( ) and (?: (?<name>
-    private static final int QUANTIFIER = 0xE58CE0;   // * + ? { }
-    private static final int ANCHOR = 0xFF9A6B;       // ^ $ | .
-    private static final int ERROR = 0xFF5555;        // doesn't compile
+    private static final int LITERAL = ConfigGuiColors.SYNTAX_DEFAULT;      // plain text
+    private static final int ESCAPE = ConfigGuiColors.SYNTAX_ESCAPE;        // \d \w \. ...
+    private static final int CHAR_CLASS = ConfigGuiColors.SYNTAX_CHAR_CLASS; // [...]
+    private static final int GROUP = ConfigGuiColors.SYNTAX_GROUP;          // ( ) and (?: (?<name>
+    private static final int QUANTIFIER = ConfigGuiColors.SYNTAX_QUANTIFIER; // * + ? { }
+    private static final int ANCHOR = ConfigGuiColors.SYNTAX_ANCHOR;        // ^ $ | .
+    private static final int ERROR = ConfigGuiColors.ERROR;                 // doesn't compile
 
     @Override
     public int[] colors(String source) {

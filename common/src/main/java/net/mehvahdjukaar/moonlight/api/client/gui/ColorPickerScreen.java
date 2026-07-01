@@ -22,7 +22,7 @@ public class ColorPickerScreen extends Screen {
     private static final int GAP = 4;
     private static final int CONTROL_HEIGHT = 20;
     private static final int TOP_MARGIN = 44;
-    private static final int TITLE_COLOR = 0xFFE0A0;
+    private static final int TITLE_COLOR = ConfigGuiColors.TITLE;
 
     private final Screen parent;
     private final Consumer<Integer> onApply;

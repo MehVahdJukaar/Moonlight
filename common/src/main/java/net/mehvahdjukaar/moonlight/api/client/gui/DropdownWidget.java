@@ -31,9 +31,9 @@ import java.util.function.Function;
  */
 public class DropdownWidget extends AbstractWidget implements Popup {
 
-    private static final int TEXT_COLOR = 0xE0E0E0;
-    private static final int DESCRIPTION_COLOR = 0xA0A0A0;
-    private static final int SELECTED_COLOR = 0x9AD8FF;
+    private static final int TEXT_COLOR = ConfigGuiColors.TEXT;
+    private static final int DESCRIPTION_COLOR = ConfigGuiColors.DESCRIPTION;
+    private static final int SELECTED_COLOR = ConfigGuiColors.SELECTED;
 
     private static final int MAX_VISIBLE = 8;
 

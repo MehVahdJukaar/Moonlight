@@ -1,10 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.CompositeWidget;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -20,7 +20,7 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * two number fields (min and max) laid out on a single row. Each field is validated against the shared bounds and
  * turns red when out of range; a valid pair is reported back as a {@link Range}.
  */
-class RangeControlWidget extends AbstractContainerWidget {
+class RangeControlWidget extends CompositeWidget {
 
     private static final int INNER_GAP = 8;
     private static final String SEPARATOR = "<";

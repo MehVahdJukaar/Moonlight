@@ -8,23 +8,22 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
 
 /**
- * A single editable config value: a (scrolling) label, an editing control from {@link ConfigControls}, a
- * rollback button enabled when the value differs from its default, and an optional left arrow that toggles the
- * inline description.
+ * A single editable config value on the main config screen: a single-line name with the editing control from
+ * {@link ConfigControls} pinned to the right and an icon reset button. Values that have a description show a
+ * disclosure triangle in the left gutter; clicking the label area toggles it, dropping the wrapped description
+ * beneath the row as read-only {@link DescriptionRow}s. A reload/restart hint sprite sits in the far-left gutter.
  */
 class OptionRow extends ConfigRow {
 
@@ -37,14 +36,12 @@ class OptionRow extends ConfigRow {
     @Nullable
     private final Component description;
     private final Control control;
-    private final Button resetButton;
-    @Nullable
-    private final Button expandButton;
+    private final IconButton resetButton;
     private final boolean editable;
     private final List<AbstractWidget> children;
 
-    // hover region of the rendered label text, refreshed each frame (used for the precise hover tooltip)
-    private int labelX0, labelX1, labelY0, labelY1;
+    // click region of the label/arrow column that toggles the description, refreshed each frame
+    private int toggleX0, toggleX1, rowY0, rowY1;
     // hover region of the reload/restart hint icon, if any
     private int reloadIconX0 = -1, reloadIconX1 = -1;
 
@@ -62,22 +59,8 @@ class OptionRow extends ConfigRow {
                 RESET_ICON, 12, 12, b -> rollback());
         this.resetButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.reset")));
 
-        List<AbstractWidget> kids = new ArrayList<>();
-        if (description != null) {
-            this.expandButton = Button.builder(Component.literal(arrowGlyph()), b -> view.toggleExpanded(value))
-                    .bounds(0, 0, ARROW_WIDTH, CONTROL_HEIGHT).build();
-            kids.add(expandButton);
-        } else {
-            this.expandButton = null;
-        }
-        kids.add(control.widget());
-        kids.add(resetButton);
-        this.children = List.copyOf(kids);
+        this.children = List.of(control.widget(), resetButton);
         refreshReset();
-    }
-
-    private String arrowGlyph() {
-        return session.isExpanded(value) ? "▼" : "▶";
     }
 
     private void onEdited() {
@@ -95,6 +78,10 @@ class OptionRow extends ConfigRow {
         session.put(value, def);
         control.setDisplayed().accept(def);
         onEdited();
+    }
+
+    private boolean hasDescription() {
+        return description != null;
     }
 
     @Override
@@ -118,15 +105,17 @@ class OptionRow extends ConfigRow {
         w.setY(top + (height - w.getHeight()) / 2);
         w.render(graphics, mouseX, mouseY, partialTick);
 
-        int labelLeft = left;
-        if (expandButton != null) {
-            expandButton.setX(left);
-            expandButton.setY(cy);
-            expandButton.render(graphics, mouseX, mouseY, partialTick);
-            labelLeft = left + ARROW_WIDTH + 2;
+        // disclosure triangle in the left gutter (only when there's a description to reveal)
+        int textLeft = left;
+        if (hasDescription()) {
+            boolean expanded = session.isExpanded(value);
+            graphics.drawString(font, expanded ? "▼" : "▶", left + 1, top + (height - font.lineHeight) / 2,
+                    contextEnabled ? DESCRIPTION_COLOR : 0x606060, false);
+            textLeft = left + ARROW_WIDTH;
         }
-        int labelRight = controlX - GAP;
-        // reload/restart hint icon: pure decoration, appended in the left gutter so it never shifts the row content
+        int textRight = controlX - GAP;
+
+        // reload/restart hint icon: pure decoration in the far-left gutter, never shifts the row content
         this.reloadIconX0 = this.reloadIconX1 = -1;
         ResourceLocation reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
         if (reloadIcon != null) {
@@ -136,15 +125,26 @@ class OptionRow extends ConfigRow {
             this.reloadIconX0 = iconX;
             this.reloadIconX1 = iconX + iconSize;
         }
-        // amber label while this value has an unsaved edit; dimmed when its category is switched off
-        boolean modified = !java.util.Objects.equals(session.currentRaw(value), value.get());
-        int labelColor = !contextEnabled ? DESCRIPTION_COLOR : modified ? MODIFIED_COLOR : LABEL_COLOR;
-        renderScrollingText(graphics, font, title, labelLeft, labelRight, top, height, labelColor);
 
-        this.labelX0 = labelLeft;
-        this.labelX1 = Math.min(labelLeft + font.width(title), labelRight);
-        this.labelY0 = top;
-        this.labelY1 = top + height;
+        boolean modified = !Objects.equals(session.currentRaw(value), value.get());
+        int titleColor = !contextEnabled ? DESCRIPTION_COLOR : modified ? MODIFIED_COLOR : LABEL_COLOR;
+        renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
+
+        // the label/arrow area toggles the description drop-down
+        this.toggleX0 = left;
+        this.toggleX1 = textRight;
+        this.rowY0 = top;
+        this.rowY1 = top + height;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (hasDescription() && button == 0
+                && mouseX >= toggleX0 && mouseX < toggleX1 && mouseY >= rowY0 && mouseY < rowY1) {
+            view.toggleExpanded(value);
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
@@ -160,17 +160,15 @@ class OptionRow extends ConfigRow {
     @Nullable
     @Override
     Component getTooltip(int mouseX, int mouseY) {
-        // only when collapsed and only over the label text itself (once expanded the inline description is the surface)
-        if (description == null || session.isExpanded(value)) return null;
-        boolean overLabel = mouseX >= labelX0 && mouseX <= labelX1 && mouseY >= labelY0 && mouseY <= labelY1;
-        return overLabel ? description : null;
+        // description is revealed by expanding the row, not as a tooltip
+        return null;
     }
 
     @Nullable
     @Override
     Component getGutterTooltip(int mouseX, int mouseY) {
-        // the reload/restart hint lives in the left gutter, outside the row's normal hover band
-        if (reloadIconX0 >= 0 && mouseX >= reloadIconX0 && mouseX <= reloadIconX1 && mouseY >= labelY0 && mouseY <= labelY1) {
+        // the reload/restart hint lives in the far-left gutter, outside the row's normal hover band
+        if (reloadIconX0 >= 0 && mouseX >= reloadIconX0 && mouseX <= reloadIconX1 && mouseY >= rowY0 && mouseY <= rowY1) {
             return reloadTooltip(value.reloadType());
         }
         return null;

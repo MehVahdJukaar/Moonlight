@@ -18,10 +18,10 @@ import java.util.function.Consumer;
 public class JsonEditScreen extends Screen {
 
     private static final int HEADER = 44;
-    private static final int HEADER_BG = 0x90000000;
-    private static final int HEADER_SEPARATOR = 0xFF101012;
-    private static final int TITLE_COLOR = 0xFFE0A0;
-    private static final int ERROR_COLOR = 0xFF5555;
+    private static final int HEADER_BG = ConfigGuiColors.HEADER_BG;
+    private static final int HEADER_SEPARATOR = ConfigGuiColors.HEADER_SEPARATOR;
+    private static final int TITLE_COLOR = ConfigGuiColors.TITLE;
+    private static final int ERROR_COLOR = ConfigGuiColors.ERROR;
 
     private final Screen parent;
     private final Consumer<String> onApply;

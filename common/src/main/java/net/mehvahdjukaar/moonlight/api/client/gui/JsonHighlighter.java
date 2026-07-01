@@ -14,12 +14,12 @@ public final class JsonHighlighter implements SyntaxHighlighter {
     private JsonHighlighter() {
     }
 
-    private static final int KEY = 0x9CDCFE;         // "key":
-    private static final int STRING = 0xCE9178;      // "value"
-    private static final int NUMBER = 0xB5CEA8;
-    private static final int KEYWORD = 0x569CD6;     // true / false / null
-    private static final int PUNCTUATION = 0x808080; // { } [ ] : ,
-    private static final int DEFAULT = 0xD4D4D4;
+    private static final int KEY = ConfigGuiColors.SYNTAX_KEY;          // "key":
+    private static final int STRING = ConfigGuiColors.SYNTAX_STRING;    // "value"
+    private static final int NUMBER = ConfigGuiColors.SYNTAX_NUMBER;
+    private static final int KEYWORD = ConfigGuiColors.SYNTAX_KEYWORD;  // true / false / null
+    private static final int PUNCTUATION = ConfigGuiColors.SYNTAX_PUNCTUATION; // { } [ ] : ,
+    private static final int DEFAULT = ConfigGuiColors.SYNTAX_DEFAULT;
 
     @Override
     public int[] colors(String line) {

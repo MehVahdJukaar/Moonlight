@@ -63,7 +63,7 @@ public class MoonlightConfigSelectScreen extends Screen {
 
     @Override
     protected void init() {
-        this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, ITEM_HEIGHT);
+        this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, SELECT_ITEM_HEIGHT);
         List<ConfigRow> rows = new ArrayList<>();
         for (ModConfigHolder h : holders) {
             Component label = Component.literal(LangBuilder.getReadableName(h.getId().getPath()));

@@ -16,10 +16,11 @@ import net.minecraft.network.chat.Component;
  */
 public class SyntaxEditBox extends MultiLineEditBox {
 
-    private static final int TEXT_COLOR = 0xFFD4D4D4;
-    private static final int PLACEHOLDER_COLOR = 0xFF808080;
-    private static final int CURSOR_COLOR = 0xFFD0D0D0;
-    private static final int SELECTION_COLOR = 0xFF2A4C8F;
+    // shared palette, forced opaque (these are drawn with an explicit alpha)
+    private static final int TEXT_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
+    private static final int PLACEHOLDER_COLOR = 0xFF000000 | ConfigGuiColors.DESCRIPTION;
+    private static final int CURSOR_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
+    private static final int SELECTION_COLOR = ConfigGuiColors.SELECTION_BG;
 
     private final Font font;
     private final Component placeholder;

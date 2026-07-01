@@ -2,14 +2,14 @@ package net.mehvahdjukaar.moonlight.api.client.config;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -17,10 +17,10 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
 
 /**
- * One full width button that opens a sub category. If the category declares a {@code feature()} toggle, that
- * boolean is edited inline here (right-aligned) instead of as a row inside the category; the button label dims when
- * the category is effectively off (its own toggle or an ancestor's), and the toggle itself is disabled when an
- * ancestor is off (you can't enable a sub-feature of a disabled feature).
+ * A full-width button that opens a sub category, Configured-style: a leading gear icon, the category name (with a
+ * one-line description subtitle when present) and a trailing chevron. If the category declares a {@code feature()}
+ * toggle it's edited inline here (right-aligned); the label dims when the category is effectively off, and the
+ * toggle is disabled when an ancestor is off.
  */
 class CategoryRow extends ConfigRow {
 
@@ -40,8 +40,8 @@ class CategoryRow extends ConfigRow {
         this.category = category;
         this.tooltip = category.description();
         this.gate = category.gate();
-        this.button = Button.builder(label(true), b -> view.openCategory(category))
-                .bounds(0, 0, ROW_WIDTH, CONTROL_HEIGHT).build();
+        this.button = Button.builder(Component.empty(), b -> view.openCategory(category))
+                .bounds(0, 0, ROW_WIDTH, ITEM_HEIGHT).build();
         if (gate != null) {
             this.toggle = new BooleanToggleWidget(CONTROL_HEIGHT, CONTROL_HEIGHT,
                     Boolean.TRUE.equals(view.session().current(gate)), val -> {
@@ -55,26 +55,29 @@ class CategoryRow extends ConfigRow {
         }
     }
 
-    /** Accent-colored label + a trailing chevron; dimmed when the category is switched off. */
-    private Component label(boolean enabled) {
-        int labelColor = enabled ? CATEGORY_COLOR : DESCRIPTION_COLOR;
-        return Component.empty()
-                .append(category.title().copy().withStyle(Style.EMPTY.withColor(TextColor.fromRgb(labelColor))))
-                .append(Component.literal("  ›").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(CRUMB_SEPARATOR_COLOR))));
-    }
-
     @Override
     public void render(GuiGraphics graphics, int index, int top, int left, int width, int height,
                        int mouseX, int mouseY, boolean hovering, float partialTick) {
+        Font font = view.font();
         int cy = top + (height - CONTROL_HEIGHT) / 2;
         boolean enabled = view.isCategoryEnabled(category);
 
         int buttonWidth = toggle != null ? width - CONTROL_HEIGHT - GAP : width;
-        button.setMessage(label(enabled));
+        button.setMessage(Component.empty()); // we draw our own icon + label over the (empty) button background
         button.setX(left);
         button.setWidth(buttonWidth);
-        button.setY(cy);
+        button.setY(top);
+        button.setHeight(height);
         button.render(graphics, mouseX, mouseY, partialTick);
+
+        int iconX = left + 6;
+        int textLeft = iconX + ROW_ICON + 6;
+        int textRight = left + buttonWidth - GAP;
+        int titleColor = enabled ? LABEL_COLOR : DESCRIPTION_COLOR; // white (bold), greyed when the feature is off
+
+        graphics.blitSprite(FOLDER_ICON, iconX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
+        Component title = category.title().copy().withStyle(ChatFormatting.BOLD);
+        renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 
         if (toggle != null && gate != null) {
             toggle.set(Boolean.TRUE.equals(view.session().current(gate)));

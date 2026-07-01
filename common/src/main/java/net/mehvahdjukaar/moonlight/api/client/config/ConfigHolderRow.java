@@ -1,13 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -15,33 +15,50 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
 
 /**
- * One full width button on the config select screen: opens a single registered config of a mod. Styled like a
- * {@link CategoryRow} (accent label + chevron) so both read as "navigate in".
+ * One full-width button on the config select screen: opens a single registered config of a mod. Styled like a
+ * {@link CategoryRow} (gear icon + accent label + chevron, with the file name as a subtitle) so both read as
+ * "navigate in".
  */
 class ConfigHolderRow extends ConfigRow {
 
     private final Button button;
-    private final List<AbstractWidget> children;
+    private final Component label;
     @Nullable
-    private final Component tooltip;
+    private final Component subtitle;
+    private final List<AbstractWidget> children;
 
-    ConfigHolderRow(Component label, @Nullable Component tooltip, Runnable onClick) {
-        this.tooltip = tooltip;
-        Component styled = Component.empty()
-                .append(label.copy().withStyle(Style.EMPTY.withColor(TextColor.fromRgb(CATEGORY_COLOR))))
-                .append(Component.literal("  ›").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(CRUMB_SEPARATOR_COLOR))));
-        this.button = Button.builder(styled, b -> onClick.run())
-                .bounds(0, 0, ROW_WIDTH, CONTROL_HEIGHT).build();
+    ConfigHolderRow(Component label, @Nullable Component subtitle, Runnable onClick) {
+        this.label = label;
+        this.subtitle = subtitle;
+        this.button = Button.builder(Component.empty(), b -> onClick.run())
+                .bounds(0, 0, ROW_WIDTH, ITEM_HEIGHT).build();
         this.children = List.of(button);
     }
 
     @Override
     public void render(GuiGraphics graphics, int index, int top, int left, int width, int height,
                        int mouseX, int mouseY, boolean hovering, float partialTick) {
+        Font font = Minecraft.getInstance().font;
+        button.setMessage(Component.empty());
         button.setX(left);
         button.setWidth(width);
-        button.setY(top + (height - CONTROL_HEIGHT) / 2);
+        button.setY(top);
+        button.setHeight(height);
         button.render(graphics, mouseX, mouseY, partialTick);
+
+        int iconX = left + 8;
+        int textLeft = iconX + ROW_ICON + 6;
+        int chevronX = left + width - 12;
+        int textRight = chevronX - GAP;
+
+        graphics.blitSprite(CONFIG_ICON, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
+        if (subtitle != null) {
+            renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY_COLOR);
+            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, DESCRIPTION_COLOR);
+        } else {
+            renderScrollingText(graphics, font, label, textLeft, textRight, top, height, CATEGORY_COLOR);
+        }
+        graphics.drawString(font, "›", chevronX, top + (height - font.lineHeight) / 2, CRUMB_SEPARATOR_COLOR, false);
     }
 
     @Override
@@ -57,6 +74,6 @@ class ConfigHolderRow extends ConfigRow {
     @Nullable
     @Override
     Component getTooltip(int mouseX, int mouseY) {
-        return tooltip;
+        return null; // file name is shown inline as the subtitle
     }
 }

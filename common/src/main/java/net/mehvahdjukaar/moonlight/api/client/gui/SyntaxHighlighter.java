@@ -23,7 +23,7 @@ import java.util.function.BiFunction;
 @FunctionalInterface
 public interface SyntaxHighlighter {
 
-    int FALLBACK_COLOR = 0xE0E0E0;
+    int FALLBACK_COLOR = ConfigGuiColors.SYNTAX_DEFAULT;
 
     /** @return one RGB color per character of {@code line} (array length == {@code line.length()}). */
     int[] colors(String line);

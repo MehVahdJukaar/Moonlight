@@ -15,13 +15,13 @@ public final class NbtHighlighter implements SyntaxHighlighter {
     private NbtHighlighter() {
     }
 
-    private static final int KEY = 0x9CDCFE;         // tag name before a ':'
-    private static final int STRING = 0xCE9178;      // "quoted" / 'quoted' / unquoted string values
-    private static final int NUMBER = 0xB5CEA8;      // numeric part of a value
-    private static final int TYPE = 0x4EC9B0;        // type suffix (b s l f d) and array markers (B; I; L;)
-    private static final int KEYWORD = 0x569CD6;     // true / false
-    private static final int PUNCTUATION = 0x808080; // { } [ ] : , ;
-    private static final int DEFAULT = 0xD4D4D4;
+    private static final int KEY = ConfigGuiColors.SYNTAX_KEY;          // tag name before a ':'
+    private static final int STRING = ConfigGuiColors.SYNTAX_STRING;    // "quoted" / 'quoted' / unquoted string values
+    private static final int NUMBER = ConfigGuiColors.SYNTAX_NUMBER;    // numeric part of a value
+    private static final int TYPE = ConfigGuiColors.SYNTAX_TYPE;        // type suffix (b s l f d) and array markers (B; I; L;)
+    private static final int KEYWORD = ConfigGuiColors.SYNTAX_KEYWORD;  // true / false
+    private static final int PUNCTUATION = ConfigGuiColors.SYNTAX_PUNCTUATION; // { } [ ] : , ;
+    private static final int DEFAULT = ConfigGuiColors.SYNTAX_DEFAULT;
 
     @Override
     public int[] colors(String line) {

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.Font;
@@ -25,11 +26,26 @@ final class ConfigScreenLayout {
         GuiHelper.renderScrollingText(graphics, font, text, minX, maxX, rowTop, rowHeight, color);
     }
 
+    /** Left-aligned single-line text hard-clipped (scissored) to {@code [minX, maxX]} — used for row subtitles. */
+    static void drawClipped(GuiGraphics graphics, Font font, Component text, int minX, int y, int maxX, int color) {
+        graphics.enableScissor(minX, y - 1, maxX, y + font.lineHeight + 1);
+        graphics.drawString(font, text, minX, y, color);
+        graphics.disableScissor();
+    }
+
+    /** First line only of a (possibly multi-line) component, as plain text — for a one-line subtitle. */
+    static Component firstLine(Component text) {
+        String s = text.getString();
+        int nl = s.indexOf('\n');
+        return Component.literal(nl >= 0 ? s.substring(0, nl) : s);
+    }
+
     // gui sprites (assets/moonlight/textures/gui/sprites/{yes,no,save}.png)
     static final ResourceLocation ON_ICON = Moonlight.res("yes");
     static final ResourceLocation OFF_ICON = Moonlight.res("no");
     static final ResourceLocation SAVE_ICON = Moonlight.res("save");
     static final ResourceLocation CONFIG_ICON = Moonlight.res("config");
+    static final ResourceLocation FOLDER_ICON = Moonlight.res("folder");
     static final ResourceLocation SEARCH_ICON = Moonlight.res("search");
     static final ResourceLocation RESET_ICON = Moonlight.res("reset");
     static final ResourceLocation DELETE_ICON = Moonlight.res("delete");
@@ -49,10 +65,12 @@ final class ConfigScreenLayout {
 
     static final int HEADER = 44;
     static final int FOOTER = 36;
-    static final int ITEM_HEIGHT = 22;
+    static final int ITEM_HEIGHT = 24; // compact single-line rows on the main config screen (button ~ on/off height)
+    static final int SELECT_ITEM_HEIGHT = 30; // taller two-line rows (title + subtitle) on the config-list screen
     static final int ROW_WIDTH = 280;
+    static final int ROW_ICON = 16; // leading category/config icon
 
-    static final int CONTROL_WIDTH = 110;
+    static final int CONTROL_WIDTH = 88; // ~80% of the former 110px, giving labels more room
     static final int CONTROL_HEIGHT = 20;
     static final int ARROW_WIDTH = 12;
     static final int RESET_WIDTH = CONTROL_HEIGHT;
@@ -60,21 +78,20 @@ final class ConfigScreenLayout {
 
     static final int DESC_LINES_PER_ROW = 2;
 
-    static final int LABEL_COLOR = 0xFFFFFF;
-    static final int TEXT_COLOR = 0xE0E0E0;
-    static final int ERROR_COLOR = 0xFF5555;
-    static final int DESCRIPTION_COLOR = 0xA0A0A0;
+    // ── palette: all colors live in one place, {@link GuiColors}; these are just the names the config code uses ──
+    static final int LABEL_COLOR = ConfigGuiColors.LABEL;
+    static final int TEXT_COLOR = ConfigGuiColors.TEXT;
+    static final int ERROR_COLOR = ConfigGuiColors.ERROR;
+    static final int DESCRIPTION_COLOR = ConfigGuiColors.DESCRIPTION;
 
-    // header / navigation
-    static final int HEADER_BG = 0x90000000;
-    static final int HEADER_SEPARATOR = 0xFF101012;
-    static final int TITLE_COLOR = 0xFFE0A0;          // soft gold
-    static final int CRUMB_COLOR = 0x9A9A9A;          // ancestor crumb
-    static final int CRUMB_HOVER_COLOR = 0xFFFFFF;
-    static final int CRUMB_CURRENT_COLOR = 0xFFE0A0;
-    static final int CRUMB_SEPARATOR_COLOR = 0x6A6A6A;
+    static final int HEADER_BG = ConfigGuiColors.HEADER_BG;
+    static final int HEADER_SEPARATOR = ConfigGuiColors.HEADER_SEPARATOR;
+    static final int TITLE_COLOR = ConfigGuiColors.TITLE;
+    static final int CRUMB_COLOR = ConfigGuiColors.CRUMB;
+    static final int CRUMB_HOVER_COLOR = ConfigGuiColors.CRUMB_HOVER;
+    static final int CRUMB_CURRENT_COLOR = ConfigGuiColors.CRUMB_CURRENT;
+    static final int CRUMB_SEPARATOR_COLOR = ConfigGuiColors.CRUMB_SEPARATOR;
 
-    // value/row accents
-    static final int CATEGORY_COLOR = 0x9AD8FF;       // light blue category labels
-    static final int MODIFIED_COLOR = 0xFFD96B;       // amber: unsaved edit
+    static final int CATEGORY_COLOR = ConfigGuiColors.CATEGORY;
+    static final int MODIFIED_COLOR = ConfigGuiColors.MODIFIED;
 }
