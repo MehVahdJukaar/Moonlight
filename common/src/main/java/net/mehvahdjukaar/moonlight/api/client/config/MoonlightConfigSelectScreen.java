@@ -1,9 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.MediaButton;
+import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -73,6 +76,11 @@ public class MoonlightConfigSelectScreen extends Screen {
         // bottom bar: Back flanked by the author's media links (matches the Configured integration screen)
         MediaButton.addAuthorMediaButtons(this, this::addRenderableWidget,
                 this.width / 2, this.height - 29, 22, modId, this::onClose);
+        // bottom-left: icon-only jump to the mods hub grid
+        IconButton modsButton = new IconButton(8, this.height - 29, 20, 20, Component.empty(), CONFIG_ICON, 16, 16,
+                b -> this.minecraft.setScreen(new ModsScreen(this, background))).borderless();
+        modsButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.mods_button")));
+        this.addRenderableWidget(modsButton);
     }
 
     @Override
@@ -88,6 +96,15 @@ public class MoonlightConfigSelectScreen extends Screen {
         graphics.fill(0, 0, this.width, HEADER, ConfigScreenLayout.HEADER_BG);
         graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigScreenLayout.HEADER_SEPARATOR);
         graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, TITLE_COLOR);
+
+        // the mod's own icon, tucked just left of the centered title
+        ModIcons.Icon icon = ModIcons.get(modId);
+        if (icon != null) {
+            int size = 16;
+            int iconX = this.width / 2 - this.font.width(this.title) / 2 - size - 4;
+            int iconY = (HEADER - size) / 2;
+            graphics.blit(icon.texture(), iconX, iconY, size, size, 0f, 0f, icon.width(), icon.height(), icon.width(), icon.height());
+        }
 
         ConfigRow hovered = this.list.getHovered(mouseX, mouseY);
         if (hovered != null) {

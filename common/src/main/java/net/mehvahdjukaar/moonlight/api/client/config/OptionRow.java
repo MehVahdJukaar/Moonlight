@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.IconButton;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
@@ -57,8 +58,8 @@ class OptionRow extends ConfigRow {
         this.editable = !(value instanceof ConfigOption.UnsupportedValue);
         this.control = ConfigControls.create(value, session, this::onEdited);
 
-        this.resetButton = Button.builder(Component.literal("↺"), b -> rollback())
-                .bounds(0, 0, RESET_WIDTH, CONTROL_HEIGHT).build();
+        this.resetButton = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
+                RESET_ICON, 12, 12, b -> rollback());
         this.resetButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.reset")));
 
         List<AbstractWidget> kids = new ArrayList<>();
@@ -159,14 +160,20 @@ class OptionRow extends ConfigRow {
     @Nullable
     @Override
     Component getTooltip(int mouseX, int mouseY) {
-        // reload/restart icon explains itself on hover, regardless of expand state
-        if (reloadIconX0 >= 0 && mouseX >= reloadIconX0 && mouseX <= reloadIconX1 && mouseY >= labelY0 && mouseY <= labelY1) {
-            return reloadTooltip(value.reloadType());
-        }
         // only when collapsed and only over the label text itself (once expanded the inline description is the surface)
         if (description == null || session.isExpanded(value)) return null;
         boolean overLabel = mouseX >= labelX0 && mouseX <= labelX1 && mouseY >= labelY0 && mouseY <= labelY1;
         return overLabel ? description : null;
+    }
+
+    @Nullable
+    @Override
+    Component getGutterTooltip(int mouseX, int mouseY) {
+        // the reload/restart hint lives in the left gutter, outside the row's normal hover band
+        if (reloadIconX0 >= 0 && mouseX >= reloadIconX0 && mouseX <= reloadIconX1 && mouseY >= labelY0 && mouseY <= labelY1) {
+            return reloadTooltip(value.reloadType());
+        }
+        return null;
     }
 
     private static Component reloadTooltip(ConfigReloadType type) {

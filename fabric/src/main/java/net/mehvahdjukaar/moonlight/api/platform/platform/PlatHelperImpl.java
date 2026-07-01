@@ -204,6 +204,15 @@ public class PlatHelperImpl {
         return FabricLoader.getInstance().getModContainer(modId).orElseThrow().getMetadata().getName();
     }
 
+    @Nullable
+    public static Path getModIcon(String modId) {
+        var container = FabricLoader.getInstance().getModContainer(modId).orElse(null);
+        if (container == null) return null;
+        String iconPath = container.getMetadata().getIconPath(128).orElse(null);
+        if (iconPath == null) return null;
+        return container.findPath(iconPath).orElse(null);
+    }
+
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {
         return new FlowerPotBlock(supplier.get(), properties);
     }

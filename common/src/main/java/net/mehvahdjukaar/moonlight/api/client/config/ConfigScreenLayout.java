@@ -29,6 +29,11 @@ final class ConfigScreenLayout {
     static final ResourceLocation ON_ICON = Moonlight.res("yes");
     static final ResourceLocation OFF_ICON = Moonlight.res("no");
     static final ResourceLocation SAVE_ICON = Moonlight.res("save");
+    static final ResourceLocation CONFIG_ICON = Moonlight.res("config");
+    static final ResourceLocation SEARCH_ICON = Moonlight.res("search");
+    static final ResourceLocation RESET_ICON = Moonlight.res("reset");
+    static final ResourceLocation DELETE_ICON = Moonlight.res("delete");
+    static final ResourceLocation EDIT_ICON = Moonlight.res("edit");
     static final ResourceLocation WORLD_RELOAD_ICON = Moonlight.res("world_reload");
     static final ResourceLocation GAME_RESTART_ICON = Moonlight.res("game_restart");
 
@@ -68,7 +73,6 @@ final class ConfigScreenLayout {
     static final int CRUMB_HOVER_COLOR = 0xFFFFFF;
     static final int CRUMB_CURRENT_COLOR = 0xFFE0A0;
     static final int CRUMB_SEPARATOR_COLOR = 0x6A6A6A;
-    static final int SEARCH_ICON_COLOR = 0x9A9A9A;
 
     // value/row accents
     static final int CATEGORY_COLOR = 0x9AD8FF;       // light blue category labels

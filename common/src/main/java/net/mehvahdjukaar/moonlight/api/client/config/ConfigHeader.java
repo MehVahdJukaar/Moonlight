@@ -92,8 +92,10 @@ class ConfigHeader {
             x += w;
         }
 
-        // search: magnifier glyph + box
-        graphics.drawString(font, "⌕", search.getX() - 10, CRUMB_Y, SEARCH_ICON_COLOR); // ⌕
+        // search: magnifier icon + box
+        int searchIconSize = 10;
+        graphics.blitSprite(SEARCH_ICON, search.getX() - searchIconSize - 2,
+                search.getY() + (SEARCH_HEIGHT - searchIconSize) / 2, searchIconSize, searchIconSize);
         search.render(graphics, mouseX, mouseY, 0);
     }
 

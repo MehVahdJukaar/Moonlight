@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -133,6 +134,11 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
         this.addRenderableWidget(this.saveButton);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
                 .bounds(this.width / 2 + 4, y, 100, 20).build());
+        // bottom-left: icon-only jump to the mods hub grid
+        IconButton modsButton = new IconButton(8, y, 20, 20, Component.empty(), CONFIG_ICON, 16, 16,
+                b -> this.minecraft.setScreen(new ModsScreen(this, session.background()))).borderless();
+        modsButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.mods_button")));
+        this.addRenderableWidget(modsButton);
         refreshSave();
     }
 
@@ -252,12 +258,20 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
 
         // no row tooltips while a dropdown is open (its popup covers the rows)
         if (!overlay.isOpen()) {
+            Component tooltip = null;
             ConfigRow hovered = this.list.getHovered(mouseX, mouseY);
             if (hovered != null) {
-                Component tooltip = hovered.getTooltip(mouseX, mouseY);
-                if (tooltip != null) {
-                    graphics.renderTooltip(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
+                tooltip = hovered.getTooltip(mouseX, mouseY);
+            }
+            // gutter decorations (e.g. reload-hint icons) sit outside the row hover band, so scan all rows for them
+            if (tooltip == null) {
+                for (ConfigRow row : this.list.children()) {
+                    tooltip = row.getGutterTooltip(mouseX, mouseY);
+                    if (tooltip != null) break;
                 }
+            }
+            if (tooltip != null) {
+                graphics.renderTooltip(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
             }
         } else {
             overlay.render(graphics, mouseX, mouseY);

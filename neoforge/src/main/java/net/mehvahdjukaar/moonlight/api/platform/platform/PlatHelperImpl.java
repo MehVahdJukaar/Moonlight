@@ -203,6 +203,17 @@ public class PlatHelperImpl {
         return ModList.get().getModContainerById(modId).get().getModInfo().getDisplayName();
     }
 
+    @Nullable
+    public static Path getModIcon(String modId) {
+        var container = ModList.get().getModContainerById(modId).orElse(null);
+        if (container == null) return null;
+        IModInfo info = container.getModInfo();
+        String logo = info.getLogoFile().orElse(null);
+        if (logo == null || logo.isBlank()) return null;
+        Path path = info.getOwningFile().getFile().findResource(logo);
+        return path != null && java.nio.file.Files.exists(path) ? path : null;
+    }
+
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
         return new DeferredSpawnEggItem(entityType, color, outerColor, properties);
     }

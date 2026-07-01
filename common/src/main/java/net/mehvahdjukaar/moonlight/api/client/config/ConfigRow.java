@@ -14,4 +14,13 @@ abstract class ConfigRow extends ContainerObjectSelectionList.Entry<ConfigRow> {
      */
     @Nullable
     abstract Component getTooltip(int mouseX, int mouseY);
+
+    /**
+     * Tooltip for decorations that sit outside the row's normal hover band (e.g. the reload-hint icon in the
+     * left gutter), which {@code getEntryAtPosition} would miss. Queried across all visible rows. Default none.
+     */
+    @Nullable
+    Component getGutterTooltip(int mouseX, int mouseY) {
+        return null;
+    }
 }

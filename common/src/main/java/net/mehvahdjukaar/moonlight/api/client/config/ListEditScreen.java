@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.ColorPickerScreen;
 import net.mehvahdjukaar.moonlight.api.client.gui.DropdownWidget;
+import net.mehvahdjukaar.moonlight.api.client.gui.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
 import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
@@ -174,10 +175,11 @@ class ListEditScreen extends Screen implements PopupHost {
                 this.box = b;
                 this.editor = b;
             }
-            this.remove = Button.builder(Component.literal("✕"), btn -> {
+            this.remove = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
+                    DELETE_ICON, 12, 12, btn -> {
                 working.remove(index);
                 rebuildRows();
-            }).bounds(0, 0, RESET_WIDTH, CONTROL_HEIGHT).build();
+            });
             this.children = List.of(editor, remove);
         }
 

@@ -254,6 +254,13 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    /** The mod's icon image file (inside its jar), or null if it declares none. Read on the client to build a texture. */
+    @Nullable
+    @PlatformImpl
+    public static Path getModIcon(String modId) {
+        throw new AssertionError();
+    }
+
     @Nullable
     @PlatformImpl
     public static <T> Field findField(Class<? super T> clazz, String fieldName) {
