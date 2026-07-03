@@ -23,9 +23,9 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * toggle it's edited inline here (right-aligned); the label dims when the category is effectively off, and the
  * toggle is disabled when an ancestor is off.
  */
-class CategoryRow extends ConfigRow {
+class CategoryRow extends ConfigListRow {
 
-    private final ConfigScreenView view;
+    private final ConfigScreenAccess view;
     private final ConfigCategory category;
     private final Button button;
     @Nullable
@@ -37,7 +37,7 @@ class CategoryRow extends ConfigRow {
     private final Component tooltip;
     private final ConfigScreenIcons.Anim iconAnim = new ConfigScreenIcons.Anim();
 
-    CategoryRow(ConfigScreenView view, ConfigCategory category) {
+    CategoryRow(ConfigScreenAccess view, ConfigCategory category) {
         this.view = view;
         this.category = category;
         this.tooltip = category.description();

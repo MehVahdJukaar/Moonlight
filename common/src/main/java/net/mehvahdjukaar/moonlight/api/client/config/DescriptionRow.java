@@ -16,7 +16,7 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.D
 /**
  * A read-only row holding a slice of an expanded value's wrapped description text.
  */
-class DescriptionRow extends ConfigRow {
+class DescriptionRow extends ConfigListRow {
 
     private final Font font;
     private final List<FormattedCharSequence> lines;

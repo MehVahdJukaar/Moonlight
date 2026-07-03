@@ -26,9 +26,9 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * disclosure triangle in the left gutter; clicking the label area toggles it, dropping the wrapped description
  * beneath the row as read-only {@link DescriptionRow}s. A reload/restart hint sprite sits in the far-left gutter.
  */
-class OptionRow extends ConfigRow {
+class OptionRow extends ConfigListRow {
 
-    private final ConfigScreenView view;
+    private final ConfigScreenAccess view;
     private final ConfigEditSession session;
     private final ConfigOption<?> value;
     @Nullable
@@ -47,7 +47,7 @@ class OptionRow extends ConfigRow {
     // hover region of the reload/restart hint icon, if any
     private int reloadIconX0 = -1, reloadIconX1 = -1;
 
-    OptionRow(ConfigScreenView view, ConfigOption<?> value) {
+    OptionRow(ConfigScreenAccess view, ConfigOption<?> value) {
         this.view = view;
         this.session = view.session();
         this.value = value;

@@ -21,7 +21,7 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * {@link CategoryRow} (gear icon + accent label + chevron, with the file name as a subtitle) so both read as
  * "navigate in".
  */
-class ConfigHolderRow extends ConfigRow {
+class ConfigHolderRow extends ConfigListRow {
 
     private final Button button;
     private final Component label;

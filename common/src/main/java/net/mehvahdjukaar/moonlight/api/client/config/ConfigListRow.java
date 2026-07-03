@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Base class for every row shown in the config list (category button, value row, description line).
  */
-abstract class ConfigRow extends ContainerObjectSelectionList.Entry<ConfigRow> {
+abstract class ConfigListRow extends ContainerObjectSelectionList.Entry<ConfigListRow> {
 
     /**
      * Tooltip to show for the given mouse position, or null for none. Rows decide their own hover region.

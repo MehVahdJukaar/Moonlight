@@ -64,7 +64,7 @@ public class MoonlightConfigSelectScreen extends Screen {
     @Override
     protected void init() {
         this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, SELECT_ITEM_HEIGHT);
-        List<ConfigRow> rows = new ArrayList<>();
+        List<ConfigListRow> rows = new ArrayList<>();
         for (ModConfigHolder h : holders) {
             Component label = Component.literal(LangBuilder.getReadableName(h.getId().getPath()));
             Component tooltip = Component.literal(h.getFileName());
@@ -107,7 +107,7 @@ public class MoonlightConfigSelectScreen extends Screen {
             graphics.blit(icon.texture(), iconX, iconY, size, size, 0f, 0f, icon.width(), icon.height(), icon.width(), icon.height());
         }
 
-        ConfigRow hovered = this.list.getHovered(mouseX, mouseY);
+        ConfigListRow hovered = this.list.getHovered(mouseX, mouseY);
         if (hovered != null) {
             Component tooltip = hovered.getTooltip(mouseX, mouseY);
             if (tooltip != null) {

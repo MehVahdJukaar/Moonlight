@@ -35,7 +35,7 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * {@link ConfigEditSession} shared across the navigation stack, so this class stays small and the system is open
  * for new control types without touching it.
  */
-public class MoonlightConfigScreen extends Screen implements ConfigScreenView, PopupHost {
+public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess, PopupHost {
 
     // reused so re-opening/leaving repeatedly refreshes one toast instead of stacking duplicates
     private static final SystemToast.SystemToastId RELOAD_TOAST_ID = new SystemToast.SystemToastId();
@@ -47,7 +47,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
 
     private ConfigOptionList list;
     private Button saveButton;
-    private ConfigHeader header;
+    private ConfigScreenHeader header;
     private String searchQuery = "";
     private final OverlayLayer overlay = new OverlayLayer(); // floats an open dropdown/popup above the list
 
@@ -119,12 +119,12 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
         this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, ITEM_HEIGHT);
 
         // top bar: title + breadcrumb trail (walk up the parent chain) + search box
-        List<ConfigHeader.Crumb> crumbs = new ArrayList<>();
+        List<ConfigScreenHeader.Crumb> crumbs = new ArrayList<>();
         for (MoonlightConfigScreen s = this; s != null; s = s.parentConfig) {
             Component label = s.isRoot() ? Component.literal("⌂") : s.category.title(); // ⌂ home
-            crumbs.add(0, new ConfigHeader.Crumb(label, s, s == this));
+            crumbs.addFirst(new ConfigScreenHeader.Crumb(label, s, s == this));
         }
-        this.header = new ConfigHeader(this.font, this.width, session.holder().getReadableName(), crumbs,
+        this.header = new ConfigScreenHeader(this.font, this.width, session.holder().getReadableName(), crumbs,
                 this.searchQuery, query -> {
             this.searchQuery = query;
             populate();
@@ -191,7 +191,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
      * {@link DescriptionRow}s inserted beneath them; expanded state lives in the session so it survives this.
      */
     private void populate() {
-        List<ConfigRow> rows = new ArrayList<>();
+        List<ConfigListRow> rows = new ArrayList<>();
         String query = searchQuery == null ? "" : searchQuery.trim().toLowerCase(Locale.ROOT);
         if (query.isEmpty()) {
             for (ConfigNode e : category.entries()) {
@@ -213,7 +213,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
         this.list.setRows(rows);
     }
 
-    private void addOption(List<ConfigRow> rows, ConfigOption<?> v) {
+    private void addOption(List<ConfigListRow> rows, ConfigOption<?> v) {
         rows.add(new OptionRow(this, v));
         // when the row is expanded, drop its wrapped description beneath it as read-only rows
         if (v.description() != null && session.isExpanded(v)) {
@@ -330,13 +330,13 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
         // no row tooltips while a dropdown is open (its popup covers the rows)
         if (!overlay.isOpen()) {
             Component tooltip = null;
-            ConfigRow hovered = this.list.getHovered(mouseX, mouseY);
+            ConfigListRow hovered = this.list.getHovered(mouseX, mouseY);
             if (hovered != null) {
                 tooltip = hovered.getTooltip(mouseX, mouseY);
             }
             // gutter decorations (e.g. reload-hint icons) sit outside the row hover band, so scan all rows for them
             if (tooltip == null) {
-                for (ConfigRow row : this.list.children()) {
+                for (ConfigListRow row : this.list.children()) {
                     tooltip = row.getGutterTooltip(mouseX, mouseY);
                     if (tooltip != null) break;
                 }

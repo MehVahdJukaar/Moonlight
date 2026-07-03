@@ -10,10 +10,6 @@ import java.util.function.Consumer;
 
 import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
 
-/**
- * A boolean toggle drawn as a vanilla button with Moonlight's on/off ({@code yes}/{@code no}) icon centered on it,
- * instead of an on/off text cycle button.
- */
 class BooleanToggleWidget extends AbstractButton {
 
     private static final int ICON_SIZE = 12;

@@ -8,7 +8,7 @@ import net.minecraft.client.gui.Font;
  * The small surface rows use to talk back to their owning screen, so rows can live as their own classes instead
  * of inner classes of a god screen.
  */
-interface ConfigScreenView {
+interface ConfigScreenAccess {
 
     Font font();
 

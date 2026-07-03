@@ -26,9 +26,6 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  */
 public final class ConfigControls {
 
-    private ConfigControls() {
-    }
-
     /**
      * Builds a bound widget for one config value. {@code onChange} must be invoked whenever the working value
      * changes so the screen can refresh the Save counter and the row's rollback button.
@@ -66,7 +63,7 @@ public final class ConfigControls {
             return new Control(w, v -> w.setValue((Boolean) v));
         });
 
-        registerEnumProvider();
+        register(ConfigOption.EnumValue.class, ConfigControls::enumControl);
 
         register(ConfigOption.StringValue.class, (o, s, onChange) ->
                 textField(s.current(o), String::valueOf, str -> {
@@ -203,12 +200,6 @@ public final class ConfigControls {
     }
 
     // ===== widget builders =====
-
-    @SuppressWarnings({"unchecked"})
-    private static void registerEnumProvider() {
-        register((Class<ConfigOption.EnumValue<?>>) (Class<?>) ConfigOption.EnumValue.class,
-                (o, s, onChange) -> enumControl(o, s, onChange));
-    }
 
     @SuppressWarnings("unchecked")
     private static <E extends Enum<E>> Control enumControl(ConfigOption.EnumValue<E> o, ConfigEditSession s, Runnable onChange) {

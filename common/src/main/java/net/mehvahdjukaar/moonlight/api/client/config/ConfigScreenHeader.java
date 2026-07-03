@@ -18,7 +18,7 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * box. Purely presentational plus breadcrumb hit-testing; it owns the search {@link EditBox} but the screen is
  * responsible for registering it for input and reading its value.
  */
-class ConfigHeader {
+class ConfigScreenHeader {
 
     /**
      * One breadcrumb segment. {@code target} is the screen to jump to when clicked; {@code current} marks the
@@ -40,7 +40,7 @@ class ConfigHeader {
     private final int[] crumbX0;
     private final int[] crumbX1;
 
-    ConfigHeader(Font font, int width, Component title, List<Crumb> crumbs, String initialQuery, Consumer<String> onSearch) {
+    ConfigScreenHeader(Font font, int width, Component title, List<Crumb> crumbs, String initialQuery, Consumer<String> onSearch) {
         this.title = title;
         this.crumbs = crumbs;
         this.crumbX0 = new int[crumbs.size()];
