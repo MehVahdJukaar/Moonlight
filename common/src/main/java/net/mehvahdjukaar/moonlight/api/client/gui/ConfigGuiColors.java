@@ -11,9 +11,9 @@ import java.util.Objects;
  * <p>
  * Rather than Minecraft's 16 harsh, fully-saturated chat colors, these are a hand-tuned, vivid palette (inspired by
  * modern dark editor themes) so text is easier on the eyes and accents read as one coherent family. The
- * {@link #chat} helper is still available if you want to fall back to a vanilla color. This is purely the text /
- * accent / syntax theme — structural chrome (header fills, separators) is not themeable and lives with the layout
- * constants instead.
+ * {@link #chat} helper is still available if you want to fall back to a vanilla color. The bulk of these are the
+ * text / accent / syntax theme; the handful of structural-chrome constants (header fills, separators) are fixed and
+ * not meant to be re-themed, but they live here too so they aren't copy-pasted across screens.
  */
 public final class ConfigGuiColors {
 
@@ -21,6 +21,10 @@ public final class ConfigGuiColors {
     public static int chat(ChatFormatting color) {
         return Objects.requireNonNull(color.getColor());
     }
+
+    // ── structural chrome (the fixed dark UI frame — deliberately NOT themeable, kept here only so it isn't duplicated) ──
+    public static final int HEADER_BG = 0x90000000;       // translucent black top/bottom bars
+    public static final int HEADER_SEPARATOR = 0xFF101012; // the 1px line under the header / above the footer
 
     // ── core text ──
     public static final int LABEL = 0xF8F8F2;        // primary label — bright off-white

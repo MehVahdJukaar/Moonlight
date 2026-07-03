@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
+import static net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors.*;
 
 /**
  * A single editable config value on the main config screen: a single-line name with the editing control from
@@ -112,7 +113,7 @@ class OptionRow extends ConfigListRow {
         if (hasDescription()) {
             boolean expanded = session.isExpanded(value);
             graphics.drawString(font, expanded ? "▼" : "▶", left + 1, top + (height - font.lineHeight) / 2,
-                    contextEnabled ? DESCRIPTION_COLOR : 0x606060, false);
+                    contextEnabled ? DESCRIPTION : 0x606060, false);
             textLeft = left + ARROW_WIDTH;
         }
         // decorative, hover-animated item/block icon just before the label, if this value declares one
@@ -136,7 +137,7 @@ class OptionRow extends ConfigListRow {
         }
 
         boolean modified = !Objects.equals(session.currentRaw(value), value.get());
-        int titleColor = !contextEnabled ? DESCRIPTION_COLOR : modified ? MODIFIED_COLOR : LABEL_COLOR;
+        int titleColor = !contextEnabled ? DESCRIPTION : modified ? MODIFIED : LABEL;
         GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 
         // the label/arrow area toggles the description drop-down

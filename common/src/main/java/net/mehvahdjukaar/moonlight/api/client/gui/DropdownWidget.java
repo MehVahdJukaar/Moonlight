@@ -31,10 +31,6 @@ import java.util.function.Function;
  */
 public class DropdownWidget extends AbstractWidget implements Popup {
 
-    private static final int TEXT_COLOR = ConfigGuiColors.TEXT;
-    private static final int DESCRIPTION_COLOR = ConfigGuiColors.DESCRIPTION;
-    private static final int SELECTED_COLOR = ConfigGuiColors.SELECTED;
-
     private static final int MAX_VISIBLE = 8;
 
     private final List<String> options;
@@ -64,7 +60,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
 
         this.searchBox = new EditBox(font(), 0, 0, width, height, Component.empty());
         this.searchBox.setBordered(false);
-        this.searchBox.setTextColor(TEXT_COLOR);
+        this.searchBox.setTextColor(ConfigGuiColors.TEXT);
         this.searchBox.setResponder(query -> {
             String q = query.trim().toLowerCase(Locale.ROOT);
             this.filtered = q.isEmpty() ? options
@@ -118,11 +114,11 @@ public class DropdownWidget extends AbstractWidget implements Popup {
                 textX = x + 2 + 18;
             }
             // scroll the value like an option-row label when it's wider than the box
-            GuiHelper.renderScrollingText(graphics, font, Component.literal(value), textX, sepX - 2, y, h, TEXT_COLOR);
+            GuiHelper.renderScrollingText(graphics, font, Component.literal(value), textX, sepX - 2, y, h, ConfigGuiColors.TEXT);
         }
 
         graphics.fill(sepX, y, sepX + 1, y + h, border); // separator, same color as the outline
-        graphics.drawCenteredString(font, open ? "▲" : "▼", sepX + arrowBox / 2, y + (h - font.lineHeight) / 2 + 1, TEXT_COLOR);
+        graphics.drawCenteredString(font, open ? "▲" : "▼", sepX + arrowBox / 2, y + (h - font.lineHeight) / 2 + 1, ConfigGuiColors.TEXT);
         graphics.renderOutline(x, y, w, h, border);
     }
 
@@ -205,7 +201,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
 
         if (filtered.isEmpty()) {
             graphics.drawString(font, Component.translatable("gui.moonlight.config.no_matches"),
-                    x + 4, y + (itemHeight - font.lineHeight) / 2 + 1, DESCRIPTION_COLOR);
+                    x + 4, y + (itemHeight - font.lineHeight) / 2 + 1, ConfigGuiColors.DESCRIPTION);
         }
 
         int visible = r[4];
@@ -223,7 +219,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
                 graphics.renderFakeItem(iconFor(opt), x + 2, iy + (itemHeight - 16) / 2);
                 textX = x + 2 + 18;
             }
-            int color = opt.equals(value) ? SELECTED_COLOR : TEXT_COLOR;
+            int color = opt.equals(value) ? ConfigGuiColors.SELECTED : ConfigGuiColors.TEXT;
             // scroll the hovered entry when it overflows; clip the rest so nothing bleeds under the scrollbar
             if (hover) {
                 GuiHelper.renderScrollingText(graphics, font, Component.literal(opt), textX, textRight, iy, itemHeight, color);

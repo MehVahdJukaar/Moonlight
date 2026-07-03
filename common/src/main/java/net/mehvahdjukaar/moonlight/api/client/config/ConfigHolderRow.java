@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
+import static net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors.*;
 
 /**
  * One full-width button on the config select screen: opens a single registered config of a mod. Styled like a
@@ -58,12 +59,12 @@ class ConfigHolderRow extends ConfigListRow {
 
         graphics.blitSprite(icon, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
         if (subtitle != null) {
-            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY_COLOR);
-            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, DESCRIPTION_COLOR);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY);
+            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, DESCRIPTION);
         } else {
-            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, CATEGORY_COLOR);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, CATEGORY);
         }
-        graphics.drawString(font, "›", chevronX, top + (height - font.lineHeight) / 2, CRUMB_SEPARATOR_COLOR, false);
+        graphics.drawString(font, "›", chevronX, top + (height - font.lineHeight) / 2, CRUMB_SEPARATOR, false);
     }
 
     @Override

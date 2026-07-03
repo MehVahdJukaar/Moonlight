@@ -18,11 +18,6 @@ import java.util.function.Consumer;
 public class JsonEditScreen extends Screen {
 
     private static final int HEADER = 44;
-    // structural header chrome — neutral translucent-black bar, not part of the themeable palette
-    private static final int HEADER_BG = 0x90000000;
-    private static final int HEADER_SEPARATOR = 0xFF101012;
-    private static final int TITLE_COLOR = ConfigGuiColors.TITLE;
-    private static final int ERROR_COLOR = ConfigGuiColors.ERROR;
 
     private final Screen parent;
     private final Consumer<String> onApply;
@@ -83,12 +78,12 @@ public class JsonEditScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.fill(0, 0, this.width, HEADER, HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, HEADER_SEPARATOR);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, TITLE_COLOR);
+        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
+        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
         if (!this.done.active) {
             graphics.drawCenteredString(this.font, Component.translatable("gui.moonlight.config.json_invalid"),
-                    this.width / 2, this.height - 42, ERROR_COLOR);
+                    this.width / 2, this.height - 42, ConfigGuiColors.ERROR);
         }
     }
 }

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
+import static net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors.*;
 
 /**
  * A full-width button that opens a sub category, Configured-style: a leading gear icon, the category name (with a
@@ -75,7 +76,7 @@ class CategoryRow extends ConfigListRow {
         int iconX = left + 6;
         int textLeft = iconX + ROW_ICON + 6;
         int textRight = left + buttonWidth - GAP;
-        int titleColor = enabled ? LABEL_COLOR : DESCRIPTION_COLOR; // white (bold), greyed when the feature is off
+        int titleColor = enabled ? LABEL : DESCRIPTION; // white (bold), greyed when the feature is off
 
         int iconY = top + (height - ROW_ICON) / 2;
         // an animated item/block icon if the category declares one, otherwise the default folder sprite

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigValueHandle;
+import net.mehvahdjukaar.moonlight.api.platform.configs.DynamicPackTrigger;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigEntry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public abstract class ConfigValue<T> extends ConfigEntry implements ConfigValueHandle<T> {
+public abstract class ConfigValue<T> extends ConfigEntry implements ConfigValueHandle<T>, DynamicPackTrigger {
 
     protected final T defaultValue;
     protected T value;

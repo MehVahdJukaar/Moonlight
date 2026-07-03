@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
 import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
+import net.minecraft.ChatFormatting;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
@@ -11,6 +13,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -45,9 +48,17 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
     @Nullable
     private final MoonlightConfigScreen parentConfig; // null = root level
 
+    // top-bar geometry: title centered on the first line, breadcrumb + search on the second
+    private static final int SIDE_MARGIN = 14;
+    private static final int CRUMB_Y = 25;
+    private static final int SEARCH_WIDTH = 110;
+    private static final int SEARCH_HEIGHT = 14;
+    private static final int SEARCH_ICON_SIZE = 10;
+
     private ConfigOptionList list;
     private Button saveButton;
-    private ConfigScreenHeader header;
+    private BreadcrumbWidget breadcrumb;
+    private EditBox searchBox;
     private String searchQuery = "";
     private final OverlayLayer overlay = new OverlayLayer(); // floats an open dropdown/popup above the list
 
@@ -118,18 +129,30 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         this.overlay.clear(); // widgets are rebuilt here, so drop any stale open popup
         this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, ITEM_HEIGHT);
 
-        // top bar: title + breadcrumb trail (walk up the parent chain) + search box
-        List<ConfigScreenHeader.Crumb> crumbs = new ArrayList<>();
-        for (MoonlightConfigScreen s = this; s != null; s = s.parentConfig) {
-            Component label = s.isRoot() ? Component.literal("⌂") : s.category.title(); // ⌂ home
-            crumbs.addFirst(new ConfigScreenHeader.Crumb(label, s, s == this));
-        }
-        this.header = new ConfigScreenHeader(this.font, this.width, session.holder().getReadableName(), crumbs,
-                this.searchQuery, query -> {
+        // top bar: a search box on the right, then a breadcrumb trail (walk up the parent chain) filling the space
+        // to its left. Both are registered for input here but drawn in render(), on top of the header bar.
+        this.searchBox = new EditBox(this.font, this.width - SIDE_MARGIN - SEARCH_WIDTH, CRUMB_Y - 3,
+                SEARCH_WIDTH, SEARCH_HEIGHT, Component.translatable("gui.moonlight.config.search"));
+        this.searchBox.setHint(Component.translatable("gui.moonlight.config.search")
+                .withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY));
+        this.searchBox.setValue(this.searchQuery);
+        this.searchBox.setResponder(query -> {
             this.searchQuery = query;
             populate();
         });
-        this.addWidget(this.header.searchBox());
+        this.addRenderableWidget(this.searchBox);
+
+        List<BreadcrumbWidget.Crumb> crumbs = new ArrayList<>();
+        for (MoonlightConfigScreen s = this; s != null; s = s.parentConfig) {
+            Component label = s.isRoot() ? Component.literal("⌂") : s.category.title(); // ⌂ home
+            crumbs.addFirst(new BreadcrumbWidget.Crumb(label, s, s == this));
+        }
+        int trailRight = this.searchBox.getX() - SEARCH_ICON_SIZE - 6; // leave room for the magnifier glyph + a gap
+        this.breadcrumb = new BreadcrumbWidget(SIDE_MARGIN, CRUMB_Y, trailRight - SIDE_MARGIN, this.font.lineHeight,
+                this.font, crumbs, target -> {
+            if (target != this) this.minecraft.setScreen(target);
+        });
+        this.addRenderableWidget(this.breadcrumb);
 
         populate();
         this.addRenderableWidget(this.list);
@@ -246,7 +269,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         int unsaved = session.unsavedCount();
         // the "(N)" unsaved counter is tinted amber to draw the eye when there are pending edits
         Component count = Component.literal("(" + unsaved + ")")
-                .withStyle(s -> s.withColor(TextColor.fromRgb(MODIFIED_COLOR)));
+                .withStyle(s -> s.withColor(TextColor.fromRgb(ConfigGuiColors.MODIFIED)));
         this.saveButton.setMessage(unsaved > 0
                 ? Component.translatable("gui.moonlight.config.save_count", count)
                 : Component.translatable("gui.moonlight.config.save"));
@@ -289,11 +312,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         if (overlay.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        Screen target = header.breadcrumbTarget(mouseX, mouseY);
-        if (target != null && target != this) {
-            this.minecraft.setScreen(target);
-            return true;
-        }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -323,9 +341,21 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
     }
 
     @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+        // header chrome sits in the background layer (drawn before the widgets by super.render): the bar, its
+        // separator, the title and the search magnifier. The row list is scissored below HEADER, so rows slide
+        // under the bar cleanly; the breadcrumb and search box are renderable widgets drawn on top of it.
+        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
+        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 7, ConfigGuiColors.TITLE);
+        graphics.blitSprite(SEARCH_ICON, this.searchBox.getX() - SEARCH_ICON_SIZE - 2,
+                this.searchBox.getY() + (SEARCH_HEIGHT - SEARCH_ICON_SIZE) / 2, SEARCH_ICON_SIZE, SEARCH_ICON_SIZE);
+    }
+
+    @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        this.header.render(graphics, this.width, mouseX, mouseY, this.font);
 
         // no row tooltips while a dropdown is open (its popup covers the rows)
         if (!overlay.isOpen()) {

@@ -90,8 +90,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         config.setTranslationKey(this.translationKey(name));
         addTranslationsAndComments(name);
 
-        config.setAffectsDynamicPacks(config.affectsDynamicPacks() || this.pendingDynamicPacks);
-        this.pendingDynamicPacks = false;
+        // stamp the pending pack flag onto this backing storage value; the flag is cleared later in recordOption, so a
+        // compound value (range/vec3) stamps all of its backing values, not just the first — see ConfigBuilder
+        if (this.pendingDynamicPacks) config.setAffectsDynamicPacks(true);
         // world-reload / game-restart is carried on the option node itself now (see ConfigBuilder#recordOption)
         Objects.requireNonNull(this.categoryStack.peek()).addEntry(config);
         if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();

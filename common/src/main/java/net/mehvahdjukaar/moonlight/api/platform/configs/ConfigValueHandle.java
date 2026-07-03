@@ -13,11 +13,6 @@ import java.util.function.Supplier;
  */
 public interface ConfigValueHandle<T> extends Supplier<T> {
 
-    /** Whether changing this value should invalidate dynamic resource/data packs. */
-    boolean affectsDynamicPacks();
-
-    void setAffectsDynamicPacks(boolean affectsDynamicPacks);
-
     /** Writes a new (already validated) value. Returns whether it actually differed from the previous one. */
     boolean setValue(T value);
 }

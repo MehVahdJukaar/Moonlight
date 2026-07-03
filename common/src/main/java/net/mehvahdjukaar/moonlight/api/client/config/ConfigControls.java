@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
+import static net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors.*;
 
 /**
  * Client side registry that turns a server safe {@link ConfigOption} into an editing {@link Control}. This
@@ -235,9 +236,9 @@ public final class ConfigControls {
         box.setResponder(str -> {
             try {
                 commit.accept(str);
-                box.setTextColor(TEXT_COLOR);
+                box.setTextColor(TEXT);
             } catch (Exception ex) {
-                box.setTextColor(ERROR_COLOR);
+                box.setTextColor(ERROR);
             }
         });
         return new Control(box, v -> box.setValue(display.apply(v)));

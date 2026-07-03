@@ -134,16 +134,15 @@ public abstract class ConfigBuilder {
         return (T) this;
     }
 
+    /**
+     * Marks the <em>next</em> defined value as affecting dynamic resource/data packs (so changing it invalidates the
+     * matching pack cache). Fluent, sticky until the next value is recorded — exactly like {@link #worldReload()}. For
+     * compound values ({@link #defineRange}/{@link #defineVec3}) it applies to every backing value, since the flag is
+     * consumed only once the combined row is recorded (see {@link #recordOption}).
+     */
     public <T extends ConfigBuilder> T affectsDynamicPacks() {
         this.pendingDynamicPacks = true;
         return (T) this;
-    }
-
-    public <T> T affectsDynamicPacks(T config) {
-        if (config instanceof ConfigValueHandle<?> dynamicPackAffecting) {
-            dynamicPackAffecting.setAffectsDynamicPacks(true);
-        }
-        return config;
     }
 
     public abstract Supplier<Boolean> define(String name, boolean defaultValue);
@@ -406,14 +405,6 @@ public abstract class ConfigBuilder {
         return () -> ResourceLocation.parse(handle.get());
     }
 
-    protected <T> T applyPendingDynamicPacks(T value) {
-        if (this.pendingDynamicPacks && value instanceof ConfigValueHandle<?> dynamicPackAffecting) {
-            dynamicPackAffecting.setAffectsDynamicPacks(true);
-        }
-        this.pendingDynamicPacks = false;
-        return value;
-    }
-
     public Component description(String name) {
         return Component.translatable(translationKey(name));
     }
@@ -621,6 +612,10 @@ public abstract class ConfigBuilder {
         if (this.suppressUi) return;
         option.setReloadType(this.pendingReload);
         this.pendingReload = ConfigReloadType.NONE;
+        // both change-effect flags are consumed at this single, compound-safe boundary: the pack flag was already
+        // stamped onto each backing storage value as it was defined (see the platform builders), and is cleared here
+        // so it doesn't leak onto the next value — mirroring how pendingReload is handled just above.
+        this.pendingDynamicPacks = false;
         this.uiStack.peek().add(option);
     }
 

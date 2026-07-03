@@ -8,6 +8,7 @@ import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.platform.configs.DynamicPackTrigger;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
@@ -69,7 +70,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     private <T> T track(T value) {
-        value = applyPendingDynamicPacks(value);
+        // stamp the pending pack flag onto this backing storage value; the flag is cleared later in recordOption, so a
+        // compound value (range/vec3) stamps all of its backing values, not just the first — see ConfigBuilder
+        if (this.pendingDynamicPacks && value instanceof DynamicPackTrigger d) {
+            d.setAffectsDynamicPacks(true);
+        }
         if (value instanceof TrackedConfigValue<?> trackedValue) {
             this.trackedValues.add(trackedValue);
         }

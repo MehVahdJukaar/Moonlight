@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -51,8 +52,8 @@ public class ModsTilesScreen extends Screen {
     private static final int CARD_BG = 0xFF1B1B20;
     private static final int CARD_BG_HOVER = 0xFF2C2C34;
     private static final int CARD_OUTLINE = 0xFF000000;
-    private static final int CARD_OUTLINE_HOVER = 0xFF000000 | CATEGORY_COLOR; // aqua accent (opaque)
-    private static final int VERSION_COLOR = DESCRIPTION_COLOR;
+    private static final int CARD_OUTLINE_HOVER = 0xFF000000 | ConfigGuiColors.CATEGORY; // aqua accent (opaque)
+    private static final int VERSION_COLOR = ConfigGuiColors.DESCRIPTION;
 
     private final Screen parent;
     @Nullable
@@ -137,9 +138,9 @@ public class ModsTilesScreen extends Screen {
         renderScrollbar(graphics);
 
         // header bar drawn last so cards scroll under it cleanly
-        graphics.fill(0, 0, this.width, HEADER, HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigScreenLayout.HEADER_SEPARATOR);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, TITLE_COLOR);
+        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
+        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
     }
 
     /** The 32×32 tiling list background over the scroll panel (mirrors {@code AbstractSelectionList#renderListBackground}). */
@@ -179,7 +180,7 @@ public class ModsTilesScreen extends Screen {
         int textCenter = x + CARD_W / 2;
         int nameY = iconY + ICON_SIZE + ICON_TEXT_GAP;
         // name is centered but marquees when it's too long for the card
-        GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, LINE, LABEL_COLOR);
+        GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, LINE, ConfigGuiColors.LABEL);
         if (entry.version() != null) {
             drawClippedCentered(graphics, entry.version(), textCenter, nameY + LINE + NAME_VER_GAP, x + 4, x + CARD_W - 4, VERSION_COLOR);
         }
@@ -205,7 +206,7 @@ public class ModsTilesScreen extends Screen {
         String initial = name.substring(0, 1).toUpperCase();
         int tx = iconX + (ICON_SIZE - this.font.width(initial)) / 2;
         int ty = iconY + (ICON_SIZE - this.font.lineHeight) / 2;
-        graphics.drawString(this.font, initial, tx, ty, CATEGORY_COLOR, false);
+        graphics.drawString(this.font, initial, tx, ty, ConfigGuiColors.CATEGORY, false);
     }
 
     private void renderScrollbar(GuiGraphics graphics) {

@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.ColorPickerScreen;
+import net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.DropdownWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
@@ -120,9 +121,9 @@ class ListEditScreen extends Screen implements PopupHost {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.fill(0, 0, this.width, HEADER, ConfigScreenLayout.HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigScreenLayout.HEADER_SEPARATOR);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, TITLE_COLOR);
+        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
+        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
         this.overlay.render(graphics, mouseX, mouseY);
     }
 
@@ -169,9 +170,9 @@ class ListEditScreen extends Screen implements PopupHost {
                 b.setValue(working.get(index));
                 b.setResponder(s -> {
                     working.set(index, s);
-                    b.setTextColor(option.isValidEntry(b.getValue()) ? TEXT_COLOR : ERROR_COLOR);
+                    b.setTextColor(option.isValidEntry(b.getValue()) ? ConfigGuiColors.TEXT : ConfigGuiColors.ERROR);
                 });
-                b.setTextColor(option.isValidEntry(b.getValue()) ? TEXT_COLOR : ERROR_COLOR);
+                b.setTextColor(option.isValidEntry(b.getValue()) ? ConfigGuiColors.TEXT : ConfigGuiColors.ERROR);
                 this.box = b;
                 this.editor = b;
             }

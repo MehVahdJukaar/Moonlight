@@ -103,8 +103,8 @@ public abstract class ModConfigHolder {
     }
 
     /** Invalidates this config's pack cache when a just-written value both changed and affects dynamic packs. */
-    protected void invalidatePacksIfChanged(ConfigValueHandle<?> handle, boolean changed) {
-        if (changed && handle.affectsDynamicPacks()) {
+    protected void invalidatePacksIfChanged(Supplier<?> handle, boolean changed) {
+        if (changed && handle instanceof DynamicPackTrigger t && t.affectsDynamicPacks()) {
             GlobalCachedStrategy.forceInvalidateState(this.getPackType());
         }
     }

@@ -22,8 +22,6 @@ import java.util.function.Consumer;
 public class ColorField extends CompositeWidget {
 
     private static final int GAP = 4;
-    private static final int TEXT_COLOR = ConfigGuiColors.TEXT;
-    private static final int ERROR_COLOR = ConfigGuiColors.ERROR;
 
     private final EditBox hexBox;
     private final ColorSwatchWidget swatch;
@@ -45,10 +43,10 @@ public class ColorField extends CompositeWidget {
                 int c = ColorUtils.parseHex(str);
                 this.color = c;
                 this.swatch.setColor(c);
-                this.hexBox.setTextColor(TEXT_COLOR);
+                this.hexBox.setTextColor(ConfigGuiColors.TEXT);
                 onChange.accept(c);
             } catch (Exception e) {
-                this.hexBox.setTextColor(ERROR_COLOR);
+                this.hexBox.setTextColor(ConfigGuiColors.ERROR);
             }
         });
         this.children = List.of(hexBox, swatch);

@@ -1,7 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
-import net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors;
-import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -74,21 +72,5 @@ final class ConfigScreenLayout {
 
     static final int DESC_LINES_PER_ROW = 2;
 
-    // ── palette: all colors live in one place, {@link GuiColors}; these are just the names the config code uses ──
-    static final int LABEL_COLOR = ConfigGuiColors.LABEL;
-    static final int TEXT_COLOR = ConfigGuiColors.TEXT;
-    static final int ERROR_COLOR = ConfigGuiColors.ERROR;
-    static final int DESCRIPTION_COLOR = ConfigGuiColors.DESCRIPTION;
-
-    // structural header chrome — a neutral translucent-black bar, not part of the themeable palette
-    static final int HEADER_BG = 0x90000000;
-    static final int HEADER_SEPARATOR = 0xFF101012;
-    static final int TITLE_COLOR = ConfigGuiColors.TITLE;
-    static final int CRUMB_COLOR = ConfigGuiColors.CRUMB;
-    static final int CRUMB_HOVER_COLOR = ConfigGuiColors.CRUMB_HOVER;
-    static final int CRUMB_CURRENT_COLOR = ConfigGuiColors.CRUMB_CURRENT;
-    static final int CRUMB_SEPARATOR_COLOR = ConfigGuiColors.CRUMB_SEPARATOR;
-
-    static final int CATEGORY_COLOR = ConfigGuiColors.CATEGORY;
-    static final int MODIFIED_COLOR = ConfigGuiColors.MODIFIED;
+    // Colors are NOT redeclared here: reference net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors directly.
 }

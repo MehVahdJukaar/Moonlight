@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
-import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
+import static net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors.*;
 
 /**
  * The editing control for a {@link net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption.Vec3Value}
@@ -74,9 +74,9 @@ class Vec3ControlWidget extends CompositeWidget {
         Double px = parse(xBox);
         Double py = parse(yBox);
         Double pz = parse(zBox);
-        this.xBox.setTextColor(px != null ? TEXT_COLOR : ERROR_COLOR);
-        this.yBox.setTextColor(py != null ? TEXT_COLOR : ERROR_COLOR);
-        this.zBox.setTextColor(pz != null ? TEXT_COLOR : ERROR_COLOR);
+        this.xBox.setTextColor(px != null ? TEXT : ERROR);
+        this.yBox.setTextColor(py != null ? TEXT : ERROR);
+        this.zBox.setTextColor(pz != null ? TEXT : ERROR);
         if (px != null && py != null && pz != null) {
             this.onChange.accept(px, py, pz);
         }

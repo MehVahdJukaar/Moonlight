@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.MediaButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
@@ -93,10 +94,10 @@ public class MoonlightConfigSelectScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
 
-        // qualified: Screen inherits its own HEADER_SEPARATOR (a texture), which would shadow the static import
-        graphics.fill(0, 0, this.width, HEADER, ConfigScreenLayout.HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigScreenLayout.HEADER_SEPARATOR);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, TITLE_COLOR);
+        // qualified: Screen inherits its own HEADER_SEPARATOR (a texture), which would shadow a static import
+        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
+        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
 
         // the mod's own icon, tucked just left of the centered title
         ModIcons.Icon icon = ModIcons.get(modId);

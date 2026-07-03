@@ -22,7 +22,6 @@ public class ColorPickerScreen extends Screen {
     private static final int GAP = 4;
     private static final int CONTROL_HEIGHT = 20;
     private static final int TOP_MARGIN = 44;
-    private static final int TITLE_COLOR = ConfigGuiColors.TITLE;
 
     private final Screen parent;
     private final Consumer<Integer> onApply;
@@ -171,7 +170,7 @@ public class ColorPickerScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 12, TITLE_COLOR);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 12, ConfigGuiColors.TITLE);
 
         renderSvSquare(graphics);
         renderHueBar(graphics);

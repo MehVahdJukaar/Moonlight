@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*;
+import static net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors.*;
 
 /**
  * The editing control for a {@link net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption.RangeValue}:
@@ -60,8 +60,8 @@ class RangeControlWidget extends CompositeWidget {
     private void onEdited() {
         Double parsedMin = parse(minBox);
         Double parsedMax = parse(maxBox);
-        this.minBox.setTextColor(parsedMin != null ? TEXT_COLOR : ERROR_COLOR);
-        this.maxBox.setTextColor(parsedMax != null ? TEXT_COLOR : ERROR_COLOR);
+        this.minBox.setTextColor(parsedMin != null ? TEXT : ERROR);
+        this.maxBox.setTextColor(parsedMax != null ? TEXT : ERROR);
         if (parsedMin != null && parsedMax != null) {
             this.onChange.accept(new Range(parsedMin, parsedMax));
         }
@@ -94,7 +94,7 @@ class RangeControlWidget extends CompositeWidget {
         Font font = Minecraft.getInstance().font;
         graphics.drawString(font, SEPARATOR,
                 getX() + half + (INNER_GAP - font.width(SEPARATOR)) / 2 + 1,
-                getY() + (getHeight() - font.lineHeight) / 2 + 1, LABEL_COLOR, false);
+                getY() + (getHeight() - font.lineHeight) / 2 + 1, LABEL, false);
     }
 
     @Override

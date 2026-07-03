@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.ARROW_WIDTH;
-import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.DESCRIPTION_COLOR;
+import static net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors.DESCRIPTION;
 
 /**
  * A read-only row holding a slice of an expanded value's wrapped description text.
@@ -31,7 +31,7 @@ class DescriptionRow extends ConfigListRow {
                        int mouseX, int mouseY, boolean hovering, float partialTick) {
         int y = top + 1;
         for (FormattedCharSequence line : lines) {
-            graphics.drawString(font, line, left + ARROW_WIDTH + 2, y, DESCRIPTION_COLOR);
+            graphics.drawString(font, line, left + ARROW_WIDTH + 2, y, DESCRIPTION);
             y += font.lineHeight;
         }
     }
