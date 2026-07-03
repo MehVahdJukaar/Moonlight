@@ -20,7 +20,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
     private static final int TEXT_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
     private static final int PLACEHOLDER_COLOR = 0xFF000000 | ConfigGuiColors.DESCRIPTION;
     private static final int CURSOR_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
-    private static final int SELECTION_COLOR = ConfigGuiColors.SELECTION_BG;
+    private static final int SELECTION_COLOR = 0xFF2A4A80; // text-selection highlight — structural, not themed
 
     private final Font font;
     private final Component placeholder;

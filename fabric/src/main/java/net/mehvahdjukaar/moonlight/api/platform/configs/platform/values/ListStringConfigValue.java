@@ -1,8 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
+import com.google.gson.JsonElement;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +11,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public class ListStringConfigValue<T extends String>  extends ConfigValue<List<String>> {
+public class ListStringConfigValue<T extends String> extends ConfigValue<List<String>> {
 
     private final Predicate<Object> predicate;
     // non-null -> entries are picked from a dropdown instead of typed (see the screen's list editor)
@@ -53,37 +52,20 @@ public class ListStringConfigValue<T extends String>  extends ConfigValue<List<S
     }
 
     @Override
-    public boolean loadFromJson(JsonObject element) {
-        if (element.has(this.name)) {
-            try {
-                var array = element.get(this.name);
-                if(array instanceof JsonArray ja){
-                    List<String> newValue = new ArrayList<>();
-                    for(var v : ja){
-                        T s = (T) v.getAsString();
-                        if(this.predicate.test(s)) newValue.add(s);
-                    }
-                    boolean changed = this.setAndTrack(newValue);
-                    this.markLoaded();
-                    return this.affectsDynamicPacks() && changed;
-                }
-            } catch (Exception ignored) {
-            }
-            Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
-        } else {
-            Moonlight.LOGGER.warn("Config file had missing entry {}", this.name);
+    protected List<String> parseValue(JsonElement element) {
+        if (!(element instanceof JsonArray ja)) return null; // wrong shape -> falls back to the default
+        List<String> newValue = new ArrayList<>();
+        for (var v : ja) {
+            String s = v.getAsString();
+            if (this.predicate.test(s)) newValue.add(s);
         }
-        this.markLoaded();
-        return false;
+        return newValue;
     }
 
     @Override
-    public void saveToJson(JsonObject object) {
-        if (this.value == null) this.value = defaultValue;
+    protected JsonElement encodeValue(List<String> value) {
         JsonArray ja = new JsonArray();
-        this.value.forEach(ja::add);
-        object.add(this.name, ja);
+        value.forEach(ja::add);
+        return ja;
     }
-
-
 }

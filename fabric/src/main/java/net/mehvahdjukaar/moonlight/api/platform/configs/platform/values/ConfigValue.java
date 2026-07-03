@@ -1,16 +1,18 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigValueHandle;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigEntry;
-import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigWrapper;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T>, IConfigWrapper {
+public abstract class ConfigValue<T> extends ConfigEntry implements ConfigValueHandle<T> {
 
     protected final T defaultValue;
     protected T value;
@@ -36,16 +38,48 @@ public abstract class ConfigValue<T> extends ConfigEntry implements Supplier<T>,
 
     public abstract boolean isValid(T value);
 
-    public void set(T newValue) {
-        this.value = newValue;
-        this.loaded = true;
+    /** Reads this value out of its json element. May throw or return null to fall back to the default. */
+    protected abstract T parseValue(JsonElement element) throws Exception;
+
+    /** Serializes this value into the json element written under {@link #getName()}. */
+    protected abstract JsonElement encodeValue(T value);
+
+    @Override
+    public boolean loadFromJson(JsonObject object) {
+        if (object.has(this.name)) {
+            try {
+                T parsed = parseValue(object.get(this.name));
+                if (parsed == null || !isValid(parsed)) parsed = getDefaultValue();
+                boolean changed = setValue(parsed);
+                markLoaded();
+                return this.affectsDynamicPacks() && changed;
+            } catch (Exception e) {
+                Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
+            }
+        } else {
+            Moonlight.LOGGER.warn("Config file had missing entry {}", this.name);
+        }
+        markLoaded();
+        return false;
     }
 
-    public boolean setAndTrack(T newValue) {
+    @Override
+    public void saveToJson(JsonObject object) {
+        if (this.value == null) this.value = getDefaultValue();
+        object.add(this.name, encodeValue(this.value));
+    }
+
+    @Override
+    public boolean setValue(T newValue) {
         boolean changed = this.loaded && !Objects.equals(this.value, newValue);
         this.value = newValue;
         this.loaded = true;
         return changed;
+    }
+
+    /** Void convenience setter (used as a {@code Consumer} by the legacy Cloth/YACL screens). */
+    public void set(T newValue) {
+        setValue(newValue);
     }
 
     protected void markLoaded() {

@@ -12,10 +12,13 @@ import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompa
 import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigValueHandle;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
+import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -28,8 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-
-import net.minecraft.server.packs.PackType;
 
 public final class FabricConfigHolder extends ModConfigHolder {
 
@@ -200,26 +201,23 @@ public final class FabricConfigHolder extends ModConfigHolder {
     @Override
     @ClientOnly
     public Screen makeScreen(Screen parent, ResourceLocation background) {
-        // TEST WIRING: native Moonlight screen. YACL/Cloth delegation kept below for restore.
-        ConfigCategory root = getConfigRoot();
-        return root == null ? null : new net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigScreen(this, root, parent, background);
-        /*
-        if (YACL) {
+        if (ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) {
+            ConfigCategory root = getConfigRoot();
+            return root == null ? null : new net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigScreen(this, root, parent, background);
+        }
+        // custom screen disabled: fall back to the old Cloth Config / YACL screens if those mods are present
+        if (CompatHandler.YACL) {
             return YACLCompat.makeScreen(parent, this, background);
-        } else if (CLOTH_CONFIG) {
+        } else if (CompatHandler.CLOTH_CONFIG) {
             return ClothConfigCompat.makeScreen(parent, this, background);
         }
         return null;
-        */
     }
 
     @Override
     public <T> void manuallySetValue(Supplier<T> config, T value) {
-        if (config instanceof ConfigValue<T> b) {
-            boolean changed = b.setAndTrack(value);
-            if (changed && b.affectsDynamicPacks()) {
-                GlobalCachedStrategy.forceInvalidateState(getPackType());
-            }
+        if (config instanceof ConfigValueHandle<T> b) {
+            invalidatePacksIfChanged(b, b.setValue(value));
         }
         this.saveConfig();
     }
@@ -235,10 +233,6 @@ public final class FabricConfigHolder extends ModConfigHolder {
             loadFromJson(jo);
         }
         this.onRefresh();
-    }
-
-    private PackType getPackType() {
-        return this.getConfigType() == ConfigType.CLIENT ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA;
     }
 
     @EventCalled

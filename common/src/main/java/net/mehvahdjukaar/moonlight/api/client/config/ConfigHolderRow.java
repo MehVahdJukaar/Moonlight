@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -8,6 +9,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -25,11 +27,14 @@ class ConfigHolderRow extends ConfigRow {
     private final Component label;
     @Nullable
     private final Component subtitle;
+    private final ResourceLocation icon;
     private final List<AbstractWidget> children;
 
-    ConfigHolderRow(Component label, @Nullable Component subtitle, Runnable onClick) {
+    ConfigHolderRow(Component label, @Nullable Component subtitle,
+                    ResourceLocation icon, Runnable onClick) {
         this.label = label;
         this.subtitle = subtitle;
+        this.icon = icon;
         this.button = Button.builder(Component.empty(), b -> onClick.run())
                 .bounds(0, 0, ROW_WIDTH, ITEM_HEIGHT).build();
         this.children = List.of(button);
@@ -51,12 +56,12 @@ class ConfigHolderRow extends ConfigRow {
         int chevronX = left + width - 12;
         int textRight = chevronX - GAP;
 
-        graphics.blitSprite(CONFIG_ICON, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
+        graphics.blitSprite(icon, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
         if (subtitle != null) {
-            renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY_COLOR);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY_COLOR);
             drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, DESCRIPTION_COLOR);
         } else {
-            renderScrollingText(graphics, font, label, textLeft, textRight, top, height, CATEGORY_COLOR);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, CATEGORY_COLOR);
         }
         graphics.drawString(font, "›", chevronX, top + (height - font.lineHeight) / 2, CRUMB_SEPARATOR_COLOR, false);
     }

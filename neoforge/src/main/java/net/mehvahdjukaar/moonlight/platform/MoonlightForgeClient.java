@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesM
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
-import net.mehvahdjukaar.moonlight.core.CompatHandler;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
@@ -47,22 +47,20 @@ public class MoonlightForgeClient {
         MoonlightClient.onItemTooltip(event.getItemStack(), event.getContext(), event.getFlags(), event.getToolTip());
     }
 
-    // mods that opt out of the native Moonlight screen and keep the old (vanilla) config screen
-    private static final Set<String> LEGACY_CONFIG_SCREEN_MODS = Set.of("supplementaries");
-
     public static void afterLoad(FMLLoadCompleteEvent event) {
-        if (CompatHandler.CONFIGURED) return;
-        // TEST WIRING: route each mod's config button to the native Moonlight screen (one extension point
-        // per mod container; the vanilla ConfigurationScreen is kept as a fallback).
+        // When Moonlight's own custom screen is disabled, register nothing and let the loader handle config screens
+        // (NeoForge's own ConfigurationScreen, or Configured if installed).
+        if (!ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) return;
+        // Otherwise route each mod's config button to the native Moonlight screen (one extension point per mod
+        // container; the vanilla ConfigurationScreen is kept as a fallback).
         Set<String> registered = new HashSet<>();
         for (var config : ModConfigHolder.getTrackedSpecs()) {
             String modId = config.getModId();
             if (!registered.add(modId)) continue;
-            boolean legacy = LEGACY_CONFIG_SCREEN_MODS.contains(modId);
             ModList.get().getModContainerById(modId).ifPresent(c ->
                     c.registerExtensionPoint(IConfigScreenFactory.class, (container, parent) -> {
                         // list every config registered for this mod (common, client, ...); opens the single one directly
-                        var screen = legacy ? null : MoonlightConfigSelectScreen.create(modId, parent, null);
+                        var screen = MoonlightConfigSelectScreen.create(modId, parent, null);
                         return screen != null ? screen : new ConfigurationScreen(container, parent);
                     }));
         }

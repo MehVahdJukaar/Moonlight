@@ -5,6 +5,8 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
+import net.minecraft.server.packs.PackType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.SyncConfigsMessage;
 import net.minecraft.client.gui.screens.Screen;
@@ -93,6 +95,18 @@ public abstract class ModConfigHolder {
 
     public boolean isSynced() {
         return this.type.isSynced();
+    }
+
+    /** The pack kind whose cache a dynamic-pack-affecting value of this config should invalidate. */
+    protected PackType getPackType() {
+        return this.type == ConfigType.CLIENT ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA;
+    }
+
+    /** Invalidates this config's pack cache when a just-written value both changed and affects dynamic packs. */
+    protected void invalidatePacksIfChanged(ConfigValueHandle<?> handle, boolean changed) {
+        if (changed && handle.affectsDynamicPacks()) {
+            GlobalCachedStrategy.forceInvalidateState(this.getPackType());
+        }
     }
 
     public String getFileName() {

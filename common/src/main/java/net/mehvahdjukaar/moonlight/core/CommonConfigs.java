@@ -46,7 +46,7 @@ public class CommonConfigs {
             builder.push("test_category");
             builder.comment("A dev only section used to test the config screen. It doesn't ship to players.");
 
-            builder.comment("A boolean toggle").define("test_bool", true);
+            builder.icon("minecraft:lever").comment("A boolean toggle").define("test_bool", true);
             builder.comment("A value that needs a world reload (shows a globe icon)").worldReload().define("test_world_reload", true);
             builder.comment("A value that needs a game restart (shows a power icon)").gameRestart().define("test_game_restart", true);
             builder.comment("An integer, edited as a text field").define("test_int", 5, 0, 100);
@@ -84,14 +84,14 @@ public class CommonConfigs {
             builder.comment("A plain Java bean (no codec needed), stored and edited as JSON").defineBean("test_bean", new TestBean());
             builder.comment("A record bean, also round-tripped through Gson").defineBean("test_record_bean", new TestRecordBean("world", 7));
 
-            builder.push("nested");
+            builder.icon("minecraft:oak_log").push("nested");
             builder.comment("A float value living in a nested sub category").define("nested_float", 0.5f, 0f, 1f);
             builder.pop();
 
             // Feature gating demo: a category with an enable toggle (shown inline on its row). Its children grey out
             // when it's off, and the returned supplier reads false whenever an ancestor feature is off — via supplier
             // composition, without ever rewriting the stored child values. (Suppliers unused here, just demonstrating.)
-            builder.pushFeature("test_feature", true);
+            builder.icon("minecraft:redstone").pushFeature("test_feature", true);
             builder.comment("Only meaningful while the feature is on").define("feature_speed", 1.0, 0, 10);
             builder.pushFeature("test_sub_feature", true);
             builder.comment("This feature reads false whenever the parent feature is off").define("sub_power", 3, 0, 9);

@@ -16,6 +16,7 @@ public class ClientConfigs {
     public static final Supplier<ShadeFix> FIX_SHADE;
     public static final Supplier<Boolean> DEBUG_RENDERS;
     public static final Supplier<TooltipMode> TAGS_TOOLTIP;
+    public static final Supplier<Boolean> CUSTOM_CONFIG_SCREEN;
 
     @Deprecated(forRemoval = true)
     public static final Supplier<Boolean> BLOCKTYPES_DEBUG = () -> false;
@@ -43,6 +44,9 @@ public class ClientConfigs {
 
         TAGS_TOOLTIP = builder.comment("Show Item and Block tags on item tooltip")
                 .define("tags_tooltips", PlatHelper.isDev() ? TooltipMode.ON : TooltipMode.OFF);
+
+        CUSTOM_CONFIG_SCREEN = builder.comment("Use Moonlight's own custom config screen. When disabled, config screens are left to the loader instead: on NeoForge that means NeoForge's own screen (or Configured, if installed), and on Fabric the old Cloth Config / YACL screens")
+                .define("custom_config_screen", true);
         builder.pop();
         CONFIG = builder.build();
         CONFIG.forceLoad();

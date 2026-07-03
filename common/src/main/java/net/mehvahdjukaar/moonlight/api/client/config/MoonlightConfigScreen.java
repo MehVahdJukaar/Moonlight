@@ -7,10 +7,13 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -33,6 +36,9 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * for new control types without touching it.
  */
 public class MoonlightConfigScreen extends Screen implements ConfigScreenView, PopupHost {
+
+    // reused so re-opening/leaving repeatedly refreshes one toast instead of stacking duplicates
+    private static final SystemToast.SystemToastId RELOAD_TOAST_ID = new SystemToast.SystemToastId();
 
     private final ConfigEditSession session;
     private final ConfigCategory category;
@@ -128,19 +134,56 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
         populate();
         this.addRenderableWidget(this.list);
 
-        // Save (with live unsaved counter) sits next to Back on every page; the session is shared across the
-        // whole navigation stack so Save here persists edits made in any sub category too.
+        // Bottom bar: [Reset all] Save | Back, all the same size. Save (with its live unsaved counter) and Back
+        // are on every page; the session is shared across the navigation stack so Save persists sub-category edits
+        // too. Reset all only shows at the root/home page, since it acts on the whole config.
         int y = this.height - 28;
-        this.saveButton = new IconButton(this.width / 2 - 104, y, 100, 20, Component.empty(), SAVE_ICON, 12, 12, b -> doSave());
-        this.addRenderableWidget(this.saveButton);
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
-                .bounds(this.width / 2 + 4, y, 100, 20).build());
+        int bw = 100, gap = 4;
+        if (isRoot()) {
+            int total = 3 * bw + 2 * gap;
+            int x0 = (this.width - total) / 2;
+            this.addRenderableWidget(new IconButton(x0, y, bw, 20,
+                    Component.translatable("gui.moonlight.config.reset_all"), RESET_ICON, 12, 12, b -> confirmResetAll()));
+            this.saveButton = new IconButton(x0 + bw + gap, y, bw, 20, Component.empty(), SAVE_ICON, 12, 12, b -> doSave());
+            this.addRenderableWidget(this.saveButton);
+            this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
+                    .bounds(x0 + 2 * (bw + gap), y, bw, 20).build());
+        } else {
+            this.saveButton = new IconButton(this.width / 2 - 104, y, bw, 20, Component.empty(), SAVE_ICON, 12, 12, b -> doSave());
+            this.addRenderableWidget(this.saveButton);
+            this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
+                    .bounds(this.width / 2 + 4, y, bw, 20).build());
+        }
         // bottom-left: icon-only jump to the mods hub grid
         IconButton modsButton = new IconButton(8, y, 20, 20, Component.empty(), CONFIG_ICON, 16, 16,
-                b -> this.minecraft.setScreen(new ModsScreen(this, session.background()))).borderless();
+                b -> this.minecraft.setScreen(new ModsTilesScreen(this, session.background()))).borderless();
         modsButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.mods_button")));
         this.addRenderableWidget(modsButton);
         refreshSave();
+    }
+
+    /** Asks for confirmation, then resets every value in the config to its default and saves immediately. */
+    private void confirmResetAll() {
+        this.minecraft.setScreen(new ConfirmScreen(confirmed -> {
+            if (confirmed) {
+                resetAllToDefaults(this.category);
+                session.apply();        // reset writes straight through, like the per-row reset + Save
+                session.clearPending();
+            }
+            this.minecraft.setScreen(this); // re-inits, so rows re-read the (now saved) values
+        }, Component.translatable("gui.moonlight.config.reset_all.title"),
+                Component.translatable("gui.moonlight.config.reset_all.message")));
+    }
+
+    /** Recursively stages the default value of every editable option in {@code cat} and its sub-categories. */
+    private void resetAllToDefaults(ConfigCategory cat) {
+        for (ConfigNode e : cat.entries()) {
+            if (e instanceof ConfigCategory sub) {
+                resetAllToDefaults(sub);
+            } else if (e instanceof ConfigOption<?> v && !(v instanceof ConfigOption.UnsupportedValue)) {
+                session.put(v, v.defaultValue());
+            }
+        }
     }
 
     /**
@@ -212,7 +255,32 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenView, P
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(isRoot() ? session.returnScreen() : parentConfig);
+        // leaving the config entirely (root → return screen) with pending edits would silently drop them: confirm first.
+        // going back to a parent category stays within the shared session, so nothing is lost and no prompt is needed.
+        if (isRoot() && session.unsavedCount() > 0) {
+            this.minecraft.setScreen(new ConfirmScreen(discard -> {
+                        if (discard) leaveConfig();
+                        else this.minecraft.setScreen(this);
+                    },
+                    Component.translatable("gui.moonlight.config.discard.title"),
+                    Component.translatable("gui.moonlight.config.discard.message", session.unsavedCount()),
+                    Component.translatable("gui.moonlight.config.discard.confirm"), CommonComponents.GUI_CANCEL));
+            return;
+        }
+        if (isRoot()) leaveConfig();
+        else this.minecraft.setScreen(parentConfig);
+    }
+
+    /** Returns to the screen the config was opened from, warning (via toast) if any saved change needs a reload. */
+    private void leaveConfig() {
+        ConfigReloadType reload = session.appliedReload();
+        if (reload != ConfigReloadType.NONE) {
+            Component message = Component.translatable(reload == ConfigReloadType.GAME_RESTART
+                    ? "gui.moonlight.config.reload_needed.game" : "gui.moonlight.config.reload_needed.world");
+            this.minecraft.getToasts().addToast(SystemToast.multiline(this.minecraft, RELOAD_TOAST_ID,
+                    Component.translatable("gui.moonlight.config.reload_needed.title"), message));
+        }
+        this.minecraft.setScreen(session.returnScreen());
     }
 
     @Override

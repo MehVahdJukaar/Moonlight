@@ -47,12 +47,18 @@ public abstract class ConfigBuilder {
     protected boolean pendingDynamicPacks;
 
     // ===== lenient comment wiring =====
-    // A comment(...) may come before or after its define(...). We remember a comment given before as
-    // pendingComment (consumed by the next define), and remember the last define's target so a comment given
-    // after can still attach to it. applyComment() writes the readable text into the lang map and lets the
-    // platform stamp it onto the on-disk value and the screen row.
+    // A comment(...) may come before or after its define(...). A comment always binds FORWARD to the next define
+    // (pendingComment, consumed there). If no define claims it before another comment arrives or the section
+    // closes, it was really an "after" comment for the last define (lastCommentTarget), so it's flushed there.
+    // This forward-first rule stops an un-commented define (e.g. a feature() "enabled" toggle) from greedily
+    // stealing the before-comment meant for the value that follows it. applyComment() writes the readable text
+    // into the lang map and lets the platform stamp it onto the on-disk value and the screen row.
     @Nullable
     private String pendingComment;
+    // whether pendingComment has already been handed to the backing store (Forge attaches to the next define, so
+    // it must be forwarded once, before that define — see pollCommentToForward); avoids re-emitting it for each
+    // suppressed backing value of a compound define.
+    private boolean pendingCommentForwarded;
     @Nullable
     private CommentTarget lastCommentTarget;
     @Nullable
@@ -78,6 +84,10 @@ public abstract class ConfigBuilder {
 
     // set by worldReload()/gameRestart(), applied to (and cleared by) the next recorded option — see recordOption
     protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
+
+    // set by icon(...), applied to (and cleared by) the next category push or defined option — see uiPush/noteDefined
+    @Nullable
+    private ResourceLocation pendingIcon;
 
     /** How a pending/late comment is applied to the value it belongs to (its on-disk comment and screen row). */
     @FunctionalInterface
@@ -130,7 +140,7 @@ public abstract class ConfigBuilder {
     }
 
     public <T> T affectsDynamicPacks(T config) {
-        if (config instanceof IConfigWrapper dynamicPackAffecting) {
+        if (config instanceof ConfigValueHandle<?> dynamicPackAffecting) {
             dynamicPackAffecting.setAffectsDynamicPacks(true);
         }
         return config;
@@ -380,60 +390,28 @@ public abstract class ConfigBuilder {
         if (type == int.class || type == Integer.class) return define(name, (Integer) current, Integer.MIN_VALUE, Integer.MAX_VALUE);
         if (type == double.class || type == Double.class) return define(name, (Double) current, -Double.MAX_VALUE, Double.MAX_VALUE);
         if (type == float.class || type == Float.class) return define(name, (Float) current, -Float.MAX_VALUE, Float.MAX_VALUE);
-        if (type == String.class) return define(name, (String) current, o -> true);
+        // must reject null: a null-accepting validator (o -> true) makes NeoForge treat a MISSING string field as
+        // valid, so it never writes the default. The key stays absent while the spec still carries its comment,
+        // which NeoForge tries to re-apply every load -> endless "config is not correct. Correcting" loop.
+        if (type == String.class) return define(name, (String) current);
         if (type.isEnum()) return define(name, (Enum) current);
         throw new IllegalArgumentException("defineBean: unsupported field type " + type.getName() + " for field '" + name + "'");
     }
 
 
     public Supplier<ResourceLocation> define(String name, ResourceLocation defaultValue) {
-        var value = new ResourceLocationConfigValue(this, name, defaultValue);
-        return applyPendingDynamicPacks(value);
+        // stored (and screen-edited) as a validated string; the returned supplier just parses it, exactly like
+        // defineRegistry/defineItem below. The dynamic-pack flag rides on the backing string handle.
+        Supplier<String> handle = define(name, defaultValue.toString(), REGISTRY_ID_CHECK);
+        return () -> ResourceLocation.parse(handle.get());
     }
 
     protected <T> T applyPendingDynamicPacks(T value) {
-        if (this.pendingDynamicPacks && value instanceof IConfigWrapper dynamicPackAffecting) {
+        if (this.pendingDynamicPacks && value instanceof ConfigValueHandle<?> dynamicPackAffecting) {
             dynamicPackAffecting.setAffectsDynamicPacks(true);
         }
         this.pendingDynamicPacks = false;
         return value;
-    }
-
-    private static class ResourceLocationConfigValue implements Supplier<ResourceLocation>, IConfigWrapper {
-
-        private final Supplier<String> inner;
-        private ResourceLocation cache;
-        private String oldString;
-        private boolean affectsDynamicPacks;
-
-        public ResourceLocationConfigValue(ConfigBuilder builder, String path, ResourceLocation defaultValue) {
-            this.inner = builder.define(path, defaultValue.toString(), s -> s != null && ResourceLocation.tryParse((String) s) != null);
-            if (this.inner instanceof IConfigWrapper dynamicPackAffecting) {
-                this.affectsDynamicPacks = dynamicPackAffecting.affectsDynamicPacks();
-            }
-        }
-
-        @Override
-        public ResourceLocation get() {
-            String s = inner.get();
-            if (!s.equals(oldString)) cache = null;
-            oldString = s;
-            if (cache == null) cache = ResourceLocation.parse(s);
-            return cache;
-        }
-
-        @Override
-        public boolean affectsDynamicPacks() {
-            return affectsDynamicPacks;
-        }
-
-        @Override
-        public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
-            this.affectsDynamicPacks = affectsDynamicPacks;
-            if (inner instanceof IConfigWrapper dynamicPackAffecting) {
-                dynamicPackAffecting.setAffectsDynamicPacks(affectsDynamicPacks);
-            }
-        }
     }
 
     public Component description(String name) {
@@ -456,18 +434,18 @@ public abstract class ConfigBuilder {
 
     /**
      * Adds a comment/description to a value. Lenient: it may be called either before or after that value's
-     * {@code define(...)}. A comment given before is held and attached to the next defined value; a comment
-     * given after attaches to the most recently defined value. Ends up in the english language file and as the
-     * hover description of the value's screen row.
+     * {@code define(...)}. A comment always binds forward to the next define; if none follows before another
+     * comment arrives or the section closes, it falls back onto the most recently defined value (an "after"
+     * comment). Ends up in the english language file and as the hover description of the value's screen row.
      */
     public ConfigBuilder comment(String comment) {
-        if (this.lastCommentTarget != null) {
-            // a value was just defined and is still waiting: this is an "after" comment for it
-            applyComment(comment);
-        } else {
-            // no value waiting: hold it for the next define ("before" comment)
-            this.pendingComment = comment;
-        }
+        // A new comment arriving means the previous one never got a define of its own, so it was an "after"
+        // comment for the last defined value: flush it there before taking this one. Then hold this one for the
+        // NEXT define. Binding forward (rather than eagerly onto the last define) is what stops an un-commented
+        // define from stealing the before-comment meant for the value that follows it.
+        if (this.pendingComment != null) applyComment(this.pendingComment);
+        this.pendingComment = comment;
+        this.pendingCommentForwarded = false;
         return this;
     }
 
@@ -479,9 +457,55 @@ public abstract class ConfigBuilder {
         return comment(String.join("\n", comment));
     }
 
-    /** Whether the last defined value is still waiting to (maybe) receive a comment that follows it. */
-    protected boolean isAwaitingAfterComment() {
-        return this.lastCommentTarget != null;
+    /**
+     * Attaches a decorative icon to the NEXT category {@code push(...)}/{@code pushFeature(...)} or the next defined
+     * value. Purely eye candy for the native config screen; ignored by everything else. The {@code id} is resolved
+     * to a rendered item/block (or a GUI sprite) lazily on the client, so it may reference things that don't exist
+     * yet when the config is built (registries are still empty that early). Chainable, like {@link #comment}:
+     * {@code builder.icon("faucet").pushFeature("faucet", true)}.
+     */
+    public ConfigBuilder icon(ResourceLocation id) {
+        this.pendingIcon = id;
+        return this;
+    }
+
+    /**
+     * Convenience {@link #icon(ResourceLocation)}: a bare path (no {@code :}) is namespaced to this config's mod id,
+     * so {@code icon("faucet")} means {@code <modid>:faucet}.
+     */
+    public ConfigBuilder icon(String id) {
+        return icon(id.indexOf(':') >= 0
+                ? ResourceLocation.parse(id)
+                : ResourceLocation.fromNamespaceAndPath(this.name.getNamespace(), id));
+    }
+
+    /**
+     * A still-pending comment at a section boundary ({@link #pop()}, {@link #build()}) had no following define, so
+     * it was an "after" comment for the last defined value; attach it there. Skipped while {@link #suppressUi} is
+     * set, because a compound value's internal push/pop (see {@link #defineRange}) must not consume the comment
+     * before the compound's own combined row does.
+     */
+    protected void flushPendingComment() {
+        if (this.suppressUi) return;
+        if (this.pendingComment != null) {
+            applyComment(this.pendingComment);
+            this.pendingComment = null;
+        }
+    }
+
+    /**
+     * For platforms whose backing store attaches a comment to the NEXT define (Forge's {@code ModConfigSpec}):
+     * returns the pending before-comment exactly once, to be forwarded right before that define runs, then marks
+     * it forwarded so the suppressed backing values of a compound value don't each re-emit it. Returns
+     * {@code null} when there is nothing new to forward.
+     */
+    @Nullable
+    protected String pollCommentToForward() {
+        if (this.pendingComment != null && !this.pendingCommentForwarded) {
+            this.pendingCommentForwarded = true;
+            return this.pendingComment;
+        }
+        return null;
     }
 
     /**
@@ -530,6 +554,10 @@ public abstract class ConfigBuilder {
             applyComment(this.pendingComment);
             this.pendingComment = null;
         }
+        if (this.pendingIcon != null && uiNode != null) {
+            uiNode.setIcon(this.pendingIcon);
+            this.pendingIcon = null;
+        }
     }
 
     // ===== loader independent UI tree (consumed by the native config screen) =====
@@ -538,6 +566,10 @@ public abstract class ConfigBuilder {
     protected void uiPush(Component title) {
         if (this.suppressUi) return;
         ConfigCategory cat = new ConfigCategory(title);
+        if (this.pendingIcon != null) { // an icon(...) right before this push decorates the category row
+            cat.setIcon(this.pendingIcon);
+            this.pendingIcon = null;
+        }
         this.uiStack.peek().add(cat);
         this.uiStack.push(cat);
         this.gateStack.push(this.gateStack.peek()); // inherit the parent's gate until a feature() narrows it

@@ -2,29 +2,20 @@ package net.mehvahdjukaar.moonlight.api.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Shared sizing/color constants for the config screen widgets. Kept in one place so the screen, list, rows and
  * control providers all agree on the grid.
  */
 final class ConfigScreenLayout {
-
-    private ConfigScreenLayout() {
-    }
-
-    /**
-     * Left aligned text that scrolls back and forth when it doesn't fit its box, mirroring vanilla's
-     * {@code AbstractWidget.renderScrollingString} (which isn't accessible from here). Shared by option-row
-     * labels and the dropdown's current-value box so overflowing text reads the same everywhere.
-     */
-    static void renderScrollingText(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int color) {
-        GuiHelper.renderScrollingText(graphics, font, text, minX, maxX, rowTop, rowHeight, color);
-    }
 
     /** Left-aligned single-line text hard-clipped (scissored) to {@code [minX, maxX]} — used for row subtitles. */
     static void drawClipped(GuiGraphics graphics, Font font, Component text, int minX, int y, int maxX, int color) {
@@ -33,18 +24,14 @@ final class ConfigScreenLayout {
         graphics.disableScissor();
     }
 
-    /** First line only of a (possibly multi-line) component, as plain text — for a one-line subtitle. */
-    static Component firstLine(Component text) {
-        String s = text.getString();
-        int nl = s.indexOf('\n');
-        return Component.literal(nl >= 0 ? s.substring(0, nl) : s);
-    }
-
     // gui sprites (assets/moonlight/textures/gui/sprites/{yes,no,save}.png)
     static final ResourceLocation ON_ICON = Moonlight.res("yes");
     static final ResourceLocation OFF_ICON = Moonlight.res("no");
     static final ResourceLocation SAVE_ICON = Moonlight.res("save");
     static final ResourceLocation CONFIG_ICON = Moonlight.res("config");
+    static final ResourceLocation CLIENT_CONFIG_ICON = Moonlight.res("config_client");
+    static final ResourceLocation SERVER_CONFIG_ICON = Moonlight.res("config_server");
+    static final ResourceLocation COMMON_CONFIG_ICON = Moonlight.res("config_common");
     static final ResourceLocation FOLDER_ICON = Moonlight.res("folder");
     static final ResourceLocation SEARCH_ICON = Moonlight.res("search");
     static final ResourceLocation RESET_ICON = Moonlight.res("reset");
@@ -54,12 +41,21 @@ final class ConfigScreenLayout {
     static final ResourceLocation GAME_RESTART_ICON = Moonlight.res("game_restart");
 
     /** The reload/restart hint sprite for a value, or null when it applies immediately. */
-    @org.jetbrains.annotations.Nullable
-    static ResourceLocation reloadIcon(net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType type) {
+    @Nullable
+    static ResourceLocation reloadIcon(ConfigReloadType type) {
         return switch (type) {
             case WORLD_RELOAD -> WORLD_RELOAD_ICON;
             case GAME_RESTART -> GAME_RESTART_ICON;
             case NONE -> null;
+        };
+    }
+
+    /** The paper "config file" sprite for a config's type, distinguishing client / server-synced / common. */
+    static ResourceLocation configFileIcon(ConfigType type) {
+        return switch (type) {
+            case CLIENT -> CLIENT_CONFIG_ICON;
+            case COMMON_SYNCED -> SERVER_CONFIG_ICON;
+            case COMMON -> COMMON_CONFIG_ICON;
         };
     }
 
@@ -84,8 +80,9 @@ final class ConfigScreenLayout {
     static final int ERROR_COLOR = ConfigGuiColors.ERROR;
     static final int DESCRIPTION_COLOR = ConfigGuiColors.DESCRIPTION;
 
-    static final int HEADER_BG = ConfigGuiColors.HEADER_BG;
-    static final int HEADER_SEPARATOR = ConfigGuiColors.HEADER_SEPARATOR;
+    // structural header chrome — a neutral translucent-black bar, not part of the themeable palette
+    static final int HEADER_BG = 0x90000000;
+    static final int HEADER_SEPARATOR = 0xFF101012;
     static final int TITLE_COLOR = ConfigGuiColors.TITLE;
     static final int CRUMB_COLOR = ConfigGuiColors.CRUMB;
     static final int CRUMB_HOVER_COLOR = ConfigGuiColors.CRUMB_HOVER;

@@ -180,11 +180,11 @@ public final class ConfigControls {
         });
 
         register(ConfigOption.ListValue.class, (o, s, onChange) -> {
-            Button button = Button.builder(listLabel(s.current(o)), b ->
+            IconButton button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, listLabel(s.current(o)), EDIT_ICON, 12, 12, b ->
                     Minecraft.getInstance().setScreen(new ListEditScreen(o, s.current(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
-                    }))).bounds(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT).build();
+                    })));
             return new Control(button, v -> button.setMessage(listLabel((List<String>) v)));
         });
 

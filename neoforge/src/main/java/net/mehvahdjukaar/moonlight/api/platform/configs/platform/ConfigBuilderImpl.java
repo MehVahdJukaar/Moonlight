@@ -94,6 +94,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ForgeConfigHolder build() {
+        flushPendingComment(); // a trailing after-comment at the very end has no define to claim it
         return new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
                 this.buildChangeCallback(), trackedValues, getUiRoot());
     }
@@ -109,6 +110,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigBuilderImpl pop() {
+        flushPendingComment(); // a trailing after-comment in this category has no following define to claim it
         builder.pop();
         cat.pop();
         uiPop();
@@ -277,6 +279,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
+        forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
         if (usesDataBuddy) {
             var w = track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier));
             ui(name, unsupported(name, w));
@@ -309,6 +312,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<JsonElement> defineJson(String path, JsonElement defaultValue) {
+        forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
         var w = track(ValueWrapper.json(builder.define(path,
                 defaultValue.toString().replace(" ", "").replace("\"", "'"))));
         ui(path, new ConfigOption.JsonValue(uiTitle(path), uiDescription(path), w));
@@ -317,6 +321,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<JsonElement> defineJson(String path, Supplier<JsonElement> defaultValue) {
+        forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
         com.google.common.base.Supplier<JsonElement> lazyDefaultValue = Suppliers.memoize(defaultValue::get);
         var w = track(ValueWrapper.json(builder.define(path,
                 () -> lazyDefaultValue.get().toString().replace(" ", "").replace("\"", "'"),
@@ -348,18 +353,21 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     protected void addTranslationsAndComments(String name) {
         builder.translation(translationKey(name));
+        forwardPendingComment();
         super.addTranslationsAndComments(name);
     }
 
-    @Override
-    public ConfigBuilder comment(String comment) {
-        // Forge can only attach a .toml comment to the NEXT defined value, so only forward before-order comments
-        // (nothing is waiting for an after-comment). After-order comments still reach the lang file and the
-        // screen row via super, they just don't make it into the .toml file.
-        if (!isAwaitingAfterComment()) {
-            builder.comment(comment);
-        }
-        return super.comment(comment);
+    /**
+     * Forge attaches a .toml comment to the NEXT defined value, so hand it the pending before-comment right
+     * before that define runs (once per comment — {@link #pollCommentToForward()} guards against re-emitting it
+     * for the suppressed backing values of a compound define). After-comments never reach a define this way, so
+     * they don't make it into the .toml file; they still reach the lang file and the screen row. Must be called
+     * before every {@code builder.define(...)} — most paths get it via {@link #addTranslationsAndComments}, but
+     * the json/object defines call {@code builder.define} directly and so invoke this themselves.
+     */
+    private void forwardPendingComment() {
+        String toForward = pollCommentToForward();
+        if (toForward != null) builder.comment(toForward);
     }
 
     abstract static class ValueWrapper<T, C> implements TrackedConfigValue<T> {

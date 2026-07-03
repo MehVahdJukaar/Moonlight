@@ -282,7 +282,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
             return true;
         }
         if (key == 257 || key == 335) { // enter
-            if (!filtered.isEmpty()) select(filtered.contains(value) ? value : filtered.get(0));
+            if (!filtered.isEmpty()) select(filtered.contains(value) ? value : filtered.getFirst());
             close();
             return true;
         }

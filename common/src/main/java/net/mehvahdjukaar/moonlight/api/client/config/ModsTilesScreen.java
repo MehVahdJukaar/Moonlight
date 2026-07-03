@@ -28,7 +28,7 @@ import static net.mehvahdjukaar.moonlight.api.client.config.ConfigScreenLayout.*
  * name + version). Clicking a card opens that mod's config(s) (via {@link MoonlightConfigSelectScreen#create}).
  * Reached from the bottom-left button on the config screens.
  */
-public class ModsScreen extends Screen {
+public class ModsTilesScreen extends Screen {
 
     private static final ResourceLocation GEAR_ICON = Moonlight.res("config");
     // the same tiling list background the vanilla selection lists use (the field is private on AbstractSelectionList)
@@ -64,7 +64,7 @@ public class ModsScreen extends Screen {
     // recomputed each layout pass, shared by render + click
     private int cols, startX, contentTop, contentBottom;
 
-    public ModsScreen(Screen parent, @Nullable ResourceLocation background) {
+    public ModsTilesScreen(Screen parent, @Nullable ResourceLocation background) {
         super(Component.translatable("gui.moonlight.config.mods_title"));
         this.parent = parent;
         this.background = background;

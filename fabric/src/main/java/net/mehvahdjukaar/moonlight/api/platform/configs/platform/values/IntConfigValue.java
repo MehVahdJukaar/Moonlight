@@ -1,8 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
 import com.google.common.base.Preconditions;
-import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 import java.util.Objects;
 
@@ -24,31 +24,13 @@ public class IntConfigValue extends ConfigValue<Integer> {
     }
 
     @Override
-    public boolean loadFromJson(JsonObject element) {
-        if (element.has(this.name)) {
-            try {
-                Integer newValue = element.get(this.name).getAsInt();
-                if (!this.isValid(newValue)) {
-                    //if not valid it defaults
-                    newValue = defaultValue;
-                }
-                boolean changed = this.setAndTrack(newValue);
-                this.markLoaded();
-                return this.affectsDynamicPacks() && changed;
-            } catch (Exception ignored) {
-            }
-            Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
-        } else {
-            Moonlight.LOGGER.warn("Config file had missing entry {}", this.name);
-        }
-        this.markLoaded();
-        return false;
+    protected Integer parseValue(JsonElement element) {
+        return element.getAsInt();
     }
 
     @Override
-    public void saveToJson(JsonObject object) {
-        if (this.value == null) this.value = defaultValue;
-        object.addProperty(this.name, this.value);
+    protected JsonElement encodeValue(Integer value) {
+        return new JsonPrimitive(value);
     }
 
     public Integer getMax() {

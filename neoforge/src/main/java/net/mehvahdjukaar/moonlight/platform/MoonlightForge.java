@@ -8,10 +8,8 @@ import net.mehvahdjukaar.moonlight.api.platform.platform.ForgeHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.platform.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ModIngredientTypes;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditionsBridge;
-import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
-import net.mehvahdjukaar.moonlight.core.integration.platform.ModConfigSelectScreen;
 import net.mehvahdjukaar.moonlight.core.misc.platform.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginMessage;
 import net.minecraft.core.BlockPos;
@@ -72,10 +70,8 @@ public class MoonlightForge {
 
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init(bus);
-
-            if (CompatHandler.CONFIGURED) {
-                ModConfigSelectScreen.registerConfigScreen(MOD_ID, ModConfigSelectScreen::new);
-            }
+            // config screen wiring lives in MoonlightForgeClient#afterLoad (gated by the custom_config_screen client
+            // config); the old Configured delegation is kept in the integration classes but no longer registered here
         }
 
         bus.addListener(MoonlightForge::addOldPoiEvent);

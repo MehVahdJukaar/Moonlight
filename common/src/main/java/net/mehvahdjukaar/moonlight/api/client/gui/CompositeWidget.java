@@ -5,13 +5,17 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 
 /**
- * An {@link AbstractContainerWidget} that actually relinquishes its children's focus.
+ * Shared base for the multi-widget config controls (color field, range, vec3, …).
  * <p>
- * Vanilla's {@code AbstractContainerWidget.setFocused(boolean)} delegates to a no-op default, so when a parent
- * unfocuses this composite through the boolean path — e.g. a selection list moving focus to another entry, which
- * calls {@code oldChild.setFocused(false)} — a focused inner widget (typically an {@link net.minecraft.client.gui.components.EditBox})
- * is never told it lost focus and keeps drawing its blinking caret / highlighted border. Clearing the focused
- * child here fixes that once for every composite control (color field, range, vec3, …).
+ * Focus <em>between</em> the inner widgets is driven entirely by vanilla's {@code setFocused(GuiEventListener)} path,
+ * so nothing is micromanaged there. The one gap is the boolean overload: vanilla's
+ * {@code AbstractContainerWidget.setFocused(boolean)} is a no-op, so when the row list switches rows and clears the
+ * old row via {@code oldRow.setFocused((GuiEventListener) null)} — which reaches this composite as a boolean
+ * {@code setFocused(false)} — a bare {@link net.minecraft.client.gui.components.EditBox} child would keep its caret.
+ * Mirroring our focus onto the currently focused child (as a leaf widget would) closes that gap. It is safe because
+ * the only callers of this boolean overload are genuine focus changes: the list is idempotent (vanilla guards
+ * {@code getFocused() != focused}) so no spurious {@code false} arrives, and the same-row redundant
+ * {@code false}→{@code true} round-trip just toggles the same child off and back on.
  */
 public abstract class CompositeWidget extends AbstractContainerWidget {
 
@@ -22,9 +26,7 @@ public abstract class CompositeWidget extends AbstractContainerWidget {
     @Override
     public void setFocused(boolean focused) {
         super.setFocused(focused);
-        if (!focused) {
-            // drop the focused child (the GuiEventListener overload does propagate the unfocus, unlike the boolean one)
-            this.setFocused((GuiEventListener) null);
-        }
+        GuiEventListener child = this.getFocused();
+        if (child != null) child.setFocused(focused);
     }
 }

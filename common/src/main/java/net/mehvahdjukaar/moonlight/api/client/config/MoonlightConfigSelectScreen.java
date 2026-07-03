@@ -68,7 +68,8 @@ public class MoonlightConfigSelectScreen extends Screen {
         for (ModConfigHolder h : holders) {
             Component label = Component.literal(LangBuilder.getReadableName(h.getId().getPath()));
             Component tooltip = Component.literal(h.getFileName());
-            rows.add(new ConfigHolderRow(label, tooltip, () -> this.minecraft.setScreen(h.makeScreen(this, background))));
+            rows.add(new ConfigHolderRow(label, tooltip, configFileIcon(h.getConfigType()),
+                    () -> this.minecraft.setScreen(h.makeScreen(this, background))));
         }
         this.list.setRows(rows);
         this.addRenderableWidget(this.list);
@@ -78,7 +79,7 @@ public class MoonlightConfigSelectScreen extends Screen {
                 this.width / 2, this.height - 29, 22, modId, this::onClose);
         // bottom-left: icon-only jump to the mods hub grid
         IconButton modsButton = new IconButton(8, this.height - 29, 20, 20, Component.empty(), CONFIG_ICON, 16, 16,
-                b -> this.minecraft.setScreen(new ModsScreen(this, background))).borderless();
+                b -> this.minecraft.setScreen(new ModsTilesScreen(this, background))).borderless();
         modsButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.mods_button")));
         this.addRenderableWidget(modsButton);
     }

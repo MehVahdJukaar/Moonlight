@@ -66,7 +66,7 @@ class ListEditScreen extends Screen implements PopupHost {
 
         int cx = this.width / 2;
         this.addRenderableWidget(Button.builder(Component.translatable("gui.moonlight.config.list_add"), b -> {
-            working.add(options != null && !options.isEmpty() ? options.get(0) : "");
+            working.add(options != null && !options.isEmpty() ? options.getFirst() : "");
             rebuildRows();
             this.list.setScrollAmount(this.list.getMaxScroll());
         }).bounds(cx - 100, this.height - 52, 200, 20).build());

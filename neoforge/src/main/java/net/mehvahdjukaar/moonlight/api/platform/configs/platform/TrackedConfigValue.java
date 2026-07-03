@@ -1,12 +1,14 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform;
 
-import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigWrapper;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigValueHandle;
 
-import java.util.function.Supplier;
+/**
+ * NeoForge {@link ConfigValueHandle}. On top of the common handle it can be asked whether the backing
+ * {@code ModConfigSpec} value changed since the last check ({@link #pollChanged()}), which the holder uses to
+ * decide dynamic-pack invalidation when Forge fires its single coarse config-reload event.
+ */
+public interface TrackedConfigValue<T> extends ConfigValueHandle<T> {
 
-public interface TrackedConfigValue<T> extends Supplier<T>, IConfigWrapper {
-
+    /** Refreshes the cached value from the backing spec; returns whether it changed since the previous poll. */
     boolean pollChanged();
-
-    boolean setValue(T value);
 }

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.minecraft.client.gui.Font;
@@ -34,6 +35,7 @@ class CategoryRow extends ConfigRow {
     private final List<AbstractWidget> children;
     @Nullable
     private final Component tooltip;
+    private final ConfigScreenIcons.Anim iconAnim = new ConfigScreenIcons.Anim();
 
     CategoryRow(ConfigScreenView view, ConfigCategory category) {
         this.view = view;
@@ -75,9 +77,16 @@ class CategoryRow extends ConfigRow {
         int textRight = left + buttonWidth - GAP;
         int titleColor = enabled ? LABEL_COLOR : DESCRIPTION_COLOR; // white (bold), greyed when the feature is off
 
-        graphics.blitSprite(FOLDER_ICON, iconX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
+        int iconY = top + (height - ROW_ICON) / 2;
+        // an animated item/block icon if the category declares one, otherwise the default folder sprite
+        if (ConfigScreenIcons.has(category.icon())) {
+            iconAnim.update(hovering);
+            ConfigScreenIcons.renderAnimated(graphics, category.icon(), iconX, iconY, iconAnim.phase(), enabled);
+        } else {
+            graphics.blitSprite(FOLDER_ICON, iconX, iconY, ROW_ICON, ROW_ICON);
+        }
         Component title = category.title().copy().withStyle(ChatFormatting.BOLD);
-        renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
+        GuiHelper. renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 
         if (toggle != null && gate != null) {
             toggle.set(Boolean.TRUE.equals(view.session().current(gate)));

@@ -11,6 +11,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.Screen;
@@ -47,7 +48,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import net.minecraft.server.packs.PackType;
 
 @SuppressWarnings("all")
 public final class ForgeConfigHolder extends ModConfigHolder {
@@ -126,10 +126,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     @Override
     public <T> void manuallySetValue(Supplier<T> config, T value) {
         if (config instanceof TrackedConfigValue<T> tracked) {
-            boolean changed = tracked.setValue(value);
-            if (changed && tracked.affectsDynamicPacks()) {
-                GlobalCachedStrategy.forceInvalidateState(this.getPackType());
-            }
+            invalidatePacksIfChanged(tracked, tracked.setValue(value));
         } else if (config instanceof ModConfigSpec.ConfigValue<T> cv) {
             cv.set(value);
         } else throw new IllegalArgumentException("Unsupported config value type: " + config.getClass());
@@ -145,15 +142,15 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     @Override
     @OnlyIn(Dist.CLIENT)
     public Screen makeScreen(Screen parent, @Nullable ResourceLocation background) {
-        // TEST WIRING: use the native Moonlight screen. Original Forge/Configured delegation kept below for restore.
-        var root = getConfigRoot();
-        return root == null ? null : new net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigScreen(this, root, parent, background);
-        /*
+        if (ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) {
+            var root = getConfigRoot();
+            return root == null ? null : new net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigScreen(this, root, parent, background);
+        }
+        // custom screen disabled: defer to whatever config screen the loader (NeoForge / Configured) registered
         return ModList.get().getModContainerById(this.getModId())
                 .flatMap(container -> container.getCustomExtension(IConfigScreenFactory.class)
                         .map(factory -> factory.createScreen(container, parent)))
                 .orElse(null);
-        */
     }
 
     @ApiStatus.Internal
@@ -278,10 +275,5 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     private static final Method LOAD_CONFIG = ObfuscationReflectionHelper.findMethod(
             ConfigTracker.class, "loadConfig",
             ModConfig.class, Path.class, Function.class);
-
-    private PackType getPackType() {
-        return this.getConfigType() == ConfigType.CLIENT ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA;
-    }
-
 
 }

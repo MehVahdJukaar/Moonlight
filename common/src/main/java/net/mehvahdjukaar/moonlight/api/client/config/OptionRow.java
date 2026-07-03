@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.IconButton;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
@@ -39,6 +40,7 @@ class OptionRow extends ConfigRow {
     private final IconButton resetButton;
     private final boolean editable;
     private final List<AbstractWidget> children;
+    private final ConfigScreenIcons.Anim iconAnim = new ConfigScreenIcons.Anim();
 
     // click region of the label/arrow column that toggles the description, refreshed each frame
     private int toggleX0, toggleX1, rowY0, rowY1;
@@ -113,13 +115,20 @@ class OptionRow extends ConfigRow {
                     contextEnabled ? DESCRIPTION_COLOR : 0x606060, false);
             textLeft = left + ARROW_WIDTH;
         }
+        // decorative, hover-animated item/block icon just before the label, if this value declares one
+        if (ConfigScreenIcons.has(value.icon())) {
+            iconAnim.update(hovering);
+            ConfigScreenIcons.renderAnimated(graphics, value.icon(), textLeft, top + (height - ROW_ICON) / 2,
+                    iconAnim.phase(), contextEnabled);
+            textLeft += ROW_ICON + GAP;
+        }
         int textRight = controlX - GAP;
 
         // reload/restart hint icon: pure decoration in the far-left gutter, never shifts the row content
         this.reloadIconX0 = this.reloadIconX1 = -1;
         ResourceLocation reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
         if (reloadIcon != null) {
-            int iconSize = 9;
+            int iconSize = 12; // native size of the world_reload / game_restart sprites (pixel-perfect)
             int iconX = left - iconSize - 3;
             graphics.blitSprite(reloadIcon, iconX, top + (height - iconSize) / 2, iconSize, iconSize);
             this.reloadIconX0 = iconX;
@@ -128,7 +137,7 @@ class OptionRow extends ConfigRow {
 
         boolean modified = !Objects.equals(session.currentRaw(value), value.get());
         int titleColor = !contextEnabled ? DESCRIPTION_COLOR : modified ? MODIFIED_COLOR : LABEL_COLOR;
-        renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
+        GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 
         // the label/arrow area toggles the description drop-down
         this.toggleX0 = left;

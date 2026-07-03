@@ -44,6 +44,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     //doesn't load it immediately. happens after registration to mimic forge
     @NotNull
     public FabricConfigHolder build() {
+        flushPendingComment(); // a trailing after-comment at the very end has no define to claim it
         assert categoryStack.size() == 1;
         return new FabricConfigHolder(this.getName(), mainCategory, this.type, this.buildChangeCallback(), getUiRoot());
     }
@@ -78,6 +79,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public ConfigBuilderImpl pop() {
+        flushPendingComment(); // a trailing after-comment in this category has no following define to claim it
         assert categoryStack.size() != 1;
         categoryStack.pop();
         uiPop();

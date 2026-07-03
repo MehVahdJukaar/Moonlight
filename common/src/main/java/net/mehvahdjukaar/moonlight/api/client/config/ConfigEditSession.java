@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.config;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +27,8 @@ public final class ConfigEditSession {
 
     private final Map<ConfigOption<?>, Object> pending = new IdentityHashMap<>();
     private final Set<ConfigOption<?>> expanded = Collections.newSetFromMap(new IdentityHashMap<>());
+    // the most severe reload requirement among values actually saved this visit (sticky across multiple saves)
+    private ConfigReloadType appliedReload = ConfigReloadType.NONE;
 
     ConfigEditSession(ModConfigHolder holder, Screen returnScreen, @Nullable ResourceLocation background) {
         this.holder = holder;
@@ -75,8 +78,17 @@ public final class ConfigEditSession {
 
     void apply() {
         pending.forEach((v, value) -> {
-            if (!Objects.equals(value, v.get())) v.apply(holder, value);
+            if (!Objects.equals(value, v.get())) {
+                v.apply(holder, value);
+                // remember the heaviest reload a saved change needs, so the exit can prompt for it
+                if (v.reloadType().ordinal() > appliedReload.ordinal()) appliedReload = v.reloadType();
+            }
         });
+    }
+
+    /** Most severe reload a saved change has required this visit ({@link ConfigReloadType#NONE} if none). */
+    ConfigReloadType appliedReload() {
+        return appliedReload;
     }
 
     void clearPending() {

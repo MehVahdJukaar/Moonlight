@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
-import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 public class EnumConfigValue<T extends Enum<T>> extends ConfigValue<T> {
 
@@ -17,45 +17,23 @@ public class EnumConfigValue<T extends Enum<T>> extends ConfigValue<T> {
         return true;
     }
 
-    public Class<T> getEnumClass(){
+    public Class<T> getEnumClass() {
         return this.defaultValue.getDeclaringClass();
     }
 
     @Override
-    public boolean loadFromJson(JsonObject element) {
-        if (element.has(this.name)) {
-            try {
-                String s = element.get(this.name).getAsString();
-                T newValue = null;
-                for(var v : acceptedValues){
-                    if(v.name().equals(s)){
-                        newValue = v;
-                        break;
-                    }
-                }
-                if (newValue == null) {
-                    //if not valid it defaults
-                    newValue = defaultValue;
-                }
-                boolean changed = this.setAndTrack(newValue);
-                this.markLoaded();
-                return this.affectsDynamicPacks() && changed;
-            } catch (Exception ignored) {
-            }
-            Moonlight.LOGGER.warn("Config file had incorrect entry {}, correcting", this.name);
-        } else {
-            Moonlight.LOGGER.warn("Config file had missing entry {}", this.name);
+    protected T parseValue(JsonElement element) {
+        String s = element.getAsString();
+        for (var v : acceptedValues) {
+            if (v.name().equals(s)) return v;
         }
-        this.markLoaded();
-        return false;
+        return null; // unknown constant -> falls back to the default
     }
 
     @Override
-    public void saveToJson(JsonObject object) {
-        if (this.value == null) this.value = defaultValue;
-        object.addProperty(this.name, this.value.name());
+    protected JsonElement encodeValue(T value) {
+        return new JsonPrimitive(value.name());
     }
-
 
     @Override
     public String getExtraInfo() {
