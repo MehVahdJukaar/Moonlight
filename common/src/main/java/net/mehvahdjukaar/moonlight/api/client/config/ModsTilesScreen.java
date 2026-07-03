@@ -116,6 +116,15 @@ public class ModsTilesScreen extends Screen {
     }
 
     @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+        // header chrome in the background layer; the card grid is scissored below HEADER, so cards slide under the bar
+        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
+        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
+    }
+
+    @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         computeLayout();
@@ -133,14 +142,9 @@ public class ModsTilesScreen extends Screen {
         }
         graphics.disableScissor();
 
-        // top/bottom inner-shadow separators framing the panel (drawn over the card edges, like the vanilla list)
-        renderListSeparators(graphics);
+        // bottom inner-shadow separator framing the panel (the top edge is covered by the header bar)
+        renderFooterSeparator(graphics);
         renderScrollbar(graphics);
-
-        // header bar drawn last so cards scroll under it cleanly
-        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
     }
 
     /** The 32×32 tiling list background over the scroll panel (mirrors {@code AbstractSelectionList#renderListBackground}). */
@@ -152,13 +156,10 @@ public class ModsTilesScreen extends Screen {
         RenderSystem.disableBlend();
     }
 
-    /** The top and bottom inner-shadow strips (mirrors {@code AbstractSelectionList#renderListSeparators}). */
-    private void renderListSeparators(GuiGraphics graphics) {
-        boolean inWorld = this.minecraft.level != null;
-        ResourceLocation header = inWorld ? Screen.INWORLD_HEADER_SEPARATOR : Screen.HEADER_SEPARATOR;
-        ResourceLocation footer = inWorld ? Screen.INWORLD_FOOTER_SEPARATOR : Screen.FOOTER_SEPARATOR;
+    /** The bottom inner-shadow strip (mirrors {@code AbstractSelectionList#renderListSeparators}, footer only). */
+    private void renderFooterSeparator(GuiGraphics graphics) {
+        ResourceLocation footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
         RenderSystem.enableBlend();
-        graphics.blit(header, 0, contentTop - 2, 0f, 0f, this.width, 2, 32, 2);
         graphics.blit(footer, 0, contentBottom, 0f, 0f, this.width, 2, 32, 2);
         RenderSystem.disableBlend();
     }

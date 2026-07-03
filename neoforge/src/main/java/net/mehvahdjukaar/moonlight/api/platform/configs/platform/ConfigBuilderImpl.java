@@ -8,7 +8,7 @@ import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
-import net.mehvahdjukaar.moonlight.api.platform.configs.DynamicPackTrigger;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigValueMeta;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
@@ -70,10 +70,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     private <T> T track(T value) {
-        // stamp the pending pack flag onto this backing storage value; the flag is cleared later in recordOption, so a
-        // compound value (range/vec3) stamps all of its backing values, not just the first — see ConfigBuilder
-        if (this.pendingDynamicPacks && value instanceof DynamicPackTrigger d) {
-            d.setAffectsDynamicPacks(true);
+        // stamp the pending change-effect flags onto this backing leaf value; they are cleared later in recordOption,
+        // so a compound value (range/vec3) stamps all of its leaves, not just the first — see ConfigBuilder
+        if (value instanceof ConfigValueMeta m) {
+            if (this.pendingDynamicPacks) m.setAffectsDynamicPacks(true);
+            if (this.pendingReload != ConfigReloadType.NONE) m.setReloadType(this.pendingReload);
         }
         if (value instanceof TrackedConfigValue<?> trackedValue) {
             this.trackedValues.add(trackedValue);
@@ -381,6 +382,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         private C cachedRaw = null;
         private boolean initialized = false;
         private boolean affectsDynamicPacks;
+        private ConfigReloadType reloadType = ConfigReloadType.NONE;
 
         ValueWrapper(ModConfigSpec.ConfigValue<C> original) {
             this.original = original;
@@ -498,6 +500,16 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         @Override
         public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
             this.affectsDynamicPacks = affectsDynamicPacks;
+        }
+
+        @Override
+        public ConfigReloadType reloadType() {
+            return reloadType;
+        }
+
+        @Override
+        public void setReloadType(ConfigReloadType reloadType) {
+            this.reloadType = reloadType;
         }
     }
 }

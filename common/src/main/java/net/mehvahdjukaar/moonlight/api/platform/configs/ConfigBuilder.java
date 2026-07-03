@@ -610,11 +610,12 @@ public abstract class ConfigBuilder {
      *  No-op while UI emission is suppressed, so a compound value's backing rows don't consume the flag before it. */
     protected void recordOption(ConfigOption<?> option) {
         if (this.suppressUi) return;
-        option.setReloadType(this.pendingReload);
+        // Both change-effect flags (reload + dynamic packs) were already stamped onto each backing leaf value as it
+        // was defined (see the platform builders); the option derives what it shows from those leaves. Here we just
+        // clear the pending flags at this single, compound-safe boundary so they don't leak onto the next value. A
+        // grouped value keeps them set across its suppressed inner defines (recordOption no-ops while suppressed),
+        // so every leaf of the group is stamped, not just the first.
         this.pendingReload = ConfigReloadType.NONE;
-        // both change-effect flags are consumed at this single, compound-safe boundary: the pack flag was already
-        // stamped onto each backing storage value as it was defined (see the platform builders), and is cleared here
-        // so it doesn't leak onto the next value — mirroring how pendingReload is handled just above.
         this.pendingDynamicPacks = false;
         this.uiStack.peek().add(option);
     }

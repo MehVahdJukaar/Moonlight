@@ -102,12 +102,25 @@ public abstract class ModConfigHolder {
         return this.type == ConfigType.CLIENT ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA;
     }
 
-    /** Invalidates this config's pack cache when a just-written value both changed and affects dynamic packs. */
-    protected void invalidatePacksIfChanged(Supplier<?> handle, boolean changed) {
-        if (changed && handle instanceof DynamicPackTrigger t && t.affectsDynamicPacks()) {
+    /**
+     * Writes a new (already validated) value to a config handle and saves it. {@code config} is the object a
+     * {@code define(...)} returned; it is exposed to mods as a read-only {@link Supplier} but is always really one of
+     * ours ({@link WritableConfigValue}), so this recovers that type with a single boundary cast rather than an
+     * {@code instanceof} chain. Invalidates this config's pack cache when the write actually changed a pack-affecting
+     * value. Shared by both loaders; only {@link #persist()} differs.
+     */
+    public <T> void manuallySetValue(Supplier<T> config, T value) {
+        if (!(config instanceof WritableConfigValue<T> handle)) {
+            throw new IllegalArgumentException("Config value is not settable: " + config);
+        }
+        if (handle.setValue(value) && handle.affectsDynamicPacks()) {
             GlobalCachedStrategy.forceInvalidateState(this.getPackType());
         }
+        this.persist();
     }
+
+    /** Flushes the whole config to disk after a manual edit (spec save on NeoForge, json write on Fabric). */
+    protected abstract void persist();
 
     public String getFileName() {
         return fileName;
@@ -186,6 +199,4 @@ public abstract class ModConfigHolder {
             super("Failed to load config file " + config.getFileName() + " of type " + config.getConfigType() + " for mod " + config.getModId() + ". Try deleting it", cause);
         }
     }
-
-    public abstract <T> void manuallySetValue(Supplier<T> config, T value);
 }

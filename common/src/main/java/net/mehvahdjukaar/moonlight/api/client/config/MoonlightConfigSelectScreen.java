@@ -91,10 +91,9 @@ public class MoonlightConfigSelectScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-
-        // qualified: Screen inherits its own HEADER_SEPARATOR (a texture), which would shadow a static import
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+        // header chrome in the background layer, behind the widgets (the list draws only its footer separator)
         graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
         graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
         graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
@@ -107,7 +106,12 @@ public class MoonlightConfigSelectScreen extends Screen {
             int iconY = (HEADER - size) / 2;
             graphics.blit(icon.texture(), iconX, iconY, size, size, 0f, 0f, icon.width(), icon.height(), icon.width(), icon.height());
         }
+    }
 
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        // row tooltip on top of everything
         ConfigListRow hovered = this.list.getHovered(mouseX, mouseY);
         if (hovered != null) {
             Component tooltip = hovered.getTooltip(mouseX, mouseY);

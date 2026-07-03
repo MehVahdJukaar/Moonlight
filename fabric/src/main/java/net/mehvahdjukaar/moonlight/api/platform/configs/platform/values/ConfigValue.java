@@ -2,8 +2,8 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigValueHandle;
-import net.mehvahdjukaar.moonlight.api.platform.configs.DynamicPackTrigger;
+import net.mehvahdjukaar.moonlight.api.platform.configs.WritableConfigValue;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigEntry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
@@ -13,12 +13,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public abstract class ConfigValue<T> extends ConfigEntry implements ConfigValueHandle<T>, DynamicPackTrigger {
+public abstract class ConfigValue<T> extends ConfigEntry implements WritableConfigValue<T> {
 
     protected final T defaultValue;
     protected T value;
     private boolean loaded;
     private boolean affectsDynamicPacks;
+    private ConfigReloadType reloadType = ConfigReloadType.NONE;
     private String translationKey = "";
     private String commentKey = "";
     private String rawComment = "";
@@ -150,5 +151,15 @@ public abstract class ConfigValue<T> extends ConfigEntry implements ConfigValueH
     @Override
     public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
         this.affectsDynamicPacks = affectsDynamicPacks;
+    }
+
+    @Override
+    public ConfigReloadType reloadType() {
+        return reloadType;
+    }
+
+    @Override
+    public void setReloadType(ConfigReloadType reloadType) {
+        this.reloadType = reloadType;
     }
 }

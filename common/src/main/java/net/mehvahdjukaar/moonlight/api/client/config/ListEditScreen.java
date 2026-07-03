@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.config;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.ColorPickerScreen;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.DropdownWidget;
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -119,12 +121,18 @@ class ListEditScreen extends Screen implements PopupHost {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+        // header chrome in the background layer, behind the widgets (the list draws only its footer separator)
         graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
         graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
         graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
-        this.overlay.render(graphics, mouseX, mouseY);
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        this.overlay.render(graphics, mouseX, mouseY); // open dropdown popup floats on top
     }
 
     private class EntryList extends ContainerObjectSelectionList<EntryRow> {
@@ -146,6 +154,15 @@ class ListEditScreen extends Screen implements PopupHost {
         @Override
         protected int getScrollbarPosition() {
             return this.width / 2 + ROW_WIDTH / 2 + 6;
+        }
+
+        @Override
+        protected void renderListSeparators(GuiGraphics graphics) {
+            // the top separator is owned by the screen's header bar (drawn in renderBackground); only draw the footer
+            ResourceLocation footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
+            RenderSystem.enableBlend();
+            graphics.blit(footer, this.getX(), this.getBottom(), 0f, 0f, this.getWidth(), 2, 32, 2);
+            RenderSystem.disableBlend();
         }
     }
 

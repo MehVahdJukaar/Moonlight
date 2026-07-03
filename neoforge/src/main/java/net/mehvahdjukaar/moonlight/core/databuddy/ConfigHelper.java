@@ -29,6 +29,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.TrackedConfigValue;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ModConfig;
@@ -145,6 +146,7 @@ public class ConfigHelper {
         private final Supplier<T> defaultObject;
         private boolean initialized;
         private boolean affectsDynamicPacks;
+        private ConfigReloadType reloadType = ConfigReloadType.NONE;
 
         private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
             this.value = value;
@@ -220,6 +222,16 @@ public class ConfigHelper {
         @Override
         public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
             this.affectsDynamicPacks = affectsDynamicPacks;
+        }
+
+        @Override
+        public ConfigReloadType reloadType() {
+            return reloadType;
+        }
+
+        @Override
+        public void setReloadType(ConfigReloadType reloadType) {
+            this.reloadType = reloadType;
         }
     }
 

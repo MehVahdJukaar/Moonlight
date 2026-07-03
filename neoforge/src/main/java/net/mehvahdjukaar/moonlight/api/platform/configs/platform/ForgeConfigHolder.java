@@ -46,7 +46,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 
 @SuppressWarnings("all")
@@ -124,12 +123,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     }
 
     @Override
-    public <T> void manuallySetValue(Supplier<T> config, T value) {
-        if (config instanceof TrackedConfigValue<T> tracked) {
-            invalidatePacksIfChanged(tracked, tracked.setValue(value));
-        } else if (config instanceof ModConfigSpec.ConfigValue<T> cv) {
-            cv.set(value);
-        } else throw new IllegalArgumentException("Unsupported config value type: " + config.getClass());
+    protected void persist() {
         spec.save();
     }
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigValueMeta;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.core.Vec3i;
@@ -12,11 +13,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * An editable leaf config value. The {@link #handle} is the very object that {@code define(...)} returned
@@ -30,7 +34,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
     protected final Supplier<T> handle;
     protected final T defaultValue;
-    private ConfigReloadType reloadType = ConfigReloadType.NONE;
 
     protected ConfigOption(Component title, @Nullable Component description, Supplier<T> handle, T defaultValue) {
         super(title, description);
@@ -38,13 +41,28 @@ public abstract class ConfigOption<T> extends ConfigNode {
         this.defaultValue = defaultValue;
     }
 
-    /** How a change to this value takes effect (drives the reload/restart icon on its screen row). */
+    /**
+     * How a change to this value takes effect (drives the reload/restart icon on its screen row). Derived from the
+     * backing leaf value(s), which are the source of truth: a grouped row (range/vec3) reports the highest-severity
+     * reload among its members — the aggregate of the bunch wins.
+     */
     public ConfigReloadType reloadType() {
-        return reloadType;
+        return backingMeta()
+                .map(ConfigValueMeta::reloadType)
+                .max(Comparator.comparingInt(Enum::ordinal))
+                .orElse(ConfigReloadType.NONE);
     }
 
-    public void setReloadType(ConfigReloadType reloadType) {
-        this.reloadType = reloadType;
+    /** The change-metadata of each backing leaf value: one entry for a simple row, several for a grouped one. */
+    protected Stream<ConfigValueMeta> backingMeta() {
+        return handle instanceof ConfigValueMeta m ? Stream.of(m) : Stream.empty();
+    }
+
+    /** Picks the {@link ConfigValueMeta} out of the given backing handles (a leaf may or may not carry metadata). */
+    protected static Stream<ConfigValueMeta> metaOf(Supplier<?>... handles) {
+        return Arrays.stream(handles)
+                .filter(h -> h instanceof ConfigValueMeta)
+                .map(h -> (ConfigValueMeta) h);
     }
 
     /**
@@ -235,6 +253,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
             holder.manuallySetValue(minHandle, range.min());
             holder.manuallySetValue(maxHandle, range.max());
         }
+
+        @Override
+        protected Stream<ConfigValueMeta> backingMeta() {
+            return metaOf(minHandle, maxHandle);
+        }
     }
 
     /**
@@ -266,6 +289,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
             holder.manuallySetValue(yHandle, v.y);
             holder.manuallySetValue(zHandle, v.z);
         }
+
+        @Override
+        protected Stream<ConfigValueMeta> backingMeta() {
+            return metaOf(xHandle, yHandle, zHandle);
+        }
     }
 
     /**
@@ -295,6 +323,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
             holder.manuallySetValue(xHandle, v.getX());
             holder.manuallySetValue(yHandle, v.getY());
             holder.manuallySetValue(zHandle, v.getZ());
+        }
+
+        @Override
+        protected Stream<ConfigValueMeta> backingMeta() {
+            return metaOf(xHandle, yHandle, zHandle);
         }
     }
 
@@ -355,6 +388,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @Override
         public void apply(ModConfigHolder holder, Object value) {
             holder.manuallySetValue(json, JsonParser.parseString((String) value));
+        }
+
+        @Override
+        protected Stream<ConfigValueMeta> backingMeta() {
+            return metaOf(json); // the real leaf is the json handle, not the synthetic string handle
         }
     }
 

@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.network.chat.Component;
@@ -90,10 +91,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         config.setTranslationKey(this.translationKey(name));
         addTranslationsAndComments(name);
 
-        // stamp the pending pack flag onto this backing storage value; the flag is cleared later in recordOption, so a
-        // compound value (range/vec3) stamps all of its backing values, not just the first — see ConfigBuilder
+        // stamp the pending change-effect flags onto this backing leaf value; they are cleared later in recordOption,
+        // so a compound value (range/vec3) stamps all of its leaves, not just the first — see ConfigBuilder
         if (this.pendingDynamicPacks) config.setAffectsDynamicPacks(true);
-        // world-reload / game-restart is carried on the option node itself now (see ConfigBuilder#recordOption)
+        if (this.pendingReload != ConfigReloadType.NONE) config.setReloadType(this.pendingReload);
         Objects.requireNonNull(this.categoryStack.peek()).addEntry(config);
         if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();
 
