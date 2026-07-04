@@ -20,9 +20,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * Main config screen
- */
 public class FabricConfigListScreen extends Screen {
 
     protected final Screen parent;

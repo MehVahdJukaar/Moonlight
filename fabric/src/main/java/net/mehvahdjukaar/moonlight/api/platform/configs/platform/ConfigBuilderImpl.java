@@ -24,9 +24,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-/**
- * Author: MehVahdJukaar
- */
 public class ConfigBuilderImpl extends ConfigBuilder {
 
     public static ConfigBuilder create(ResourceLocation name, ConfigType type) {

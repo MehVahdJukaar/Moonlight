@@ -64,9 +64,6 @@ public abstract class ConfigNode {
         return icon;
     }
 
-    /**
-     * Display name of this entry (category button label or value label).
-     */
     public Component title() {
         return title;
     }

@@ -117,7 +117,6 @@ public final class FabricConfigHolder extends ModConfigHolder {
             Map<String, String> comments = new LinkedHashMap<>();
             mainEntry.gatherAllValues().forEach(e -> {
                 String key = e.getName();
-                // name of the JSON key
                 String comment = e.getRawComment();
                 String extraComment = e.getExtraInfo();
                 if (!extraComment.isEmpty()) {
@@ -126,7 +125,6 @@ public final class FabricConfigHolder extends ModConfigHolder {
                     }
                     comment += extraComment;
                 }
-                // textual comment you want to insert
                 if (!comment.isEmpty()) {
                     comments.put(key, comment);
                 }

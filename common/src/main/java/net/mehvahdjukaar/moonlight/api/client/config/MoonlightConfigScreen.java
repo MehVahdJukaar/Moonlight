@@ -57,7 +57,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
 
     private ConfigOptionList list;
     private Button saveButton;
-    private BreadcrumbWidget breadcrumb;
     private EditBox searchBox;
     private String searchQuery = "";
     private final OverlayLayer overlay = new OverlayLayer(); // floats an open dropdown/popup above the list
@@ -148,11 +147,11 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
             crumbs.addFirst(new BreadcrumbWidget.Crumb(label, s, s == this));
         }
         int trailRight = this.searchBox.getX() - SEARCH_ICON_SIZE - 6; // leave room for the magnifier glyph + a gap
-        this.breadcrumb = new BreadcrumbWidget(SIDE_MARGIN, CRUMB_Y, trailRight - SIDE_MARGIN, this.font.lineHeight,
+        BreadcrumbWidget breadcrumb = new BreadcrumbWidget(SIDE_MARGIN, CRUMB_Y, trailRight - SIDE_MARGIN, this.font.lineHeight,
                 this.font, crumbs, target -> {
             if (target != this) this.minecraft.setScreen(target);
         });
-        this.addRenderableWidget(this.breadcrumb);
+        this.addRenderableWidget(breadcrumb);
 
         populate();
         this.addRenderableWidget(this.list);
@@ -177,7 +176,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
             this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
                     .bounds(this.width / 2 + 4, y, bw, 20).build());
         }
-        // bottom-left: icon-only jump to the mods hub grid
         IconButton modsButton = new IconButton(8, y, 20, 20, Component.empty(), CONFIG_ICON, 16, 16,
                 b -> this.minecraft.setScreen(new ModsTilesScreen(this, session.background()))).borderless();
         modsButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.mods_button")));
@@ -238,7 +236,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
 
     private void addOption(List<ConfigListRow> rows, ConfigOption<?> v) {
         rows.add(new OptionRow(this, v));
-        // when the row is expanded, drop its wrapped description beneath it as read-only rows
         if (v.description() != null && session.isExpanded(v)) {
             List<FormattedCharSequence> lines = this.font.split(v.description(), ROW_WIDTH - ARROW_WIDTH - GAP);
             for (int i = 0; i < lines.size(); i += DESC_LINES_PER_ROW) {

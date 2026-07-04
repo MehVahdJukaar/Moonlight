@@ -240,7 +240,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
             var loadedConfig = NEW_LOADED_CONFIG.newInstance(newConfig, path, modConfig);
             //this sets the values
             SET_CONFIG.invoke(modConfig, loadedConfig, (Function<ModConfig, ModConfigEvent>) ModConfigEvent.Reloading::new);
-            ((IConfigSpec.ILoadedConfig) loadedConfig).save(); //save to disk
+            ((IConfigSpec.ILoadedConfig) loadedConfig).save();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

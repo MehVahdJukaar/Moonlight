@@ -116,7 +116,7 @@ public abstract class ConfigBuilder {
             if (e.isDefault()) translations.forEach(e::addEntry);
         };
         MoonlightEventsHelper.addListener(consumer, AfterLanguageLoadEvent.class);
-        Moonlight.addDependent(name.getNamespace()); //add config mod id
+        Moonlight.addDependent(name.getNamespace());
     }
 
     public abstract ModConfigHolder build();

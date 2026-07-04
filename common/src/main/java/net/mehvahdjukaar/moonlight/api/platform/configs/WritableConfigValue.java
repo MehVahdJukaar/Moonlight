@@ -19,12 +19,9 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public interface WritableConfigValue<T> extends Supplier<T> {
 
-    /** Writes a new (already validated) value. Returns whether it actually differed from the previous one. */
     boolean setValue(T value);
 
-    /** Whether changing this value needs a world reload / game restart before it takes effect. */
     ConfigReloadType reloadType();
 
-    /** Whether changing this value should invalidate dynamic resource/data packs. */
     boolean affectsDynamicPacks();
 }

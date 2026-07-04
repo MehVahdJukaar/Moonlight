@@ -37,7 +37,7 @@ class OptionRow extends ConfigListRow {
     private final Component title;
     @Nullable
     private final Component description;
-    private final Control control;
+    private final ConfigControl control;
     private final IconButton resetButton;
     private final boolean editable;
     private final List<AbstractWidget> children;
@@ -108,7 +108,6 @@ class OptionRow extends ConfigListRow {
         w.setY(top + (height - w.getHeight()) / 2);
         w.render(graphics, mouseX, mouseY, partialTick);
 
-        // disclosure triangle in the left gutter (only when there's a description to reveal)
         int textLeft = left;
         if (hasDescription()) {
             boolean expanded = session.isExpanded(value);
@@ -140,7 +139,6 @@ class OptionRow extends ConfigListRow {
         int titleColor = !contextEnabled ? DESCRIPTION : modified ? MODIFIED : LABEL;
         GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 
-        // the label/arrow area toggles the description drop-down
         this.toggleX0 = left;
         this.toggleX1 = textRight;
         this.rowY0 = top;

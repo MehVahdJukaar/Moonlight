@@ -18,10 +18,13 @@ dependencies {
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
     modCompileOnly("curse.maven:map-atlases-forge-519759:7659933")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
-    modImplementation("curse.maven:quark-243121:8342602")
+    modCompileOnly("curse.maven:quark-243121:8146177")
     modImplementation("curse.maven:zeta-968868:7980010")
 
-    modCompileOnly("curse.maven:the-twilight-forest-227639:7398100")
+    modImplementation("io.siuolplex:wood_you_dye:3.0.0+neoforge-1.21.1-SNAPSHOT")
+    modImplementation("curse.maven:every-compat-628539:8316235")
+
+    modImplementation("curse.maven:the-twilight-forest-227639:7398100")
 //    modImplementation("curse.maven:open-loader-354339:6546293")
     //modImplementation("curse.maven:prickle-1023259:6961457")
 

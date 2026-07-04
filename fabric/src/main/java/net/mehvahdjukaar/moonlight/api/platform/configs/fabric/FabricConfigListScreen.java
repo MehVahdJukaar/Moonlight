@@ -20,9 +20,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * Main config screen
- */
 @Deprecated(forRemoval = true)
 public class FabricConfigListScreen extends net.mehvahdjukaar.moonlight.api.platform.configs.platform.FabricConfigListScreen {
 

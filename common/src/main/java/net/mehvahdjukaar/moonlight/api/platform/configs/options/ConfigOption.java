@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 /**
  * An editable leaf config value in the loader independent screen model. Most kinds are backed by a single writable
- * value of the same type {@code T} and so extend {@link LeafConfigOption}; the compound kinds (range/vec3/json) sit on
+ * value of the same type {@code T} and so extend {@link SimpleConfigOption}; the compound kinds (range/vec3/json) sit on
  * top of several backing leaves and extend this class directly, implementing {@link #get()}/{@link #apply}/
  * {@link #backingMeta()} from those leaves. This is the single loader independent bridge the whole screen is built on.
  *
@@ -81,11 +81,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
      * returned (a {@code ConfigValue} on Fabric, a {@code ValueWrapper} on NeoForge). The compound kinds instead sit on
      * top of several leaves and extend {@link ConfigOption} directly.
      */
-    public abstract static class LeafConfigOption<T> extends ConfigOption<T> {
+    public abstract static class SimpleConfigOption<T> extends ConfigOption<T> {
 
         protected final WritableConfigValue<T> handle;
 
-        protected LeafConfigOption(Component title, @Nullable Component description, WritableConfigValue<T> handle, T defaultValue) {
+        protected SimpleConfigOption(Component title, @Nullable Component description, WritableConfigValue<T> handle, T defaultValue) {
             super(title, description, defaultValue);
             this.handle = handle;
         }
@@ -112,13 +112,13 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
     // ===== concrete value kinds =====
 
-    public static class BooleanValue extends LeafConfigOption<Boolean> {
+    public static class BooleanValue extends SimpleConfigOption<Boolean> {
         public BooleanValue(Component title, @Nullable Component description, WritableConfigValue<Boolean> handle, Boolean defaultValue) {
             super(title, description, handle, defaultValue);
         }
     }
 
-    public static class IntValue extends LeafConfigOption<Integer> {
+    public static class IntValue extends SimpleConfigOption<Integer> {
         public final int min;
         public final int max;
 
@@ -139,7 +139,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class DoubleValue extends LeafConfigOption<Double> {
+    public static class DoubleValue extends SimpleConfigOption<Double> {
         public final double min;
         public final double max;
 
@@ -164,7 +164,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class FloatValue extends LeafConfigOption<Float> {
+    public static class FloatValue extends SimpleConfigOption<Float> {
         public final float min;
         public final float max;
 
@@ -175,14 +175,13 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /** A float drawn as a slider instead of a text field. See {@link IntSliderValue}. */
     public static class FloatSliderValue extends FloatValue {
         public FloatSliderValue(Component title, @Nullable Component description, WritableConfigValue<Float> handle, Float defaultValue, float min, float max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
-    public static class EnumValue<E extends Enum<E>> extends LeafConfigOption<E> {
+    public static class EnumValue<E extends Enum<E>> extends SimpleConfigOption<E> {
         public final E[] options;
 
         public EnumValue(Component title, @Nullable Component description, WritableConfigValue<E> handle, E defaultValue, E[] options) {
@@ -191,7 +190,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class StringValue extends LeafConfigOption<String> {
+    public static class StringValue extends SimpleConfigOption<String> {
         @Nullable
         public final Predicate<Object> validator;
 
@@ -205,10 +204,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * A regular expression, stored as its source string and validated to compile. Edited as a text field with
-     * live regex syntax highlighting.
-     */
     public static class RegexValue extends StringValue {
         public RegexValue(Component title, @Nullable Component description, WritableConfigValue<String> handle, String defaultValue) {
             super(title, description, handle, defaultValue, o -> o instanceof String s && isValidRegex(s));
@@ -224,12 +219,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * A string picked from a set of options, edited with a dropdown/picker widget. Options are supplied lazily
-     * (so registry backed pickers can list entries once registries are populated), and an optional {@code icon}
-     * maps an option to an {@link ItemStack} shown beside it (used by the item/block pickers).
-     */
-    public static class DropdownValue extends LeafConfigOption<String> {
+    public static class DropdownValue extends SimpleConfigOption<String> {
         public final Supplier<List<String>> options;
         @Nullable
         public final Function<String, ItemStack> icon;
@@ -243,20 +233,12 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * An ARGB color, stored as an int. Edited as a hex field plus a color picker.
-     */
-    public static class ColorValue extends LeafConfigOption<Integer> {
+    public static class ColorValue extends SimpleConfigOption<Integer> {
         public ColorValue(Component title, @Nullable Component description, WritableConfigValue<Integer> handle, Integer defaultValue) {
             super(title, description, handle, defaultValue);
         }
     }
 
-    /**
-     * A {@link Range} value: two backing double config values ({@code minHandle}/{@code maxHandle}) presented and
-     * edited as one row. {@code min}/{@code max} are the shared accepted bounds of both endpoints. Writing goes
-     * through both handles at once, so there is no single {@code Supplier<Range>} the loader knows how to persist.
-     */
     public static class RangeValue extends ConfigOption<Range> {
         public final Supplier<Double> minHandle;
         public final Supplier<Double> maxHandle;
@@ -376,7 +358,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
      * individual entries valid/invalid in the editor. When {@code options} is present each entry is picked with a
      * dropdown (with an optional {@code icon}, as in {@link DropdownValue}) instead of typed as free text.
      */
-    public static class ListValue extends LeafConfigOption<List<String>> {
+    public static class ListValue extends SimpleConfigOption<List<String>> {
         @Nullable
         public final Predicate<String> entryValidator;
         @Nullable

@@ -35,7 +35,7 @@ class BooleanToggleWidget extends AbstractButton {
 
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderWidget(graphics, mouseX, mouseY, partialTick); // vanilla button background
+        super.renderWidget(graphics, mouseX, mouseY, partialTick);
         int iconX = getX() + (getWidth() - ICON_SIZE) / 2;
         int iconY = getY() + (getHeight() - ICON_SIZE) / 2;
         graphics.blitSprite(value ? ON_ICON : OFF_ICON, iconX, iconY, ICON_SIZE, ICON_SIZE);
