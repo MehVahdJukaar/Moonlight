@@ -2,13 +2,12 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.platform;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigValueMeta;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
@@ -26,7 +25,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -69,13 +67,17 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return new ConfigOption.UnsupportedValue(uiTitle(name), uiDescription(name), (Supplier<Object>) handle);
     }
 
+    /**
+     * Snapshot of the builder's pending change-effect flags (reload + dynamic packs), injected into each leaf as it
+     * is defined instead of being stamped through a setter afterwards. The flags stay set across a compound value's
+     * suppressed inner defines, so every leaf of a range/vec3 gets the same meta; they are cleared at the compound
+     * boundary in {@code recordOption}.
+     */
+    private ConfigMeta pendingMeta() {
+        return new ConfigMeta(this.pendingReload, this.pendingDynamicPacks);
+    }
+
     private <T> T track(T value) {
-        // stamp the pending change-effect flags onto this backing leaf value; they are cleared later in recordOption,
-        // so a compound value (range/vec3) stamps all of its leaves, not just the first — see ConfigBuilder
-        if (value instanceof ConfigValueMeta m) {
-            if (this.pendingDynamicPacks) m.setAffectsDynamicPacks(true);
-            if (this.pendingReload != ConfigReloadType.NONE) m.setReloadType(this.pendingReload);
-        }
         if (value instanceof TrackedConfigValue<?> trackedValue) {
             this.trackedValues.add(trackedValue);
         }
@@ -127,7 +129,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<Boolean> define(String name, boolean defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue);
-        var w = track(ValueWrapper.simple(value));
+        var w = track(ValueWrapper.simple(value, pendingMeta()));
         ui(name, new ConfigOption.BooleanValue(uiTitle(name), uiDescription(name), w, defaultValue));
         return w;
     }
@@ -145,7 +147,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private Supplier<Integer> defineInt(String name, int defaultValue, int min, int max, boolean slider) {
         addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
-        var w = track(ValueWrapper.simple(value));
+        var w = track(ValueWrapper.simple(value, pendingMeta()));
         ui(name, slider
                 ? new ConfigOption.IntSliderValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max)
                 : new ConfigOption.IntValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max));
@@ -165,7 +167,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private Supplier<Double> defineDouble(String name, double defaultValue, double min, double max, boolean slider) {
         addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
-        var w = track(ValueWrapper.simple(value));
+        var w = track(ValueWrapper.simple(value, pendingMeta()));
         ui(name, slider
                 ? new ConfigOption.DoubleSliderValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max)
                 : new ConfigOption.DoubleValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max));
@@ -176,7 +178,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<Double> definePercentage(String name, double defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, 0.0, 1.0);
-        var w = track(ValueWrapper.simple(value));
+        var w = track(ValueWrapper.simple(value, pendingMeta()));
         ui(name, new ConfigOption.PercentValue(uiTitle(name), uiDescription(name), w, defaultValue));
         return w;
     }
@@ -195,7 +197,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private Supplier<Float> defineFloat(String name, float defaultValue, float min, float max, boolean slider) {
         addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
-        var w = track(new ValueWrapper<Float, Double>(value) {
+        var w = track(new ValueWrapper<Float, Double>(value, pendingMeta()) {
             @Override
             Float map(Double value) {
                 return value.floatValue();
@@ -217,7 +219,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         String def = (String) ColorUtils.CODEC.encodeStart(JavaOps.INSTANCE, defaultValue).getOrThrow();
         var value = builder.define(name, def,
                 o -> o instanceof String s && ColorUtils.isValidString(s));
-        var w = track(ValueWrapper.fromString(value, ColorUtils.CODEC));
+        var w = track(ValueWrapper.fromString(value, ColorUtils.CODEC, pendingMeta()));
         ui(name, new ConfigOption.ColorValue(uiTitle(name), uiDescription(name), w, defaultValue));
         return w;
     }
@@ -226,7 +228,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
-        var w = track(ValueWrapper.simple(value));
+        var w = track(ValueWrapper.simple(value, pendingMeta()));
         ui(name, new ConfigOption.StringValue(uiTitle(name), uiDescription(name), w, defaultValue, validator));
         return w;
     }
@@ -235,7 +237,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     protected Supplier<String> defineRegexSource(String name, String defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, ConfigBuilder.REGEX_CHECK);
-        var w = track(ValueWrapper.simple(value));
+        var w = track(ValueWrapper.simple(value, pendingMeta()));
         ui(name, new ConfigOption.RegexValue(uiTitle(name), uiDescription(name), w, defaultValue));
         return w;
     }
@@ -245,7 +247,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
                                                   Supplier<List<String>> options, Function<String, ItemStack> icon) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
-        var w = track(ValueWrapper.simple(value));
+        var w = track(ValueWrapper.simple(value, pendingMeta()));
         ui(name, new ConfigOption.DropdownValue(uiTitle(name), uiDescription(name), w, defaultValue, options, icon));
         return w;
     }
@@ -253,7 +255,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public <T> Supplier<T> define(String name, Supplier<T> defaultValue, Predicate<Object> validator) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
-        var w = track(ValueWrapper.simple(value));
+        var w = track(ValueWrapper.simple(value, pendingMeta()));
         ui(name, unsupported(name, w));
         return w;
     }
@@ -264,7 +266,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var value = builder.defineList(name, defaultValue, predicate);
         @SuppressWarnings("unchecked")
         ModConfigSpec.ConfigValue<List<String>> listValue = (ModConfigSpec.ConfigValue<List<String>>) (ModConfigSpec.ConfigValue<?>) value;
-        var w = track(ValueWrapper.simple(listValue));
+        var w = track(ValueWrapper.simple(listValue, pendingMeta()));
         ui(name, new ConfigOption.ListValue(uiTitle(name), uiDescription(name), w, List.copyOf(defaultValue),
                 s -> predicate.test(s)));
         return w;
@@ -277,7 +279,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var value = builder.defineList(name, defaultValue, entryValidator);
         @SuppressWarnings("unchecked")
         ModConfigSpec.ConfigValue<List<String>> listValue = (ModConfigSpec.ConfigValue<List<String>>) (ModConfigSpec.ConfigValue<?>) value;
-        var w = track(ValueWrapper.simple(listValue));
+        var w = track(ValueWrapper.simple(listValue, pendingMeta()));
         ui(name, new ConfigOption.ListValue(uiTitle(name), uiDescription(name), w, List.copyOf(defaultValue),
                 entryValidator::test, options, icon));
         return w;
@@ -287,7 +289,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
         forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
         if (usesDataBuddy) {
-            var w = track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier));
+            var w = track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier, pendingMeta()));
             ui(name, unsupported(name, w));
             return w;
         }
@@ -304,7 +306,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
                 builder.define(name,
                         () -> jsonSupplier.get().toString().replace(" ", "").replace("\"", "'"),
                         o -> o != null && jsonSupplier.get().getClass().isAssignableFrom(o.getClass())),
-                codec
+                codec, pendingMeta()
         ));
         ui(name, unsupported(name, w));
         return w;
@@ -320,7 +322,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<JsonElement> defineJson(String path, JsonElement defaultValue) {
         forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
         var w = track(ValueWrapper.json(builder.define(path,
-                defaultValue.toString().replace(" ", "").replace("\"", "'"))));
+                defaultValue.toString().replace(" ", "").replace("\"", "'")), pendingMeta()));
         ui(path, new ConfigOption.JsonValue(uiTitle(path), uiDescription(path), w));
         return w;
     }
@@ -331,7 +333,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         com.google.common.base.Supplier<JsonElement> lazyDefaultValue = Suppliers.memoize(defaultValue::get);
         var w = track(ValueWrapper.json(builder.define(path,
                 () -> lazyDefaultValue.get().toString().replace(" ", "").replace("\"", "'"),
-                o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass()))));
+                o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass())), pendingMeta()));
         ui(path, new ConfigOption.JsonValue(uiTitle(path), uiDescription(path), w));
         return w;
     }
@@ -340,7 +342,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.defineEnum(name, defaultValue);
-        var w = track(ValueWrapper.simple(value));
+        var w = track(ValueWrapper.simple(value, pendingMeta()));
         ui(name, new ConfigOption.EnumValue<>(uiTitle(name), uiDescription(name), w, defaultValue,
                 defaultValue.getDeclaringClass().getEnumConstants()));
         return w;
@@ -374,142 +376,5 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private void forwardPendingComment() {
         String toForward = pollCommentToForward();
         if (toForward != null) builder.comment(toForward);
-    }
-
-    abstract static class ValueWrapper<T, C> implements TrackedConfigValue<T> {
-        private final ModConfigSpec.ConfigValue<C> original;
-        private T cachedValue = null;
-        private C cachedRaw = null;
-        private boolean initialized = false;
-        private boolean affectsDynamicPacks;
-        private ConfigReloadType reloadType = ConfigReloadType.NONE;
-
-        ValueWrapper(ModConfigSpec.ConfigValue<C> original) {
-            this.original = original;
-        }
-
-        // simple pass‑through wrapper
-        public static <T> ValueWrapper<T, T> simple(ModConfigSpec.ConfigValue<T> original) {
-            return new ValueWrapper<>(original) {
-                @Override
-                T map(T value) { return value; }
-                @Override
-                T unmap(T value) { return value; }
-            };
-        }
-
-        // wrapper that uses a Codec to convert between String and T (e.g. for colours)
-        public static <T> ValueWrapper<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec) {
-            return new ValueWrapper<>(original) {
-                @Override
-                T map(String value) {
-                    return codec.parse(JavaOps.INSTANCE, value).getOrThrow();
-                }
-                @Override
-                String unmap(T value) {
-                    return codec.encodeStart(JavaOps.INSTANCE, value).getOrThrow().toString();
-                }
-            };
-        }
-
-        // wrapper that handles JSON config values (stored as String, exposed as JsonElement)
-        public static ValueWrapper<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original) {
-            return new ValueWrapper<>(original) {
-                @Override
-                JsonElement map(String value) {
-                    try {
-                        // stored string uses single quotes to avoid escaping issues, revert to double quotes for parsing
-                        return JsonParser.parseString(value.replace("'", "\""));
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to parse JSON config value: " + value, e);
-                    }
-                }
-                @Override
-                String unmap(JsonElement value) {
-                    // store as compact string with single quotes
-                    return value.toString().replace(" ", "").replace("\"", "'");
-                }
-            };
-        }
-
-        public static <T> ValueWrapper<T, String> codec(ModConfigSpec.ConfigValue<String> original, Codec<T> codec) {
-            return new ValueWrapper<>(original) {
-                @Override
-                T map(String raw) {
-                    // raw is stored with single quotes, restore double quotes and parse
-                    JsonElement json = JsonParser.parseString(raw.replace("'", "\""));
-                    return codec.decode(JsonOps.INSTANCE, json)
-                            .getOrThrow()
-                            .getFirst();
-                }
-
-                @Override
-                String unmap(T value) {
-                    JsonElement json = codec.encodeStart(JsonOps.INSTANCE, value).getOrThrow();
-                    // store with single quotes to avoid escaping issues
-                    return json.toString().replace(" ", "").replace("\"", "'");
-                }
-            };
-        }
-
-        abstract T map(C value);
-        abstract C unmap(T value);
-
-        @Override
-        public T get() {
-            pollChanged();
-            if (cachedValue == null && initialized) {
-                cachedValue = map(cachedRaw);
-            }
-            return cachedValue;
-        }
-
-        @Override
-        public boolean pollChanged() {
-            C current = original.get();
-            if (!initialized) {
-                cachedRaw = current;
-                cachedValue = map(current);
-                initialized = true;
-                return false;
-            }
-            if (!Objects.equals(cachedRaw, current)) {
-                cachedRaw = current;
-                cachedValue = map(current);
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean setValue(T value) {
-            C raw = unmap(value);
-            boolean changed = !initialized || !Objects.equals(cachedRaw, raw);
-            original.set(raw);
-            cachedRaw = raw;
-            cachedValue = value;
-            initialized = true;
-            return changed;
-        }
-
-        @Override
-        public boolean affectsDynamicPacks() {
-            return affectsDynamicPacks;
-        }
-
-        @Override
-        public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
-            this.affectsDynamicPacks = affectsDynamicPacks;
-        }
-
-        @Override
-        public ConfigReloadType reloadType() {
-            return reloadType;
-        }
-
-        @Override
-        public void setReloadType(ConfigReloadType reloadType) {
-            this.reloadType = reloadType;
-        }
     }
 }

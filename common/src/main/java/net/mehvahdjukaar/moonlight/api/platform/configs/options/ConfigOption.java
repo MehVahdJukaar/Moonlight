@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigValueMeta;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.WritableConfigValue;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
@@ -48,21 +48,21 @@ public abstract class ConfigOption<T> extends ConfigNode {
      */
     public ConfigReloadType reloadType() {
         return backingMeta()
-                .map(ConfigValueMeta::reloadType)
+                .map(WritableConfigValue::reloadType)
                 .max(Comparator.comparingInt(Enum::ordinal))
                 .orElse(ConfigReloadType.NONE);
     }
 
-    /** The change-metadata of each backing leaf value: one entry for a simple row, several for a grouped one. */
-    protected Stream<ConfigValueMeta> backingMeta() {
-        return handle instanceof ConfigValueMeta m ? Stream.of(m) : Stream.empty();
+    /** The backing leaf value(s), read for their change metadata: one for a simple row, several for a grouped one. */
+    protected Stream<WritableConfigValue<?>> backingMeta() {
+        return handle instanceof WritableConfigValue<?> m ? Stream.of(m) : Stream.empty();
     }
 
-    /** Picks the {@link ConfigValueMeta} out of the given backing handles (a leaf may or may not carry metadata). */
-    protected static Stream<ConfigValueMeta> metaOf(Supplier<?>... handles) {
+    /** Picks the {@link WritableConfigValue} leaves out of the given backing handles (a handle may be synthetic). */
+    protected static Stream<WritableConfigValue<?>> metaOf(Supplier<?>... handles) {
         return Arrays.stream(handles)
-                .filter(h -> h instanceof ConfigValueMeta)
-                .map(h -> (ConfigValueMeta) h);
+                .filter(h -> h instanceof WritableConfigValue)
+                .map(h -> (WritableConfigValue<?>) h);
     }
 
     /**
@@ -255,7 +255,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<ConfigValueMeta> backingMeta() {
+        protected Stream<WritableConfigValue<?>> backingMeta() {
             return metaOf(minHandle, maxHandle);
         }
     }
@@ -291,7 +291,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<ConfigValueMeta> backingMeta() {
+        protected Stream<WritableConfigValue<?>> backingMeta() {
             return metaOf(xHandle, yHandle, zHandle);
         }
     }
@@ -326,7 +326,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<ConfigValueMeta> backingMeta() {
+        protected Stream<WritableConfigValue<?>> backingMeta() {
             return metaOf(xHandle, yHandle, zHandle);
         }
     }
@@ -391,7 +391,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<ConfigValueMeta> backingMeta() {
+        protected Stream<WritableConfigValue<?>> backingMeta() {
             return metaOf(json); // the real leaf is the json handle, not the synthetic string handle
         }
     }

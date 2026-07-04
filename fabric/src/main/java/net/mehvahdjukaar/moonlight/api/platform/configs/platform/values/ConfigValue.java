@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
 import net.mehvahdjukaar.moonlight.api.platform.configs.WritableConfigValue;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigEntry;
@@ -18,8 +19,7 @@ public abstract class ConfigValue<T> extends ConfigEntry implements WritableConf
     protected final T defaultValue;
     protected T value;
     private boolean loaded;
-    private boolean affectsDynamicPacks;
-    private ConfigReloadType reloadType = ConfigReloadType.NONE;
+    private ConfigMeta meta = ConfigMeta.NONE;
     private String translationKey = "";
     private String commentKey = "";
     private String rawComment = "";
@@ -145,21 +145,16 @@ public abstract class ConfigValue<T> extends ConfigEntry implements WritableConf
 
     @Override
     public boolean affectsDynamicPacks() {
-        return affectsDynamicPacks;
-    }
-
-    @Override
-    public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
-        this.affectsDynamicPacks = affectsDynamicPacks;
+        return meta.affectsDynamicPacks();
     }
 
     @Override
     public ConfigReloadType reloadType() {
-        return reloadType;
+        return meta.reloadType();
     }
 
-    @Override
-    public void setReloadType(ConfigReloadType reloadType) {
-        this.reloadType = reloadType;
+    /** Build-time only: the builder injects this leaf's change metadata as it is defined (see {@link ConfigMeta}). */
+    public void setMeta(ConfigMeta meta) {
+        this.meta = meta;
     }
 }

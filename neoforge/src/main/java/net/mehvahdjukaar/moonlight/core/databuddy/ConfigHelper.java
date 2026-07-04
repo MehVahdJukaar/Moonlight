@@ -29,6 +29,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.TrackedConfigValue;
 import net.neoforged.fml.ModList;
@@ -124,6 +125,10 @@ public class ConfigHelper {
      * @return A reload-sensitive wrapper around your config object value. Use ConfigObject#get to get the most up-to-date object.
      */
     public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
+        return defineObject(builder, name, codec, defaultSupplier, ConfigMeta.NONE);
+    }
+
+    public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier, ConfigMeta meta) {
         com.google.common.base.Supplier<Object> lazyDefaultValue = Suppliers.memoize(() -> {
             T defaultValue = defaultSupplier.get();
             var encodeResult = codec.encodeStart(TomlConfigOps.INSTANCE, defaultValue);
@@ -132,7 +137,7 @@ public class ConfigHelper {
 
         ModConfigSpec.ConfigValue<Object> value = builder.define(name, lazyDefaultValue,
                 Objects::nonNull);
-        return new ConfigObject<>(value, codec, defaultSupplier);
+        return new ConfigObject<>(value, codec, defaultSupplier, meta);
     }
 
     /**
@@ -145,13 +150,13 @@ public class ConfigHelper {
         private T parsedObject;
         private final Supplier<T> defaultObject;
         private boolean initialized;
-        private boolean affectsDynamicPacks;
-        private ConfigReloadType reloadType = ConfigReloadType.NONE;
+        private final ConfigMeta meta;
 
-        private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
+        private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier, ConfigMeta meta) {
             this.value = value;
             this.codec = codec;
             this.defaultObject = Suppliers.memoize(defaultSupplier);
+            this.meta = meta;
         }
 
         @Override
@@ -216,22 +221,12 @@ public class ConfigHelper {
 
         @Override
         public boolean affectsDynamicPacks() {
-            return affectsDynamicPacks;
-        }
-
-        @Override
-        public void setAffectsDynamicPacks(boolean affectsDynamicPacks) {
-            this.affectsDynamicPacks = affectsDynamicPacks;
+            return meta.affectsDynamicPacks();
         }
 
         @Override
         public ConfigReloadType reloadType() {
-            return reloadType;
-        }
-
-        @Override
-        public void setReloadType(ConfigReloadType reloadType) {
-            this.reloadType = reloadType;
+            return meta.reloadType();
         }
     }
 
