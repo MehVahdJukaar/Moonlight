@@ -9,11 +9,11 @@ import java.util.Objects;
  * widgets (config screen, dropdowns, color picker, JSON/SNBT/regex editors, mods hub). Change them here to retheme
  * the whole UI in one place.
  * <p>
- * Rather than Minecraft's 16 harsh, fully-saturated chat colors, these are a hand-tuned, vivid palette (inspired by
- * modern dark editor themes) so text is easier on the eyes and accents read as one coherent family. The
- * {@link #chat} helper is still available if you want to fall back to a vanilla color. The bulk of these are the
- * text / accent / syntax theme; the handful of structural-chrome constants (header fills, separators) are fixed and
- * not meant to be re-themed, but they live here too so they aren't copy-pasted across screens.
+ * The palette leans on Minecraft's own vibrant chat colors (via the {@link #chat} helper) so the UI feels native and
+ * lively, with a handful of hand-tuned customs where the vanilla grays would look flat — muted secondary text,
+ * breadcrumbs and separators. Each accent role gets its own distinct hue so they read as one coherent family. The
+ * bulk of these are the text / accent / syntax theme; the handful of structural-chrome constants (header fills,
+ * separators) are fixed and not meant to be re-themed, but they live here too so they aren't copy-pasted across screens.
  */
 public final class ConfigGuiColors {
 
@@ -27,34 +27,34 @@ public final class ConfigGuiColors {
     public static final int HEADER_SEPARATOR = 0xFF101012; // the 1px line under the header / above the footer
 
     // ── core text ──
-    public static final int LABEL = 0xF8F8F2;        // primary label — bright off-white
-    public static final int TEXT = 0xF8F8F2;         // editable field text
-    public static final int DESCRIPTION = 0x9AA4C0;  // subtitles / secondary text — cool muted blue-gray
-    public static final int ERROR = 0xFF5555;        // invalid value — vivid red
-    public static final int TITLE = 0xFFC24B;        // screen title — rich gold
-    public static final int MODIFIED = 0xFFB86C;     // unsaved edit — warm orange, pops against the gold title
-    public static final int CATEGORY = 0x8BE9FD;     // category labels / accents — vivid cyan
-    public static final int SELECTED = 0xBD93F9;     // highlighted / selected entry — purple, a distinct accent hue
+    public static final int LABEL = chat(ChatFormatting.WHITE);        // primary label — MC white
+    public static final int TEXT = chat(ChatFormatting.WHITE);         // editable field text
+    public static final int DESCRIPTION = 0xA8B0C0;                    // subtitles / secondary text — custom muted blue-gray (softer than MC gray)
+    public static final int ERROR = chat(ChatFormatting.RED);          // invalid value — MC red
+    public static final int TITLE = chat(ChatFormatting.GOLD);         // screen title — MC gold
+    public static final int MODIFIED = chat(ChatFormatting.YELLOW);    // unsaved edit — MC yellow, pops against the gold title
+    public static final int CATEGORY = chat(ChatFormatting.AQUA);      // category labels / accents — MC aqua
+    public static final int SELECTED = chat(ChatFormatting.LIGHT_PURPLE); // highlighted / selected entry — MC light purple, a distinct accent hue
 
     // ── breadcrumb / navigation ──
-    public static final int CRUMB = 0x8B93A5;
-    public static final int CRUMB_HOVER = 0xF8F8F2;
-    public static final int CRUMB_CURRENT = 0xF1FA8C;      // pale yellow — the page you're on
-    public static final int CRUMB_SEPARATOR = 0x565F70;
+    public static final int CRUMB = 0x8B93A5;                          // custom muted blue-gray
+    public static final int CRUMB_HOVER = chat(ChatFormatting.WHITE);
+    public static final int CRUMB_CURRENT = chat(ChatFormatting.YELLOW); // MC yellow — the page you're on
+    public static final int CRUMB_SEPARATOR = 0x565F70;                // custom faint separator
 
     // ── syntax highlighting (JSON / SNBT editors) ──
-    public static final int SYNTAX_DEFAULT = 0xF8F8F2;
-    public static final int SYNTAX_KEY = 0x8BE9FD;         // cyan
-    public static final int SYNTAX_STRING = 0x50FA7B;      // green
-    public static final int SYNTAX_NUMBER = 0xBD93F9;      // purple
-    public static final int SYNTAX_KEYWORD = 0xFF79C6;     // pink
-    public static final int SYNTAX_TYPE = 0xFFB86C;        // orange
-    public static final int SYNTAX_PUNCTUATION = 0xABB2BF; // soft gray
+    public static final int SYNTAX_DEFAULT = chat(ChatFormatting.WHITE);
+    public static final int SYNTAX_KEY = chat(ChatFormatting.AQUA);         // aqua
+    public static final int SYNTAX_STRING = chat(ChatFormatting.GREEN);     // green
+    public static final int SYNTAX_NUMBER = chat(ChatFormatting.GOLD);      // gold
+    public static final int SYNTAX_KEYWORD = chat(ChatFormatting.LIGHT_PURPLE); // light purple
+    public static final int SYNTAX_TYPE = chat(ChatFormatting.YELLOW);      // yellow
+    public static final int SYNTAX_PUNCTUATION = chat(ChatFormatting.GRAY); // gray
 
     // ── regex-specific token roles ──
-    public static final int SYNTAX_ESCAPE = 0xFFB86C;      // orange
-    public static final int SYNTAX_CHAR_CLASS = 0x50FA7B;  // green
-    public static final int SYNTAX_GROUP = 0x8BE9FD;       // cyan
-    public static final int SYNTAX_QUANTIFIER = 0xFF79C6;  // pink
-    public static final int SYNTAX_ANCHOR = 0xF1FA8C;      // yellow
+    public static final int SYNTAX_ESCAPE = chat(ChatFormatting.GOLD);          // gold
+    public static final int SYNTAX_CHAR_CLASS = chat(ChatFormatting.GREEN);     // green
+    public static final int SYNTAX_GROUP = chat(ChatFormatting.AQUA);           // aqua
+    public static final int SYNTAX_QUANTIFIER = chat(ChatFormatting.LIGHT_PURPLE); // light purple
+    public static final int SYNTAX_ANCHOR = chat(ChatFormatting.YELLOW);        // yellow
 }

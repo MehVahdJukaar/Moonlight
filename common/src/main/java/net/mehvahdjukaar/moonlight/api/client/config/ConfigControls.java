@@ -64,7 +64,10 @@ public final class ConfigControls {
             return new Control(w, v -> w.setValue((Boolean) v));
         });
 
-        register(ConfigOption.EnumValue.class, ConfigControls::enumControl);
+        @SuppressWarnings("unchecked")
+        Class<ConfigOption.EnumValue<?>> enumClass =
+                (Class<ConfigOption.EnumValue<?>>) (Class<?>) ConfigOption.EnumValue.class;
+        register(enumClass, (o, s, onChange) -> enumControl(o, s, onChange));
 
         register(ConfigOption.StringValue.class, (o, s, onChange) ->
                 textField(s.current(o), String::valueOf, str -> {

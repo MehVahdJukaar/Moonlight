@@ -4,6 +4,7 @@ import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
+import net.mehvahdjukaar.moonlight.api.resources.textures.PalettedPermutationsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
@@ -29,6 +30,7 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
 
         //also using for this
         TextureCache.clear();
+        PalettedPermutationsHelper.invalidate();
 
         ClientLevel level = Minecraft.getInstance().level;
         if (level != null) {
