@@ -128,6 +128,8 @@ transitive-accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaz
 transitive-accessible method net/minecraft/client/renderer/texture/SpriteContents getFrameCount ()I
 
 #texture image stuff
+#paletted permutations: rebuild virtual repaletted sprites at gen time
+accessible method net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations createPaletteMapping ([I[I)Ljava/util/function/IntUnaryOperator;
 accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameWidth I
 accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameHeight I
 accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frames Ljava/util/List;

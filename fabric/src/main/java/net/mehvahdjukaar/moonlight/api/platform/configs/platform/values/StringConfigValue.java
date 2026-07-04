@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -10,8 +12,8 @@ public class StringConfigValue extends ConfigValue<String> {
 
     private final Predicate<Object> validator;
 
-    public StringConfigValue(String name, String defaultValue, Predicate<Object> validator) {
-        super(name, defaultValue);
+    public StringConfigValue(String name, String defaultValue, Predicate<Object> validator, ConfigMeta meta) {
+        super(name, defaultValue, meta);
         this.validator = validator;
         Preconditions.checkState(isValid(defaultValue), "Config defaults are invalid");
     }

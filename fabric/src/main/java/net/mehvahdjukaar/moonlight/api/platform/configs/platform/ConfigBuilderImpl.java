@@ -87,13 +87,19 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return this;
     }
 
+    /**
+     * Snapshot of the builder's pending change-effect flags, passed into each leaf's constructor as it is defined.
+     * The flags stay set across a compound value's suppressed inner defines (recordOption no-ops while suppressed),
+     * so every leaf of a range/vec3 gets the same meta; they are cleared at the compound boundary in recordOption.
+     */
+    private ConfigMeta pendingMeta() {
+        return new ConfigMeta(this.pendingReload, this.pendingDynamicPacks);
+    }
+
     private void doAddConfig(String name, ConfigValue<?> config) {
         config.setTranslationKey(this.translationKey(name));
         addTranslationsAndComments(name);
 
-        // inject the pending change-effect flags into this backing leaf value; they are cleared later in recordOption,
-        // so a compound value (range/vec3) stamps all of its leaves, not just the first — see ConfigBuilder
-        config.setMeta(new ConfigMeta(this.pendingReload, this.pendingDynamicPacks));
         Objects.requireNonNull(this.categoryStack.peek()).addEntry(config);
         if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();
 
@@ -143,9 +149,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
             return new ConfigOption.StringValue(title, null, s, s.getDefaultValue(),
                     o -> o instanceof String str && s.isValid(str));
         } else if (v instanceof ListStringConfigValue<?> l) {
-            @SuppressWarnings("unchecked")
-            Supplier<List<String>> handle = (Supplier<List<String>>) l;
-            return new ConfigOption.ListValue(title, null, handle, l.getDefaultValue(),
+            return new ConfigOption.ListValue(title, null, l, l.getDefaultValue(),
                     l.getPredicate()::test, l.getOptions(), l.getIcon());
         } else if (v instanceof JsonConfigValue j) {
             // raw json + beans (defineBean rides on defineJson) -> editable json text box
@@ -163,7 +167,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
-        var config = new BoolConfigValue(name, defaultValue);
+        var config = new BoolConfigValue(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
@@ -171,7 +175,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
-        var config = new DoubleConfigValue(name, defaultValue, min, max);
+        var config = new DoubleConfigValue(name, defaultValue, min, max, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
@@ -179,14 +183,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Experimental
     @Override
     public Supplier<Float> define(String name, float defaultValue, float min, float max) {
-        var config = new FloatConfigValue(name, defaultValue, min, max);
+        var config = new FloatConfigValue(name, defaultValue, min, max, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<Double> definePercentage(String name, double defaultValue) {
-        var config = new DoubleConfigValue(name, defaultValue, 0.0, 1.0);
+        var config = new DoubleConfigValue(name, defaultValue, 0.0, 1.0, pendingMeta());
         config.setPercent(true);
         doAddConfig(name, config);
         return config;
@@ -194,14 +198,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
-        var config = new IntConfigValue(name, defaultValue, min, max);
+        var config = new IntConfigValue(name, defaultValue, min, max, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<Integer> defineSlider(String name, int defaultValue, int min, int max) {
-        var config = new IntConfigValue(name, defaultValue, min, max);
+        var config = new IntConfigValue(name, defaultValue, min, max, pendingMeta());
         config.setSlider(true);
         doAddConfig(name, config);
         return config;
@@ -209,7 +213,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Double> defineSlider(String name, double defaultValue, double min, double max) {
-        var config = new DoubleConfigValue(name, defaultValue, min, max);
+        var config = new DoubleConfigValue(name, defaultValue, min, max, pendingMeta());
         config.setSlider(true);
         doAddConfig(name, config);
         return config;
@@ -217,7 +221,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Float> defineSlider(String name, float defaultValue, float min, float max) {
-        var config = new FloatConfigValue(name, defaultValue, min, max);
+        var config = new FloatConfigValue(name, defaultValue, min, max, pendingMeta());
         config.setSlider(true);
         doAddConfig(name, config);
         return config;
@@ -225,21 +229,21 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Integer> defineColor(String name, int defaultValue) {
-        var config = new ColorConfigValue(name, defaultValue);
+        var config = new ColorConfigValue(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
-        var config = new StringConfigValue(name, defaultValue, validator);
+        var config = new StringConfigValue(name, defaultValue, validator, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     protected Supplier<String> defineRegexSource(String name, String defaultValue) {
-        var config = new RegexConfigValue(name, defaultValue);
+        var config = new RegexConfigValue(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
@@ -247,14 +251,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     protected Supplier<String> defineChoiceSource(String name, String defaultValue, Predicate<Object> validator,
                                                   Supplier<List<String>> options, Function<String, ItemStack> icon) {
-        var config = new DropdownConfigValue(name, defaultValue, validator, options, icon);
+        var config = new DropdownConfigValue(name, defaultValue, validator, options, icon, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
-        var config = new ListStringConfigValue<>(name, (List<String>) defaultValue, predicate);
+        var config = new ListStringConfigValue<>(name, (List<String>) defaultValue, predicate, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
@@ -262,35 +266,35 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     protected Supplier<List<String>> defineListSource(String name, List<String> defaultValue, Predicate<Object> entryValidator,
                                                       Supplier<List<String>> options, Function<String, ItemStack> icon) {
-        var config = new ListStringConfigValue<>(name, defaultValue, entryValidator, options, icon);
+        var config = new ListStringConfigValue<>(name, defaultValue, entryValidator, options, icon, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
-        var config = new EnumConfigValue<>(name, defaultValue);
+        var config = new EnumConfigValue<>(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<JsonElement> defineJson(String name, Supplier<JsonElement> defaultValue) {
-        var config = new JsonConfigValue(name, defaultValue);
+        var config = new JsonConfigValue(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<JsonElement> defineJson(String name, JsonElement defaultValue) {
-        var config = new JsonConfigValue(name, () -> defaultValue);
+        var config = new JsonConfigValue(name, () -> defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultValue, Codec<T> codec) {
-        var config = new ObjectConfigValue<>(name, defaultValue, codec);
+        var config = new ObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
         doAddConfig(name, config);
         return config;
     }

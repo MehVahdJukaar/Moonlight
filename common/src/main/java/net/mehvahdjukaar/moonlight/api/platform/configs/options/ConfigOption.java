@@ -23,21 +23,19 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * An editable leaf config value. The {@link #handle} is the very object that {@code define(...)} returned
- * (a {@code ConfigValue} on Fabric, a {@code TrackedConfigValue} on NeoForge); reading it gives the live
- * value and passing it back through {@link ModConfigHolder#manuallySetValue} writes it. This is the single
- * loader independent bridge the whole screen is built on.
+ * An editable leaf config value in the loader independent screen model. Most kinds are backed by a single writable
+ * value of the same type {@code T} and so extend {@link LeafConfigOption}; the compound kinds (range/vec3/json) sit on
+ * top of several backing leaves and extend this class directly, implementing {@link #get()}/{@link #apply}/
+ * {@link #backingMeta()} from those leaves. This is the single loader independent bridge the whole screen is built on.
  *
  * @param <T> the value type
  */
 public abstract class ConfigOption<T> extends ConfigNode {
 
-    protected final Supplier<T> handle;
     protected final T defaultValue;
 
-    protected ConfigOption(Component title, @Nullable Component description, Supplier<T> handle, T defaultValue) {
+    protected ConfigOption(Component title, @Nullable Component description, T defaultValue) {
         super(title, description);
-        this.handle = handle;
         this.defaultValue = defaultValue;
     }
 
@@ -53,10 +51,8 @@ public abstract class ConfigOption<T> extends ConfigNode {
                 .orElse(ConfigReloadType.NONE);
     }
 
-    /** The backing leaf value(s), read for their change metadata: one for a simple row, several for a grouped one. */
-    protected Stream<WritableConfigValue<?>> backingMeta() {
-        return handle instanceof WritableConfigValue<?> m ? Stream.of(m) : Stream.empty();
-    }
+    /** The backing leaf value(s), read for their change metadata: one for a leaf row, several for a grouped one. */
+    protected abstract Stream<WritableConfigValue<?>> backingMeta();
 
     /** Picks the {@link WritableConfigValue} leaves out of the given backing handles (a handle may be synthetic). */
     protected static Stream<WritableConfigValue<?>> metaOf(Supplier<?>... handles) {
@@ -68,9 +64,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
     /**
      * The currently saved value.
      */
-    public T get() {
-        return handle.get();
-    }
+    public abstract T get();
 
     public T defaultValue() {
         return defaultValue;
@@ -78,26 +72,57 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
     /**
      * Writes the given (already validated) value back to the underlying config and saves it.
-     * The cast is safe because {@code value} always originates from a control bound to this entry.
      */
-    @SuppressWarnings("unchecked")
-    public void apply(ModConfigHolder holder, Object value) {
-        holder.manuallySetValue(this.handle, (T) value);
+    public abstract void apply(ModConfigHolder holder, Object value);
+
+    /**
+     * The common case: an option backed by a single writable leaf of the same type {@code T}. Reading, writing and
+     * change metadata all go straight through that one {@link WritableConfigValue} — the very object {@code define(...)}
+     * returned (a {@code ConfigValue} on Fabric, a {@code ValueWrapper} on NeoForge). The compound kinds instead sit on
+     * top of several leaves and extend {@link ConfigOption} directly.
+     */
+    public abstract static class LeafConfigOption<T> extends ConfigOption<T> {
+
+        protected final WritableConfigValue<T> handle;
+
+        protected LeafConfigOption(Component title, @Nullable Component description, WritableConfigValue<T> handle, T defaultValue) {
+            super(title, description, defaultValue);
+            this.handle = handle;
+        }
+
+        @Override
+        public T get() {
+            return handle.get();
+        }
+
+        /**
+         * The cast is safe because {@code value} always originates from a control bound to this entry.
+         */
+        @Override
+        @SuppressWarnings("unchecked")
+        public void apply(ModConfigHolder holder, Object value) {
+            holder.manuallySetValue(this.handle, (T) value);
+        }
+
+        @Override
+        protected Stream<WritableConfigValue<?>> backingMeta() {
+            return Stream.of(this.handle);
+        }
     }
 
     // ===== concrete value kinds =====
 
-    public static class BooleanValue extends ConfigOption<Boolean> {
-        public BooleanValue(Component title, @Nullable Component description, Supplier<Boolean> handle, Boolean defaultValue) {
+    public static class BooleanValue extends LeafConfigOption<Boolean> {
+        public BooleanValue(Component title, @Nullable Component description, WritableConfigValue<Boolean> handle, Boolean defaultValue) {
             super(title, description, handle, defaultValue);
         }
     }
 
-    public static class IntValue extends ConfigOption<Integer> {
+    public static class IntValue extends LeafConfigOption<Integer> {
         public final int min;
         public final int max;
 
-        public IntValue(Component title, @Nullable Component description, Supplier<Integer> handle, Integer defaultValue, int min, int max) {
+        public IntValue(Component title, @Nullable Component description, WritableConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue);
             this.min = min;
             this.max = max;
@@ -109,16 +134,16 @@ public abstract class ConfigOption<T> extends ConfigNode {
      * the control registry keys on the exact class, so no separate style flag is needed.
      */
     public static class IntSliderValue extends IntValue {
-        public IntSliderValue(Component title, @Nullable Component description, Supplier<Integer> handle, Integer defaultValue, int min, int max) {
+        public IntSliderValue(Component title, @Nullable Component description, WritableConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
-    public static class DoubleValue extends ConfigOption<Double> {
+    public static class DoubleValue extends LeafConfigOption<Double> {
         public final double min;
         public final double max;
 
-        public DoubleValue(Component title, @Nullable Component description, Supplier<Double> handle, Double defaultValue, double min, double max) {
+        public DoubleValue(Component title, @Nullable Component description, WritableConfigValue<Double> handle, Double defaultValue, double min, double max) {
             super(title, description, handle, defaultValue);
             this.min = min;
             this.max = max;
@@ -127,23 +152,23 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
     /** A double drawn as a slider instead of a text field. See {@link IntSliderValue}. */
     public static class DoubleSliderValue extends DoubleValue {
-        public DoubleSliderValue(Component title, @Nullable Component description, Supplier<Double> handle, Double defaultValue, double min, double max) {
+        public DoubleSliderValue(Component title, @Nullable Component description, WritableConfigValue<Double> handle, Double defaultValue, double min, double max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
     /** A {@code [0, 1]} double drawn as a slider that displays a percentage. */
     public static class PercentValue extends DoubleValue {
-        public PercentValue(Component title, @Nullable Component description, Supplier<Double> handle, Double defaultValue) {
+        public PercentValue(Component title, @Nullable Component description, WritableConfigValue<Double> handle, Double defaultValue) {
             super(title, description, handle, defaultValue, 0.0, 1.0);
         }
     }
 
-    public static class FloatValue extends ConfigOption<Float> {
+    public static class FloatValue extends LeafConfigOption<Float> {
         public final float min;
         public final float max;
 
-        public FloatValue(Component title, @Nullable Component description, Supplier<Float> handle, Float defaultValue, float min, float max) {
+        public FloatValue(Component title, @Nullable Component description, WritableConfigValue<Float> handle, Float defaultValue, float min, float max) {
             super(title, description, handle, defaultValue);
             this.min = min;
             this.max = max;
@@ -152,25 +177,25 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
     /** A float drawn as a slider instead of a text field. See {@link IntSliderValue}. */
     public static class FloatSliderValue extends FloatValue {
-        public FloatSliderValue(Component title, @Nullable Component description, Supplier<Float> handle, Float defaultValue, float min, float max) {
+        public FloatSliderValue(Component title, @Nullable Component description, WritableConfigValue<Float> handle, Float defaultValue, float min, float max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
-    public static class EnumValue<E extends Enum<E>> extends ConfigOption<E> {
+    public static class EnumValue<E extends Enum<E>> extends LeafConfigOption<E> {
         public final E[] options;
 
-        public EnumValue(Component title, @Nullable Component description, Supplier<E> handle, E defaultValue, E[] options) {
+        public EnumValue(Component title, @Nullable Component description, WritableConfigValue<E> handle, E defaultValue, E[] options) {
             super(title, description, handle, defaultValue);
             this.options = options;
         }
     }
 
-    public static class StringValue extends ConfigOption<String> {
+    public static class StringValue extends LeafConfigOption<String> {
         @Nullable
         public final Predicate<Object> validator;
 
-        public StringValue(Component title, @Nullable Component description, Supplier<String> handle, String defaultValue, @Nullable Predicate<Object> validator) {
+        public StringValue(Component title, @Nullable Component description, WritableConfigValue<String> handle, String defaultValue, @Nullable Predicate<Object> validator) {
             super(title, description, handle, defaultValue);
             this.validator = validator;
         }
@@ -185,7 +210,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
      * live regex syntax highlighting.
      */
     public static class RegexValue extends StringValue {
-        public RegexValue(Component title, @Nullable Component description, Supplier<String> handle, String defaultValue) {
+        public RegexValue(Component title, @Nullable Component description, WritableConfigValue<String> handle, String defaultValue) {
             super(title, description, handle, defaultValue, o -> o instanceof String s && isValidRegex(s));
         }
 
@@ -204,12 +229,12 @@ public abstract class ConfigOption<T> extends ConfigNode {
      * (so registry backed pickers can list entries once registries are populated), and an optional {@code icon}
      * maps an option to an {@link ItemStack} shown beside it (used by the item/block pickers).
      */
-    public static class DropdownValue extends ConfigOption<String> {
+    public static class DropdownValue extends LeafConfigOption<String> {
         public final Supplier<List<String>> options;
         @Nullable
         public final Function<String, ItemStack> icon;
 
-        public DropdownValue(Component title, @Nullable Component description, Supplier<String> handle,
+        public DropdownValue(Component title, @Nullable Component description, WritableConfigValue<String> handle,
                              String defaultValue, Supplier<List<String>> options,
                              @Nullable Function<String, ItemStack> icon) {
             super(title, description, handle, defaultValue);
@@ -221,8 +246,8 @@ public abstract class ConfigOption<T> extends ConfigNode {
     /**
      * An ARGB color, stored as an int. Edited as a hex field plus a color picker.
      */
-    public static class ColorValue extends ConfigOption<Integer> {
-        public ColorValue(Component title, @Nullable Component description, Supplier<Integer> handle, Integer defaultValue) {
+    public static class ColorValue extends LeafConfigOption<Integer> {
+        public ColorValue(Component title, @Nullable Component description, WritableConfigValue<Integer> handle, Integer defaultValue) {
             super(title, description, handle, defaultValue);
         }
     }
@@ -240,11 +265,16 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         public RangeValue(Component title, @Nullable Component description, Supplier<Double> minHandle,
                           Supplier<Double> maxHandle, Range defaultValue, double min, double max) {
-            super(title, description, () -> new Range(minHandle.get(), maxHandle.get()), defaultValue);
+            super(title, description, defaultValue);
             this.minHandle = minHandle;
             this.maxHandle = maxHandle;
             this.min = min;
             this.max = max;
+        }
+
+        @Override
+        public Range get() {
+            return new Range(minHandle.get(), maxHandle.get());
         }
 
         @Override
@@ -274,12 +304,17 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         public Vec3Value(Component title, @Nullable Component description, Supplier<Double> xHandle,
                          Supplier<Double> yHandle, Supplier<Double> zHandle, Vec3 defaultValue, double min, double max) {
-            super(title, description, () -> new Vec3(xHandle.get(), yHandle.get(), zHandle.get()), defaultValue);
+            super(title, description, defaultValue);
             this.xHandle = xHandle;
             this.yHandle = yHandle;
             this.zHandle = zHandle;
             this.min = min;
             this.max = max;
+        }
+
+        @Override
+        public Vec3 get() {
+            return new Vec3(xHandle.get(), yHandle.get(), zHandle.get());
         }
 
         @Override
@@ -309,12 +344,17 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         public Vec3iValue(Component title, @Nullable Component description, Supplier<Integer> xHandle,
                           Supplier<Integer> yHandle, Supplier<Integer> zHandle, Vec3i defaultValue, int min, int max) {
-            super(title, description, () -> new Vec3i(xHandle.get(), yHandle.get(), zHandle.get()), defaultValue);
+            super(title, description, defaultValue);
             this.xHandle = xHandle;
             this.yHandle = yHandle;
             this.zHandle = zHandle;
             this.min = min;
             this.max = max;
+        }
+
+        @Override
+        public Vec3i get() {
+            return new Vec3i(xHandle.get(), yHandle.get(), zHandle.get());
         }
 
         @Override
@@ -336,7 +376,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
      * individual entries valid/invalid in the editor. When {@code options} is present each entry is picked with a
      * dropdown (with an optional {@code icon}, as in {@link DropdownValue}) instead of typed as free text.
      */
-    public static class ListValue extends ConfigOption<List<String>> {
+    public static class ListValue extends LeafConfigOption<List<String>> {
         @Nullable
         public final Predicate<String> entryValidator;
         @Nullable
@@ -344,12 +384,12 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @Nullable
         public final Function<String, ItemStack> icon;
 
-        public ListValue(Component title, @Nullable Component description, Supplier<List<String>> handle,
+        public ListValue(Component title, @Nullable Component description, WritableConfigValue<List<String>> handle,
                          List<String> defaultValue, @Nullable Predicate<String> entryValidator) {
             this(title, description, handle, defaultValue, entryValidator, null, null);
         }
 
-        public ListValue(Component title, @Nullable Component description, Supplier<List<String>> handle,
+        public ListValue(Component title, @Nullable Component description, WritableConfigValue<List<String>> handle,
                          List<String> defaultValue, @Nullable Predicate<String> entryValidator,
                          @Nullable Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon) {
             super(title, description, handle, defaultValue);
@@ -376,8 +416,13 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         // handle/default stay lazy: on NeoForge the spec can't be read at define time, so never call json.get() here
         public JsonValue(Component title, @Nullable Component description, Supplier<JsonElement> json) {
-            super(title, description, () -> GSON.toJson(json.get()), null);
+            super(title, description, null);
             this.json = json;
+        }
+
+        @Override
+        public String get() {
+            return GSON.toJson(json.get());
         }
 
         @Override
@@ -401,13 +446,26 @@ public abstract class ConfigOption<T> extends ConfigNode {
      * edit the file manually.
      */
     public static class UnsupportedValue extends ConfigOption<Object> {
+        private final Supplier<Object> handle;
+
         public UnsupportedValue(Component title, @Nullable Component description, Supplier<Object> handle) {
-            super(title, description, handle, null);
+            super(title, description, null);
+            this.handle = handle;
+        }
+
+        @Override
+        public Object get() {
+            return handle.get();
         }
 
         @Override
         public void apply(ModConfigHolder holder, Object value) {
             // not editable
+        }
+
+        @Override
+        protected Stream<WritableConfigValue<?>> backingMeta() {
+            return metaOf(handle);
         }
     }
 }

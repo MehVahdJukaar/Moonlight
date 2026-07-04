@@ -1,12 +1,14 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
 public class BoolConfigValue extends ConfigValue<Boolean> {
 
-    public BoolConfigValue(String name, Boolean defaultValue) {
-        super(name, defaultValue);
+    public BoolConfigValue(String name, Boolean defaultValue, ConfigMeta meta) {
+        super(name, defaultValue, meta);
     }
 
     @Override

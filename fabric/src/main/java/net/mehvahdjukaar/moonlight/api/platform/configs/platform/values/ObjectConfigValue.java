@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
@@ -12,8 +14,8 @@ public class ObjectConfigValue<T> extends ConfigValue<T> {
     private final Codec<T> codec;
     private final Supplier<T> lazyDefault;
 
-    public ObjectConfigValue(String name, Supplier<T> defaultValue, Codec<T> codec) {
-        super(name, null);
+    public ObjectConfigValue(String name, Supplier<T> defaultValue, Codec<T> codec, ConfigMeta meta) {
+        super(name, null, meta);
         this.codec = codec;
         this.lazyDefault = Suppliers.memoize(defaultValue);
     }

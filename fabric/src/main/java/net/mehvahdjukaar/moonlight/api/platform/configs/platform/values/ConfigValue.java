@@ -19,16 +19,17 @@ public abstract class ConfigValue<T> extends ConfigEntry implements WritableConf
     protected final T defaultValue;
     protected T value;
     private boolean loaded;
-    private ConfigMeta meta = ConfigMeta.NONE;
+    private final ConfigMeta meta;
     private String translationKey = "";
     private String commentKey = "";
     private String rawComment = "";
     private boolean slider = false;
     private boolean percent = false;
 
-    protected ConfigValue(String name, T defaultValue) {
+    protected ConfigValue(String name, T defaultValue, ConfigMeta meta) {
         super(name);
         this.defaultValue = defaultValue;
+        this.meta = meta;
         if (!(this instanceof ObjectConfigValue<T>) && !(this instanceof JsonConfigValue)) {
             Objects.requireNonNull(defaultValue, "default value cant be null");
         }
@@ -151,10 +152,5 @@ public abstract class ConfigValue<T> extends ConfigEntry implements WritableConf
     @Override
     public ConfigReloadType reloadType() {
         return meta.reloadType();
-    }
-
-    /** Build-time only: the builder injects this leaf's change metadata as it is defined (see {@link ConfigMeta}). */
-    public void setMeta(ConfigMeta meta) {
-        this.meta = meta;
     }
 }

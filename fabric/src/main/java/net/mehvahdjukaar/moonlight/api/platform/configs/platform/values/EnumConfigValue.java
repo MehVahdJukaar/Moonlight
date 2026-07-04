@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
@@ -7,8 +9,8 @@ public class EnumConfigValue<T extends Enum<T>> extends ConfigValue<T> {
 
     private final T[] acceptedValues;
 
-    public EnumConfigValue(String name, T defaultValue) {
-        super(name, defaultValue);
+    public EnumConfigValue(String name, T defaultValue, ConfigMeta meta) {
+        super(name, defaultValue, meta);
         this.acceptedValues = defaultValue.getDeclaringClass().getEnumConstants();
     }
 
