@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.integration.platform;
 
 
-import net.mehvahdjukaar.moonlight.api.client.gui.MediaButton;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
 import net.mehvahdjukaar.moonlight.api.integration.configured.CustomConfigSelectScreen;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
@@ -33,7 +33,7 @@ public class ModConfigSelectScreen extends CustomConfigSelectScreen {
         int y = this.height - 29;
         int centerX = this.width / 2;
 
-        MediaButton.addAuthorMediaButtons(this, this::addRenderableWidget,
+        MediaButton.addAuthorMediaButtons((Screen) this, this::addRenderableWidget,
                 centerX, y, 22, Moonlight.MOD_ID,
                 "https://www.curseforge.com/minecraft/mc-mods/moonlight-lib",
                 "https://modrinth.com/mod/moonlight",

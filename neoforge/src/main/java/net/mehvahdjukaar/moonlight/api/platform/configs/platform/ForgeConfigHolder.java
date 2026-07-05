@@ -138,7 +138,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     public Screen makeScreen(Screen parent, @Nullable ResourceLocation background) {
         if (ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) {
             var root = getConfigRoot();
-            return root == null ? null : new net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigScreen(this, root, parent, background);
+            return root == null ? null : new net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen(this, root, parent, background);
         }
         // custom screen disabled: defer to whatever config screen the loader (NeoForge / Configured) registered
         return ModList.get().getModContainerById(this.getModId())

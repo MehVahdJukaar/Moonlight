@@ -23,9 +23,6 @@ import java.util.Locale;
  */
 public final class ModIcons {
 
-    private ModIcons() {
-    }
-
     /** A loaded icon texture plus its pixel size (icons aren't always square). */
     public record Icon(ResourceLocation texture, int width, int height) {
     }

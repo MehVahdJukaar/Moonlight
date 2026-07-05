@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.ChatBubbleWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;

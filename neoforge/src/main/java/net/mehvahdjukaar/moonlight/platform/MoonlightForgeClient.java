@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.platform;
 
 
-import net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigSelectScreen;
+import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;

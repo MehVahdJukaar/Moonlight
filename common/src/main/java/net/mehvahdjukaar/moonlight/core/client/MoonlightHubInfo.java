@@ -6,7 +6,7 @@ import com.google.gson.JsonDeserializer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.client.gui.MediaButton;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;

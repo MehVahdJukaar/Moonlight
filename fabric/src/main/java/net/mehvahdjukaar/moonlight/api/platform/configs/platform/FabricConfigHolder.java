@@ -199,7 +199,7 @@ public final class FabricConfigHolder extends ModConfigHolder {
     public Screen makeScreen(Screen parent, ResourceLocation background) {
         if (ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) {
             ConfigCategory root = getConfigRoot();
-            return root == null ? null : new net.mehvahdjukaar.moonlight.api.client.config.MoonlightConfigScreen(this, root, parent, background);
+            return root == null ? null : new net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen(this, root, parent, background);
         }
         // custom screen disabled: fall back to the old Cloth Config / YACL screens if those mods are present
         if (CompatHandler.YACL) {
