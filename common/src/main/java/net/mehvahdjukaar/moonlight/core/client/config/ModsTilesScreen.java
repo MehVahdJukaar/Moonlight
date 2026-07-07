@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
+import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -249,10 +250,6 @@ public class ModsTilesScreen extends Screen {
     @Override
     public void onClose() {
         this.minecraft.setScreen(parent);
-    }
-
-    private interface ThrowingSupplier<T> {
-        T get() throws Exception;
     }
 
     private static String safe(ThrowingSupplier<String> supplier, String fallback) {

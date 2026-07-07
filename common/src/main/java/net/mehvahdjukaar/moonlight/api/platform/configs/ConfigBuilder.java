@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
+import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
@@ -296,6 +297,22 @@ public abstract class ConfigBuilder {
 
     //be very careful with these as you might use some objects that aren't registered yet and things will break
     public abstract <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec);
+
+    /**
+     * Like {@link #defineObject} — same on-disk shape and the same {@code Supplier<T>} handle — but the value carries a
+     * {@link SchemaCodec}, so instead of the "edit the file manually" placeholder it gets a real, schema-driven form on
+     * the native config screen (a {@code SchemaEditScreen} generated from {@link SchemaCodec#schema()}). Records become
+     * navigable sub-categories of primitive rows; anything the form can't render structurally (lists, maps, alternatives,
+     * opaque codecs) degrades to a raw-JSON editor for that node. The wire format is entirely the codec's, so an existing
+     * {@code defineObject} can be upgraded to {@code defineSchema} with no data migration once its codec declares a schema.
+     */
+    public abstract <T> Supplier<T> defineSchema(String name, com.google.common.base.Supplier<T> defaultSupplier, SchemaCodec<T> codec);
+
+    /** Convenience {@link #defineSchema}: wraps a raw {@code Codec} — a codec with no declared schema degrades to a
+     *  raw-JSON ({@link net.mehvahdjukaar.codecui.Schema.Opaque}) editor, exactly like {@link #defineObject} but editable. */
+    public <T> Supplier<T> defineSchema(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
+        return defineSchema(name, defaultSupplier, SchemaCodec.wrap(codec));
+    }
 
     public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec) {
         return defineObject(name, defaultSupplier, codec.listOf());

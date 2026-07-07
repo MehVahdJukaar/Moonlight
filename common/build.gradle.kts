@@ -7,8 +7,12 @@ common {
 }
 
 val sable_version_comp: String by extra
+val codecui_version: String by extra
 
 dependencies {
+
+    // Declarative codec schema API — compile against the common (named-mappings) artifact; bundled (JiJ) per loader.
+    compileOnly("net.mehvahdjukaar:codecui-common:${codecui_version}")
 
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     // modCompileOnly("pebjebs.mapatlases:map_atlases-fabric:1.21-6.5.1");

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.platform;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
+import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
@@ -94,6 +95,15 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     private void doAddConfig(String name, ConfigValue<?> config) {
+        doAddConfig(name, config, ConfigBuilderImpl::toOption);
+    }
+
+    /**
+     * As {@link #doAddConfig(String, ConfigValue)} but with an explicit screen-row factory, so codec-backed values that
+     * want a richer row than the default {@link #toOption} mapping (e.g. {@link #defineSchema} → an editable
+     * {@link ConfigOption.SchemaValue} instead of an {@link ConfigOption.UnsupportedValue}) can supply their own.
+     */
+    private void doAddConfig(String name, ConfigValue<?> config, Function<ConfigValue<?>, ConfigOption<?>> optionFactory) {
         config.setTranslationKey(this.translationKey(name));
         addTranslationsAndComments(name);
 
@@ -102,7 +112,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
         // build the matching screen row; the comment (before or after) fills in its description and file comment
         if (!suppressUi) {
-            ConfigOption<?> option = toOption(config);
+            ConfigOption<?> option = optionFactory.apply(config);
             recordOption(option);
             noteDefined(name, option, raw -> {
                 config.setRawComment(raw);
@@ -293,6 +303,16 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultValue, Codec<T> codec) {
         var config = new ObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
         doAddConfig(name, config);
+        return config;
+    }
+
+    @Override
+    public <T> Supplier<T> defineSchema(String name, com.google.common.base.Supplier<T> defaultValue, SchemaCodec<T> codec) {
+        // same storage as defineObject (SchemaCodec IS a Codec, so the wire format is identical) but an editable
+        // schema-driven row instead of the unsupported placeholder
+        var config = new ObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
+        doAddConfig(name, config, c -> new ConfigOption.SchemaValue<>(
+                config.getTranslation(), null, config, config::getDefaultValue, codec));
         return config;
     }
 

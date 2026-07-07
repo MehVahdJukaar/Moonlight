@@ -7,6 +7,8 @@ import com.google.gson.JsonParser;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.WritableConfigValue;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
+import net.mehvahdjukaar.codecui.Schema;
+import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -420,6 +422,55 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @Override
         protected Stream<WritableConfigValue<?>> backingMeta() {
             return metaOf(json); // the real leaf is the json handle, not the synthetic string handle
+        }
+    }
+
+    /**
+     * A codec-backed object value that <em>can</em> be edited, because it carries a {@link SchemaCodec}: its screen row
+     * opens a form generated from the schema (see {@code SchemaEditScreen}) instead of the "edit manually" placeholder.
+     * Reading/writing/change-metadata go straight through the one object leaf {@code define} returned (an
+     * {@code ObjectConfigValue} on Fabric, a codec {@code ValueWrapper}/{@code ConfigObject} on NeoForge), so the wire
+     * format is unchanged. The default is kept lazy: the object may reference things not registered when the config is built.
+     *
+     * @param <T> the object type
+     */
+    public static class SchemaValue<T> extends ConfigOption<T> {
+        private final WritableConfigValue<T> handle;
+        private final Supplier<T> lazyDefault;
+        public final SchemaCodec<T> codec;
+
+        public SchemaValue(Component title, @Nullable Component description, WritableConfigValue<T> handle,
+                           Supplier<T> lazyDefault, SchemaCodec<T> codec) {
+            super(title, description, null);
+            this.handle = handle;
+            this.lazyDefault = lazyDefault;
+            this.codec = codec;
+        }
+
+        /** The declared edit surface the form is generated from. */
+        public Schema<T> schema() {
+            return codec.schema();
+        }
+
+        @Override
+        public T get() {
+            return handle.get();
+        }
+
+        @Override
+        public T defaultValue() {
+            return lazyDefault.get();
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void apply(ModConfigHolder holder, Object value) {
+            holder.manuallySetValue(this.handle, (T) value);
+        }
+
+        @Override
+        protected Stream<WritableConfigValue<?>> backingMeta() {
+            return Stream.of(this.handle);
         }
     }
 

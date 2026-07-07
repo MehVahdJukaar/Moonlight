@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
+import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -309,6 +310,33 @@ public class ConfigBuilderImpl extends ConfigBuilder {
                 codec, pendingMeta()
         ));
         ui(name, unsupported(name, w));
+        return w;
+    }
+
+    @Override
+    public <T> Supplier<T> defineSchema(String name, com.google.common.base.Supplier<T> defaultSupplier, SchemaCodec<T> codec) {
+        forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
+        if (usesDataBuddy) {
+            var w = track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier, pendingMeta()));
+            ui(name, new ConfigOption.SchemaValue<>(uiTitle(name), uiDescription(name), w, defaultSupplier::get, codec));
+            return w;
+        }
+
+        com.google.common.base.Supplier<JsonElement> jsonSupplier = () -> {
+            var e = codec.encodeStart(JsonOps.INSTANCE, defaultSupplier.get());
+            var json = e.resultOrPartial(s -> {
+                throw new RuntimeException("Invalid default value for config " + name + ": " + s);
+            });
+            if (json.isEmpty()) throw new RuntimeException("Invalid default value for config " + name);
+            return json.get();
+        };
+        var w = track(ValueWrapper.codec(
+                builder.define(name,
+                        () -> jsonSupplier.get().toString().replace(" ", "").replace("\"", "'"),
+                        o -> o != null && jsonSupplier.get().getClass().isAssignableFrom(o.getClass())),
+                codec, pendingMeta()
+        ));
+        ui(name, new ConfigOption.SchemaValue<>(uiTitle(name), uiDescription(name), w, defaultSupplier::get, codec));
         return w;
     }
 

@@ -9,7 +9,7 @@ import java.util.*;
 
 /**
  * Mutable editing state for one config screen visit, shared across the whole navigation stack (so edits and
- * expanded rows made in a sub category survive going back and are persisted by a single Save). Holds only a
+ * expanded rows made in a subcategory survive going back and are persisted by a single Save). Holds only a
  * working copy; nothing is written to the underlying config until {@link #apply()}.
  */
 public final class ConfigEditSession {

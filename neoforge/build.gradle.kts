@@ -14,7 +14,13 @@ neoForge {
     }
 }
 
+val codecui_version: String by extra
+
 dependencies {
+    // Declarative codec schema API — runtime dep + bundled (JiJ) into the shipped jar.
+    implementation("net.mehvahdjukaar:codecui-neoforge:${codecui_version}")
+    jarJar("net.mehvahdjukaar:codecui-neoforge:${codecui_version}")
+
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
     modCompileOnly("curse.maven:map-atlases-forge-519759:7659933")
     modCompileOnly("curse.maven:modernfix-790626:4599353")

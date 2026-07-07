@@ -9,7 +9,12 @@ fabric {
 
 val cloth_version: String by extra
 val cca_version: String by extra
+val codecui_version: String by extra
 dependencies {
+
+    // Declarative codec schema API — remapped mod dep for dev + bundled (JiJ) into the shipped jar.
+    modImplementation("net.mehvahdjukaar:codecui-fabric:${codecui_version}")
+    include("net.mehvahdjukaar:codecui-fabric:${codecui_version}")
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
     modCompileOnly ("curse.maven:map-atlases-forge-519759:7659933")

@@ -182,7 +182,7 @@ public final class ConfigControls {
         register(ConfigOption.JsonValue.class, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
                     Component.translatable("gui.moonlight.config.edit"), EDIT_ICON, 12, 12, b ->
-                    Minecraft.getInstance().setScreen(new JsonEditScreen(o.title(), s.current(o), Minecraft.getInstance().screen, edited -> {
+                    Minecraft.getInstance().setScreen(new JsonEditScreen(o.title(), o.description(), s.current(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
                     })));
