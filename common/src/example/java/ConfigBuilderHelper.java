@@ -1,5 +1,8 @@
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.codecui.SchemaCodec;
+import net.mehvahdjukaar.codecui.SchemaCodecs;
+import net.mehvahdjukaar.codecui.SchemaRecord;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -24,6 +27,14 @@ public class ConfigBuilderHelper {
             Codec.INT.fieldOf("second").forGetter(m -> m.second)
     ).apply(inst, MyObj::new));
 
+    // Same object, but declared with a CodecUI schema (via the codecui jar Moonlight bundles). A SchemaCodec IS a
+    // Codec, so the wire format is identical to CODEC above — but because it carries an edit surface, defineSchema
+    // below can build a real in-game form for it (here: two 0..100 int sliders) instead of the "edit file" placeholder.
+    public static final SchemaCodec<MyObj> SCHEMA_CODEC = SchemaRecord.create(MyObj.class, i -> i.group(
+            i.field("first", SchemaCodecs.intRange(0, 100), MyObj::first),
+            i.field("second", SchemaCodecs.intRange(0, 100), MyObj::second)
+    ).apply(i, MyObj::new));
+
 
     public static final Supplier<Boolean> BOOL_CONFIG;
     public static final Supplier<Integer> COLOR_CONFIG;
@@ -31,6 +42,7 @@ public class ConfigBuilderHelper {
     public static final Supplier<Direction> ENUM_CONFIG;
     public static final Supplier<List<String>> LIST_CONFIG;
     public static final Supplier<MyObj> OBJECT_CONFIG;
+    public static final Supplier<MyObj> SCHEMA_CONFIG;
 
     public static final ModConfigHolder CONFIG_SPEC;
 
@@ -46,6 +58,8 @@ public class ConfigBuilderHelper {
         LIST_CONFIG = builder.comment("This is a list").define("list_config", List.of("dog"));
         OBJECT_CONFIG = builder.comment("Custom object. Note that this wont show up on config screens")
                 .defineObject("custom_object", () -> new MyObj(2, 4), CODEC);
+        SCHEMA_CONFIG = builder.comment("Custom object with a declared schema - editable via a generated form")
+                .defineSchema("schema_object", () -> new MyObj(2, 4), SCHEMA_CODEC);
         builder.pop();
 
 

@@ -65,6 +65,15 @@ public final class ColorUtils {
     }
 
     /**
+     * Formats a color as a hex string, either {@code #AARRGGBB} (with alpha) or {@code #RRGGBB} (without).
+     */
+    public static String toHexString(int color, boolean hasAlpha) {
+        return hasAlpha
+                ? "#" + String.format("%08X", color)
+                : "#" + String.format("%06X", color & 0xFFFFFF);
+    }
+
+    /**
      * Builds an ARGB color from HSV components (all {@code 0..1}) and an {@code 0..255} alpha, via {@link HSVColor}.
      */
     public static int hsvToArgb(float hue, float saturation, float value, int alpha) {

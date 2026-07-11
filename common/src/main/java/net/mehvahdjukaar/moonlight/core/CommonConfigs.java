@@ -1,6 +1,10 @@
 package net.mehvahdjukaar.moonlight.core;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import net.mehvahdjukaar.codecui.SchemaCodec;
+import net.mehvahdjukaar.codecui.SchemaCodecs;
+import net.mehvahdjukaar.codecui.SchemaRecord;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -23,6 +27,23 @@ public class CommonConfigs {
     public static final Supplier<Boolean> MULTI_THREADED_GENERATION;
 
     public static final ModConfigHolder CONFIG;
+
+    // Dev-only demo for defineSchema (below): a codec that carries a CodecUI schema, so the native config screen can
+    // build a real form for it instead of the "edit file" placeholder. Declared before the static block that uses it.
+    private static final SchemaCodec<Nested> NESTED_SCHEMA = SchemaRecord.create(Nested.class, i -> i.group(
+            i.field("x", SchemaCodecs.intRange(-16, 16), Nested::x),
+            i.field("weight", SchemaCodecs.doubleRange(0, 1), Nested::weight)
+    ).apply(i, Nested::new));
+
+    private static final SchemaCodec<SchemaTest> SCHEMA_TEST = SchemaRecord.create(SchemaTest.class, i -> i.group(
+            i.field("name", SchemaCodecs.STRING, SchemaTest::name),
+            i.field("enabled", SchemaCodecs.BOOL, SchemaTest::enabled),
+            i.field("level", SchemaCodecs.intRange(0, 100), SchemaTest::level),
+            i.field("facing", SchemaCodecs.enumeration(Direction.CODEC, List.of(Direction.values()), Direction::getSerializedName), SchemaTest::facing),
+            i.field("color", SchemaCodecs.colorArgb(Codec.INT), SchemaTest::color),
+            i.field("tags", SchemaCodecs.list(SchemaCodecs.STRING), SchemaTest::tags),
+            i.field("nested", NESTED_SCHEMA, SchemaTest::nested)
+    ).apply(i, SchemaTest::new));
 
     static {
         ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.COMMON_SYNCED);
@@ -83,6 +104,9 @@ public class CommonConfigs {
             builder.comment("A raw JSON value, edited in a text box with syntax highlighting").defineJson("test_json", json);
             builder.comment("A plain Java bean (no codec needed), stored and edited as JSON").defineBean("test_bean", new TestBean());
             builder.comment("A record bean, also round-tripped through Gson").defineBean("test_record_bean", new TestRecordBean("world", 7));
+            builder.comment("A codec object with a declared CodecUI schema, edited via a generated form: records become navigable sub categories, the string list falls back to the JSON editor")
+                    .defineSchema("test_schema", () -> new SchemaTest("hello", true, 5, Direction.NORTH, 0xFFFF5555,
+                            List.of("alpha", "beta"), new Nested(1, 0.5)), SCHEMA_TEST);
 
             builder.icon("minecraft:oak_log").push("nested");
             builder.comment("A float value living in a nested sub category").define("nested_float", 0.5f, 0f, 1f);
@@ -119,5 +143,14 @@ public class CommonConfigs {
 
     /** Dev-only sample record bean: Gson (2.10+) round-trips records via their canonical constructor. */
     public record TestRecordBean(String label, int amount) {
+    }
+
+    /** Dev-only sample for {@code defineSchema}: a codec object whose fields drive a generated form. */
+    public record SchemaTest(String name, boolean enabled, int level, Direction facing, int color,
+                             List<String> tags, Nested nested) {
+    }
+
+    /** Nested record inside {@link SchemaTest}: rendered as its own navigable sub category. */
+    public record Nested(int x, double weight) {
     }
 }

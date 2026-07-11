@@ -190,6 +190,18 @@ public final class ConfigControls {
             });
         });
 
+        // codec objects that declare a CodecUI schema get a real, schema-generated form instead of the placeholder
+        @SuppressWarnings("unchecked")
+        Class<ConfigOption.SchemaValue<?>> schemaClass =
+                (Class<ConfigOption.SchemaValue<?>>) (Class<?>) ConfigOption.SchemaValue.class;
+        register(schemaClass, (o, s, onChange) -> {
+            Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
+                    Component.translatable("gui.moonlight.config.edit"), EDIT_ICON, 12, 12, b ->
+                    Minecraft.getInstance().setScreen(SchemaEditScreen.create(o, s, onChange)));
+            return new ConfigVisuals<Object>(button, v -> {
+            });
+        });
+
         register(ConfigOption.UnsupportedValue.class, (o, s, onChange) -> disabled());
     }
 

@@ -6,10 +6,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A navigable group of config entries. Rendered as one big button that opens a sub screen listing its
- * {@link #entries()}. The root of a config is also a category (its title is the config file name).
- */
 public class ConfigCategory extends ConfigNode {
 
     private final List<ConfigNode> entries = new ArrayList<>();

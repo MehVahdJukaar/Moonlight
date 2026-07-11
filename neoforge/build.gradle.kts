@@ -25,10 +25,7 @@ dependencies {
     modCompileOnly("curse.maven:map-atlases-forge-519759:7659933")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:8146177")
-    modImplementation("curse.maven:zeta-968868:7980010")
-
-    modImplementation("io.siuolplex:wood_you_dye:3.0.0+neoforge-1.21.1-SNAPSHOT")
-    modImplementation("curse.maven:every-compat-628539:8316235")
+    modCompileOnly("curse.maven:zeta-968868:7980010")
 
     modImplementation("curse.maven:the-twilight-forest-227639:7398100")
 //    modImplementation("curse.maven:open-loader-354339:6546293")
@@ -47,8 +44,8 @@ dependencies {
 
     modCompileOnly("curse.maven:map-atlases-forge-519759:4990003")
     //modImplementation ("curse.maven:supplementaries-412082:4995508")
-    modImplementation("curse.maven:configured-457570:7276577")
-    modImplementation("curse.maven:yacl-667299:5424504")
+    modCompileOnly("curse.maven:configured-457570:7276577")
+    modCompileOnly("curse.maven:yacl-667299:5424504")
     modCompileOnly("curse.maven:alexs-caves-924854:4806837")
 }
 

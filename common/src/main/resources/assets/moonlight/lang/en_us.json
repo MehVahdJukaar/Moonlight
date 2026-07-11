@@ -29,6 +29,7 @@
   "gui.moonlight.config.reload.game": "Requires game restart",
   "gui.moonlight.config.json_hint": "Enter JSON…",
   "gui.moonlight.config.json_invalid": "Invalid JSON",
+  "gui.moonlight.config.schema_invalid": "Invalid value: %s",
   "tooltip.moonlight.media.youtube": "Youtube Channel",
   "tooltip.moonlight.media.twitter": "Twitter Page",
   "tooltip.moonlight.media.discord": "Mod Discord",
