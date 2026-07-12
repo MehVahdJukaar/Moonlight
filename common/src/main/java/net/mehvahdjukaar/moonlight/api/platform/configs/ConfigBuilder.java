@@ -37,10 +37,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-/**
- * A loader independent config builder
- * Support common config syncing
- */
+/** A loader independent config builder. Supports common config syncing. */
 public abstract class ConfigBuilder {
 
     protected final Map<String, String> translations = new HashMap<>();
@@ -80,8 +77,7 @@ public abstract class ConfigBuilder {
     /** Reserved child name for the boolean a {@link #feature} declares. */
     public static final String FEATURE_TOGGLE_NAME = "enabled";
 
-    //always on. can be called to disable
-    protected boolean usesDataBuddy = true;
+    protected boolean usesDataBuddy = true; // on by default; setWriteJsons() disables it
 
     // set by worldReload()/gameRestart(), applied to (and cleared by) the next recorded option — see recordOption
     protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
@@ -137,9 +133,7 @@ public abstract class ConfigBuilder {
 
     /**
      * Marks the <em>next</em> defined value as affecting dynamic resource/data packs (so changing it invalidates the
-     * matching pack cache). Fluent, sticky until the next value is recorded — exactly like {@link #worldReload()}. For
-     * compound values ({@link #defineRange}/{@link #defineVec3}) it applies to every backing value, since the flag is
-     * consumed only once the combined row is recorded (see {@link #recordOption}).
+     * matching pack cache). Fluent and sticky until the next value is recorded, like {@link #worldReload()}.
      */
     public <T extends ConfigBuilder> T affectsDynamicPacks() {
         this.pendingDynamicPacks = true;
@@ -295,24 +289,12 @@ public abstract class ConfigBuilder {
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
-    //be very careful with these as you might use some objects that aren't registered yet and things will break
-    public abstract <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec);
-
     /**
-     * Like {@link #defineObject} — same on-disk shape and the same {@code Supplier<T>} handle — but the value carries a
-     * {@link SchemaCodec}, so instead of the "edit the file manually" placeholder it gets a real, schema-driven form on
-     * the native config screen (a {@code SchemaEditScreen} generated from {@link SchemaCodec#schema()}). Records become
-     * navigable sub-categories of primitive rows; anything the form can't render structurally (lists, maps, alternatives,
-     * opaque codecs) degrades to a raw-JSON editor for that node. The wire format is entirely the codec's, so an existing
-     * {@code defineObject} can be upgraded to {@code defineSchema} with no data migration once its codec declares a schema.
+     * Defines a value stored via {@code codec}, edited on the native config screen as a schema-driven form: the codec
+     * is wrapped into a {@link SchemaCodec} (one that already is keeps its declared schema; a plain codec degrades to
+     * a raw-JSON editor). Be careful with defaults referencing objects that aren't registered this early.
      */
-    public abstract <T> Supplier<T> defineSchema(String name, com.google.common.base.Supplier<T> defaultSupplier, SchemaCodec<T> codec);
-
-    /** Convenience {@link #defineSchema}: wraps a raw {@code Codec} — a codec with no declared schema degrades to a
-     *  raw-JSON ({@link net.mehvahdjukaar.codecui.Schema.Opaque}) editor, exactly like {@link #defineObject} but editable. */
-    public <T> Supplier<T> defineSchema(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
-        return defineSchema(name, defaultSupplier, SchemaCodec.wrap(codec));
-    }
+    public abstract <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec);
 
     public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec) {
         return defineObject(name, defaultSupplier, codec.listOf());
@@ -331,11 +313,10 @@ public abstract class ConfigBuilder {
     public abstract Supplier<JsonElement> defineJson(String name, Supplier<JsonElement> defaultValue);
 
     /**
-     * Defines a config value from a plain Java bean (POJO or record) — for when you'd rather not write a
-     * {@link Codec}. Instead of storing a JSON blob, each field is reflectively turned into its own native config
-     * value (a boolean toggle / string / number / enum widget) grouped under a sub-category named {@code name}, and
-     * the returned supplier reconstructs the bean from those live values. Supported field types: boolean, int,
-     * double, float, String and enums; the bean must be either a record or have a no-arg constructor.
+     * Defines a config value from a plain Java bean (POJO or record), for when you'd rather not write a {@link Codec}.
+     * Each field becomes its own native config value grouped under a sub-category named {@code name}, and the returned
+     * supplier reconstructs the bean from those live values. Supported field types: boolean, int, double, float, String
+     * and enums; the bean must be a record or have a no-arg constructor.
      */
     public <T> Supplier<T> defineBean(String name, T defaultValue) {
         @SuppressWarnings("unchecked")
@@ -447,30 +428,22 @@ public abstract class ConfigBuilder {
      * comment). Ends up in the english language file and as the hover description of the value's screen row.
      */
     public ConfigBuilder comment(String comment) {
-        // A new comment arriving means the previous one never got a define of its own, so it was an "after"
-        // comment for the last defined value: flush it there before taking this one. Then hold this one for the
-        // NEXT define. Binding forward (rather than eagerly onto the last define) is what stops an un-commented
-        // define from stealing the before-comment meant for the value that follows it.
+        // a new comment means the previous one had no define of its own -> it was an "after" comment; flush it first
         if (this.pendingComment != null) applyComment(this.pendingComment);
         this.pendingComment = comment;
         this.pendingCommentForwarded = false;
         return this;
     }
 
-    /**
-     * Multi line comment, mirroring Forge's {@code ModConfigSpec.Builder.comment(String...)}. Like the single
-     * line version it may come before or after the value's {@code define(...)}.
-     */
+    /** Multi line variant of {@link #comment(String)}, mirroring Forge's {@code comment(String...)}. */
     public ConfigBuilder comment(String... comment) {
         return comment(String.join("\n", comment));
     }
 
     /**
-     * Attaches a decorative icon to the NEXT category {@code push(...)}/{@code pushFeature(...)} or the next defined
-     * value. Purely eye candy for the native config screen; ignored by everything else. The {@code id} is resolved
-     * to a rendered item/block (or a GUI sprite) lazily on the client, so it may reference things that don't exist
-     * yet when the config is built (registries are still empty that early). Chainable, like {@link #comment}:
-     * {@code builder.icon("faucet").pushFeature("faucet", true)}.
+     * Attaches a decorative icon to the NEXT category {@code push(...)}/{@code pushFeature(...)} or defined value.
+     * Eye candy for the native config screen, resolved to an item/block (or GUI sprite) lazily on the client, so the
+     * {@code id} may reference things not registered yet at build time. Chainable, like {@link #comment}.
      */
     public ConfigBuilder icon(ResourceLocation id) {
         this.pendingIcon = id;
@@ -516,10 +489,7 @@ public abstract class ConfigBuilder {
         return null;
     }
 
-    /**
-     * Forge parity alias for {@link #worldReload()} (Forge calls it {@code worldRestart()}), so configs can be
-     * ported over with fewer edits.
-     */
+    /** Forge parity alias for {@link #worldReload()} (Forge calls it {@code worldRestart()}). */
     public ConfigBuilder worldRestart() {
         return worldReload();
     }
@@ -529,10 +499,7 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    /**
-     * Accepted for Forge parity ({@code ModConfigSpec.Builder.translation}), but a no-op: Moonlight derives the
-     * translation keys automatically from the category/value names, so an explicit key isn't needed.
-     */
+    /** Accepted for Forge parity but a no-op: Moonlight derives translation keys from the category/value names. */
     public ConfigBuilder translation(String translationKey) {
         return this;
     }

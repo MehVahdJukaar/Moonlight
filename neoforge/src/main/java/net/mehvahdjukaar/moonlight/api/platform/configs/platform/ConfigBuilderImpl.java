@@ -287,34 +287,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
-        forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
-        if (usesDataBuddy) {
-            var w = track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier, pendingMeta()));
-            ui(name, unsupported(name, w));
-            return w;
-        }
-
-        com.google.common.base.Supplier<JsonElement> jsonSupplier = () -> {
-            var e = codec.encodeStart(JsonOps.INSTANCE, defaultSupplier.get());
-            var json = e.resultOrPartial(s -> {
-                throw new RuntimeException("Invalid default value for config " + name + ": " + s);
-            });
-            if (json.isEmpty()) throw new RuntimeException("Invalid default value for config " + name);
-            return json.get();
-        };
-        var w = track(ValueWrapper.codec(
-                builder.define(name,
-                        () -> jsonSupplier.get().toString().replace(" ", "").replace("\"", "'"),
-                        o -> o != null && jsonSupplier.get().getClass().isAssignableFrom(o.getClass())),
-                codec, pendingMeta()
-        ));
-        ui(name, unsupported(name, w));
-        return w;
-    }
-
-    @Override
-    public <T> Supplier<T> defineSchema(String name, com.google.common.base.Supplier<T> defaultSupplier, SchemaCodec<T> codec) {
+    public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> rawCodec) {
+        SchemaCodec<T> codec = SchemaCodec.wrap(rawCodec);
         forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
         if (usesDataBuddy) {
             var w = track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier, pendingMeta()));

@@ -28,7 +28,7 @@ public class CommonConfigs {
 
     public static final ModConfigHolder CONFIG;
 
-    // Dev-only demo for defineSchema (below): a codec that carries a CodecUI schema, so the native config screen can
+    // Dev-only demo for defineObject (below): a codec that carries a CodecUI schema, so the native config screen can
     // build a real form for it instead of the "edit file" placeholder. Declared before the static block that uses it.
     private static final SchemaCodec<Nested> NESTED_SCHEMA = SchemaRecord.create(Nested.class, i -> i.group(
             i.field("x", SchemaCodecs.intRange(-16, 16), Nested::x),
@@ -106,7 +106,7 @@ public class CommonConfigs {
             builder.comment("A plain Java bean (no codec needed), stored and edited as JSON").defineBean("test_bean", new TestBean());
             builder.comment("A record bean, also round-tripped through Gson").defineBean("test_record_bean", new TestRecordBean("world", 7));
             builder.comment("A codec object with a declared CodecUI schema, edited via a generated form: records become navigable sub categories, the string list falls back to the JSON editor")
-                    .defineSchema("test_schema", () -> new SchemaTest("hello", true, 5, Direction.NORTH, 0xFFFF5555,
+                    .defineObject("test_schema", () -> new SchemaTest("hello", true, 5, Direction.NORTH, 0xFFFF5555,
                             List.of("alpha", "beta"), new Nested(1, 0.5)), SCHEMA_TEST);
 
             builder.icon("minecraft:oak_log").push("nested");
@@ -146,7 +146,7 @@ public class CommonConfigs {
     public record TestRecordBean(String label, int amount) {
     }
 
-    /** Dev-only sample for {@code defineSchema}: a codec object whose fields drive a generated form. */
+    /** Dev-only sample for {@code defineObject}: a codec object whose fields drive a generated form. */
     public record SchemaTest(String name, boolean enabled, int level, Direction facing, int color,
                              List<String> tags, Nested nested) {
     }

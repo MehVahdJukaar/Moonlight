@@ -28,8 +28,8 @@ public class ConfigBuilderHelper {
     ).apply(inst, MyObj::new));
 
     // Same object, but declared with a CodecUI schema (via the codecui jar Moonlight bundles). A SchemaCodec IS a
-    // Codec, so the wire format is identical to CODEC above — but because it carries an edit surface, defineSchema
-    // below can build a real in-game form for it (here: two 0..100 int sliders) instead of the "edit file" placeholder.
+    // Codec, so the wire format is identical to CODEC above — but because it carries an edit surface, defineObject
+    // builds a real in-game form for it (here: two 0..100 int sliders) instead of a raw-JSON editor.
     public static final SchemaCodec<MyObj> SCHEMA_CODEC = SchemaRecord.create(MyObj.class, i -> i.group(
             i.field("first", SchemaCodecs.intRange(0, 100), MyObj::first),
             i.field("second", SchemaCodecs.intRange(0, 100), MyObj::second)
@@ -56,10 +56,10 @@ public class ConfigBuilderHelper {
         RESOURCE_CONFIG = builder.comment("Resource location config").define("res", ResourceLocation.parse("hello"));
         ENUM_CONFIG = builder.comment("Enum config").define("direction", Direction.UP);
         LIST_CONFIG = builder.comment("This is a list").define("list_config", List.of("dog"));
-        OBJECT_CONFIG = builder.comment("Custom object. Note that this wont show up on config screens")
+        OBJECT_CONFIG = builder.comment("Custom object with a plain codec - edited as raw JSON on the config screen")
                 .defineObject("custom_object", () -> new MyObj(2, 4), CODEC);
         SCHEMA_CONFIG = builder.comment("Custom object with a declared schema - editable via a generated form")
-                .defineSchema("schema_object", () -> new MyObj(2, 4), SCHEMA_CODEC);
+                .defineObject("schema_object", () -> new MyObj(2, 4), SCHEMA_CODEC);
         builder.pop();
 
 

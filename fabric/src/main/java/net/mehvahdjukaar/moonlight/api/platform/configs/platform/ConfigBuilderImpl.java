@@ -100,7 +100,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     /**
      * As {@link #doAddConfig(String, ConfigValue)} but with an explicit screen-row factory, so codec-backed values that
-     * want a richer row than the default {@link #toOption} mapping (e.g. {@link #defineSchema} → an editable
+     * want a richer row than the default {@link #toOption} mapping (e.g. {@link #defineObject} → an editable
      * {@link ConfigOption.SchemaValue} instead of an {@link ConfigOption.UnsupportedValue}) can supply their own.
      */
     private void doAddConfig(String name, ConfigValue<?> config, Function<ConfigValue<?>, ConfigOption<?>> optionFactory) {
@@ -300,16 +300,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultValue, Codec<T> codec) {
-        var config = new ObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
-        doAddConfig(name, config);
-        return config;
-    }
-
-    @Override
-    public <T> Supplier<T> defineSchema(String name, com.google.common.base.Supplier<T> defaultValue, SchemaCodec<T> codec) {
-        // same storage as defineObject (SchemaCodec IS a Codec, so the wire format is identical) but an editable
-        // schema-driven row instead of the unsupported placeholder
+    public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultValue, Codec<T> rawCodec) {
+        // SchemaCodec IS a Codec (identical wire format), so this gives an editable schema-driven row for free
+        SchemaCodec<T> codec = SchemaCodec.wrap(rawCodec);
         var config = new ObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
         doAddConfig(name, config, c -> new ConfigOption.SchemaValue<>(
                 config.getTranslation(), null, config, config::getDefaultValue, codec));
