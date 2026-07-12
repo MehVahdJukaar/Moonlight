@@ -135,7 +135,7 @@ class OptionRow extends ConfigListRow {
         this.reloadIconX0 = this.reloadIconX1 = -1;
         ResourceLocation reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
         if (reloadIcon != null) {
-            int iconSize = 12; // native size of the world_reload / game_restart sprites (pixel-perfect)
+            int iconSize = 8; // native size of the world_reload / game_restart sprites (pixel-perfect)
             int iconX = left - iconSize - 3;
             graphics.blitSprite(reloadIcon, iconX, top + (height - iconSize) / 2, iconSize, iconSize);
             this.reloadIconX0 = iconX;
